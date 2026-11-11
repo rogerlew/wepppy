@@ -68,7 +68,7 @@ _JWT = re.compile(r'(?<![\w-])([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]
 _BEARER = re.compile(r'(?i)\b(Bearer|Basic)\s+[A-Za-z0-9._~+/=%-]+')
 _QUOTED = r'''(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;}\]]+)'''
 _ASSIGN = re.compile(r'''(?i)(?<![\w-])(["']?[\w-]+["']?\s*[:=]\s*)''')
-_VALUE = re.compile(_QUOTED)
+_VALUE = re.compile(r'\[REDACTED\](?=$|[\s,;}\]])|' + _QUOTED)
 
 _SENSITIVE = re.compile(r'(?i)password|passwd|secret|token|api[_-]?key|credential')
 

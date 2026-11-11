@@ -92,6 +92,14 @@ focused sink/canary checks and the exact full Python and frontend gates.
 
 ## Decision Log
 
+- User correction during M5: “Bearer [REDACTED] required.” is unhelpful.
+  Preserve the existing useful-diagnostic contract by rewriting static auth
+  explanations as access-token prose, retaining missing/invalid/claim/revocation
+  reasons and all status/auth decisions. Do not weaken credential filtering or
+  ratify opaque messages through test expectations. Durable rule:
+  `docs/schemas/safe-traceback-contract.md`, rendering/structural-filter section.
+
+
 - Decision: preserve tracebacks and absolute paths, using one sanitized
   representation rather than audience-specific variants.
   Rationale: the app depends on traceback observability; account creation makes
@@ -404,3 +412,18 @@ compatibility tests and the exact full gates. No run data is migrated.
 
 Current stage: M5, exact full regression gates on the reviewed candidate.
 No full-suite pass, SEC-05 closure or deployment is claimed.
+
+M5 execution: reviewed candidate `3fea2f06dd7bdacca6813a2b55679e8e99c7514f`
+committed. Exact npm lint and npm test passed (126 suites / 1076 tests).
+Exact full Python gate failed on test infrastructure. Container acceptance rerun on the commit
+passes. See `artifacts/20261111_full_validation.md`.
+
+M5 discovery: first full pytest stopped after 677 passes/29 skips on a
+collection-order fixture leak to deployment Redis. Tests now patch/restore the
+two cached constructors as well as redis.Redis; integration lock files are
+test-local. Focused auth/microservice regression and independent QA precede
+the exact full rerun. A separately security-reviewed idempotence fix prevents
+repeated rendering from adding brackets to existing redaction placeholders.
+The shared opt-in real-Redis credential fixture passes 113 integration cases;
+Roads publication hash changes retain reviewed diagnostic-only provenance.
+See the full-validation receipt for diagnostic sweeps and pending exact gates.

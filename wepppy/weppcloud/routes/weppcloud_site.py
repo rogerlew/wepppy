@@ -436,7 +436,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=[],
             granted_scopes=[],
         )
-        response = error_factory("Bearer token required.")
+        response = error_factory("An access token is required in the Authorization header.")
         response.status_code = 401
         return response
 
@@ -462,7 +462,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=[],
             granted_scopes=[],
         )
-        response = error_factory("Invalid bearer token.")
+        response = error_factory("Invalid access token.")
         response.status_code = 401
         return response
     except Exception:
@@ -475,7 +475,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=[],
             granted_scopes=[],
         )
-        response = error_factory("Failed to validate bearer token.")
+        response = error_factory("Failed to validate access token.")
         response.status_code = 401
         return response
 
@@ -491,7 +491,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=[],
             granted_scopes=[],
         )
-        response = error_factory("Bearer token missing subject claim.")
+        response = error_factory("Access token missing subject claim.")
         response.status_code = 401
         return response
     if not jti:
@@ -503,7 +503,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=[],
             granted_scopes=[],
         )
-        response = error_factory("Bearer token missing jti claim.")
+        response = error_factory("Access token missing jti claim.")
         response.status_code = 401
         return response
     if token_class not in {"user", "service"}:
@@ -515,7 +515,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=[],
             granted_scopes=[],
         )
-        response = error_factory("Bearer token class not authorized for operator bootstrap.")
+        response = error_factory("Access token class not authorized for operator bootstrap.")
         response.status_code = 403
         return response
 
@@ -545,7 +545,7 @@ def issue_rq_engine_operator_token():
                 requested_scopes=[],
                 granted_scopes=[],
             )
-            response = error_factory("Bearer token has been revoked.", status_code=403)
+            response = error_factory("Access token has been revoked.", status_code=403)
             return response
     except redis.RedisError:
         current_app.logger.exception("rq-engine operator token bootstrap revocation service unavailable")
@@ -573,7 +573,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=[],
             granted_scopes=[],
         )
-        response = error_factory("Failed to validate bearer token revocation status.", status_code=500)
+        response = error_factory("Failed to validate access token revocation status.", status_code=500)
         return response
 
     request_payload: Mapping[str, Any] = {}
@@ -616,7 +616,7 @@ def issue_rq_engine_operator_token():
 
     authorized_scopes = _authorized_operator_scopes(claims)
     if not authorized_scopes:
-        response = error_factory("Bearer token does not authorize operator bootstrap scopes.", status_code=403)
+        response = error_factory("Access token does not authorize operator bootstrap scopes.", status_code=403)
         _audit_operator_token_event(
             outcome="forbidden",
             status_code=403,

@@ -282,7 +282,7 @@ def test_issue_rq_engine_operator_token_requires_bearer_auth() -> None:
 
     assert response.status_code == 401
     payload = response.get_json()
-    assert payload["error"]["message"] == "Bearer token required."
+    assert payload["error"]["message"] == "An access token is required in the Authorization header."
 
 
 def test_issue_rq_engine_operator_token_handles_jwt_config_error(
@@ -332,7 +332,7 @@ def test_issue_rq_engine_operator_token_rejects_missing_subject(monkeypatch: pyt
         )
 
     assert response.status_code == 401
-    assert response.get_json()["error"]["message"] == "Bearer token missing subject claim."
+    assert response.get_json()["error"]["message"] == "Access token missing subject claim."
 
 
 def test_issue_rq_engine_operator_token_rejects_missing_jti(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -355,7 +355,7 @@ def test_issue_rq_engine_operator_token_rejects_missing_jti(monkeypatch: pytest.
         )
 
     assert response.status_code == 401
-    assert response.get_json()["error"]["message"] == "Bearer token missing jti claim."
+    assert response.get_json()["error"]["message"] == "Access token missing jti claim."
 
 
 def test_issue_rq_engine_operator_token_rejects_disallowed_token_class(
@@ -381,7 +381,7 @@ def test_issue_rq_engine_operator_token_rejects_disallowed_token_class(
         )
 
     assert response.status_code == 403
-    assert response.get_json()["error"]["message"] == "Bearer token class not authorized for operator bootstrap."
+    assert response.get_json()["error"]["message"] == "Access token class not authorized for operator bootstrap."
 
 
 def test_issue_rq_engine_operator_token_rejects_revoked_token(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -406,7 +406,7 @@ def test_issue_rq_engine_operator_token_rejects_revoked_token(monkeypatch: pytes
         )
 
     assert response.status_code == 403
-    assert response.get_json()["error"]["message"] == "Bearer token has been revoked."
+    assert response.get_json()["error"]["message"] == "Access token has been revoked."
 
 
 def test_issue_rq_engine_operator_token_handles_revocation_service_unavailable(
@@ -458,7 +458,7 @@ def test_issue_rq_engine_operator_token_rejects_invalid_bearer(monkeypatch: pyte
 
     assert response.status_code == 401
     payload = response.get_json()
-    assert payload["error"]["message"] == "Invalid bearer token."
+    assert payload["error"]["message"] == "Invalid access token."
 
 
 def test_issue_rq_engine_operator_token_rejects_non_json_body_with_content(

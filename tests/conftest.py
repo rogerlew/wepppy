@@ -1,4 +1,5 @@
 import importlib
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -7,6 +8,9 @@ import pytest
 
 from tests.factories.fixtures import rq_environment, rq_recorder  # noqa: F401
 
+
+# Preserve only source metadata; real-Redis tests explicitly opt in below.
+_RUNTIME_REDIS_PASSWORD_FILE = os.environ.get("REDIS_PASSWORD_FILE")
 
 def pytest_configure(config) -> None:
     """Register custom markers used across the suite."""
@@ -52,6 +56,13 @@ def _clear_secret_file_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "ZOHO_NOREPLY_EMAIL_PASSWORD_FILE",
     ):
         monkeypatch.delenv(key, raising=False)
+
+
+@pytest.fixture
+def runtime_redis_credentials(monkeypatch: pytest.MonkeyPatch, _clear_secret_file_env: None) -> None:
+    """Restore the configured credential source only for explicit real-Redis tests."""
+    if _RUNTIME_REDIS_PASSWORD_FILE:
+        monkeypatch.setenv("REDIS_PASSWORD_FILE", _RUNTIME_REDIS_PASSWORD_FILE)
 
 
 @pytest.fixture(scope="session")
@@ -208,6 +219,18 @@ def _install_redis_stub():
             return False
 
     redis_module.Redis = RecordingRedis
+    # Request middleware/auth capture constructors during collection, before
+    # this session fixture runs. Stub those aliases too so auth tests cannot
+    # accidentally contact deployment Redis based on import order.
+    captured_clients = []
+    for module_name, attribute in (
+        ("wepppy.microservices.rq_engine", "_LIFECYCLE_REDIS_CLIENT"),
+        ("wepppy.microservices.rq_engine.auth", "_AUTH_REDIS_CLIENT"),
+    ):
+        module = sys.modules.get(module_name)
+        if module is not None and hasattr(module, attribute):
+            captured_clients.append((module, attribute, getattr(module, attribute)))
+            setattr(module, attribute, RecordingRedis)
 
     try:
         redis_settings = importlib.import_module("wepppy.config.redis_settings")
@@ -217,6 +240,9 @@ def _install_redis_stub():
         pass
 
     yield
+
+    for module, attribute, original in captured_clients:
+        setattr(module, attribute, original)
 
     if original_cls is not None:
         redis_module.Redis = original_cls

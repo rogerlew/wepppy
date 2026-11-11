@@ -124,7 +124,7 @@ class _PipelineExecuteFault:
 
 
 @pytest.fixture
-def rq_connection():
+def rq_connection(runtime_redis_credentials):
     connection = redis.StrictRedis(**redis_connection_kwargs(RedisDB.RQ))
     try:
         connection.ping()

@@ -2450,7 +2450,13 @@ def test_download_failures_have_safe_correlated_diagnostics(
     assert response.status_code == 500
     assert response.headers['x-request-id'] == 'diagnostic-reference'
     assert 'diagnostic-reference' in response.text
-    assert 'diagnostic-reference' in caplog.text
+    if failure in ('empty', 'unreadable'):
+        from wepppy.observability.safe_traceback import UNAVAILABLE
+        assert UNAVAILABLE in caplog.text
+        # Caller-provided request IDs are not trusted when sources cannot load.
+        assert 'diagnostic-reference' not in caplog.text
+    else:
+        assert 'diagnostic-reference' in caplog.text
     assert str(private_path) not in response.text
     assert 'diagnostic-token' not in response.text
     assert 'private-exception-sentinel' not in response.text

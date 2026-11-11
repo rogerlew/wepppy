@@ -26,7 +26,7 @@
     },
     "wepppy/nodb/mods/roads/_parameterization_comparisons.py": {
       "recorded": null,
-      "current": "1281d82b3e49d0b73907c01c1d1bf280920fa414b479ec365923e51d6be7b40e"
+      "current": "6e6ee7abbebc1916931a056477cd8064fc83b83262ef5e9791b781df4d293f0a"
     },
     "wepppy/nodb/mods/roads/parameterization.py": {
       "recorded": null,
@@ -34,11 +34,11 @@
     },
     "wepppy/nodb/mods/roads/roads.py": {
       "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
-      "current": "b65713d1356143ca8ac76c62e5c28437f5e35f439df5c6af771266dd6bc5fb0a"
+      "current": "f924f48f20778ce33505273aecf5220d3ec3376d424a16e2c83a654200691c4b"
     },
     "wepppy/wepp/interchange/_roads_lifecycle.py": {
       "recorded": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
-      "current": "daf24fbc23c3fb411a0cadd0d1cb3a13a7b4bdf4f673edcf0c7647940cda9d54"
+      "current": "aa5b7e7b8a76aeaa877af5e39d45f092abf09eeb3304b22f57c3e74745459a92"
     },
     "wepppy/wepp/management/managements.py": {
       "recorded": null,
@@ -175,6 +175,33 @@
         }
       },
       "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-implementation-correctness-review.md"
+    },
+    {
+      "date": "2026-11-11",
+      "commit": "3fea2f06dd7bdacca6813a2b55679e8e99c7514f",
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "previous_reviewed_sha256": "b65713d1356143ca8ac76c62e5c28437f5e35f439df5c6af771266dd6bc5fb0a",
+      "current_sha256": "f924f48f20778ce33505273aecf5220d3ec3376d424a16e2c83a654200691c4b",
+      "scope": "Sanitize exception-derived diagnostic output only; no scientific inputs, formulas, routing, model execution or successful result changes. Historical full-project evidence remains explicitly stale.",
+      "evidence": "docs/work-packages/20261111_safe_traceback_sanitization/artifacts/20261111_correctness_review.md"
+    },
+    {
+      "date": "2026-11-11",
+      "commit": "3fea2f06dd7bdacca6813a2b55679e8e99c7514f",
+      "path": "wepppy/nodb/mods/roads/_parameterization_comparisons.py",
+      "previous_reviewed_sha256": "1281d82b3e49d0b73907c01c1d1bf280920fa414b479ec365923e51d6be7b40e",
+      "current_sha256": "6e6ee7abbebc1916931a056477cd8064fc83b83262ef5e9791b781df4d293f0a",
+      "scope": "Sanitize exception-derived diagnostic output only; no scientific inputs, formulas, routing, model execution or successful result changes. Historical full-project evidence remains explicitly stale.",
+      "evidence": "docs/work-packages/20261111_safe_traceback_sanitization/artifacts/20261111_correctness_review.md"
+    },
+    {
+      "date": "2026-11-11",
+      "commit": "3fea2f06dd7bdacca6813a2b55679e8e99c7514f",
+      "path": "wepppy/wepp/interchange/_roads_lifecycle.py",
+      "previous_reviewed_sha256": "daf24fbc23c3fb411a0cadd0d1cb3a13a7b4bdf4f673edcf0c7647940cda9d54",
+      "current_sha256": "aa5b7e7b8a76aeaa877af5e39d45f092abf09eeb3304b22f57c3e74745459a92",
+      "scope": "Sanitize exception-derived diagnostic output only; no scientific inputs, formulas, routing, model execution or successful result changes. Historical full-project evidence remains explicitly stale.",
+      "evidence": "docs/work-packages/20261111_safe_traceback_sanitization/artifacts/20261111_correctness_review.md"
     }
   ]
 }

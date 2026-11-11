@@ -118,7 +118,7 @@ def test_resolve_config_requires_real_identity_and_matches(monkeypatch, tmp_path
 
 
 @pytest.mark.integration
-def test_atomic_marker_preserves_ttl_and_revocation_with_real_redis(monkeypatch):
+def test_atomic_marker_preserves_ttl_and_revocation_with_real_redis(monkeypatch, runtime_redis_credentials):
     import redis
     import uuid
     from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs

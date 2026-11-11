@@ -110,6 +110,15 @@ PEM private-key blocks and secret/password/token/API-key assignments, including
 quoted dictionary/JSON forms. This is a bounded credential grammar, not a claim
 to identify arbitrary unknown secrets or arbitrary encodings.
 
+Application-authored authentication errors must retain an actionable reason
+after filtering. Use unambiguous prose such as “An access token is required in
+the Authorization header.” for a missing credential, and “Access token missing
+subject claim.” for invalid claims. Do not accept placeholder-filled boilerplate
+as a usability fix or exempt raw exception text/credential-shaped strings from
+filtering. This wording preserves useful diagnostics without guessing whether
+an unknown value after a credential scheme is a secret. Status codes, response
+fields and authentication decisions remain unchanged.
+
 Resource ceilings are implementation safety bounds: 64 KiB per source, 256
 source constituents, 1 MiB diagnostic input/output, 64 structured levels and
 1,024 structured nodes, 100 traceback frames, 10 group levels and 15 group

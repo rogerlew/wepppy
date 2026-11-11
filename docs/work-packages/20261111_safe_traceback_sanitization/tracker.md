@@ -130,25 +130,19 @@ peers; this list is not an exhaustive closure claim.
 - M0-M3 complete; M4 final review receipts retained.
 - Pending: M5 full regression gates.
 
-## Handoff
+## Current execution state
 
-Continue from `prompts/active/implementation_execplan.md` only after the Redis
-tracker records its green checkpoint. Start M0 from
-`artifacts/20261111_kubernetes_secret_handling_review.md`; preserve its
-process-owned source distinction and separate live-deployment boundary. Preserve
-unrelated dirty work. No full suite or security closure has occurred.
+Redis prerequisite, M0 checkpoint, M1-M3 implementation and M4 independent
+correctness/security/QA reviews are complete. Reviewed implementation candidate:
+`3fea2f06dd7bdacca6813a2b55679e8e99c7514f`. Exact npm lint/test and container
+acceptance passed; first exact Python run stopped after 677 passes/29 skips.
 
-## M0 execution update
+M5 follow-up repairs cover captured Redis constructor test stubs, explicit
+real-Redis credential-source fixtures, repeated-redaction idempotence and
+reviewed Roads diagnostic-source freshness hashes. Focused renderer checks
+(141 tests), real-Redis checks (113 tests), and independent follow-up reviews
+pass. Diagnostic suite exploration is not a substitute for the pending exact
+full Python command. See `artifacts/20261111_full_validation.md`.
 
-Starting revision `2b6439df4d7b12e3fb740c9632d45d6eec7da809`. Canonical draft:
-`docs/schemas/safe-traceback-contract.md`. Independent review is resolving
-transitive source ownership and final source/sink coverage before the standalone
-checkpoint. No implementation or full-suite/security closure is claimed.
-
-## Implementation progress
-
-M1-M3 implemented; M4 active. Forty focused tests pass including actual Redis
-persistence/pubsub and generated status artifacts. Container and benchmark
-evidence is retained; expanded source/sink review remains open. Exact full
-pytest/npm gates and SEC-05 closure have not occurred. See the active plan's
-Implementation execution update and `artifacts/20261111_extended_sink_audit.md`.
+SEC-05 remains open. No production deployment occurred. Preserve unrelated
+working-tree changes while completing the final reviewed candidate and gates.

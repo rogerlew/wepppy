@@ -15,3 +15,18 @@ canonical contract checkpoint `d6796407f29b4dd7b05031ed89efa416b13a5665`.
 The review covers the implementation candidate immediately following this
 receipt. M5 exact full gates and final revision binding remain pending.
 No production deployment or historical data scrubbing is authorized or claimed.
+
+M5 regression addendum: PASS for bounded assignment-placeholder matching.
+Repeated sanitation remains stable without an exemption or weaker credential
+matching. 141 focused tests passed; independent reviewer checked 10 delimiter,
+suffix and configured-secret cases. Full M5 acceptance remains pending.
+
+M5 auth wording direction: PASS. Clear static access-token prose and validation
+prefixes preserve useful reasons under existing structural filtering. Do not
+whitelist message text or sanitize raw exceptions before internal expiration
+checks. Existing output boundaries still filter credential-bearing suffixes;
+independent pure probes confirm synthetic bearer values remain absent.
+
+Implemented auth wording: PASS. Four production files change prose only; token
+parsing, reauth, statuses and filtering remain unchanged. No exemptions were
+added. All 378 focused tests pass, including appended credential canaries.

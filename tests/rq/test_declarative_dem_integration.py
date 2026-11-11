@@ -9,7 +9,7 @@ from rq.registry import FailedJobRegistry
 from tests.rq.test_declarative_dem import definition, project  # noqa: F401
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("runtime_redis_credentials")]
 
 
 def test_worker_refusal_uses_failed_registry(project, monkeypatch):

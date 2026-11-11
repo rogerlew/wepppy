@@ -211,7 +211,7 @@ def _require_rq_token(token: str, *, required_scopes: Sequence[str]) -> Mapping[
     except auth_tokens.JWTConfigurationError as exc:
         raise AuthError(f"JWT configuration error: {exc}", status_code=500) from exc
     except auth_tokens.JWTDecodeError as exc:
-        raise AuthError(f"Invalid token: {exc}") from exc
+        raise AuthError(f"Token validation failed. {exc}") from exc
 
     _check_revocation(str(claims.get("jti") or ""))
     if str(claims.get("token_class") or "").strip().lower() == "session":

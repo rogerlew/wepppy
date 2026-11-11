@@ -165,7 +165,11 @@ def integration_accounts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture(autouse=True)
-def integration_redis(monkeypatch: pytest.MonkeyPatch) -> IntegrationRedisDouble:
+def integration_redis(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> IntegrationRedisDouble:
+    from wepppy.rq import submission_recovery
+
+    # Keep request-admission filesystem locks within this test workspace.
+    monkeypatch.setattr(submission_recovery, "_LIFECYCLE_LOCK_DIR", str(tmp_path / "lifecycle"))
     redis_double = IntegrationRedisDouble()
 
     monkeypatch.setattr(rq_auth.redis, "Redis", lambda **_kwargs: redis_double)

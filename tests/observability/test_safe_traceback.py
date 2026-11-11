@@ -225,3 +225,28 @@ def test_optional_package_source_is_metadata_only_and_reads_current_file(tmp_pat
     source.unlink()
     source.mkdir()
     assert safe.safe_text('context', source_profile=profile) == safe.UNAVAILABLE
+
+
+@pytest.mark.parametrize('text', [
+    'password=unknown-canary', 'Invalid token: Token signature mismatch',
+    '{"secret": "unknown-canary"}', 'token=[REDACTED]',
+])
+def test_structural_redaction_is_stable_across_output_boundaries(text):
+    once = safe.safe_text(text, source_profile=profiles.SHAPE)
+    assert safe.safe_text(once, source_profile=profiles.SHAPE) == once
+
+
+@pytest.mark.parametrize("message", [
+    "An access token is required in the Authorization header.",
+    "Access token missing subject claim.",
+    "Invalid access token.",
+    "The Authorization header must contain an access token using the 'Bearer' scheme.",
+    "Token validation failed. Token signature mismatch",
+    "Token validation failed. Token has expired",
+])
+def test_auth_explanations_remain_readable_without_credential_exemptions(message):
+    assert safe.safe_text(message, source_profile=profiles.SHAPE) == message
+    with_credential = message + " Bearer synthetic-credential-canary"
+    result = safe.safe_text(with_credential, source_profile=profiles.SHAPE)
+    assert message in result
+    assert "synthetic-credential-canary" not in result

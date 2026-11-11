@@ -671,7 +671,7 @@ def test_create_reauths_expired_rq_token_with_session_cookie(
     owner_calls: Dict[str, Any] = {}
 
     def _raise_expired_token(*_args, **_kwargs):
-        raise project_routes.AuthError("Invalid token: Token has expired")
+        raise project_routes.AuthError("Token validation failed. Token has expired")
 
     monkeypatch.setattr(
         project_routes,
@@ -716,7 +716,7 @@ def test_create_non_expired_rq_token_error_does_not_reauth(
     client, captured = create_client
 
     def _raise_signature_error(*_args, **_kwargs):
-        raise project_routes.AuthError("Invalid token: Token signature mismatch")
+        raise project_routes.AuthError("Token validation failed. Token signature mismatch")
 
     monkeypatch.setattr(
         project_routes,
@@ -736,7 +736,7 @@ def test_create_non_expired_rq_token_error_does_not_reauth(
     )
 
     assert response.status_code == 401
-    assert response.json()["error"]["message"] == "Invalid token: Token signature mismatch"
+    assert response.json()["error"]["message"] == "Token validation failed. Token signature mismatch"
     assert "cfg" not in captured
 
 

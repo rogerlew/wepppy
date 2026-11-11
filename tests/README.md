@@ -70,7 +70,7 @@ OSM_ROADS_POSTGRES_INTEGRATION=1 wctl run-pytest tests/topo -k osm_roads_postgre
 
 ## Tips
 
-- The suite ships with a Redis stub (`tests/conftest.py`), so you never need a live Redis server for local runs.
+- Unit tests use the Redis stub in `tests/conftest.py`. Explicit Redis integration tests require their configured Compose or disposable Redis server.
 - Tests assume no network access. If you must touch external services, stub the call or drop mock payloads into `tests/data/`.
 - Mirror source layout when creating new tests—if you add `wepppy/foo/bar.py`, expect to create `tests/foo/test_bar.py`.
 - Reach for the shared factories under `tests/factories/` instead of hand-rolling Redis/Queue stubs. `rq_environment` (auto-installed via `tests/conftest.py`) gives you a recorder-backed `RedisPrep` + `Queue` pair, while `singleton_factory` helps build NoDb-style controllers with locking/parse stubs.
@@ -103,3 +103,13 @@ flushes shared Redis. The test checks stored failure strings, callbacks and
 actual worker-pool/PFDF/spawn process output. The mounted-file container probe
 is `tests/docker/safe_traceback_probe.py`; its fixture and operational limits
 are documented in `docs/schemas/safe-traceback-contract.md`.
+
+The session Redis stub also replaces rq-engine's middleware/auth constructor
+aliases captured during collection. Tests that exercise those real boundaries
+must explicitly supply their own connection; ordinary auth integration tests
+must not contact deployment Redis because of import order.
+
+Explicit Compose Redis tests request `runtime_redis_credentials` to restore the
+configured password-file path after unit-test environment cleanup. The fixture
+captures path metadata only; it does not read or retain credential values.
+Disposable-socket tests keep their own connection configuration.

@@ -64,7 +64,7 @@ def _extract_bearer_token(request: Request) -> str:
         raise AuthError("Missing Authorization header")
     parts = header.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise AuthError("Authorization header must be Bearer token")
+        raise AuthError("The Authorization header must contain an access token using the 'Bearer' scheme.")
     return parts[1].strip()
 
 
@@ -402,7 +402,7 @@ def require_jwt(
     except JWTConfigurationError as exc:
         raise AuthError(f"JWT configuration error: {exc}", status_code=500) from exc
     except JWTDecodeError as exc:
-        raise AuthError(f"Invalid token: {exc}") from exc
+        raise AuthError(f"Token validation failed. {exc}") from exc
 
     _check_revocation(str(claims.get("jti") or ""))
     if str(claims.get("token_class") or "").strip().lower() == "session":

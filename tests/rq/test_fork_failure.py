@@ -28,7 +28,7 @@ def _success(runid):
 
 
 @pytest.fixture
-def fork_jobs():
+def fork_jobs(runtime_redis_credentials):
     connection = redis.StrictRedis(**redis_connection_kwargs(RedisDB.RQ))
     try:
         connection.ping()

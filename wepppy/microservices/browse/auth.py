@@ -189,7 +189,7 @@ def _extract_bearer_token(request: StarletteRequest) -> str | None:
         return None
     parts = header.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise BrowseAuthError("Authorization header must be Bearer token")
+        raise BrowseAuthError("The Authorization header must contain an access token using the 'Bearer' scheme.")
     return parts[1].strip()
 
 
@@ -231,7 +231,7 @@ def _decode_token(token: str) -> Mapping[str, Any]:
             public_safe=True,
         ) from exc
     except JWTDecodeError as exc:
-        raise BrowseAuthError(f"Invalid token: {exc}") from exc
+        raise BrowseAuthError(f"Token validation failed. {exc}") from exc
 
     _check_revocation(str(claims.get("jti") or ""))
     return claims
