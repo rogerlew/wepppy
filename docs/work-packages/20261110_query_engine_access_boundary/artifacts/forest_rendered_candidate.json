@@ -1,0 +1,95 @@
+{
+  "weppcloud": {
+    "command": [
+      "gunicorn",
+      "--limit-request-line",
+      "8190",
+      "--workers",
+      "4",
+      "--threads",
+      "2",
+      "--timeout",
+      "1800",
+      "--bind",
+      "0.0.0.0:8000",
+      "--log-level",
+      "info",
+      "--forwarded-allow-ips",
+      "192.168.1.1",
+      "--max-requests",
+      "1000",
+      "--max-requests-jitter",
+      "200",
+      "wepppy.weppcloud.app:app"
+    ],
+    "user": "1000:993",
+    "origins": null,
+    "mounts": [
+      {
+        "type": "bind",
+        "source": "/home/workdir/wepppy",
+        "target": "/workdir/wepppy",
+        "read_only": null
+      },
+      {
+        "type": "bind",
+        "source": "/home/workdir/wepppyo3",
+        "target": "/workdir/wepppyo3",
+        "read_only": null
+      },
+      {
+        "type": "bind",
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "target": "/workdir/wepppy-test-engine-data",
+        "read_only": null
+      },
+      {
+        "type": "bind",
+        "source": "/wc1",
+        "target": "/wc1",
+        "read_only": null
+      }
+    ]
+  },
+  "query-engine": {
+    "command": [
+      "uvicorn",
+      "--h11-max-incomplete-event-size",
+      "131072",
+      "wepppy.query_engine.app.server:create_app",
+      "--factory",
+      "--host",
+      "0.0.0.0",
+      "--port",
+      "8041"
+    ],
+    "user": "1000:993",
+    "origins": "https://forest.tail305ec9.ts.net",
+    "mounts": [
+      {
+        "type": "bind",
+        "source": "/home/workdir/wepppy",
+        "target": "/workdir/wepppy",
+        "read_only": null
+      },
+      {
+        "type": "bind",
+        "source": "/home/workdir/wepppyo3",
+        "target": "/workdir/wepppyo3",
+        "read_only": null
+      },
+      {
+        "type": "bind",
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "target": "/workdir/wepppy-test-engine-data",
+        "read_only": null
+      },
+      {
+        "type": "bind",
+        "source": "/wc1",
+        "target": "/wc1",
+        "read_only": null
+      }
+    ]
+  }
+}

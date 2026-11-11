@@ -6,12 +6,17 @@ import uuid
 from pathlib import Path
 from wepppy.weppcloud.app import app, db, User, Run, runs_users, user_datastore
 from wepppy.nodb.core import Ron, Wepp
-from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.weppcloud.utils.helpers import get_wd, redis_wd_cache_client
+from wepppy.nodb.base import clear_nodb_file_cache
+from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard, invalidate_catalog_incarnation
 
-manifest = Path('/tmp/qe-boundary-fixtures.json')
+manifest = Path('/workdir/wepppy/docker/secrets/qe-boundary-fixtures.json')
 with app.app_context():
     if '--cleanup' in sys.argv:
         data = json.loads(manifest.read_text())
+        import redis
+        from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+        sessions = redis.Redis(**redis_connection_kwargs(RedisDB.SESSION))
         for runid in data['runs']:
             assert runid.startswith(data['prefix']) and data['prefix'].startswith('qe-boundary-')
             path = Path(get_wd(runid, prefer_active=False, read_only=True))
@@ -20,8 +25,18 @@ with app.app_context():
             if row:
                 db.session.execute(runs_users.delete().where(runs_users.c.run_id == row.id))
                 db.session.delete(row)
-            shutil.rmtree(path)
-        db.session.commit()
+            if path.exists():
+                clear_nodb_file_cache(runid, wd_override=path)
+                if redis_wd_cache_client is not None:
+                    redis_wd_cache_client.delete(runid)
+                with catalog_lifecycle_guard(path):
+                    invalidate_catalog_incarnation(path)
+                    shutil.rmtree(path)
+            keys = list(sessions.scan_iter(match=f'auth:session:run:{runid}:*'))
+            if keys:
+                sessions.delete(*keys)
+            db.session.commit()
+
         manifest.unlink()
         print('Cleaned fixture run rows, ownership associations and directories:', len(data['runs']))
     else:

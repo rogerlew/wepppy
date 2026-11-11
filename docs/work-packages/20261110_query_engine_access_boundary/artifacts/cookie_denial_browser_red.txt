@@ -1,0 +1,4 @@
+INFO:wctl2:docker compose exec -T weppcloud cat /workdir/wepppy/docker/secrets/qe-cookie-denial-followup.json
+Ordinary private page/cookie/query records: passed
+Admin without Batch membership collection status: 500
+Expected values to be strictly equal:

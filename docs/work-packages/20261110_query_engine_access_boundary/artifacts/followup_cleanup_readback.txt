@@ -1,0 +1,3 @@
+INFO:wctl2:docker compose exec -T weppcloud python -
+Remaining fixture rows: 0
+Remaining fixture directories/manifests: 0

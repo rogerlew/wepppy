@@ -29,12 +29,13 @@ finding deployed or resolved.
 - [x] M0: operator ratified revised contract; standalone checkpoint `2f9401f93`.
 - [x] M1: retained original anonymous-private failure; added real resolver/JWT/catalog regression matrix.
 - [x] M2: strict checked targets, current authorization and scoped catalog sources implemented; review fixes under validation.
-- [ ] M3: deliver the query-engine browser cookie bridge, activation method/CSRF
-      posture, exact CORS policy, and direct-browser regressions.
-- [ ] M4: complete focused/broad gates and independent correctness, QA, code, and
-      security reviews.
-- [ ] M5: validate in a production-equivalent environment and perform an
-      explicitly authorized containment-safe wepp1 rollout.
+- [x] M3: query cookie bridge, POST/origin controls and exact CORS implemented;
+      real direct-page, collection, 100-cookie and logout browser gates passed.
+- [x] M4: focused/broad gates (one verified unrelated baseline failure) and
+      independent reviews completed; narrow follow-ups committed as `d033a33df`.
+- [x] M5 environment portion: forest browser/Caddy/native data acceptance passed.
+- [ ] M5 production portion: explicitly authorized containment-safe wepp1 rollout
+      and 14-day observation remain pending.
 
 - [x] Review fixes: preserve external DEM skip semantics and parent `.nodir`
       links; bound post-admission authorization-backend failures; preserve log
@@ -86,6 +87,28 @@ finding deployed or resolved.
   context resolver and checks populated catalog/log bytes on denial.
 
 ## Decision Log
+
+- CID-6 follow-up: normal binding uses typed QueryTarget credential IDs; no bare
+  Batch-name alias. Preserve a bare Culvert UUID only for service credentials
+  with signed `service_groups` containing `culverts`, as the existing issuer
+  does. Current feature/principal checks remain. Real JWT regressions and the
+  independent security reproduction proved an ordinary-run credential could
+  otherwise cross into a same-named group. Canonical rationale: HTTP contract,
+  credential resource-binding paragraph before "Browser transport and lifecycle".
+- Validation composition: the completed broad run belongs to `5009b4f64`;
+  focused authentication/query/collection and bounded browser gates cover the
+  subsequent two narrow corrections. Security review accepted this composition;
+  unrelated soil/roads tests need no repeat. Do not call it a full pass on the
+  follow-up revision.
+
+- CID-5 follow-up: preserve admitted collection pages when grouped query
+  authorization denies401/403 using either canonical error class. Do not mint a
+  credential; log resource/status and preserve backend errors. Admin/Root collection
+  reads and Batch query membership are intentionally distinct. Broadening query
+  authority or failing the admitted page would violate those existing policies.
+  Normative clarification: HTTP access contract, "Browser transport and lifecycle".
+  Retained Flask and real-browser red tests establish the need for this narrow fix.
+
 
 - Decision (2026-11-11): set query-engine Uvicorn H11 incomplete-event buffer to
   131072 bytes (old 16384) in dev/prod only. A real browser retained 100 cookies,
@@ -141,14 +164,16 @@ finding deployed or resolved.
 
 ## Outcomes & Retrospective
 
-Contract accepted and committed as `2f9401f93` before source/test changes. Strict
-HTTP resolution, current authorization, scoped catalog source checks, browser
-cookie bridge, POST activation and exact CORS are implemented. Focused tests and
-independent reviews found compatibility defects; fixes and expanded tests are
-in progress. Frontend lint/test (124 suites, 1069 tests), stub hygiene and helper
-stubtest passed. Broad Python and final focused gates are running. Browser,
-100-run cookie capacity and production-equivalent validation remain pending.
-No production deployment or incident-resolution claim is made.
+Contract accepted and committed as `2f9401f93` before source/test changes.
+Implementation `5009b4f64` passed focused tests and the forest Caddy/browser
+matrix, including one 100-run collection and logout. Its broad suite completed
+with 13,362 passed, 435 skipped and one pre-existing usersum template assertion;
+both implicated files match pre-work `b3786ae7e` byte for byte. This is an explicit
+unrelated gate blocker, not a full-suite pass. Frontend 124 suites/1069 tests,
+stubs and exception enforcement passed. Narrow CID-5/CID-6 follow-ups preserve
+admitted collection pages and typed resource binding; their focused/browser
+validation is recorded separately rather than attributed to the frozen broad run.
+Production deployment and the 14-day observation gate remain unauthorized/pending.
 
 ## Context and Orientation
 
@@ -490,3 +515,20 @@ implementation. Production deployment is not authorized.
 
 M0 complete: accepted standalone checkpoint ancestor `2f9401f93` committed
 2026-11-11 UTC before implementation/test edits. M1 execution begins.
+
+
+Candidate/environment update (2026-11-11 UTC): implementation committed as
+`5009b4f64`; manifest matches. Independent QA/security accepted the final forest
+browser receipt, including one 100-run collection page and 63600-byte cookie
+request after bounded capacity corrections. Disposable data/accounts/secrets were
+removed with zero-count readback. The earlier evolving-tree broad run was
+interrupted (4013 passed,126 skipped); an exact-candidate broad run is now active.
+No production deployment or incident-closure claim is made.
+
+
+Final local handoff (2026-11-11 UTC): follow-up commit `d033a33df` closes CID-5
+and CID-6. Focused suite487 passed/2 skipped; additional human Culvert delegation
+and live membership revocation1 passed; final forest browser passed. Security
+accepted the exact two source hashes in `final_source_manifest.json`. The broad
+baseline result remains13,362 passed/435 skipped/one pre-existing failure.
+All disposable follow-up fixtures are removed; readback is retained separately.

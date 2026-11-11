@@ -1,0 +1,7 @@
+INFO:wctl2:docker compose exec -T weppcloud python docs/work-packages/20261110_query_engine_access_boundary/artifacts/cookie_denial_fixtures.py
+2026-11-11 03:23:03 [INFO] wepppy.run.qe-cookie-denial-a1587e76c7.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-11-11 03:23:03 [INFO] wepppy.run.qe-cookie-denial-a1587e76c7.ron: ron.set_map(extent=[-117.1, 46.6, -117.0, 46.7], center=[-117.05, 46.65], zoom=12
+project_commit_mirror_failed pid=348000 runid=child source=nodb committed_at=2026-11-11T03:23:04.098262+00:00 process_failures=1
+2026-11-11 03:23:04 [INFO] wepppy.run.batch;;qe-cookie-denial-a1587e76c7;;child.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-11-11 03:23:04 [INFO] wepppy.run.batch;;qe-cookie-denial-a1587e76c7;;child.ron: ron.set_map(extent=[-117.1, 46.6, -117.0, 46.7], center=[-117.05, 46.65], zoom=12
+Created one ordinary private run and one private Batch base/child

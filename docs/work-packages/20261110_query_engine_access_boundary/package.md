@@ -1,6 +1,6 @@
 # Query-engine run access boundary
 
-**Status**: Open (2026-11-11 UTC); contract checkpoint `2f9401f93`; implementation and validation in progress
+**Status**: Open (2026-11-11 UTC); contract checkpoint `2f9401f93`; implemented and forest validated; production rollout/observation pending
 
 **Timezone**: UTC
 

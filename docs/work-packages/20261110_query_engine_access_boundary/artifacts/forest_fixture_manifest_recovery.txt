@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud python -
+Removed exactly one disposable account whose temporary credential file was lost during recreate

@@ -1,0 +1,11 @@
+INFO:wctl2:docker compose exec -T weppcloud python docs/work-packages/20261110_query_engine_access_boundary/artifacts/forest_fixtures.py --cleanup
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20261110_query_engine_access_boundary/artifacts/forest_fixtures.py", line 30, in <module>
+    shutil.rmtree(path)
+  File "/usr/local/lib/python3.12/shutil.py", line 766, in rmtree
+    _rmtree_safe_fd(stack, onexc)
+  File "/usr/local/lib/python3.12/shutil.py", line 704, in _rmtree_safe_fd
+    onexc(func, path, err, direntry=orig_entry, dir_fd=parent_fd)
+  File "/usr/local/lib/python3.12/shutil.py", line 663, in _rmtree_safe_fd
+    os.rmdir(name, dir_fd=dirfd)
+OSError: [Errno 39] Directory not empty: PosixPath('/wc1/runs/qe/qe-boundary-c8cc6aa9f5-000')

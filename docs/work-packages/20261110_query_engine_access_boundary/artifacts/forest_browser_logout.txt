@@ -1,0 +1,17 @@
+INFO:wctl2:docker compose exec -T weppcloud cat /tmp/qe-boundary-fixtures.json
+Real password/CAP browser login: passed
+Direct page status/cookie count: 200 1
+Owner browser query records: passed
+INFO:wctl2:docker compose exec -T weppcloud python -c 'import json,hashlib; from pathlib import Path; m=json.loads(Path('"'"'/tmp/qe-boundary-fixtures.json'"'"').read_text()); r=Path('"'"'/wc1/runs/qe'"'"')/m['"'"'runs'"'"'][0]; paths=list((r/'"'"'_query_engine'"'"').rglob('"'"'*'"'"'))+[r/'"'"'exceptions.log'"'"']; print(json.dumps({str(p.relative_to(r)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if p.is_file()}))'
+INFO:wctl2:docker compose exec -T weppcloud cat /tmp/qe-boundary-unrelated.json
+Unrelated real browser account denied page/query without minting cookie: passed
+Anonymous private denial/public query: passed
+INFO:wctl2:docker compose exec -T weppcloud python -c 'import json,hashlib; from pathlib import Path; m=json.loads(Path('"'"'/tmp/qe-boundary-fixtures.json'"'"').read_text()); r=Path('"'"'/wc1/runs/qe'"'"')/m['"'"'runs'"'"'][0]; paths=list((r/'"'"'_query_engine'"'"').rglob('"'"'*'"'"'))+[r/'"'"'exceptions.log'"'"']; print(json.dumps({str(p.relative_to(r)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if p.is_file()}))'
+Denied requests left catalog/log SHA256 manifest unchanged: 3
+POST activation and origin boundaries: passed
+Collection page admitted: 50
+Collection page admitted: 50
+Total collection query cookie count: 100
+100-cookie bytes before query: 63600
+100-cookie request through Caddy accepted; total query cookie bytes: 63600
+Real logout revokes retained query cookies: passed

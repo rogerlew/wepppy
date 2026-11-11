@@ -1,0 +1,5 @@
+INFO:wctl2:docker compose exec -T weppcloud python -c 'from pathlib import Path;from wepppy.weppcloud.app import app,Run,User;ctx=app.app_context();ctx.push();print('"'"'Remaining fixture run rows:'"'"',Run.query.filter(Run.runid.like('"'"'qe-boundary-c8cc6aa9f5-%'"'"')).count());print('"'"'Remaining fixture directories:'"'"',len(list(Path('"'"'/wc1/runs/qe'"'"').glob('"'"'qe-boundary-c8cc6aa9f5-*'"'"'))));print('"'"'Remaining disposable accounts:'"'"',User.query.filter(User.email.like('"'"'qe-boundary-%@example.com'"'"'),User.first_name=='"'"'Query boundary'"'"',User.last_name=='"'"'Disposable'"'"').count());print('"'"'Temporary fixture secret files:'"'"',len(list(Path('"'"'/workdir/wepppy/docker/secrets'"'"').glob('"'"'qe-boundary-*.json'"'"'))))'
+Remaining fixture run rows: 0
+Remaining fixture directories: 0
+Remaining disposable accounts: 0
+Temporary fixture secret files: 0

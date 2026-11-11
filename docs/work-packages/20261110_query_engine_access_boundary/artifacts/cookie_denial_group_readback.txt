@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud python -c 'import json;from pathlib import Path;from wepppy.nodb.core import Ron,Wepp;from wepppy.weppcloud.utils.helpers import get_wd;m=json.loads(Path('"'"'/workdir/wepppy/docker/secrets/qe-cookie-denial-followup.json'"'"').read_text());p=get_wd(m['"'"'batch'"'"'],prefer_active=False,read_only=True);print('"'"'Ron/Wepp canonical grouped identity:'"'"',Ron.getInstance(p).runid==m['"'"'batch'"'"'],Wepp.getInstance(p).runid==m['"'"'batch'"'"'])'
+Ron/Wepp canonical grouped identity: True True

@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud python docs/work-packages/20261110_query_engine_access_boundary/artifacts/forest_fixtures.py --cleanup
+Cleaned fixture run rows, ownership associations and directories: 101

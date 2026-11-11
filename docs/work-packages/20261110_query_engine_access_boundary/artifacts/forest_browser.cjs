@@ -130,8 +130,9 @@ async function login(page, supplied) {
     page.locator('input[type="submit"], button[type="submit"]').first().click()]);
 }
 
+if (require.main === module) {
 (async () => {
- const manifest = JSON.parse(execFileSync('wctl',['exec','-T','weppcloud','cat','/tmp/qe-boundary-fixtures.json'], {encoding:'utf8'}));
+ const manifest = JSON.parse(execFileSync('wctl',['exec','-T','weppcloud','cat','/workdir/wepppy/docker/secrets/qe-boundary-fixtures.json'], {encoding:'utf8'}));
  const browser = await chromium.launch({headless:true});
  try {
  const owner = await browser.newContext();
@@ -149,6 +150,7 @@ async function login(page, supplied) {
  assert.equal(queryCookies.length,1);
  assert(queryCookies.every(c => c.httpOnly && c.secure && c.sameSite==='Lax' && c.path==='/query-engine/runs/'));
  assert(!(await page.evaluate(()=>document.cookie)).includes(queryCookies[0].value));
+ assert(!(await page.content()).includes(queryCookies[0].value));
  const endpoint = `/query-engine/runs/${run}/${cfg}`;
  async function fetchQuery(p, target) {
   return p.evaluate(async url => {const r=await fetch(url+'/query', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({datasets:['data/sample.parquet']})}); return {status:r.status,body:await r.json()};},target);
@@ -158,18 +160,23 @@ async function login(page, supplied) {
  assert.deepEqual(result.body.records,[{value:3},{value:7}]);
  console.log('Owner browser query records: passed');
  const snapshot=()=>JSON.parse(execFileSync('wctl',['exec','-T','weppcloud','python','-c',
-  "import json,hashlib; from pathlib import Path; m=json.loads(Path('/tmp/qe-boundary-fixtures.json').read_text()); r=Path('/wc1/runs/qe')/m['runs'][0]; paths=list((r/'_query_engine').rglob('*'))+[r/'exceptions.log']; print(json.dumps({str(p.relative_to(r)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if p.is_file()}))"],{encoding:'utf8'}));
+  "import json,hashlib; from pathlib import Path; m=json.loads(Path('/workdir/wepppy/docker/secrets/qe-boundary-fixtures.json').read_text()); r=Path('/wc1/runs/qe')/m['runs'][0]; paths=list((r/'_query_engine').rglob('*'))+[r/'exceptions.log']; print(json.dumps({str(p.relative_to(r)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if p.is_file()}))"],{encoding:'utf8'}));
  const beforeDenial=snapshot();
  const unrelated=await browser.newContext();
  const unrelatedPage=await unrelated.newPage();
- const supplied=JSON.parse(execFileSync('wctl',['exec','-T','weppcloud','cat','/tmp/qe-boundary-unrelated.json'],{encoding:'utf8'}));
+ const supplied=JSON.parse(execFileSync('wctl',['exec','-T','weppcloud','cat','/workdir/wepppy/docker/secrets/qe-boundary-unrelated.json'],{encoding:'utf8'}));
  try {await login(unrelatedPage,supplied);} catch (error) {
  console.log('Unrelated login form result:',(await unrelatedPage.locator('body').innerText()).replaceAll(supplied.DEV_AGENT_EMAIL,'[fixture email]').replaceAll(supplied.DEV_AGENT_PASSWORD,'[redacted]').slice(0,1600)); throw error;
  }
  const unrelatedEntry=await unrelatedPage.goto(`${base}/weppcloud/runs/${run}/${cfg}/`);
- assert.equal(unrelatedEntry.status(),403);
+ assert.equal(unrelatedEntry.status(),404); // Existing Flask page conceals private runs.
  assert.equal((await unrelated.cookies(base+'/query-engine/runs/')).filter(c=>c.name.startsWith('wepp_query_')).length,0);
  assert.equal((await fetchQuery(unrelatedPage,endpoint)).status,401);
+ const unrelatedBearer=execFileSync('wctl',['exec','-T','weppcloud','python','-c',
+ "import json,uuid; from pathlib import Path; from wepppy.weppcloud.app import app,User; from wepppy.weppcloud.utils.auth_tokens import issue_token; ctx=app.app_context();ctx.push(); m=json.loads(Path('/workdir/wepppy/docker/secrets/qe-boundary-fixtures.json').read_text()); c=json.loads(Path('/workdir/wepppy/docker/secrets/qe-boundary-unrelated.json').read_text()); u=User.query.filter_by(email=c['DEV_AGENT_EMAIL']).one(); print(issue_token(str(u.id),audience='query-engine',scopes=['runs:read','queries:execute'],runs=[m['runs'][0]],expires_in=120,extra_claims={'token_class':'user','jti':uuid.uuid4().hex})['token'])"],{encoding:'utf8'}).trim();
+ const unrelatedSigned=await unrelated.request.get(base+endpoint+'/schema',{headers:{Authorization:'Bearer '+unrelatedBearer}});
+ assert.equal(unrelatedSigned.status(),403);
+ console.log('Real current-account unrelated bearer returns403: passed');
  console.log('Unrelated real browser account denied page/query without minting cookie: passed');
  await unrelated.close();
  const anonymous=await browser.newContext();
@@ -186,7 +193,7 @@ async function login(page, supplied) {
  const wrongOrigin=await owner.request.post(base+endpoint+'/activate',{headers:{Origin:'https://hostile.invalid'}});
  assert.equal(wrongOrigin.status(),403);
  assert.deepEqual(snapshot(),beforeDenial);
- console.log('Denied requests left catalog/log SHA256 manifest unchanged:',Object.keys(beforeDenial).length);
+ console.log('Denied requests left catalog/log SHA256 manifest unchanged:',JSON.stringify(beforeDenial));
  const activation=await page.evaluate(async url=>{const r=await fetch(url+'/activate',{method:'POST'});return r.status;},endpoint);
  assert.equal(activation,200);
  console.log('POST activation and origin boundaries: passed');
@@ -198,6 +205,12 @@ async function login(page, supplied) {
  assert.equal(collection.status(),200);
  console.log('Collection page admitted:',ws.length);
  }
+ if(chunks===1) {
+ const oversized=await anonymous.request.get(base+'/weppcloud/login?padding='+'x'.repeat(8200));
+ assert.equal(oversized.status(),400);
+ assert((await oversized.text()).includes('8190'));
+ console.log('Request line above8190 remains rejected: passed');
+ }
  const all=(await owner.cookies(base+'/query-engine/runs/')).filter(c=>c.name.startsWith('wepp_query_'));
  console.log('Total collection query cookie count:',all.length);
  assert.equal(all.length,100);
@@ -206,6 +219,12 @@ async function login(page, supplied) {
  assert.equal(last.status,200,JSON.stringify(last.body));
  assert.deepEqual(last.body.records,[{value:3},{value:7}]);
  console.log('100-cookie request through Caddy accepted; total query cookie bytes:',all.reduce((n,c)=>n+c.name.length+c.value.length+2,0));
+ await page.goto(base+'/weppcloud/logout');
+ assert.equal((await fetchQuery(page,endpoint)).status,401);
+ console.log('Real logout revokes retained query cookies: passed');
  await anonymous.close(); await owner.close();
  } finally {await browser.close();}
-})().catch(error=>{console.error(error.message);process.exitCode=1;});
+})().catch(error=>{console.error(error.message.split('\n')[0]);process.exitCode=1;});
+
+}
+module.exports = {login, base};

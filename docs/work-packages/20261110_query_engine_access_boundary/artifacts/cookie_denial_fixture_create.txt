@@ -1,0 +1,22 @@
+INFO:wctl2:docker compose exec -T weppcloud python docs/work-packages/20261110_query_engine_access_boundary/artifacts/cookie_denial_fixtures.py
+2026-11-11 03:19:46 [INFO] wepppy.run.qe-cookie-denial-3834ffc8cd.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-11-11 03:19:46 [INFO] wepppy.run.qe-cookie-denial-3834ffc8cd.ron: ron.set_map(extent=[-117.1, 46.6, -117.0, 46.7], center=[-117.05, 46.65], zoom=12
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:46.681225+00:00 process_failures=1
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:46.711772+00:00 process_failures=2
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:46.740560+00:00 process_failures=3
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:46.771279+00:00 process_failures=4
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:46.816134+00:00 process_failures=5
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:46.983256+00:00 process_failures=6
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.024919+00:00 process_failures=7
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.049939+00:00 process_failures=8
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.090069+00:00 process_failures=9
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.108097+00:00 process_failures=10
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.135904+00:00 process_failures=11
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.154402+00:00 process_failures=12
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.175348+00:00 process_failures=13
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.194041+00:00 process_failures=14
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.214949+00:00 process_failures=15
+2026-11-11 03:19:47 [INFO] wepppy.run.child.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-11-11 03:19:47 [INFO] wepppy.run.child.ron: ron.set_map(extent=[-117.1, 46.6, -117.0, 46.7], center=[-117.05, 46.65], zoom=12
+project_commit_mirror_failed pid=346988 runid=child source=nodb committed_at=2026-11-11T03:19:47.309600+00:00 process_failures=16
+Created one ordinary private run and one private Batch base/child

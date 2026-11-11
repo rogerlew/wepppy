@@ -1,0 +1,6 @@
+INFO:wctl2:docker compose exec -T weppcloud cat /workdir/wepppy/docker/secrets/qe-cookie-denial-followup.json
+Ordinary private page/cookie/query records: passed
+Admin without Batch membership collection status: 200
+Admitted Batch collection remains available without minting a query grant: passed
+Ordinary session bearer rejected at grouped resource binding: passed
+Ordinary logout revocation: passed

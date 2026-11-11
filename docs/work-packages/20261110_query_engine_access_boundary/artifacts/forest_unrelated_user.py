@@ -8,7 +8,7 @@ from pathlib import Path
 from flask_security.utils import hash_password
 from wepppy.weppcloud.app import app, db, User, user_datastore
 
-record = Path('/tmp/qe-boundary-unrelated.json')
+record = Path('/workdir/wepppy/docker/secrets/qe-boundary-unrelated.json')
 with app.app_context():
     if '--cleanup' in sys.argv:
         values = json.loads(record.read_text())

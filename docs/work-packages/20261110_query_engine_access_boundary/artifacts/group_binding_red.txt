@@ -1,0 +1,75 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/query_engine/test_http_access_boundary.py -k bare_ordinary_binding --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 93 items / 87 deselected / 6 selected
+
+tests/query_engine/test_http_access_boundary.py F
+
+=================================== FAILURES ===================================
+____ test_bare_ordinary_binding_cannot_select_same_named_group[user-batch] _____
+
+boundary = (<starlette.testclient.TestClient object at 0x74dd30baaab0>, PosixPath('/tmp/pytest-of-unknown/pytest-3/test_bare_ordinary_binding_can0/runs/ab/ab-private'), ['catalog'])
+signed_token = <function signed_token.<locals>.issue at 0x74dd30c19080>
+session_state = ({0: {}, 9: {}, 11: {'auth:session:run:team:boundary-session': '1'}}, {0: {}, 9: {}, 11: {}})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x74dd4ae83d40>
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-3/test_bare_ordinary_binding_can0')
+kind = 'batch', token_class = 'user'
+
+    @pytest.mark.parametrize('kind', ['batch', 'culvert'])
+    @pytest.mark.parametrize('token_class', ['user', 'session', 'service'])
+    def test_bare_ordinary_binding_cannot_select_same_named_group(
+            boundary, signed_token, session_state, monkeypatch, tmp_path, kind, token_class):
+        from wepppy.weppcloud.utils import feature_access_runtime
+        client, _, calls = boundary
+        root = tmp_path / kind
+        child = root / 'team/runs/child'
+        child.mkdir(parents=True)
+        (root / 'team/_base').mkdir()
+        monkeypatch.setenv('BATCH_RUNNER_ROOT' if kind == 'batch' else 'CULVERTS_ROOT', str(root))
+        class Store:
+            def membership(self, *args, **kwargs):
+                return True, True
+        monkeypatch.setattr(feature_access_runtime, 'feature_store', Store)
+        _mark_session('team')
+        token = signed_token(runid='team', token_class=token_class, config='cfg',
+                             session_id='boundary-session', service_groups=['admin-run-token'],
+                             feature_access_principal={'version': 1, 'kind': 'human', 'id': 42})
+        response = client.get(f'/runs/{kind};;team;;child/cfg/schema',
+                              headers={'Authorization': 'Bearer ' + token})
+>       assert response.status_code == 403, response.text
+E       AssertionError: {"runid":"/tmp/pytest-of-unknown/pytest-3/test_bare_ordinary_binding_can0/batch/team/runs/child","entries":[]}
+E       assert 200 == 403
+E        +  where 200 = <Response [200 OK]>.status_code
+
+tests/query_engine/test_http_access_boundary.py:713: AssertionError
+=============================== warnings summary ===============================
+tests/query_engine/test_http_access_boundary.py::test_bare_ordinary_binding_cannot_select_same_named_group[user-batch]
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/query_engine/test_http_access_boundary.py::test_bare_ordinary_binding_cannot_select_same_named_group[user-batch]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/query_engine/test_http_access_boundary.py::test_bare_ordinary_binding_cannot_select_same_named_group[user-batch]
+tests/query_engine/test_http_access_boundary.py::test_bare_ordinary_binding_cannot_select_same_named_group[user-batch]
+tests/query_engine/test_http_access_boundary.py::test_bare_ordinary_binding_cannot_select_same_named_group[user-batch]
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/query_engine/test_http_access_boundary.py::test_bare_ordinary_binding_cannot_select_same_named_group[user-batch]
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/query_engine/test_http_access_boundary.py::test_bare_ordinary_binding_cannot_select_same_named_group[user-batch]
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/query_engine/test_http_access_boundary.py::test_bare_ordinary_binding_cannot_select_same_named_group[user-batch]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================ 1 failed, 87 deselected, 7 warnings in 12.68s =================

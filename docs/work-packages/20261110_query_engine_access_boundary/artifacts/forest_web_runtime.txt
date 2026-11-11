@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud python -c 'from pathlib import Path; print(Path('"'"'/proc/7/cmdline'"'"').read_bytes().replace(bytes([0]),b'"'"' '"'"').decode())'
+/opt/venv/bin/python /opt/venv/bin/gunicorn --limit-request-line 8190 --workers 4 --threads 2 --timeout 1800 --bind 0.0.0.0:8000 --log-level info --forwarded-allow-ips 192.168.1.1 --max-requests 1000 --max-requests-jitter 200 wepppy.weppcloud.app:app

@@ -1,0 +1,11 @@
+INFO:wctl2:docker compose exec -T query-engine python -c 'import json,os,stat;from pathlib import Path;from uvicorn.protocols.http.auto import AutoHTTPProtocol;print(json.dumps({'"'"'uid'"'"':os.getuid(),'"'"'gid'"'"':os.getgid(),'"'"'groups'"'"':os.getgroups(),'"'"'protocol'"'"':AutoHTTPProtocol.__name__,'"'"'origins'"'"':os.environ['"'"'QUERY_ENGINE_ALLOWED_ORIGINS'"'"'],'"'"'run_root_mode'"'"':oct(stat.S_IMODE(Path('"'"'/wc1/runs'"'"').stat().st_mode))},indent=2))'
+{
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "protocol": "H11Protocol",
+  "origins": "https://forest.tail305ec9.ts.net",
+  "run_root_mode": "0o755"
+}

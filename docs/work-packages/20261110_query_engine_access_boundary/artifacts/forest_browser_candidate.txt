@@ -1,0 +1,19 @@
+INFO:wctl2:docker compose exec -T weppcloud cat /workdir/wepppy/docker/secrets/qe-boundary-fixtures.json
+Real password/CAP browser login: passed
+Direct page status/cookie count: 200 1
+Owner browser query records: passed
+INFO:wctl2:docker compose exec -T weppcloud python -c 'import json,hashlib; from pathlib import Path; m=json.loads(Path('"'"'/workdir/wepppy/docker/secrets/qe-boundary-fixtures.json'"'"').read_text()); r=Path('"'"'/wc1/runs/qe'"'"')/m['"'"'runs'"'"'][0]; paths=list((r/'"'"'_query_engine'"'"').rglob('"'"'*'"'"'))+[r/'"'"'exceptions.log'"'"']; print(json.dumps({str(p.relative_to(r)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if p.is_file()}))'
+INFO:wctl2:docker compose exec -T weppcloud cat /workdir/wepppy/docker/secrets/qe-boundary-unrelated.json
+INFO:wctl2:docker compose exec -T weppcloud python -c 'import json,uuid; from pathlib import Path; from wepppy.weppcloud.app import app,User; from wepppy.weppcloud.utils.auth_tokens import issue_token; ctx=app.app_context();ctx.push(); m=json.loads(Path('"'"'/workdir/wepppy/docker/secrets/qe-boundary-fixtures.json'"'"').read_text()); c=json.loads(Path('"'"'/workdir/wepppy/docker/secrets/qe-boundary-unrelated.json'"'"').read_text()); u=User.query.filter_by(email=c['"'"'DEV_AGENT_EMAIL'"'"']).one(); print(issue_token(str(u.id),audience='"'"'query-engine'"'"',scopes=['"'"'runs:read'"'"','"'"'queries:execute'"'"'],runs=[m['"'"'runs'"'"'][0]],expires_in=120,extra_claims={'"'"'token_class'"'"':'"'"'user'"'"','"'"'jti'"'"':uuid.uuid4().hex})['"'"'token'"'"'])'
+Real current-account unrelated bearer returns403: passed
+Unrelated real browser account denied page/query without minting cookie: passed
+Anonymous private denial/public query: passed
+INFO:wctl2:docker compose exec -T weppcloud python -c 'import json,hashlib; from pathlib import Path; m=json.loads(Path('"'"'/workdir/wepppy/docker/secrets/qe-boundary-fixtures.json'"'"').read_text()); r=Path('"'"'/wc1/runs/qe'"'"')/m['"'"'runs'"'"'][0]; paths=list((r/'"'"'_query_engine'"'"').rglob('"'"'*'"'"'))+[r/'"'"'exceptions.log'"'"']; print(json.dumps({str(p.relative_to(r)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if p.is_file()}))'
+Denied requests left catalog/log SHA256 manifest unchanged: {"_query_engine/catalog.json":"4f24c96b5683e0765f62fb2cbecf6a6c1a392b71fb4db0255d4437019d9760d4","_query_engine/refresh/incarnation.json":"59d4cef613a76981b5142d00688034bc8d70bd1c971ea66a13c0d2ee77a56a79","_query_engine/refresh/status.json":"243843aab859d197fde5d6531aa47c98eeda6329f7586998f26c8cba2321f6ed"}
+POST activation and origin boundaries: passed
+Collection page admitted: 100
+Request line above8190 remains rejected: passed
+Total collection query cookie count: 100
+100-cookie bytes before query: 63600
+100-cookie request through Caddy accepted; total query cookie bytes: 63600
+Real logout revokes retained query cookies: passed

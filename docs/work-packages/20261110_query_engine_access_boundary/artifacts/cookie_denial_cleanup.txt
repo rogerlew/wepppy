@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud python docs/work-packages/20261110_query_engine_access_boundary/artifacts/cookie_denial_fixtures.py --cleanup
+Removed ordinary and Batch fixtures, row/associations, caches, markers and manifest

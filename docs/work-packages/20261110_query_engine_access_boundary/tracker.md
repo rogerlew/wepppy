@@ -8,11 +8,11 @@
 
 **Started**: 2026-11-11 01:03 UTC
 
-**Current phase**: M2/M3 implemented; M4 review fixes and validation
+**Current phase**: Local implementation/reviews and forest validation complete; rollout pending
 
-**Last updated**: 2026-11-11 02:12 UTC
+**Last updated**: 2026-11-11 02:44 UTC
 
-**Next milestone**: close local reviews and validate browser/ingress
+**Next milestone**: authorized wepp1 rollout and 14-day observation
 
 **Security impact**: `high`
 
@@ -32,14 +32,14 @@
 - [x] Implement strict identifier resolution and pre-side-effect authorization.
 - [x] Add the query-engine-scoped HttpOnly browser token path.
 - [x] Restrict activation method/authority and query-engine CORS.
-- [ ] Run focused, broad, browser, Compose/Caddy, and artifact readback gates.
-- [ ] Complete independent correctness, QA, code, and security reviews.
+- [x] Run focused, broad, browser, Compose/Caddy, and artifact readback gates (one unrelated baseline broad failure).
+- [x] Complete independent correctness, QA, code, and security reviews.
 - [ ] Validate on forest/equivalent and deploy to wepp1 only when authorized.
 
 ### In Progress
 
-- [ ] Independent review fixes, expanded compatibility tests, broad gates and
-      browser/environment evidence.
+- [x] Independent review fixes, expanded compatibility tests, broad gates and
+      browser/environment evidence; follow-up commit `d033a33df`.
 
 ### Blocked
 
@@ -61,8 +61,8 @@
   branch creation.
 - **2026-11-11 01:03 UTC** - Package opened for the operator-requested F1 fix.
 - **2026-11-11** - Operator approved revised contract; checkpoint `2f9401f93`.
-- **Pending** - Local implementation and validation.
-- **Pending** - Forest/equivalent acceptance and wepp1 rollout.
+- **2026-11-11** - Implementation `5009b4f64`; broad 13,362 passed / 435 skipped / one verified pre-existing template assertion.
+- **2026-11-11** - Forest browser/Caddy acceptance passed; wepp1 rollout remains pending authorization.
 
 ## Decisions Log
 
@@ -157,7 +157,7 @@ at its existing revision and require implementation to reconcile deliberately.
 
 ## Progress Notes
 
-### 2026-11-11 02:12 UTC: Execute M0 contract preparation
+### 2026-11-11 02:44 UTC: Execute M0 contract preparation
 
 Prepared `docs/schemas/query-engine-http-access-contract.md` and proposed
 amendments to session, JWT, CSRF, composite IDs, feature governance, PCV and query
@@ -265,3 +265,41 @@ M0 complete: accepted standalone checkpoint ancestor `2f9401f93` committed
   Log and the canonical HTTP operations guide. No production changes performed.
 - Observe-only quality report lacks Radon and changed-file analysis; no complexity
   threshold conclusion is claimed.
+
+
+## Forest acceptance and cleanup (2026-11-11 UTC)
+
+- Candidate `5009b4f64` committed; production-source/config/test manifest has no
+  mismatches. Independent QA/security accepted the final single 100-run browser
+  workflow, real account/session decisions, unchanged denial artifacts and logout.
+- All 101 synthetic runs, ownership associations, disposable account and temporary
+  secret files were removed; exact cache/marker cleanup and zero-count readback
+  are retained. NFS log handles required a graceful web-worker reload; the full
+  pytest process was not affected by that reload.
+- The earlier evolving-tree full run was interrupted after 4013 passed/126 skipped.
+  A new `wctl run-pytest tests --maxfail=1` is running against committed candidate
+  `5009b4f64` (`artifacts/full_suite_candidate.txt`). Do not claim a broad pass yet.
+- Production rollout and incident observation remain separately gated by M5.
+
+
+## Final consumer-check follow-up
+
+Code review confirmed a medium compatibility gap after the initial forest gate:
+a collection may admit Admin/Root while private Batch query admission still
+requires membership. Canonical RQ AuthError401/403 escaped the cookie helper's
+Starlette-only catch and turned an admitted page into500. A new Flask collection
+regression reproduces the failure (`cookie_denial_red.txt`). The bounded fix will
+omit the query cookie for either canonical denial class, log that disposition,
+and preserve dependency errors and both admission policies. The broad run remains
+on frozen production candidate5009b4f64; follow-up validation is tracked separately.
+
+
+## Final follow-up decisions
+
+CID-5 preserves admitted collection pages on query-only401/403, omits the
+credential and logs only resource/status;503 remains explicit. CID-6 confines
+ordinary credentials to typed resources and preserves only the proven Culvert
+service UUID delegation. Normative details/rationale are in the HTTP access
+contract's credential-binding paragraph and "Browser transport and lifecycle".
+The frozen broad result and narrow follow-up gates are composed evidence, not a
+claim that the final follow-up revision passed a complete broad run.

@@ -1,0 +1,175 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/weppcloud/routes/test_combined_watershed_viewer_security.py -k grouped_query_cookie_denial --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 25 items / 23 deselected / 2 selected
+
+tests/weppcloud/routes/test_combined_watershed_viewer_security.py F
+
+=================================== FAILURES ===================================
+________ test_collection_page_survives_grouped_query_cookie_denial[401] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7a684ad1a0f0>
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_collection_page_survives_0')
+status_code = 401
+
+    @pytest.mark.parametrize('status_code', [401, 403])
+    def test_collection_page_survives_grouped_query_cookie_denial(monkeypatch, tmp_path, status_code):
+        """Collection read admission does not imply a grouped query grant."""
+        module = _load_module()
+        from wepppy.query_engine.app import access
+        from wepppy.microservices.rq_engine.auth import AuthError
+        from wepppy.weppcloud.utils import helpers, query_cookie
+        generator = importlib.import_module('wepppy.weppcloud.combined_watershed_viewer_generator')
+        root = tmp_path / 'batch'
+        (root / 'group/_base').mkdir(parents=True)
+        (root / 'group/runs/child').mkdir(parents=True)
+        monkeypatch.setenv('BATCH_RUNNER_ROOT', str(root))
+        monkeypatch.setattr(helpers, 'redis_wd_cache_client', None)
+        monkeypatch.setattr(access.rq_auth, '_reject_fork_preparing_run', lambda _: None)
+        user = SimpleNamespace(id=42, is_authenticated=True, is_active=True,
+                               has_role=lambda role: role == 'Admin')
+        monkeypatch.setattr(module, 'current_user', user)
+        monkeypatch.setattr(query_cookie, 'current_user', user)
+        _install_public_stub(monkeypatch, module, set())
+        _install_template_stub(monkeypatch, module)
+        runid = 'batch;;group;;child'
+        monkeypatch.setattr(generator, 'collection_metadata',
+                            lambda ids, **kw: {'ws': [{'runid': runid, 'cfg': 'cfg'}]})
+        denied_calls = []
+        def deny_group(*args, **kwargs):
+            denied_calls.append('grouped query admission')
+            raise AuthError('Feature access denied', status_code=status_code)
+        monkeypatch.setattr(access, 'require_feature_access', deny_group)
+        app = _build_app(module)
+        app.config['TESTING'] = False
+        with app.test_client() as client:
+>           response = client.get('/bounds_ws_viewer', query_string={'ws': json.dumps([{'runid': runid}])})
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/weppcloud/routes/test_combined_watershed_viewer_security.py:285:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/opt/venv/lib/python3.12/site-packages/werkzeug/test.py:1162: in get
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/testing.py:235: in open
+    response = super().open(
+/opt/venv/lib/python3.12/site-packages/werkzeug/test.py:1116: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/werkzeug/test.py:988: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/werkzeug/test.py:1264: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:1536: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:1514: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:860: in handle_exception
+    server_error = self.ensure_sync(handler)(server_error)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:1511: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:919: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:809: in handle_user_exception
+    return self.ensure_sync(handler)(e)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:917: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:902: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/weppcloud/routes/combined_watershed_viewer.py:163: in bounds_ws_viewer
+    return _render_collection('bounds_ws_viewer.htm', include_ids=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/weppcloud/routes/combined_watershed_viewer.py:144: in _render_collection
+    set_query_cookie(response, item['runid'], item['cfg'], omit_public=True)
+wepppy/weppcloud/utils/query_cookie.py:30: in set_query_cookie
+    authorize_resource(target, identity_claims)
+wepppy/query_engine/app/access.py:193: in authorize_resource
+    return _authorize_resource(target, claims, operation=operation, source=source)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/query_engine/app/access.py:157: in _authorize_resource
+    principal = require_feature_access(claims, parts[0] + '_runner',
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+args = ({'feature_access_principal': {'id': 42, 'kind': 'human', 'version': 1}, 'token_class': 'session'}, 'batch_runner')
+kwargs = {'operation': 'inspect', 'protected_read': True}
+
+    def deny_group(*args, **kwargs):
+        denied_calls.append('grouped query admission')
+>       raise AuthError('Feature access denied', status_code=status_code)
+E       wepppy.microservices.rq_engine.auth.AuthError: Feature access denied
+
+tests/weppcloud/routes/test_combined_watershed_viewer_security.py:280: AuthError
+------------------------------ Captured log call -------------------------------
+ERROR    test_combined_watershed_viewer_security:app.py:875 Exception on /bounds_ws_viewer [GET]
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/app.py", line 809, in handle_user_exception
+    return self.ensure_sync(handler)(e)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/routes/combined_watershed_viewer.py", line 163, in bounds_ws_viewer
+    return _render_collection('bounds_ws_viewer.htm', include_ids=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/routes/combined_watershed_viewer.py", line 144, in _render_collection
+    set_query_cookie(response, item['runid'], item['cfg'], omit_public=True)
+  File "/workdir/wepppy/wepppy/weppcloud/utils/query_cookie.py", line 30, in set_query_cookie
+    authorize_resource(target, identity_claims)
+  File "/workdir/wepppy/wepppy/query_engine/app/access.py", line 193, in authorize_resource
+    return _authorize_resource(target, claims, operation=operation, source=source)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/query_engine/app/access.py", line 157, in _authorize_resource
+    principal = require_feature_access(claims, parts[0] + '_runner',
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/weppcloud/routes/test_combined_watershed_viewer_security.py", line 280, in deny_group
+    raise AuthError('Feature access denied', status_code=status_code)
+wepppy.microservices.rq_engine.auth.AuthError: Feature access denied
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/weppcloud/routes/test_combined_watershed_viewer_security.py::test_collection_page_survives_grouped_query_cookie_denial[401]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/weppcloud/routes/test_combined_watershed_viewer_security.py::test_collection_page_survives_grouped_query_cookie_denial[401]
+tests/weppcloud/routes/test_combined_watershed_viewer_security.py::test_collection_page_survives_grouped_query_cookie_denial[401]
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/weppcloud/routes/test_combined_watershed_viewer_security.py::test_collection_page_survives_grouped_query_cookie_denial[401]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================ 1 failed, 23 deselected, 6 warnings in 11.09s =================

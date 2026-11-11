@@ -1,0 +1,3 @@
+INFO:wctl2:docker compose restart query-engine
+ Container wepppy-query-engine Restarting
+ Container wepppy-query-engine Started

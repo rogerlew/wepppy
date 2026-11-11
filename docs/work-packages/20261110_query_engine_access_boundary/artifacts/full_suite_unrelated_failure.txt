@@ -1,0 +1,3 @@
+tests/weppcloud/test_usersum_template_wiring.py: unchanged from pre-work b3786ae7e = True; sha256 738b5cd17c5d59b28eed7d7955038d6d598aa55af41d861f54f7383933aa38c9
+wepppy/weppcloud/templates/user/runs2.html: unchanged from pre-work b3786ae7e = True; sha256 dba1f745b74b3b75f3b99b0549d05b6ce7757c9f24032adefcddebcc1ba26d62
+Broad run stopped at pre-existing runsTtlDeletionHelpUrl template assertion; no package changes to either file.
