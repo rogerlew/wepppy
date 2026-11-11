@@ -40,7 +40,7 @@ def _smoke_environment() -> dict[str, str]:
     return {
         **os.environ,
         "WEPPCLOUD_SMOKE_IMAGE": "wepppy-canary-smoke:sha-" + ("a" * 40),
-        "WEPPCLOUD_SMOKE_REDIS_PASSWORD": "ephemeral-test-only-redis",
+        "WEPPCLOUD_SMOKE_REDIS_PASSWORD_FILE": "/tmp/ephemeral-test-only-redis",
         "WEPPCLOUD_SMOKE_SECRET_KEY": "ephemeral-test-only-flask-key",
         "WEPPCLOUD_SMOKE_PASSWORD_SALT": "ephemeral-test-only-salt",
         "WEPPCLOUD_SMOKE_AGENT_JWT_SECRET": "ephemeral-test-only-agent-jwt",

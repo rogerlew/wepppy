@@ -30,7 +30,7 @@ def _redis() -> redis.StrictRedis:
     if _redis_client is None:
         pool = redis.ConnectionPool(
             **redis_connection_kwargs(
-                RedisDB.STATUS,
+                RedisDB.STATUS, for_pool=True,
                 decode_responses=True,
                 extra={"max_connections": 10},
             )

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -20,8 +21,8 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.ListenAddr != defaultListenAddr {
 		t.Fatalf("ListenAddr = %s, want %s", cfg.ListenAddr, defaultListenAddr)
 	}
-	if cfg.RedisURL != defaultRedisURL {
-		t.Fatalf("RedisURL = %s, want %s", cfg.RedisURL, defaultRedisURL)
+	if cfg.RedisEndpoint != defaultRedisEndpoint {
+		t.Fatalf("RedisEndpoint = %s, want %s", cfg.RedisEndpoint, defaultRedisEndpoint)
 	}
 	if cfg.PingInterval != defaultPingInterval {
 		t.Fatalf("PingInterval = %s, want %s", cfg.PingInterval, defaultPingInterval)
@@ -83,8 +84,8 @@ func TestLoadEnvironmentOverrides(t *testing.T) {
 	if cfg.ListenAddr != "127.0.0.1:9101" {
 		t.Fatalf("ListenAddr = %s, want 127.0.0.1:9101", cfg.ListenAddr)
 	}
-	if cfg.RedisURL != "redis://redis:6380/4" {
-		t.Fatalf("RedisURL = %s, want redis://redis:6380/4", cfg.RedisURL)
+	if cfg.RedisEndpoint != "redis://redis:6380/4" {
+		t.Fatalf("RedisEndpoint = %s, want redis://redis:6380/4", cfg.RedisEndpoint)
 	}
 	if cfg.PingInterval != 150*time.Millisecond {
 		t.Fatalf("PingInterval = %s, want 150ms", cfg.PingInterval)
@@ -127,7 +128,7 @@ func TestLoadEnvironmentOverrides(t *testing.T) {
 	}
 }
 
-func TestLoadRedisURLFallbackWithPassword(t *testing.T) {
+func TestLoadRedisEndpointFallbackWithPassword(t *testing.T) {
 	clearPreflightEnv(t)
 
 	t.Setenv("REDIS_URL", "redis://redis:6379/0")
@@ -138,12 +139,12 @@ func TestLoadRedisURLFallbackWithPassword(t *testing.T) {
 		t.Fatalf("Load() returned error: %v", err)
 	}
 
-	if cfg.RedisURL != "redis://:sekret@redis:6379/0" {
-		t.Fatalf("RedisURL = %s, want redis://:sekret@redis:6379/0", cfg.RedisURL)
+	if cfg.RedisEndpoint != "redis://redis:6379/0" {
+		t.Fatalf("RedisEndpoint = %s, want redis://redis:6379/0", cfg.RedisEndpoint)
 	}
 }
 
-func TestLoadPreflightRedisURLInjectsPassword(t *testing.T) {
+func TestLoadPreflightRedisEndpointInjectsPassword(t *testing.T) {
 	clearPreflightEnv(t)
 
 	t.Setenv("PREFLIGHT_REDIS_URL", "redis://redis:6379/0")
@@ -154,12 +155,12 @@ func TestLoadPreflightRedisURLInjectsPassword(t *testing.T) {
 		t.Fatalf("Load() returned error: %v", err)
 	}
 
-	if cfg.RedisURL != "redis://:sekret@redis:6379/0" {
-		t.Fatalf("RedisURL = %s, want redis://:sekret@redis:6379/0", cfg.RedisURL)
+	if cfg.RedisEndpoint != "redis://redis:6379/0" {
+		t.Fatalf("RedisEndpoint = %s, want redis://redis:6379/0", cfg.RedisEndpoint)
 	}
 }
 
-func TestLoadRedisURLFallbackWithPasswordFile(t *testing.T) {
+func TestLoadRedisEndpointFallbackWithPasswordFile(t *testing.T) {
 	clearPreflightEnv(t)
 
 	secretPath := filepath.Join(t.TempDir(), "redis_password")
@@ -175,12 +176,12 @@ func TestLoadRedisURLFallbackWithPasswordFile(t *testing.T) {
 		t.Fatalf("Load() returned error: %v", err)
 	}
 
-	if cfg.RedisURL != "redis://:sekret@redis:6379/0" {
-		t.Fatalf("RedisURL = %s, want redis://:sekret@redis:6379/0", cfg.RedisURL)
+	if cfg.RedisEndpoint != "redis://redis:6379/0" {
+		t.Fatalf("RedisEndpoint = %s, want redis://redis:6379/0", cfg.RedisEndpoint)
 	}
 }
 
-func TestLoadPreflightRedisURLInjectsPasswordFromFile(t *testing.T) {
+func TestLoadPreflightRedisEndpointInjectsPasswordFromFile(t *testing.T) {
 	clearPreflightEnv(t)
 
 	secretPath := filepath.Join(t.TempDir(), "redis_password")
@@ -196,8 +197,8 @@ func TestLoadPreflightRedisURLInjectsPasswordFromFile(t *testing.T) {
 		t.Fatalf("Load() returned error: %v", err)
 	}
 
-	if cfg.RedisURL != "redis://:sekret@redis:6379/0" {
-		t.Fatalf("RedisURL = %s, want redis://:sekret@redis:6379/0", cfg.RedisURL)
+	if cfg.RedisEndpoint != "redis://redis:6379/0" {
+		t.Fatalf("RedisEndpoint = %s, want redis://redis:6379/0", cfg.RedisEndpoint)
 	}
 }
 
@@ -217,19 +218,18 @@ func TestLoadErrorsWhenRedisPasswordFileIsEmpty(t *testing.T) {
 }
 
 func TestStringRedactsRedisPassword(t *testing.T) {
-	cfg := Config{
-		ListenAddr:   defaultListenAddr,
-		RedisURL:     "redis://:sekret@redis:6379/0",
-		PingInterval: defaultPingInterval,
-		PongTimeout:  defaultPongTimeout,
+	clearPreflightEnv(t)
+	t.Setenv("REDIS_URL", "redis://:sekret@redis:6379/2")
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
 	}
-
-	rendered := cfg.String()
-	if strings.Contains(rendered, "sekret") {
-		t.Fatalf("Config.String() leaked redis password: %s", rendered)
+	if strings.Contains(fmt.Sprintf("%v %+v %#v %v", cfg, cfg, cfg, cfg.RedisOptions), "sekret") {
+		t.Fatal("config representation leaked credential")
 	}
-	if !strings.Contains(rendered, "redis://:redacted@redis:6379/0") {
-		t.Fatalf("Config.String() did not include redacted redis URL: %s", rendered)
+	_, password := cfg.RedisOptions.CredentialsProvider()
+	if password != "sekret" {
+		t.Fatal("credential was lost")
 	}
 }
 
@@ -247,5 +247,40 @@ func clearPreflightEnv(t *testing.T) {
 	}
 	for _, key := range []string{"REDIS_PASSWORD_FILE", "PREFLIGHT_REDIS_PASSWORD_FILE"} {
 		os.Unsetenv(key)
+	}
+}
+
+func TestPasswordFileFraming(t *testing.T) {
+	clearPreflightEnv(t)
+	path := filepath.Join(t.TempDir(), "password")
+	t.Setenv("REDIS_PASSWORD_FILE", path)
+	for _, value := range []string{"", "\n", " secret\n", "secret \n", "secret\r\n", "a\x00b", "\u00a0secret\n", "secret\u2003\n", "\x1csecret", "secret\x1f", string([]byte{0xff})} {
+		if err := os.WriteFile(path, []byte(value), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := Load(); err == nil {
+			t.Fatal("invalid secret file accepted")
+		}
+	}
+	if err := os.WriteFile(path, []byte("é 🔒:@ %\n\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, password := cfg.RedisOptions.CredentialsProvider()
+	if password != "é 🔒:@ %" {
+		t.Fatal("valid UTF-8 credential changed")
+	}
+}
+
+func TestMalformedHostConfiguration(t *testing.T) {
+	clearPreflightEnv(t)
+	for _, host := range []string{"user@cache", "cache?password=canary", "cache/path", "cache host"} {
+		t.Setenv("REDIS_HOST", host)
+		if _, err := Load(); err == nil {
+			t.Fatal("invalid host accepted")
+		}
 	}
 }

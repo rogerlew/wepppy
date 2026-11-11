@@ -43,7 +43,7 @@ def session_redis_url(db_default: RedisDB = RedisDB.SESSION) -> str:
 - `RedisDB.SESSION` aliases DB 11 (shared with `WD_CACHE`).
 - `session_redis_url()` enforces DB 11 unless `SESSION_REDIS_DB` overrides it.
 - `SESSION_REDIS_URL` takes precedence; if omitted, session URLs inherit host/credentials from `REDIS_URL` (or `RQ_REDIS_URL`) while swapping in the session DB.
-- Weppcloud session storage uses `session_redis_url()` to avoid `REDIS_URL` path drift.
+- WEPPcloud session storage uses `session_redis_connection_kwargs()` to avoid `REDIS_URL` path drift.
 
 ## Env knobs and precedence
 
@@ -51,7 +51,7 @@ def session_redis_url(db_default: RedisDB = RedisDB.SESSION) -> str:
 
 Prefer setting one “top-level” URL where possible:
 
-- `RQ_REDIS_URL` is the primary deployment-level knob for RQ and is expected to point at DB 9 (example: `redis://:password@redis:6379/9`).
+- `RQ_REDIS_URL` is the primary deployment-level knob for RQ and is expected to point at DB 9 (example: `redis://redis:6379/9`).
 - `REDIS_URL` is the primary URL for async Redis consumers (microservices). In the docker stacks it commonly defaults to `RQ_REDIS_URL` so host/credentials remain consistent; DB selection is then done per feature.
 - `SESSION_REDIS_URL` and `SESSION_REDIS_DB` override where Flask sessions are stored. Precedence is:
   1) `SESSION_REDIS_URL` + `SESSION_REDIS_DB`,
@@ -85,3 +85,7 @@ Deploy automation includes an explicit “flush only DB 9 (RQ)” step. The host
 - `REDIS_PASSWORD_FILE` (preferred) or `REDIS_PASSWORD` (discouraged)
 - `REDIS_TIMEOUT_SECONDS`, `REDIS_PING_ATTEMPTS`, `REDIS_PING_DELAY_SECONDS`
 - `RQ_REDIS_URL`, `REDIS_URL` (used only to infer host/port; DB is still forced to 9)
+
+Current credential handling follows the [Redis transport contract](../schemas/redis-credential-transport-contract.md).
+URL helpers return nonsecret endpoints. Use native client kwargs (or
+`for_pool=True` for pools) to retain password, TLS and socket options.

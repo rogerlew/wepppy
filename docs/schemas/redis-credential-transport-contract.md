@@ -92,6 +92,13 @@ printing credentials, and never export it into a long-lived parent/application.
 This narrowly scoped bridge is subject to independent security review. Health
 checks and operator examples call the wrapper with nonsecret arguments. The
 wrapper must preserve redis-cli exit status; probes additionally require PONG.
+The existing host-side `scripts/redis_flush_rq_db.sh` retains its password-free
+local-fixture mode only when neither a file nor legacy password is configured.
+An explicit file must fail closed; a present default file takes precedence.
+Its command/timeout child alone receives REDISCLI_AUTH. DB 9-only flush, dry-run,
+reachability and retry semantics remain unchanged. Legacy URL inputs to the
+performance harness are normalized at ingestion; operator examples must use a
+nonsecret endpoint and password file, never credentials in a CLI argument.
 
 ## Acceptance and recovery
 

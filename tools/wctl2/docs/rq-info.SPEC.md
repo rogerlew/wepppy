@@ -32,9 +32,10 @@ wctl rq-info --detail --detail-limit 10 [RQ_INFO_ARGS...]
   from live worker hash keys before invoking `rq info`.
   - If no live worker hashes remain (for example, long-running jobs exceeded worker TTL),
     the sync attempts a best-effort recovery of worker indexes from started job metadata.
-- Resolves the Redis URL *inside the container* via `wepppy.config.redis_settings.redis_url(RedisDB.RQ)` so it can:
-  - force Redis DB 9
-  - inject credentials from `REDIS_PASSWORD_FILE` (preferred) or `REDIS_PASSWORD` (legacy)
+- Loads `wepppy.config.rq_redis` with its owned connection class and explicit
+  empty `--url` to suppress Click's legacy environment URL default. Native
+  kwargs resolve the mounted password separately and force DB 9; no password
+  URL is constructed or placed in process arguments.
 - Always targets the `default batch fork-archive` queue args, then appends any
   extra CLI args.
 - Returns the exit code from the underlying `rq info` command.

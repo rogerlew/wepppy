@@ -28,9 +28,9 @@ frontend gates.
       waiver for this package.
 - [x] (2026-11-11 UTC) M0: ratify transport contract through independent
       correctness/security/operations reviews; standalone checkpoint follows.
-- [ ] M1: migrate Python native/session/async Redis clients.
-- [ ] M2: migrate Go status/preflight/streamauth clients.
-- [ ] M3: migrate RQ CLI, Redis server, healthchecks and operator helpers.
+- [x] (2026-11-11 UTC; focused acceptance in progress) M1: migrate Python native/session/async Redis clients.
+- [x] (2026-11-11 UTC; focused acceptance in progress) M2: migrate Go status/preflight/streamauth clients.
+- [x] (2026-11-11 UTC; final review in progress) M3: migrate RQ CLI, Redis server, healthchecks and operator helpers.
 - [ ] M4: pass focused tests, real Compose acceptance and independent reviews.
 - [ ] M5: record the checkpoint that unblocks F5.
 
@@ -72,7 +72,11 @@ frontend gates.
 
 ## Outcomes & Retrospective
 
-M0 contract review passed; implementation and runtime acceptance remain pending. Populate this section with exact
+M0 contract review passed at `ca1034a2b`. M1-M3 are implemented; M4 final
+revision/review gates remain pending. Initial isolated Compose acceptance passes
+sync DBs 0/2/9/11/13/14/15, async PubSub, Flask session expiry, six RQ workers
+and job result 42, Go health and dashboard HTTP. Private ACL modes, negative
+credentials, restart and baseline rollback/candidate restore passed. Populate this section with exact
 credential scans, connectivity evidence, compatibility limits and residual
 deployment risk after each milestone.
 
@@ -179,8 +183,8 @@ Expected focused commands, refined to actual changed tests, are:
     wctl run-pytest tests/test_redis_settings.py
     wctl run-pytest tests/weppcloud/test_session_cookie_migration.py
     wctl run-pytest tests/docker/unit/test_rq_worker_startup_contract.py
-    wctl run-status-tests
-    wctl run-preflight-tests
+    wctl run --rm --no-deps status-build sh -lc 'cd /workspace/services/status2 && PATH=/usr/local/go/bin:$PATH go test -tags=integration ./...'
+    wctl run --rm --no-deps preflight-build sh -lc 'cd /workspace/services/preflight2 && PATH=/usr/local/go/bin:$PATH go test -tags=integration ./...'
     (cd services/streamauth && go test ./...)
 
 Add direct tests for any new RQ config/launcher and Redis entrypoint helper. Run
@@ -234,3 +238,11 @@ Python/Go/RQ/server/health acceptance. No implementation or deployment occurred.
 2026-11-11 execution revision: M0 ratified the canonical transport contract and
 recorded RQ API/Click precedence, streamauth override, secret LF framing and
 Compose isolation discoveries. No production implementation changed at M0.
+
+2026-11-11 execution update: Go test wrappers unexpectedly recreated shared dev
+Redis at 20:45:58 UTC because they omit --no-deps. Redis remained healthy and
+existing native AUTH passed, but no pre-recreation snapshot exists, so no claim
+of zero interruption or unchanged jobs is made. All subsequent builders use
+explicit --no-deps. Canonical-derived synthetic acceptance is isolated under
+`/tmp/wepppy-redis-transport-acceptance`; it replaces names/network/ports/data
+and secrets. No production service was deployed.

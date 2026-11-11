@@ -1,296 +1,284 @@
-"""
-Centralized Redis configuration helpers.
+"""Redis endpoints and separately resolved credentials.
 
-The helpers in this module shim over the various environment variables we have
-used historically (`REDIS_HOST`, `REDIS_PORT`, `REDIS_URL`, etc.) so that every
-component resolves the same effective host, port, and database numbers.  This
-is especially important in containerized deployments where the Redis hostname
-is provided by Docker (`redis`, `cache`, ...), not `localhost`.
+See docs/schemas/redis-credential-transport-contract.md. URL helpers are for
+nonsecret endpoint display; construct authenticated clients with native kwargs.
 """
-
 from __future__ import annotations
 
 import os
 from enum import IntEnum
+from pathlib import Path
 from functools import lru_cache
-from typing import Any, Dict, Iterable, Mapping, Optional, Union
-from urllib.parse import ParseResult, quote, urlparse, urlunparse
+from typing import Any, Mapping, Optional, Union
+from urllib.parse import parse_qsl, unquote, urlencode, urlparse, urlunparse
 
-from wepppy.config.secrets import get_secret
+from wepppy.config.secrets import SecretConfigurationError, get_secret
 
 try:
-    import redis  # type: ignore
-except ImportError:  # pragma: no cover - redis is optional for typing
-    redis = None  # type: ignore
+    import redis
+except ImportError:  # redis is optional until a client is requested
+    redis = None
 
 
 class RedisDB(IntEnum):
-    """Semantic names for Redis logical databases used across the project."""
-
     LOCK = 0
     STATUS = 2
     RQ = 9
     WD_CACHE = 11
-    SESSION = 11  # alias; Flask session storage shares WD cache
+    SESSION = 11
     NODB_CACHE = 13
     README = 14
     LOG_LEVEL = 15
 
 
-def _parse_url(raw_url: str) -> Optional[ParseResult]:
-    parsed = urlparse(raw_url)
-    if not parsed.scheme or not parsed.hostname:
-        return None
-    return parsed
+class _Password(str):
+    """Native Redis str input whose diagnostic forms never expose its bytes."""
+
+    def __repr__(self):
+        return '<redacted>'
+
+    __str__ = __repr__
+
+    def __format__(self, spec):
+        return format("<redacted>", spec)
 
 
-def _redis_password() -> Optional[str]:
-    password = get_secret("REDIS_PASSWORD")
-    if password:
-        return password
-    return None
+class ConnectionKwargs(dict):
+    """Native constructor arguments with a nonsecret diagnostic representation."""
+
+    def __repr__(self):
+        return repr({k: ('<redacted>' if k in {'password', 'username'} else v)
+                     for k, v in self.items()})
+
+    __str__ = __repr__
 
 
-def _format_netloc(parsed: ParseResult) -> str:
-    hostname = parsed.hostname
-    if not hostname:
-        return ""
-    host = hostname
-    if ":" in hostname and not hostname.startswith("["):
-        host = f"[{hostname}]"
-    if parsed.port:
-        return f"{host}:{parsed.port}"
-    return host
+def _validate_query(parsed):
+    from redis.connection import parse_url, URL_QUERY_ARGUMENT_PARSERS
+    allowed = set(URL_QUERY_ARGUMENT_PARSERS) | {
+        'ssl_ca_certs', 'ssl_ca_data', 'ssl_cert_reqs', 'ssl_keyfile', 'ssl_certfile',
+        'ssl_min_version', 'ssl_ciphers', 'encoding',
+        'encoding_errors', 'client_name', 'lib_name', 'lib_version', 'decode_responses',
+    }
+    if any(k not in allowed for k, _ in parse_qsl(parsed.query)):
+        raise ValueError('Invalid Redis connection options')
+    # Native parser validates typed values; never surface parser input/errors.
+    parse_url(urlunparse(parsed._replace(netloc='localhost', path='/0')))
 
 
-def _apply_password(parsed: ParseResult, password: Optional[str]) -> ParseResult:
-    if not password or parsed.password:
-        return parsed
-    netloc = _format_netloc(parsed)
-    if not netloc:
-        return parsed
-    username = parsed.username or ""
-    password_enc = quote(password, safe="")
-    if username:
-        username_enc = quote(username, safe="")
-        auth = f"{username_enc}:{password_enc}"
-    else:
-        auth = f":{password_enc}"
-    return parsed._replace(netloc=f"{auth}@{netloc}")
+def _raw_url(session=False):
+    names = ('SESSION_REDIS_URL', 'REDIS_URL', 'RQ_REDIS_URL') if session else (
+        'REDIS_URL', 'RQ_REDIS_URL', 'SESSION_REDIS_URL')
+    return next((os.environ[n] for n in names if os.getenv(n)), None)
 
 
-def _auth_from_parsed(parsed: Optional[ParseResult]) -> tuple[Optional[str], Optional[str]]:
-    if parsed is None:
-        return None, None
-    username = parsed.username or None
-    password = parsed.password
-    if password:
-        return username, password
-    return username, None
+def _resolve(session=False, raw_url=None):
+    """Parse userinfo only at ingestion; never cache the secret-bearing URL."""
+    raw = raw_url if raw_url is not None else _raw_url(session)
+    try:
+        password = get_secret('REDIS_PASSWORD')
+        if os.getenv('REDIS_PASSWORD_FILE', '').strip():
+            framed = Path(os.environ['REDIS_PASSWORD_FILE'].strip()).read_bytes().decode('utf-8').rstrip('\n')
+            if framed != password:
+                raise ValueError('Invalid Redis password file framing')
+    except (SecretConfigurationError, OSError, UnicodeError):
+        raise ValueError('Redis password file is unavailable or empty') from None
+    username = None
+    try:
+        if raw:
+            parsed = urlparse(raw)
+            if parsed.scheme not in ('redis', 'rediss', 'unix'):
+                raise ValueError()
+            if parsed.scheme != 'unix' and not parsed.hostname:
+                raise ValueError()
+            if parsed.scheme == 'unix' and not parsed.path:
+                raise ValueError()
+            if parsed.port is not None and not 1 <= parsed.port <= 65535:
+                raise ValueError()
+            username = unquote(parsed.username) if parsed.username else None
+            legacy = unquote(parsed.password) if parsed.password is not None else None
+            if password is not None and legacy is not None and password != legacy:
+                raise ValueError()
+            password = password if password is not None else legacy
+            query = parse_qsl(parsed.query, keep_blank_values=True)
+            _validate_query(parsed)
+            if any(k in {'username', 'password', 'credential_provider', 'host', 'port',
+                         'path', 'connection_class'} for k, _ in query):
+                raise ValueError()
+            if parsed.scheme != 'unix' and parsed.path not in ('', '/'):
+                _db(parsed.path.lstrip('/'))
+            for key, value in query:
+                if key == 'db':
+                    _db(value)
+            if parsed.fragment:
+                raise ValueError()
+            host = parsed.hostname or ''
+            if ':' in host:
+                host = f'[{host}]'
+            netloc = host + (f':{parsed.port}' if parsed.port else '')
+            parsed = parsed._replace(netloc=netloc)
+        else:
+            host = os.getenv('REDIS_HOST', 'localhost')
+            if not host or any(c in host for c in '/?#@\\') or any(c.isspace() for c in host):
+                raise ValueError()
+            if ':' in host and not host.startswith('['):
+                host = f'[{host}]'
+            port = int(os.getenv('REDIS_PORT', '6379'))
+            if not 1 <= port <= 65535:
+                raise ValueError()
+            parsed = urlparse(f'redis://{host}:{port}/0')
+        if password is not None and (not password or '\x00' in password or '\r' in password or '\n' in password):
+            raise ValueError()
+    except (ValueError, UnicodeError):
+        raise ValueError('Invalid or conflicting Redis configuration') from None
+    return parsed, username, password
 
 
 @lru_cache(maxsize=1)
-def _base_url() -> Optional[ParseResult]:
-    """
-    Cache the parsed base Redis URL, if provided.
-
-    When `REDIS_URL` (or legacy `RQ_REDIS_URL`) is defined we preserve the
-    scheme, credentials, host, port, and query parameters while swapping the
-    database index as needed.
-    """
-
-    raw_url = (
-        os.getenv("REDIS_URL")
-        or os.getenv("RQ_REDIS_URL")
-        or os.getenv("SESSION_REDIS_URL")
-    )
-    if not raw_url:
-        return None
-
-    parsed = _parse_url(raw_url)
-    if parsed is None:
-        return None
-    return _apply_password(parsed, _redis_password())
+def _base_url():
+    return _resolve()[0]
 
 
 @lru_cache(maxsize=1)
-def _session_base_url() -> Optional[ParseResult]:
-    raw_url = (
-        os.getenv("SESSION_REDIS_URL")
-        or os.getenv("REDIS_URL")
-        or os.getenv("RQ_REDIS_URL")
-    )
-    if not raw_url:
-        return None
-    parsed = _parse_url(raw_url)
-    if parsed is None:
-        return None
-    return _apply_password(parsed, _redis_password())
+def _session_base_url():
+    return _resolve(True)[0]
 
 
 @lru_cache(maxsize=1)
 def redis_host() -> str:
-    """Resolve the Redis hostname, preferring URL-based configuration."""
-
-    parsed = _base_url()
-    if parsed and parsed.hostname:
-        return parsed.hostname
-
-    return os.getenv("REDIS_HOST", "localhost")
+    return _base_url().hostname or 'localhost'
 
 
 @lru_cache(maxsize=1)
 def redis_port() -> int:
-    """Resolve the Redis port, respecting URL overrides."""
-
-    parsed = _base_url()
-    if parsed and parsed.port:
-        return parsed.port
-
-    return int(os.getenv("REDIS_PORT", "6379"))
+    port = _base_url().port
+    return port if port is not None else _environment_port()
 
 
-def _apply_db(parsed: ParseResult, db: int) -> str:
-    """Return a new URL string with the supplied database index."""
+def _environment_port() -> int:
+    try:
+        value = int(os.getenv('REDIS_PORT', '6379'))
+        if not 1 <= value <= 65535:
+            raise ValueError()
+        return value
+    except ValueError:
+        raise ValueError('Invalid Redis port') from None
 
-    path = f"/{int(db)}"
-    return urlunparse(parsed._replace(path=path))
+
+def _db(value):
+    try:
+        result = int(value)
+        if result < 0:
+            raise ValueError()
+        return result
+    except (ValueError, TypeError):
+        raise ValueError('Invalid Redis database') from None
+
+
+def _apply_db(parsed, db):
+    db = _db(db)
+    query = [(k, v) for k, v in parse_qsl(parsed.query) if k != 'db']
+    if parsed.scheme == 'unix':
+        query.append(('db', str(db)))
+        path = parsed.path
+    else:
+        path = f'/{db}'
+    if parsed.scheme == 'unix':
+        return 'unix://' + path + '?' + urlencode(query)
+    return urlunparse(parsed._replace(path=path, query=urlencode(query)))
 
 
 @lru_cache(maxsize=None)
-def redis_url(db: Union[int, RedisDB]) -> str:
-    """
-    Build a connection URL for the specified logical database.
-
-    If `REDIS_URL` was provided we reuse its scheme, credentials, and port while
-    updating only the database number in the path segment.  Otherwise we fall
-    back to `redis://<host>:<port>/<db>`.
-    """
-
-    parsed = _base_url()
-    if parsed is not None:
-        return _apply_db(parsed, int(db))
-
-    password = _redis_password()
-    if password:
-        password_enc = quote(password, safe="")
-        return f"redis://:{password_enc}@{redis_host()}:{redis_port()}/{int(db)}"
-    return f"redis://{redis_host()}:{redis_port()}/{int(db)}"
+def redis_url(db: Union[int, RedisDB]):
+    """Return a credential-free endpoint; not an authenticated connection URL."""
+    return _apply_db(_base_url(), db)
 
 
-def redis_connection_kwargs(
-    db: Union[int, RedisDB],
-    *,
-    decode_responses: Optional[bool] = None,
-    extra: Optional[Mapping[str, Any]] = None,
-) -> Dict[str, Any]:
-    """
-    Produce a kwargs dict for redis.Redis / StrictRedis constructors.
-
-    This mirrors the parameters we usually pass (`host`, `port`, `db`, and
-    optionally `decode_responses`) while allowing callers to provide extra
-    keyword arguments through `extra`.
-    """
-
-    username, password = _auth_from_parsed(_base_url())
-    if not password:
-        password = _redis_password()
-    kwargs: Dict[str, Any] = {
-        "host": redis_host(),
-        "port": redis_port(),
-        "db": int(db),
-    }
-
-    if password:
-        kwargs["password"] = password
-        if username:
-            kwargs["username"] = username
-
-    if decode_responses is not None:
-        kwargs["decode_responses"] = decode_responses
-
-    if extra:
-        kwargs.update(extra)
-
-    return kwargs
-
-
-def _session_db(default: Union[int, RedisDB]) -> int:
-    raw = os.getenv("SESSION_REDIS_DB")
-    if raw is not None:
-        return int(raw)
-    return int(default)
+def _session_db(default):
+    if os.getenv('SESSION_REDIS_DB') is not None:
+        return _db(os.environ['SESSION_REDIS_DB'])
+    if os.getenv('SESSION_REDIS_URL'):
+        parsed = _session_base_url()
+        query = dict(parse_qsl(parsed.query))
+        if 'db' in query:
+            return _db(query['db'])
+        if parsed.scheme != 'unix' and parsed.path not in ('', '/'):
+            return _db(parsed.path.lstrip('/'))
+    return _db(default)
 
 
 @lru_cache(maxsize=1)
-def session_redis_url(db_default: Union[int, RedisDB] = RedisDB.SESSION) -> str:
-    """
-    Build a Redis URL for Flask session storage.
-
-    - Prefer SESSION_REDIS_URL when provided.
-    - Respect SESSION_REDIS_DB overrides.
-    - Fall back to REDIS_URL/RQ_REDIS_URL host settings with the session DB.
-    """
-
-    session_url = os.getenv("SESSION_REDIS_URL")
-    session_db_raw = os.getenv("SESSION_REDIS_DB")
-    db = _session_db(db_default)
-
-    if session_url:
-        parsed = _session_base_url()
-        if parsed is not None:
-            if session_db_raw is None and parsed.path and parsed.path != "/":
-                return urlunparse(parsed)
-            return _apply_db(parsed, db)
-
-    parsed = _session_base_url()
-    if parsed is not None:
-        return _apply_db(parsed, db)
-
-    return f"redis://{redis_host()}:{redis_port()}/{db}"
+def session_redis_url(db_default=RedisDB.SESSION):
+    return _apply_db(_session_base_url(), _session_db(db_default))
 
 
-def redis_client(
-    db: Union[int, RedisDB],
-    *,
-    decode_responses: Optional[bool] = None,
-    client_cls: Optional[Any] = None,
-    extra_kwargs: Optional[Mapping[str, Any]] = None,
-):
-    """
-    Instantiate a Redis client using the centralized configuration.
-
-    Parameters
-    ----------
-    db:
-        Logical Redis database number or `RedisDB` enum member.
-    decode_responses:
-        Defaults to whichever choice the caller needs; we pass it through for
-        convenience.
-    client_cls:
-        Allows callers to override the constructor (e.g. `redis.StrictRedis`).
-        If omitted we use `redis.Redis`.
-    extra_kwargs:
-        Optional mapping merged into the constructor kwargs.
-    """
-
+def redis_connection_kwargs(
+    db: Union[int, RedisDB], *, decode_responses: Optional[bool] = None,
+    extra: Optional[Mapping[str, Any]] = None, for_pool: bool = False,
+    asynchronous: bool = False, session: bool = False,
+    endpoint_url: Optional[str] = None,
+) -> ConnectionKwargs:
+    """Native Redis constructor kwargs; set for_pool for ConnectionPool callers."""
     if redis is None:
-        raise RuntimeError("redis package is required to build a Redis client")
+        raise RuntimeError('redis package is required to build a Redis client')
+    from redis.connection import parse_url, URL_QUERY_ARGUMENT_PARSERS
+    parsed, username, password = _resolve(session, endpoint_url)
+    try:
+        kwargs = ConnectionKwargs(parse_url(_apply_db(parsed, db)))
+    except (ValueError, TypeError):
+        raise ValueError('Invalid Redis connection options') from None
+    # Native parser yields pool kwargs. Redis constructors use ssl/unix_socket_path.
+    kwargs.pop('connection_class', None)
+    if parsed.scheme == 'unix':
+        if for_pool:
+            from redis import asyncio as aioredis
+            kwargs['connection_class'] = (aioredis.UnixDomainSocketConnection if asynchronous
+                                          else redis.UnixDomainSocketConnection)
+        else:
+            kwargs['unix_socket_path'] = kwargs.pop('path')
+    else:
+        kwargs.setdefault('host', 'localhost')
+        if 'port' not in kwargs:
+            kwargs['port'] = 6379 if session else _environment_port()
+        if not 1 <= kwargs['port'] <= 65535:
+            raise ValueError('Invalid Redis port')
+        if parsed.scheme == 'rediss':
+            if for_pool:
+                from redis import asyncio as aioredis
+                kwargs['connection_class'] = aioredis.SSLConnection if asynchronous else redis.SSLConnection
+            else:
+                kwargs['ssl'] = True
+    if username is not None:
+        kwargs['username'] = username
+    if password is not None:
+        kwargs['password'] = _Password(password)
+    if decode_responses is not None:
+        kwargs['decode_responses'] = decode_responses
+    if extra:
+        kwargs.update(extra)
+    return kwargs
 
-    cls = client_cls or redis.Redis
-    kwargs = redis_connection_kwargs(
-        db,
-        decode_responses=decode_responses,
-        extra=extra_kwargs,
-    )
-    return cls(**kwargs)
+
+def session_redis_connection_kwargs(db_default=RedisDB.SESSION):
+    return redis_connection_kwargs(_session_db(db_default), session=True)
 
 
-def redis_async_url(db: Union[int, RedisDB]) -> str:
-    """
-    Convenience helper for async services that prefer URL-style connection
-    strings.  We expose it separately so we do not have to import redis.asyncio
-    in synchronous processes.
-    """
+def redis_client(db, *, decode_responses=None, client_cls=None, extra_kwargs=None):
+    kwargs = redis_connection_kwargs(db, decode_responses=decode_responses, extra=extra_kwargs)
+    return (client_cls or redis.Redis)(**kwargs)
 
+
+def redis_async_client(db, *, decode_responses=None, extra_kwargs=None):
+    from redis import asyncio as aioredis
+    return aioredis.Redis(**redis_connection_kwargs(
+        db, decode_responses=decode_responses, extra=extra_kwargs, asynchronous=True))
+
+
+def redis_endpoint_url(raw_url, db):
+    """Normalize a legacy input endpoint without returning credentials."""
+    return _apply_db(_resolve(raw_url=raw_url)[0], db)
+
+
+def redis_async_url(db):
+    """Compatibility endpoint helper; use redis_async_client for authentication."""
     return redis_url(db)

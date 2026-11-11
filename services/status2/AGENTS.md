@@ -13,7 +13,7 @@
 
 ## Runtime Configuration
 Environment variables are prefixed with `STATUS_`. Common options:
-- `STATUS_REDIS_URL` – connection string; supports TLS/password via Go-Redis URL syntax (injects `REDIS_PASSWORD` if missing).
+- `STATUS_REDIS_URL` – credential-free endpoint; supports TLS via Go-Redis URL syntax (resolves the mounted password separately).
 - `STATUS_LISTEN_ADDR` – bind address (default `:9002`).
 - `STATUS_PING_INTERVAL`, `STATUS_PONG_TIMEOUT` – WebSocket heartbeat timings.
 - `STATUS_REDIS_RETRY_BASE`, `STATUS_REDIS_RETRY_MAX`, `STATUS_REDIS_MAX_RETRIES` – control startup retry behavior. Use `0` retries for infinite.
@@ -48,3 +48,7 @@ access. Browser clients mint through the same-origin cookie bridge and use the
 fixed plus bearer subprotocol pair. Keep proxy header filtering and static error
 logs intact; credentials must never enter retained diagnostics. Expiry is 4001,
 without terminal hangup. Health probes remain unauthenticated.
+
+Redis credential resolution and legacy conflicts follow the
+[transport contract](../../docs/schemas/redis-credential-transport-contract.md).
+Endpoints never contain credentials; client options use a non-printing provider.

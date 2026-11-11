@@ -36,7 +36,7 @@ type Grant struct{ Expires time.Time }
 
 // New uses the existing Redis host/auth but canonical DBs 11 (sessions) and 0 (JTI).
 // Signing keys are read only from the same comma-separated secret file as Python.
-func New(secretFile, redisURL string, origins []string) (*Validator, error) {
+func New(secretFile string, redisOptions *redis.Options, origins []string) (*Validator, error) {
 	if secretFile == "" || len(origins) == 0 {
 		return nil, errors.New("stream authorization configuration required")
 	}
@@ -59,10 +59,11 @@ func New(secretFile, redisURL string, origins []string) (*Validator, error) {
 		}
 		v.origins[normalized] = true
 	}
-	opts, err := redis.ParseURL(redisURL)
-	if err != nil {
-		return nil, errors.New("invalid authorization Redis configuration")
+	if redisOptions == nil {
+		return nil, errors.New("authorization Redis configuration required")
 	}
+	copyOptions := *redisOptions
+	opts := &copyOptions
 	opts.DB = 11
 	opts.ContextTimeoutEnabled = true
 	opts.DialTimeout = time.Second

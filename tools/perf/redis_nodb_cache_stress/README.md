@@ -96,7 +96,7 @@ If resolver-based URL resolution is not appropriate for your host, use one expli
 ```bash
 python tools/perf/redis_nodb_cache_stress/run_harness.py \
   --target-profile wepp2 \
-  --redis-url "redis://:<password>@redis-host:6379/9"
+  --redis-url "redis://redis-host:6379/9"
 ```
 
 The harness rewrites the URL path to DB `13`.
@@ -196,3 +196,7 @@ Execution mode:
 
 Cross-host Redis confirmation for `wepp2` run:
 - `wepp2` `RQ_REDIS_URL` host resolved to `192.168.100.237` (db `/9`), which is `wepp1`.
+
+Set `REDIS_PASSWORD_FILE` to a readable mounted secret before running. URL
+arguments must be credential-free. The resolver and explicit endpoint paths
+construct authenticated native pool kwargs; errors do not echo URL inputs.

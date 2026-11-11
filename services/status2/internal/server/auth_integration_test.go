@@ -27,7 +27,7 @@ func streamFixture(t *testing.T) (*Server, *httptest.Server, *miniredis.Miniredi
 	if err := os.WriteFile(key, []byte("fixture-key"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	cfg := config.Config{RedisURL: "redis://" + m.Addr() + "/2", SigningKeyFile: key, AllowedOrigins: []string{"https://example.test"},
+	cfg := config.Config{RedisEndpoint: "redis://" + m.Addr() + "/2", SigningKeyFile: key, AllowedOrigins: []string{"https://example.test"},
 		PingInterval: time.Second, PongTimeout: 5 * time.Second, WriteTimeout: time.Second, RedisRequestTimeout: time.Second,
 		RedisRetryBase: time.Millisecond, RedisRetryMax: time.Second, RedisMaxRetries: 1, MaxMessageSize: 65536}
 	srv, err := New(cfg, slog.New(slog.NewTextHandler(io.Discard, nil)))

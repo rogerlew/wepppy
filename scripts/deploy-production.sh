@@ -1278,7 +1278,7 @@ else
             REGISTERED_FORK_ARCHIVE_WORKERS="$(
                 wctl docker compose exec -T rq-worker-fork-archive \
                     /opt/venv/bin/python -c \
-                    'import os; import redis; import socket; from rq import Worker; connection = redis.Redis.from_url(os.environ["RQ_REDIS_URL"], password=open(os.environ["REDIS_PASSWORD_FILE"], encoding="utf-8").read().strip()); workers = [worker for worker in Worker.all(connection=connection) if "fork-archive" in worker.queue_names()]; current = [worker for worker in workers if worker.hostname == socket.gethostname() and connection.ttl(worker.key) > 0]; print(f"{len(workers)}:{len(current)}")' \
+                    'import socket; from rq import Worker; from wepppy.config.redis_settings import redis_client, RedisDB; connection = redis_client(RedisDB.RQ); workers = [worker for worker in Worker.all(connection=connection) if "fork-archive" in worker.queue_names()]; current = [worker for worker in workers if worker.hostname == socket.gethostname() and connection.ttl(worker.key) > 0]; print(f"{len(workers)}:{len(current)}")' \
                     2>/dev/null || true
             )"
             if [ "${REGISTERED_FORK_ARCHIVE_WORKERS}" = "1:1" ]; then

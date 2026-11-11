@@ -165,7 +165,7 @@ Each connection includes:
 
 | Env Var | Default | Description |
 |---------|---------|-------------|
-| `STATUS_REDIS_URL` | `redis://localhost:6379/2` | Target Redis DB (injects `REDIS_PASSWORD` if the URL lacks auth; falls back to `REDIS_URL` when unset). |
+| `STATUS_REDIS_URL` | `redis://localhost:6379/2` | Target Redis DB (resolves credentials separately from the mounted password file; falls back to `REDIS_URL` when unset). |
 | `STATUS_LISTEN_ADDR` | `:9002` | Bind address. |
 | `STATUS_PING_INTERVAL` | `5s` | Heartbeat cadence. |
 | `STATUS_PONG_TIMEOUT` | `75s` | Idle cutoff (set ≥60s in production). |
@@ -326,3 +326,7 @@ Run the Go suite via:
 - Third-party or automation clients MUST honor the same heartbeat contract and SHOULD mirror the browser behavior of sending `init`, replying with `pong`, and ignoring unknown message types.
 - Future protocol extensions MUST preserve the `status` frame schema or version it explicitly. Additional control frames MUST be optional and documented alongside this contract.
 - Operators SHOULD monitor `status2_write_errors_total` and connection churn metrics when adjusting heartbeat settings; spikes indicate misconfigured timeouts or clients that are not compliant with the contract.
+
+Redis credential resolution and legacy conflicts follow the
+[transport contract](../../docs/schemas/redis-credential-transport-contract.md).
+Endpoints never contain credentials; client options use a non-printing provider.

@@ -40,25 +40,25 @@ def _build_configured_app(
     return app
 
 
-def test_build_session_redis_uses_session_url_helper(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_build_session_redis_uses_native_session_kwargs(monkeypatch: pytest.MonkeyPatch) -> None:
     captured = {}
 
-    def fake_session_url(db_default: int = 11) -> str:
+    def fake_session_kwargs(db_default: int = 11) -> dict:
         captured["db_default"] = db_default
-        return "redis://session-cache:6380/11"
+        return {"host": "session-cache", "port": 6380, "db": 11}
 
-    def fake_from_url(url: str):
-        captured["url"] = url
+    def fake_redis(**kwargs):
+        captured["kwargs"] = kwargs
         return "client"
 
-    monkeypatch.setattr(redis_settings, "session_redis_url", fake_session_url)
-    monkeypatch.setattr(configuration.redis, "from_url", fake_from_url)
+    monkeypatch.setattr(redis_settings, "session_redis_connection_kwargs", fake_session_kwargs)
+    monkeypatch.setattr(configuration.redis, "Redis", fake_redis)
 
     result = configuration._build_session_redis()
 
     assert result == "client"
     assert captured["db_default"] == 11
-    assert captured["url"] == "redis://session-cache:6380/11"
+    assert captured["kwargs"] == {"host": "session-cache", "port": 6380, "db": 11}
 
 
 def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(

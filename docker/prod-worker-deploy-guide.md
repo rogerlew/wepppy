@@ -189,7 +189,7 @@ Important:
 ### Validate Redis auth
 Inside the worker host:
 ```
-redis-cli -h <redis_ip> -a "$(cat docker/secrets/redis_password)" -n 9 ping
+REDIS_PASSWORD_FILE=docker/secrets/redis_password docker/redis-cli-secret.sh -h <redis_ip> -n 9 ping
 ```
 
 ## Troubleshooting

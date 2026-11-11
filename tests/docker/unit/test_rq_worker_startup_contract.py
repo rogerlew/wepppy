@@ -110,16 +110,16 @@ def test_prod_worker_compose_workers_use_startup_gate_contract() -> None:
     assert "/healthz" in healthcheck_test[1]
 
 
-def test_rq_worker_startup_script_uses_url_based_probe() -> None:
+def test_rq_worker_startup_script_uses_native_probe() -> None:
     script_text = _RQ_STARTUP_SCRIPT_PATH.read_text(encoding="utf-8")
 
-    assert "redis.Redis.from_url(" in script_text
-    assert "redis_url(" in script_text
-    assert "Invalid worker Redis URL" in script_text
+    assert "redis_connection_kwargs(RedisDB.RQ)" in script_text
+    assert "redis.Redis.from_url(" not in script_text
+    assert "--config wepppy.config.rq_redis" in script_text
+    assert "--connection-class wepppy.config.rq_redis.Connection" in script_text
+    assert "--url ''" in script_text
     assert "RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS" in script_text
     assert "RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS" in script_text
-    assert "/opt/venv/bin/python - <<'PY'" in script_text
-    assert '/opt/venv/bin/python - "$redis_url"' in script_text
     assert '/opt/venv/bin/python - "$startup_delay"' in script_text
 
 

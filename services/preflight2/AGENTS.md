@@ -13,7 +13,7 @@
 
 ## Configuration
 All environment variables use the `PREFLIGHT_` prefix:
-- `PREFLIGHT_REDIS_URL` – full Redis URL including auth/tls if required (injects `REDIS_PASSWORD` if missing).
+- `PREFLIGHT_REDIS_URL` – credential-free Redis endpoint including TLS options if required (resolves the mounted password separately).
   - Falls back to `REDIS_URL` + `REDIS_PASSWORD` (or `REDIS_HOST`/`REDIS_PORT`) when unset.
 - `PREFLIGHT_LISTEN_ADDR` – bind address (default `:9001`).
 - `PREFLIGHT_PING_INTERVAL`, `PREFLIGHT_PONG_TIMEOUT` – WebSocket heartbeat intervals.
@@ -58,3 +58,7 @@ access. Browser clients mint through the same-origin cookie bridge and use the
 fixed plus bearer subprotocol pair. Keep proxy header filtering and static error
 logs intact; credentials must never enter retained diagnostics. Expiry is 4001,
 without terminal hangup. Health probes remain unauthenticated.
+
+Redis credential resolution and legacy conflicts follow the
+[transport contract](../../docs/schemas/redis-credential-transport-contract.md).
+Endpoints never contain credentials; client options use a non-printing provider.

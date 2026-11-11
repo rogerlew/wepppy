@@ -6,6 +6,8 @@ if [[ $# -ne 3 ]]; then
   exit 2
 fi
 
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
 service=$1
 image=$2
 expected_revision=$3
@@ -45,11 +47,15 @@ wait_for_url() {
 case "${service}" in
   status|preflight)
     docker network create "${network}" >/dev/null
-    docker run -d --name "${redis_container}" --network "${network}" \
-      redis:8.2.1-alpine@sha256:f887e6dacdcfa8e14af2f625fdf4474ff8c37dc36ce13b9e89e6e9a901f155ad \
-      redis-server --requirepass contract-only >/dev/null
     printf '%s' 'contract-only' > "${secret_dir}/redis_password"
     chmod 0444 "${secret_dir}/redis_password"
+    docker run -d --name "${redis_container}" --network "${network}" \
+      -v "${secret_dir}/redis_password:/run/secrets/redis_password:ro" \
+      -v "${script_dir}/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro" \
+      -v "${script_dir}/redis-password.sh:/usr/local/bin/redis-password.sh:ro" \
+      --entrypoint /usr/local/bin/redis-entrypoint.sh \
+      -e REDIS_APPENDONLY=no -e REDIS_SAVE_SCHEDULE= \
+      redis:8.2.1-alpine@sha256:f887e6dacdcfa8e14af2f625fdf4474ff8c37dc36ce13b9e89e6e9a901f155ad >/dev/null
     if [[ "${service}" == "status" ]]; then
       port=9002
       prefix=STATUS

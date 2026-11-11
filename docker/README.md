@@ -353,18 +353,18 @@ Keyspace notifications remain enabled (`notify-keyspace-events Kh`, required by 
 Inspect durability settings (inside the Redis container):
 
 ```bash
-wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" CONFIG GET appendonly'
-wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" CONFIG GET appendfsync'
-wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" CONFIG GET aof-use-rdb-preamble'
-wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" CONFIG GET save'
-wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" INFO persistence'
+wctl exec redis sh -lc '/usr/local/bin/redis-cli-secret.sh CONFIG GET appendonly'
+wctl exec redis sh -lc '/usr/local/bin/redis-cli-secret.sh CONFIG GET appendfsync'
+wctl exec redis sh -lc '/usr/local/bin/redis-cli-secret.sh CONFIG GET aof-use-rdb-preamble'
+wctl exec redis sh -lc '/usr/local/bin/redis-cli-secret.sh CONFIG GET save'
+wctl exec redis sh -lc '/usr/local/bin/redis-cli-secret.sh INFO persistence'
 ```
 
 Verify DB9 contents (before a flush):
 
 ```bash
-wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" -n 9 DBSIZE'
-wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" -n 9 --scan --pattern "rq:*" | head'
+wctl exec redis sh -lc '/usr/local/bin/redis-cli-secret.sh -n 9 DBSIZE'
+wctl exec redis sh -lc '/usr/local/bin/redis-cli-secret.sh -n 9 --scan --pattern "rq:*" | head'
 ```
 
 Run the deploy-policy flush (DB 9 only):
@@ -606,7 +606,7 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
   `wctl exec -T weppcloud flask --app wepppy.weppcloud.app db upgrade`
 
 - **Inspect Redis**  
-  `docker compose -f docker/docker-compose.dev.yml exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)"'`
+  `docker compose -f docker/docker-compose.dev.yml exec redis sh -lc '/usr/local/bin/redis-cli-secret.sh'`
 
 - **Stop everything**  
   `docker compose -f docker/docker-compose.dev.yml down`
@@ -671,7 +671,7 @@ can receive an empty Caddy HTTP 200. Homelab login uses local passwords only.
 ```bash
 curl -fsS http://localhost:8000/health
 curl -fsS http://localhost:8080/health
-wctl exec redis sh -lc 'redis-cli -a "$(cat /run/secrets/redis_password)" ping'
+wctl exec redis sh -lc '/usr/local/bin/redis-cli-secret.sh ping'
 wctl exec postgres pg_isready -U wepppy -d wepppy
 ```
 
@@ -754,3 +754,11 @@ per-file state checks; this is not exhaustive randomized isolation evidence.
 The separate [Roads receipt follow-up](../docs/dev-notes/roads-project-render-contention.md#publication-provenance-follow-up-2026-10-29)
 records the previously unacknowledged render-only source delta without changing
 historical model results. No production deployment is part of this CI repair.
+
+Redis credential transport follows the [canonical contract](../docs/schemas/redis-credential-transport-contract.md).
+The entrypoint generates a private runtime ACL file; health and operator probes
+use `/usr/local/bin/redis-cli-secret.sh`. RQ uses `wepppy.config.rq_redis` with
+an empty `--url` override. Do not put the password in URLs or arguments.
+For `docker-compose.canary-smoke.yml`, set `WEPPCLOUD_SMOKE_REDIS_PASSWORD_FILE`
+to a private synthetic secret file; the previous plaintext environment setting
+is no longer consumed.

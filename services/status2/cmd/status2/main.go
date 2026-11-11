@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/rogerlew/wepppy/services/streamauth"
 
 	"github.com/rogerlew/wepppy/services/status2/internal/config"
 	"github.com/rogerlew/wepppy/services/status2/internal/server"
@@ -28,7 +28,7 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: cfg.LogLevel}))
 	logger.Info("starting status2", "config", cfg.String())
 
-	if _, err := redis.ParseURL(cfg.RedisURL); err != nil {
+	if _, _, err := streamauth.ParseRedisEndpoint(cfg.RedisEndpoint, ""); err != nil {
 		logger.Error("invalid redis url", "error", err)
 		os.Exit(1)
 	}

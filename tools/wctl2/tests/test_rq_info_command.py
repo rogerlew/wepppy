@@ -20,8 +20,8 @@ def _expected_rq_info_command(extra: str = "") -> str:
     base = (
         "set -euo pipefail; "
         f"{rq_command._compose_rq_registry_sync_command()}; "
-        f'redis_url="$({rq_command._compose_rq_redis_url_command()})"; '
-        "exec /opt/venv/bin/rq info -u \"$redis_url\" default batch fork-archive"
+        "exec /opt/venv/bin/rq info --url '' --config wepppy.config.rq_redis "
+        "--connection-class wepppy.config.rq_redis.Connection default batch fork-archive"
     )
     if extra:
         return f"{base} {extra}"

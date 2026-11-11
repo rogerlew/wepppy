@@ -59,7 +59,7 @@ PRIMARY_RUNS_ROOT = "/wc1/runs"
 LEGACY_RUNS_ROOT = "/geodata/weppcloud_runs"
 try:
     pool_kwargs = redis_connection_kwargs(
-        RedisDB.WD_CACHE,
+        RedisDB.WD_CACHE, for_pool=True,
         decode_responses=True,
         extra={"max_connections": 50},
     )

@@ -96,10 +96,6 @@ if conn.scard(Worker.redis_workers_keys) == 0:
         for queue_name in queue_names:
             conn.sadd(worker_registration.WORKERS_BY_QUEUE_KEY % queue_name, worker_key)
 """
-_RQ_REDIS_URL_SNIPPET = (
-    "from wepppy.config.redis_settings import redis_url, RedisDB; "
-    "print(redis_url(RedisDB.RQ))"
-)
 
 
 def _context(ctx: typer.Context) -> CLIContext:
@@ -118,19 +114,6 @@ def _compose_python_command(args: List[str]) -> str:
     return f"cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy {quoted}"
 
 
-def _compose_rq_redis_url_command() -> str:
-    """
-    Resolve the RQ Redis URL inside the container.
-
-    We intentionally avoid constructing an authenticated URL on the host so the
-    password never appears in the host command line. The wepppy config helper
-    supports both legacy env vars (REDIS_PASSWORD) and secret files
-    (REDIS_PASSWORD_FILE).
-    """
-    args = [_PYTHON_BIN, "-c", _RQ_REDIS_URL_SNIPPET]
-    return _compose_python_command(args)
-
-
 def _compose_rq_registry_sync_command() -> str:
     args = [_PYTHON_BIN, "-c", _RQ_REGISTRY_SYNC_SNIPPET]
     return _compose_python_command(args)
@@ -138,13 +121,12 @@ def _compose_rq_registry_sync_command() -> str:
 
 def _compose_rq_info_command(extra_args: List[str]) -> str:
     registry_sync_command = _compose_rq_registry_sync_command()
-    redis_url_command = _compose_rq_redis_url_command()
     rq_args = quote_args([*_RQ_DEFAULT_QUEUES, *extra_args])
     return (
         "set -euo pipefail; "
         f"{registry_sync_command}; "
-        f'redis_url="$({redis_url_command})"; '
-        f'exec {_RQ_BINARY} info -u "$redis_url" {rq_args}'
+        f"exec {_RQ_BINARY} info --url '' --config wepppy.config.rq_redis "
+        f"--connection-class wepppy.config.rq_redis.Connection {rq_args}"
     )
 
 

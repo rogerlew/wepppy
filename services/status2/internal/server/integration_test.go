@@ -35,7 +35,7 @@ func TestStatusWebsocketFlow(t *testing.T) {
  cfg := config.Config{
  SigningKeyFile: key,
 		ListenAddr:          ":0",
-		RedisURL:            "redis://" + m.Addr() + "/2",
+		RedisEndpoint:            "redis://" + m.Addr() + "/2",
 		PingInterval:        time.Second,
 		PongTimeout:         5 * time.Second,
 		WriteTimeout:        time.Second,

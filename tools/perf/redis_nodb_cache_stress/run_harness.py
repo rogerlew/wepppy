@@ -166,33 +166,19 @@ def build_operation_table(weights: Dict[str, int]) -> List[str]:
 def as_redis_db_url(raw_url: str, db: int) -> str:
     parsed = urlparse(raw_url)
     if not parsed.scheme or not parsed.hostname:
-        raise ValueError(f"Invalid Redis URL: {raw_url}")
+        raise ValueError("Invalid Redis URL")
     path = f"/{int(db)}"
     return urlunparse(parsed._replace(path=path))
 
 
 def connection_pool_kwargs_from_url(redis_url: str) -> Dict[str, Any]:
+    from wepppy.config.redis_settings import redis_connection_kwargs
     parsed = urlparse(redis_url)
-    if not parsed.scheme or not parsed.hostname:
-        raise ValueError(f"Invalid Redis URL: {redis_url}")
-
-    db = 0
-    if parsed.path and parsed.path != "/":
-        try:
-            db = int(parsed.path.lstrip("/"))
-        except ValueError as exc:
-            raise ValueError(f"Redis URL path must contain numeric DB index: {redis_url}") from exc
-
-    kwargs: Dict[str, Any] = {
-        "host": parsed.hostname,
-        "port": parsed.port or 6379,
-        "db": db,
-    }
-    if parsed.username:
-        kwargs["username"] = parsed.username
-    if parsed.password:
-        kwargs["password"] = parsed.password
-    return kwargs
+    try:
+        db = int(parsed.path.lstrip('/') or '0')
+    except ValueError:
+        raise ValueError('Redis URL path must contain numeric DB index') from None
+    return redis_connection_kwargs(db, for_pool=True, endpoint_url=redis_url)
 
 
 def redact_redis_url(raw_url: str) -> str:
@@ -681,6 +667,13 @@ def main() -> int:
     operation_table = build_operation_table(parse_operation_weights(args.operation_weights))
 
     redis_url = resolve_redis_url(args)
+    from wepppy.config.redis_settings import redis_endpoint_url
+    if args.use_wepppy_resolver:
+        from wepppy.config.redis_settings import redis_connection_kwargs
+        pool_kwargs = redis_connection_kwargs(args.redis_db, for_pool=True)
+    else:
+        pool_kwargs = connection_pool_kwargs_from_url(redis_url)
+    redis_url = redis_endpoint_url(redis_url, args.redis_db)
 
     print("== redis_nodb_cache_stress ==")
     print(f"target_profile={args.target_profile}")
@@ -694,7 +687,6 @@ def main() -> int:
             print(f"sample_key={key_payload.key} payload_bytes={len(key_payload.payload_text.encode('utf-8'))}")
         return 0
 
-    pool_kwargs = connection_pool_kwargs_from_url(redis_url)
     pool_kwargs.update(
         {
             "decode_responses": True,

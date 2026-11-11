@@ -6,6 +6,7 @@
 # - Never calls FLUSHALL.
 # - Validates the DB index and fails closed if it isn't 9.
 #
+set +x
 set -euo pipefail
 
 log() {
@@ -76,6 +77,7 @@ if ! command -v redis-cli >/dev/null 2>&1; then
   exit 0
 fi
 
+redis_password_file_explicit="${REDIS_PASSWORD_FILE:+yes}"
 REDIS_PASSWORD_FILE="${REDIS_PASSWORD_FILE:-/run/secrets/redis_password}"
 REDIS_TIMEOUT_SECONDS="${REDIS_TIMEOUT_SECONDS:-2}"
 
@@ -114,17 +116,18 @@ fi
 REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
 REDIS_PORT="${REDIS_PORT:-6379}"
 
-if [[ -n "${REDIS_PASSWORD:-}" ]]; then
-  export REDISCLI_AUTH="${REDIS_PASSWORD}"
-elif [[ -f "${REDIS_PASSWORD_FILE}" ]]; then
-  REDISCLI_AUTH="$(cat "${REDIS_PASSWORD_FILE}")"
-  if [[ -z "${REDISCLI_AUTH}" ]]; then
-    log "ERROR" "Redis password file is empty: ${REDIS_PASSWORD_FILE}"
-    exit 1
-  fi
-  export REDISCLI_AUTH
+# A configured/existing file is authoritative. Keep explicit password-free local
+# operator fixtures, but never fall back after a configured file fails.
+unset REDISCLI_AUTH
+redis_cli_password=""
+if [[ -n "${redis_password_file_explicit}" || -f "${REDIS_PASSWORD_FILE}" ]]; then
+  source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../docker" && pwd)/redis-password.sh"
+  redis_cli_password="$REDIS_PASSWORD_VALUE"
+  unset REDIS_PASSWORD_VALUE
+elif [[ -n "${REDIS_PASSWORD:-}" ]]; then
+  redis_cli_password="$REDIS_PASSWORD"
 else
-  log "WARN" "Redis password file not found: ${REDIS_PASSWORD_FILE} (continuing without auth)"
+  log "WARN" "No credential configured; using password-free local fixture mode."
 fi
 
 redis_cmd_base=(
@@ -137,9 +140,9 @@ redis_cmd_base=(
 
 run_redis_cli() {
   if command -v timeout >/dev/null 2>&1; then
-    timeout "${REDIS_TIMEOUT_SECONDS}" "${redis_cmd_base[@]}" "$@"
+    REDISCLI_AUTH="$redis_cli_password" timeout "${REDIS_TIMEOUT_SECONDS}" "${redis_cmd_base[@]}" "$@"
   else
-    "${redis_cmd_base[@]}" "$@"
+    REDISCLI_AUTH="$redis_cli_password" "${redis_cmd_base[@]}" "$@"
   fi
 }
 

@@ -3,16 +3,23 @@ package config
 import (
 	"fmt"
 	"log/slog"
-	"net/url"
+	"net"
+
 	"os"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
+
+	"github.com/redis/go-redis/v9"
+	"github.com/rogerlew/wepppy/services/streamauth"
 )
 
 type Config struct {
 	ListenAddr          string
-	RedisURL            string
+	RedisEndpoint       string
+	RedisOptions        *redis.Options
 	SigningKeyFile      string
 	PingInterval        time.Duration
 	PongTimeout         time.Duration
@@ -30,7 +37,7 @@ type Config struct {
 const (
 	envPrefix                 = "STATUS_"
 	defaultListenAddr         = ":9002"
-	defaultRedisURL           = "redis://localhost:6379/2"
+	defaultRedisEndpoint      = "redis://localhost:6379/2"
 	defaultRedisHost          = "localhost"
 	defaultRedisPort          = "6379"
 	defaultRedisDB            = "2"
@@ -46,14 +53,15 @@ const (
 )
 
 func Load() (Config, error) {
-	redisURL, err := resolveRedisURL()
+	redisURL, opts, err := resolveRedisEndpoint()
 	if err != nil {
 		return Config{}, err
 	}
 
 	cfg := Config{
 		ListenAddr:          getEnv("LISTEN_ADDR", defaultListenAddr),
-		RedisURL:            redisURL,
+		RedisEndpoint:       redisURL,
+		RedisOptions:        opts,
 		SigningKeyFile:      os.Getenv("WEPP_AUTH_JWT_SECRETS_FILE"),
 		PingInterval:        getDurationEnv("PING_INTERVAL", defaultPingInterval),
 		PongTimeout:         getDurationEnv("PONG_TIMEOUT", defaultPongTimeout),
@@ -87,26 +95,30 @@ func envKey(key string) string {
 	return envPrefix + key
 }
 
-func resolveRedisURL() (string, error) {
+func resolveRedisEndpoint() (string, *redis.Options, error) {
 	password, err := resolveRedisPassword()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	if v := os.Getenv(envKey("REDIS_URL")); v != "" {
-		return applyRedisPassword(v, password), nil
+	raw := os.Getenv(envKey("REDIS_URL"))
+	if raw == "" {
+		raw = os.Getenv("REDIS_URL")
 	}
-	if v := os.Getenv("REDIS_URL"); v != "" {
-		return applyRedisPassword(v, password), nil
+	if raw == "" {
+		host := os.Getenv("REDIS_HOST")
+		if host == "" {
+			host = defaultRedisHost
+		}
+		if strings.ContainsAny(host, "/?#@\\") || strings.IndexFunc(host, unicode.IsSpace) >= 0 {
+			return "", nil, fmt.Errorf("invalid Redis host")
+		}
+		port := os.Getenv("REDIS_PORT")
+		if port == "" {
+			port = defaultRedisPort
+		}
+		raw = "redis://" + net.JoinHostPort(host, port) + "/" + defaultRedisDB
 	}
-	host := os.Getenv("REDIS_HOST")
-	if host == "" {
-		host = defaultRedisHost
-	}
-	port := os.Getenv("REDIS_PORT")
-	if port == "" {
-		port = defaultRedisPort
-	}
-	return buildRedisURL(host, port, password), nil
+	return streamauth.ParseRedisEndpoint(raw, password)
 }
 
 func resolveRedisPassword() (string, error) {
@@ -131,39 +143,14 @@ func readSecretFile(path string, label string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("unable to read %s at %s: %w", label, path, err)
 	}
-	value := strings.TrimSpace(string(contents))
+	value := strings.TrimRight(string(contents), "\n")
+	if !utf8.Valid(contents) || value != strings.TrimFunc(value, func(r rune) bool { return unicode.IsSpace(r) || (r >= 0x1c && r <= 0x1f) }) || strings.ContainsAny(value, "\x00\r\n") {
+		return "", fmt.Errorf("invalid Redis password file framing")
+	}
 	if value == "" {
 		return "", fmt.Errorf("%s at %s is empty", label, path)
 	}
 	return value, nil
-}
-
-func applyRedisPassword(rawURL string, password string) string {
-	if password == "" {
-		return rawURL
-	}
-	parsed, err := url.Parse(rawURL)
-	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
-		return rawURL
-	}
-	if parsed.User != nil {
-		if _, hasPassword := parsed.User.Password(); hasPassword {
-			return rawURL
-		}
-		username := parsed.User.Username()
-		parsed.User = url.UserPassword(username, password)
-		return parsed.String()
-	}
-	parsed.User = url.UserPassword("", password)
-	return parsed.String()
-}
-
-func buildRedisURL(host string, port string, password string) string {
-	creds := ""
-	if password != "" {
-		creds = url.UserPassword("", password).String() + "@"
-	}
-	return fmt.Sprintf("redis://%s%s:%s/%s", creds, host, port, defaultRedisDB)
 }
 
 func getEnv(key, fallback string) string {
@@ -241,18 +228,6 @@ func parseLogLevel(raw string) slog.Level {
 	}
 }
 
-func redactRedisURL(raw string) string {
-	parsed, err := url.Parse(raw)
-	if err != nil || parsed.User == nil {
-		return raw
-	}
-	if _, hasPassword := parsed.User.Password(); !hasPassword {
-		return raw
-	}
-	parsed.User = url.UserPassword(parsed.User.Username(), "redacted")
-	return parsed.String()
-}
-
 func (c Config) String() string {
 	origins := "any"
 	if len(c.AllowedOrigins) > 0 {
@@ -260,7 +235,7 @@ func (c Config) String() string {
 	}
 	return fmt.Sprintf("listen=%s redis=%s ping=%s pong=%s metrics=%t origins=%s",
 		c.ListenAddr,
-		redactRedisURL(c.RedisURL),
+		c.RedisEndpoint,
 		c.PingInterval,
 		c.PongTimeout,
 		c.MetricsEnabled,

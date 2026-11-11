@@ -16,38 +16,17 @@ startup_delay="${RQ_WORKER_STARTUP_DELAY_SECONDS:-5}"
 probe_connect_timeout="${RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS:-5}"
 probe_socket_timeout="${RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS:-5}"
 
-redis_url="$(
-  /opt/venv/bin/python - <<'PY'
-import os
-import sys
-from urllib.parse import urlparse
-
-from wepppy.config.redis_settings import RedisDB, redis_url
-
-raw_url = os.getenv("REDIS_URL") or os.getenv("RQ_REDIS_URL") or ""
-parsed = urlparse(raw_url)
-if not parsed.scheme or not parsed.hostname:
-    print(
-        "Invalid worker Redis URL; set RQ_REDIS_URL to redis://<host>:<port>/<db>.",
-        file=sys.stderr,
-    )
-    raise SystemExit(64)
-
-print(redis_url(RedisDB.RQ))
-PY
-)"
-
-/opt/venv/bin/python - "$redis_url" "$wait_timeout" "$wait_interval" "$probe_connect_timeout" "$probe_socket_timeout" <<'PY'
+/opt/venv/bin/python - "$wait_timeout" "$wait_interval" "$probe_connect_timeout" "$probe_socket_timeout" <<'PYPROBE'
 import sys
 import time
-
 import redis
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
-redis_url_value = sys.argv[1]
-timeout_seconds = float(sys.argv[2])
-poll_interval_seconds = max(0.1, float(sys.argv[3]))
-connect_timeout_seconds = max(0.1, float(sys.argv[4]))
-socket_timeout_seconds = max(0.1, float(sys.argv[5]))
+kwargs = redis_connection_kwargs(RedisDB.RQ)
+timeout_seconds = float(sys.argv[1])
+poll_interval_seconds = max(0.1, float(sys.argv[2]))
+connect_timeout_seconds = max(0.1, float(sys.argv[3]))
+socket_timeout_seconds = max(0.1, float(sys.argv[4]))
 deadline = time.monotonic() + timeout_seconds
 attempt = 0
 last_error: Exception | None = None
@@ -55,11 +34,8 @@ last_error: Exception | None = None
 while time.monotonic() < deadline:
     attempt += 1
     try:
-        redis.Redis.from_url(
-            redis_url_value,
-            socket_connect_timeout=connect_timeout_seconds,
-            socket_timeout=socket_timeout_seconds,
-        ).ping()
+        redis.Redis(**{**kwargs, "socket_connect_timeout": connect_timeout_seconds,
+                       "socket_timeout": socket_timeout_seconds}).ping()
         print(f"Redis ready for RQ after {attempt} attempt(s).")
         break
     except (redis.exceptions.RedisError, OSError, ValueError) as exc:
@@ -76,7 +52,7 @@ else:
         file=sys.stderr,
     )
     raise SystemExit(1)
-PY
+PYPROBE
 
 /opt/venv/bin/python - "$startup_delay" <<'PY'
 import sys
@@ -90,7 +66,9 @@ PY
 
 exec /opt/venv/bin/rq worker-pool \
   -n "$worker_count" \
-  -u "$redis_url" \
+  --url '' \
+  --config wepppy.config.rq_redis \
+  --connection-class wepppy.config.rq_redis.Connection \
   --logging-level INFO \
   --worker-class wepppy.rq.WepppyRqWorker \
   "$queue_name" \

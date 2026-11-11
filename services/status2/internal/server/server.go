@@ -41,19 +41,22 @@ func New(cfg config.Config, logger *slog.Logger) (*Server, error) {
 	}
 	logger = logger.With("component", "status2")
 
-	opts, err := redis.ParseURL(cfg.RedisURL)
-	if err != nil {
-		return nil, fmt.Errorf("parse redis url: %w", err)
-	}
+	opts := cfg.RedisOptions
 	if opts == nil {
-		return nil, errors.New("redis options resolved to nil")
+		var err error
+		_, opts, err = streamauth.ParseRedisEndpoint(cfg.RedisEndpoint, "")
+		if err != nil {
+			return nil, err
+		}
 	}
+	copyOptions := *opts
+	opts = &copyOptions
 	if opts.DB < 0 {
 		opts.DB = 0
 	}
 	opts.ContextTimeoutEnabled = true
 
-	auth, err := streamauth.New(cfg.SigningKeyFile, cfg.RedisURL, cfg.AllowedOrigins)
+	auth, err := streamauth.New(cfg.SigningKeyFile, opts, cfg.AllowedOrigins)
 	if err != nil {
 		return nil, err
 	}
@@ -136,13 +139,13 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	expiry := time.AfterFunc(time.Until(grant.Expires), func() {
 		_ = conn.Close(websocket.StatusCode(streamauth.ExpiredCode), "stream credential expired")
-        cancel()
+		cancel()
 	})
 	defer expiry.Stop()
 	connLogger := s.logger.With("run_id", runID, "channel", channel)
 	connection := newConnection(s, connLogger, runID, channel, conn)
 	connection.expires = grant.Expires
- if err := connection.run(ctx); err != nil {
+	if err := connection.run(ctx); err != nil {
 		if errors.Is(err, context.Canceled) {
 			return
 		}
@@ -155,7 +158,7 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 }
 
 type connection struct {
- expires time.Time
+	expires  time.Time
 	srv      *Server
 	logger   *slog.Logger
 	runID    string

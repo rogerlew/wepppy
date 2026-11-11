@@ -1,6 +1,6 @@
 # Redis credential transport hardening
 
-**Status**: Open (2026-11-11 UTC); scaffolded, contract checkpoint required
+**Status**: Open (2026-11-11 UTC); implemented, final scoped acceptance/review pending
 
 **Timezone**: UTC
 

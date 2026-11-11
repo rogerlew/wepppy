@@ -12,6 +12,7 @@ import (
 
 	miniredis "github.com/alicebob/miniredis/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 func claimsFor(service string) jwt.MapClaims {
@@ -65,7 +66,7 @@ func TestAuthorizationMatrix(t *testing.T) {
 					if err := os.WriteFile(key, []byte("fixture-key"), 0600); err != nil {
 						t.Fatal(err)
 					}
-					v, err := New(key, "redis://"+m.Addr()+"/2", []string{"https://example.test"})
+					v, err := New(key, &redis.Options{Addr: m.Addr(), DB: 2}, []string{"https://example.test"})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -99,7 +100,7 @@ func TestTransportAndOutage(t *testing.T) {
 	m := miniredis.RunT(t)
 	key := filepath.Join(t.TempDir(), "key")
 	os.WriteFile(key, []byte("fixture-key"), 0600)
-	v, err := New(key, "redis://"+m.Addr(), []string{"https://example.test"})
+	v, err := New(key, &redis.Options{Addr: m.Addr()}, []string{"https://example.test"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +141,7 @@ func TestStrictClaimsRotationAndOperation(t *testing.T) {
 	m := miniredis.RunT(t)
 	key := filepath.Join(t.TempDir(), "key")
 	os.WriteFile(key, []byte("new-key,fixture-key"), 0600)
-	v, err := New(key, "redis://"+m.Addr(), []string{"https://example.test"})
+	v, err := New(key, &redis.Options{Addr: m.Addr()}, []string{"https://example.test"})
 	if err != nil {
 		t.Fatal(err)
 	}

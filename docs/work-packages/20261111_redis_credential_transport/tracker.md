@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-11-11 18:27 UTC
-**Current phase**: M0 ratified; M1 implementation next
+**Current phase**: M1-M3 implemented; M4 focused runtime/reviews in progress
 **Last updated**: 2026-11-11 18:27 UTC
-**Next milestone**: Python client implementation
+**Next milestone**: final candidate review and M5 checkpoint
 **Security impact**: high
 **Starting revision**: `f0df22e5f8d2ae6255c6aa0e718394ad69a41b51`
 **Security artifact**: `artifacts/20261111_security_review.md`
@@ -23,9 +23,9 @@ service or deployment change has occurred.
 - [x] Record the operator's focused-validation decision and package ordering.
 - [x] M0: ratify endpoint/credential types, legacy URL precedence, RQ adapter,
       Redis ACL/config file and healthcheck behavior.
-- [ ] M1: convert Python native/session/async consumers with focused tests.
-- [ ] M2: convert status2/preflight2/streamauth Go clients with focused tests.
-- [ ] M3: convert RQ startup, server entrypoint, healthchecks and operator helpers.
+- [x] M1: convert Python native/session/async consumers with focused tests.
+- [x] M2: convert status2/preflight2/streamauth Go clients with focused tests.
+- [x] M3: convert RQ startup, server entrypoint, healthchecks and operator helpers.
 - [ ] M4: run scoped unit/integration/Compose acceptance and independent reviews.
 - [ ] M5: publish the reviewed checkpoint that unblocks F5.
 
@@ -115,3 +115,17 @@ Independent M0 correctness, security and operations artifacts pass. Contract
 lint passes. Standalone ancestor commit contains documentation only; existing
 unrelated changes are excluded. RQ adapter/empty --url, streamauth own timeouts,
 LF file framing and explicitly isolated Compose inputs are required.
+
+## Execution update — 2026-11-11 21:02 UTC
+
+M1-M3 implemented. Initial isolated real AUTH, session expiry, RQ registration
+and job result 42, Go health, dashboard, ACL permissions, wrong/missing inputs,
+restart and baseline rollback/candidate restore pass. Seven Compose variants
+render and contain no synthetic password. Pinned Alpine Redis authenticates and
+retains explicitly disabled snapshots. Focused Python/Go tests and final
+independent re-review are still running; F5 remains blocked until M5.
+
+The Go wrapper unexpectedly recreated shared dev Redis at 20:45:58 UTC. It is
+healthy with original password/data/image and native AUTH succeeds. No prior
+state snapshot exists; no zero-interruption claim is made. Further builders use
+--no-deps. See operations review for the candid event record.

@@ -53,7 +53,7 @@ _MUTATION_LOCK_TTL_SECONDS = 60
 
 try:
     pool_kwargs = redis_connection_kwargs(
-        RedisDB.README,
+        RedisDB.README, for_pool=True,
         decode_responses=True,
         extra={"max_connections": 50},
     )

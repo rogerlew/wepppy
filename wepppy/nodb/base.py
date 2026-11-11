@@ -450,7 +450,7 @@ def _relpath_from_lock_key(runid: str, lock_key: str) -> str:
 
 try:
     pool_kwargs = redis_connection_kwargs(
-        RedisDB.NODB_CACHE,
+        RedisDB.NODB_CACHE, for_pool=True,
         decode_responses=True,
         extra=NODB_CACHE_POOL_EXTRA_KWARGS,
     )
@@ -468,7 +468,7 @@ except (redis.exceptions.RedisError, OSError, ValueError) as exc:
 
 try:
     pool_kwargs = redis_connection_kwargs(
-        RedisDB.STATUS,
+        RedisDB.STATUS, for_pool=True,
         decode_responses=True,
         extra={"max_connections": 50},
     )
@@ -486,7 +486,7 @@ except (redis.exceptions.RedisError, OSError, ValueError) as exc:
 
 try:
     pool_kwargs = redis_connection_kwargs(
-        RedisDB.LOCK,
+        RedisDB.LOCK, for_pool=True,
         decode_responses=True,
         extra={"max_connections": 50},
     )
@@ -504,7 +504,7 @@ except (redis.exceptions.RedisError, OSError, ValueError) as exc:
 
 try:
     pool_kwargs = redis_connection_kwargs(
-        RedisDB.LOG_LEVEL,
+        RedisDB.LOG_LEVEL, for_pool=True,
         decode_responses=True,
         extra={"max_connections": 50},
     )
@@ -531,7 +531,7 @@ def _ensure_redis_lock_client() -> redis.StrictRedis:
 
     try:
         pool_kwargs = redis_connection_kwargs(
-            RedisDB.LOCK,
+            RedisDB.LOCK, for_pool=True,
             decode_responses=True,
             extra={"max_connections": 50},
         )
@@ -564,7 +564,7 @@ def _ensure_redis_nodb_cache_client() -> redis.StrictRedis:
 
     try:
         pool_kwargs = redis_connection_kwargs(
-            RedisDB.NODB_CACHE,
+            RedisDB.NODB_CACHE, for_pool=True,
             decode_responses=True,
             extra=NODB_CACHE_POOL_EXTRA_KWARGS,
         )

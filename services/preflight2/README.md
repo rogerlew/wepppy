@@ -191,7 +191,7 @@ runaway calls during outages.
 
 | Env Var | Default | Description |
 |---------|---------|-------------|
-| `PREFLIGHT_REDIS_URL` | `redis://localhost:6379/0` | Target Redis DB (injects `REDIS_PASSWORD` if the URL lacks auth; falls back to `REDIS_URL` when unset). |
+| `PREFLIGHT_REDIS_URL` | `redis://localhost:6379/0` | Target Redis DB (resolves credentials separately from the mounted password file; falls back to `REDIS_URL` when unset). |
 | `PREFLIGHT_LISTEN_ADDR` | `:9001` | Bind address. |
 | `PREFLIGHT_PING_INTERVAL` | `5s` | Heartbeat cadence. |
 | `PREFLIGHT_PONG_TIMEOUT` | `75s` | Idle cutoff (set ≥60s in production). |
@@ -312,3 +312,7 @@ runaway calls during outages.
 - **Logging**: Structured JSON to stdout. Pipe through `jq` or ship into Loki/ELK. Look for `connection ended with error` messages to diagnose client issues.
 - **Redis prerequisites**: Start Redis with hash keyspace notifications enabled, e.g. `command: ["redis-server", "--notify-keyspace-events", "Kh"]`. Without `Kh`, Redis never publishes the `__keyspace@0__:<runid>` messages caused by `HSET`/`HDEL`, so preflight receives only the initial checklist.
 - **Deployment**: Roll out alongside the Python service first (e.g., route 10% of traffic) before swapping the main Caddy upstream. Keep the old container available for at least one release as a fallback.
+
+Redis credential resolution and legacy conflicts follow the
+[transport contract](../../docs/schemas/redis-credential-transport-contract.md).
+Endpoints never contain credentials; client options use a non-printing provider.

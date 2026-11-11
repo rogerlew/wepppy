@@ -21,11 +21,8 @@ def _require_env(name: str) -> str:
 def _build_session_redis(db_default: int = 11) -> redis.Redis:
     from wepppy.config import redis_settings
 
-    return redis.from_url(redis_settings.session_redis_url(db_default))
+    return redis.Redis(**redis_settings.session_redis_connection_kwargs(db_default))
 
-    host = os.getenv("SESSION_REDIS_HOST", os.getenv("REDIS_HOST", "localhost"))
-    port = int(os.getenv("SESSION_REDIS_PORT", os.getenv("REDIS_PORT", "6379")))
-    return redis.Redis(host=host, port=port, db=db)
 
 
 def _get_env_any(names: List[str], default: Optional[str] = None) -> Optional[str]:
