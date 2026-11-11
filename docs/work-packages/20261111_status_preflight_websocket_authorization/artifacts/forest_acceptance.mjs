@@ -179,7 +179,7 @@ cdp.on('Network.webSocketHandshakeResponseReceived', event => {
 });
 cdp.on('Network.webSocketFrameReceived', event => {
     const socket = sockets.get(event.requestId); if (!socket) return;
-    try { messages.push({ url: socket.url, body: JSON.parse(event.response.payloadData) }); } catch { /* control frame */ }
+    try { messages.push({ requestId: event.requestId, url: socket.url, body: JSON.parse(event.response.payloadData) }); } catch { /* control frame */ }
 });
 async function createPrivateRun() {
     await page.goto(base + '/weppcloud/create');
@@ -226,7 +226,14 @@ from wepppy.config.redis_settings import RedisDB,redis_connection_kwargs
 r,m=json.loads(sys.stdin.read())
 with Redis(**redis_connection_kwargs(RedisDB.STATUS)) as c: print(c.publish(r+':wepp',m))
 `;
-    execFileSync('wctl', ['exec','-T','weppcloud','python','-c',publish], {input:JSON.stringify([a.runid,marker]),stdio:['pipe','pipe','pipe']});
+    async function publishWhenSubscribed(value) {
+        await until(() => {
+            const count = execFileSync('wctl', ['exec','-T','weppcloud','python','-c',publish],
+                {input:JSON.stringify([a.runid,value]),encoding:'utf8',stdio:['pipe','pipe','pipe']});
+            return Number(count.trim()) > 0;
+        }, 'status subscription readiness');
+    }
+    await publishWhenSubscribed(marker);
     await until(() => messages.some(m => m.url.includes('/status/' + a.runid + ':wepp') && m.body.type === 'status' && m.body.data === marker), 'status marker');
     check('actual-status-marker', true);
     await page.waitForFunction(marker => document.body.textContent.includes(marker), marker);
@@ -238,8 +245,15 @@ with Redis(**redis_connection_kwargs(RedisDB.STATUS)) as c: print(c.publish(r+':
         s.claims?.runid===a.runid && s.claims.service===service && s.claims.issuedAt>=initialIssued[service]+240
         && s.status===101 && (service!=='status' || s.url.includes(':wepp?')))), 'scheduled renewal of both streams', 310000);
     check('both-streams-renewed-with-fresh-credentials', true);
+    await until(() => messages.some(m => {
+        const renewed = sockets.get(m.requestId);
+        return m.body.type === 'preflight' && renewed?.claims?.runid === a.runid
+            && renewed.claims.service === 'preflight'
+            && renewed.claims.issuedAt >= initialIssued.preflight + 240 && renewed.status === 101;
+    }), 'preflight payload from renewed socket');
+    check('actual-preflight-payload-after-renewal', true);
     check('renewed-preflight-connected', await page.evaluate(()=>window.preflightConnected===true));
-    execFileSync('wctl', ['exec','-T','weppcloud','python','-c',publish], {input:JSON.stringify([a.runid,marker+'_renewed']),stdio:['pipe','pipe','pipe']});
+    await publishWhenSubscribed(marker+'_renewed');
     await page.waitForFunction(marker => document.body.textContent.includes(marker), marker+'_renewed');
     check('status-marker-rendered-after-renewal', true);
     stage = 'negative-connections';
@@ -283,6 +297,15 @@ with Redis(**redis_connection_kwargs(RedisDB.STATUS)) as c: print(c.publish(r+':
 } catch {
     failure = true; // Never print an exception that could contain request credentials.
 } finally {
+    try {
+        await page.goto(base + '/weppcloud/logout');
+        if (runs.length) {
+            const run = runs[0];
+            const response = await page.request.post(base+'/rq-engine/api/runs/'+run.runid+'/'+run.config+'/stream-token',
+                {headers:{Origin:base},data:{service:'status'}});
+            check('logout-removes-private-authority', response.status() === 403);
+        }
+    } catch { failure = true; checks['logout-cleanup'] = false; }
     await context.close();
     await browser.close();
     let cleanup = 'no disposable runs';
