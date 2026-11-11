@@ -34,7 +34,9 @@ identified internal pickle uses outside project artifact request paths.
 | Nested allowed Bootstrap directory | Restricted | Pending |
 | NUL-free protocol-shaped bytes | Restricted by suffix | Pending |
 | Existing physical file | List/download only | Pending |
-| Existing NoDir/archive member | List/download only; no materialized D-Tale | Pending |
+| Physical file under NoDir root | List/download only; preview 415 | Pending |
+| Retired archive member | Existing retirement error; no materialization/forward | Pending |
+| Whole retired archive | Download original archive bytes | Existing focused regression |
 | CSV/TSV | Existing preview/D-Tale behavior | Pending |
 | Feather/Arrow | Existing D-Tale behavior | Pending |
 | Parquet variants | Existing lazy behavior | Pending |

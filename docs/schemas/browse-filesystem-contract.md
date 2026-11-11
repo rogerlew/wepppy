@@ -81,10 +81,11 @@ sensitive-path controls. They MUST NOT advertise preview or D-Tale actions in
 directory listings or file metadata. Direct browse preview and browse-to-D-Tale
 requests MUST return HTTP 415 before reader invocation, NoDir materialization,
 or outbound loader calls. The D-Tale internal loader MUST also return HTTP 415
-and MUST NOT register or call a pickle reader. This applies to physical files
-and virtual archive members; raw authorized download remains available,
+and MUST NOT register or call a pickle reader. This applies to physical files and any supported virtual file representation; raw authorized download remains available,
 including existing raw query/header byte-delivery modes. Representation or
 preview requests return 415; they must not fall through to generic text rendering.
+Opaque retired archives remain downloadable as whole files; this restriction
+does not restore virtual archive traversal or replace existing retirement errors.
 Existing authentication, authorization and containment decisions retain
 precedence, and missing files retain their normal 404 response.
 

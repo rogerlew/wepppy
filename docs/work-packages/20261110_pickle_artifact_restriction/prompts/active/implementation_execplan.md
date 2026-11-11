@@ -22,7 +22,7 @@ operator's decision, do not run the full Python or frontend suites.
 
 - [x] (2026-11-11 03:50 UTC) Confirm F2 source paths and operator scope.
 - [x] (2026-11-11 03:50 UTC) Scaffold package and review artifacts.
-- [ ] M0: amend canonical contracts, obtain two reviews, and commit the ancestor
+- [x] (2026-11-11 04:08 UTC) M0: amend canonical contracts, obtain two reviews, and commit the ancestor
       checkpoint.
 - [ ] M1: add focused failing tests for Bootstrap, browse, and D-Tale.
 - [ ] M2: remove pickle admission/readers/capability advertisements and update
@@ -31,7 +31,15 @@ operator's decision, do not run the full Python or frontend suites.
       security reviews.
 - [ ] M4: perform an explicitly authorized scoped rollout and closeout.
 
+Checkpoint ancestor: `aeab3c3e1` (base `991fc5e2c3`). Two independent reviews approved before implementation.
+
 ## Surprises & Discoveries
+
+- Runtime inspection and red tests found archive-backed NoDir traversal is retired
+  (`runtime_paths/fs.py:resolve`, HTTP 409 `NODIR_ARCHIVE_RETIRED`). Preserve
+  retirement errors and whole-archive download; test physical files under NoDir
+  roots and assert retired virtual requests never materialize or forward. No
+  archive support is restored by this package.
 
 - Observation: Bootstrap rejects blobs containing NUL bytes, but protocol-0
   pickle can be NUL-free; binary detection is not a deserialization safety gate.

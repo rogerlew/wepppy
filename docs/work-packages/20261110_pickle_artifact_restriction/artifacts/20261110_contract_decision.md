@@ -108,3 +108,11 @@ evidence that it consumes project artifacts through these entry points.
 - **Standalone ancestor commit**: pending.
 
 Implementation is gated until the pending checkpoint items are complete.
+
+## Archive compatibility clarification
+
+Red tests exposed a stale planning assumption: archive-backed runtime access is
+retired. Preserve existing 409/404 member responses and whole-archive byte access.
+The approved pickle rule applies to physical files, including NoDir directory
+roots; it does not restore virtual archive support. Both independent reviewers
+approved this clarification on 2026-11-11 04:10 UTC before production edits.

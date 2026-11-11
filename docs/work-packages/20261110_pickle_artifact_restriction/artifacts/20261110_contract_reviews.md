@@ -21,3 +21,12 @@ Reviews completed 2026-11-11 04:08 UTC before source or test edits.
 No unresolved medium/high findings. The primary agent accepts both reviews.
 The focused-suite waiver is retained. These approvals establish the contract
 checkpoint only; implementation and deployment evidence remain pending.
+
+## Supplemental archive clarification, 2026-11-11 04:10 UTC
+
+Both independent reviewers approved preserving retired archive traversal errors
+and whole-archive byte download after inspection of `runtime_paths/fs.py` and
+existing route tests. The initial plan incorrectly assumed virtual archives were
+active. The canonical browse exception and failure-class matrix now distinguish
+physical files under NoDir roots from retired archive members. No archive access
+is restored; no production implementation preceded this clarification.

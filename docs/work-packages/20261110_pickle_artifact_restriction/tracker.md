@@ -6,7 +6,7 @@
 
 **Timezone**: UTC  
 **Started**: 2026-11-11 03:50 UTC  
-**Current phase**: contract checkpoint preparation  
+**Current phase**: M1 focused failing regressions  
 **Last updated**: 2026-11-11 03:50 UTC  
 **Next milestone**: ratify and checkpoint the restriction contract  
 **Security impact**: `high`  
@@ -49,7 +49,7 @@
 ## Timeline
 
 - **2026-11-11 03:50 UTC** - Package opened for the operator-requested F2 fix.
-- **Pending** - Contract checkpoint ancestor.
+- **2026-11-11 04:08 UTC** - Contract checkpoint ancestor `aeab3c3e1`; both independent reviews approved.
 - **Pending** - Focused implementation and validation.
 - **Pending** - Scoped rollout and closeout.
 
