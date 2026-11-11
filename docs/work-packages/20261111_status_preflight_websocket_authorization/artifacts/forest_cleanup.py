@@ -16,7 +16,7 @@ with app.app_context():
     Run, User, datastore = get_user_models()
     for run in runs:
         runid = run['runid']
-        assert run['config'] == 'dev_unit_1' and ';' not in runid and '/' not in runid
+        assert run['config'] == '0' and ';' not in runid and '/' not in runid
         owners = get_run_owners_lazy(runid)
         assert owners and all(owner.email == 'dev-agent@example.com' for owner in owners)
         wd = get_wd(runid, prefer_active=False)

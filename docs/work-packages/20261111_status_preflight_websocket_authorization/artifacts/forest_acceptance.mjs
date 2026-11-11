@@ -183,10 +183,10 @@ cdp.on('Network.webSocketFrameReceived', event => {
 });
 async function createPrivateRun() {
     await page.goto(base + '/weppcloud/create');
-    const form = page.locator('form.wc-run-form').filter({ has: page.locator('input[name="config"][value="dev_unit_1"]') }).first();
-    await Promise.all([page.waitForURL(/\/weppcloud\/runs\/[^/]+\/dev_unit_1\//), form.locator('button').click()]);
+    const form = page.locator('form.wc-run-form').filter({ has: page.locator('input[name="config"][value="0"]') }).first();
+    await Promise.all([page.waitForURL(/\/weppcloud\/runs\/[^/]+\/0\//), form.locator('button').click()]);
     const runid = new URL(page.url()).pathname.split('/')[3];
-    runs.push({ runid, config: 'dev_unit_1' });
+    runs.push({ runid, config: '0' });
     // Persist only disposable identities so interrupted acceptance can be cleaned up.
     fs.writeFileSync('/tmp/stream-auth-disposable-runs.json', JSON.stringify(runs));
     await page.waitForFunction(() => Boolean(window.WCHttp?.createStreamConnection));
