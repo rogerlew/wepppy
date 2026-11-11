@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import uuid
 
-from flask import request
+from flask import current_app, request
 from flask_login import current_user
 from starlette.exceptions import HTTPException
 
+from wepppy.microservices.rq_engine.auth import AuthError
 from wepppy.query_engine.app.access import authorize_resource
 from wepppy.query_engine.app.helpers import resolve_target
 from wepppy.weppcloud.utils import auth_tokens
@@ -28,8 +29,12 @@ def set_query_cookie(response, runid, config, *, omit_public=False):
     identity_claims = {'token_class': 'session', 'feature_access_principal': principal_claim(principal)}
     try:
         authorize_resource(target, identity_claims)
-    except HTTPException as exc:
+    except (HTTPException, AuthError) as exc:
         if exc.status_code in {401, 403}:
+            current_app.logger.info(
+                'Query credential omitted for run %s: access status %s',
+                target.runid, exc.status_code,
+            )
             return response  # The page's grant does not necessarily include query access.
         raise
     if omit_public:

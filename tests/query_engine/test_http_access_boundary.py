@@ -551,7 +551,7 @@ def test_culvert_bound_integration_can_query(boundary,signed_token,session_state
     child.mkdir(parents=True)
     _dataset(child)
     monkeypatch.setenv('CULVERTS_ROOT',str(root))
-    token=signed_token(runid='team',feature_access_principal={'version':1,'kind':'integration','id':'culvert-web-app'})
+    token=signed_token(runid='team',service_groups=['culverts'],feature_access_principal={'version':1,'kind':'integration','id':'culvert-web-app'})
     response=client.post('/runs/culvert;;team;;child/cfg/query',headers={'Authorization':'Bearer '+token},
                          json={'datasets':['data/sample.parquet']})
     assert response.status_code==200,response.text
@@ -687,3 +687,57 @@ def test_ownerless_metadata_is_required_without_creating_state(boundary, monkeyp
     assert response.status_code == (200 if valid else 404), response.text
     assert not (run/'VERSION').exists()
     assert not (run/'exceptions.log').exists()
+
+
+@pytest.mark.parametrize('kind', ['batch', 'culvert'])
+@pytest.mark.parametrize('token_class', ['user', 'session', 'service'])
+def test_bare_ordinary_binding_cannot_select_same_named_group(
+        boundary, signed_token, session_state, monkeypatch, tmp_path, kind, token_class):
+    from wepppy.weppcloud.utils import feature_access_runtime
+    client, _, calls = boundary
+    root = tmp_path / kind
+    child = root / 'team/runs/child'
+    child.mkdir(parents=True)
+    (root / 'team/_base').mkdir()
+    monkeypatch.setenv('BATCH_RUNNER_ROOT' if kind == 'batch' else 'CULVERTS_ROOT', str(root))
+    class Store:
+        def membership(self, *args, **kwargs):
+            return True, True
+    monkeypatch.setattr(feature_access_runtime, 'feature_store', Store)
+    _mark_session('team')
+    token = signed_token(runid='team', token_class=token_class, config='cfg',
+                         session_id='boundary-session', service_groups=['admin-run-token'],
+                         feature_access_principal={'version': 1, 'kind': 'human', 'id': 42})
+    response = client.get(f'/runs/{kind};;team;;child/cfg/schema',
+                          headers={'Authorization': 'Bearer ' + token})
+    assert response.status_code == 403, response.text
+    assert calls == []
+    assert not (child / '_query_engine').exists()
+    assert not (child / 'exceptions.log').exists()
+
+
+def test_culvert_uuid_service_human_delegation_rechecks_membership(
+        boundary, signed_token, session_state, monkeypatch, tmp_path):
+    from wepppy.weppcloud.utils import feature_access_runtime
+    client, _, _ = boundary
+    root = tmp_path / 'culverts'
+    child = root / 'team/runs/child'
+    child.mkdir(parents=True)
+    _dataset(child)
+    monkeypatch.setenv('CULVERTS_ROOT', str(root))
+    allowed = [True]
+    class Store:
+        def membership(self, *args, **kwargs):
+            return allowed[0], allowed[0]
+    monkeypatch.setattr(feature_access_runtime, 'feature_store', Store)
+    token = signed_token(runid='team', service_groups=['culverts'],
+                         feature_access_principal={'version': 1, 'kind': 'human', 'id': 42})
+    headers = {'Authorization': 'Bearer ' + token}
+    url = '/runs/culvert;;team;;child/cfg/query'
+    response = client.post(url, headers=headers, json={'datasets': ['data/sample.parquet']})
+    assert response.status_code == 200, response.text
+    assert response.json()['records'] == [{'value': 3}, {'value': 7}]
+    before = {str(p.relative_to(child)): p.read_bytes() for p in child.rglob('*') if p.is_file()}
+    allowed[0] = False
+    assert client.post(url, headers=headers, json={'datasets': ['data/sample.parquet']}).status_code == 403
+    assert {str(p.relative_to(child)): p.read_bytes() for p in child.rglob('*') if p.is_file()} == before

@@ -1,8 +1,9 @@
 # Query-engine HTTP access contract
 
 Status: accepted QE-AUTH-F1-20261110 amendment, explicitly approved by the
-operator on 2026-11-11. Implementation conformance is pending. This contract does
-not claim that the current HTTP service enforces these boundaries.
+operator on 2026-11-11. Implemented and locally/environment validated in the
+query-engine access-boundary work package. Production rollout and observation
+remain pending; this status does not claim production conformance.
 
 ## Scope and rationale
 
@@ -132,7 +133,12 @@ child-bound credential may inspect only that child, not its parent or siblings.
 For sessions validate the marker for the credential's admitted resource, then
 apply the parent's current sharing/ownership policy. Batch-group and Culvert
 batch UUID grants retain existing group binding; a bare matching name never
-confers a new resource grant.
+confers a new resource grant. Batch grants use typed child/parent or
+`batch;;<name>;;_base` identifiers. A bare Culvert batch UUID is accepted only
+for a service credential whose signed `service_groups` includes `culverts`,
+matching the existing Culvert issuer; current feature/principal checks still apply.
+This prevents ordinary run credentials from crossing resource classes through
+a name collision while preserving established Culvert delegation.
 
 ## Browser transport and lifecycle
 
@@ -173,6 +179,12 @@ buffer. They address observed 5537-byte collection URLs and 63600-byte cookie
 headers. The latter bounds incomplete parser events, not total headers. Caddy
 limits remain unchanged; see the [operations guide](../dev-notes/query-engine-http-operations.md)
 for runtime selection, cost and rollback.
+
+An admitted page or collection remains successful when query admission denies
+401/403: omit the query credential and retain the query surface's own denial.
+Collection Admin/Root read policy can differ from private Batch query membership;
+this distinction does not grant query authority. Log the resource/status without
+credential material. Backend unavailability remains an explicit failure.
 
 ## Explicit activation and browser request origin
 

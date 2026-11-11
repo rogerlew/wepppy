@@ -72,9 +72,13 @@ def _decode(token):
     return claims
 
 
-def _resource_ids(target):
+def _resource_ids(target, claims):
     ids = set(target.credential_ids)
-    if target.parent_id.startswith(('batch;;', 'culvert;;')):
+    # Only the existing typed Culvert service grant uses a bare batch UUID.
+    # Ordinary run credentials must not cross into a same-named grouped run.
+    if (target.parent_id.startswith('culvert;;')
+            and claims.get('token_class') == 'service'
+            and 'culverts' in browse_auth._normalize_list(claims.get('service_groups'))):
         ids.add(target.parent_id.split(';;')[1])
     return ids
 
@@ -93,7 +97,7 @@ def _verify_claims(claims, target, operation, source):
     if not required.issubset(scopes):
         raise HTTPException(403, 'Insufficient scope')
     runs = browse_auth._normalize_list(claims.get('runs') or claims.get('runid'))
-    if (runs and _resource_ids(target).isdisjoint(runs)) or (not runs and token_class != 'user'):
+    if (runs and _resource_ids(target, claims).isdisjoint(runs)) or (not runs and token_class != 'user'):
         raise HTTPException(403, 'Credential not authorized for run')
     if token_class == 'session':
         if claims.get('config') != target.config:

@@ -249,3 +249,45 @@ def test_existing_independent_grants_remain_valid(monkeypatch, grant):
     user = SimpleNamespace(id=51, is_authenticated=grant != 'public', is_active=True,
                            has_role=lambda role: role == grant)
     assert can_read_collection_run('unrelated-run', user, public=grant == 'public')
+
+
+@pytest.mark.parametrize('status_code', [401, 403, 503])
+def test_collection_page_survives_grouped_query_cookie_denial(monkeypatch, tmp_path, status_code):
+    """Collection read admission does not imply a grouped query grant."""
+    module = _load_module()
+    from wepppy.query_engine.app import access
+    from wepppy.microservices.rq_engine.auth import AuthError
+    from wepppy.weppcloud.utils import helpers, query_cookie
+    generator = importlib.import_module('wepppy.weppcloud.combined_watershed_viewer_generator')
+    root = tmp_path / 'batch'
+    (root / 'group/_base').mkdir(parents=True)
+    (root / 'group/runs/child').mkdir(parents=True)
+    monkeypatch.setenv('BATCH_RUNNER_ROOT', str(root))
+    monkeypatch.setattr(helpers, 'redis_wd_cache_client', None)
+    monkeypatch.setattr(access.rq_auth, '_reject_fork_preparing_run', lambda _: None)
+    user = SimpleNamespace(id=42, is_authenticated=True, is_active=True,
+                           has_role=lambda role: role == 'Admin')
+    monkeypatch.setattr(module, 'current_user', user)
+    monkeypatch.setattr(query_cookie, 'current_user', user)
+    _install_public_stub(monkeypatch, module, set())
+    _install_template_stub(monkeypatch, module)
+    runid = 'batch;;group;;child'
+    monkeypatch.setattr(generator, 'collection_metadata',
+                        lambda ids, **kw: {'ws': [{'runid': runid, 'cfg': 'cfg'}]})
+    denied_calls = []
+    def deny_group(*args, **kwargs):
+        denied_calls.append('grouped query admission')
+        raise AuthError('Feature access denied', status_code=status_code)
+    monkeypatch.setattr(access, 'require_feature_access', deny_group)
+    app = _build_app(module)
+    app.config['TESTING'] = status_code == 503
+    with app.test_client() as client:
+        if status_code == 503:
+            with pytest.raises(AuthError) as failure:
+                client.get('/bounds_ws_viewer', query_string={'ws': json.dumps([{'runid': runid}])})
+            assert failure.value.status_code == 503  # Required backend failures are not hidden.
+        else:
+            response = client.get('/bounds_ws_viewer', query_string={'ws': json.dumps([{'runid': runid}])})
+            assert response.status_code == 200
+            assert not any('wepp_query_' in value for value in response.headers.getlist('Set-Cookie'))
+    assert denied_calls == ['grouped query admission']
