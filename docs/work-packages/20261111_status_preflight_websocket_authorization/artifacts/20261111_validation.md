@@ -19,6 +19,10 @@ forest cutover. All commands run on forest through the installed dev `wctl`.
 
 ## Discovered validation issues
 
+- First full pytest attempt: 2,012 passed, 37 skipped, one failure in 603.67
+  seconds. The new endpoint made OpenAPI 165,024 bytes against the 165,000-byte
+  limit. Shortened only the new route metadata; focused OpenAPI suite now
+  passes (13 tests), and the full suite is rerunning with the unchanged budget.
 - Host `python3` lacks Jinja2. Used the canonical web container for the builder;
   the local `.venv` also provides Jinja2 for the deploy entry point.
 - Initial Go redaction test found newline immediately after `->` escaped the

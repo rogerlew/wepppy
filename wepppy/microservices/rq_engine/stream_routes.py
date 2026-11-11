@@ -152,9 +152,9 @@ def _store_marker(runid: str, sid: str) -> None:
 
 @router.post(
     '/runs/{runid}/{config}/stream-token',
-    summary='Issue a short-lived status or preflight credential',
+    summary='Issue stream credential',
     tags=['rq-engine', 'session'], operation_id=rq_operation_id('issue_stream_token'),
-    responses=agent_route_responses(success_code=200, success_description='Stream credential issued.'),
+    responses=agent_route_responses(success_code=200, success_description='Credential issued.'),
 )
 async def issue_stream_token(runid: str, config: str, request: Request) -> JSONResponse:
     try:

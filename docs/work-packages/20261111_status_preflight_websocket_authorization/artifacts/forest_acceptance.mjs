@@ -248,6 +248,10 @@ with Redis(**redis_connection_kwargs(RedisDB.STATUS)) as c: print(c.publish(r+':
         check('anonymous-private-denied-' + run.runid, response.status()===403);
     }
     await anonymous.close();
+    stage = 'standalone-archive';
+    await page.goto(base + '/weppcloud/runs/' + a.runid + '/' + a.config + '/rq-archive-dashboard');
+    await until(() => [...sockets.values()].some(s => s.url.includes('/status/' + a.runid + ':archive?') && s.status === 101 && s.fixed && s.selected === 'wepp-stream.v1'), 'standalone archive handshake');
+    check('standalone-archive-authorized', true);
     stage = 'credential-non-retention';
     const storage = await page.evaluate(() => JSON.stringify({local:{...localStorage},session:{...sessionStorage}}));
     const logs = ['weppcloud','wepppy-rq-engine','weppcloud-status','weppcloud-preflight','wepppy-caddy'].map(name => {
