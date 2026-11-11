@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_diagnostics
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import RQ_ENGINE
+
 import json
 import logging
 import os
@@ -830,7 +834,15 @@ async def export_features_submit(runid: str, config: str, request: Request):
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="job_active")
     except FeaturesExportValidationError as exc:
-        return JSONResponse(exc.to_error_payload(), status_code=exc.status_code)
+        payload = exc.to_error_payload()
+        payload["error"].update(safe_diagnostics(
+            source_profile=current_profile(RQ_ENGINE),
+            message=payload["error"]["message"], details=payload["error"]["details"],
+        ))
+        payload["errors"] = safe_diagnostics(
+            source_profile=current_profile(RQ_ENGINE), errors=payload["errors"],
+        )["errors"]
+        return JSONResponse(payload, status_code=exc.status_code)
     except FeaturesExportServiceError as exc:
         return error_response(
             str(exc),
@@ -905,7 +917,15 @@ async def export_features_profile_resolve(runid: str, config: str, request: Requ
             ]
         )
     except FeaturesExportValidationError as exc:
-        return JSONResponse(exc.to_error_payload(), status_code=exc.status_code)
+        payload = exc.to_error_payload()
+        payload["error"].update(safe_diagnostics(
+            source_profile=current_profile(RQ_ENGINE),
+            message=payload["error"]["message"], details=payload["error"]["details"],
+        ))
+        payload["errors"] = safe_diagnostics(
+            source_profile=current_profile(RQ_ENGINE), errors=payload["errors"],
+        )["errors"]
+        return JSONResponse(payload, status_code=exc.status_code)
     except FeaturesExportServiceError as exc:
         return error_response(
             str(exc),

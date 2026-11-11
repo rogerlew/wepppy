@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_diagnostics
+from wepppy.observability.secret_profiles import SHAPE
+
 from dataclasses import dataclass
 
 from starlette.responses import JSONResponse
@@ -21,6 +24,8 @@ class ShapeConverterError(Exception):
 
 
 def error_payload(*, code: str, message: str, details: str) -> dict[str, dict[str, str]]:
+    fields = safe_diagnostics(source_profile=SHAPE, message=message, details=details)
+    message, details = fields["message"], fields["details"]
     return {
         "error": {
             "code": code,

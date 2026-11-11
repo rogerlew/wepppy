@@ -1,8 +1,11 @@
 """Routes for omni blueprint extracted from app.py."""
 
+from wepppy.observability.safe_traceback import render_current_exception
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 from wepppy.request_payload import RequestPayloadError
 
-import traceback
 
 from .._common import *  # noqa: F401,F403
 from wepppy.nodb.single_input_policy import single_input_uploads_enabled
@@ -236,7 +239,7 @@ def query_omni_scenarios_report(runid, config):
                                scenarios=scenarios)
 
     except Exception as exc:
-        return exception_factory(msg=exc, runid=runid, details=traceback.format_exc())
+        return exception_factory(msg=exc, runid=runid, details=render_current_exception(source_profile=current_profile(WEB)))
 
 
 @omni_bp.route('/runs/<string:runid>/<config>/report/omni_contrasts')
@@ -353,4 +356,4 @@ def query_omni_contrasts_report(runid, config):
                                report=report)
 
     except Exception as exc:  # broad-except: boundary contract
-        return exception_factory(msg=exc, runid=runid, details=traceback.format_exc())
+        return exception_factory(msg=exc, runid=runid, details=render_current_exception(source_profile=current_profile(WEB)))

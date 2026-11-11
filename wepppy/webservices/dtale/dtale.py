@@ -33,6 +33,11 @@ dataset paths; public tables retain ordinary anonymous downstream access.
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging, current_profile
+from wepppy.observability.secret_profiles import DTALE
+from wepppy.observability.safe_traceback import safe_text
+install_safe_logging(DTALE)
+
 import hashlib
 import json
 import logging
@@ -1418,7 +1423,7 @@ def _lazy_parquet_get_data(data_id: str):
     except _SourceChangedError as exc:
         # Upstream grid transport discards non-2xx bodies; use its visible
         # error envelope without returning successful row data.
-        return jsonify({"success": False, "error": str(exc), "code": "changed_source"})
+        return jsonify({"success": False, "error": safe_text(exc, source_profile=current_profile(DTALE)), "code": "changed_source"})
     return_data = {
         "results": results,
         "columns": [
@@ -1697,7 +1702,7 @@ def load_into_dtale():
             _discard_dataset(data_id)
             _verify_source(target, fingerprint, resolved_target)
             logger.exception("Failed to lazily load parquet %s", target)
-            abort(500, description=str(exc))
+            abort(500, description=safe_text(exc, source_profile=current_profile(DTALE)))
 
         if MAX_ROWS and lazy_rows > MAX_ROWS:
             global_state.cleanup(data_id)
@@ -1744,7 +1749,7 @@ def load_into_dtale():
     except Exception as exc:  # pragma: no cover - surface full error to caller
         _verify_source(target, fingerprint, resolved_target)
         logger.exception("Failed to load %s", target)
-        abort(500, description=str(exc))
+        abort(500, description=safe_text(exc, source_profile=current_profile(DTALE)))
 
     _verify_source(target, fingerprint, resolved_target)
     if MAX_ROWS and len(df) > MAX_ROWS:

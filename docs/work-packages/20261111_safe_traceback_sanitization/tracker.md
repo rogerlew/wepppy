@@ -4,17 +4,17 @@
 
 **Timezone**: UTC
 **Started**: 2026-11-11 18:27 UTC
-**Current phase**: M0 contract and inventory review
-**Last updated**: 2026-11-11 19:05 UTC
-**Next milestone**: F5 standalone contract checkpoint
+**Current phase**: M5 full regression gates
+**Last updated**: 2026-11-11 22:26 UTC
+**Next milestone**: M5 exact full regression gates
 **Finding**: F5 / SEC-05
 **Security impact**: high
 **Starting revision**: `f0df22e5f8d2ae6255c6aa0e718394ad69a41b51`
 **Security artifact**: `artifacts/20261111_security_review.md`
 
 Redis prerequisite PASS at `db7ef7cb7e1d05400b6acca333526dfe80c7b417`.
-M0 canonical draft and expanded inventories are under independent review.
-No code, logging, API, secret or deployment behavior changed.
+M0 checkpoint committed. M1-M3 implemented and focused output acceptance passes.
+Final independent reviews are recorded; no production deployment occurred.
 
 ## Task Board
 
@@ -26,11 +26,11 @@ No code, logging, API, secret or deployment behavior changed.
 - [x] Review openwepp Kubernetes/SOPS handling and add process-owned source,
       compound decoder, container-log and production-equivalent mount gates.
 - [x] Prerequisite: Redis credential transport scoped checkpoint passes.
-- [ ] M0: ratify safe traceback/source/sink contract and standalone checkpoint.
-- [ ] M1: implement renderer, temporary snapshot and focused unit tests.
-- [ ] M2: integrate API/error-factory and logging formatter sinks.
-- [ ] M3: integrate run logs, RQ persistence and publication sinks.
-- [ ] M4: focused canary/performance/UI compatibility validation and reviews.
+- [x] M0: ratify safe traceback/source/sink contract and standalone checkpoint.
+- [x] M1: implement renderer, temporary snapshot and focused unit tests.
+- [x] M2: integrate API/error-factory and logging formatter sinks.
+- [x] M3: integrate run logs, RQ persistence and publication sinks.
+- [x] M4: focused canary/performance/UI compatibility validation and reviews.
 - [ ] M5: run full pytest, npm lint and full npm tests; close SEC-05 from evidence.
 
 ## Decisions
@@ -112,12 +112,12 @@ peers; this list is not an exhaustive closure claim.
 
 ## Review Gates
 
-- [ ] Redis prerequisite complete.
-- [ ] Contract/source/sink matrix accepted.
-- [ ] Correctness review passed.
-- [ ] QA review passed.
-- [ ] Dedicated security review passed.
-- [ ] Focused canary and performance gates pass.
+- [x] Redis prerequisite complete.
+- [x] Contract/source/sink matrix accepted at `d6796407f29b4dd7b05031ed89efa416b13a5665`.
+- [x] Correctness review passed (M4 source/focused).
+- [x] QA review passed (M4 source/focused).
+- [x] Dedicated security review passed (M4 source/focused).
+- [x] Focused canary and performance gates pass.
 - [ ] Full pytest, npm lint and full npm tests pass.
 - [ ] Audit board SEC-05 updated from evidence.
 
@@ -126,8 +126,8 @@ peers; this list is not an exhaustive closure claim.
 - 2026-11-11 18:27 UTC: scaffold and record design/order/test decisions.
 - 2026-11-11 19:05 UTC: openwepp source review incorporated; no cluster access,
   SOPS decryption, implementation or deployment.
-- Blocked: Redis package scoped acceptance.
-- Pending: M0-M4 implementation/reviews.
+- Redis scoped acceptance: complete.
+- M0-M3 complete; M4 final review receipts retained.
 - Pending: M5 full regression gates.
 
 ## Handoff
@@ -144,3 +144,11 @@ Starting revision `2b6439df4d7b12e3fb740c9632d45d6eec7da809`. Canonical draft:
 `docs/schemas/safe-traceback-contract.md`. Independent review is resolving
 transitive source ownership and final source/sink coverage before the standalone
 checkpoint. No implementation or full-suite/security closure is claimed.
+
+## Implementation progress
+
+M1-M3 implemented; M4 active. Forty focused tests pass including actual Redis
+persistence/pubsub and generated status artifacts. Container and benchmark
+evidence is retained; expanded source/sink review remains open. Exact full
+pytest/npm gates and SEC-05 closure have not occurred. See the active plan's
+Implementation execution update and `artifacts/20261111_extended_sink_audit.md`.

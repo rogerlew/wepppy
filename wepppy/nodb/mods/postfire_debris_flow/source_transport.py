@@ -4,6 +4,10 @@ Run in a dedicated main-thread preparation process: SIGALRM bounds DNS/TLS,
 slow response bodies and native raster callbacks, not just socket inactivity.
 No GDAL URL is exposed and no redirect or automatic retry is permitted.
 """
+
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
 from contextlib import contextmanager
 import io
 import hashlib
@@ -120,7 +124,7 @@ class Transport:
         except Exception as exc:  # noqa: BLE001 -- retained transport diagnostic boundary; re-raises.
             # Transport boundary: retain the failed request, then propagate;
             # malformed/network/native callback errors never become fallback.
-            record.update(status='failed',error_type=type(exc).__name__,error=str(exc)[:2048])
+            record.update(status='failed',error_type=type(exc).__name__,error=safe_text(exc, source_profile=current_profile(WORKER))[:2048])
             if isinstance(getattr(exc,'code',None),int):
                 record['http_status'] = exc.code
             raise

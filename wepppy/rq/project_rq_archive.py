@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from wepppy.query_engine.catalog_refresh import (
     catalog_lifecycle_guard, invalidate_catalog_incarnation,
 )
@@ -561,7 +565,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         except Exception as exc:
             # Boundary catch: preserve contract behavior while logging unexpected failures.
             __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_archive.py:325", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-            runtime.publish_status(status_channel, f"Failed to clear NoDb cache after restore ({exc})")
+            runtime.publish_status(status_channel, safe_text(f"Failed to clear NoDb cache after restore ({exc})", source_profile=current_profile(WORKER)))
             raise
         runtime.publish_status(
             status_channel,

@@ -1,6 +1,10 @@
 """Immutable SBS response-event seeds and verified multipart bytes."""
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from contextlib import contextmanager
 import hashlib
 import json
@@ -185,7 +189,7 @@ def capture_event_seed(seed_upload_root, event_id, source):
         except (OSError, ValueError) as exc:
             # Retain partial work through the same authorized directory descriptor.
             _json_record(descriptor, 'status.json', {'status': 'failed', 'event_id': event_id,
-                                                  'error': str(exc)})
+                                                  'error': safe_text(str(exc), source_profile=current_profile(WORKER))})
             raise
 
 

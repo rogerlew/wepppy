@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import argparse
 import json
 import os
@@ -217,8 +221,8 @@ def _process_run(
                 event.update(
                     {
                         "status": "exception",
-                        "message": f"failed reading run lock state: {exc}",
-                        "details": str(exc),
+                        "message": safe_text(f"failed reading run lock state: {exc}", source_profile=current_profile(WORKER)),
+                        "details": safe_text(exc, source_profile=current_profile(WORKER)),
                         "duration_ms": 0,
                     }
                 )
@@ -397,8 +401,8 @@ def _process_run(
             event.update(
                 {
                     "status": "exception",
-                    "message": str(exc),
-                    "details": str(exc),
+                    "message": safe_text(exc, source_profile=current_profile(WORKER)),
+                    "details": safe_text(exc, source_profile=current_profile(WORKER)),
                 }
             )
             counters["failed"] += 1
@@ -568,7 +572,7 @@ def main(argv: Iterable[str] | None = None) -> int:
             verbose=args.verbose,
         )
     except _RECOVERABLE_EXCEPTIONS as exc:  # pragma: no cover - CLI safety
-        print(f"ERROR: {exc}", file=sys.stderr)
+        print(safe_text(f"ERROR: {exc}", source_profile=current_profile(WORKER)), file=sys.stderr)
         return 2
 
     print(json.dumps(summary, sort_keys=True))

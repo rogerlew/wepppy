@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import render_current_exception, render_stack, safe_text, safe_structure, safe_diagnostics, new_error_id
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 from wepppy.request_payload import RequestPayloadError
 
 from datetime import datetime
@@ -11,8 +15,6 @@ import json
 import logging
 import os
 import socket
-import traceback
-import uuid
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
@@ -67,7 +69,7 @@ try:
     redis_wd_cache_client = redis.StrictRedis(connection_pool=redis_wd_cache_pool)
     redis_wd_cache_client.ping()
 except Exception as e:  # broad-except: boundary contract
-    print(f'Error connecting to Redis: {e}')
+    print(safe_text(f'Error connecting to Redis: {e}', source_profile=current_profile(WEB)))
     redis_wd_cache_client = None
 
 _PLAYBACK_USE_CLONE = os.getenv("PROFILE_PLAYBACK_USE_CLONE", "false").lower() in {"1", "true", "yes", "on"}
@@ -277,7 +279,7 @@ def get_wd(runid: str, *, prefer_active: bool = True, read_only: bool = False) -
                     # Cached path no longer exists, delete stale entry
                     redis_wd_cache_client.delete(runid)
         except redis.exceptions.ConnectionError as e:
-            print(f"Warning: Redis connection error during GET. Falling back to filesystem. Error: {e}")
+            print(safe_text(f"Warning: Redis connection error during GET. Falling back to filesystem. Error: {e}", source_profile=current_profile(WEB)))
 
 
     path = None
@@ -350,7 +352,7 @@ def get_wd(runid: str, *, prefer_active: bool = True, read_only: bool = False) -
             redis_wd_cache_client.set(runid, path, ex=72 * 3600)
         except redis.exceptions.ConnectionError as e:
             # If caching fails, the function still succeeds. Just log the issue.
-            print(f"Warning: Redis connection error during SET. Error: {e}")
+            print(safe_text(f"Warning: Redis connection error during SET. Error: {e}", source_profile=current_profile(WEB)))
 
     return path
 
@@ -547,11 +549,11 @@ def error_factory(
     Returns:
         Flask `Response` object with a JSON body.
     """
-    message = _ensure_text(msg)
-    stacktrace_text = ''.join(traceback.format_stack())
+    message = safe_text(msg, source_profile=current_profile(WEB))
+    stacktrace_text = render_stack(source_profile=current_profile(WEB))
     resolved_error_id = error_id
     if resolved_error_id is None and status_code is not None and status_code >= 500:
-        resolved_error_id = uuid.uuid4().hex
+        resolved_error_id = new_error_id()
     resolved_code = code
     if resolved_code is None and status_code is not None:
         resolved_code = _default_error_code(status_code)
@@ -570,6 +572,7 @@ def error_factory(
         },
     )
 
+    details = safe_structure(details, source_profile=current_profile(WEB)) if details is not None else None
     error_payload = {'message': message}
     if code:
         error_payload['code'] = code
@@ -582,7 +585,7 @@ def error_factory(
     if resolved_error_id is not None:
         payload['error_id'] = resolved_error_id
     if errors is not None:
-        payload['errors'] = errors
+        payload['errors'] = safe_diagnostics(source_profile=current_profile(WEB), errors=errors)['errors']
 
     response = jsonify(payload)
     if status_code is not None:
@@ -610,10 +613,10 @@ def upload_error_factory(
     error_id: Optional[str] = None,
 ) -> Response:
     """Return canonical upload error payloads with stable code + error_id."""
-    message = _ensure_text(msg)
-    resolved_error_id = error_id or uuid.uuid4().hex
+    message = safe_text(msg, source_profile=current_profile(WEB))
+    resolved_error_id = error_id or new_error_id()
     resolved_code = code or _default_error_code(status_code)
-    resolved_details = message if details is None else details
+    resolved_details = message if details is None else safe_structure(details, source_profile=current_profile(WEB))
 
     payload: dict[str, Any] = {
         "error": {
@@ -624,7 +627,7 @@ def upload_error_factory(
         "error_id": resolved_error_id,
     }
     if errors is not None:
-        payload["errors"] = errors
+        payload["errors"] = safe_diagnostics(source_profile=current_profile(WEB), errors=errors)["errors"]
     response = jsonify(payload)
     response.status_code = status_code
     return response
@@ -639,10 +642,10 @@ def upload_exception_factory(
     errors: Optional[list[Any]] = None,
 ) -> Response:
     """Log traceback with error_id and return canonical upload error payload."""
-    message = _format_error_message(msg)
-    resolved_error_id = uuid.uuid4().hex
+    message = safe_text(_format_error_message(msg), source_profile=current_profile(WEB))
+    resolved_error_id = new_error_id()
     resolved_code = code or _default_error_code(status_code)
-    stacktrace = traceback.format_exc()
+    stacktrace = render_current_exception(source_profile=current_profile(WEB))
     logger.error(
         "Upload exception response emitted [error_id=%s code=%s status=%s]: %s\n%s",
         resolved_error_id,
@@ -656,7 +659,7 @@ def upload_exception_factory(
             "status_code": status_code,
         },
     )
-    resolved_details = message if details is None else details
+    resolved_details = message if details is None else safe_structure(details, source_profile=current_profile(WEB))
     return upload_error_factory(
         message,
         status_code=status_code,
@@ -713,13 +716,13 @@ def exception_factory(
         Flask `Response` with the JSON error payload and HTTP 500 status.
     """
     if stacktrace is None:
-        stacktrace = traceback.format_exc()
+        stacktrace = render_current_exception(source_profile=current_profile(WEB))
 
-    message = _format_error_message(msg)
-    stacktrace_text = stacktrace if isinstance(stacktrace, str) else _ensure_text(stacktrace)
+    message = safe_text(_format_error_message(msg), source_profile=current_profile(WEB))
+    stacktrace_text = safe_text(stacktrace, source_profile=current_profile(WEB))
     resolved_error_id = error_id
     if resolved_error_id is None and status_code >= 500:
-        resolved_error_id = uuid.uuid4().hex
+        resolved_error_id = new_error_id()
 
     log_suffix = f' for run {runid}' if runid else ''
     logger.error(
@@ -747,6 +750,7 @@ def exception_factory(
             except OSError as log_error:
                 logger.warning('Error writing run exception log for %s: %s', runid, log_error)
 
+    details = safe_structure(details, source_profile=current_profile(WEB)) if details is not None else None
     error_payload = {'message': message}
     if code:
         error_payload['code'] = code
@@ -964,7 +968,7 @@ def authorize_and_handle_with_exception_factory(
             if isinstance(exc, PreferenceResolutionError):
                 return preference_resolution_error_response(runid)
             # For unexpected errors, return the standard exception payload with details.
-            stacktrace = traceback.format_exc()
+            stacktrace = render_current_exception(source_profile=current_profile(WEB))
             return exception_factory(
                 msg=exc,
                 stacktrace=stacktrace,
@@ -1028,7 +1032,7 @@ def handle_with_exception_factory(
                     str(runid) if runid is not None else None
                 )
             # Anything else becomes our standard error response, optionally tagged with runid.
-            stacktrace = traceback.format_exc()
+            stacktrace = render_current_exception(source_profile=current_profile(WEB))
             return exception_factory(
                 msg=exc,
                 stacktrace=stacktrace,

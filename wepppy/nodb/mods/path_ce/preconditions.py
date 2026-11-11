@@ -16,6 +16,10 @@ HTML report (Phase 3), not the solve.
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
@@ -84,7 +88,10 @@ def _read_artifact(path: Path, relpath: str) -> Tuple[Optional[pd.DataFrame], Op
     try:
         return pd.read_parquet(path), None
     except (OSError, ValueError, KeyError, pa.lib.ArrowException) as exc:
-        return None, f"{relpath} is unreadable ({exc.__class__.__name__}: {exc}) — regenerate it."
+        return None, safe_text(
+            f"{relpath} is unreadable ({exc.__class__.__name__}: {exc}) — regenerate it.",
+            source_profile=current_profile(WORKER),
+        )
 
 
 def validate_preconditions(

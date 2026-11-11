@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from wepppy.query_engine.catalog_refresh import invalidate_catalog_incarnation, catalog_lifecycle_guard
 
 import errno
@@ -1561,7 +1565,7 @@ def prepare_fork_run(
             if format_ttl_failure is not None:
                 message = format_ttl_failure(exc)
             else:
-                message = f"STATUS TTL initialization failed ({exc})"
+                message = safe_text(f"STATUS TTL initialization failed ({exc})", source_profile=current_profile(WORKER))
             publish_status(
                 status_channel,
                 message,

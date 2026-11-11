@@ -26,6 +26,11 @@ issue while keeping the HTTP status at 200.
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging, current_profile
+from wepppy.observability.secret_profiles import REDIS_ONLY
+from wepppy.observability.safe_traceback import safe_text
+install_safe_logging(REDIS_ONLY)
+
 import asyncio
 import json
 import logging
@@ -261,12 +266,12 @@ async def elevationquery_endpoint(request: Request) -> JSONResponse:
     try:
         lat, lng = await _extract_coordinates(request)
     except InputValidationError as exc:
-        return _build_response(elevation=None, lat=None, lng=None, error=str(exc))
+        return _build_response(elevation=None, lat=None, lng=None, error=safe_text(exc, source_profile=current_profile(REDIS_ONLY)))
 
     try:
         active_root = await asyncio.to_thread(_resolve_active_root, runid)
     except RunNotFoundError as exc:
-        return _build_response(elevation=None, lat=lat, lng=lng, error=str(exc))
+        return _build_response(elevation=None, lat=lat, lng=lng, error=safe_text(exc, source_profile=current_profile(REDIS_ONLY)))
     except Exception:
         logger.exception("Unexpected failure resolving run root for %s", runid)
         return _build_response(
@@ -279,7 +284,7 @@ async def elevationquery_endpoint(request: Request) -> JSONResponse:
     try:
         dem_path = await asyncio.to_thread(_locate_dem, active_root)
     except DemNotFoundError as exc:
-        return _build_response(elevation=None, lat=lat, lng=lng, error=str(exc))
+        return _build_response(elevation=None, lat=lat, lng=lng, error=safe_text(exc, source_profile=current_profile(REDIS_ONLY)))
     except Exception as exc:
         logger.exception("Unexpected error locating DEM for %s", runid)
         return _build_response(
@@ -293,9 +298,9 @@ async def elevationquery_endpoint(request: Request) -> JSONResponse:
     try:
         elevation = await asyncio.to_thread(_sample_dem, dem_path, lng, lat)
     except OutsideDemError as exc:
-        return _build_response(elevation=None, lat=lat, lng=lng, error=str(exc))
+        return _build_response(elevation=None, lat=lat, lng=lng, error=safe_text(exc, source_profile=current_profile(REDIS_ONLY)))
     except InvalidDemError as exc:
-        return _build_response(elevation=None, lat=lat, lng=lng, error=str(exc))
+        return _build_response(elevation=None, lat=lat, lng=lng, error=safe_text(exc, source_profile=current_profile(REDIS_ONLY)))
     except Exception:
         logger.exception("Unexpected error sampling elevation for %s using %s", runid, dem_path)
         return _build_response(
@@ -323,10 +328,7 @@ def _guess_request_coordinates(request: Request) -> Tuple[Optional[float], Optio
 
 
 def _format_exception_message(exc: BaseException) -> str:
-    try:
-        detail = str(exc)
-    except Exception:
-        detail = repr(exc)
+    detail = safe_text(exc, source_profile=current_profile(REDIS_ONLY))
 
     if detail and detail != exc.__class__.__name__:
         return f'{exc.__class__.__name__}: {detail}'

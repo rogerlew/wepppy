@@ -18,6 +18,10 @@ Keep endpoints small and focused. Here are some guidelines:
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -272,7 +276,7 @@ def issue_query_engine_mcp_token(runid, config):
             }},
         )
     except JWTConfigurationError as exc:
-        return jsonify({'error': {'message': f'JWT configuration error: {exc}'}}), 500
+        return jsonify({'error': {'message': safe_text(f'JWT configuration error: {exc}', source_profile=current_profile(WEB))}}), 500
     except (RuntimeError, ValueError) as exc:  # pragma: no cover - defensive logging
         logging.error("Failed to issue Query Engine MCP token for %s: %s", runid, exc)
         return jsonify({'error': {'message': 'Failed to generate MCP token.'}}), 500

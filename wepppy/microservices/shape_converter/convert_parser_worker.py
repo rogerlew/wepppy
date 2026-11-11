@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging, current_profile
+from wepppy.observability.secret_profiles import SHAPE
+from wepppy.observability.safe_traceback import safe_text
+install_safe_logging(SHAPE)
+
 import argparse
 import collections.abc as cabc
 import pickle
@@ -92,7 +97,7 @@ def _load_shapefile_payload(
                             f"Feature count exceeded limit {max_features} while reading shapefile."
                         )
     except (fiona_errors.FionaError, OSError, RuntimeError, ValueError, TypeError) as exc:
-        raise ValueError(str(exc)) from exc
+        raise ValueError(safe_text(exc, source_profile=current_profile(SHAPE))) from exc
 
     source_crs_wkt: str | None = source_crs.to_wkt() if source_crs is not None else None
     return {
@@ -138,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     except Exception as exc:  # noqa: BLE001
         # Worker boundary: parent maps this stderr text into canonical API errors.
-        print(str(exc), file=sys.stderr)
+        print(safe_text(exc, source_profile=current_profile(SHAPE)), file=sys.stderr)
         return 1
 
     try:
@@ -146,7 +151,7 @@ def main(argv: list[str] | None = None) -> int:
         with output_path.open("wb") as handle:
             pickle.dump(payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
     except OSError as exc:
-        print(f"Failed to write parser payload: {exc}", file=sys.stderr)
+        print(safe_text(f"Failed to write parser payload: {exc}", source_profile=current_profile(SHAPE)), file=sys.stderr)
         return 3
 
     return 0

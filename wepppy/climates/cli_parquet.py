@@ -4,6 +4,10 @@ Contract: docs/schemas/climate-parquet-lineage-contract.md.
 """
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import errno
 import hashlib
 import json
@@ -183,7 +187,7 @@ class _CliParquetAttempt:
 
     def __exit__(self, exc_type, exc, traceback):
         try:
-            self._record_outcome("complete" if self.committed else "failed", None if exc is None else str(exc))
+            self._record_outcome("complete" if self.committed else "failed", None if exc is None else safe_text(str(exc), source_profile=current_profile(WORKER)))
         finally:
             os.close(self.directory)
             self.directory = None

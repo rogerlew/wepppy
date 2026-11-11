@@ -10,6 +10,9 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging, current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 import csv
 from pathlib import Path
@@ -217,7 +220,8 @@ def _create_process_pool_executor(
 
         if ctx is not None:
             try:
-                return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx)
+                return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx,
+                                           initializer=install_safe_logging, initargs=(current_profile(WORKER),))
             except (OSError, PermissionError) as exc:
                 log.warning(
                     "Spawn start method unavailable for ProcessPoolExecutor (%s); using default context instead.",

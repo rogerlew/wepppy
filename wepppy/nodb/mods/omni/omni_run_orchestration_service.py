@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import os
 import time
 from os.path import join as _join
@@ -180,7 +184,7 @@ class OmniRunOrchestrationService:
                 contrast_name,
                 "failed",
                 job_id=rq_job_id,
-                error=str(exc),
+                error=safe_text(str(exc), source_profile=current_profile(WORKER)),
             )
             raise
         omni._write_contrast_run_status(

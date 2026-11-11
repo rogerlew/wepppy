@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import argparse
 import configparser
 import errno
@@ -166,7 +170,7 @@ def resolve_apply_nodir(run_dir: Path) -> ApplyNoDirResolution:
         return ApplyNoDirResolution(
             value=None,
             source="ron_parse_error",
-            message=f"failed to read config from ron.nodb: {exc}",
+            message=safe_text(f"failed to read config from ron.nodb: {exc}", source_profile=current_profile(WORKER)),
         )
 
     cfg_filename, overrides = _parse_cfg_spec(cfg_spec)
@@ -182,7 +186,7 @@ def resolve_apply_nodir(run_dir: Path) -> ApplyNoDirResolution:
             return ApplyNoDirResolution(
                 value=None,
                 source="cfg_override_error",
-                message=f"invalid nodb:apply_nodir override: {exc}",
+                message=safe_text(f"invalid nodb:apply_nodir override: {exc}", source_profile=current_profile(WORKER)),
             )
 
     defaults_path = Path(resolve_defaults_path(run_dir))
@@ -196,7 +200,7 @@ def resolve_apply_nodir(run_dir: Path) -> ApplyNoDirResolution:
         return ApplyNoDirResolution(
             value=None,
             source="defaults_read_error",
-            message=f"failed reading defaults file {defaults_path}: {exc}",
+            message=safe_text(f"failed reading defaults file {defaults_path}: {exc}", source_profile=current_profile(WORKER)),
         )
 
     try:
@@ -206,7 +210,7 @@ def resolve_apply_nodir(run_dir: Path) -> ApplyNoDirResolution:
         return ApplyNoDirResolution(
             value=None,
             source="cfg_read_error",
-            message=f"failed reading cfg file {cfg_path}: {exc}",
+            message=safe_text(f"failed reading cfg file {cfg_path}: {exc}", source_profile=current_profile(WORKER)),
         )
 
     try:
@@ -224,7 +228,7 @@ def resolve_apply_nodir(run_dir: Path) -> ApplyNoDirResolution:
         return ApplyNoDirResolution(
             value=None,
             source="cfg_value_error",
-            message=f"invalid nodb.apply_nodir value {raw_value!r}: {exc}",
+            message=safe_text(f"invalid nodb.apply_nodir value {raw_value!r}: {exc}", source_profile=current_profile(WORKER)),
         )
 
     return ApplyNoDirResolution(
@@ -470,7 +474,7 @@ def _refresh_query_catalog_entry(run_dir: Path, target_relpath: str) -> str:
         return "catalog_refresh=updated"
     except Exception as exc:
         # Deliberate best-effort boundary: catalog refresh must never abort file migration.
-        return f"catalog_refresh=deferred:{exc}"
+        return safe_text(f"catalog_refresh=deferred:{exc}", source_profile=current_profile(WORKER))
 
 
 def _process_candidates_for_run(
@@ -550,7 +554,7 @@ def _process_candidates_for_run(
                     status="error",
                     source_sha256=None,
                     target_sha256=None,
-                    message=f"failed hashing source file: {exc}",
+                    message=safe_text(f"failed hashing source file: {exc}", source_profile=current_profile(WORKER)),
                     resource_type=candidate.resource_type,
                 )
             )
@@ -577,7 +581,7 @@ def _process_candidates_for_run(
                             status="error",
                             source_sha256=source_hash,
                             target_sha256=None,
-                            message=f"failed hashing target file: {exc}",
+                            message=safe_text(f"failed hashing target file: {exc}", source_profile=current_profile(WORKER)),
                             resource_type=candidate.resource_type,
                         )
                     )
@@ -692,7 +696,7 @@ def _process_candidates_for_run(
                         status="error",
                         source_sha256=source_hash,
                         target_sha256=None,
-                        message=f"move failed: {exc}",
+                        message=safe_text(f"move failed: {exc}", source_profile=current_profile(WORKER)),
                         resource_type=candidate.resource_type,
                     )
                 )
@@ -755,7 +759,7 @@ def _process_candidates_for_run(
                         status="error",
                         source_sha256=source_hash,
                         target_sha256=target_hash,
-                        message=f"failed deleting dedup source: {exc}",
+                        message=safe_text(f"failed deleting dedup source: {exc}", source_profile=current_profile(WORKER)),
                         resource_type=candidate.resource_type,
                     )
                 )
@@ -844,7 +848,7 @@ def _process_run(
                 files_conflict=0,
                 files_error=1,
                 final_status="error",
-                message=f"failed scanning run root resources: {exc}",
+                message=safe_text(f"failed scanning run root resources: {exc}", source_profile=current_profile(WORKER)),
             )
         )
         return RunResult(
@@ -981,7 +985,7 @@ def _process_run(
                     files_conflict=0,
                     files_error=1,
                     final_status="error",
-                    message=f"failed to acquire lock file: {exc}",
+                    message=safe_text(f"failed to acquire lock file: {exc}", source_profile=current_profile(WORKER)),
                 )
             )
             return RunResult(
@@ -1062,7 +1066,7 @@ def _validate_wepp1_approval(path: Path, approval_token: str | None) -> tuple[bo
     try:
         content = path.read_text(encoding="utf-8")
     except OSError as exc:
-        return False, f"failed reading approval file: {exc}"
+        return False, safe_text(f"failed reading approval file: {exc}", source_profile=current_profile(WORKER))
 
     if "wepp1 apply approved" not in content.lower():
         return False, "approval file missing required statement: wepp1 apply approved"
@@ -1204,7 +1208,7 @@ def run_batch_migration(
             "ended_utc": _now_iso_utc(),
             "duration_seconds": round(perf_counter() - started, 3),
             "status": "error",
-            "errors": [f"failed discovering project directories: {exc}"],
+            "errors": [safe_text(f"failed discovering project directories: {exc}", source_profile=current_profile(WORKER))],
             "totals": {
                 "runs_discovered": 0,
                 "runs_processed": 0,
@@ -1361,7 +1365,7 @@ def main(argv: Iterable[str] | None = None) -> int:
             approval_token=args.approval_token,
         )
     except ValueError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        print(safe_text(f"ERROR: {exc}", source_profile=current_profile(WORKER)), file=sys.stderr)
         return 2
 
     try:

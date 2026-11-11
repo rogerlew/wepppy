@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/workdir/wepppy/tests/docker/safe_traceback_probe.py", line 43, in <module>
+    raise RuntimeError('mounted-context ' + canary + ' ' + ' '.join(ring))
+RuntimeError: mounted-context [REDACTED] [REDACTED] [REDACTED]
+
+ValueError: control-context [REDACTED] [REDACTED] [REDACTED]
+
+ValueError: replacement-context [REDACTED]
+
+{"uid": 1000, "gid": 993, "mode": "0444", "normal_source_reads": 0, "replacement_observed": true, "downstream_and_stale_paths_excluded": true, "required_missing_fails_closed": true}
+INFO ordinary successful progress
+ERROR web exception
+Traceback (most recent call last):
+  File "/workdir/wepppy/tests/docker/safe_traceback_probe.py", line 43, in <module>
+    raise RuntimeError('mounted-context ' + canary + ' ' + ' '.join(ring))
+RuntimeError: mounted-context [REDACTED] [REDACTED] [REDACTED]

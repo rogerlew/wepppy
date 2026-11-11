@@ -27,6 +27,10 @@ looks for: {geodata_dir}/{dataset}/{year}/.vrt
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import REDIS_ONLY
+install_safe_logging(REDIS_ONLY)
+
 import fnmatch
 import os
 import shlex

@@ -1,6 +1,10 @@
 """Derived, source-verified Roads parameterization comparisons (not saved intent)."""
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import hashlib
 import json
 import math
@@ -288,7 +292,7 @@ def query_comparisons(wd) -> dict:
     try:
         history = _source(root, HISTORY)
     except ValueError as exc:
-        return {"status": "unavailable", "scope": SCOPE, "reason": str(exc), "runs": [], "diagnostics": []}
+        return {"status": "unavailable", "scope": SCOPE, "reason": safe_text(str(exc), source_profile=current_profile(WORKER)), "runs": [], "diagnostics": []}
     if history.is_dir():
         candidates.extend(path for path in sorted(history.iterdir()) if path.is_dir() and not path.is_symlink())
     runs, diagnostics = [], []
@@ -298,7 +302,7 @@ def query_comparisons(wd) -> dict:
                 continue
             runs.append(_read_snapshot(candidate, root))
         except (OSError, ValueError, TypeError, KeyError, OverflowError, RoadsResultsUnavailable) as exc:
-            diagnostics.append({"snapshot_relpath": str((candidate / SNAPSHOT).relative_to(root)), "reason": str(exc)})
+            diagnostics.append({"snapshot_relpath": str((candidate / SNAPSHOT).relative_to(root)), "reason": safe_text(str(exc), source_profile=current_profile(WORKER))})
     runs.sort(key=lambda run: (run["completed_at"], run["run_id"]), reverse=True)
     for custom in (run for run in runs if not run["is_default"]):
         baseline = next((run for run in runs if run["is_default"] and

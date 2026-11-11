@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -327,7 +331,7 @@ def _load_cosurffrags_surface_proxy_from_soils_parquet(wd: str) -> tuple[float |
         return None, {
             "status": "unavailable",
             "reason": "cosurffrags_query_failed",
-            "error": str(exc),
+            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
         }
 
     surface_proxy_0_1 = float(np.clip(cover_pct / 100.0, 0.0, 1.0))
@@ -360,7 +364,7 @@ def _load_cfvo_surface_proxy_from_raster(
                 "status": "unavailable",
                 "reason": "cfvo_read_failed",
                 "path": raster_path,
-                "error": str(exc),
+                "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
             }
 
         finite = valid_mask & np.isfinite(aligned)

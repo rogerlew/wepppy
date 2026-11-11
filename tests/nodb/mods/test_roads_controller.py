@@ -2093,6 +2093,8 @@ def test_run_roads_wepp_persists_failed_summary_on_watershed_failure(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from tests.observability.canaries import install_canary
+    canary = install_canary(monkeypatch, tmp_path)
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
 
     Path(controller.roads_monotonic_geojson_path).parent.mkdir(parents=True, exist_ok=True)
@@ -2223,7 +2225,7 @@ def test_run_roads_wepp_persists_failed_summary_on_watershed_failure(
         lambda self, *, output_pass_path, **_kwargs: Path(output_pass_path).write_text("combined", encoding="utf-8"),
     )
     monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", lambda *args, **kwargs: None)
-    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir, *, wepp_bin: (_ for _ in ()).throw(Exception("watershed boom")))
+    monkeypatch.setattr(roads_module, "run_watershed", lambda _runs_dir, *, wepp_bin: (_ for _ in ()).throw(Exception("watershed boom " + canary)))
 
     with pytest.raises(Exception, match="watershed boom"):
         controller.run_roads_wepp()
@@ -2233,13 +2235,18 @@ def test_run_roads_wepp_persists_failed_summary_on_watershed_failure(
     last_run = summary["last_run_summary"]
 
     assert status["status"] == "failed"
-    assert status["errors"] == ["watershed boom"]
+    assert status["errors"] == ["watershed boom [REDACTED]"]
     assert last_run is not None
     assert last_run["status"] == "failed"
     assert last_run["failed_stage"] == "watershed_rerun"
     assert last_run["executed_segment_count"] == 1
     assert last_run["targeted_hillslope_wepp_ids"] == [1]
     assert last_run["segment_pass_count"] == 1
+
+    persisted = Path(controller._nodb).read_text()
+    assert canary not in persisted and "watershed boom [REDACTED]" in persisted
+    for artifact in tmp_path.rglob("*.json"):
+        assert canary not in artifact.read_text()
 
 
 @pytest.mark.usefixtures("modeled_accounting_stub")

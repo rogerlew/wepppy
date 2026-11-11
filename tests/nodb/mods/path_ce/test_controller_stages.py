@@ -252,3 +252,17 @@ def test_results_are_detached_copies(controller):
     view = controller.results
     view["treatments"].append("bogus")
     assert "bogus" not in controller.results["treatments"]
+
+
+def test_failure_status_is_sanitized_in_nodb(tmp_path, monkeypatch):
+    from tests.observability.canaries import install_canary
+    canary = install_canary(monkeypatch, tmp_path)
+    controller = PathCostEffective(str(tmp_path), 'disturbed9002-wbt-mofe.cfg')
+    def fail(*args):
+        raise RuntimeError('path-context ' + canary)
+    monkeypatch.setattr(controller, 'validate', fail)
+    with pytest.raises(RuntimeError, match='path-context'):
+        controller.run()
+    persisted = Path(controller._nodb).read_text()
+    assert canary not in persisted and 'path-context [REDACTED]' in persisted
+    assert controller.status == 'failed'

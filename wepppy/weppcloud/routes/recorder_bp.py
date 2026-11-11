@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 from wepppy.weppcloud.routes._common import parse_json_payload, RequestPayloadError
 
 from wepppy.request_payload import RequestPayloadError
@@ -95,9 +99,9 @@ def recorder_promote(runid: str, config: str) -> Response:
             slug=slug,
         )
     except FileNotFoundError as exc:
-        return jsonify({"error": {"message": str(exc)}}), 404
+        return jsonify({"error": {"message": safe_text(exc, source_profile=current_profile(WEB))}}), 404
     except Exception as exc:
         current_app.logger.exception("Failed to promote recorder draft for %s", runid)
-        return jsonify({"error": {"message": str(exc)}}), 500
+        return jsonify({"error": {"message": safe_text(exc, source_profile=current_profile(WEB))}}), 500
 
     return jsonify({"profile": result})

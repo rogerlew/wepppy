@@ -9,6 +9,10 @@ drive agricultural dashboards and treatment comparisons.
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import csv
 import hashlib
 import json
@@ -762,7 +766,7 @@ class AgFields(NoDbBase):
             summary = integrator.run()
         except Exception as exc:  # broad-except: persisted public operation boundary
             failed_phase = integrator.phase if integrator is not None else 'preflight'
-            public_message = str(exc).replace(str(Path(self.wd).resolve()), '<run>')
+            public_message = safe_text(str(exc), source_profile=current_profile(WORKER)).replace(str(Path(self.wd).resolve()), '<run>')
             failure = {
                 'phase': failed_phase,
                 'type': type(exc).__name__,
@@ -841,7 +845,7 @@ class AgFields(NoDbBase):
                 entry['error'] = {
                     'phase': 'clear',
                     'type': type(exc).__name__,
-                    'message': str(exc).replace(
+                    'message': safe_text(str(exc), source_profile=current_profile(WORKER)).replace(
                         str(Path(self.wd).resolve()),
                         '<run>',
                     ),
@@ -1315,7 +1319,7 @@ class AgFields(NoDbBase):
                             first_year_only=False,
                         )
                     except (OSError, UnicodeError, ValueError, AssertionError, IndexError) as exc:
-                        message = str(exc) or exc.__class__.__name__
+                        message = safe_text(str(exc), source_profile=current_profile(WORKER)) or exc.__class__.__name__
                         self._persist_plant_processing_failure(filename, message)
                         raise PlantFileProcessingError(filename, message) from exc
 
@@ -1331,7 +1335,7 @@ class AgFields(NoDbBase):
                         if item['normalizations']:
                             self._rewrite_management_preserving_header_comments(management, path)
                 except (OSError, UnicodeError, ValueError, AssertionError, IndexError) as exc:
-                    staged_errors[path.name] = str(exc) or exc.__class__.__name__
+                    staged_errors[path.name] = safe_text(str(exc), source_profile=current_profile(WORKER)) or exc.__class__.__name__
                 else:
                     staged_valid.add(path.name)
 
@@ -1368,7 +1372,7 @@ class AgFields(NoDbBase):
                     try:
                         read_management(str(path))
                     except (OSError, UnicodeError, ValueError, AssertionError, IndexError) as exc:
-                        all_invalid.append({'filename': path.name, 'error': str(exc) or exc.__class__.__name__})
+                        all_invalid.append({'filename': path.name, 'error': safe_text(str(exc), source_profile=current_profile(WORKER)) or exc.__class__.__name__})
                     else:
                         all_valid.append(path.name)
                 self._valid_plant_files = all_valid
@@ -1507,7 +1511,7 @@ class AgFields(NoDbBase):
                     logger_name=self.logger.name,
                 )
             except (ValueError, FileNotFoundError) as exc:
-                results.append({**base_result, 'status': 'error', 'valid': False, 'message': str(exc)})
+                results.append({**base_result, 'status': 'error', 'valid': False, 'message': safe_text(str(exc), source_profile=current_profile(WORKER))})
                 continue
             results.append(
                 {

@@ -1,4 +1,8 @@
 """Bounded provenance and retained publication for Geneva geometry/alignment."""
+
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
 from dataclasses import dataclass
 import errno
 import json
@@ -210,7 +214,7 @@ class _Attempt:
                 exc = error
         # Diagnostic boundary: do not mask original failures or reverse a commit.
         try:
-            self._status('complete' if self.committed else 'failed', None if exc is None else str(exc))
+            self._status('complete' if self.committed else 'failed', None if exc is None else safe_text(str(exc), source_profile=current_profile(WORKER)))
         except (OSError, ValueError):
             _LOG.exception('Unable to record Geneva derivation status at %s', self.root)
         if validation_error is not None:

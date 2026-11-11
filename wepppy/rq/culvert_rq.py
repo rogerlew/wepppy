@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import json
 import logging
 import os
@@ -505,7 +509,7 @@ def run_culvert_run_rq(
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq.py:413", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         error_payload = {
             "type": "CulvertPointsLoadError",
-            "message": str(exc),
+            "message": safe_text(exc, source_profile=current_profile(WORKER)),
         }
         return _record_validation_failure(
             runner=runner,
@@ -1541,11 +1545,11 @@ def _process_culvert_run(
     except NoOutletFoundError as exc:
         # Gracefully handle sparse network - culvert watershed has no stream intersection
         status = "skipped_no_outlet"
-        error_payload = {"type": "NoOutletFoundError", "message": str(exc)}
+        error_payload = {"type": "NoOutletFoundError", "message": safe_text(exc, source_profile=current_profile(WORKER))}
         logger.warning(f"culvert_run {culvert_batch_uuid}/{run_id}: skipped (no outlet) - {exc}")
     except Exception as exc:
         status = "failed"
-        error_payload = {"type": type(exc).__name__, "message": str(exc)}
+        error_payload = {"type": type(exc).__name__, "message": safe_text(exc, source_profile=current_profile(WORKER))}
         logger.exception(f"culvert_run {culvert_batch_uuid}/{run_id}: failed - {exc}")
     else:
         logger.info(f"culvert_run {culvert_batch_uuid}/{run_id}: completed")

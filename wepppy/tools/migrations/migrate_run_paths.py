@@ -11,6 +11,10 @@ Usage:
     python scripts/migrate_run_paths.py /wc1/runs/md/mdobre-auxiliary-responsiveness
 """
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import os
 import sys
 import json
@@ -67,10 +71,10 @@ def migrate_nodb_file(nodb_path: Path, old_prefix: str, new_prefix: str, dry_run
         with open(nodb_path, 'r') as f:
             data = json.load(f)
     except json.JSONDecodeError as e:
-        print(f"  ❌ Failed to parse JSON in {nodb_path.name}: {e}")
+        print(safe_text(f"  ❌ Failed to parse JSON in {nodb_path.name}: {e}", source_profile=current_profile(WORKER)))
         return False, 0
     except Exception as e:
-        print(f"  ❌ Failed to read {nodb_path.name}: {e}")
+        print(safe_text(f"  ❌ Failed to read {nodb_path.name}: {e}", source_profile=current_profile(WORKER)))
         return False, 0
     
     # Convert to string to count occurrences
@@ -135,7 +139,7 @@ def clear_redis_cache(run_dir: str, dry_run: bool = False) -> int:
     except subprocess.CalledProcessError:
         print(f"  ⚠️  Failed to clear Redis DB 13 cache (redis-cli may not be available)")
     except Exception as e:
-        print(f"  ⚠️  Error clearing Redis DB 13: {e}")
+        print(safe_text(f"  ⚠️  Error clearing Redis DB 13: {e}", source_profile=current_profile(WORKER)))
     
     # Clear locks in DB 0 (distributed locks)
     try:
@@ -160,7 +164,7 @@ def clear_redis_cache(run_dir: str, dry_run: bool = False) -> int:
     except subprocess.CalledProcessError:
         print(f"  ⚠️  Failed to clear Redis DB 0 locks (redis-cli may not be available)")
     except Exception as e:
-        print(f"  ⚠️  Error clearing Redis DB 0: {e}")
+        print(safe_text(f"  ⚠️  Error clearing Redis DB 0: {e}", source_profile=current_profile(WORKER)))
     
     return total_cleared
 

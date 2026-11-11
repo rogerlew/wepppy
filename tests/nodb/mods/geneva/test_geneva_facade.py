@@ -480,3 +480,25 @@ def test_prepare_kernel_failure_sets_failed_state_and_error_payload(
     assert geneva.status_payload()["status"] == "failed"
     errors = geneva.results_payload()["errors"]
     assert errors and errors[0]["code"] == "invalid_input"
+
+
+def test_failed_storm_diagnostic_retained_without_secret(tmp_path, monkeypatch):
+    from tests.observability.canaries import install_canary
+    canary = install_canary(monkeypatch, tmp_path)
+    fake_kernel = _FakeKernelGateway()
+    original = fake_kernel.call_json_api
+    def call(api_name, payload):
+        if api_name == 'geneva_run_batch':
+            raise GenevaKernelError('storm-context ' + canary, code='synthetic_failure')
+        return original(api_name, payload)
+    monkeypatch.setattr(fake_kernel, 'call_json_api', call)
+    monkeypatch.setattr(geneva_module, '_GENEVA_HSG_ASSIGNMENT_SERVICE', _FakeHsgService(_fixture_paths()))
+    monkeypatch.setattr(geneva_module, '_GENEVA_KERNEL_GATEWAY', fake_kernel)
+    geneva = Geneva(str(tmp_path), '0.cfg')
+    geneva.set_enabled(True)
+    geneva.prepare_hrus(force_rebuild=True)
+    geneva.build_frequency_panel(rebuild=True)
+    result = geneva.run_batch({'schema_version': 1, 'runoff_model': {'tc_hours': 1.1}})
+    output = (tmp_path / 'geneva' / 'batch_summary.json').read_text()
+    assert canary not in output and 'storm-context' in output and '[REDACTED]' in output
+    assert canary not in json.dumps(result)

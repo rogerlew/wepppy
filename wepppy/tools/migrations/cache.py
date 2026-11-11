@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from pathlib import Path
 from typing import Tuple
 
@@ -37,7 +41,7 @@ def invalidate_redis_cache(wd: str, *, dry_run: bool = False) -> Tuple[bool, str
     except redis.ConnectionError:
         return True, "Redis not reachable (cache invalidation skipped)"
     except Exception as exc:
-        return True, f"Redis connection failed: {exc} (cache invalidation skipped)"
+        return True, safe_text(f"Redis connection failed: {exc} (cache invalidation skipped)", source_profile=current_profile(WORKER))
 
     # Find all cached .nodb keys for this working directory
     pattern = f"{wd_abs}/*.nodb"

@@ -46,6 +46,13 @@ For maintenance purposes, adjust template markup within the dedicated `templates
 module should remain focused on routing, filesystem queries, and response orchestration.
 """
 
+from wepppy.observability.safe_traceback import render_exception, safe_text, safe_diagnostics
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import BROWSE
+
+from wepppy.observability.safe_logging import install as install_safe_logging
+install_safe_logging(BROWSE)
+
 import asyncio
 import os
 import re
@@ -54,7 +61,6 @@ import json
 import fnmatch
 import logging
 import html
-import traceback
 import sys
 from html import escape as html_escape
 
@@ -851,7 +857,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
 async def browse_http_exception_handler(request: StarletteRequest, exc: HTTPException):
     if exc.status_code >= 500:
         return await download_http_exception_handler(request, exc)
-    detail = exc.detail
+    detail = safe_diagnostics(source_profile=current_profile(BROWSE), detail=exc.detail)["detail"]
     if isinstance(detail, (dict, list)):
         response = JSONResponse(detail, status_code=exc.status_code)
     else:
@@ -875,11 +881,7 @@ async def browse_http_exception_handler(request: StarletteRequest, exc: HTTPExce
 
 
 def _format_exception_message(exc: BaseException) -> str:
-    try:
-        detail = str(exc)
-    except Exception:
-        # Boundary: some exception __str__ implementations can fail; fallback to repr for diagnostics.
-        detail = repr(exc)
+    detail = safe_text(exc, source_profile=current_profile(BROWSE))
 
     if detail and detail != exc.__class__.__name__:
         return f'{exc.__class__.__name__}: {detail}'
@@ -887,6 +889,7 @@ def _format_exception_message(exc: BaseException) -> str:
 
 
 def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
+    stacktrace_text = safe_text(stacktrace_text, source_profile=current_profile(BROWSE))
     if not BROWSE_WRITE_RUN_EXCEPTIONS_LOG:
         return
 
@@ -913,7 +916,7 @@ async def browse_exception_handler(request: StarletteRequest, exc: Exception):
     stacktrace_text: str | None = None
     stacktrace_display: str | None = None
     if BROWSE_DEBUG_ERRORS or BROWSE_WRITE_RUN_EXCEPTIONS_LOG:
-        stacktrace_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+        stacktrace_lines = render_exception(exc, source_profile=current_profile(BROWSE)).splitlines(keepends=True)
         stacktrace_text = ''.join(stacktrace_lines)
         stacktrace_display = stacktrace_text.strip('\n')
 

@@ -1,6 +1,10 @@
 """Bootstrap routes for git-backed input workflows."""
 
 from __future__ import annotations
+
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
 from wepppy.weppcloud.routes._common import parse_request_payload
 
 
@@ -68,7 +72,7 @@ def verify_token():
         ensure_bootstrap_opt_in(context.runid)
     except BootstrapOperationError as exc:
         # Keep Caddy forward_auth contract stable: all denials return 401.
-        return _reject(exc.message, status_code=401)
+        return _reject(safe_text(exc.message, source_profile=current_profile(WEB)), status_code=401)
     except Exception:
         current_app.logger.exception("bootstrap verify-token failed")
         return _reject("bootstrap verification failed")

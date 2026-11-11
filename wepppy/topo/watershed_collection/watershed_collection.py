@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import hashlib
 import json
 import re
@@ -113,7 +117,7 @@ class WatershedFeature(object):
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(geojson_object, f, indent=2)
         except IOError as e:
-            print(f"Error: Could not write to file {filepath}. Reason: {e}")
+            print(safe_text(f"Error: Could not write to file {filepath}. Reason: {e}", source_profile=current_profile(WORKER)))
 
     def is_valid(self) -> bool:
         """Return True when the underlying GeoJSON feature contains required keys."""
@@ -841,7 +845,7 @@ class WatershedCollection(object):
                         "or contain path separators"
                     )
             except Exception as exc:  # noqa: BLE001
-                message = str(exc)
+                message = safe_text(str(exc), source_profile=current_profile(WORKER))
                 errors.append({
                     "index": index,
                     "feature_id": feature.get("id"),

@@ -1,0 +1,243 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: d6796407f
+Merge base: d6796407f29b4dd7b05031ed89efa416b13a5665
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 114
+
+Files:
+  M services/cao/scripts/wojak_bootstrap.py
+  M services/profile_playback/app.py
+  M wepppy/climates/cli_parquet.py
+  M wepppy/climates/prism/bulk_client.py
+  M wepppy/config/rq_redis.py
+  M wepppy/eu/soils/soil_build.py
+  M wepppy/landcover/rap/rangeland_analysis_platform.py
+  M wepppy/locales/conus/openet/openet_client.py
+  M wepppy/microservices/browse/browse.py
+  M wepppy/microservices/browse/errors.py
+  M wepppy/microservices/download/app.py
+  M wepppy/microservices/dss_preview.py
+  M wepppy/microservices/elevationquery.py
+  M wepppy/microservices/rq_engine/__init__.py
+  M wepppy/microservices/rq_engine/export_routes.py
+  M wepppy/microservices/rq_engine/project_config_update_routes.py
+  M wepppy/microservices/rq_engine/responses.py
+  M wepppy/microservices/shape_converter/app.py
+  M wepppy/microservices/shape_converter/convert_parser_worker.py
+  M wepppy/microservices/shape_converter/errors.py
+  M wepppy/microservices/weppcloudr_control_plane.py
+  M wepppy/nodb/base.py
+  M wepppy/nodb/batch_runner.py
+  M wepppy/nodb/core/climate_edde_build.py
+  M wepppy/nodb/core/soils.py
+  M wepppy/nodb/mods/ag_fields/ag_fields.py
+  M wepppy/nodb/mods/ag_fields/concept1_integration.py
+  M wepppy/nodb/mods/ag_fields/hybrid_integration.py
+  M wepppy/nodb/mods/ag_fields/watershed_integration.py
+  M wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py
+  M wepppy/nodb/mods/geneva/collaborators/batch_run_service.py
+  M wepppy/nodb/mods/omni/omni_run_orchestration_service.py
+  M wepppy/nodb/mods/openet/openet_ts.py
+  M wepppy/nodb/mods/path_ce/path_cost_effective.py
+  M wepppy/nodb/mods/path_ce/preconditions.py
+  M wepppy/nodb/mods/path_ce/threshold_sweep.py
+  M wepppy/nodb/mods/postfire_debris_flow/observability.py
+  M wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py
+  M wepppy/nodb/mods/postfire_debris_flow/source_transport.py
+  M wepppy/nodb/mods/roads/_parameterization_comparisons.py
+  M wepppy/nodb/mods/roads/roads.py
+  M wepppy/nodb/mods/rusle/c_integration.py
+  M wepppy/nodb/mods/rusle/k_integration.py
+  M wepppy/nodb/status_messenger.py
+  A wepppy/observability/safe_logging.py
+  A wepppy/observability/safe_traceback.py
+  A wepppy/observability/secret_profiles.py
+  M wepppy/profile_recorder/assembler.py
+  M wepppy/profile_recorder/playback.py
+  M wepppy/profile_recorder/sbs_seed.py
+  M wepppy/query_engine/app/mcp/auth.py
+  M wepppy/query_engine/app/mcp/router.py
+  M wepppy/query_engine/app/server.py
+  M wepppy/rq/ag_fields_rq.py
+  M wepppy/rq/agent_rq.py
+  M wepppy/rq/batch_rq.py
+  M wepppy/rq/cancel_job.py
+  M wepppy/rq/culvert_rq.py
+  M wepppy/rq/exception_logging.py
+  M wepppy/rq/job_info.py
+  M wepppy/rq/migrations_rq.py
+  M wepppy/rq/omni_rq.py
+  M wepppy/rq/path_ce_rq.py
+  M wepppy/rq/project_rq_archive.py
+  M wepppy/rq/project_rq_delete.py
+  M wepppy/rq/project_rq_fork.py
+  M wepppy/rq/rq_worker.py
+  M wepppy/rq/run_sync_rq.py
+  M wepppy/rq/weppcloudr_rq.py
+  M wepppy/soils/ssurgo/ssurgo.py
+  M wepppy/tools/migrations/cache.py
+  M wepppy/tools/migrations/interchange.py
+  M wepppy/tools/migrations/landuse.py
+  M wepppy/tools/migrations/migrate_ashpost_pickles.py
+  M wepppy/tools/migrations/migrate_interchange.py
+  M wepppy/tools/migrations/migrate_landuse_parquet.py
+  M wepppy/tools/migrations/migrate_observed_nodb.py
+  M wepppy/tools/migrations/migrate_run.py
+  M wepppy/tools/migrations/migrate_run_paths.py
+  M wepppy/tools/migrations/migrate_soils_parquet.py
+  M wepppy/tools/migrations/migrate_watersheds_peridot_tables.py
+  M wepppy/tools/migrations/migrate_wbt_geojson_ids.py
+  M wepppy/tools/migrations/nodb.py
+  M wepppy/tools/migrations/nodir_bulk.py
+  M wepppy/tools/migrations/run_migrations.py
+  M wepppy/tools/migrations/runner.py
+  M wepppy/tools/migrations/soils.py
+  M wepppy/tools/migrations/unroll_root_resources_batch.py
+  M wepppy/tools/migrations/watershed.py
+  M wepppy/tools/scheduler.py
+  M wepppy/topo/watershed_collection/watershed_collection.py
+  M wepppy/webservices/dtale/dtale.py
+  M wepppy/webservices/metquery.py
+  M wepppy/webservices/wmesque.py
+  M wepppy/webservices/wmesque2.py
+  M wepppy/wepp/interchange/_roads_lifecycle.py
+  M wepppy/wepp/reports/_cache_freshness.py
+  M wepppy/weppcloud/app.py
+  M wepppy/weppcloud/bootstrap/pre_receive.py
+  M wepppy/weppcloud/combined_viewer_preparation.py
+  M wepppy/weppcloud/routes/_common.py
+  M wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py
+  M wepppy/weppcloud/routes/bootstrap.py
+  M wepppy/weppcloud/routes/command_bar/command_bar.py
+  M wepppy/weppcloud/routes/gl_dashboard.py
+  M wepppy/weppcloud/routes/gl_dashboard_flow_duration.py
+  M wepppy/weppcloud/routes/nodb_api/observed_bp.py
+  M wepppy/weppcloud/routes/nodb_api/omni_bp.py
+  M wepppy/weppcloud/routes/nodb_api/project_bp.py
+  M wepppy/weppcloud/routes/recorder_bp.py
+  M wepppy/weppcloud/routes/run_0/run_0_bp.py
+  M wepppy/weppcloud/routes/usersum/usersum.py
+  M wepppy/weppcloud/utils/feature_access_web.py
+  M wepppy/weppcloud/utils/helpers.py
+
+Per-file delta (unsuppressed broad catches):
+  M services/cao/scripts/wojak_bootstrap.py (base=0 current=0 delta=+0)
+  M services/profile_playback/app.py (base=2 current=0 delta=-2)
+  M wepppy/climates/cli_parquet.py (base=0 current=0 delta=+0)
+  M wepppy/climates/prism/bulk_client.py (base=0 current=0 delta=+0)
+  M wepppy/config/rq_redis.py (base=0 current=0 delta=+0)
+  M wepppy/eu/soils/soil_build.py (base=0 current=0 delta=+0)
+  M wepppy/landcover/rap/rangeland_analysis_platform.py (base=0 current=0 delta=+0)
+  M wepppy/locales/conus/openet/openet_client.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/browse/browse.py (base=5 current=4 delta=-1)
+  M wepppy/microservices/browse/errors.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/download/app.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/dss_preview.py (base=7 current=0 delta=-7)
+  M wepppy/microservices/elevationquery.py (base=5 current=0 delta=-5)
+  M wepppy/microservices/rq_engine/__init__.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/export_routes.py (base=2 current=1 delta=-1)
+  M wepppy/microservices/rq_engine/project_config_update_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/responses.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/shape_converter/app.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/shape_converter/convert_parser_worker.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/shape_converter/errors.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/weppcloudr_control_plane.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/base.py (base=16 current=15 delta=-1)
+  M wepppy/nodb/batch_runner.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/core/climate_edde_build.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/core/soils.py (base=1 current=1 delta=+0)
+  M wepppy/nodb/mods/ag_fields/ag_fields.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/ag_fields/concept1_integration.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/ag_fields/hybrid_integration.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/ag_fields/watershed_integration.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/geneva/collaborators/batch_run_service.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/omni/omni_run_orchestration_service.py (base=1 current=0 delta=-1)
+  M wepppy/nodb/mods/openet/openet_ts.py (base=2 current=0 delta=-2)
+  M wepppy/nodb/mods/path_ce/path_cost_effective.py (base=1 current=1 delta=+0)
+  M wepppy/nodb/mods/path_ce/preconditions.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/path_ce/threshold_sweep.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/observability.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/source_transport.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/roads/_parameterization_comparisons.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/roads/roads.py (base=18 current=18 delta=+0)
+  M wepppy/nodb/mods/rusle/c_integration.py (base=1 current=1 delta=+0)
+  M wepppy/nodb/mods/rusle/k_integration.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/status_messenger.py (base=0 current=0 delta=+0)
+  A wepppy/observability/safe_logging.py (base=0 current=0 delta=+0)
+  A wepppy/observability/safe_traceback.py (base=0 current=0 delta=+0)
+  A wepppy/observability/secret_profiles.py (base=0 current=0 delta=+0)
+  M wepppy/profile_recorder/assembler.py (base=18 current=0 delta=-18)
+  M wepppy/profile_recorder/playback.py (base=12 current=0 delta=-12)
+  M wepppy/profile_recorder/sbs_seed.py (base=0 current=0 delta=+0)
+  M wepppy/query_engine/app/mcp/auth.py (base=1 current=0 delta=-1)
+  M wepppy/query_engine/app/mcp/router.py (base=3 current=3 delta=+0)
+  M wepppy/query_engine/app/server.py (base=5 current=4 delta=-1)
+  M wepppy/rq/ag_fields_rq.py (base=0 current=0 delta=+0)
+  M wepppy/rq/agent_rq.py (base=0 current=0 delta=+0)
+  M wepppy/rq/batch_rq.py (base=11 current=10 delta=-1)
+  M wepppy/rq/cancel_job.py (base=0 current=0 delta=+0)
+  M wepppy/rq/culvert_rq.py (base=9 current=9 delta=+0)
+  M wepppy/rq/exception_logging.py (base=0 current=0 delta=+0)
+  M wepppy/rq/job_info.py (base=2 current=2 delta=+0)
+  M wepppy/rq/migrations_rq.py (base=5 current=0 delta=-5)
+  M wepppy/rq/omni_rq.py (base=10 current=10 delta=+0)
+  M wepppy/rq/path_ce_rq.py (base=3 current=0 delta=-3)
+  M wepppy/rq/project_rq_archive.py (base=5 current=5 delta=+0)
+  M wepppy/rq/project_rq_delete.py (base=11 current=11 delta=+0)
+  M wepppy/rq/project_rq_fork.py (base=1 current=1 delta=+0)
+  M wepppy/rq/rq_worker.py (base=3 current=0 delta=-3)
+  M wepppy/rq/run_sync_rq.py (base=4 current=2 delta=-2)
+  M wepppy/rq/weppcloudr_rq.py (base=0 current=0 delta=+0)
+  M wepppy/soils/ssurgo/ssurgo.py (base=3 current=3 delta=+0)
+  M wepppy/tools/migrations/cache.py (base=2 current=0 delta=-2)
+  M wepppy/tools/migrations/interchange.py (base=6 current=0 delta=-6)
+  M wepppy/tools/migrations/landuse.py (base=3 current=0 delta=-3)
+  M wepppy/tools/migrations/migrate_ashpost_pickles.py (base=1 current=0 delta=-1)
+  M wepppy/tools/migrations/migrate_interchange.py (base=5 current=0 delta=-5)
+  M wepppy/tools/migrations/migrate_landuse_parquet.py (base=3 current=0 delta=-3)
+  M wepppy/tools/migrations/migrate_observed_nodb.py (base=0 current=0 delta=+0)
+  M wepppy/tools/migrations/migrate_run.py (base=0 current=0 delta=+0)
+  M wepppy/tools/migrations/migrate_run_paths.py (base=3 current=0 delta=-3)
+  M wepppy/tools/migrations/migrate_soils_parquet.py (base=3 current=0 delta=-3)
+  M wepppy/tools/migrations/migrate_watersheds_peridot_tables.py (base=2 current=0 delta=-2)
+  M wepppy/tools/migrations/migrate_wbt_geojson_ids.py (base=1 current=0 delta=-1)
+  M wepppy/tools/migrations/nodb.py (base=0 current=0 delta=+0)
+  M wepppy/tools/migrations/nodir_bulk.py (base=0 current=0 delta=+0)
+  M wepppy/tools/migrations/run_migrations.py (base=1 current=0 delta=-1)
+  M wepppy/tools/migrations/runner.py (base=1 current=1 delta=+0)
+  M wepppy/tools/migrations/soils.py (base=5 current=0 delta=-5)
+  M wepppy/tools/migrations/unroll_root_resources_batch.py (base=1 current=1 delta=+0)
+  M wepppy/tools/migrations/watershed.py (base=4 current=4 delta=+0)
+  M wepppy/tools/scheduler.py (base=0 current=0 delta=+0)
+  M wepppy/topo/watershed_collection/watershed_collection.py (base=0 current=0 delta=+0)
+  M wepppy/webservices/dtale/dtale.py (base=6 current=6 delta=+0)
+  M wepppy/webservices/metquery.py (base=5 current=0 delta=-5)
+  M wepppy/webservices/wmesque.py (base=2 current=0 delta=-2)
+  M wepppy/webservices/wmesque2.py (base=0 current=0 delta=+0)
+  M wepppy/wepp/interchange/_roads_lifecycle.py (base=0 current=0 delta=+0)
+  M wepppy/wepp/reports/_cache_freshness.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/app.py (base=1 current=1 delta=+0)
+  M wepppy/weppcloud/bootstrap/pre_receive.py (base=1 current=1 delta=+0)
+  M wepppy/weppcloud/combined_viewer_preparation.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/_common.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/bootstrap.py (base=7 current=0 delta=-7)
+  M wepppy/weppcloud/routes/command_bar/command_bar.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/gl_dashboard.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/gl_dashboard_flow_duration.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/nodb_api/observed_bp.py (base=2 current=0 delta=-2)
+  M wepppy/weppcloud/routes/nodb_api/omni_bp.py (base=5 current=0 delta=-5)
+  M wepppy/weppcloud/routes/nodb_api/project_bp.py (base=1 current=1 delta=+0)
+  M wepppy/weppcloud/routes/recorder_bp.py (base=2 current=2 delta=+0)
+  M wepppy/weppcloud/routes/run_0/run_0_bp.py (base=15 current=15 delta=+0)
+  M wepppy/weppcloud/routes/usersum/usersum.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/utils/feature_access_web.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/utils/helpers.py (base=1 current=1 delta=+0)
+
+Net delta (all changed files): -122
+Result: PASS

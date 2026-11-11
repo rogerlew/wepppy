@@ -696,14 +696,16 @@ def test_manifest_schemas_match_frozen_v1_contract() -> None:
     }
 
 
-def test_preflight_failure_persists_sanitized_terminal_summary(tmp_path: Path) -> None:
+def test_preflight_failure_persists_sanitized_terminal_summary(tmp_path: Path, monkeypatch) -> None:
+    from tests.observability.canaries import install_canary
+    canary = install_canary(monkeypatch, tmp_path)
     controller = _area_controller(tmp_path)
     controller.wepp_instance = SimpleNamespace(wepp_bin=None)
     controller.wepp_bin = None
     integrator = AgFieldsWatershedIntegrator(controller)
     integrator.phase = "preflight"
 
-    integrator._write_failure_summary(RuntimeError(f"invalid input under {tmp_path}"))
+    integrator._write_failure_summary(RuntimeError(f"invalid input under {tmp_path} {canary}"))
 
     summary = json.loads(
         (integrator.manifest_dir / "integration_summary.json").read_text(encoding="utf-8")
@@ -711,3 +713,6 @@ def test_preflight_failure_persists_sanitized_terminal_summary(tmp_path: Path) -
     assert summary["status"] == "failed"
     assert summary["failure"]["phase"] == "preflight"
     assert str(tmp_path) not in summary["failure"]["message"]
+
+    assert canary not in json.dumps(summary)
+    assert "[REDACTED]" in summary["failure"]["message"]

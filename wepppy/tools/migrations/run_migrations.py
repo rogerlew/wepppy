@@ -27,6 +27,10 @@ Examples:
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import argparse
 import os
 import sys
@@ -91,7 +95,7 @@ def create_archive(wd: str, verbose: bool = True) -> Optional[str]:
         return str(archive_path)
     except Exception as e:
         if verbose:
-            print(f"❌ Archive creation failed: {e}")
+            print(safe_text(f"❌ Archive creation failed: {e}", source_profile=current_profile(WORKER)))
         if archive_path_tmp.exists():
             archive_path_tmp.unlink()
         return None

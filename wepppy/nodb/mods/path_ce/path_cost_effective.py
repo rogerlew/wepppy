@@ -27,6 +27,10 @@ WGS geojson exports are missing).
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from wepppy.nodb.single_input_policy import require_feature_allowed
 import copy
 import hashlib
@@ -608,10 +612,10 @@ class PathCostEffective(NoDbBase):
                     report.channels_geojson,
                 )
         except (PathCEPreconditionError, PathCESolverError, PathCEReportError, ValueError) as exc:
-            self.set_status("failed", message=str(exc))
+            self.set_status("failed", message=safe_text(str(exc), source_profile=current_profile(WORKER)))
             raise
         except Exception as exc:
-            self.set_status("failed", message=f"PATH-CE run failed: {exc}")
+            self.set_status("failed", message=safe_text(f"PATH-CE run failed: {exc}", source_profile=current_profile(WORKER)))
             raise
 
         payload = {

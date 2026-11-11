@@ -19,6 +19,10 @@ probe_socket_timeout="${RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS:-5}"
 /opt/venv/bin/python - "$wait_timeout" "$wait_interval" "$probe_connect_timeout" "$probe_socket_timeout" <<'PYPROBE'
 import sys
 import time
+from wepppy.observability.safe_logging import install
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.secret_profiles import REDIS_ONLY
+install(REDIS_ONLY)
 import redis
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
@@ -41,14 +45,14 @@ while time.monotonic() < deadline:
     except (redis.exceptions.RedisError, OSError, ValueError) as exc:
         last_error = exc
         print(
-            f"Waiting for Redis readiness (attempt {attempt}): {exc}",
+            safe_text(f"Waiting for Redis readiness (attempt {attempt}): {exc}", source_profile=REDIS_ONLY),
             file=sys.stderr,
         )
         time.sleep(poll_interval_seconds)
 else:
     print(
         "Timed out waiting for Redis readiness "
-        f"after {timeout_seconds:.1f}s: {last_error}",
+        f"after {timeout_seconds:.1f}s: " + safe_text(last_error, source_profile=REDIS_ONLY),
         file=sys.stderr,
     )
     raise SystemExit(1)

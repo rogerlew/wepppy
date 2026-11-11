@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text, safe_structure
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import inspect
 import json
 import logging
@@ -68,6 +72,7 @@ def _publish_result(channel: str, job_id: str, result: Dict[str, Any]) -> None:
 
 
 def _publish_failure(channel: str, job_id: str, payload: Dict[str, Any]) -> None:
+    payload = safe_structure(payload, source_profile=current_profile(WORKER))
     StatusMessenger.publish(
         channel,
         f"rq:{job_id} EXCEPTION_JSON {json.dumps(payload, sort_keys=True, separators=(',', ':'))}",
@@ -139,7 +144,7 @@ def build_ag_fields_subfields_rq(
         return result
     except Exception as exc:  # broad-except: RQ task boundary preserves terminal status contract
         logger.exception("AgFields build-subfields worker failed", extra={"runid": runid, "job_id": job_id})
-        _publish_failure(status_channel, job_id, {"message": str(exc) or exc.__class__.__name__})
+        _publish_failure(status_channel, job_id, {"message": safe_text(exc, source_profile=current_profile(WORKER)) or exc.__class__.__name__})
         _publish_exception(status_channel, job_id, func_name, runid)
         raise
 
@@ -172,7 +177,7 @@ def process_ag_fields_plant_db_rq(runid: str, plant_db_zip_fn: str) -> Dict[str,
         )
         return result
     except PlantFileProcessingError as exc:
-        payload = {"filename": exc.filename, "message": str(exc)}
+        payload = {"filename": exc.filename, "message": safe_text(exc, source_profile=current_profile(WORKER))}
         logger.exception(
             "AgFields plant-db worker rejected an archive member",
             extra={"runid": runid, "job_id": job_id, "plant_filename": exc.filename},
@@ -182,7 +187,7 @@ def process_ag_fields_plant_db_rq(runid: str, plant_db_zip_fn: str) -> Dict[str,
         raise
     except Exception as exc:  # broad-except: RQ task boundary preserves terminal status contract
         logger.exception("AgFields plant-db worker failed", extra={"runid": runid, "job_id": job_id})
-        _publish_failure(status_channel, job_id, {"message": str(exc) or exc.__class__.__name__})
+        _publish_failure(status_channel, job_id, {"message": safe_text(exc, source_profile=current_profile(WORKER)) or exc.__class__.__name__})
         _publish_exception(status_channel, job_id, func_name, runid)
         raise
     finally:
@@ -262,7 +267,7 @@ def run_ag_fields_wepp_rq(
         payload = {
             "field_id": exc.field_id,
             "sub_field_id": exc.sub_field_id,
-            "message": str(exc),
+            "message": safe_text(exc, source_profile=current_profile(WORKER)),
         }
         logger.exception(
             "AgFields WEPP worker failed",
@@ -271,7 +276,7 @@ def run_ag_fields_wepp_rq(
                 "job_id": job_id,
                 "field_id": exc.field_id,
                 "sub_field_id": exc.sub_field_id,
-                "error_message": str(exc),
+                "error_message": safe_text(exc, source_profile=current_profile(WORKER)),
             },
         )
         _publish_failure(status_channel, job_id, payload)
@@ -279,7 +284,7 @@ def run_ag_fields_wepp_rq(
         raise
     except Exception as exc:  # broad-except: RQ task boundary preserves terminal status contract
         logger.exception("AgFields WEPP worker failed", extra={"runid": runid, "job_id": job_id})
-        _publish_failure(status_channel, job_id, {"message": str(exc) or exc.__class__.__name__})
+        _publish_failure(status_channel, job_id, {"message": safe_text(exc, source_profile=current_profile(WORKER)) or exc.__class__.__name__})
         _publish_exception(status_channel, job_id, func_name, runid)
         raise
 
@@ -346,7 +351,7 @@ def run_ag_fields_watershed_rq(
             status_channel,
             job_id,
             {
-                "message": str(exc) or exc.__class__.__name__,
+                "message": safe_text(exc, source_profile=current_profile(WORKER)) or exc.__class__.__name__,
                 "scheme": parsed_scheme.value,
             },
         )
@@ -400,7 +405,7 @@ def finalize_ag_fields_watershed_suite_rq(
             "AgFields watershed suite finalizer failed",
             extra={"runid": runid, "job_id": job_id},
         )
-        _publish_failure(status_channel, job_id, {"message": str(exc) or exc.__class__.__name__})
+        _publish_failure(status_channel, job_id, {"message": safe_text(exc, source_profile=current_profile(WORKER)) or exc.__class__.__name__})
         _publish_exception(status_channel, job_id, func_name, runid)
         raise
 
@@ -549,7 +554,7 @@ def run_ag_fields_watershed_suite_rq(
         _publish_failure(
             status_channel,
             parent_job_id,
-            {"message": str(exc) or exc.__class__.__name__},
+            {"message": safe_text(exc, source_profile=current_profile(WORKER)) or exc.__class__.__name__},
         )
         _publish_exception(status_channel, parent_job_id, func_name, runid)
         raise

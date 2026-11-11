@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_diagnostics
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import QUERY
+
 from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, require_root, discovery_headers
 
 from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
@@ -96,9 +100,12 @@ def _error_response(status_code: int, code: str, detail: str, error_meta: Mappin
     Returns:
         JSONResponse following the JSON:API error shape.
     """
+    has_error_meta = bool(error_meta)
+    fields = safe_diagnostics(source_profile=current_profile(QUERY), detail=detail, error_meta=dict(error_meta) if error_meta else None)
+    detail, error_meta = fields["detail"], fields["error_meta"]
     error_entry = {"code": code, "detail": detail}
-    if error_meta:
-        error_entry["meta"] = dict(error_meta)
+    if has_error_meta:
+        error_entry["meta"] = error_meta
     return JSONResponse({"errors": [error_entry], "meta": _with_trace_id({})}, status_code=status_code)
 
 

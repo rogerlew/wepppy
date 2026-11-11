@@ -40,11 +40,11 @@ focused sink/canary checks and the exact full Python and frontend gates.
 - [x] (2026-11-11) M0 draft canonical contract, source search and sink inventory.
 - [x] (2026-11-11 21:24 UTC) M0 independent correctness/security PASS; all
       source ownership findings resolved.
-- [ ] M0: ratify safe traceback/source/sink contract and checkpoint.
-- [ ] M1: implement renderer/snapshot and focused unit/performance tests.
-- [ ] M2: integrate API/error factory and logging formatter sinks.
-- [ ] M3: integrate run-file, RQ persistence and publication sinks.
-- [ ] M4: close focused validation and independent reviews.
+- [x] M0: ratified checkpoint `d6796407f29b4dd7b05031ed89efa416b13a5665`.
+- [x] M1: implemented bounded renderer/snapshots; focused tests and benchmark pass.
+- [x] M2: integrated API/error factories, process hooks and logging sinks.
+- [x] M3: integrated run-file, Redis persistence/publications and audited artifact peers.
+- [x] M4: focused acceptance and independent correctness/security/QA PASS.
 - [ ] M5: pass full pytest, npm lint and full npm tests; close SEC-05.
 
 ## Surprises & Discoveries
@@ -140,7 +140,10 @@ focused sink/canary checks and the exact full Python and frontend gates.
 Redis prerequisite verified. M0 canonical contract and expanded inventories are
 drafted; independent reviewers found transitive Flask secret consumption, NoDb
 queue/status formatter bypasses and additional exception-text persistence.
-Implementation and all validation gates remain pending.
+Implementation is present; 40 focused canary tests pass, including actual RQ
+Redis records, pubsub, multiprocessing/spawn, and four model status-file writers.
+Synthetic read-only container mounts passed. Expanded adapters and source
+profiles await final independent M4 review; full gates remain pending.
 
 ## Context and Orientation
 
@@ -376,3 +379,28 @@ key-ring/WEPPcloudR/Kubernetes token coverage, container stdout/stderr and a
 synthetic production-equivalent mount gate. F5 does not decrypt SOPS, query
 Kubernetes or authorize a live rollout. No implementation or deployment
 occurred.
+
+## Implementation execution update
+
+The renderer, profiles and hooks are implemented after the standalone contract
+checkpoint. A 24-file, 8194-character benchmark measured median 3.623 ms and
+maximum 3.957 ms per render; 10,000 ordinary log records performed zero source
+reads. Synthetic Docker acceptance used UID 1000/GID 993, read-only mode 0444
+mounts, no network, and same-process file replacement.
+
+Review-driven repairs include credential mapping values, database URL parsing,
+Redis alias precedence, cached/queued log provenance, interpreter output fallback,
+multiprocessing targets, trusted error IDs, bounded structural scanners, and
+status/manifest/CSV diagnostics emitted as ordinary strings. The extended sink
+audit records the finite producer matrix and exclusions. Production playback
+and Wojak bootstrap are included after caller verification; Discord's implicit
+package token is included with its existing optional-absence semantics.
+
+Compatibility/regression plan for artifact diagnostics: retain all field names,
+statuses, types, scientific values, callback exceptions and successful writes;
+only exception-derived diagnostic strings are replaced. Read generated status
+JSON/Redis/publication outputs directly with synthetic canaries, then run affected
+compatibility tests and the exact full gates. No run data is migrated.
+
+Current stage: M5, exact full regression gates on the reviewed candidate.
+No full-suite pass, SEC-05 closure or deployment is claimed.

@@ -46,6 +46,10 @@ python "${PROJECT_ROOT}/docker/wepppyo3-interchange-preflight.py"
 
 echo ">>> Validating whitebox_tools import..."
 python - <<'PY'
+from wepppy.observability.safe_logging import install
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.secret_profiles import SHAPE
+install(SHAPE)
 import os
 
 mount_wbt = "/workdir/weppcloud-wbt/WBT"
@@ -57,7 +61,7 @@ try:
     import whitebox_tools  # type: ignore
 except Exception as exc:
     print(">>> ERROR: unable to import whitebox_tools.")
-    print(f"    exception: {type(exc).__name__}: {exc}")
+    print(safe_text(f"    exception: {type(exc).__name__}: {exc}", source_profile=SHAPE))
     print(f"    mount WBT dir exists: {os.path.isdir(mount_wbt)} ({mount_wbt})")
     print(f"    mount module exists: {os.path.isfile(mount_module)} ({mount_module})")
     print(f"    fallback WBT dir exists: {os.path.isdir(fallback_wbt)} ({fallback_wbt})")

@@ -111,9 +111,11 @@ def test_all_thresholds_includes_anchor_values(austere_frame):
     assert set(results_df["sdyd_threshold"]) == {0, 1}
 
 
-def test_all_thresholds_records_solver_errors(austere_frame, monkeypatch):
+def test_all_thresholds_records_solver_errors(austere_frame, monkeypatch, tmp_path):
+    from tests.observability.canaries import install_canary
+    canary = install_canary(monkeypatch, tmp_path)
     def _solver_error(**_kwargs):
-        raise threshold_sweep_module.PulpSolverError("CBC unavailable")
+        raise threshold_sweep_module.PulpSolverError("CBC unavailable " + canary)
 
     monkeypatch.setattr(threshold_sweep_module, "ce_select_sites_flexible", _solver_error)
 
@@ -131,3 +133,8 @@ def test_all_thresholds_records_solver_errors(austere_frame, monkeypatch):
 
     assert results_df.loc[0, "model_primary_status"] is None
     assert "PulpSolverError" in results_df.loc[0, "error"]
+
+    output = tmp_path / "sweep.csv"
+    results_df.to_csv(output, index=False)
+    assert canary not in output.read_text()
+    assert "[REDACTED]" in output.read_text()

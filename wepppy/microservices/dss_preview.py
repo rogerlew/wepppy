@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -112,7 +116,7 @@ def build_preview(path: str) -> DssPreview:
             try:
                 info = runtime.dss_info(fid, pathname)
             except Exception as exc:  # pragma: no cover - defensive
-                notes.append(f"Metadata unavailable ({exc})")
+                notes.append(safe_text(f"Metadata unavailable ({exc})", source_profile=current_profile(WEB)))
                 row = _row_from_parts(
                     index=index,
                     pathname=pathname,

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import shutil
 from pathlib import Path
 from typing import Tuple
@@ -78,7 +82,7 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
             generate_interchange_documentation,
         )
     except ImportError as exc:
-        return False, f"Failed to import wepppy modules: {exc}"
+        return False, safe_text(f"Failed to import wepppy modules: {exc}", source_profile=current_profile(WORKER))
 
     # Load NoDb instances
     try:
@@ -90,7 +94,7 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
         delete_after_interchange = wepp.delete_after_interchange
         pass_family = _normalize_pass_family(getattr(wepp, "pass_family", PASS_FAMILY_LEGACY_ASCII))
     except Exception as exc:
-        return False, f"Failed to load run configuration: {exc}"
+        return False, safe_text(f"Failed to load run configuration: {exc}", source_profile=current_profile(WORKER))
 
     # Check for watershed outputs
     # Single storm runs don't have soil_pw0.txt or chnwb.txt.
@@ -127,7 +131,7 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
         )
         generated.append("hillslope")
     except Exception as exc:
-        return False, f"Hillslope interchange failed: {exc}"
+        return False, safe_text(f"Hillslope interchange failed: {exc}", source_profile=current_profile(WORKER))
 
     # Run watershed interchange if outputs exist
     if has_watershed:
@@ -143,7 +147,7 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
             )
             generated.append("watershed")
         except Exception as exc:
-            return False, f"Watershed interchange failed: {exc}"
+            return False, safe_text(f"Watershed interchange failed: {exc}", source_profile=current_profile(WORKER))
 
     # Generate totalwatsed3
     if not is_single_storm:
@@ -151,14 +155,14 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
             run_totalwatsed3(interchange_dir, baseflow_opts=baseflow_opts)
             generated.append("totalwatsed3")
         except Exception as exc:
-            return False, f"totalwatsed3 interchange failed: {exc}"
+            return False, safe_text(f"totalwatsed3 interchange failed: {exc}", source_profile=current_profile(WORKER))
 
     # Generate documentation
     try:
         generate_interchange_documentation(interchange_dir)
         generated.append("docs")
     except Exception as exc:
-        return False, f"Interchange documentation failed: {exc}"
+        return False, safe_text(f"Interchange documentation failed: {exc}", source_profile=current_profile(WORKER))
 
     return True, f"Generated interchange: {', '.join(generated)}"
 
@@ -202,4 +206,4 @@ def refresh_query_catalog(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
         return True, f"Refreshed query catalog ({len(parquet_files)} interchange files)"
     except Exception as exc:
         # Non-fatal - catalog will be refreshed on first query
-        return True, f"Catalog refresh deferred: {exc}"
+        return True, safe_text(f"Catalog refresh deferred: {exc}", source_profile=current_profile(WORKER))

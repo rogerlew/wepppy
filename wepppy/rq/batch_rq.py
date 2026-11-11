@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
 
 """
@@ -89,7 +93,7 @@ def _collect_run_task_status(run_wd: Path) -> tuple[dict[str, Any], list[str]]:
     except FileNotFoundError:
         return {}, []
     except (OSError, TypeError, ValueError, redis.exceptions.RedisError) as exc:
-        return {}, [f"task_status_unavailable: {type(exc).__name__}: {exc}"]
+        return {}, [safe_text(f"task_status_unavailable: {type(exc).__name__}: {exc}", source_profile=current_profile(WORKER))]
 
     task_status: dict[str, Any] = {}
     warnings: list[str] = []
@@ -98,8 +102,8 @@ def _collect_run_task_status(run_wd: Path) -> tuple[dict[str, Any], list[str]]:
             task_status[task.value] = prep[task]
         except (TypeError, ValueError, redis.exceptions.RedisError) as exc:
             task_status[task.value] = None
-            task_status[f"{task.value}_error"] = f"{type(exc).__name__}: {exc}"
-            warnings.append(f"{task.value}: {type(exc).__name__}: {exc}")
+            task_status[f"{task.value}_error"] = safe_text(f"{type(exc).__name__}: {exc}", source_profile=current_profile(WORKER))
+            warnings.append(f"{task.value}: {task_status[f'{task.value}_error']}")
     return task_status, warnings
 
 
@@ -696,7 +700,7 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
             "selection": selection_summary,
         }
 
-    except Exception:
+    except Exception:  # broad-except: task boundary reports status and re-raises the original failure
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/batch_rq.py:364", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job_id} EXCEPTION {func_name}({batch_name})')
@@ -929,7 +933,7 @@ def run_batch_watershed_rq(
         elapsed = time.time() - start_ts
         error_payload = {
             "type": type(exc).__name__,
-            "message": str(exc),
+            "message": safe_text(exc, source_profile=current_profile(WORKER)),
         }
 
         try:
@@ -1009,7 +1013,7 @@ def _final_batch_complete_rq(batch_name: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER batch END_BROADCAST')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni END_BROADCAST')
 
-    except Exception:
+    except Exception:  # broad-except: task boundary reports status and re-raises the original failure
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/batch_rq.py:512", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({batch_name})')

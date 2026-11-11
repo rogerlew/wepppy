@@ -3,6 +3,11 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.secret_profiles import SHAPE
+install(SHAPE)
+
 import hashlib
 import inspect
 import os
@@ -36,7 +41,7 @@ def validate_wepppyo3_interchange() -> tuple[Path, str]:
             ">>> ERROR: unable to import the required WEPPpyo3 interchange release.",
             file=sys.stderr,
         )
-        print(f"    exception: {type(exc).__name__}: {exc}", file=sys.stderr)
+        print(safe_text(f"    exception: {type(exc).__name__}: {exc}", source_profile=SHAPE), file=sys.stderr)
         print(f"    required release root: {required_root}", file=sys.stderr)
         raise
 

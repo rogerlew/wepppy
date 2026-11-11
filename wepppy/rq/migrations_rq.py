@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import inspect
 import logging
 from datetime import datetime, timezone
@@ -112,7 +116,7 @@ def migrations_rq(
                 _run_archive_inline(wd, runid, job_id, channel, sync_channel, file_logger)
                 publish_and_log("ARCHIVE_COMPLETE", "Backup archive created")
             except Exception as e:
-                publish_and_log("ARCHIVE_FAILED", str(e))
+                publish_and_log("ARCHIVE_FAILED", safe_text(e, source_profile=current_profile(WORKER)))
                 file_logger.error(f"Archive failed: {e}", exc_info=True)
                 raise
         
@@ -138,7 +142,7 @@ def migrations_rq(
                 file_logger.info("Updated NoDb version marker to current")
             except Exception as version_err:
                 result.success = False
-                result.errors["version"] = str(version_err)
+                result.errors["version"] = safe_text(version_err, source_profile=current_profile(WORKER))
                 file_logger.error(f"Failed to update NoDb version: {version_err}", exc_info=True)
 
         if result.success:
@@ -182,7 +186,7 @@ def migrations_rq(
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/migrations_rq.py:177", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 pass
-        publish_and_log("EXCEPTION", str(e))
+        publish_and_log("EXCEPTION", safe_text(e, source_profile=current_profile(WORKER)))
         file_logger.error(f"Migration exception: {e}", exc_info=True)
         raise
 

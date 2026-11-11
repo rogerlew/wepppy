@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import WOJAK
+from wepppy.observability.safe_traceback import safe_text
+install_safe_logging(WOJAK)
+
 import base64
 import binascii
 import json
@@ -270,5 +275,5 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except Exception as exc:  # noqa: BLE001
-        print(f"[ERROR] Wojak bootstrap failed: {exc}", file=sys.stderr)
+        print(safe_text(f"[ERROR] Wojak bootstrap failed: {exc}", source_profile=WOJAK), file=sys.stderr)
         sys.exit(1)

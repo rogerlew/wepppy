@@ -130,7 +130,13 @@ def test_apply_rejects_stale_preview_without_enqueue(client) -> None:
     assert FakeQueue.calls == []
 
 
-def test_apply_enqueues_once_and_reports_active_conflict(client) -> None:
+@pytest.mark.parametrize('unavailable_diagnostic_source', [False, True])
+def test_apply_enqueues_once_and_reports_active_conflict(client, monkeypatch, unavailable_diagnostic_source) -> None:
+    if unavailable_diagnostic_source:
+        from wepppy.observability import safe_logging
+        from wepppy.observability.safe_traceback import SecretSourceProfile, SecretSourceSpec
+        monkeypatch.setattr(safe_logging, '_PROFILE', SecretSourceProfile('unavailable', (
+            SecretSourceSpec(None, required=True, path='/f5-nonexistent-secret'),)))
     http, _claims, preview, _redis = client
     body = {"preview_id": preview.preview_id, "trigger": {"section": "new", "option": "option"}}
     accepted = http.post("/api/runs/run-1/config/project-config/update-apply", json=body)

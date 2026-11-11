@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from collections.abc import Mapping, Sequence
 from datetime import date
 import json
@@ -178,7 +182,7 @@ def fetch_monthly_multipolygon_timeseries(
                 coordinates, start_date, end_date, variable
             )
         except (requests.exceptions.RequestException, ValueError) as exc:  # pragma: no cover - API/network errors
-            print(f"Error fetching {feature_id}: {exc}")
+            print(safe_text(f"Error fetching {feature_id}: {exc}", source_profile=current_profile(WORKER)))
             continue
 
         results[feature_id] = result

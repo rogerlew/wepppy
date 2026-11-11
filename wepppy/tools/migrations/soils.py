@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import json
 from pathlib import Path
 from typing import Any, Tuple
@@ -19,7 +23,7 @@ def _soils_nodb_has_summaries(soils_nodb: Path) -> Tuple[bool, str | None]:
     try:
         data = json.loads(soils_nodb.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        return False, f"Failed to read soils.nodb: {exc}"
+        return False, safe_text(f"Failed to read soils.nodb: {exc}", source_profile=current_profile(WORKER))
 
     state = data.get("py/state", data)
     if not isinstance(state, dict):
@@ -75,13 +79,13 @@ def migrate_soils_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
         try:
             from wepppy.nodb.core import Soils
         except ImportError as exc:
-            return False, f"Soils migration unavailable: {exc}"
+            return False, safe_text(f"Soils migration unavailable: {exc}", source_profile=current_profile(WORKER))
 
         try:
             soils = Soils.getInstance(str(run_path))
             soils.dump_soils_parquet()
         except Exception as exc:
-            return False, f"Failed to generate soils parquet: {exc}"
+            return False, safe_text(f"Failed to generate soils parquet: {exc}", source_profile=current_profile(WORKER))
 
         soils_parquet = pick_existing_parquet_path(run_path, "soils/soils.parquet")
         if soils_parquet is not None:
@@ -100,7 +104,7 @@ def migrate_soils_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
         schema = meta.schema.to_arrow_schema()
         field_names = [f.name for f in schema]
     except Exception as exc:
-        return False, f"Failed to read parquet metadata: {exc}"
+        return False, safe_text(f"Failed to read parquet metadata: {exc}", source_profile=current_profile(WORKER))
 
     # Check if migration needed (has uppercase columns)
     # Note: wepp_id is optional - not all soils files have it
@@ -145,7 +149,7 @@ def migrate_soils_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
         update_catalog_entry(run_path, "soils/soils.parquet")
         return True, "Normalized soils parquet schema"
     except Exception as exc:
-        return False, f"Failed to normalize soils parquet: {exc}"
+        return False, safe_text(f"Failed to normalize soils parquet: {exc}", source_profile=current_profile(WORKER))
 
 
 def migrate_soils_nodb_meta(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
@@ -222,7 +226,7 @@ def migrate_soils_nodb_meta(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
 
         return True, f"Cleared _meta_fn from {cleared_count} soil summaries"
     except Exception as exc:
-        return False, f"Failed to migrate soils.nodb meta: {exc}"
+        return False, safe_text(f"Failed to migrate soils.nodb meta: {exc}", source_profile=current_profile(WORKER))
 
 
 def migrate_soils_dir_paths(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
@@ -316,4 +320,4 @@ def migrate_soils_dir_paths(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
 
         return True, f"Fixed soils_dir in {fixed_count} soil summaries"
     except Exception as exc:
-        return False, f"Failed to migrate soils_dir paths: {exc}"
+        return False, safe_text(f"Failed to migrate soils_dir paths: {exc}", source_profile=current_profile(WORKER))

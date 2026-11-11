@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 import os
 import re
 from functools import lru_cache
@@ -913,7 +917,7 @@ def _search_documents(
         except UsersumSearchUnavailableError as exc:
             if _coerce_bool(current_app.config.get("USERSUM_SEARCH_STRICT_POSTGRES")):
                 raise
-            warning = f"PostgreSQL search unavailable, using in-memory fallback: {exc}"
+            warning = safe_text(f"PostgreSQL search unavailable, using in-memory fallback: {exc}", source_profile=current_profile(WEB))
         else:
             warning = None
     else:
@@ -1104,9 +1108,9 @@ def usersum_api_search():
         limit = _parse_int_query_arg("limit", default=_DEFAULT_SEARCH_LIMIT, min_value=1, max_value=_MAX_SEARCH_LIMIT)
         offset = _parse_int_query_arg("offset", default=0, min_value=0)
     except ValueError as exc:
-        return jsonify({"error": {"message": str(exc)}}), 400
+        return jsonify({"error": {"message": safe_text(exc, source_profile=current_profile(WEB))}}), 400
     except PermissionError as exc:
-        return jsonify({"error": {"message": str(exc)}}), 403
+        return jsonify({"error": {"message": safe_text(exc, source_profile=current_profile(WEB))}}), 403
 
     try:
         results, total, warning = _search_documents(
@@ -1118,7 +1122,7 @@ def usersum_api_search():
             caller_max_role=caller_max_role,
         )
     except UsersumSearchUnavailableError as exc:
-        return jsonify({"error": {"message": str(exc)}}), 503
+        return jsonify({"error": {"message": safe_text(exc, source_profile=current_profile(WEB))}}), 503
 
     payload = {
         "results": [
@@ -1160,7 +1164,7 @@ def usersum_search():
         limit = _parse_int_query_arg("limit", default=_DEFAULT_SEARCH_LIMIT, min_value=1, max_value=_MAX_SEARCH_LIMIT)
         offset = _parse_int_query_arg("offset", default=0, min_value=0)
     except (ValueError, PermissionError) as exc:
-        error_message = str(exc)
+        error_message = safe_text(exc, source_profile=current_profile(WEB))
 
     results: List[SearchResult] = []
     total = 0
@@ -1175,7 +1179,7 @@ def usersum_search():
                 caller_max_role=caller_max_role,
             )
         except UsersumSearchUnavailableError as exc:
-            error_message = str(exc)
+            error_message = safe_text(exc, source_profile=current_profile(WEB))
 
     category_options = sorted({doc["category"] for doc in _catalog().visible_docs(caller_max_role)})
     return _render_with_usersum_shell(

@@ -411,8 +411,11 @@ def test_intelligent_fallback_selects_and_materializes_only_added_local_donor(
     assert substitutions["101"]["fallback_reason"] == "donor_materialization_failed"
     assert preparation["status"] == "prepared"
 
+    from tests.observability.canaries import install_canary
+    canary = install_canary(monkeypatch, tmp_path)
+
     def _support_unavailable(*_args):
-        raise ValueError("injected native support read failure")
+        raise ValueError("injected native support read failure " + canary)
 
     monkeypatch.setattr(fallback, "categorical_candidate_support_wgs84", _support_unavailable)
     final_domsoils, substitutions, _final_soils, preparation = soils._select_ssurgo_intelligent_fallbacks(
@@ -427,6 +430,7 @@ def test_intelligent_fallback_selects_and_materializes_only_added_local_donor(
     )
     assert final_domsoils == {"101": "10"}
     assert substitutions["101"]["fallback_reason"] == "candidate_support_unavailable"
+    assert canary not in repr(substitutions)
     assert preparation["status"] == "prepared"
 
     class _CandidateBuildUnavailable:
@@ -435,7 +439,7 @@ def test_intelligent_fallback_selects_and_materializes_only_added_local_donor(
 
         @staticmethod
         def makeWeppSoils(**_kwargs) -> None:
-            raise OSError("injected candidate collection failure")
+            raise OSError("injected candidate collection failure " + canary)
 
     monkeypatch.setattr("wepppy.nodb.core.soils.SurgoSoilCollection", _CandidateBuildUnavailable)
     final_domsoils, substitutions, final_soils, preparation = soils._select_ssurgo_intelligent_fallbacks(
@@ -452,6 +456,8 @@ def test_intelligent_fallback_selects_and_materializes_only_added_local_donor(
     assert final_soils == {"10": SimpleNamespace(fname="10.sol")}
     assert substitutions["101"]["fallback_reason"] == "candidate_build_unavailable"
     assert preparation["status"] == "build_unavailable"
+    assert canary not in repr(preparation)
+    assert "[REDACTED]" in repr(preparation)
 
 
 def test_added_donor_materialization_removes_failed_publication_and_retries(

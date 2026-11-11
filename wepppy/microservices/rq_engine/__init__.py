@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import RQ_ENGINE
+install_safe_logging(RQ_ENGINE)
+
 import re
 import logging
 from contextlib import asynccontextmanager

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from datetime import datetime
@@ -121,7 +125,7 @@ def _raise_batch_error(
     logger.error("%s", error)
     if status_channel is not None:
         try:
-            StatusMessenger.publish(status_channel, str(error))
+            StatusMessenger.publish(status_channel, safe_text(str(error), source_profile=current_profile(WORKER)))
         except redis.RedisError:
             logger.exception(
                 "Failed to publish ESDAC batch diagnostic to status channel %s",

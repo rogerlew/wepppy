@@ -5,6 +5,10 @@ combined-viewer-preparation directory for working/failed/complete evidence.
 """
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
 
 import argparse
@@ -187,7 +191,7 @@ def _prepare_guarded(wd):
     except Exception as exc:  # broad-except: Offline boundary records failure evidence and re-raises.
         # Offline operation boundary: retain failure evidence, then propagate the original failure.
         manifest['status'] = 'failed'
-        manifest['error'] = f'{type(exc).__name__}: {exc}'
+        manifest['error'] = safe_text(f'{type(exc).__name__}: {exc}', source_profile=current_profile(WORKER))
         _save(manifest_path, manifest)
         raise
 

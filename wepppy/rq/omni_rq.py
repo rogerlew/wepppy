@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 """RQ orchestration for Omni scenario execution and dependent post-processing."""
 
 import inspect
@@ -431,7 +435,7 @@ def run_omni_scenario_rq(
         try:
             payload = {
                 "type": type(exc).__name__,
-                "message": str(exc),
+                "message": safe_text(exc, source_profile=current_profile(WORKER)),
                 "scenario": locals().get("scenario_name"),
                 "scenario_type": str(locals().get("scenario_enum")) if locals().get("scenario_enum") is not None else None,
                 "dependency_target": locals().get("dependency_target_key"),

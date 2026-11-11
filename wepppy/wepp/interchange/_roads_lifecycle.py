@@ -1,6 +1,10 @@
 """Current Roads publication and replacement; roads-preparation-lifecycle-contract.md."""
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 from contextlib import ExitStack, contextmanager
 from contextvars import ContextVar
 import fcntl
@@ -488,7 +492,7 @@ def protect_flask_response(root):
     try:
         guard.__enter__()
     except RoadsResultsUnavailable as exc:
-        response = make_response(jsonify(error=str(exc), code=exc.code), 409)
+        response = make_response(jsonify(error=safe_text(str(exc), source_profile=current_profile(WEB)), code=exc.code), 409)
         response.headers['Cache-Control'] = 'no-store'
         abort(response)
     guards[root] = guard

@@ -1,8 +1,11 @@
 """Visible, persistent attempt records independent of RQ retention."""
+
+from wepppy.observability.safe_traceback import render_current_exception
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
 import json
 import os
 from pathlib import Path
-import traceback
 
 __all__ = ['write_json', 'record_attempts', 'record_error', 'require_visible_storage']
 
@@ -47,4 +50,4 @@ def record_error(wd, identity):
     root.mkdir(parents=True, exist_ok=True)
     path = safe(wd, root/'error.log', exists=False)
     with path.open('a') as stream:
-        stream.write(traceback.format_exc() + '\n')
+        stream.write(render_current_exception(source_profile=current_profile(WORKER)) + '\n')

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import RQ_ENGINE
+
 from dataclasses import asdict
 import logging
 import os
@@ -268,7 +272,7 @@ async def update_availability(runid: str, config: str, request: Request) -> JSON
             "Builder registry is unavailable.",
             status_code=503,
             code="builder_registry_error",
-            details=str(exc),
+            details=safe_text(exc, source_profile=current_profile(RQ_ENGINE)),
         )
         response.headers["Retry-After"] = "5"
         return response
@@ -285,7 +289,7 @@ async def update_availability(runid: str, config: str, request: Request) -> JSON
             "Builder registry is unavailable.",
             status_code=503,
             code="builder_registry_error",
-            details=str(exc),
+            details=safe_text(exc, source_profile=current_profile(RQ_ENGINE)),
         )
         response.headers["Retry-After"] = "5"
         return response
@@ -323,7 +327,7 @@ async def update_availability(runid: str, config: str, request: Request) -> JSON
             "Builder registry is unavailable.",
             status_code=503,
             code="builder_registry_error",
-            details=str(exc),
+            details=safe_text(exc, source_profile=current_profile(RQ_ENGINE)),
         )
         response.headers["Retry-After"] = "5"
         return response
@@ -337,7 +341,7 @@ async def update_availability(runid: str, config: str, request: Request) -> JSON
             "acknowledgment_required": False,
             "last_update": last_update,
             "reason": "config_update_unavailable",
-            "details": str(exc),
+            "details": safe_text(exc, source_profile=current_profile(RQ_ENGINE)),
         })
 
 
@@ -373,12 +377,12 @@ async def update_preview(runid: str, config: str, request: Request) -> JSONRespo
             "Builder registry is unavailable.",
             status_code=503,
             code="builder_registry_error",
-            details=str(exc),
+            details=safe_text(exc, source_profile=current_profile(RQ_ENGINE)),
         )
         response.headers["Retry-After"] = "5"
         return response
     except ConfigUpdateError as exc:
-        return error_response(str(exc), status_code=409, code="config_update_unavailable")
+        return error_response(safe_text(exc, source_profile=current_profile(RQ_ENGINE)), status_code=409, code="config_update_unavailable")
 
 
 def _apply_payload(
@@ -473,11 +477,11 @@ def _recovered_apply_response(
             "Capability refresh acknowledgment is required.",
             status_code=400,
             code="capability_refresh_acknowledgment_required",
-            details=str(exc),
+            details=safe_text(exc, source_profile=current_profile(RQ_ENGINE)),
         )
     except ConfigUpdateError as exc:
         return validation_error_response([{
-            "field": "request", "code": "invalid_request", "message": str(exc)
+            "field": "request", "code": "invalid_request", "message": safe_text(exc, source_profile=current_profile(RQ_ENGINE))
         }])
     return JSONResponse({
         "applied": True,
@@ -639,7 +643,7 @@ async def update_apply(runid: str, config: str, request: Request) -> JSONRespons
         if not isinstance(payload, dict) or not isinstance(payload.get("preview_id"), str):
             raise ConfigUpdateError("Request requires preview_id")
     except (ConfigUpdateError, ValueError) as exc:
-        return validation_error_response([{"field": "request", "code": "invalid_request", "message": str(exc)}])
+        return validation_error_response([{"field": "request", "code": "invalid_request", "message": safe_text(exc, source_profile=current_profile(RQ_ENGINE))}])
     try:
         requested_preview_id = str(payload["preview_id"])
         authority_runid = _authority_runid(runid)
@@ -681,11 +685,11 @@ async def update_apply(runid: str, config: str, request: Request) -> JSONRespons
                         "Capability refresh acknowledgment is required.",
                         status_code=400,
                         code="capability_refresh_acknowledgment_required",
-                        details=str(exc),
+                        details=safe_text(exc, source_profile=current_profile(RQ_ENGINE)),
                     )
                 except ConfigUpdateError as exc:
                     return validation_error_response([{
-                        "field": "request", "code": "invalid_request", "message": str(exc)
+                        "field": "request", "code": "invalid_request", "message": safe_text(exc, source_profile=current_profile(RQ_ENGINE))
                     }])
                 if current.additions and not any(
                     item.section == section and item.option == option
@@ -720,24 +724,24 @@ async def update_apply(runid: str, config: str, request: Request) -> JSONRespons
         assert job_id is not None
         return JSONResponse({"job_id": job_id}, status_code=202)
     except StaleConfigPreviewError as exc:
-        return error_response(str(exc), status_code=409, code="stale_config_preview")
+        return error_response(safe_text(exc, source_profile=current_profile(RQ_ENGINE)), status_code=409, code="stale_config_preview")
     except ConfigUpdateRegistryError as exc:
         response = error_response(
             "Builder registry is unavailable.",
             status_code=503,
             code="builder_registry_error",
-            details=str(exc),
+            details=safe_text(exc, source_profile=current_profile(RQ_ENGINE)),
         )
         response.headers["Retry-After"] = "5"
         return response
     except ConfigUpdateUnavailableError as exc:
-        return error_response(str(exc), status_code=409, code="config_update_unavailable")
+        return error_response(safe_text(exc, source_profile=current_profile(RQ_ENGINE)), status_code=409, code="config_update_unavailable")
     except ConfigUpdateError as exc:
         return error_response(
             "Project config update state is invalid.",
             status_code=409,
             code="config_update_unavailable",
-            details=str(exc),
+            details=safe_text(exc, source_profile=current_profile(RQ_ENGINE)),
         )
     except RuntimeError as exc:
         if str(exc) == "config_update_in_progress":

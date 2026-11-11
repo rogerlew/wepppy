@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from datetime import datetime, timezone
 import errno
 from glob import glob
@@ -1252,9 +1256,9 @@ class BatchRunner(NoDbBase):
             with open(metadata_path, "r", encoding="utf-8") as fp:
                 payload = json.load(fp)
         except OSError as exc:
-            return None, f"{type(exc).__name__}: {exc}"
+            return None, safe_text(f"{type(exc).__name__}: {exc}", source_profile=current_profile(WORKER))
         except json.JSONDecodeError as exc:
-            return None, f"{type(exc).__name__}: {exc}"
+            return None, safe_text(f"{type(exc).__name__}: {exc}", source_profile=current_profile(WORKER))
 
         if not isinstance(payload, dict):
             return None, f"metadata payload must be an object, got {type(payload).__name__}"
@@ -1281,7 +1285,7 @@ class BatchRunner(NoDbBase):
                 _base_document, base_state = _load_nodb_document(base_path)
                 _run_document, run_state = _load_nodb_document(run_path)
             except (OSError, ValueError, json.JSONDecodeError) as exc:
-                errors.append(f"{filename}: {type(exc).__name__}: {exc}")
+                errors.append(safe_text(f"{filename}: {type(exc).__name__}: {exc}", source_profile=current_profile(WORKER)))
                 continue
 
             file_changed = False
@@ -1352,7 +1356,7 @@ class BatchRunner(NoDbBase):
                 base_document, base_state = _load_nodb_document(base_path)
                 run_document, run_state = _load_nodb_document(run_path)
             except (OSError, ValueError, json.JSONDecodeError) as exc:
-                errors.append(f"{filename}: {type(exc).__name__}: {exc}")
+                errors.append(safe_text(f"{filename}: {type(exc).__name__}: {exc}", source_profile=current_profile(WORKER)))
                 continue
 
             file_changed = False
@@ -1515,14 +1519,14 @@ class BatchRunner(NoDbBase):
                 prep_missing = True
             except (OSError, TypeError, ValueError) as exc:
                 prep = None
-                prep_error = f"{type(exc).__name__}: {exc}"
+                prep_error = safe_text(f"{type(exc).__name__}: {exc}", source_profile=current_profile(WORKER))
             if prep is not None:
                 for task in self.DEFAULT_TASKS:
                     try:
                         run_states[task.value] = prep[task]
                     except (TypeError, ValueError) as exc:
                         run_states[task.value] = None
-                        run_states[f"{task.value}_error"] = f"{type(exc).__name__}: {exc}"
+                        run_states[f"{task.value}_error"] = safe_text(f"{type(exc).__name__}: {exc}", source_profile=current_profile(WORKER))
 
         metadata, metadata_error = self._read_run_metadata(run_wd) if run_exists else (None, None)
         metadata_status = None

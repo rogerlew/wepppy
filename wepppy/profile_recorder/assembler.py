@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 """Event assembler that builds profile drafts from recorder payloads."""
 
 import json
@@ -227,7 +231,7 @@ class ProfileAssembler:
 
                 ron = Ron.getInstanceFromRunID(run_id, ignore_lock=True)
             except Exception as exc:
-                notes.append(f"[ron] failed to read {attr}: {exc}")
+                notes.append(safe_text(f"[ron] failed to read {attr}: {exc}", source_profile=current_profile(WORKER)))
             else:
                 match = self._evaluate_ron_expectation(ron, attr, expectation)
                 if match is not None:

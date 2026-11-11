@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
 
 import hashlib
@@ -829,7 +833,7 @@ class Roads(NoDbBase):
         self._errors = []
 
     def _record_error_and_raise(self, exc: Exception) -> None:
-        message = str(exc)
+        message = safe_text(str(exc), source_profile=current_profile(WORKER))
         try:
             self._append_roads_log(
                 "error",
@@ -1288,12 +1292,12 @@ class Roads(NoDbBase):
         try:
             input_crs = CRS.from_user_input(input_crs_raw)
         except Exception as exc:
-            return None, f"Unable to parse Roads input CRS {input_crs_raw!r}: {exc}"
+            return None, safe_text(f"Unable to parse Roads input CRS {input_crs_raw!r}: {exc}", source_profile=current_profile(WORKER))
 
         try:
             raster_paths = self._resolve_prepare_raster_paths()
         except Exception as exc:
-            return None, f"Unable to resolve Roads DEM path: {exc}"
+            return None, safe_text(f"Unable to resolve Roads DEM path: {exc}", source_profile=current_profile(WORKER))
 
         try:
             with rasterio.open(raster_paths["dem_path"]) as dem_dataset:
@@ -1312,7 +1316,7 @@ class Roads(NoDbBase):
                     geod=geod,
                 )
         except (RasterioIOError, ValueError) as exc:
-            return None, str(exc)
+            return None, safe_text(str(exc), source_profile=current_profile(WORKER))
 
         return profile, None
 
@@ -1634,7 +1638,7 @@ class Roads(NoDbBase):
                     {
                         "configured_input_crs": configured_input_crs,
                         "dem_input_crs": dem_input_crs,
-                        "reason": str(exc),
+                        "reason": safe_text(str(exc), source_profile=current_profile(WORKER)),
                     },
                 )
                 convert_kwargs["input_crs"] = dem_input_crs
@@ -3457,7 +3461,7 @@ class Roads(NoDbBase):
                     warning_limit=DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT,
                 )
             except ValueError as exc:
-                diagnostics.append(f"{segment_id}: {exc}")
+                diagnostics.append(safe_text(f"{segment_id}: {exc}", source_profile=current_profile(WORKER)))
                 continue
             routing = self._derive_routing_mode_hint(properties)
             key = (design, resolved["surface"], resolved["traffic"], resolved["soil_texture"], routing)
@@ -3499,7 +3503,7 @@ class Roads(NoDbBase):
             history = contained(project, "wepp/roads/history")
             snapshots = [] if not history.is_dir() else sorted(history.iterdir(), reverse=True)
         except (OSError, ValueError) as exc:
-            diagnostics.append(f"Historical readback unavailable: {exc}")
+            diagnostics.append(safe_text(f"Historical readback unavailable: {exc}", source_profile=current_profile(WORKER)))
             return None
         candidates = []
         for snapshot in snapshots:
@@ -3511,7 +3515,7 @@ class Roads(NoDbBase):
                 if receipt_path.is_file():
                     candidates.append((receipt_path.stat().st_mtime_ns, snapshot, receipt_path))
             except (OSError, ValueError) as exc:
-                diagnostics.append(f"Historical readback unavailable at {snapshot.name}: {exc}")
+                diagnostics.append(safe_text(f"Historical readback unavailable at {snapshot.name}: {exc}", source_profile=current_profile(WORKER)))
         for _, snapshot, receipt_path in sorted(candidates, reverse=True):
             try:
                 receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
@@ -3590,7 +3594,7 @@ class Roads(NoDbBase):
                         "current": False, "historical": True,
                         "history_relpath": os.path.relpath(snapshot, self.wd)}
             except (OSError, ValueError, TypeError, KeyError) as exc:
-                diagnostics.append(f"Historical readback unavailable at {snapshot.name}: {exc}")
+                diagnostics.append(safe_text(f"Historical readback unavailable at {snapshot.name}: {exc}", source_profile=current_profile(WORKER)))
         return None
 
     def query_parameterization(self):
@@ -3601,7 +3605,7 @@ class Roads(NoDbBase):
                      if raw_state is None else roads_parameterization.validate_state(raw_state))
         except (ValueError, TypeError, KeyError) as exc:
             return {"status": "invalid", "baseline_id": None, "configuration_hash": None,
-                    "overrides": None, "diagnostics": [str(exc)], "groups": [],
+                    "overrides": None, "diagnostics": [safe_text(str(exc), source_profile=current_profile(WORKER))], "groups": [],
                     "last_completed_run": None,
                     "comparisons": {"available": False, "reason": "Repair parameterization before a new execution."}}
         params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
@@ -3613,7 +3617,7 @@ class Roads(NoDbBase):
                           "baseline_id": repository_baseline["id"]}
         except (OSError, ValueError, TypeError, KeyError) as exc:
             # Repository inspection is diagnostic; retained valid state remains authoritative.
-            repository = {"status": "unavailable", "baseline_id": None, "reason": str(exc)}
+            repository = {"status": "unavailable", "baseline_id": None, "reason": safe_text(str(exc), source_profile=current_profile(WORKER))}
         last_completed = self._last_parameterization_readback(diagnostics)
         if last_completed and last_completed["current"]:
             for group in groups:
@@ -4512,14 +4516,14 @@ class Roads(NoDbBase):
                                     "status": "failed",
                                     "routing_mode": routing_mode,
                                     "reason": "trace_execution_failed",
-                                    "error": str(exc),
+                                    "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                 }
                             )
                             failed_segment_records.append(
                                 {
                                     "segment_id": segment_id,
                                     "reason": "trace_execution_failed",
-                                    "error": str(exc),
+                                    "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                 }
                             )
                             self._append_roads_log(
@@ -4530,7 +4534,7 @@ class Roads(NoDbBase):
                                     "routing_mode": routing_mode,
                                     "seed_row": seed_row,
                                     "seed_col": seed_col,
-                                    "error": str(exc),
+                                    "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                 },
                             )
                             continue
@@ -4696,7 +4700,7 @@ class Roads(NoDbBase):
                                 "status": "skipped",
                                 "routing_mode": routing_mode,
                                 "reason": "segment_profile_unavailable",
-                                "error": str(exc),
+                                "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                 **trace_summary,
                             }
                         )
@@ -4708,7 +4712,7 @@ class Roads(NoDbBase):
                                 "target_hillslope_wepp_id": wepp_id_int,
                                 "routing_mode": routing_mode,
                                 "reason": "segment_profile_unavailable",
-                                "error": str(exc),
+                                "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                             },
                         )
                         continue
@@ -4872,7 +4876,7 @@ class Roads(NoDbBase):
                                 "status": "failed",
                                 "routing_mode": routing_mode,
                                 "reason": "segment_run_failed",
-                                "error": str(exc),
+                                "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                 **trace_summary,
                             }
                         )
@@ -4883,7 +4887,7 @@ class Roads(NoDbBase):
                                 "target_hillslope_wepp_id": wepp_id_int,
                                 "routing_mode": routing_mode,
                                 "reason": "segment_run_failed",
-                                "error": str(exc),
+                                "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                             }
                         )
                         self._append_roads_log(
@@ -4894,7 +4898,7 @@ class Roads(NoDbBase):
                                 "segment_run_id": segment_run_id,
                                 "target_hillslope_wepp_id": wepp_id_int,
                                 "routing_mode": routing_mode,
-                                "error": str(exc),
+                                "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                             },
                         )
                         continue
@@ -5066,7 +5070,7 @@ class Roads(NoDbBase):
                                             "routing_mode": "outslope_unrutted_replacement",
                                             "reason": "failed_missing_parameter",
                                             "missing_fields": ["hillslope_geometry"],
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                             "design": "outslope_unrutted",
                                             "overlap_length_m": overlap_length_m,
                                             "inclusion_ratio": inclusion_ratio,
@@ -5079,7 +5083,7 @@ class Roads(NoDbBase):
                                             "target_hillslope_wepp_id": int(wepp_id_int),
                                             "routing_mode": "outslope_unrutted_replacement",
                                             "reason": "failed_missing_parameter",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                         }
                                     )
                                     self._append_roads_log(
@@ -5089,7 +5093,7 @@ class Roads(NoDbBase):
                                             "segment_id": source_segment_id,
                                             "segment_hillslope_id": segment_hillslope_id,
                                             "reason": "failed_missing_parameter",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                         },
                                     )
                                 continue
@@ -5250,7 +5254,7 @@ class Roads(NoDbBase):
                                             "routing_mode": "outslope_unrutted_replacement",
                                             "reason": "failed_missing_parameter",
                                             "missing_fields": ["segment_profile"],
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                             "design": "outslope_unrutted",
                                             "overlap_length_m": overlap_length_m,
                                             "inclusion_ratio": inclusion_ratio,
@@ -5263,7 +5267,7 @@ class Roads(NoDbBase):
                                             "target_hillslope_wepp_id": int(wepp_id_int),
                                             "routing_mode": "outslope_unrutted_replacement",
                                             "reason": "failed_missing_parameter",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                         }
                                     )
                                     self._append_roads_log(
@@ -5273,7 +5277,7 @@ class Roads(NoDbBase):
                                             "segment_id": source_segment_id,
                                             "segment_hillslope_id": segment_hillslope_id,
                                             "reason": "failed_missing_parameter",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                         },
                                     )
                                     strip_failure = True
@@ -5751,7 +5755,7 @@ class Roads(NoDbBase):
                                             "status": "failed",
                                             "routing_mode": "outslope_unrutted_replacement",
                                             "reason": "segment_run_failed",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                             "design": "outslope_unrutted",
                                             "overlap_length_m": overlap_length_m,
                                             "inclusion_ratio": inclusion_ratio,
@@ -5765,7 +5769,7 @@ class Roads(NoDbBase):
                                             "target_hillslope_wepp_id": int(wepp_id_int),
                                             "routing_mode": "outslope_unrutted_replacement",
                                             "reason": "segment_run_failed",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                         }
                                     )
                                     self._append_roads_log(
@@ -5777,7 +5781,7 @@ class Roads(NoDbBase):
                                             "segment_run_id": segment_run_id,
                                             "target_hillslope_wepp_id": int(wepp_id_int),
                                             "routing_mode": "outslope_unrutted_replacement",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                         },
                                     )
                                     continue
@@ -5950,7 +5954,7 @@ class Roads(NoDbBase):
                                             "status": "failed",
                                             "routing_mode": "outslope_unrutted_replacement",
                                             "reason": "segment_run_failed",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                             "design": "outslope_unrutted_remainder",
                                         }
                                     )
@@ -5961,7 +5965,7 @@ class Roads(NoDbBase):
                                             "target_hillslope_wepp_id": int(wepp_id_int),
                                             "routing_mode": "outslope_unrutted_replacement",
                                             "reason": "segment_run_failed",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                         }
                                     )
                                     self._append_roads_log(
@@ -5972,7 +5976,7 @@ class Roads(NoDbBase):
                                             "segment_run_id": segment_run_id,
                                             "target_hillslope_wepp_id": int(wepp_id_int),
                                             "routing_mode": "outslope_unrutted_replacement",
-                                            "error": str(exc),
+                                            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                         },
                                     )
                                 else:
@@ -6255,7 +6259,7 @@ class Roads(NoDbBase):
                     **run_summary_base,
                     "status": "failed",
                     "failed_stage": "watershed_rerun",
-                    "error": str(exc),
+                    "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                     "failed_at": int(time.time()),
                 }
                 self._append_roads_log(
@@ -6263,7 +6267,7 @@ class Roads(NoDbBase):
                     "watershed_rerun_failed",
                     {
                         "watershed_run_relpath": run_summary_base["watershed_run_relpath"],
-                        "error": str(exc),
+                        "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                     },
                 )
                 raise
@@ -6312,7 +6316,7 @@ class Roads(NoDbBase):
                     {
                         "status": "failed",
                         "failed_stage": current_stage,
-                        "error": str(exc),
+                        "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                         "failed_at": int(time.time()),
                     }
                 )

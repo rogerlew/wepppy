@@ -77,6 +77,9 @@ Warning:
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import SafeFormatter, current_profile, install as install_safe_logging
+from wepppy.observability.secret_profiles import WORKER
+
 import functools
 import hashlib
 import importlib
@@ -710,7 +713,8 @@ def createProcessPoolExecutor(
 
         if ctx is not None:
             try:
-                return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx)
+                return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx,
+                                           initializer=install_safe_logging, initargs=(current_profile(WORKER),))
             except (OSError, PermissionError) as exc:
                 log.warning(
                     'Spawn start method unavailable for ProcessPoolExecutor (%s); using default context instead.',
@@ -1025,7 +1029,7 @@ class NoDbBase(object):
         # Define a standard log format
         log_format = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
         date_format = '%Y-%m-%d %H:%M:%S'  # Local time with milliseconds and timezone
-        formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
+        formatter = SafeFormatter(logging.Formatter(fmt=log_format, datefmt=date_format), current_profile(WORKER))
 
         if queue_handler is None:
             # Close stale instance-level handlers when rehydrating without logger metadata.
@@ -1044,6 +1048,7 @@ class NoDbBase(object):
             # Initialize queue and queue handler
             self._log_queue = queue.Queue(-1)
             self._queue_handler = QueueHandler(self._log_queue)
+            self._queue_handler.setFormatter(SafeFormatter(None, current_profile(WORKER)))
 
             # Clear existing handlers from component logger
             for handler in list(self.logger.handlers):

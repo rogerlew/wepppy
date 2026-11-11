@@ -1,6 +1,6 @@
 # F5 traceback source and sink failure matrix
 
-**Status**: M0 inventory expanded; implementation/evidence pending
+**Status**: Implemented; focused sink readback passes; full regression pending
 **Date**: 2026-11-11 UTC
 
 The broken shared assumption is that a formatted traceback is safe to copy into
@@ -105,3 +105,12 @@ as a database consumer in postgres mode (`initialize_project_commits` ->
 `run_catalog.adapter`). Select that metadata from the existing explicit mode.
 D-Tale consumes verified claims rather than decoding JWTs; its profile excludes
 the authorization key ring while retaining Flask-init and D-Tale sources.
+
+## Extended producer closure
+
+See `20261111_extended_sink_audit.md` for the finite persisted/plain-string
+producer audit and `20261111_focused_validation.md` for output-family receipts.
+Those repairs cover delayed logs, status JSON, NoDb fields, CSV diagnostics,
+controlled-error RQ results, direct HTTP/HTML bypasses, production playback and
+the Wojak bootstrap entry point. Static review covers repeated mechanical peers;
+actual file/Redis/HTTP output tests cover the distinct output boundaries.

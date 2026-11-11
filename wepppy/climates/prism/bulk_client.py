@@ -3,6 +3,10 @@
 No model transformations are performed. In particular, dewpoint remains raw.
 See docs/dev-notes/prism-800m-client-design.md for the persisted contract.
 """
+
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
 from dataclasses import dataclass
 from datetime import date
 import gzip
@@ -102,7 +106,7 @@ class PrismBulkClient:
             LOGGER.exception('PRISM extraction failed; attempt=%s', attempt)
             try:
                 write_json(attempt / 'status.json', dict(state='failed', finished_utc=now(),
-                           error_type=type(exc).__name__, error=str(exc)))
+                           error_type=type(exc).__name__, error=safe_text(str(exc), source_profile=current_profile(WORKER))))
             except OSError:
                 LOGGER.exception('Unable to retain PRISM failure status: %s', attempt)
             raise

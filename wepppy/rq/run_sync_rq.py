@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import render_exception, safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import hashlib
 import inspect
 import json
@@ -154,8 +158,8 @@ def _publish_exception(channel: str, job_id: str, exc: Exception) -> None:
     """Publish an exception with full traceback to the status channel."""
     import traceback
     
-    error_msg = str(exc)
-    tb_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+    error_msg = safe_text(exc, source_profile=current_profile(WORKER))
+    tb_lines = render_exception(exc, source_profile=current_profile(WORKER)).splitlines(keepends=True)
     
     # Publish the exception info as a JSON payload for the dashboard
     import json

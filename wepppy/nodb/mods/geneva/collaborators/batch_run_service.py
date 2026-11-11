@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import math
 from typing import TYPE_CHECKING, Any, Mapping
 
@@ -191,7 +195,7 @@ class GenevaBatchRunService:
                         "datasource_id": cell.get("datasource_id"),
                         "duration_minutes": cell.get("duration_minutes"),
                         "ari_years": cell.get("ari_years"),
-                        "error": str(exc),
+                        "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                     }
                 )
 

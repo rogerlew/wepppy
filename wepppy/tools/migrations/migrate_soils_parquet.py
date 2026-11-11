@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-import argparse
 import sys
-import traceback
+
+from wepppy.observability.safe_traceback import render_current_exception, safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
+import argparse
 from datetime import datetime, timezone
 from pathlib import Path
 from time import perf_counter
@@ -119,7 +123,7 @@ def _log(log_fp, run_dir: Path, status: str, duration_ms: int, metrics: Dict[str
     for key in sorted(metrics):
         parts.append(f"{key}={metrics[key]}")
     if error:
-        parts.append(f"error={error}")
+        parts.append(safe_text(f"error={error}", source_profile=current_profile(WORKER)))
     log_fp.write(" ".join(parts) + "\n")
     log_fp.flush()
 
@@ -130,7 +134,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     try:
         run_dirs = list(_discover_run_dirs(args.root))
     except (FileNotFoundError, NotADirectoryError) as exc:
-        print(exc, file=sys.stderr)
+        print(safe_text(exc, source_profile=current_profile(WORKER)), file=sys.stderr)
         return 2
 
     if args.limit is not None:
@@ -184,11 +188,11 @@ def main(argv: Iterable[str] | None = None) -> int:
                     skipped += 1
             except Exception as exc:  # pragma: no cover - defensive logging
                 status = "failed"
-                error_text = str(exc)
+                error_text = safe_text(exc, source_profile=current_profile(WORKER))
                 failed += 1
-                print(f"  ! Failed to process {run_dir}: {exc}", file=sys.stderr)
+                print(safe_text(f"  ! Failed to process {run_dir}: {exc}", source_profile=current_profile(WORKER)), file=sys.stderr)
                 if args.verbose:
-                    traceback.print_exc()
+                    print(render_current_exception(source_profile=current_profile(WORKER)), file=sys.stderr)
 
             duration_ms = int((perf_counter() - start) * 1000)
             _log(log_fp, run_dir, status, duration_ms, metrics, error_text)

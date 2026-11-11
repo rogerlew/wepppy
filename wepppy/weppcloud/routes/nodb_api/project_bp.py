@@ -1,5 +1,9 @@
 """Routes for project blueprint extracted from app.py."""
 
+from wepppy.observability.safe_traceback import render_current_exception
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 from wepppy.request_payload import RequestPayloadError
 
 from datetime import datetime
@@ -8,7 +12,6 @@ from contextlib import nullcontext
 from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 
 import os
-import traceback
 import redis
 from werkzeug.exceptions import HTTPException
 from rq import Queue
@@ -360,7 +363,7 @@ def delete_run(runid, config):
             from wepppy.weppcloud.utils.run_ttl import mark_delete_state
 
             mark_delete_state(wd, "queued", touched_by="delete_request")
-        except Exception as exc:
+        except Exception as exc:  # broad-except: best-effort TTL telemetry must preserve delete workflow
             current_app.logger.warning(
                 "Failed to update TTL delete state for %s: %s",
                 wd,
@@ -792,7 +795,7 @@ def task_set_mod(runid, config):
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:583", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        stacktrace = traceback.format_exc()
+        stacktrace = render_current_exception(source_profile=current_profile(WEB))
         return exception_factory(
             'Error updating module state',
             stacktrace=stacktrace,

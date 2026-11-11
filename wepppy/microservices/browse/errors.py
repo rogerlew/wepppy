@@ -1,5 +1,9 @@
 """Safe, correlated failure responses shared by file delivery services."""
 
+from wepppy.observability.safe_traceback import safe_structure
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import DOWNLOAD
+
 import logging
 
 from starlette.exceptions import HTTPException
@@ -64,7 +68,7 @@ async def download_exception_handler(request: Request, exc: Exception):
 
 async def download_http_exception_handler(request: Request, exc: HTTPException):
     reference = request_id(request)
-    detail = exc.detail
+    detail = safe_structure(exc.detail, source_profile=current_profile(DOWNLOAD))
     if exc.status_code < 500:
         return PlainTextResponse(str(detail), status_code=exc.status_code,
                                  headers=exc.headers)

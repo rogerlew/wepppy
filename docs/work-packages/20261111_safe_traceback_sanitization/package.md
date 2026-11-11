@@ -1,6 +1,6 @@
 # Safe traceback and exceptional-path secret sanitization
 
-**Status**: Open (2026-11-11 UTC); queued behind Redis credential transport
+**Status**: Implemented; focused acceptance and final reviews active (2026-11-11 UTC). Full regression gates pending.
 
 **Timezone**: UTC
 

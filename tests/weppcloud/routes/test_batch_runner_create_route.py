@@ -68,3 +68,20 @@ def test_create_batch_prefers_disturbed_default(batch_create_client, monkeypatch
     kwargs = captured["kwargs"]
     assert kwargs["available_configs"] == ["alpha_wbt", "disturbed9002_wbt", "zeta_wbt"]
     assert kwargs["form_state"]["base_config"] == "disturbed9002_wbt"
+
+
+def test_create_failure_html_does_not_disclose_secret(batch_create_client, monkeypatch, tmp_path):
+    from flask import render_template_string
+    from tests.observability.canaries import install_canary
+    canary = install_canary(monkeypatch, tmp_path)
+    client, _ = batch_create_client
+    monkeypatch.setattr(batch_runner_module, 'get_configs', lambda: ['disturbed9002_wbt'])
+    def fail(*args):
+        raise ValueError('batch-context ' + canary)
+    monkeypatch.setattr(batch_runner_module, '_validate_config', fail)
+    monkeypatch.setattr(batch_runner_module, 'render_template', lambda template, **context:
+        render_template_string('<ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>', **context))
+    response = client.post('/batch/create/', data={'batch_name': 'test', 'base_config': 'disturbed9002_wbt'})
+    output = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert canary not in output and 'batch-context [REDACTED]' in output

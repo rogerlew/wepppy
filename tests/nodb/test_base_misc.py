@@ -682,7 +682,11 @@ def test_create_process_pool_executor_prefers_spawn_but_falls_back(monkeypatch):
     result = base.createProcessPoolExecutor(2, logger=logger, prefer_spawn=True)
 
     assert result == 'fallback-executor'
-    assert calls == [{'max_workers': 2, 'mp_context': ctx_object}, {'max_workers': 2}]
+    assert calls == [
+        {'max_workers': 2, 'mp_context': ctx_object,
+         'initializer': base.install_safe_logging, 'initargs': (base.current_profile(base.WORKER),)},
+        {'max_workers': 2},
+    ]
     assert logger.records
 
 

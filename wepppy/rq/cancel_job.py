@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 """Utilities for canceling RQ jobs (and their dependency tree) from workers or CLIs."""
 
 import json
@@ -64,7 +68,7 @@ def _cancel_kubernetes_render(job: Job) -> Dict[str, str] | None:
     except (BackendError, OSError) as exc:
         job.meta["render_cleanup_state"] = "cleanup_timeout"
         job.save_meta()
-        return {"error": str(exc), "code": "cleanup_timeout"}
+        return {"error": safe_text(exc, source_profile=current_profile(WORKER)), "code": "cleanup_timeout"}
     if receipt.get("rq_job_id") != job.id or receipt.get("request_digest") != request_digest:
         job.meta["render_cleanup_state"] = "cleanup_timeout"
         job.save_meta()

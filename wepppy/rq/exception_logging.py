@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import render_current_exception
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import functools
 import inspect
 import logging
-import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Callable, ParamSpec, TypeVar, Any
@@ -34,7 +37,7 @@ def _append_exception_log(runid: str, func_name: str) -> None:
         target = wd / "exceptions.log"
         target.parent.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.utcnow().isoformat() + "Z"
-        formatted = traceback.format_exc()
+        formatted = render_current_exception(source_profile=current_profile(WORKER))
         with target.open("a", encoding="utf-8") as stream:
             stream.write(f"[{timestamp}] {func_name} failed\n{formatted}\n")
     except Exception as exc:  # broad-except: best-effort logging must preserve original failure

@@ -1,12 +1,15 @@
 """Shared imports and helpers for WEPPcloud blueprints."""
 
+from wepppy.observability.safe_traceback import render_current_exception
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 import csv
 import io
 import json
 import logging
 import os
 import shutil
-import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -112,7 +115,7 @@ def _maybe_log_exception(exc: Exception) -> None:
         endpoint = request.endpoint or "nodb_api"
         stream = [
             f"[{timestamp}] {endpoint}",
-            traceback.format_exc(),
+            render_current_exception(source_profile=current_profile(WEB)),
             "",
         ]
         with target.open("a", encoding="utf-8") as handle:

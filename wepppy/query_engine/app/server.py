@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import render_exception, safe_text, safe_structure
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import QUERY
+
+from wepppy.observability.safe_logging import install as install_safe_logging
+install_safe_logging(QUERY)
+
 from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, discovery_headers
 
 from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
@@ -13,7 +20,6 @@ import logging
 import math
 import threading
 import time
-import traceback
 from collections import OrderedDict, deque
 from dataclasses import asdict
 from datetime import datetime
@@ -500,7 +506,7 @@ async def query_engine_http_exception_handler(request: StarletteRequest, exc: HT
         JSONResponse with error metadata and optional stacktrace.
     """
     payload: dict[str, Any] = {
-        "error": exc.detail if exc.detail else exc.__class__.__name__,
+        "error": safe_structure(exc.detail, source_profile=current_profile(QUERY)) if exc.detail else exc.__class__.__name__,
         "status_code": exc.status_code,
     }
 
@@ -508,7 +514,7 @@ async def query_engine_http_exception_handler(request: StarletteRequest, exc: HT
         LOGGER.exception("Query boundary unavailable")
         return JSONResponse({"error": "Query service unavailable", "status_code": exc.status_code}, status_code=exc.status_code)
     if exc.status_code >= 500:
-        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace = render_exception(exc, source_profile=current_profile(QUERY))
         payload["stacktrace"] = stacktrace
         LOGGER.exception("HTTPException %s for %s: %s", exc.status_code, request.url, exc.detail)
     else:
@@ -531,7 +537,7 @@ async def query_engine_exception_handler(request: StarletteRequest, exc: Excepti
         LOGGER.exception("Query admission failed")
         return JSONResponse({"error": "Query service unavailable", "status_code": 503}, status_code=503)
 
-    stacktrace_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+    stacktrace_lines = render_exception(exc, source_profile=current_profile(QUERY)).splitlines(keepends=True)
     stacktrace_text = "".join(stacktrace_lines)
     stacktrace_clean = stacktrace_text.strip("\n")
     message = _format_exception_message(exc)
@@ -557,10 +563,7 @@ def _format_exception_message(exc: BaseException) -> str:
     Returns:
         Human-readable message combining exception type and detail.
     """
-    try:
-        detail = str(exc)
-    except Exception:
-        detail = repr(exc)
+    detail = safe_text(exc, source_profile=current_profile(QUERY))
 
     if detail and detail != exc.__class__.__name__:
         return f"{exc.__class__.__name__}: {detail}"
@@ -574,6 +577,7 @@ def _log_exception_details(stacktrace_text: str, target: QueryTarget | None) -> 
         stacktrace_text: Stacktrace text to append.
         target: Previously admitted, checked resource.
     """
+    stacktrace_text = safe_text(stacktrace_text, source_profile=current_profile(QUERY))
     if target is None:
         return
     run_path = target.path
@@ -858,11 +862,11 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     try:
         payload = QueryRequest(**body)
     except (TypeError, ValueError) as exc:  # pragma: no cover - simple validation error reporting
-        stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace_text = render_exception(exc, source_profile=current_profile(QUERY))
         LOGGER.debug("Invalid query payload for %s: %s", run_path, exc, exc_info=True)
         return JSONResponse(
             {
-                "error": f"Invalid query payload: {exc}",
+                "error": safe_text(f"Invalid query payload: {exc}", source_profile=current_profile(QUERY)),
                 "stacktrace": stacktrace_text,
                 "exc_info": stacktrace_text,
                 "status_code": 422,
@@ -875,7 +879,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
         if any(roads_lifecycle.current_path(spec.path) for spec in payload.dataset_specs):
             await run_in_threadpool(_check_roads_current, context.base_dir)
     except roads_lifecycle.RoadsResultsUnavailable as exc:
-        return JSONResponse({'error': str(exc), 'code': exc.code}, status_code=409,
+        return JSONResponse({'error': safe_text(exc, source_profile=current_profile(QUERY)), 'code': exc.code}, status_code=409,
                             headers={'Cache-Control': 'no-store'})
     try:
         result = await run_in_threadpool(
@@ -889,21 +893,21 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     except HTTPException:
         raise
     except roads_lifecycle.RoadsResultsUnavailable as exc:
-        return JSONResponse({'error': str(exc), 'code': exc.code}, status_code=409,
+        return JSONResponse({'error': safe_text(exc, source_profile=current_profile(QUERY)), 'code': exc.code}, status_code=409,
                             headers={'Cache-Control': 'no-store'})
     except FileNotFoundError as exc:
-        stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace_text = render_exception(exc, source_profile=current_profile(QUERY))
         LOGGER.warning("Query dataset missing for %s", run_path, exc_info=True)
         return JSONResponse(
-            {"error": str(exc), "stacktrace": stacktrace_text, "exc_info": stacktrace_text, "status_code": 404},
+            {"error": safe_text(exc, source_profile=current_profile(QUERY)), "stacktrace": stacktrace_text, "exc_info": stacktrace_text, "status_code": 404},
             status_code=404,
         )
     except ValueError as exc:
-        stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace_text = render_exception(exc, source_profile=current_profile(QUERY))
         LOGGER.debug("Query validation error for %s: %s", run_path, exc, exc_info=True)
         return JSONResponse(
             {
-                "error": str(exc),
+                "error": safe_text(exc, source_profile=current_profile(QUERY)),
                 "stacktrace": stacktrace_text,
                 "exc_info": stacktrace_text,
                 "status_code": 422,
@@ -911,12 +915,12 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
             status_code=422,
         )
     except Exception as exc:  # pragma: no cover - defensive error reporting
-        stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace_text = render_exception(exc, source_profile=current_profile(QUERY))
         LOGGER.exception("Query execution failed for %s", run_path)
         _log_exception_details(stacktrace_text, getattr(request.state, "query_target", None))
         return JSONResponse(
             {
-                "error": f"Query execution failed: {exc}",
+                "error": safe_text(f"Query execution failed: {exc}", source_profile=current_profile(QUERY)),
                 "stacktrace": stacktrace_text,
                 "stacktrace_lines": stacktrace_text.strip("\n").splitlines(),
                 "exc_info": stacktrace_text,
@@ -970,9 +974,9 @@ async def activate_run(request: StarletteRequest) -> Response:
     except HTTPException:
         raise
     except Exception as exc:
-        stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        stacktrace = render_exception(exc, source_profile=current_profile(QUERY))
         LOGGER.exception("Activation failed for %s", run_path)
-        return JSONResponse({"error": f"Activation failed: {exc}", "stacktrace": stacktrace}, status_code=500)
+        return JSONResponse({"error": safe_text(f"Activation failed: {exc}", source_profile=current_profile(QUERY)), "stacktrace": stacktrace}, status_code=500)
 
     catalog = dict(catalog)
     catalog["files"] = await run_in_threadpool(visible_entries, request, run_path, catalog.get("files", []))

@@ -2,6 +2,12 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import render_exception, safe_text
+from wepppy.observability.safe_logging import current_profile, install as install_safe_logging
+from wepppy.observability.secret_profiles import WORKER, worker_profile
+import sys
+install_safe_logging(worker_profile(tuple(arg for arg in sys.argv if arg in {"default", "batch", "fork-archive"})))
+
 import os
 import time
 from os.path import join as _join
@@ -13,7 +19,6 @@ import signal
 import logging
 
 import json
-import traceback
 from typing import Any, cast
 from multiprocessing import Process
 
@@ -288,6 +293,7 @@ class WepppyRqWorker(Worker):
         exc_string: str = '',
     ) -> None:
         """Publish job failure events while preserving the superclass behavior."""
+        exc_string = safe_text(exc_string, source_profile=current_profile(WORKER))
         job_was_stopped = getattr(self, "_stopped_job_id", None) == job.id
         controlled_error = (
             job.meta.get("error")
@@ -295,7 +301,7 @@ class WepppyRqWorker(Worker):
             else None
         )
         if isinstance(controlled_error, dict):
-            sanitized = str(controlled_error.get("message") or "Controlled job failure")
+            sanitized = safe_text(controlled_error.get("message") or "Controlled job failure", source_profile=current_profile(WORKER))
             super().handle_job_failure(
                 job,
                 queue,
@@ -383,7 +389,7 @@ class WepppyRqWorker(Worker):
             else None
         )
         if isinstance(controlled_error, dict):
-            message = str(controlled_error.get("message") or "Controlled job failure")
+            message = safe_text(controlled_error.get("message") or "Controlled job failure", source_profile=current_profile(WORKER))
             error_id = str(job.meta.get("error_id") or "")
             edge_ids = (
                 controlled_error.get("details", {}).get("edge_hillslope_ids", [])
@@ -409,8 +415,14 @@ class WepppyRqWorker(Worker):
             job.meta["exc_string"] = message
             job.save_meta()
         else:
-            super().handle_exception(job, *exc_info)
-            exc_string = ''.join(traceback.format_exception(*exc_info))
+            # RQ 2.12's superclass formats raw diagnostics and includes job args.
+            # Preserve its handler ordering/arguments, sanitizing before output.
+            exc_string = render_exception(exc_info[1], source_profile=current_profile(WORKER))
+            self.log.error("Worker %s: job %s raised an exception\n%s", self.name, job.id, exc_string)
+            for handler in self._exc_handlers:
+                fallthrough = handler(job, *exc_info)
+                if fallthrough is not None and not fallthrough:
+                    break
             job.meta['exc_string'] = exc_string
             job.save()
         StatusMessenger.publish('f{runid}:rq', json.dumps({'job': job.id, 'status': 'exception'}))
@@ -436,7 +448,7 @@ class WepppyRqWorker(Worker):
         except (OSError, RuntimeError) as exc:
             # Cleanup boundary: cancellation still stops RQ, but uncertain
             # process ownership must never authorize directory-lock release.
-            self._directory_lock_containment_error = str(exc)
+            self._directory_lock_containment_error = safe_text(exc, source_profile=current_profile(WORKER))
             LOGGER.exception("Directory lock containment unavailable job_id=%s", job.id)
         with maintenance_lock_execution(job.id) as execution_id:
             self._directory_lock_execution_id = execution_id
@@ -515,7 +527,7 @@ class WepppyRqWorker(Worker):
                 # termination/Redis state and preserve RQ's terminal handling.
                 LOGGER.exception("Directory lock cleanup failed job_id=%s", job.id)
                 record_cleanup(job, self._directory_lock_execution_id,
-                               "pending", reason=str(exc))
+                               "pending", reason=safe_text(exc, source_profile=current_profile(WORKER)))
 
     def _retire_if_writers_remain(self, job: Job) -> bool:
         from wepppy.rq.directory_locks import has_remaining_writers

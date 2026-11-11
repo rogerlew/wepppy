@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import SHAPE
+
 import json
 import os
 import sys
@@ -316,5 +320,5 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except Exception as exc:  # broad-except: Git hook process boundary reports rejection
-        sys.stderr.write(f"Bootstrap validation failed: {exc}\n")
+        sys.stderr.write(safe_text(f"Bootstrap validation failed: {exc}\n", source_profile=current_profile(SHAPE)))
         sys.exit(1)

@@ -1,6 +1,10 @@
 """Content observations and atomic compact-cache publication for C08/C09 reports."""
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import json
 import logging
 import os
@@ -166,7 +170,7 @@ class _CacheBuild:
         # This diagnostic boundary never masks a producer/publication exception
         # or rolls back a completed atomic replacement over another request.
         try:
-            self._status("complete" if self.committed else "failed", None if exc is None else str(exc))
+            self._status("complete" if self.committed else "failed", None if exc is None else safe_text(str(exc), source_profile=current_profile(WORKER)))
         except OSError:
             _LOG.exception("Unable to persist report attempt status at %s", self.root)
         return False

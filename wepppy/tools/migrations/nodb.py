@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import json
 import re
 from pathlib import Path
@@ -37,7 +41,7 @@ def migrate_observed_nodb(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
         with open(observed_nodb, "r") as f:
             data = json.load(f)
     except json.JSONDecodeError as exc:
-        return False, f"Failed to parse JSON: {exc}"
+        return False, safe_text(f"Failed to parse JSON: {exc}", source_profile=current_profile(WORKER))
 
     py_object = data.get("py/object", "")
 
@@ -186,7 +190,7 @@ def migrate_nodb_jsonpickle_format(wd: str, *, dry_run: bool = False) -> Tuple[b
             with open(nodb_file, "r") as f:
                 data = json.load(f)
         except json.JSONDecodeError as exc:
-            error_files.append((nodb_file.name, f"JSON parse error: {exc}"))
+            error_files.append((nodb_file.name, safe_text(f"JSON parse error: {exc}", source_profile=current_profile(WORKER))))
             continue
 
         # Check if already in new format (has py/state)

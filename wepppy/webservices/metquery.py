@@ -21,6 +21,12 @@ plain-text messages to keep client debugging straightforward.
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import REDIS_ONLY
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+install_safe_logging(REDIS_ONLY)
+
 import math
 import os
 from os.path import join as _join
@@ -33,7 +39,6 @@ from subprocess import Popen, PIPE
 
 from calendar import isleap
 
-import traceback
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import netCDF4
@@ -314,7 +319,7 @@ def daily_worker(args: Tuple[int, str, Tuple[float, float, float, float]]) -> Tu
     try:
         crop_nc(fname, bbox, dst)
     except Exception as e:
-        return 'Exception', str(e)
+        return 'Exception', safe_text(e, source_profile=current_profile(REDIS_ONLY))
 
     return 'Success', dst
 

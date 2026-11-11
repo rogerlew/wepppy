@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import QUERY
+
 import base64
 import binascii
 import hashlib
@@ -575,7 +579,7 @@ class MCPAuthMiddleware(BaseHTTPMiddleware):
             _check_revocation(principal.token_id)
             request.state.mcp_principal = principal
         except AuthError as exc:
-            payload = {"errors": [{"code": exc.code, "detail": exc.detail}]}
+            payload = {"errors": [{"code": exc.code, "detail": safe_text(exc.detail, source_profile=current_profile(QUERY))}]}
             return JSONResponse(payload, status_code=exc.status_code, headers=exc.headers)
 
         return await call_next(request)

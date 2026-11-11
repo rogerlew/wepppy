@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 """Profile playback tooling that replays recorder captures into WEPPcloud."""
 
 import argparse
@@ -251,9 +255,9 @@ class PlaybackSession:
                     time.sleep(1.0)
                 except requests.RequestException as exc:
                     response_time_ms = int((time.time() - start_time) * 1000) if 'start_time' in locals() else 0
-                    self.results.append((request_id, f"{effective_path}: error {exc} ({response_time_ms}ms)"))
+                    self.results.append((request_id, safe_text(f"{effective_path}: error {exc} ({response_time_ms}ms)", source_profile=current_profile(WORKER))))
                     if self.verbose:
-                        self._log(f"{request_id} → error {exc} ({response_time_ms}ms)")
+                        self._log(safe_text(f"{request_id} → error {exc} ({response_time_ms}ms)", source_profile=current_profile(WORKER)))
             else:
                 action = f"{method} {effective_path}"
                 if json_payload is not None:
@@ -576,7 +580,7 @@ class PlaybackSession:
         except requests.RequestException:
             raise
         except Exception as exc:
-            self._log(f"Failed to build form-data payload for {path}: {exc}")
+            self._log(safe_text(f"Failed to build form-data payload for {path}: {exc}", source_profile=current_profile(WORKER)))
 
         if recorded_values:
             self._apply_recorded_form_values(data, recorded_values)
@@ -605,7 +609,7 @@ class PlaybackSession:
                     data["sol_ver"] = self._format_number(sol_ver)
             except Exception as exc:
                 if self.verbose:
-                    self._log(f"Failed to load Disturbed for soils form: {exc}")
+                    self._log(safe_text(f"Failed to load Disturbed for soils form: {exc}", source_profile=current_profile(WORKER)))
 
     def _populate_landuse_form(
         self,
@@ -848,7 +852,7 @@ class PlaybackSession:
                 try:
                     active_text = active_marker.read_text(encoding="utf-8").strip()
                 except Exception as exc:
-                    self._log(f"Failed to read active config seed {active_marker}: {exc}")
+                    self._log(safe_text(f"Failed to read active config seed {active_marker}: {exc}", source_profile=current_profile(WORKER)))
                 else:
                     if active_text:
                         self.seed_config_stem = Path(active_text).stem
@@ -859,12 +863,12 @@ class PlaybackSession:
                     try:
                         shutil.copy2(item, target / item.name)
                     except Exception as exc:
-                        self._log(f"Failed to copy seed config {item}: {exc}")
+                        self._log(safe_text(f"Failed to copy seed config {item}: {exc}", source_profile=current_profile(WORKER)))
         if self.seed_config_stem:
             try:
                 Ron(str(target), f"{self.seed_config_stem}.cfg", run_group="profile", group_name="tmp")
             except Exception as exc:
-                self._log(f"Failed to initialize Ron with seed config {self.seed_config_stem}: {exc}")
+                self._log(safe_text(f"Failed to initialize Ron with seed config {self.seed_config_stem}: {exc}", source_profile=current_profile(WORKER)))
 
     def _format_yearless_date(self, value: Any) -> Optional[str]:
         """Render a month/day string as expected by form fields."""
@@ -930,7 +934,7 @@ class PlaybackSession:
                 cleared = clear_locks(runid)
             except Exception as exc:
                 if self.verbose:
-                    self._log(f"[locks:{stage}] Failed to clear locks for {runid}: {exc}")
+                    self._log(safe_text(f"[locks:{stage}] Failed to clear locks for {runid}: {exc}", source_profile=current_profile(WORKER)))
                 continue
             total_cleared += len(cleared)
             if self.verbose and cleared:
@@ -949,7 +953,7 @@ class PlaybackSession:
                 data = json.loads(content)
             except Exception as exc:
                 if self.verbose:
-                    self._log(f"Skipping run-group retag for {nodb_path}: {exc}")
+                    self._log(safe_text(f"Skipping run-group retag for {nodb_path}: {exc}", source_profile=current_profile(WORKER)))
                 continue
             state = data.get("py/state")
             if not isinstance(state, dict):
@@ -962,7 +966,7 @@ class PlaybackSession:
                 nodb_path.write_text(json.dumps(data), encoding="utf-8")
             except Exception as exc:
                 if self.verbose:
-                    self._log(f"Failed to write retagged run-group for {nodb_path}: {exc}")
+                    self._log(safe_text(f"Failed to write retagged run-group for {nodb_path}: {exc}", source_profile=current_profile(WORKER)))
 
     def _extract_job_id(self, response: requests.Response) -> Optional[str]:
         """Parse job ids from JSON responses returned by POST requests."""
@@ -991,7 +995,7 @@ class PlaybackSession:
             payload = response.json()
         except Exception as exc:  # pragma: no cover - defensive logging
             if self.verbose:
-                self._log(f"Failed to fetch job info for {job_id}: {exc}")
+                self._log(safe_text(f"Failed to fetch job info for {job_id}: {exc}", source_profile=current_profile(WORKER)))
             return None
 
         if not isinstance(payload, dict):
@@ -1099,7 +1103,7 @@ class PlaybackSession:
                 )
             except requests.RequestException as exc:
                 if self.verbose:
-                    self._log(f"job {job_id} status request failed: {exc}")
+                    self._log(safe_text(f"job {job_id} status request failed: {exc}", source_profile=current_profile(WORKER)))
                 time.sleep(interval)
                 if time.time() >= end_time:
                     raise RuntimeError(f"Timeout waiting for job {job_id}") from exc

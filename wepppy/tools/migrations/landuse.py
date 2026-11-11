@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import json
 from pathlib import Path
 from typing import Any, Tuple
@@ -15,7 +19,7 @@ def _landuse_nodb_has_summaries(landuse_nodb: Path) -> Tuple[bool, str | None]:
     try:
         data = json.loads(landuse_nodb.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        return False, f"Failed to read landuse.nodb: {exc}"
+        return False, safe_text(f"Failed to read landuse.nodb: {exc}", source_profile=current_profile(WORKER))
 
     state = data.get("py/state", data)
     if not isinstance(state, dict):
@@ -71,13 +75,13 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         try:
             from wepppy.nodb.core import Landuse
         except ImportError as exc:
-            return False, f"Landuse migration unavailable: {exc}"
+            return False, safe_text(f"Landuse migration unavailable: {exc}", source_profile=current_profile(WORKER))
 
         try:
             landuse = Landuse.getInstance(str(run_path))
             landuse.dump_landuse_parquet()
         except Exception as exc:
-            return False, f"Failed to generate landuse parquet: {exc}"
+            return False, safe_text(f"Failed to generate landuse parquet: {exc}", source_profile=current_profile(WORKER))
 
         landuse_parquet = pick_existing_parquet_path(run_path, "landuse/landuse.parquet")
         if landuse_parquet is not None:
@@ -96,7 +100,7 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         schema = meta.schema.to_arrow_schema()
         field_names = [f.name for f in schema]
     except Exception as exc:
-        return False, f"Failed to read parquet metadata: {exc}"
+        return False, safe_text(f"Failed to read parquet metadata: {exc}", source_profile=current_profile(WORKER))
 
     # Check if migration needed (has uppercase columns)
     # Note: wepp_id is optional - not all landuse files have it
@@ -141,4 +145,4 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         update_catalog_entry(run_path, "landuse/landuse.parquet")
         return True, "Normalized landuse parquet schema"
     except Exception as exc:
-        return False, f"Failed to normalize landuse parquet: {exc}"
+        return False, safe_text(f"Failed to normalize landuse parquet: {exc}", source_profile=current_profile(WORKER))

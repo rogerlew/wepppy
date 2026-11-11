@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_structure, UNAVAILABLE
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import json
 import os
 import shlex
@@ -41,6 +45,10 @@ def _redis() -> redis.StrictRedis:
 
 def _publish(channel: str, payload: Dict[str, Any]) -> None:
     """Publish a JSON payload to the provided Redis pub/sub channel."""
+    if payload.get("type") == "error":
+        payload = safe_structure(payload, source_profile=current_profile(WORKER))
+        if not isinstance(payload, dict):
+            payload = {"type": "error", "content": UNAVAILABLE}
     _redis().publish(channel, json.dumps(payload, separators=(",", ":")))
 
 

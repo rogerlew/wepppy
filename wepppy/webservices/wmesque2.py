@@ -49,6 +49,12 @@ The response body contains the raster, while ``WMesque-Meta`` holds JSON
 metadata (base64-url encoded) describing the processing pipeline.
 """
 
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import REDIS_ONLY
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+install_safe_logging(REDIS_ONLY)
+
 import subprocess
 import os
 import logging
@@ -212,7 +218,7 @@ def process_raster(
         if expected_revision is not None:
             revision_id(expected_revision)
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(status_code=400, detail=safe_text(exc, source_profile=current_profile(REDIS_ONLY))) from exc
     source, revision = resolve_dataset(geodata_dir, dataset.strip("/"))
     if expected_revision is not None and revision != expected_revision:
         raise HTTPException(status_code=409, detail="Requested dataset revision unavailable")
@@ -322,7 +328,7 @@ def process_raster(
             fn_list_to_cleanup.append(dst3)
             dst_final = dst3
         except (RuntimeError, FileNotFoundError) as e:
-            raise HTTPException(status_code=500, detail=f"Failed to convert to output format: {e}")
+            raise HTTPException(status_code=500, detail=safe_text(f"Failed to convert to output format: {e}", source_profile=current_profile(REDIS_ONLY)))
 
     return dst_final, meta, fn_list_to_cleanup
 

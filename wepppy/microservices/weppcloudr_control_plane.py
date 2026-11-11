@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import CONTROL_PLANE
+install_safe_logging(CONTROL_PLANE)
+
 import fcntl
 import hmac
 import json

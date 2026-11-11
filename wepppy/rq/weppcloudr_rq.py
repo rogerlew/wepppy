@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import BATCH_WORKER
+
 import fcntl
 import hashlib
 import inspect
@@ -153,7 +157,7 @@ def _open_child_directory(parent_fd: int, name: str) -> int:
     return os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent_fd)
 
 
-def _write_command_logs(active_path: Path, job_id: str, stdout: str, stderr: str) -> None:
+def _write_command_logs(active_path: Path, job_id: str, stdout: str, stderr: str, *, diagnostic: bool = False) -> None:
     maximum = int(os.getenv("WEPPCLOUDR_LOG_MAX_BYTES", str(DEFAULT_LOG_MAX_BYTES)))
     if maximum < 1024:
         raise BackendConfigurationError("WEPPCLOUDR_LOG_MAX_BYTES must be at least 1024.")
@@ -177,6 +181,8 @@ def _write_command_logs(active_path: Path, job_id: str, stdout: str, stderr: str
                 if not stat.S_ISREG(os.fstat(descriptor).st_mode):
                     raise WeppcloudRError("DEVAL command log is not a regular file.")
                 os.fchmod(descriptor, 0o660)
+                if diagnostic:
+                    value = safe_text(value, source_profile=current_profile(BATCH_WORKER))
                 payload = _bounded_log(value, maximum).encode("utf-8")
                 view = memoryview(payload)
                 while view:
@@ -487,7 +493,7 @@ def render_deval_details_rq(
             try:
                 result = executor.render(request, timeout=exec_timeout)
             except BackendExecutionError as exc:
-                _write_command_logs(active_path, job_id, exc.stdout, exc.stderr)
+                _write_command_logs(active_path, job_id, exc.stdout, exc.stderr, diagnostic=True)
                 raise
             _write_command_logs(active_path, job_id, result.stdout, result.stderr)
             _validate_artifact(output_path, active_path)

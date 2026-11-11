@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 """Helpers for introspecting RQ job trees and reporting aggregated status."""
 
 from datetime import datetime, timezone
@@ -335,7 +339,7 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
                 results[job_id] = {
                     "job_id": job_id,
                     "status": "error",
-                    "exc_info": str(exc),
+                    "exc_info": safe_text(exc, source_profile=current_profile(WORKER)),
                 }
                 if is_catalog_job(job_id):
                     results[job_id] = safe_job_details(job_id)
@@ -358,7 +362,7 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
                 results[job_id] = {
                     "job_id": job_id,
                     "status": "error",
-                    "exc_info": str(exc),
+                    "exc_info": safe_text(exc, source_profile=current_profile(WORKER)),
                 }
                 if is_catalog_job(job_id):
                     results[job_id] = safe_job_details(job_id)

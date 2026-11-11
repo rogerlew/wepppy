@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import render_current_exception, safe_diagnostics, new_error_id
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import RQ_ENGINE
+
 import logging
 import sys
-import traceback
-import uuid
 from typing import Any
 
 from fastapi.responses import JSONResponse
@@ -47,13 +49,15 @@ def error_response(
     error_id: str | None = None,
     log_exception: bool | None = None,
 ) -> JSONResponse:
-    resolved_error_id = error_id or uuid.uuid4().hex
+    resolved_error_id = error_id or new_error_id()
     resolved_code = code or _default_error_code(status_code)
     if details is None:
         if errors is not None:
             details = "Validation failed."
         else:
             details = message
+    sanitized = safe_diagnostics(source_profile=current_profile(RQ_ENGINE), message=message, details=details, errors=errors)
+    message, details, errors = sanitized["message"], sanitized["details"], sanitized["errors"]
     error_payload: dict[str, Any] = {
         "message": message,
         "details": details,
@@ -69,7 +73,7 @@ def error_response(
     if log_exception is None:
         log_exception = status_code >= 500 and sys.exc_info()[0] is not None
     if log_exception:
-        traceback_text = traceback.format_exc()
+        traceback_text = render_current_exception(source_profile=current_profile(RQ_ENGINE))
         logger.error(
             "rq-engine error response emitted [error_id=%s code=%s status=%s]: %s\n%s",
             resolved_error_id,
@@ -96,7 +100,7 @@ def error_response_with_traceback(
     errors: list[dict[str, Any]] | None = None,
     error_id: str | None = None,
 ) -> JSONResponse:
-    traceback_text = traceback.format_exc()
+    traceback_text = render_current_exception(source_profile=current_profile(RQ_ENGINE))
     return error_response(
         message,
         status_code=status_code,

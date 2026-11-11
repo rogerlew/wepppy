@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import SHAPE
+install_safe_logging(SHAPE)
+
 import asyncio
 import json
 import logging
@@ -132,14 +139,14 @@ def _is_scratch_root_writable(scratch_root: Path) -> tuple[bool, str | None]:
     try:
         scratch_root.mkdir(parents=True, exist_ok=True)
     except OSError as exc:
-        return False, f"scratch_root_create_failed: {exc}"
+        return False, safe_text(f"scratch_root_create_failed: {exc}", source_profile=current_profile(SHAPE))
 
     try:
         with tempfile.NamedTemporaryFile(mode="w", dir=scratch_root, delete=True, encoding="utf-8") as handle:
             handle.write("shape-converter readiness check")
             handle.flush()
     except OSError as exc:
-        return False, f"scratch_root_not_writable: {exc}"
+        return False, safe_text(f"scratch_root_not_writable: {exc}", source_profile=current_profile(SHAPE))
 
     return True, None
 

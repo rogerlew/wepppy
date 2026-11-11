@@ -519,20 +519,33 @@ def test_run_omni_contrast_writes_failed_status_and_reraises(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from tests.observability.canaries import install_canary
+    from wepppy.nodb.mods.omni.omni_state_contrast_mixin import OmniStateContrastMixin
+    canary = install_canary(monkeypatch, tmp_path)
     service = OmniRunOrchestrationService()
 
     def _run_contrast(*_args, **_kwargs):
-        raise ValueError("boom")
+        raise ValueError("boom " + canary)
 
     _install_omni_module_stub(monkeypatch, run_contrast=_run_contrast)
 
     omni = _ContrastOmniStub(tmp_path)
+    original_write = omni._write_contrast_run_status
+    def write(*args, **kwargs):
+        original_write(*args, **kwargs)
+        OmniStateContrastMixin._write_contrast_run_status(omni, *args, **kwargs)
+    omni._write_contrast_run_status = write
+    omni._contrast_run_status_path = lambda contrast_id: str(tmp_path / 'contrast.json')
+    omni._contrast_sidecar_dir = lambda: str(tmp_path)
     with pytest.raises(ValueError, match="boom"):
         service.run_omni_contrast(omni, 1, rq_job_id="job-2")
 
     statuses = [status for _, _, status, _, _ in omni.status_calls]
     assert statuses == ["started", "failed"]
-    assert omni.status_calls[-1][4] == "boom"
+    assert omni.status_calls[-1][4] == "boom [REDACTED]"
+
+    assert canary not in (tmp_path / "contrast.json").read_text()
+    assert "boom [REDACTED]" in (tmp_path / "contrast.json").read_text()
 
 
 def test_run_omni_contrasts_retries_lock_and_cleans_stale_entries(

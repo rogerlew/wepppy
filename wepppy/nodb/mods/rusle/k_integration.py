@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from collections import deque
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -647,7 +651,7 @@ def _load_optional_cfvo_near_surface(
             # malformed/unreadable and record explicit skip reason.
             "status": "not_applied",
             "reason": "cfvo_layer_processing_failed",
-            "error": str(exc),
+            "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
         }
 
     averaged = _weighted_depth_average(

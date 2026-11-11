@@ -1,4 +1,8 @@
 """Collect EDDE outside locks and publish one validated climate generation."""
+
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
 from copy import deepcopy
 from pathlib import Path
 import shutil
@@ -236,7 +240,7 @@ def run_edde_build(climate, *, attrs=None):
     finally:
         error = sys.exc_info()[1]
         if error is not None:
-            status['error'] = {'type': type(error).__name__, 'message': str(error)}
+            status['error'] = {'type': type(error).__name__, 'message': safe_text(error, source_profile=current_profile(WORKER))}
         status.update(state='complete' if complete else ('superseded' if status['state'] == 'superseded' else 'failed'), finished_utc=now())
         try:
             write_json(stage / 'build-status.json', status)

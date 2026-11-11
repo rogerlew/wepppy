@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 import logging
 import os
 from flask import current_app, make_response
@@ -139,7 +143,7 @@ def gl_dashboard(runid: str, config: str):
     try:
         output_scope = normalize_output_scope(request.args.get("output_scope"))
     except ValueError as exc:
-        response = error_factory(str(exc))
+        response = error_factory(safe_text(exc, source_profile=current_profile(WEB)))
         response.status_code = 400
         return response
 
@@ -151,7 +155,7 @@ def gl_dashboard(runid: str, config: str):
         with roads_lifecycle.current_read(wd):
             roads_scope = {"available": True, "reason": None}
     except roads_lifecycle.RoadsResultsUnavailable as exc:
-        roads_scope = {"available": False, "reason": str(exc)}
+        roads_scope = {"available": False, "reason": safe_text(exc, source_profile=current_profile(WEB))}
     except (OSError, ValueError):
         logger.warning("Cannot inspect Roads scope readiness", exc_info=True)
         roads_scope = {"available": False, "reason": "Roads readiness could not be read. Reload or contact support."}

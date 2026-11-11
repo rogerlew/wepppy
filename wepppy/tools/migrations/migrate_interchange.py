@@ -12,8 +12,13 @@ Usage:
     python scripts/migrate_interchange.py /wc1/runs/bi/biogeographic-six --force
 """
 
-import os
 import sys
+
+from wepppy.observability.safe_traceback import render_current_exception, safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
+import os
 import shutil
 from pathlib import Path
 from typing import Optional
@@ -70,7 +75,7 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
             generate_interchange_documentation,
         )
     except ImportError as e:
-        print(f"❌ Failed to import wepppy modules: {e}")
+        print(safe_text(f"❌ Failed to import wepppy modules: {e}", source_profile=current_profile(WORKER)))
         print(f"   Make sure you're in the correct Python environment")
         return
     
@@ -83,7 +88,7 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
         is_single_storm = climate.is_single_storm
         delete_after_interchange = wepp.delete_after_interchange
     except Exception as e:
-        print(f"❌ Failed to load run configuration: {e}")
+        print(safe_text(f"❌ Failed to load run configuration: {e}", source_profile=current_profile(WORKER)))
         return
     
     # Check for required watershed outputs
@@ -148,9 +153,9 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
             size_mb = pf.stat().st_size / (1024 * 1024)
             print(f"   📊 {pf.name} ({size_mb:.2f} MB)")
     except Exception as e:
-        print(f"❌ Hillslope interchange failed: {e}")
+        print(safe_text(f"❌ Hillslope interchange failed: {e}", source_profile=current_profile(WORKER)))
         import traceback
-        traceback.print_exc()
+        print(render_current_exception(source_profile=current_profile(WORKER)), file=sys.stderr)
         return
     
     # Run watershed interchange (if we have outputs)
@@ -172,9 +177,9 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
                 size_mb = wf.stat().st_size / (1024 * 1024)
                 print(f"   📊 {wf.name} ({size_mb:.2f} MB)")
         except Exception as e:
-            print(f"❌ Watershed interchange failed: {e}")
+            print(safe_text(f"❌ Watershed interchange failed: {e}", source_profile=current_profile(WORKER)))
             import traceback
-            traceback.print_exc()
+            print(render_current_exception(source_profile=current_profile(WORKER)), file=sys.stderr)
             # Continue - hillslope interchange is still useful
     
     # Generate totalwatsed3 (combined daily balance)
@@ -187,7 +192,7 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
             size_mb = totalwatsed_file.stat().st_size / (1024 * 1024)
             print(f"✅ totalwatsed3.parquet generated ({size_mb:.2f} MB)")
     except Exception as e:
-        print(f"⚠️  totalwatsed3 generation failed: {e}")
+        print(safe_text(f"⚠️  totalwatsed3 generation failed: {e}", source_profile=current_profile(WORKER)))
         # Non-fatal - continue
     
     # Generate documentation
@@ -198,7 +203,7 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
         if readme_path.exists():
             print(f"✅ README.md generated")
     except Exception as e:
-        print(f"⚠️  Documentation generation failed: {e}")
+        print(safe_text(f"⚠️  Documentation generation failed: {e}", source_profile=current_profile(WORKER)))
         # Non-fatal
     
     print()

@@ -1,3 +1,7 @@
+
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import SCHEDULER
+install_safe_logging(SCHEDULER)
 import argparse
 import importlib
 import json

@@ -9,6 +9,10 @@ status callback.
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import inspect
 import logging
 from typing import Any, Dict
@@ -100,7 +104,7 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
         raise
     except Exception as exc:
         try:
-            controller.set_status("failed", message=str(exc))
+            controller.set_status("failed", message=safe_text(exc, source_profile=current_profile(WORKER)))
         except Exception as status_exc:  # pragma: no cover - best-effort cleanup only
             logger.warning(
                 "path_ce: failed to update controller status after exception (runid=%s job_id=%s): %s",

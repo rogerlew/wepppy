@@ -1,6 +1,10 @@
 """Read-only source ownership and outlet metadata for the daily duration graph."""
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 import csv
 import io
 import json
@@ -52,7 +56,7 @@ def _source_status(root: Path, relative: str) -> dict:
         return {"available": True}
     except (OSError, ValueError, RuntimeError) as exc:
         LOGGER.info("Flow-duration source unavailable at %s: %s", root / relative, exc)
-        return {"available": False, "reason": str(exc) if isinstance(exc, ValueError) else "Daily source cannot be read"}
+        return {"available": False, "reason": safe_text(exc, source_profile=current_profile(WEB)) if isinstance(exc, ValueError) else "Daily source cannot be read"}
 
 
 def _observed_status(project: Path) -> dict:
@@ -107,7 +111,7 @@ def _observed_status(project: Path) -> dict:
         return {"present": True, "available": True, "records": records}
     except (OSError, ValueError, RuntimeError, csv.Error, duckdb.Error) as exc:
         LOGGER.warning("Observed flow-duration source unavailable at %s: %s", candidate, exc)
-        reason = str(exc) if isinstance(exc, ValueError) else "Observed CSV or watershed area cannot be read"
+        reason = safe_text(exc, source_profile=current_profile(WEB)) if isinstance(exc, ValueError) else "Observed CSV or watershed area cannot be read"
         return {"present": True, "available": False, "reason": reason}
 
 

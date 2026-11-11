@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 import os
 import re
 from copy import deepcopy
@@ -244,7 +248,7 @@ def create_batch_project():
             )
             return redirect(url_for("batch_runner.view_batch", batch_name=batch_runner.batch_name))   
         except (ValueError, FileExistsError, FileNotFoundError) as err:
-            errors.append(str(err))
+            errors.append(safe_text(err, source_profile=current_profile(WEB)))
 
     if errors:
         context["errors"] = errors
@@ -446,7 +450,7 @@ def validate_template(batch_name: str):
     try:
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
     except FileNotFoundError as exc:
-        return jsonify({"error": {"message": str(exc)}}), 404
+        return jsonify({"error": {"message": safe_text(exc, source_profile=current_profile(WEB))}}), 404
     payload = parse_request_payload(request, trim_strings=True)
     template = payload.get("template")
     if not template:
@@ -455,7 +459,7 @@ def validate_template(batch_name: str):
     try:
         watershed_collection = batch_runner.get_watershed_collection()
     except ValueError as exc:
-        return jsonify({"error": {"message": str(exc)}}), 400
+        return jsonify({"error": {"message": safe_text(exc, source_profile=current_profile(WEB))}}), 400
 
     validation = watershed_collection.validate_template(template)
     status = "ok" if validation["summary"]["is_valid"] else "invalid"
@@ -495,14 +499,14 @@ def runstate(batch_name: str):
     try:
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
     except FileNotFoundError as exc:
-        return jsonify({"error": {"message": str(exc)}}), 404
+        return jsonify({"error": {"message": safe_text(exc, source_profile=current_profile(WEB))}}), 404
 
     try:
         report = batch_runner.generate_runstate_cli_report()
     except ValueError as exc:
         return jsonify({
             "status": "empty",
-            "message": str(exc),
+            "message": safe_text(exc, source_profile=current_profile(WEB)),
             "report": "",
         }), 200
 

@@ -1,4 +1,9 @@
 
+from wepppy.observability.safe_logging import install as install_safe_logging, current_profile
+from wepppy.observability.secret_profiles import PLAYBACK
+from wepppy.observability.safe_traceback import safe_text
+install_safe_logging(PLAYBACK)
+
 import asyncio
 import json
 import logging
@@ -804,14 +809,14 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
     try:
         run_id = _detect_profile_run_id(profile_root)
     except ProfileOperationError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(status_code=400, detail=safe_text(str(exc), source_profile=current_profile(PLAYBACK))) from exc
 
     # Clean up any existing sandbox. The playback session itself will clear
     # locks at the appropriate stages, so we avoid doing it twice here.
     try:
         sandbox_uuid, sandbox_run_dir = _prepare_sandbox_run(profile_root, run_id)
     except ProfileOperationError as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to prepare sandbox: {exc}") from exc
+        raise HTTPException(status_code=500, detail=safe_text(f"Failed to prepare sandbox: {exc}", source_profile=current_profile(PLAYBACK))) from exc
 
     sandbox_run_id = f"profile;;tmp;;{sandbox_uuid}"
 
@@ -829,7 +834,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
             _perform_login(session, login_base_url, ADMIN_EMAIL, ADMIN_PASSWORD)
         except (requests.RequestException, RuntimeError) as exc:
             _RUNNER_LOGGER.exception("Playback authentication failed for %s", profile)
-            raise HTTPException(status_code=502, detail=f"Login failed: {exc}") from exc
+            raise HTTPException(status_code=502, detail=safe_text(f"Login failed: {exc}", source_profile=current_profile(PLAYBACK))) from exc
         else:
             _log_auth_success(profile, login_base_url)
             _mirror_cookies(session, login_base_url, playback_base_url)
@@ -927,7 +932,7 @@ async def fork_profile_route(profile: str, payload: ProfileForkRequest) -> Profi
     try:
         return await run_in_threadpool(fork_profile, profile, payload, _RUNNER_LOGGER)
     except ProfileOperationError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(status_code=400, detail=safe_text(str(exc), source_profile=current_profile(PLAYBACK))) from exc
 
 
 @app.post("/archive/{profile}", response_model=ProfileArchiveResult)
@@ -935,7 +940,7 @@ async def archive_profile_route(profile: str, payload: ProfileArchiveRequest) ->
     try:
         return await run_in_threadpool(archive_profile, profile, payload, _RUNNER_LOGGER)
     except ProfileOperationError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(status_code=400, detail=safe_text(str(exc), source_profile=current_profile(PLAYBACK))) from exc
 
 
 

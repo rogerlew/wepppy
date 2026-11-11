@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import safe_record_message, current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import logging
+import sys
+from wepppy.observability.safe_traceback import safe_text
 from typing import Optional
 from .stream_messages import sanitize_progress
 
@@ -30,6 +35,8 @@ class StatusMessenger:
     def publish(cls, channel: str, message: str) -> int:
         """Publish ``message`` to ``channel`` via Redis pub/sub."""
 
+        if sys.exception() is not None:
+            message = safe_text(message, source_profile=current_profile(WORKER))
         return cls._get_client().publish(channel, sanitize_progress(message))
 
     @classmethod
@@ -54,5 +61,5 @@ class StatusMessengerHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         """Format ``record`` and publish the message to the configured channel."""
 
-        msg = record.getMessage()
+        msg = safe_record_message(record, current_profile(WORKER))
         StatusMessenger.publish(self.channel, msg)

@@ -1,5 +1,9 @@
 """Download/aggregation helpers for the US Rangeland Analysis Platform."""
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
@@ -159,7 +163,7 @@ class RangelandAnalysisPlatform(object):
             else:
                 return False
         except (OSError, RuntimeError, ValueError) as exc:
-            print(f"Error validating raster {filename}: {exc}")
+            print(safe_text(f"Error validating raster {filename}: {exc}", source_profile=current_profile(WORKER)))
             return False
         finally:
             if dataset:

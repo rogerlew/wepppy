@@ -7,6 +7,10 @@ NoDb lock only while changing additive state.
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import hashlib
 import json
 import math
@@ -1172,7 +1176,7 @@ class AgFieldsWatershedIntegrator:
             "failure": {
                 "phase": self.phase,
                 "type": type(exc).__name__,
-                "message": self._public_error_message(exc),
+                "message": safe_text(self._public_error_message(exc), source_profile=current_profile(WORKER)),
             },
         }
         _atomic_json(self.manifest_dir / "integration_summary.json", summary)

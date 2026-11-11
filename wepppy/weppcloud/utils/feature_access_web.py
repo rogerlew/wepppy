@@ -1,4 +1,8 @@
 """Session-only FA-01 transport and read models; no feature endpoint admission."""
+
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
 from datetime import datetime, timedelta
 from functools import wraps
 from uuid import uuid4
@@ -57,6 +61,7 @@ def access_store():
 
 
 def access_error(code, message, status, *, error_id=None):
+    message = safe_text(message, source_profile=current_profile(WEB))
     body = {"error": {"code": code, "message": message, "details": message}}
     if error_id:
         body["error_id"] = error_id

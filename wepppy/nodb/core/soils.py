@@ -50,6 +50,10 @@ Warning:
     SSURGO data availability varies by region.
 """
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import os
 import inspect
 import json
@@ -1806,12 +1810,12 @@ class Soils(NoDbBase):
             self.logger.warning("SSURGO local candidate preparation unavailable: %s", exc)
             return self._global_ssurgo_substitutions(
                 raw_domsoil_d, primary_soils, global_mukey, "candidate_preparation_unavailable"
-            ) + ({"status": "unavailable", "error": str(exc)},)
+            ) + ({"status": "unavailable", "error": safe_text(str(exc), source_profile=current_profile(WORKER))},)
         except (CandidateRasterUnavailable, FileNotFoundError, OSError, ValueError) as exc:
             self.logger.warning("SSURGO local candidate preparation unavailable: %s", exc)
             return self._global_ssurgo_substitutions(
                 raw_domsoil_d, primary_soils, global_mukey, "candidate_preparation_unavailable"
-            ) + ({"status": "unavailable", "error": str(exc)},)
+            ) + ({"status": "unavailable", "error": safe_text(str(exc), source_profile=current_profile(WORKER))},)
 
         try:
             candidate_collection = SurgoSoilCollection(
@@ -1831,12 +1835,12 @@ class Soils(NoDbBase):
             self.logger.exception("SSURGO local candidate build failed")
             return self._global_ssurgo_substitutions(
                 raw_domsoil_d, primary_soils, global_mukey, "candidate_build_unavailable"
-            ) + ({"status": "build_unavailable", "error": str(exc)},)
+            ) + ({"status": "build_unavailable", "error": safe_text(str(exc), source_profile=current_profile(WORKER))},)
         except (SsurgoRequestError, OSError, ValueError) as exc:
             self.logger.exception("SSURGO local candidate build failed")
             return self._global_ssurgo_substitutions(
                 raw_domsoil_d, primary_soils, global_mukey, "candidate_build_unavailable"
-            ) + ({"status": "build_unavailable", "error": str(exc)},)
+            ) + ({"status": "build_unavailable", "error": safe_text(str(exc), source_profile=current_profile(WORKER))},)
 
         buildable_mukeys = set(primary_soils) | {str(mukey) for mukey in added_wepp_soils}
         substitutions: Dict[str, Dict[str, Any]] = {}
@@ -1860,12 +1864,12 @@ class Soils(NoDbBase):
             self.logger.warning("SSURGO raw-map source locations unavailable: %s", exc)
             return self._global_ssurgo_substitutions(
                 raw_domsoil_d, primary_soils, global_mukey, "candidate_location_unavailable"
-            ) + ({"status": "location_unavailable", "error": str(exc)},)
+            ) + ({"status": "location_unavailable", "error": safe_text(str(exc), source_profile=current_profile(WORKER))},)
         except (OSError, ValueError) as exc:
             self.logger.warning("SSURGO raw-map source locations unavailable: %s", exc)
             return self._global_ssurgo_substitutions(
                 raw_domsoil_d, primary_soils, global_mukey, "candidate_location_unavailable"
-            ) + ({"status": "location_unavailable", "error": str(exc)},)
+            ) + ({"status": "location_unavailable", "error": safe_text(str(exc), source_profile=current_profile(WORKER))},)
         for topaz_id in affected_topaz_ids:
             raw_mukey = str(raw_domsoil_d[topaz_id])
             source_location = source_locations[topaz_id]

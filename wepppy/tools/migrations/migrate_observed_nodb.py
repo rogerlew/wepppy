@@ -10,6 +10,10 @@ Usage:
     python scripts/migrate_observed_nodb.py /wc1/runs/md/mdobre-auxiliary-responsiveness
 """
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import os
 import sys
 import json
@@ -41,7 +45,7 @@ def migrate_observed_nodb(run_dir: str) -> None:
         with open(observed_nodb, 'r') as f:
             data = json.load(f)
     except json.JSONDecodeError as e:
-        print(f"❌ Failed to parse JSON: {e}")
+        print(safe_text(f"❌ Failed to parse JSON: {e}", source_profile=current_profile(WORKER)))
         return
     
     # Check if migration is needed

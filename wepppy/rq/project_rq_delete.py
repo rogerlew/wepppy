@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard
 
 import errno
+import sys
 import logging
 import os
 import time
@@ -24,6 +29,8 @@ class DeleteRuntime:
 
 
 def _publish(runtime: DeleteRuntime, channel: str, message: str) -> None:
+    if sys.exception() is not None:
+        message = safe_text(message, source_profile=current_profile(WORKER))
     runtime.publish_status(channel, message)
 
 
@@ -288,7 +295,7 @@ def gc_runs_rq(
         except Exception as exc:
             # Boundary catch: preserve contract behavior while logging unexpected failures.
             __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq_delete.py:268", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-            errors.append({"runid": str(runid), "error": str(exc)})
+            errors.append({"runid": str(runid), "error": safe_text(exc, source_profile=current_profile(WORKER))})
             _publish(
                 runtime,
                 status_channel,

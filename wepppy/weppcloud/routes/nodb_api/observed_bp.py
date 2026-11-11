@@ -1,7 +1,10 @@
 """Routes for observed blueprint extracted from app.py."""
 
+from wepppy.observability.safe_traceback import render_current_exception
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
 
-import traceback
+
 
 from .._common import *  # noqa: F401,F403
 
@@ -54,7 +57,7 @@ def submit_task_run_model_fit(runid, config):
         return exception_factory(
             'Error running model fit',
             runid=runid,
-            details=traceback.format_exc(),
+            details=render_current_exception(source_profile=current_profile(WEB)),
         )
 
     return success_factory()

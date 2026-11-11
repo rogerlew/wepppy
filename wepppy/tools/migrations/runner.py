@@ -17,6 +17,10 @@ Usage:
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -234,7 +238,7 @@ def check_migrations_needed(wd: str) -> Dict[str, Any]:
                     "name": name,
                     "description": MIGRATION_DESCRIPTIONS.get(name, ""),
                     "would_apply": False,
-                    "message": f"Error checking: {exc}",
+                    "message": safe_text(f"Error checking: {exc}", source_profile=current_profile(WORKER)),
                     "error": True,
                 }
             )
@@ -300,11 +304,11 @@ def run_all_migrations(
                 status = "applied" if applied else "skipped"
                 on_progress(name, f"{name}: {status} - {message}")
 
-        except Exception as exc:
+        except Exception as exc:  # broad-except: per-migration boundary retains explicit failure result
             result.success = False
-            result.errors[name] = str(exc)
+            result.errors[name] = safe_text(exc, source_profile=current_profile(WORKER))
             if on_progress:
-                on_progress(name, f"{name}: ERROR - {exc}")
+                on_progress(name, f"{name}: ERROR - {result.errors[name]}")
 
     result.completed_at = datetime.now(timezone.utc)
     if result.success and not dry_run:

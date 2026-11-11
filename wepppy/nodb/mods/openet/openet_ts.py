@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import json
 import os
 import time
@@ -467,7 +471,7 @@ class OpenET_TS(NoDbBase):
                                 )
                                 last_progress_time = time.time()
                             except Exception as exc:
-                                failures.append((topaz_id, str(exc)))
+                                failures.append((topaz_id, safe_text(str(exc), source_profile=current_profile(WORKER))))
 
                 if failures:
                     self.logger.warning(

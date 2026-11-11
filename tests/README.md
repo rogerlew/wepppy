@@ -14,6 +14,7 @@ tests/
 ├── climates/        # Climate data integrations
 ├── wepp/            # WEPP executables, translators, soils utilities
 ├── query_engine/    # DuckDB/MCP tests
+├── observability/   # Synthetic secret canaries, API/log/file/process boundaries
 └── data/            # Static fixtures and sample payloads
 ```
 
@@ -91,3 +92,14 @@ Happy testing! Keep the muscles fresh by running `wctl run-pytest tests --maxfai
 
 See [the Roads suite](roads/README.md) for the portable 516-profile matrix,
 four-texture comparisons, optional full-site checks and published report workflow.
+
+
+## Safe traceback validation
+
+Run `wctl run-pytest tests/observability`. The real RQ persistence case is opt-in:
+pass `--f5-redis-socket <container-visible Unix socket>` for a disposable Redis
+server whose `f5-disposable-server` key is `synthetic-only`. It never uses or
+flushes shared Redis. The test checks stored failure strings, callbacks and
+actual worker-pool/PFDF/spawn process output. The mounted-file container probe
+is `tests/docker/safe_traceback_probe.py`; its fixture and operational limits
+are documented in `docs/schemas/safe-traceback-contract.md`.

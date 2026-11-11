@@ -21,6 +21,10 @@ plotting stack.
 Sync notes and reference goldens: ``docs/work-packages/20260720_path_ce_v2/``.
 """
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import os
 import ast
 from contextlib import redirect_stderr, redirect_stdout
@@ -276,7 +280,7 @@ def all_thresholds(
                     'total_cost': np.nan,
                     'total_fixed_cost': np.nan,
                     'untreatable_sdyd_increase': None,
-                    'error': repr(exc),
+                    'error': safe_text(repr(exc), source_profile=current_profile(WORKER)),
                 })
     results_df = pd.DataFrame(results)
     return results_df

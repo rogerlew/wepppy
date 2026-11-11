@@ -2,6 +2,12 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import DOWNLOAD
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+install_safe_logging(DOWNLOAD)
+
 import asyncio
 import logging
 import os
@@ -367,7 +373,7 @@ async def archive_download(request: Request) -> Response:
             bytes_sent=0,
             duration_ms=(time.monotonic() - started) * 1000,
             outcome="range_not_satisfiable",
-            error_reason=str(exc),
+            error_reason=safe_text(exc, source_profile=current_profile(DOWNLOAD)),
         )
         return Response(status_code=416, headers=headers)
     except HTTPException as exc:

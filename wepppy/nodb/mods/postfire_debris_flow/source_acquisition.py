@@ -3,6 +3,12 @@
 CLI runs in a dedicated main-thread process so network/native deadlines are
 enforceable. Inputs are retained as ordinary project artifacts, not activated.
 """
+
+import sys
+
+from wepppy.observability.safe_traceback import render_current_exception, safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
 from datetime import datetime, timezone
 import json
 import math
@@ -160,8 +166,8 @@ def _acquisition_worker(operation, target, arguments, output, active):
             # Dedicated process boundary: all failures retain diagnostics;
             # the supervising parent rejects a nonzero worker exit.
             io.write_json(output/f'{operation}_failure.json',{'status':'failed','error_type':type(exc).__name__,
-                                                       'error':str(exc)[:2048]})
-            traceback.print_exc(limit=10)
+                                                       'error':safe_text(exc, source_profile=current_profile(WORKER))[:2048]})
+            print(render_current_exception(source_profile=current_profile(WORKER)), file=sys.stderr)
             raise
 
 

@@ -9,6 +9,10 @@ Usage:
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import argparse
 import os
 import sys
@@ -67,7 +71,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     try:
         run_path = _resolve_wd(args.runid, args.wd)
     except ValueError as exc:
-        print(f"Error: {exc}")
+        print(safe_text(f"Error: {exc}", source_profile=current_profile(WORKER)))
         return 2
 
     if not run_path.exists():

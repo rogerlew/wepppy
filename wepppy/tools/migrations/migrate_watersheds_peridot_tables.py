@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-import argparse
 import sys
-import traceback
+
+from wepppy.observability.safe_traceback import render_current_exception, safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
+import argparse
 from datetime import datetime, timezone
 from pathlib import Path
 from time import perf_counter
@@ -150,7 +154,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     try:
         run_dirs = list(_discover_run_dirs(args.root, max_depth=args.max_depth))
     except (FileNotFoundError, NotADirectoryError) as exc:
-        print(exc, file=sys.stderr)
+        print(safe_text(exc, source_profile=current_profile(WORKER)), file=sys.stderr)
         return 2
 
     if args.limit is not None:
@@ -203,10 +207,10 @@ def main(argv: Iterable[str] | None = None) -> int:
             except Exception as exc:  # pragma: no cover - operational script safeguard
                 failed += 1
                 status = "failed"
-                error_text = str(exc)
-                print(f"  ! Failed to migrate {run_dir}: {exc}", file=sys.stderr)
+                error_text = safe_text(exc, source_profile=current_profile(WORKER))
+                print(safe_text(f"  ! Failed to migrate {run_dir}: {exc}", source_profile=current_profile(WORKER)), file=sys.stderr)
                 if args.verbose:
-                    traceback.print_exc()
+                    print(render_current_exception(source_profile=current_profile(WORKER)), file=sys.stderr)
             finally:
                 if not metrics:
                     metrics = _collect_metrics(run_dir)

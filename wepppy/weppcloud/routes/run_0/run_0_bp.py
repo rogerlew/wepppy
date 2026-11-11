@@ -1,5 +1,9 @@
 """Routes for wepp blueprint extracted from app.py."""
 
+from wepppy.observability.safe_traceback import render_current_exception, safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WEB
+
 import os
 import pathlib
 from wepppy.query_engine.catalog_refresh import catalog_lifecycle_guard, invalidate_catalog_incarnation
@@ -12,7 +16,6 @@ import uuid
 from wepppy.nodb.single_input_policy import EXCLUDED_FEATURES, single_input_uploads_enabled
 from wepppy.weppcloud.utils.runid import generate_runid
 import json
-import traceback
 from urllib.parse import unquote, urlsplit
 try:
     import pyarrow.lib as _pyarrow_lib
@@ -2527,7 +2530,7 @@ def runs0(runid, config):
         response.headers["Retry-After"] = "5"
         return response
     except Exception as exc:
-        stacktrace = traceback.format_exc()
+        stacktrace = render_current_exception(source_profile=current_profile(WEB))
         # Reuse exception_factory for logging + run exception log side effects.
         exception_factory(msg=exc, stacktrace=stacktrace, runid=runid, details=stacktrace)
         return _render_run_internal_error_page(runid, config, stacktrace)
@@ -2759,7 +2762,7 @@ def _render_run_authority_error_page(
     escaped_runid = escape(runid)
     escaped_config = escape(config)
     escaped_code = escape(code)
-    escaped_details = escape(details)
+    escaped_details = escape(safe_text(details, source_profile=current_profile(WEB)))
     escaped_error_id = escape(error_id)
     body = f"""<!doctype html>
 <html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"robots\"

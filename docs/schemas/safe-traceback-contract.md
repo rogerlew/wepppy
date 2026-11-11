@@ -49,6 +49,9 @@ The following source families are explicit metadata, not mount discovery:
 | Model service clients | `OPENTOPOGRAPHY_API_KEY`, `CLIMATE_ENGINE_API_KEY`, `OPENET_API_KEY`, `WC_TOKEN` |
 | Query MCP | `WEPP_MCP_JWT_SECRET` |
 | D-Tale | `DTALE_INTERNAL_TOKEN` |
+| Discord | `weppcloud2/discord_bot/.bot_token` relative to the installed package; metadata lookup never imports the credential client |
+| Profile playback | `ADMIN_PASSWORD` / `ADMIN_PASSWORD_FILE` |
+| Wojak bootstrap | environment-only `AGENT_JWT_TOKEN`, `AGENT_JWT_SECRET` loaded by its Redis environment bridge |
 | Batch render client | `WEPPCLOUDR_K8S_IDENTITY_TOKEN_FILE` (raw token) |
 | Render control plane | `WEPPCLOUDR_CONTROL_PLANE_TOKEN_FILE`, `WEPPCLOUDR_TLS_KEY_FILE` (PEM), projected `/var/run/secrets/kubernetes.io/serviceaccount/token` |
 
@@ -57,7 +60,7 @@ consumer. Environment-only aliases do not gain invented file inputs. Public
 certificates, CA bundles, namespace files and `EXTERNAL_HOST` are not secrets.
 
 The Flask-init set is Redis, database (including URL credentials), Flask,
-`AGENT_JWT_SECRET` and mail/OAuth. Importing `weppcloud.app` resolves this entire
+`AGENT_JWT_SECRET`, mail/OAuth and the Discord client imported by NoDb core. Importing `weppcloud.app` resolves this entire
 set, including when imported lazily by another process. This set does not by
 itself include CAP, authorization key rings or model-service API keys.
 
@@ -72,10 +75,17 @@ itself include CAP, authorization key rings or model-service API keys.
 | Elevation/metquery/wmesque/wmesque2 | Redis; no model service keys without a verified local consumer |
 | Default/declarative RQ | Flask-init, model service clients |
 | Batch RQ | Default RQ plus batch render client |
-| Fork/archive RQ | Redis; database when project-commit mode is postgres (explicit mode-based metadata, not mount presence) |
-| Scheduler | Redis, database |
+| Fork/archive RQ | Redis, Discord; database when project-commit mode is postgres (explicit mode-based metadata, not mount presence) |
+| Scheduler | Redis, database, Discord |
 | Render control plane | Redis, render control plane |
 | Shape converter | None; stale Redis setting is excluded |
+| Profile playback | Flask-init, ADMIN_PASSWORD; model execution is submitted over HTTP |
+| Wojak bootstrap | Wojak environment token/signing secret only |
+
+The implicit Discord file may be absent because its consumer disables notifications
+on missing files. A present unreadable/invalid file fails closed. This exception
+is explicit package-file metadata and does not weaken configured `_FILE` handling.
+No directories or package modules are imported to discover values.
 
 Sources absent in a deployment are optional unless the adapter's actual startup
 contract requires them. The web profile excludes the downstream batch identity
@@ -176,3 +186,23 @@ credential material. Operators investigate a generic sanitization failure using
 the correlated failure and configured mount health, never enable raw diagnostics.
 Existing logs and Redis records are not retroactively rewritten. Deployment and
 live incident recovery remain separately authorized.
+
+## Adapter maintenance
+
+`wepppy/observability/secret_profiles.py` owns source metadata; additions require
+a verified consumer. `safe_logging.install` selects the first process owner before
+application imports, wraps existing/future handlers, and covers interpreter,
+thread, unraisable and multiprocessing target failures. Verify those hooks when
+upgrading Python or RQ. Spawn pools explicitly initialize their worker profile.
+
+Persist exception-derived status/manifest/CSV fields through `safe_text` before
+serialization; delayed plain strings lose logging exception provenance. Keep
+original exception objects and messages for parsing, retry and callback decisions.
+`safe_diagnostics` preserves adapter-owned names and the outer list/dict/None
+shape on failure while discarding failed content. It does not make arbitrary
+user-supplied dictionary keys into schema.
+
+Standalone corpus, fuzzing, benchmark and data-preparation scripts are outside
+production service acceptance. Generic agent transcripts/command output and
+historical stored diagnostics are outside Python exception sanitization. The
+production-invoked Wojak bootstrap catch and playback results are included.

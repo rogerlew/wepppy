@@ -1,3 +1,7 @@
+
+from wepppy.observability.safe_logging import install as install_safe_logging
+from wepppy.observability.secret_profiles import WEB
+install_safe_logging(WEB)
 # Copyright (c) 2016-, University of Idaho
 # All rights reserved.
 #

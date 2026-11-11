@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from wepppy.observability.safe_traceback import safe_text
+from wepppy.observability.safe_logging import current_profile
+from wepppy.observability.secret_profiles import WORKER
+
 import json
 import os
 import pickle
@@ -284,7 +288,7 @@ def migrate_watershed_lookup_caches(wd: str, *, dry_run: bool = False) -> Tuple[
         with open(watershed_nodb, "r", encoding="utf-8") as f:
             data = json.load(f)
     except (json.JSONDecodeError, OSError) as exc:
-        return False, f"Failed to read watershed.nodb: {exc}"
+        return False, safe_text(f"Failed to read watershed.nodb: {exc}", source_profile=current_profile(WORKER))
 
     state = data.get("py/state", data)
     if not isinstance(state, dict):
@@ -303,7 +307,7 @@ def migrate_watershed_lookup_caches(wd: str, *, dry_run: bool = False) -> Tuple[
     try:
         _atomic_write_json(watershed_nodb, data)
     except OSError as exc:
-        return False, f"Failed to write watershed.nodb: {exc}"
+        return False, safe_text(f"Failed to write watershed.nodb: {exc}", source_profile=current_profile(WORKER))
 
     return True, f"Removed {len(found_fields)} transient watershed lookup cache field(s)"
 
@@ -346,7 +350,7 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
             with open(watershed_nodb, "r") as f:
                 data = json.load(f)
         except (json.JSONDecodeError, OSError) as exc:
-            return False, f"Failed to read watershed.nodb: {exc}"
+            return False, safe_text(f"Failed to read watershed.nodb: {exc}", source_profile=current_profile(WORKER))
 
         state = data.get("py/state", data)
         if not isinstance(state, dict):
@@ -526,7 +530,7 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
     except ImportError:
         return True, "Peridot migration not available (skipped)"
     except Exception as exc:
-        return False, f"Watershed migration failed: {exc}"
+        return False, safe_text(f"Watershed migration failed: {exc}", source_profile=current_profile(WORKER))
 
     if changed:
         return True, "Normalized watershed tables (CSV to Parquet conversion)"
@@ -577,7 +581,7 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
         with open(watershed_nodb, "r") as f:
             data = json.load(f)
     except (json.JSONDecodeError, OSError) as exc:
-        return False, f"Failed to read watershed.nodb: {exc}"
+        return False, safe_text(f"Failed to read watershed.nodb: {exc}", source_profile=current_profile(WORKER))
 
     # The nodb format stores state under py/state for jsonpickle serialization
     state = data.get("py/state", data)
@@ -663,7 +667,7 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
         ]
         con.close()
     except Exception as exc:
-        return False, f"Failed to read topaz_ids from parquet: {exc}"
+        return False, safe_text(f"Failed to read topaz_ids from parquet: {exc}", source_profile=current_profile(WORKER))
 
     # Replace legacy dictionaries with placeholder dicts containing just the IDs
     # This maintains iteration compatibility while dropping the actual summary objects
@@ -706,14 +710,14 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
             changes.append("externalized _structure to structure.json")
         except Exception as exc:
             # Non-fatal - structure migration can be skipped
-            changes.append(f"_structure migration skipped: {exc}")
+            changes.append(safe_text(f"_structure migration skipped: {exc}", source_profile=current_profile(WORKER)))
 
     # Write updated watershed.nodb
     try:
         with open(watershed_nodb, "w") as f:
             json.dump(data, f, indent=2)
     except OSError as exc:
-        return False, f"Failed to write watershed.nodb: {exc}"
+        return False, safe_text(f"Failed to write watershed.nodb: {exc}", source_profile=current_profile(WORKER))
 
     # Calculate new size
     new_size = len(json.dumps(data))
