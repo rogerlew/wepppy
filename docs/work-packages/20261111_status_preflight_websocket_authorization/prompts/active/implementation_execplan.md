@@ -42,7 +42,7 @@ and leaves no token in URLs, logs, storage, selected protocols or artifacts.
       checks, exact Origins, bounded message redaction, and Go integration tests.
 - [x] M4: pass focused and broad validation; close correctness, QA and security
       review findings.
-- [ ] M5: perform the authorized, service-scoped forest redeploy with health and
+- [x] M5: perform the authorized, service-scoped forest redeploy with health and
       rollback evidence.
 - [ ] M6: pass real forest browser E2E and cleanup; update the audit board from
       retained sanitized evidence.
@@ -419,9 +419,10 @@ approved. M1-M3 implemented; M4 broad validation ongoing; forest acceptance pend
 
 Inspected `scripts/deploy-production.sh` and installed dev preset. The targeted
 web plan resolves `recreate=weppcloud rq-engine` and skips worker/stack shutdown.
-Web Python is bind-mounted from this checkout; no Python dependency changed, so
-reuse the current web image and rebuild generated assets through the canonical
-entry point. Both Go images are rebuilt from the reviewed Dockerfiles.
+Web Python is bind-mounted from this checkout. The canonical entry point
+requires a candidate web image build before recreation even without Python
+dependency changes; retain that guard and rebuild generated assets through the
+same entry point. Both Go images were rebuilt from the reviewed Dockerfiles.
 
 After M4 completes, execute:
 
@@ -429,7 +430,7 @@ After M4 completes, execute:
 wctl build status preflight
 wctl up -d --no-deps --force-recreate caddy
 PATH="$PWD/.venv/bin:$PATH" scripts/deploy-production.sh --targeted-web \
-  --skip-pull --skip-build --skip-themes --no-flush-rq-db --skip-docker-prune
+  --skip-pull --skip-themes --no-flush-rq-db --skip-docker-prune
 wctl up -d --no-deps --force-recreate status preflight
 node docs/work-packages/20261111_status_preflight_websocket_authorization/artifacts/forest_acceptance.mjs
 ```
@@ -457,3 +458,13 @@ signing fixture does not replace browser authorization proof. See the failure
 matrix for authority, isolation and temporary-credential handling.
 
 M4 completed: full pytest passed (13,568 passed / 435 skipped, 3,785.08 seconds) at `fadc8847b`. Local gates and independent code reviews pass. Proceeding to authorized forest cutover and browser acceptance.
+
+Forest cutover: Caddy recreated successfully. The initial targeted-web attempt
+rejected `--skip-build` before changing web containers. Retried without that flag
+to honor the canonical candidate-build guard. One historical query-catalog job
+has no registered queue listener and is preserved; no started jobs exist.
+
+M5 completed: five forest containers recreated, all running with zero restarts;
+login and rq-engine/status/preflight health return HTTP 200. Caddy header filter
+is verified active. Canonical candidate web build and image/stability gates
+passed. M6 real-browser acceptance remains pending. See before/after receipts.

@@ -35,7 +35,7 @@ browser acceptance remain mandatory. Production deployment is not authorized.
       exact Origin configuration, message redaction, and Go integration tests.
 - [x] M4: run focused gates, full pytest, npm lint, full npm tests, and close
       correctness, QA, and security review findings.
-- [ ] M5: render and validate forest Compose; drain affected work safely;
+- [x] M5: render and validate forest Compose; drain affected work safely;
       redeploy only affected services; check health and rollback readiness.
 - [ ] M6: run actual forest browser E2E for both token-bearing handshakes,
       authorized messages, negative cases, secret non-retention, and cleanup.
@@ -185,3 +185,8 @@ M0 completed: standalone ratified ancestor `6a06ad49a`; both independent reviews
 approved. M1-M3 implemented; M4 broad validation ongoing; forest acceptance pending.
 
 M4 completed: full pytest passed (13,568 passed / 435 skipped, 3,785.08 seconds) at `fadc8847b`. Local gates and independent code reviews pass. Proceeding to authorized forest cutover and browser acceptance.
+
+M5 completed: five forest containers recreated, all running with zero restarts;
+login and rq-engine/status/preflight health return HTTP 200. Caddy header filter
+is verified active. Canonical candidate web build and image/stability gates
+passed. M6 real-browser acceptance remains pending. See before/after receipts.

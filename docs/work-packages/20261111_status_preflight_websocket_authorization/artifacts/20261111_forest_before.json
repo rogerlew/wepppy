@@ -79,5 +79,18 @@
     "status": 200,
     "preflight": 200
   },
-  "rollback_source_snapshot": "/tmp/stream-auth-runtime-rollback.tar (task-owned tracked runtime files at ratified ancestor; generated bundle rebuild required after restore)"
+  "rollback_source_snapshot": "/tmp/stream-auth-runtime-rollback.tar (task-owned tracked runtime files at ratified ancestor; generated bundle rebuild required after restore)",
+  "cutover_recheck": {
+    "at": "2026-11-11T20:05:03.731377+00:00",
+    "revision": "366d91633e0b8fae21bf3803e44daebbfb45206b",
+    "health": "login, rq-engine, status and preflight all HTTP 200",
+    "active_started_jobs": 0,
+    "worker_count": 11,
+    "queued_exception": "One historical 2026-10-23 query-catalog job on qcat-variants-catalog-20261023, no registered listener; documented in 20261027 RQ upgrade baseline. Preserved; no cancellation or Redis flush.",
+    "worker_queues": [
+      "batch",
+      "default",
+      "fork-archive"
+    ]
+  }
 }

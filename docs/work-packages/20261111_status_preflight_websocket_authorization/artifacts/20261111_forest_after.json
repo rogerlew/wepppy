@@ -1,0 +1,60 @@
+{
+  "at": "2026-11-11T20:14:53.266936+00:00",
+  "revision": "366d91633e0b8fae21bf3803e44daebbfb45206b",
+  "containers": [
+    {
+      "name": "/weppcloud",
+      "container": "0b619cfab36b318483a1db9b8807f0162f49d401b80423d2c5687fb555961829",
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "started": "2026-11-11T20:13:38.479978252Z",
+      "state": "running",
+      "user": "1000:993",
+      "restart_count": 0
+    },
+    {
+      "name": "/wepppy-rq-engine",
+      "container": "4900068f3fd6dfd6bd5ab38835bcea562aaab2b1dd417c078ca74a347f4b5c42",
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "started": "2026-11-11T20:13:38.701274591Z",
+      "state": "running",
+      "user": "1000:993",
+      "restart_count": 0
+    },
+    {
+      "name": "/weppcloud-status",
+      "container": "b264d22204424129f2ee0a3ef767428f34d2743a960a845672b61ad3cd403338",
+      "image": "sha256:dd324d2f0b498f0365d4c95e1137927a836078383a6199cd67af46ac08b2eed1",
+      "started": "2026-11-11T20:14:40.545954897Z",
+      "state": "running",
+      "user": "1000:993",
+      "restart_count": 0
+    },
+    {
+      "name": "/weppcloud-preflight",
+      "container": "3a0bd2c48651817df6bb40f893c4d8466f0c1cc830dbe8de29e3e93aca195285",
+      "image": "sha256:db6e878e4c9610150dadc0b946681376bfc8d51896492ff25d818842d3cd42a1",
+      "started": "2026-11-11T20:14:40.76554067Z",
+      "state": "running",
+      "user": "1000:993",
+      "restart_count": 0
+    },
+    {
+      "name": "/wepppy-caddy",
+      "container": "db12457b87d331db8fac4111a9401ae45ed340f2b2a8ba2c4b1b4147223206ad",
+      "image": "sha256:2ad4f81b9a44d531eff80b8d8c65c495c8a867648dc9a3e3720224d7418b3f90",
+      "started": "2026-11-11T20:05:05.083357501Z",
+      "state": "running",
+      "user": "",
+      "restart_count": 0
+    }
+  ],
+  "health": {
+    "/weppcloud/login": 200,
+    "/rq-engine/health": 200,
+    "/weppcloud-microservices/status/health": 200,
+    "/weppcloud-microservices/preflight/health": 200
+  },
+  "caddy_protocol_header_filter_active": true,
+  "scope": "forest only; workers and Redis preserved; no flush or prune",
+  "deployment": "Canonical targeted-web candidate build, health/image/restart checks passed; status/preflight independently recreated from reviewed images."
+}
