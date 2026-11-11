@@ -139,12 +139,18 @@ func main() {
 
 	results := make(chan result, *clientsFlag)
 	var wg sync.WaitGroup
+	var ready sync.WaitGroup
+	ready.Add(*clientsFlag)
+	start := make(chan struct{})
+	go func() { ready.Wait(); close(start) }()
 
 	for clientID := 0; clientID < *clientsFlag; clientID++ {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
-			latencies, payloadBytes, err := runClient(ctx, logger, id, *samplesFlag, extraPayload, redisClient, wsURL, redisChannel, *recvTimeout, dial)
+			signalReady := sync.OnceFunc(ready.Done)
+			defer signalReady()
+			latencies, payloadBytes, err := runClient(ctx, logger, id, *samplesFlag, extraPayload, redisClient, wsURL, redisChannel, *recvTimeout, dial, *clientsFlag, signalReady, start)
 			results <- result{latencies: latencies, payloadSize: payloadBytes, err: err}
 		}(clientID)
 	}
@@ -213,6 +219,9 @@ func runClient(
 	redisChannel string,
 	recvTimeout time.Duration,
 	dial *websocket.DialOptions,
+	expectedSubscribers int,
+	signalReady func(),
+	start <-chan struct{},
 ) ([]time.Duration, int, error) {
 	logger.Printf("[client %d] connecting to %s", clientID, wsURL)
 	conn, resp, err := websocket.Dial(ctx, wsURL, dial)
@@ -228,6 +237,30 @@ func runClient(
 
 	if conn.Subprotocol() != "wepp-stream.v1" {
 		return nil, 0, fmt.Errorf("unexpected selected protocol")
+	}
+	// An accepted socket can precede its Redis subscribe acknowledgment.
+	// Wait for all fixture subscribers, then release publishers together.
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		counts, err := redisClient.PubSubNumSub(ctx, redisChannel).Result()
+		if err != nil {
+			return nil, 0, fmt.Errorf("subscription readiness unavailable")
+		}
+		if counts[redisChannel] >= int64(expectedSubscribers) {
+			break
+		}
+		select {
+		case <-ctx.Done():
+			return nil, 0, fmt.Errorf("subscription readiness timed out")
+		case <-ticker.C:
+		}
+	}
+	signalReady()
+	select {
+	case <-start:
+	case <-ctx.Done():
+		return nil, 0, fmt.Errorf("fixture barrier timed out")
 	}
 	latencies := make([]time.Duration, 0, samples)
 	rng := rand.New(rand.NewSource(time.Now().UnixNano() + int64(clientID)*1_000_000))

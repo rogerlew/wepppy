@@ -205,6 +205,10 @@ try {
     const b = await createPrivateRun();
     stage = 'authorized-streams';
     await page.goto(base + '/weppcloud/runs/' + a.runid + '/' + a.config + '/');
+    await page.waitForFunction(() => Boolean(window.Wepp?.getInstance));
+    // Empty projects have no active job: use the existing controller lifecycle
+    // to open its real status panel without submitting model work.
+    await page.evaluate(() => { const controller=window.Wepp.getInstance(); controller.connect_status_stream(controller); });
     await until(() => [...sockets.values()].some(s => s.claims?.runid === a.runid && s.claims?.service === 'preflight' && s.status === 101), 'preflight handshake');
     await until(() => [...sockets.values()].some(s => s.claims?.runid === a.runid && s.url.includes(':wepp?') && s.status === 101), 'status handshake');
     for (const service of ['status','preflight']) {
@@ -225,6 +229,8 @@ with Redis(**redis_connection_kwargs(RedisDB.STATUS)) as c: print(c.publish(r+':
     execFileSync('wctl', ['exec','-T','weppcloud','python','-c',publish], {input:JSON.stringify([a.runid,marker]),stdio:['pipe','pipe','pipe']});
     await until(() => messages.some(m => m.url.includes('/status/' + a.runid + ':wepp') && m.body.type === 'status' && m.body.data === marker), 'status marker');
     check('actual-status-marker', true);
+    await page.waitForFunction(marker => document.body.textContent.includes(marker), marker);
+    check('status-marker-rendered', true);
     stage = 'negative-connections';
     for (const service of ['status','preflight']) {
         for (const crossRun of [false,true]) {

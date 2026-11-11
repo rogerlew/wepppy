@@ -53,3 +53,21 @@ actual GitHub Actions execution is not claimed. Independent reviewers approved
 the tooling auth changes. The inherited k6 connection-age metric was renamed
 and its invalid latency threshold removed; handshake and message-count gates
 remain enforced. Live operator smoke will follow forest cutover.
+
+## Production-identity status canary
+
+A disposable `wctl run --rm --no-deps --name stream-auth-status-canary status`
+container used the built image
+`sha256:dd324d2f0b498f0365d4c95e1137927a836078383a6199cd67af46ac08b2eed1`,
+UID/GID `1000:993`, configured signing/Redis secret mounts and exact forest
+Origin. The trusted operator smoke ran against its internal Docker address.
+Two clients received five messages each (10 total), with the fixed negotiated
+protocol. No live service was recreated for this canary.
+
+The first two-client attempt exposed an inherited smoke race: HTTP 101 preceded
+Redis subscription readiness, so one client's initial publish was lost. The
+fixture now waits for all subscriptions and releases publishers together;
+retest passed. Both attempted fixtures left zero session markers. Canary log
+scan found no bearer/JWT credential pattern; the disposable container was
+stopped/removed. This proves service transport under actual mounts/identity,
+not browser authorization or deployed Caddy acceptance.

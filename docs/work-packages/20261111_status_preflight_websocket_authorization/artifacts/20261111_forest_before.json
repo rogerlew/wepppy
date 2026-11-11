@@ -47,5 +47,37 @@
       "user": ""
     }
   ],
-  "queues": "All discovered queues had zero queued and started jobs; 11 workers registered. No jobs canceled."
+  "queues": "All discovered queues had zero queued and started jobs; 11 workers registered. No jobs canceled.",
+  "desired_config": {
+    "status": {
+      "user": "1000:993",
+      "origin": "https://forest.tail305ec9.ts.net",
+      "signing_file": "/run/secrets/wepp_auth_jwt_secrets",
+      "secret_names": [
+        "redis_password",
+        "wepp_auth_jwt_secrets"
+      ]
+    },
+    "preflight": {
+      "user": "1000:993",
+      "origin": "https://forest.tail305ec9.ts.net",
+      "signing_file": "/run/secrets/wepp_auth_jwt_secrets",
+      "secret_names": [
+        "redis_password",
+        "wepp_auth_jwt_secrets"
+      ]
+    }
+  },
+  "signing_readback": {
+    "uid": 1000,
+    "gid": 993,
+    "readable": true,
+    "nonempty": true
+  },
+  "predeploy_health": {
+    "rq-engine": 200,
+    "status": 200,
+    "preflight": 200
+  },
+  "rollback_source_snapshot": "/tmp/stream-auth-runtime-rollback.tar (task-owned tracked runtime files at ratified ancestor; generated bundle rebuild required after restore)"
 }
