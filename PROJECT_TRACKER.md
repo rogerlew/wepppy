@@ -1,4 +1,4 @@
-Ready for canary handoff: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — reviewed implementation and inactive open-wepp-org receiving package committed. Lifecycle/artifact/failure gates pass; broad continuations retain one confirmed unrelated baseline assertion. Live image/runtime/viewing acceptance and package closure remain pending.
+Completed 2026-11-11 UTC: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — corrected immutable runtime and notification schema deployed; real DEM, HTTP/archive and owned fault gates passed; temporary workers removed and ordinary fleet healthy. Exact test limitations and retained incomplete fault projects are documented.
 
 Verified on forest: [Culvert catalog contention and stateless WBT](docs/work-packages/20261109_culvert_catalog_contention/package.md) — two fresh 33/33 parallel replays; model/artifact/download checks pass; 296 focused tests and 230 WBT tests pass. Broad suite: 13,236 pass, one confirmed baseline template failure. Production unchanged.
 

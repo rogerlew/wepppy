@@ -2,11 +2,11 @@
 
 ## Quick Status
 
-**Started / last updated**: 2026-11-10
+**Started / last updated**: 2026-11-10 / 2026-11-11 UTC
 
-**Phase**: Ready for controlled canary handoff; M5 live acceptance pending
+**Phase**: Closed — bounded live acceptance and final review complete
 
-**Next**: Receiving operator publishes/reviews the candidate and authorizes the bounded canary
+**Next**: No required work for this bounded slice; large-DEM cost and generalization remain deferred.
 
 **Security**: High; independent source and staged deployment review passed
 
@@ -18,8 +18,8 @@
 - [x] M2: shared DEM task provenance and on-demand regression coverage.
 - [x] M3: independent engine/image adapter; inactive bounded worker preparation.
 - [x] M4: real local finalization/viewing; cluster endpoint evidence belongs to M5.
-- [ ] M5: open-wepp-org validation, fault cases and archive/readback evidence.
-- [ ] M6: final correctness, QA, security, documentation and closeout.
+- [x] M5: open-wepp-org validation, fault cases and archive/readback evidence.
+- [x] M6: final correctness, QA, security, documentation and closeout.
 
 ## Decisions
 
@@ -32,13 +32,11 @@ No Bootstrap, deterministic/comparison machinery or compatibility layer.
 
 ## Risks and dependencies
 
-Actual image/attempt binding is unproven (ARCH-3 / INTEGRITY-1). Cluster worker
-capacity must be inspected without displacing active jobs. Existing read-only
-finalization refreshes catalogs and creates a browse manifest; permissible later
-writes and failure ordering need direct tests. A DEM-only project may not support
-all reports: select a genuine existing DEM viewer/derived task, not a fake report.
-SOPS is deferred for engine-specific secret storage, not permission to bypass the
-infrastructure repository's existing secret delivery requirements.
+Actual runtime/image binding and all bounded receiving gates are proven. Preserve
+failed/incomplete attempts; unknown worker-loss cleanup never authorizes replay or
+finalization. Large-DEM observation cost and private elevation authorization remain
+deferred. No clean whole-suite claim: the unchanged TTL-help baseline assertion is
+explicitly dispositioned in final_full_suite.txt.
 
 ## Verification and evidence
 
@@ -65,7 +63,7 @@ working-tree changes and do not create/switch branches.
 
 ## Handoff
 
-Continue the [active ExecPlan](prompts/active/implementation_execplan.md) at the
+Historical handoff instruction (superseded by closure): continue the [historical ExecPlan](prompts/completed/implementation_execplan.md) at the
 receiving M5 gate. [Deployment handoff](artifacts/deployment_handoff.md) links the
 inactive open-wepp-org package and runbook. Source implementation and local tests
 are complete subject to final gates below; live runtime identity, browser/download,
@@ -164,3 +162,17 @@ missing test Redis executable; it is not the acceptance result. RQ graph check
 passes. No full-suite claim is made; broad-suite limitations from the original
 handoff remain. Independent source correction review is retained in the receiving
 security review. Corrected image publication and fresh-UUID live acceptance follow.
+
+## Receiving outcome — 2026-11-11 UTC
+
+[Receiving acceptance](artifacts/receiving_acceptance.md) supersedes the historical
+handoff status above: corrected image and table migration deployed, live success,
+HTTP/archive and all owned fault gates executed, ordinary fleet restored and
+all temporary workers removed. M5 is complete. Failed/incomplete fixtures remain
+truthful, preserved and never replayed; large-DEM cost is deferred explicitly.
+
+M6 complete: final full-scope failed-first invocation retained the same13793-item
+collection and stopped on the byte-identical, already-reproduced TTL-help baseline.
+No tests were excluded and no exhaustive pass is claimed. Corrected scoped tests,
+actual live gates and independent receiving review pass. Temporary test overlays
+restored; implementation ExecPlan archived with outcome.

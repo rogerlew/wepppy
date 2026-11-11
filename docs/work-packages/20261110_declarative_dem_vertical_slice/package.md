@@ -1,6 +1,6 @@
 # Declarative DEM vertical slice
 
-**Status**: Open — ready for controlled canary handoff; live acceptance pending
+**Status**: Closed 2026-11-11 UTC — corrected runtime, table migrations and bounded live acceptance complete
 
 **Timezone**: UTC
 
@@ -12,8 +12,9 @@ Deliver one real declarative acquisition build on the open-wepp-org Kubernetes
 cluster using the same DEM RQ task as on-demand modeling. The resulting ordinary
 project must retain task/image provenance, finalize read-only, and support an
 actual subsequent on-demand viewing task without changing protected build state.
-Execution is now authorized through deployment-ready handoff; deployment and live
-acceptance remain a separate receiving step.
+Roger authorized receiving deployment and table migrations. Corrected immutable
+runtime, real acquisition/viewing/archive and owned failure acceptance are deployed
+and recorded in [receiving acceptance](artifacts/receiving_acceptance.md).
 
 ## Objectives and scope
 
@@ -109,7 +110,7 @@ stop and separately scope the scientific change rather than hide it here.
 - [Canonical proposed specification](../../schemas/declarative-model-build-spec.md)
 - [Architecture review dispositions](../../reviews/declarative-model-build-spec-review.md)
 - [Tracker](tracker.md)
-- [Active ExecPlan](prompts/active/implementation_execplan.md)
+- [Completed ExecPlan](prompts/completed/implementation_execplan.md)
 - [Reviewed contract decision](artifacts/20261110_contract_decision.md)
 - [Evidence ledger](artifacts/validation_matrix.md)
 
@@ -117,3 +118,12 @@ Deliverables are working application/deployment changes in their respective
 repositories, current contracts, concrete operator commands, retained sanitized
 cluster evidence and an operator runbook. Future full-pipeline expansion is a
 separate scope. No delivery date is asserted before fixture/deployment discovery.
+
+## Closeout
+
+Delivered implementation `f02e78cc0`, published immutable image, migrated schema,
+actual public DEM/read-only/view/archive behavior and owned fault acceptance.
+[Receiving evidence](artifacts/receiving_acceptance.md) records runtime identities,
+recovery and deferred scope. [Final full-suite disposition](artifacts/final_full_suite.txt)
+retains the reproduced unrelated baseline failure without claiming all tests pass.
+No source or receiving implementation gate remains for this bounded slice.

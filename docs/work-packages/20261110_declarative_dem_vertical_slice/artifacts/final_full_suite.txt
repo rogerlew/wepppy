@@ -1,0 +1,27 @@
+Final corrected-source full-scope invocation — 2026-11-11 UTC
+
+Exact f02 production/test overlay files on forest; original baseline HEAD b3786ae7e,
+unrelated preexisting edits preserved. Overlays hash-verified before restoration.
+
+Initial: wctl run-pytest tests --maxfail=1
+Collected13793 items/1skip. Gracefully interrupted only owned pytest after
+418passed/28skipped/20warnings in214.21s to prioritize known failures.
+
+Terminal: wctl run-pytest tests --maxfail=1 --failed-first
+Same13793-item scope, no exclusions; standard pytest failed-first ordering.
+1failed/1skipped/10warnings in33.17s, stopped atfirstfailure.
+No claim that every collected test executed or passed.
+
+Failure: tests/weppcloud/test_usersum_template_wiring.py::test_runs_template_uses_the_ttl_deletion_usersum_doc_id
+Assertion: expected runsTtlDeletionHelpUrl in templates/user/runs2.html.
+Exact match to retained baseline reproduction at contract ancestor d6e101ab8.
+Test SHA256738b5cd17c5d59b28eed7d7955038d6d598aa55af41d861f54f7383933aa38c9
+Template SHA256dba1f745b74b3b75f3b99b0549d05b6ce7757c9f24032adefcddebcc1ba26d62
+Both current forest inputs match baseline_template_inputs.json byte-for-byte.
+No production/test correction touches either file. Existing baseline failure
+is dispositioned outside this bounded DEM deployment; not fixed or hidden.
+
+Correction coverage:106focusedpassed/0skipped with real disposableRedis;
+5586NoDb/RQpassed/182skipped. Source historical full continuations retain6401
+unique passes/241skips and same baseline failure; no clean-full-suite claim.
+All final four temporary test-overlay files restored after terminal result.

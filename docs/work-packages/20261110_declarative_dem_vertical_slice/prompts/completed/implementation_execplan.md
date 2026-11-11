@@ -1,11 +1,19 @@
+# Completed outcome — 2026-11-11 UTC
+
+Bounded receiving deployment, table migrations, live acceptance/faults, cleanup
+and independent review complete. Source `f02e78cc0` is deployed; final full-scope
+invocation retains a confirmed unrelated baseline failure, not a clean pass.
+The planning/handoff sections below are historical and superseded by the receiving
+outcome and final_full_suite artifacts. No M5/M6 work remains for this bounded slice.
+
 # Complete the declarative DEM vertical slice on open-wepp-org
 
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Maintain
 Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective.
 Execution authorized on 2026-11-10 through deployment-ready handoff. Keep the
-package tracker synchronized. Live deployment and cluster acceptance are deferred
-to the receiving operator; no live cluster changes have happened.
+package tracker synchronized. Roger subsequently authorized deployment and table migrations. Receiving live
+acceptance and cleanup are recorded in artifacts/receiving_acceptance.md.
 
 ## Purpose / Big Picture
 
@@ -21,7 +29,7 @@ unit test. Production wepp.cloud remains out of rollout scope.
 ## Progress
 
 - [x] (2026-11-10 23:32 UTC) Receiving migration, native checks and candidate fleet rollout passed.
-- [ ] Repair confirmed RedisPrep NFS attribute-preservation failure, verify real mounted workflow, publish reviewed correction and resume M5 with a fresh UUID.
+- [x] Repair confirmed RedisPrep NFS attribute-preservation failure, verify real mounted workflow, publish reviewed correction and resume M5 with a fresh UUID.
 
 
 - [x] (2026-11-10 20:18 UTC) Scaffold plan and evidence/review records.
@@ -29,8 +37,8 @@ unit test. Production wepp.cloud remains out of rollout scope.
 - [x] M2 shared task provenance with real artifact and on-demand parity tests.
 - [x] M3 operator engine/image adapter; reviewed inactive deployment configuration.
 - [x] M4 real local protection/viewing; live endpoint acceptance remains M5.
-- [ ] M5 cluster acceptance, fault/recovery cases and retention evidence.
-- [ ] M6 independent final reviews, required gates and closeout.
+- [x] M5 cluster acceptance, fault/recovery cases and retention evidence.
+- [x] M6 independent final reviews, required gates and closeout.
 
 - [x] (2026-11-10) Independent source correctness, QA and security reviews passed.
 - [x] (2026-11-10) Reviewed inactive receiving configuration and runbook copied to open-wepp-org.
@@ -97,7 +105,7 @@ RQ graph passed, and the exact snapshot correction passed ordinary initializatio
 and repeated publication on the actual NFS mount with unchanged access metadata.
 The live `python -m` entrypoint also exposed RQ rejection of __main__ functions;
 canonical import-string enqueue restores the intended fixed dispatch contract.
-Publication and fresh-UUID acceptance remain pending; failed original state is retained.
+Publication and fresh-UUID live acceptance passed; failed original state is retained.
 
 
 Contract checkpoint and local on-demand science/readback are complete. Shared
@@ -398,7 +406,14 @@ runs supply the documented coverage, not a fabricated full-suite pass. A legacy
 Ron test double gained required identity fields; independent QA approved the test
 correction. No production code changed after the reviewed implementation commit.
 
-M2–M4 and local M6 preparation are complete. M5 and final closeout remain open.
-Next action is the authorized receiving canary using the inactive runbook, actual
+M2–M4 and local M6 preparation are complete. At the historical handoff, M5 and final closeout remained open.
+The next action at that historical checkpoint was the authorized receiving canary using the inactive runbook, actual
 published manifest and live preflight. Do not close this package before target
 runtime/artifact/viewing and failure-recovery acceptance.
+
+Receiving outcome: M5 success, HTTP/archive, source/checkpoint/finalizer faults,
+running cancellation and worker loss all have actual runtime evidence. Temporary
+workers are removed, Flux restored, ordinary fleet healthy. The narrow NFS and
+CLI corrections preserve the existing contract. Broad corrected tests passed
+5586 with182 explicit skips; no clean full-suite claim. Final independent review
+and full-scope invocation disposition complete; see artifacts/final_full_suite.txt.
