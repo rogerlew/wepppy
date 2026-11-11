@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate route inventory drift against the frozen endpoint inventory artifact."""
+"""Validate route inventory drift against the canonical endpoint inventory."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 
 INVENTORY_FILE = Path(
-    "docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md"
+    "docs/schemas/rq-engine-endpoint-inventory.md"
 )
 
 _ALLOWED_CLASSIFICATIONS = {"agent-facing", "internal", "ui-only"}

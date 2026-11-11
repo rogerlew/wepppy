@@ -10,7 +10,7 @@ on:
       - tools/check_route_contract_checklist.py
       - tools/wctl2/commands/python_tasks.py
       - tools/wctl2/tests/test_python_tasks_commands.py
-      - docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md
+      - docs/schemas/rq-engine-endpoint-inventory.md
       - docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md
       - .github/forest_workflows/rq-engine-contract-guards.yml
       - .github/workflows/rq-engine-contract-guards.yml
@@ -26,7 +26,7 @@ on:
       - tools/check_route_contract_checklist.py
       - tools/wctl2/commands/python_tasks.py
       - tools/wctl2/tests/test_python_tasks_commands.py
-      - docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md
+      - docs/schemas/rq-engine-endpoint-inventory.md
       - docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md
       - .github/forest_workflows/rq-engine-contract-guards.yml
       - .github/workflows/rq-engine-contract-guards.yml

@@ -15,7 +15,7 @@ if str(REPO_ROOT) not in sys.path:
 from tools.rq_engine_contract_rules import required_response_codes
 
 INVENTORY_FILE = Path(
-    "docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md"
+    "docs/schemas/rq-engine-endpoint-inventory.md"
 )
 CHECKLIST_FILE = Path(
     "docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md"

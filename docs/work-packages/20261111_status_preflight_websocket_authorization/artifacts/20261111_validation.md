@@ -38,6 +38,19 @@ forest cutover. All commands run on forest through the installed dev `wctl`.
 Raw test output remains local under `/tmp/stream-auth-*.log`. Browser evidence
 must contain only selected non-secret claims and assertions, never credentials.
 
+The third full pytest attempt stopped after 9,803 passed and 429 skipped
+(3,491.79 seconds) because the new browser-only route was missing from the
+endpoint inventory. Promoted the unchanged existing table from its closed
+package to `docs/schemas/rq-engine-endpoint-inventory.md`, added the stream-token
+row, and switched the three readers, canonical pointers and generated CI path
+filters. Both inventory/checklist guards pass. A focused pass over the remaining
+test directories precedes another unsegmented full run; neither partial result
+is a full-suite pass. This exposed a maintenance gap: route onboarding should
+name the inventory guard before the expensive full suite.
+
+QA tightened the forest harness before deployment: wait for Redis subscribers,
+require a fresh preflight frame after renewal, log out explicitly, and clear the
+disposable run cache before deletion. Cleanup can resume after partial success.
 ## Final consumer/tooling checks
 
 The second full pytest attempt was explicitly interrupted at 387 passed / 28

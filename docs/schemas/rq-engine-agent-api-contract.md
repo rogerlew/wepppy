@@ -18,9 +18,9 @@ lifecycle polling, and route ownership.
   - Proxied: `/rq-engine/openapi.json`
 - Stable OpenAPI operation IDs use the `rq_engine_` prefix.
 
-Route ownership and freeze artifacts:
-- Frozen endpoint inventory:
-  `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
+Current route ownership and historical checklist:
+- Canonical current endpoint inventory:
+  `docs/schemas/rq-engine-endpoint-inventory.md`
 - Route contract checklist:
   `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
 - Drift guards:
@@ -626,7 +626,7 @@ frozen 114-route agent-facing checklist.
 | `GET` | `/api/admin/jobs-detail` | Complete started + queued jobs across `default`, `batch`, and `fork-archive` queues. | JWT Bearer, `rq:status`, `Admin`/`Root` role |
 
 Inventory source of truth for these internal routes remains:
-`docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`.
+`docs/schemas/rq-engine-endpoint-inventory.md`.
 
 ## Bootstrap + Flask Exceptions
 Agent-facing Bootstrap operations are canonically owned by rq-engine. Two

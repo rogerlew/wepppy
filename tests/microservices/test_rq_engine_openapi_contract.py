@@ -15,7 +15,7 @@ pytestmark = pytest.mark.microservice
 
 
 INVENTORY_FILE = Path(
-    "docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md"
+    "docs/schemas/rq-engine-endpoint-inventory.md"
 )
 
 # Includes the three contract-required project config update operations added by WP08.

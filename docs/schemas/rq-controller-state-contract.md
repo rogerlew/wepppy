@@ -28,9 +28,9 @@
 - No UI rendering prescriptions beyond optional hint metadata.
 
 ## Frozen Baseline vs Target Profile
-- `Frozen baseline`: current implemented route behavior captured in
-  `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
-  and
+- Current implemented routes are listed in
+  `docs/schemas/rq-engine-endpoint-inventory.md`
+  with the historical frozen contract baseline in
   `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`.
 - `Target profile`: additive post-cutover behavior described in this contract for
   controller-state endpoints and descriptor/schema hardening.
@@ -393,7 +393,7 @@ because they are common orchestration-adjacent operations, but they are not
 pipeline DAG nodes and MUST NOT appear in `pipeline.steps[]`.
 
 For the exhaustive current run-scoped inventory baseline, use:
-- `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
+- `docs/schemas/rq-engine-endpoint-inventory.md`
 - `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
 
 | Canonical Operation ID | Typical Endpoint | Class |
@@ -2016,7 +2016,7 @@ When a package is closed, its active ExecPlan SHOULD be archived to
 
 ## Change Management
 - As this draft is implemented package-by-package:
-  - add endpoints to `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
+  - add endpoints to `docs/schemas/rq-engine-endpoint-inventory.md`
   - add route rows to `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
   - update `docs/schemas/rq-engine-agent-api-contract.md`
   - add OpenAPI/contract tests in `tests/microservices/`
