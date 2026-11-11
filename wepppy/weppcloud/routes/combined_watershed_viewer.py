@@ -137,7 +137,12 @@ def _render_collection(template="combined_ws_viewer.htm", include_ids=True):
         current_app.logger.warning('Combined viewer metadata unavailable: %s', exc)
         return error_factory('Collection metadata is not ready. Contact the project maintainer.', status_code=409)
     context = {'center': [39, -99], 'zoom': 5, **metadata, **options, 'sitePrefix': current_app.config.get('SITE_PREFIX', '/weppcloud')}
-    return render_template(template, collection=context)
+    from flask import make_response
+    from wepppy.weppcloud.utils.query_cookie import set_query_cookie
+    response = make_response(render_template(template, collection=context))
+    for item in metadata['ws']:
+        set_query_cookie(response, item['runid'], item['cfg'], omit_public=True)
+    return response
 
 
 @combined_watershed_viewer_bp.route('/combined_ws_viewer')

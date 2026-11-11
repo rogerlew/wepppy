@@ -149,14 +149,28 @@ The `/mcp` prefix provides a **Model Context Protocol**-compatible API for LLM a
 
 **Note:** MCP routes are mounted when `WEPP_MCP_JWT_SECRET` is configured. If the secret is unset, `/mcp` is not mounted.
 
-QE-AUTH-F1-20261110 accepted 2026-11-11 (implementation pending):
+QE-AUTH-F1-20261110 accepted 2026-11-11; implemented primary HTTP boundary:
 [query HTTP access](../../docs/schemas/query-engine-http-access-contract.md)
 defines canonical identifiers, pre-catalog authorization, browser cookie
 transport and POST-only forced activation. The implemented primary discovery
 and console paths are `/schema` and GET `/query`; `/catalog` and `/console`
 below are historical documentation errors, not additional aliases. Deployment
 must configure `QUERY_ENGINE_ALLOWED_ORIGINS` with exact public origins and pass
-real browser/Compose/Caddy gates. No deployment or conformance is claimed here.
+real browser/Compose/Caddy gates before rollout. Source implementation does not
+imply production deployment.
+
+For private dashboards, sign in and open the project or collection page first.
+The page sets an HttpOnly query cookie; JavaScript does not receive the token.
+After session expiry or an access change, sign in again and reload that page.
+Public ordinary reads continue without login. The query console activates with
+a same-origin POST button; GET activation returns 405.
+
+API clients use a `query-engine` audience bearer credential with `runs:read`
+and `queries:execute`, bound to the requested resource. Explicit forced
+activation also needs `runs:activate`. HTTP routes require both run ID and config;
+MCP keeps its existing bare-ID route grammar and independent authentication.
+See the [HTTP operator guide](../../docs/dev-notes/query-engine-http-operations.md)
+for origin configuration, compatibility and rollout checks.
 
 ### Catalog Activation
 

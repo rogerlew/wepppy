@@ -1,0 +1,42 @@
+INFO:wctl2:docker compose exec -T weppcloud cat /tmp/qe-boundary-fixtures.json
+Real password/CAP browser login: passed
+Direct page status/cookie count: 200 1
+Owner browser query records: passed
+INFO:wctl2:docker compose exec -T weppcloud python -c 'import json,hashlib; from pathlib import Path; m=json.loads(Path('"'"'/tmp/qe-boundary-fixtures.json'"'"').read_text()); r=Path('"'"'/wc1/runs/qe'"'"')/m['"'"'runs'"'"'][0]; paths=list((r/'"'"'_query_engine'"'"').rglob('"'"'*'"'"'))+[r/'"'"'exceptions.log'"'"']; print(json.dumps({str(p.relative_to(r)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if p.is_file()}))'
+INFO:wctl2:docker compose exec -T weppcloud cat /tmp/qe-boundary-unrelated.json
+Unrelated login form result: WEPPcloud
+THEMES
+Default (Light) · AA checked
+High Contrast (Light) · AA checked
+OneDark · Sensory preference
+Dark Modern · Sensory preference
+Ayu Dark · Sensory preference
+Ayu Mirage · AA checked
+Ayu Light · Sensory preference
+Ayu Dark · Bordered · Sensory preference
+Ayu Mirage · Bordered · AA checked
+Ayu Light · Bordered · Sensory preference
+Cursor Dark (Anysphere) · Sensory preference
+Cursor Dark (Midnight) · AA checked
+Cursor Dark (High Contrast) · Sensory preference
+WEPPcloud Sign In
+
+Enter your WEPPcloud credentials to access tools and projects.
+
+Email  Invalid email address
+Password
+Show
+ Remember me on this device
+I'm not a robot
+CAP
+PROTECTED BY CAP
+Complete verification to sign in.
+Login
+Register
+Forgot password
+Confirm account
+page.waitForURL: Timeout 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+  navigated to "https://forest.tail305ec9.ts.net/weppcloud/login"
+============================================================

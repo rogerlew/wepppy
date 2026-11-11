@@ -1,0 +1,6 @@
+INFO:wctl2:docker compose exec -T weppcloud cat /tmp/qe-boundary-fixtures.json
+Real password/CAP browser login: passed
+Direct page status/cookie count: 200 1
+page.evaluate: SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input
+    at eval (eval at evaluate (:290:30), <anonymous>:1:204)
+    at async <anonymous>:316:30

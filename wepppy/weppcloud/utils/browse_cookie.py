@@ -43,4 +43,17 @@ __all__ = [
     "browse_cookie_name",
     "browse_cookie_name_candidates",
     "browse_cookie_path",
+    "query_cookie_name",
+    "query_cookie_path",
 ]
+
+
+def query_cookie_name(runid: str, config: str) -> str:
+    """Query credentials use distinct hashed keys, including ordinary run IDs."""
+    digest = hashlib.sha256(f"{runid}\n{config}".encode('utf-8')).hexdigest()[:16]
+    return f"wepp_query_jwt_{digest}"
+
+
+def query_cookie_path() -> str:
+    """The prefix also carries parent credentials to composite Omni URLs."""
+    return '/query-engine/runs/'

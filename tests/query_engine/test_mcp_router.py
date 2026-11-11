@@ -162,11 +162,15 @@ def _make_client(monkeypatch, tmp_path, runid: str, *, files: list[dict[str, Any
         pytest.skip(f"starlette.testclient unavailable: {exc}")
 
     if create_catalog:
-        run_dir = _bootstrap_run(tmp_path, runid, files=files)
+        run_dir = _bootstrap_run(tmp_path / runid[:2], runid, files=files)
     else:
-        run_dir = tmp_path / runid
+        run_dir = tmp_path / runid[:2] / runid
         run_dir.mkdir(parents=True, exist_ok=True)
 
+    from wepppy.weppcloud.utils import helpers as canonical_helpers
+    monkeypatch.setattr(canonical_helpers, 'PRIMARY_RUNS_ROOT', str(tmp_path))
+    monkeypatch.setattr(canonical_helpers, 'redis_wd_cache_client', None)
+    (run_dir / 'PUBLIC').touch()
     from wepppy.query_engine.app import helpers
 
     def fake_resolve(candidate: str):
@@ -1132,8 +1136,8 @@ def test_discovery_does_not_cache_roads_availability(monkeypatch, tmp_path, road
     from wepppy.query_engine.app.mcp import auth
 
     path = (f'/mcp/runs/{runid}/catalog' if endpoint == 'mcp' else
-            f'/runs/{runid}' if endpoint == 'info' else f'/runs/{runid}/{endpoint}')
-    response = TestClient(app).get(path, headers={'Authorization': 'Bearer '+_issue_token(auth, runid)})
+            f'/runs/{runid}/cfg' if endpoint == 'info' else f'/runs/{runid}/cfg/{endpoint}')
+    response = TestClient(app).get(path, headers={'Authorization': 'Bearer '+_issue_token(auth, runid)} if endpoint == 'mcp' else {})
     assert response.status_code == 200, response.text
     assert (response.headers.get('Cache-Control') == 'no-store') is roads
     if roads:
@@ -1172,7 +1176,8 @@ def test_catalog_contention_keeps_http_loop_responsive(monkeypatch, tmp_path, en
     # Isolate the query executor's second freshness barrier from initial discovery.
     context = resolve_run_context(str(run_dir), run_interchange=False)
     if endpoint == 'query':
-        monkeypatch.setattr(server, 'resolve_run_context', lambda *a, **k: context)
+        from wepppy.query_engine import context as context_module
+        monkeypatch.setattr(context_module, 'resolve_run_context', lambda *a, **k: context)
     receipt = refresh.record_catalog_refresh(run_dir, 'a.parquet')
     token = _issue_token(auth, runid, scopes=('runs:read', 'queries:validate', 'queries:execute', 'runs:activate'))
     child = subprocess.Popen(
@@ -1207,14 +1212,14 @@ with catalog_lifecycle_guard(sys.argv[1]):
                 # This event loop owns the test-local limiter; production defaults stay intact.
                 limiter.total_tokens = 1
             async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://testserver') as client:
-                headers = {'Authorization': f'Bearer {token}'}
+                headers = {'Authorization': f'Bearer {token}'} if endpoint in {'catalog', 'validate', 'activate'} else {}
                 paths = {
-                    'schema': f'/runs/{runid}/schema',
-                    'saturated-health': f'/runs/{runid}/schema',
+                    'schema': f'/runs/{runid}/cfg/schema',
+                    'saturated-health': f'/runs/{runid}/cfg/schema',
                     'catalog': f'/mcp/runs/{runid}/catalog',
                     'validate': f'/mcp/runs/{runid}/queries/validate',
                     'activate': f'/mcp/runs/{runid}/activate',
-                    'query': f'/runs/{runid}/query',
+                    'query': f'/runs/{runid}/cfg/query',
                 }
                 if endpoint in {'validate', 'query'}:
                     body = {'datasets': ['a.parquet']}

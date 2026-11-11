@@ -1,0 +1,85 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/weppcloud/routes/test_run_0_nocfg_auth_bridge.py tests/microservices/test_browse_auth_routes.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 160 items
+
+tests/weppcloud/routes/test_run_0_nocfg_auth_bridge.py ......F
+
+=================================== FAILURES ===================================
+_______ test_set_run_session_jwt_cookie_sets_secure_for_forwarded_https ________
+
+run0_app = (<Flask 'test_run_0_nocfg_auth_bridge'>, <module 'wepppy.weppcloud.routes.run_0.run_0_bp' from '/workdir/wepppy/wepppy/weppcloud/routes/run_0/run_0_bp.py'>, 'ab1234', [])
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5d70ac32c0>
+
+    def test_set_run_session_jwt_cookie_sets_secure_for_forwarded_https(
+        run0_app,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        app, module, runid, _url_for_calls = run0_app
+        monkeypatch.setattr(module, "_session_identity_claims", lambda: (42, ["User"]))
+        monkeypatch.setattr(module, "_resolve_session_id_from_request", lambda: "sid-1")
+        monkeypatch.setattr(module, "_session_user_authorized_for_run", lambda *_args: True)
+        monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
+        monkeypatch.setattr(module.auth_tokens, "issue_token", lambda *_args, **_kwargs: {"token": "session-token"})
+
+        with app.test_request_context(f"/runs/{runid}/", headers={"X-Forwarded-Proto": "https"}):
+            response = app.make_response(("ok", 200))
+>           assert module._set_run_session_jwt_cookie(response, runid=runid, config="cfg") is True
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/weppcloud/routes/test_run_0_nocfg_auth_bridge.py:258:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+wepppy/weppcloud/routes/run_0/run_0_bp.py:1757: in _set_run_session_jwt_cookie
+    set_query_cookie(response, runid, config)
+wepppy/weppcloud/utils/query_cookie.py:20: in set_query_cookie
+    if not current_user.is_authenticated or not current_user.is_active:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/werkzeug/local.py:318: in __get__
+    obj = instance._get_current_object()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/werkzeug/local.py:526: in _get_current_object
+    return get_name(local())
+                    ^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask_login/utils.py:25: in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+                                      ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _get_user():
+        if has_request_context():
+            if "_login_user" not in g:
+>               current_app.login_manager._load_user()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'Flask' object has no attribute 'login_manager'
+
+/opt/venv/lib/python3.12/site-packages/flask_login/utils.py:370: AttributeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/weppcloud/routes/test_run_0_nocfg_auth_bridge.py::test_set_run_session_jwt_cookie_sets_secure_for_forwarded_https
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=================== 1 failed, 6 passed, 6 warnings in 1.49s ====================

@@ -50,7 +50,7 @@
               {% if not catalog_ready %}
                 <div class="wc-note">
                   Catalog metadata was not found. Visit
-                  <a id="activateLink" href="{{ activate_url }}">{{ activate_url_display }}</a>
+                  <button id="activateLink" type="button">Refresh catalog</button>
                   to activate the run, then reload this page.
                 </div>
               {% endif %}
@@ -143,7 +143,7 @@
     const postUrl = postUrlTarget !== "/" && postUrlTarget.endsWith("/")
       ? postUrlTarget.slice(0, -1)
       : postUrlTarget;
-    const activateUrlObject = new URL(activateRelative, window.location.href);
+    const activateUrlObject = new URL(postUrl.replace(/\/query$/, "/activate"), window.location.origin);
     const activateUrl = activateUrlObject.pathname;
     const postAbsoluteUrl = new URL(postUrl, window.location.origin).href;
     const activateAbsoluteUrl = activateUrlObject.href;
@@ -153,8 +153,20 @@
     }
     const activateLink = document.getElementById('activateLink');
     if (activateLink) {
-      activateLink.href = activateAbsoluteUrl;
-      activateLink.textContent = activateAbsoluteUrl;
+      activateLink.addEventListener('click', async () => {
+        activateLink.disabled = true;
+        try {
+          const response = await fetch(activateAbsoluteUrl, {method: 'POST', credentials: 'same-origin'});
+          if (!response.ok) {
+            setStatus(response.status === 401 || response.status === 403
+              ? 'Sign in or reload your project page, then try again.' : 'Catalog refresh failed.', 'attention');
+            return;
+          }
+          window.location.reload();
+        } finally {
+          activateLink.disabled = false;
+        }
+      });
     }
 
     const initialPayloadValue = JSON.stringify(initialPayload, null, 2);

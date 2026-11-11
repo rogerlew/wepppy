@@ -121,6 +121,7 @@ production and Kubernetes topology changes are outside this implementation.
 | `OAUTH_REDIRECT_HOST` | — | `wepppy.weppcloud.configuration` | Redirect host override; falls back to `EXTERNAL_HOST`. |
 | `EXTERNAL_HOST` | — | `wepppy.weppcloud.configuration`; compose (common env) | Public host name used for OAuth redirect construction (and other external metadata). |
 | `EXTERNAL_HOST_DESCRIPTION` | — | compose (common env) | Human-oriented host label (used by query-engine service env). |
+| `QUERY_ENGINE_ALLOWED_ORIGINS` | Compose: `https://${EXTERNAL_HOST}`; standalone: empty | query-engine | Comma-separated exact HTTP(S) origins. Wildcards, credentials, non-root paths, query and fragment are rejected at startup. Empty disables cross-origin requests; browser deployments must set the actual public origin. See [HTTP access operations](dev-notes/query-engine-http-operations.md). |
 | `OAUTH_GITHUB_CLIENT_ID` | — | `wepppy.weppcloud.configuration`; compose(prod): `weppcloud` | GitHub OAuth client id. |
 | `GITHUB_OAUTH_CLIENT_ID` | — | `wepppy.weppcloud.configuration` | Legacy alias for `OAUTH_GITHUB_CLIENT_ID`. |
 | `GITHUB_OAUTH_CLIENTID` | — | `wepppy.weppcloud.configuration` | Legacy alias for `OAUTH_GITHUB_CLIENT_ID`. |

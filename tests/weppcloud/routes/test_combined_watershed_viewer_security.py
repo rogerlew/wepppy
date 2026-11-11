@@ -20,6 +20,9 @@ def _load_module():
 def _build_app(module) -> Flask:
     app = Flask(__name__)
     app.config["TESTING"] = True
+    from flask_login import LoginManager
+    manager = LoginManager(app)
+    manager.user_loader(lambda _: None)
     app.register_blueprint(module.combined_watershed_viewer_bp)
     return app
 
@@ -202,7 +205,7 @@ def test_portland_member_can_enter_collection_but_not_mixed(monkeypatch):
     _install_public_stub(monkeypatch, module, set())
     user = SimpleNamespace(id=51, is_authenticated=True, is_active=True, has_role=lambda role: role == 'PortlandGroup')
     monkeypatch.setattr(module, 'current_user', user)
-    monkeypatch.setattr(generator, 'collection_metadata', lambda ids, **kw: {'ws': [{'runid': r} for r in ids]})
+    monkeypatch.setattr(generator, 'collection_metadata', lambda ids, **kw: {'ws': [{'runid': r, 'cfg': 'cfg'} for r in ids]})
     run = next(iter(portland_runids()))
     with app.test_client() as client:
         assert client.get('/combined_ws_viewer', query_string={'ws': json.dumps([{'runid':run}])}).status_code == 200

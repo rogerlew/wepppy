@@ -17,6 +17,10 @@ _GEO_READ_EXTENSIONS = {".geojson", ".fgb", ".gpkg", ".shp"}
 
 def _find_parent_run_root(base: Path) -> Path | None:
     """Best-effort inference of the run root for `_pups` child directories."""
+    from .access_scope import current_scope
+    scope = current_scope()
+    if scope is not None:
+        return scope.parent if base == scope.root and scope.parent != base else None
     parts = base.parts
     try:
         idx = parts.index("_pups")
@@ -48,6 +52,8 @@ def _resolve_dataset_path(root: Path, fs_path: str, logical_path: str) -> Path:
     if parent_root is not None:
         allowed_roots.append(parent_root.resolve(strict=False))
 
+    from .access_scope import check_source
+    check_source(dataset_path)
     resolved_dataset = dataset_path.resolve(strict=False)
     for allowed_root in allowed_roots:
         try:

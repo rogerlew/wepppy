@@ -1,0 +1,61 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/query_engine/test_http_access_boundary.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 54 items
+
+tests/query_engine/test_http_access_boundary.py ........................ [ 44%]
+.................F
+
+=================================== FAILURES ===================================
+_________________ test_owner_cookie_and_current_owner_removal __________________
+
+boundary = (<starlette.testclient.TestClient object at 0x7c783c45f8c0>, PosixPath('/tmp/pytest-of-unknown/pytest-93/test_owner_cookie_and_current_0/runs/ab/ab-private'), [])
+signed_token = <function signed_token.<locals>.issue at 0x7c783c4567a0>
+session_state = ({0: {}, 9: {}, 11: {'auth:session:run:ab-private:boundary-session': '1'}}, {0: {}, 9: {}, 11: {}})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7c783c45cce0>
+
+    def test_owner_cookie_and_current_owner_removal(boundary, signed_token, session_state, monkeypatch):
+        from wepppy.weppcloud.utils import helpers
+        client, run, _ = boundary
+        _dataset(run)
+        _mark_session()
+        _session_cookie(client, signed_token)
+        response = client.post('/runs/ab-private/cfg/query', headers={'Sec-Fetch-Site':'same-origin'},
+                               json={'datasets':['data/sample.parquet']})
+>       assert response.status_code == 200, response.text
+E       AssertionError: {"error":"Authentication required","status_code":401}
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/query_engine/test_http_access_boundary.py:256: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  wepppy.query_engine.app.server:server.py:515 HTTPException 401 for http://testserver/runs/ab-private/cfg/query: Authentication required
+=============================== warnings summary ===============================
+tests/query_engine/test_http_access_boundary.py::test_private_denial_precedes_catalog_and_logs[--GET]
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/query_engine/test_http_access_boundary.py::test_private_denial_precedes_catalog_and_logs[--GET]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/query_engine/test_http_access_boundary.py: 44 warnings
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/query_engine/test_http_access_boundary.py::test_private_denial_precedes_catalog_and_logs[--GET]
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/query_engine/test_http_access_boundary.py::test_private_denial_precedes_catalog_and_logs[--GET]
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/query_engine/test_http_access_boundary.py::test_owner_cookie_and_current_owner_removal
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================== 1 failed, 41 passed, 48 warnings in 12.77s ==================

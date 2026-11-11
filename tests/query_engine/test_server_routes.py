@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import re
 from types import SimpleNamespace
+from pathlib import Path
 from typing import Any, Dict, List
 
 import pytest
@@ -88,8 +89,12 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
     from wepppy.query_engine.app import server
 
     runid = "sample-run"
-    run_dir = tmp_path / runid
+    run_dir = tmp_path / runid[:2] / runid
     run_dir.mkdir(parents=True, exist_ok=True)
+    from wepppy.weppcloud.utils import helpers as canonical_helpers
+    monkeypatch.setattr(canonical_helpers, 'PRIMARY_RUNS_ROOT', str(tmp_path))
+    monkeypatch.setattr(canonical_helpers, 'redis_wd_cache_client', None)
+    (run_dir / 'PUBLIC').touch()
 
     class DummyCatalog:
         def __init__(self) -> None:
@@ -106,6 +111,7 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
             return "TEXT"
 
     dummy_catalog = DummyCatalog()
+    dummy_catalog.root = run_dir
 
     def fake_resolve_run_path(runid_param: str):
         if runid_param not in {runid, str(run_dir)}:
@@ -133,8 +139,9 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
     def fake_run_query(context, payload, *, authorize=None):
         return QueryResult(records=[{"value": 1}], schema=[], row_count=1, sql="SELECT 1")
 
-    monkeypatch.setattr(server, "resolve_run_path", fake_resolve_run_path)
-    monkeypatch.setattr(server, "resolve_run_context", fake_resolve_context)
+    # Downstream catalog behavior is isolated; admission uses real paths/public state.
+    from wepppy.query_engine import context as context_module
+    monkeypatch.setattr(context_module, "resolve_run_context", fake_resolve_context)
     monkeypatch.setattr(server, "activate_query_engine", fake_activate_query_engine)
     monkeypatch.setattr(server, "run_query", fake_run_query)
 
@@ -143,9 +150,9 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
 
     # GET console renders without and with trailing slash
     correlation_id = "cid-query-console-1"
-    response_no_slash_get = client.get(f"/runs/{runid}/query")
+    response_no_slash_get = client.get(f"/runs/{runid}/cfg/query")
     response_trailing_slash_get = client.get(
-        f"/runs/{runid}/query/",
+        f"/runs/{runid}/cfg/query/",
         headers={_CORRELATION_HEADER: correlation_id},
     )
     assert response_no_slash_get.status_code == 200
@@ -161,12 +168,12 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
     }
 
     response_no_slash_post = client.post(
-        f"/runs/{runid}/query",
+        f"/runs/{runid}/cfg/query",
         json=payload,
         headers={_CORRELATION_HEADER: correlation_id},
     )
     response_trailing_slash_post = client.post(
-        f"/runs/{runid}/query/",
+        f"/runs/{runid}/cfg/query/",
         json=payload,
         headers={_CORRELATION_HEADER: correlation_id},
     )
@@ -240,12 +247,19 @@ def test_query_endpoint_accepts_scenario_in_body(monkeypatch, tmp_path):
     from wepppy.query_engine.formatter import QueryResult
 
     runid = "sample-run"
-    run_dir = tmp_path / runid
+    run_dir = tmp_path / runid[:2] / runid
     run_dir.mkdir(parents=True, exist_ok=True)
+    from wepppy.weppcloud.utils import helpers as canonical_helpers
+    monkeypatch.setattr(canonical_helpers, 'PRIMARY_RUNS_ROOT', str(tmp_path))
+    monkeypatch.setattr(canonical_helpers, 'redis_wd_cache_client', None)
+    (run_dir / 'PUBLIC').touch()
 
     captured_scenario = []
+    (run_dir / "_pups/omni/scenarios/mulch_30_sbs_map").mkdir(parents=True)
 
     class DummyCatalog:
+        root = run_dir
+
         def entries(self):
             return [SimpleNamespace(path="test.parquet", fs_path=None)]
 
@@ -269,10 +283,11 @@ def test_query_endpoint_accepts_scenario_in_body(monkeypatch, tmp_path):
         force_refresh: bool = False,
     ):
         # Capture the scenario parameter to verify it was passed
-        captured_scenario.append(scenario)
+        captured_scenario.append(Path(runid_path).name)
+        DummyCatalog.root = Path(runid_path)
         return SimpleNamespace(
             runid=runid_path,
-            base_dir=run_dir,
+            base_dir=Path(runid_path),
             scenario=scenario,
             catalog=DummyCatalog(),
         )
@@ -280,8 +295,9 @@ def test_query_endpoint_accepts_scenario_in_body(monkeypatch, tmp_path):
     def fake_run_query(context, payload, *, authorize=None):
         return QueryResult(records=[{"value": 1}], schema=[], row_count=1, sql="SELECT 1")
 
-    monkeypatch.setattr(server, "resolve_run_path", fake_resolve_run_path)
-    monkeypatch.setattr(server, "resolve_run_context", fake_resolve_context)
+    # Downstream catalog behavior is isolated; admission uses real paths/public state.
+    from wepppy.query_engine import context as context_module
+    monkeypatch.setattr(context_module, "resolve_run_context", fake_resolve_context)
     monkeypatch.setattr(server, "run_query", fake_run_query)
 
     app = server.create_app()
@@ -294,7 +310,7 @@ def test_query_endpoint_accepts_scenario_in_body(monkeypatch, tmp_path):
         "limit": 1,
     }
 
-    response = client.post(f"/runs/{runid}/query", json=payload)
+    response = client.post(f"/runs/{runid}/cfg/query", json=payload)
     assert response.status_code == 200
     assert _CORRELATION_HEADER in response.headers
     assert _CORRELATION_ID_PATTERN.match(response.headers[_CORRELATION_HEADER])
@@ -310,8 +326,12 @@ def test_query_endpoint_invalid_payload_returns_422_with_expected_envelope(monke
     from wepppy.query_engine.app import server
 
     runid = "sample-run"
-    run_dir = tmp_path / runid
+    run_dir = tmp_path / runid[:2] / runid
     run_dir.mkdir(parents=True, exist_ok=True)
+    from wepppy.weppcloud.utils import helpers as canonical_helpers
+    monkeypatch.setattr(canonical_helpers, 'PRIMARY_RUNS_ROOT', str(tmp_path))
+    monkeypatch.setattr(canonical_helpers, 'redis_wd_cache_client', None)
+    (run_dir / 'PUBLIC').touch()
 
     def fake_resolve_run_path(runid_param: str):
         if runid_param != runid:
@@ -326,19 +346,20 @@ def test_query_endpoint_invalid_payload_returns_422_with_expected_envelope(monke
         run_interchange: bool = True,
         force_refresh: bool = False,
     ):
-        return SimpleNamespace(runid=runid_path, base_dir=run_dir, scenario=scenario)
+        return SimpleNamespace(runid=runid_path, base_dir=run_dir, scenario=scenario, catalog=SimpleNamespace(root=run_dir))
 
     def fake_query_request(**_body):
         raise exc_cls("boom")
 
-    monkeypatch.setattr(server, "resolve_run_path", fake_resolve_run_path)
-    monkeypatch.setattr(server, "resolve_run_context", fake_resolve_context)
+    # Downstream catalog behavior is isolated; admission uses real paths/public state.
+    from wepppy.query_engine import context as context_module
+    monkeypatch.setattr(context_module, "resolve_run_context", fake_resolve_context)
     monkeypatch.setattr(server, "QueryRequest", fake_query_request)
 
     app = server.create_app()
     client = TestClient(app)
 
-    response = client.post(f"/runs/{runid}/query", json={"datasets": ["test.parquet"]})
+    response = client.post(f"/runs/{runid}/cfg/query", json={"datasets": ["test.parquet"]})
     assert response.status_code == 422
     assert _CORRELATION_HEADER in response.headers
     assert _CORRELATION_ID_PATTERN.match(response.headers[_CORRELATION_HEADER])
@@ -351,14 +372,15 @@ def test_query_endpoint_invalid_payload_returns_422_with_expected_envelope(monke
 
 
 @pytest.mark.unit
-def test_query_engine_preflight_emits_correlation_id_header() -> None:
+def test_query_engine_preflight_emits_correlation_id_header(monkeypatch) -> None:
     from wepppy.query_engine.app import server
 
+    monkeypatch.setenv("QUERY_ENGINE_ALLOWED_ORIGINS", "https://example.test")
     app = server.create_app()
     client = TestClient(app)
 
     response = client.options(
-        "/runs/demo/query",
+        "/runs/demo/cfg/query",
         headers={
             "Origin": "https://example.test",
             "Access-Control-Request-Method": "POST",

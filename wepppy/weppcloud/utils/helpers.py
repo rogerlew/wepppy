@@ -223,13 +223,15 @@ def _resolve_omni_child_path(parent_runid: str, omni_kind: str, leaf: str) -> tu
     return base_root, scenario_path
 
 
-def get_wd(runid: str, *, prefer_active: bool = True) -> str:
+def get_wd(runid: str, *, prefer_active: bool = True, read_only: bool = False) -> str:
     """Return the working directory path for a run, caching lookups in Redis.
 
     Args:
         runid: Run identifier to resolve.
         prefer_active: When True, prefer the active Flask context (when available)
             before hitting Redis or the filesystem.
+        read_only: Resolve the canonical layout without consulting/mutating the
+            WD cache or creating Omni links. Intended for admission checks.
 
     Returns:
         Absolute filesystem path for the requested run.
@@ -264,7 +266,7 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
                 context_override = str(run_root)
 
     # 1. Attempt to fetch the working directory from the cache
-    if redis_wd_cache_client:
+    if redis_wd_cache_client and not read_only:
         try:
             cached_wd = redis_wd_cache_client.get(runid)
             if cached_wd:
@@ -293,7 +295,8 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
             scenario_dir = 'scenarios' if omni_kind == 'omni' else 'contrasts'
             scenario_path = _join(base_root, '_pups', 'omni', scenario_dir, leaf)
             path = scenario_path
-            _ensure_omni_shared_inputs(base_root, scenario_path)
+            if not read_only:
+                _ensure_omni_shared_inputs(base_root, scenario_path)
         else:
             if len(parts) != 3:
                 raise ValueError(f'Invalid grouped run identifier: {runid}')
@@ -316,12 +319,14 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
                 # Omni scenarios live under the parent run's _pups directory.
                 base_root, scenario_path = _resolve_omni_child_path(_group, "omni", _runid)
                 path = scenario_path
-                _ensure_omni_shared_inputs(base_root, scenario_path)
+                if not read_only:
+                    _ensure_omni_shared_inputs(base_root, scenario_path)
             elif _name == 'omni-contrast':
                 # Omni contrasts live under the parent run's _pups directory.
                 base_root, scenario_path = _resolve_omni_child_path(_group, "omni-contrast", _runid)
                 path = scenario_path
-                _ensure_omni_shared_inputs(base_root, scenario_path)
+                if not read_only:
+                    _ensure_omni_shared_inputs(base_root, scenario_path)
             else:
                 raise ValueError(f'Unknown group prefix: {_group}')
     elif path is None:
@@ -339,7 +344,7 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
     # 3. Store the determined path in the cache for future requests
     # Only cache if the path actually exists to avoid caching stale paths
-    if redis_wd_cache_client and _exists(path):
+    if redis_wd_cache_client and not read_only and _exists(path):
         try:
             # Cache the result with a 72-hour (259200 seconds) expiration
             redis_wd_cache_client.set(runid, path, ex=72 * 3600)

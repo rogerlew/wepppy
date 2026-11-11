@@ -1,0 +1,16 @@
+INFO:wctl2:docker compose exec -T caddy caddy validate --config /etc/caddy/Caddyfile
+{"level":"info","ts":1794362653.6814787,"msg":"using config from file","file":"/etc/caddy/Caddyfile"}
+{"level":"warn","ts":1794362653.6854353,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-For: the reverse proxy's default behavior is to pass headers to the upstream"}
+{"level":"warn","ts":1794362653.6854727,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-Host: the reverse proxy's default behavior is to pass headers to the upstream"}
+{"level":"warn","ts":1794362653.6860204,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-Host: the reverse proxy's default behavior is to pass headers to the upstream"}
+{"level":"warn","ts":1794362653.6874795,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-Host: the reverse proxy's default behavior is to pass headers to the upstream"}
+{"level":"warn","ts":1794362653.6876445,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-Host: the reverse proxy's default behavior is to pass headers to the upstream"}
+{"level":"warn","ts":1794362653.687787,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-Host: the reverse proxy's default behavior is to pass headers to the upstream"}
+{"level":"warn","ts":1794362653.687929,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-Host: the reverse proxy's default behavior is to pass headers to the upstream"}
+{"level":"info","ts":1794362653.6926613,"msg":"adapted config to JSON","adapter":"caddyfile"}
+{"level":"warn","ts":1794362653.6927164,"msg":"Caddyfile input is not formatted; run 'caddy fmt --overwrite' to fix inconsistencies","adapter":"caddyfile","file":"/etc/caddy/Caddyfile","line":10}
+{"level":"info","ts":1794362653.695203,"logger":"http.auto_https","msg":"automatic HTTPS is completely disabled for server","server_name":"srv0"}
+{"level":"info","ts":1794362653.695418,"logger":"tls.cache.maintenance","msg":"started background certificate maintenance","cache":"0x82a80058980"}
+{"level":"info","ts":1794362653.701363,"logger":"tls.cache.maintenance","msg":"stopped background certificate maintenance","cache":"0x82a80058980"}
+{"level":"info","ts":1794362653.70141,"logger":"http","msg":"servers shutting down with eternal grace period"}
+Valid configuration

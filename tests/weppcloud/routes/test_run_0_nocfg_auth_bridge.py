@@ -27,6 +27,10 @@ def run0_app(
     tmp_path: Path,
 ):
     module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.run_0.run_0_bp"))
+    # This suite isolates the existing browse bridge. Query issuance has direct
+    # signed-token/real-path coverage in test_http_access_boundary.py.
+    from wepppy.weppcloud.utils import query_cookie
+    monkeypatch.setattr(query_cookie, 'set_query_cookie', lambda response, *a, **kw: response)
 
     runid = "ab1234"
     run_root = tmp_path / runid
@@ -64,6 +68,10 @@ def run0_prefixed_grouped_app(
     tmp_path: Path,
 ):
     module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.run_0.run_0_bp"))
+    # This suite isolates the existing browse bridge. Query issuance has direct
+    # signed-token/real-path coverage in test_http_access_boundary.py.
+    from wepppy.weppcloud.utils import query_cookie
+    monkeypatch.setattr(query_cookie, 'set_query_cookie', lambda response, *a, **kw: response)
 
     runid = "upset-reckoning;;omni;;undisturbed"
     config = "disturbed9002"

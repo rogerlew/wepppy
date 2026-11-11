@@ -1,6 +1,6 @@
 # Query-engine run access boundary
 
-**Status**: Open (2026-11-11 UTC); M0 proposal independently reviewed; exact ratification/checkpoint pending
+**Status**: Open (2026-11-11 UTC); contract checkpoint `2f9401f93`; implementation and validation in progress
 
 **Timezone**: UTC
 
@@ -97,7 +97,7 @@ because the originating audit board is intentionally local and gitignored.
   real temporary run roots; production-equivalent Caddy/Compose HTTP checks.
 - **Actual-project/environment gate**: forest or equivalent first, then a
   controlled wepp1 public/private fixture after explicit deployment approval.
-- **Highest completion claim currently supported**: diagnosed.
+- **Highest completion claim currently supported**: implemented; local validation in progress.
 
 ## Stakeholders
 

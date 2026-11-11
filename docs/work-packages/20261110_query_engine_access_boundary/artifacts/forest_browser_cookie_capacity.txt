@@ -1,0 +1,10 @@
+INFO:wctl2:docker compose exec -T weppcloud cat /tmp/qe-boundary-fixtures.json
+Real password/CAP browser login: passed
+Direct page status/cookie count: 200 1
+Owner browser query records: passed
+Anonymous private denial/public query: passed
+POST activation and origin boundaries: passed
+Collection page admitted: 50
+Collection page admitted: 50
+Total collection query cookie count: 100
+page.evaluate: TypeError: Failed to fetch

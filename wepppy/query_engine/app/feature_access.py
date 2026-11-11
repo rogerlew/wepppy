@@ -11,6 +11,10 @@ from wepppy.microservices.browse import auth as browse_auth
 
 def require_root(request, base_dir):
     """Check resolved workflow roots, including absolute paths and aliases."""
+    if getattr(request.state, "query_target", None) is not None:
+        from .access import require_data_path
+        require_data_path(request, base_dir)
+        return
     from wepppy.microservices.rq_engine.auth import AuthError
     from wepppy.microservices.rq_engine.feature_access import require_feature_access
     from wepppy.nodb.base import NoDbBase
@@ -46,17 +50,26 @@ def require_root(request, base_dir):
         raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
 
 
-def _entry_sources(base_dir, entry):
+def _entry_sources(base_dir, entry, request=None):
     from wepppy.query_engine.core import _resolve_dataset_path
     path = entry.get("path", "") if isinstance(entry, dict) else entry.path
     fs_path = entry.get("fs_path") if isinstance(entry, dict) else entry.fs_path
+    if request is not None and getattr(request.state, "query_target", None) is not None:
+        from .access import require_data_path
+        if Path(path).is_absolute() or '..' in Path(path).parts:
+            raise HTTPException(403, 'Dataset outside authorized resource')
+        require_data_path(request, Path(base_dir) / path)
+        require_data_path(request, Path(base_dir) / (fs_path or path))
     return (Path(base_dir) / path, _resolve_dataset_path(Path(base_dir), fs_path or path, path))
 
 
 def require_datasets(request, base_dir, paths, *, entries=()):
+    if getattr(request.state, "query_target", None) is not None:
+        from .access import recheck
+        recheck(request)
     require_root(request, base_dir)
     by_path = {entry.get("path") if isinstance(entry, dict) else entry.path: entry for entry in entries}
-    sources = [source for path in paths for source in _entry_sources(base_dir, by_path.get(path, {"path": path}))]
+    sources = [source for path in paths for source in _entry_sources(base_dir, by_path.get(path, {"path": path}), request)]
     for source in sources:
         require_root(request, source)
 
@@ -72,11 +85,14 @@ def discovery_headers(base_dir, entries=()):
 
 
 def visible_entries(request, base_dir, entries):
+    if getattr(request.state, "query_target", None) is not None:
+        from .access import recheck
+        recheck(request)
     require_root(request, base_dir)
     visible = []
     for entry in entries:
-        sources = _entry_sources(base_dir, entry)
         try:
+            sources = _entry_sources(base_dir, entry, request)
             for source in sources:
                 require_root(request, source)
         except HTTPException as exc:

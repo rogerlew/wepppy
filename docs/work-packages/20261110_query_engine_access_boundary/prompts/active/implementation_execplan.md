@@ -26,16 +26,19 @@ finding deployed or resolved.
 - [x] (2026-11-11 01:03 UTC) Confirm F1 source path and scaffold the package.
 - [x] (2026-11-11 01:25 UTC) Prepare exact canonical HTTP contract and cross-contract amendments; review source compatibility with two independent reviewers.
 - [x] (2026-11-11 01:26 UTC) Both independent contract reviews passed; retain disposition and reviewed contract digest.
-- [ ] M0: ratify revised contract matrix
-      and commit the standalone checkpoint ancestor.
-- [ ] M1: add failing resolver, auth, side-effect, token, and valid-state tests.
-- [ ] M2: implement strict target resolution and pre-side-effect authorization.
+- [x] M0: operator ratified revised contract; standalone checkpoint `2f9401f93`.
+- [x] M1: retained original anonymous-private failure; added real resolver/JWT/catalog regression matrix.
+- [x] M2: strict checked targets, current authorization and scoped catalog sources implemented; review fixes under validation.
 - [ ] M3: deliver the query-engine browser cookie bridge, activation method/CSRF
       posture, exact CORS policy, and direct-browser regressions.
 - [ ] M4: complete focused/broad gates and independent correctness, QA, code, and
       security reviews.
 - [ ] M5: validate in a production-equivalent environment and perform an
       explicitly authorized containment-safe wepp1 rollout.
+
+- [x] Review fixes: preserve external DEM skip semantics and parent `.nodir`
+      links; bound post-admission authorization-backend failures; preserve log
+      creation mode under the existing umask.
 
 ## Surprises & Discoveries
 
@@ -73,13 +76,44 @@ finding deployed or resolved.
 - Observation: feature-access governance names query-engine as a protected read
   surface. This package must consume that policy, not create a competing one.
 
+- Implementation review: native catalog scans and schema reads precede response
+  filtering. Retained sibling-source tests justified a ContextVar scope around
+  synchronous catalog/query work, reusing native scans and existing policies.
+- Actual Omni links include parent metadata, archived climate/watershed inputs,
+  and `wepp/runs`. External DEM links are skipped by the native scanner and must
+  remain skipped during pending refresh inventory as well.
+- The prior test spy patched an unused server alias; it now wraps the actual
+  context resolver and checks populated catalog/log bytes on denial.
+
 ## Decision Log
+
+- Decision (2026-11-11): set query-engine Uvicorn H11 incomplete-event buffer to
+  131072 bytes (old 16384) in dev/prod only. A real browser retained 100 cookies,
+  totaling 63600 bytes, then failed with HTTP2 protocol error; query-engine
+  reported an invalid HTTP request. Evidence: `forest_browser_header_failure.txt`
+  and `forest_header_failure_service.txt`. Independent security review reproduced
+  rejection at 16384, acceptance at 131072 and rejection of an oversized
+  incomplete event. This preserves cookie transport with at most 112 KiB extra
+  incomplete-event buffer per connection; it is not a total-header limit. Caddy
+  limits stay unchanged. Revert restores the known capacity failure.
+
+
+- Decision (2026-11-11): raise only WEPPcloud Gunicorn request-line cap from
+  implicit 4094 to explicit 8190 bytes in dev/prod Compose. Real 100-run browser
+  acceptance failed at 5537 bytes before cookie issuance; retained evidence is
+  `artifacts/forest_browser_collection_failure.txt`. The accepted contract permits
+  a bounded limit expansion after such evidence. Smaller fixture IDs would hide
+  the supported collection failure; transport redesign adds unnecessary cost.
+  Existing header/body limits, service identities and topology remain unchanged.
+  Rollback restores the old cap and the known 100-run URL limitation; validate
+  the candidate before any production rollout.
+
 
 - Decision (2026-11-11, Codex proposal): use the exact new HTTP contract and
   revised decision artifact for ratification. Preserve ownerless/PCV access,
   use all-hashed query-prefix cookies with existing lifetime, and specify the
   cookie activation exception. These correct ambiguities in the initial draft;
-  operator ratification is still pending, not inferred from source behavior.
+  operator ratified these exact choices before checkpoint `2f9401f93`.
 - Decision: inspect fetched changes without integrating them. The two commits
   affect declarative DEM and snapshot metadata, not this boundary. Stay on the
   existing branch and preserve unrelated working-tree changes.
@@ -98,22 +132,23 @@ finding deployed or resolved.
   is inside the exact root allowed for that identifier class.
   Rationale: removing only one fallback would leave alternate-path and poisoned
   cache risks; broad root allowlists can still cross tenants.
-  Date/Author: 2026-11-11, Codex planning recommendation; ratification pending.
+  Date/Author: 2026-11-11, Codex recommendation, ratified by operator at checkpoint `2f9401f93`.
 - Decision: use a separate query-engine-audience token in an HttpOnly cookie
   scoped to the query route. Do not reuse a JavaScript-readable token.
   Rationale: audience and path confinement preserve least privilege without
   breaking direct dashboard calls.
-  Date/Author: 2026-11-11, Codex planning recommendation; ratification pending.
+  Date/Author: 2026-11-11, Codex recommendation, ratified by operator at checkpoint `2f9401f93`.
 
 ## Outcomes & Retrospective
 
-M0 canonical proposal and source-based compatibility assessment are prepared;
-both independent reviews passed. Exact operator ratification and ancestor commit
-are pending. Only diagnosis and contract preparation are complete. The application is not patched,
-validated, deployed, or incident-resolved. The scaffold identifies the token-path
-compatibility issue before implementation, avoiding a denial-only patch that
-would break legitimate private dashboards. Update this section after each
-milestone with actual behavior and remaining gaps.
+Contract accepted and committed as `2f9401f93` before source/test changes. Strict
+HTTP resolution, current authorization, scoped catalog source checks, browser
+cookie bridge, POST activation and exact CORS are implemented. Focused tests and
+independent reviews found compatibility defects; fixes and expanded tests are
+in progress. Frontend lint/test (124 suites, 1069 tests), stub hygiene and helper
+stubtest passed. Broad Python and final focused gates are running. Browser,
+100-run cookie capacity and production-equivalent validation remain pending.
+No production deployment or incident-resolution claim is made.
 
 ## Context and Orientation
 
@@ -452,3 +487,6 @@ CSRF-contract differences, left untouched. Evidence: `artifacts/20261110_m0_doc_
 Operator ratification, 2026-11-11 UTC: "I approve the revised contract. please
 commit and proceed". Exact contract approved; checkpoint commit follows before
 implementation. Production deployment is not authorized.
+
+M0 complete: accepted standalone checkpoint ancestor `2f9401f93` committed
+2026-11-11 UTC before implementation/test edits. M1 execution begins.

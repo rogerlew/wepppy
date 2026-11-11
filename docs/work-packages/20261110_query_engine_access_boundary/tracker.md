@@ -4,13 +4,20 @@
 
 ## Quick Status
 
-**Timezone**: UTC  
-**Started**: 2026-11-11 01:03 UTC  
-**Current phase**: M0 reviewed proposal awaiting exact ratification  
-**Last updated**: 2026-11-11 01:25 UTC  
-**Next milestone**: ratify and checkpoint the query-engine access contract  
-**Security impact**: `high`  
-**Dedicated security review**: `yes`  
+**Timezone**: UTC
+
+**Started**: 2026-11-11 01:03 UTC
+
+**Current phase**: M2/M3 implemented; M4 review fixes and validation
+
+**Last updated**: 2026-11-11 02:12 UTC
+
+**Next milestone**: close local reviews and validate browser/ingress
+
+**Security impact**: `high`
+
+**Dedicated security review**: `yes`
+
 **Security artifact**: `artifacts/20261110_security_review.md`
 
 ## Task Board
@@ -18,26 +25,26 @@
 ### Ready / Backlog
 
 - [ ] Decide whether wepp1 needs immediate Caddy containment before the code fix.
-- [ ] Ratify the access/state matrix and explicit activation behavior.
-- [ ] Amend canonical query-engine, session-token, and browser-mutation contracts.
-- [ ] Obtain two independent contract reviews and commit the ancestor checkpoint.
-- [ ] Add failing route, resolver, token, side-effect, and valid-state regressions.
-- [ ] Implement strict identifier resolution and pre-side-effect authorization.
-- [ ] Add the query-engine-scoped HttpOnly browser token path.
-- [ ] Restrict activation method/authority and query-engine CORS.
+- [x] Ratify the access/state matrix and explicit activation behavior.
+- [x] Amend canonical query-engine, session-token, and browser-mutation contracts.
+- [x] Obtain two independent contract reviews and commit the ancestor checkpoint.
+- [x] Add failing route, resolver, token, side-effect, and valid-state regressions.
+- [x] Implement strict identifier resolution and pre-side-effect authorization.
+- [x] Add the query-engine-scoped HttpOnly browser token path.
+- [x] Restrict activation method/authority and query-engine CORS.
 - [ ] Run focused, broad, browser, Compose/Caddy, and artifact readback gates.
 - [ ] Complete independent correctness, QA, code, and security reviews.
 - [ ] Validate on forest/equivalent and deploy to wepp1 only when authorized.
 
 ### In Progress
 
-- [ ] Revised exact contract and cross-links prepared; both independent reviews passed;
-      operator ratification and checkpoint pending.
+- [ ] Independent review fixes, expanded compatibility tests, broad gates and
+      browser/environment evidence.
 
 ### Blocked
 
-- [ ] Implementation is gated, not externally blocked: the required contract
-      checkpoint and operator approval do not yet exist.
+- [ ] Production deployment requires separate operator authorization after
+      candidate validation; no production action has been taken.
 
 ### Done
 
@@ -53,7 +60,7 @@
 - **2026-11-11 00:59 UTC** - `git fetch --prune origin`; no merge, checkout, or
   branch creation.
 - **2026-11-11 01:03 UTC** - Package opened for the operator-requested F1 fix.
-- **Pending** - Contract checkpoint ancestor.
+- **2026-11-11** - Operator approved revised contract; checkpoint `2f9401f93`.
 - **Pending** - Local implementation and validation.
 - **Pending** - Forest/equivalent acceptance and wepp1 rollout.
 
@@ -150,7 +157,7 @@ at its existing revision and require implementation to reconcile deliberately.
 
 ## Progress Notes
 
-### 2026-11-11 01:25 UTC: Execute M0 contract preparation
+### 2026-11-11 02:12 UTC: Execute M0 contract preparation
 
 Prepared `docs/schemas/query-engine-http-access-contract.md` and proposed
 amendments to session, JWT, CSRF, composite IDs, feature governance, PCV and query
@@ -205,8 +212,10 @@ for a scaffold and were not run.
 
 ## Handoff Summary
 
-**From**: Codex  
-**To**: implementation owner after contract checkpoint  
+**From**: Codex
+
+**To**: implementation owner after contract checkpoint
+
 **Date**: 2026-11-11 01:03 UTC
 
 **What's complete**: source diagnosis, exact M0 contract proposal, affected
@@ -235,3 +244,24 @@ CSRF-contract differences, left untouched. Evidence: `artifacts/20261110_m0_doc_
 Operator ratification, 2026-11-11 UTC: "I approve the revised contract. please
 commit and proceed". Exact contract approved; checkpoint commit follows before
 implementation. Production deployment is not authorized.
+
+M0 complete: accepted standalone checkpoint ancestor `2f9401f93` committed
+2026-11-11 UTC before implementation/test edits. M1 execution begins.
+
+
+## Implementation and validation update (2026-11-11 UTC)
+
+- Checkpoint ancestor `2f9401f93` precedes all source/test edits.
+- M1/M2 implemented; direct browser cookie, exact CORS and POST activation paths
+  implemented. Independent correctness/code/security and local QA findings closed.
+- Focused release gate: 478 passed, 2 skipped; npm:124 suites/1069 tests passed;
+  helper stubtest, stub hygiene and changed broad-exception gate passed.
+- Full Python sanity gate is still running; do not infer completion from the
+  focused suite. Final browser/environment gate remains in progress.
+- Real forest login/direct-page cookie, owner query, public query, private denial
+  and activation origin checks passed.100-run acceptance exposed existing URL
+  and H11 incomplete-header buffering limits. Bounded, independently reviewed
+  corrections and retained failure evidence are recorded in the ExecPlan Decision
+  Log and the canonical HTTP operations guide. No production changes performed.
+- Observe-only quality report lacks Radon and changed-file analysis; no complexity
+  threshold conclusion is claimed.

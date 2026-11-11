@@ -1,0 +1,6 @@
+INFO:wctl2:docker compose up -d --no-deps query-engine
+time="2026-11-10T18:20:59-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container wepppy-query-engine Recreate
+ Container wepppy-query-engine Recreated
+ Container wepppy-query-engine Starting
+ Container wepppy-query-engine Started

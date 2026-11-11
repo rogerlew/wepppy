@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, require_root, discovery_headers
+from wepppy.query_engine.app.feature_access import require_datasets, visible_entries, discovery_headers
 
 from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 
@@ -47,11 +47,12 @@ from wepppy.observability.correlation import (
 )
 from wepppy.config.secrets import get_secret
 
-from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
+from wepppy.query_engine import activate_query_engine, run_query
 from wepppy.query_engine.payload import QueryRequest
 from wepppy.weppcloud.utils.assets import resolve_asset_version
 from .query_presets import QUERY_PRESETS
-from .helpers import resolve_run_path
+from .helpers import QueryTarget
+from .access import authorize_request, configured_origins, prepare_context, recheck, execute_scoped
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 SHARED_TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "weppcloud" / "templates"
@@ -503,6 +504,9 @@ async def query_engine_http_exception_handler(request: StarletteRequest, exc: HT
         "status_code": exc.status_code,
     }
 
+    if exc.status_code >= 500 and request.url.path.startswith("/runs/"):
+        LOGGER.exception("Query boundary unavailable")
+        return JSONResponse({"error": "Query service unavailable", "status_code": exc.status_code}, status_code=exc.status_code)
     if exc.status_code >= 500:
         stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         payload["stacktrace"] = stacktrace
@@ -523,14 +527,16 @@ async def query_engine_exception_handler(request: StarletteRequest, exc: Excepti
     Returns:
         JSONResponse with stacktrace details.
     """
+    if getattr(request.state, "query_target", None) is None and request.url.path.startswith("/runs/"):
+        LOGGER.exception("Query admission failed")
+        return JSONResponse({"error": "Query service unavailable", "status_code": 503}, status_code=503)
+
     stacktrace_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
     stacktrace_text = "".join(stacktrace_lines)
     stacktrace_clean = stacktrace_text.strip("\n")
     message = _format_exception_message(exc)
-    runid = request.path_params.get("runid")
-
     LOGGER.exception("Unhandled exception for %s", request.url)
-    _log_exception_details(stacktrace_text, runid)
+    _log_exception_details(stacktrace_text, getattr(request.state, "query_target", None))
 
     payload = {
         "error": message,
@@ -561,29 +567,30 @@ def _format_exception_message(exc: BaseException) -> str:
     return exc.__class__.__name__
 
 
-def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
+def _log_exception_details(stacktrace_text: str, target: QueryTarget | None) -> None:
     """Append stacktrace details to `<run>/exceptions.log` when possible.
 
     Args:
         stacktrace_text: Stacktrace text to append.
-        runid: Run identifier used to resolve the filesystem path.
+        target: Previously admitted, checked resource.
     """
-    if not runid:
+    if target is None:
         return
-
-    try:
-        run_path = resolve_run_path(runid)
-    except Exception:
+    run_path = target.path
+    if run_path.resolve() != run_path:
         return
 
     log_path = run_path / "exceptions.log"
+    if log_path.resolve() != log_path:
+        return
     try:
-        with log_path.open("a", encoding="utf-8") as handle:
+        fd = os.open(log_path, os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_NOFOLLOW, 0o666)
+        with os.fdopen(fd, "a", encoding="utf-8") as handle:
             handle.write(f"[{datetime.now().isoformat()}]\n")
             handle.write(stacktrace_text)
             handle.write("\n\n")
     except OSError:
-        LOGGER.warning("Unable to append to query engine exception log for %s", runid, exc_info=True)
+        LOGGER.warning("Unable to append to query engine exception log for %s", target.runid, exc_info=True)
 
 
 async def homepage(request: StarletteRequest) -> Response:
@@ -611,13 +618,13 @@ async def run_info(request: StarletteRequest) -> Response:
     """
     runid_param: str = request.path_params["runid"]
     try:
-        run_path = resolve_run_path(runid_param)
-        require_root(request, run_path)
+        target = await run_in_threadpool(authorize_request, request, "read")
+        run_path = target.path
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
-        context = await run_in_threadpool(resolve_run_context, str(run_path), auto_activate=True, run_interchange=False)
+        context = await run_in_threadpool(prepare_context, request, str(run_path), auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -638,7 +645,7 @@ async def run_info(request: StarletteRequest) -> Response:
             "catalog_entries": catalog_entries,
             "asset_version": ASSET_VERSION,
         },
-        headers=discovery_headers(context.base_dir, context.catalog.entries()),
+        headers=discovery_headers(context.base_dir, catalog_entries),
     )
 
 
@@ -653,13 +660,13 @@ async def run_schema(request: StarletteRequest) -> Response:
     """
     runid_param: str = request.path_params["runid"]
     try:
-        run_path = resolve_run_path(runid_param)
-        require_root(request, run_path)
+        target = await run_in_threadpool(authorize_request, request, "read")
+        run_path = target.path
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
-        context = await run_in_threadpool(resolve_run_context, str(run_path), auto_activate=True, run_interchange=False)
+        context = await run_in_threadpool(prepare_context, request, str(run_path), auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -668,7 +675,7 @@ async def run_schema(request: StarletteRequest) -> Response:
         "runid": str(run_path),
         "entries": [asdict(entry) for entry in entries],
     }
-    return JSONResponse(data, headers=discovery_headers(context.base_dir, context.catalog.entries()))
+    return JSONResponse(data, headers=discovery_headers(context.base_dir, entries))
 
 
 async def make_query_endpoint(request: StarletteRequest) -> Response:
@@ -701,8 +708,8 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
         )
 
     try:
-        run_path = resolve_run_path(runid_param)
-        require_root(request, run_path)
+        target = await run_in_threadpool(authorize_request, request, "read")
+        run_path = target.path
     except FileNotFoundError:
         return PlainTextResponse(f"Run '{runid_param}' not found", status_code=404)
 
@@ -712,15 +719,17 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
     sample_dataset = "landuse/landuse.parquet"
 
     try:
-        context = await run_in_threadpool(resolve_run_context, str(run_path), auto_activate=True, run_interchange=False)
-        headers = discovery_headers(context.base_dir, context.catalog.entries())
+        context = await run_in_threadpool(prepare_context, request, str(run_path), auto_activate=True, run_interchange=False)
         catalog_entries = await run_in_threadpool(visible_entries, request, context.base_dir, context.catalog.entries())
+        headers = discovery_headers(context.base_dir, catalog_entries)
         if catalog_entries:
             # Use first parquet file, skip JSON/other metadata files
             for entry in catalog_entries:
                 if entry.path.endswith('.parquet'):
                     sample_dataset = entry.path
                     break
+    except HTTPException:
+        raise
     except FileNotFoundError:
         catalog_ready = False
     except Exception:  # pragma: no cover - defensive logging
@@ -824,8 +833,8 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
         )
 
     try:
-        run_path = resolve_run_path(runid_param)
-        require_root(request, run_path)
+        target = await run_in_threadpool(authorize_request, request, "query")
+        run_path = target.path
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -835,10 +844,14 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
         return JSONResponse({"error": "Invalid JSON payload"}, status_code=400)
 
     # Extract optional scenario from request body
+    if not isinstance(body, dict):
+        raise HTTPException(400, "Invalid JSON payload")
     scenario = body.pop("scenario", None)
+    if scenario is not None and not isinstance(scenario, str):
+        raise HTTPException(400, "Invalid scenario")
 
     try:
-        context = await run_in_threadpool(resolve_run_context, str(run_path), scenario=scenario, auto_activate=True, run_interchange=False)
+        context = await run_in_threadpool(prepare_context, request, str(run_path), scenario=scenario, auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -866,7 +879,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
                             headers={'Cache-Control': 'no-store'})
     try:
         result = await run_in_threadpool(
-            run_query,
+            execute_scoped, request, run_query,
             context, payload,
             authorize=lambda fresh: require_datasets(
                 request, fresh.base_dir, [spec.path for spec in payload.dataset_specs],
@@ -900,7 +913,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     except Exception as exc:  # pragma: no cover - defensive error reporting
         stacktrace_text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         LOGGER.exception("Query execution failed for %s", run_path)
-        _log_exception_details(stacktrace_text, runid_param)
+        _log_exception_details(stacktrace_text, getattr(request.state, "query_target", None))
         return JSONResponse(
             {
                 "error": f"Query execution failed: {exc}",
@@ -934,18 +947,28 @@ async def activate_run(request: StarletteRequest) -> Response:
     Returns:
         JSONResponse describing activation status.
     """
+    if request.method != "POST":
+        raise HTTPException(405, "Method not allowed")
     runid_param: str = request.path_params["runid"]
 
     try:
-        run_path = resolve_run_path(runid_param)
-        require_root(request, run_path)
+        target = await run_in_threadpool(authorize_request, request, "activate")
+        run_path = target.path
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
-        catalog = await run_in_threadpool(activate_query_engine, run_path, force_refresh=True)
+        await run_in_threadpool(recheck, request)
+        # The cache path itself must not redirect activation outside the run.
+        from .helpers import checked_path
+        checked_path(run_path / "_query_engine" / "catalog.json", run_path)
+        catalog = await run_in_threadpool(execute_scoped, request, activate_query_engine, run_path,
+                                          force_refresh=True, run_interchange=False,
+                                          mutation_checkpoint=lambda: recheck(request))
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
+    except HTTPException:
+        raise
     except Exception as exc:
         stacktrace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         LOGGER.exception("Activation failed for %s", run_path)
@@ -1062,10 +1085,10 @@ def create_app() -> Starlette:
     # Add CORS middleware to allow cross-origin requests
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Allow all origins in development
+        allow_origins=configured_origins(),
         allow_credentials=True,
-        allow_methods=["*"],  # Allow all methods (GET, POST, OPTIONS, etc.)
-        allow_headers=["*"],  # Allow all headers
+        allow_methods=["GET", "HEAD", "POST", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
     )
 
     @app.middleware("http")

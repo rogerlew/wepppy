@@ -114,6 +114,12 @@ def _emit_request_correlation_id(response):
     return response
 
 
+@app.after_request
+def _set_query_page_credentials(response):
+    from wepppy.weppcloud.utils.query_cookie import set_page_query_cookie
+    return set_page_query_cookie(response)
+
+
 @app.before_request
 def _protect_declarative_project():
     values = request.view_args or {}

@@ -1,0 +1,4 @@
+INFO:wctl2:docker compose exec -T query-engine python -c 'import os; from uvicorn.protocols.http.auto import AutoHTTPProtocol; print('"'"'protocol:'"'"',AutoHTTPProtocol.__name__); print('"'"'command:'"'"',open('"'"'/proc/7/cmdline'"'"','"'"'rb'"'"').read().replace(bytes([0]),b'"'"' '"'"').decode()); print('"'"'uid/gid:'"'"',os.getuid(),os.getgid())'
+protocol: H11Protocol
+command: /opt/venv/bin/python /opt/venv/bin/uvicorn --h11-max-incomplete-event-size 131072 wepppy.query_engine.app.server:create_app --factory --host 0.0.0.0 --port 8041
+uid/gid: 1000 993

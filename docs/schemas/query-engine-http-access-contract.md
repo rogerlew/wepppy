@@ -167,6 +167,13 @@ without automatic redirect loops or repeated token retries. The existing maximum
 limits; public/ownerless reads need no credential issuance. Do not raise proxy
 limits or redesign token transport without retained failing acceptance evidence.
 
+The evidence-selected capacity settings for this implementation are an 8190-byte Flask
+Gunicorn request-line cap and a 131072-byte query-engine H11 incomplete-event
+buffer. They address observed 5537-byte collection URLs and 63600-byte cookie
+headers. The latter bounds incomplete parser events, not total headers. Caddy
+limits remain unchanged; see the [operations guide](../dev-notes/query-engine-http-operations.md)
+for runtime selection, cost and rollback.
+
 ## Explicit activation and browser request origin
 
 Forced activation is POST-only and is a cache operation, not a restricted model

@@ -1,0 +1,19 @@
+INFO:wctl2:docker compose logs --tail 18 query-engine
+wepppy-query-engine  | WARNING:wepppy.query_engine.app.server:HTTPException 401 for http://forest.tail305ec9.ts.net/runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/query: Authentication required
+wepppy-query-engine  | INFO:     172.28.0.26:60788 - "POST /runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/query HTTP/1.1" 401 Unauthorized
+wepppy-query-engine  | INFO:     172.28.0.26:60788 - "POST /runs/qe-boundary-c8cc6aa9f5-100/disturbed9002/query HTTP/1.1" 200 OK
+wepppy-query-engine  | WARNING:wepppy.query_engine.app.server:HTTPException 405 for http://forest.tail305ec9.ts.net/runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate: Method not allowed
+wepppy-query-engine  | INFO:     172.28.0.26:60788 - "GET /runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate HTTP/1.1" 405 Method Not Allowed
+wepppy-query-engine  | WARNING:wepppy.query_engine.app.server:HTTPException 403 for http://forest.tail305ec9.ts.net/runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate: Origin not allowed
+wepppy-query-engine  | INFO:     172.28.0.26:60788 - "POST /runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate HTTP/1.1" 403 Forbidden
+wepppy-query-engine  | INFO:     172.28.0.26:60788 - "POST /runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate HTTP/1.1" 200 OK
+wepppy-query-engine  | INFO:     172.28.0.26:45918 - "POST /runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/query HTTP/1.1" 200 OK
+wepppy-query-engine  | WARNING:wepppy.query_engine.app.server:HTTPException 401 for http://forest.tail305ec9.ts.net/runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/query: Authentication required
+wepppy-query-engine  | INFO:     172.28.0.26:45918 - "POST /runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/query HTTP/1.1" 401 Unauthorized
+wepppy-query-engine  | INFO:     172.28.0.26:45918 - "POST /runs/qe-boundary-c8cc6aa9f5-100/disturbed9002/query HTTP/1.1" 200 OK
+wepppy-query-engine  | WARNING:wepppy.query_engine.app.server:HTTPException 405 for http://forest.tail305ec9.ts.net/runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate: Method not allowed
+wepppy-query-engine  | INFO:     172.28.0.26:45918 - "GET /runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate HTTP/1.1" 405 Method Not Allowed
+wepppy-query-engine  | WARNING:wepppy.query_engine.app.server:HTTPException 403 for http://forest.tail305ec9.ts.net/runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate: Origin not allowed
+wepppy-query-engine  | INFO:     172.28.0.26:45918 - "POST /runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate HTTP/1.1" 403 Forbidden
+wepppy-query-engine  | INFO:     172.28.0.26:45918 - "POST /runs/qe-boundary-c8cc6aa9f5-000/disturbed9002/activate HTTP/1.1" 200 OK
+wepppy-query-engine  | WARNING:  Invalid HTTP request received.

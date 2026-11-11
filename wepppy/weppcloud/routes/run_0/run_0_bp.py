@@ -1753,6 +1753,8 @@ def _set_run_session_jwt_cookie(response, *, runid: str, config: str, require_ro
             samesite=_cookie_samesite(),
             path=_batch_browse_compat_cookie_path(),
         )
+    from wepppy.weppcloud.utils.query_cookie import set_query_cookie
+    set_query_cookie(response, runid, config)
     return True
 
 

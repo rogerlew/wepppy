@@ -1,0 +1,14 @@
+INFO:wctl2:docker compose exec -T weppcloud cat /tmp/qe-boundary-fixtures.json
+Real password/CAP browser login: passed
+Direct page status/cookie count: 200 1
+Owner browser query records: passed
+Anonymous private denial/public query: passed
+POST activation and origin boundaries: passed
+Collection page admitted: 50
+Collection page admitted: 50
+Total collection query cookie count: 100
+100-cookie bytes before query: 63600
+Query transport failure: net::ERR_HTTP2_PROTOCOL_ERROR
+page.evaluate: TypeError: Failed to fetch
+    at eval (eval at evaluate (:290:30), <anonymous>:1:204)
+    at async <anonymous>:316:30

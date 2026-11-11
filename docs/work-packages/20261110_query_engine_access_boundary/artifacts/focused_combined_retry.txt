@@ -1,0 +1,348 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/query_engine tests/weppcloud/routes/test_run_0_nocfg_auth_bridge.py tests/microservices/test_browse_auth_routes.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 428 items
+
+tests/query_engine/test_activate.py ..............                       [  3%]
+tests/query_engine/test_benchmarks.py ss                                 [  3%]
+tests/query_engine/test_catalog_refresh.py ............................. [ 10%]
+......................                                                   [ 15%]
+tests/query_engine/test_context.py ...............                       [ 19%]
+tests/query_engine/test_core.py .........................                [ 25%]
+tests/query_engine/test_formatter.py .                                   [ 25%]
+tests/query_engine/test_http_access_boundary.py ........................ [ 30%]
+..................................                                       [ 38%]
+tests/query_engine/test_mcp_auth.py .........                            [ 40%]
+tests/query_engine/test_mcp_openapi_contract.py ..                       [ 41%]
+tests/query_engine/test_mcp_router.py .................................. [ 49%]
+..........                                                               [ 51%]
+tests/query_engine/test_server_routes.py .....................F
+
+=================================== FAILURES ===================================
+_________________ test_query_endpoint_accepts_scenario_in_body _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7cf00fd9d6a0>
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-96/test_query_endpoint_accepts_sc0')
+
+    @pytest.mark.unit
+    def test_query_endpoint_accepts_scenario_in_body(monkeypatch, tmp_path):
+        """Verify that scenario parameter in body is properly passed to resolve_run_context.
+
+        This is the CORRECT way to query scenario data - via the body parameter,
+        not URL manipulation.
+        """
+        from wepppy.query_engine.app import server
+        from wepppy.query_engine.formatter import QueryResult
+
+        runid = "sample-run"
+        run_dir = tmp_path / runid[:2] / runid
+        run_dir.mkdir(parents=True, exist_ok=True)
+        from wepppy.weppcloud.utils import helpers as canonical_helpers
+        monkeypatch.setattr(canonical_helpers, 'PRIMARY_RUNS_ROOT', str(tmp_path))
+        monkeypatch.setattr(canonical_helpers, 'redis_wd_cache_client', None)
+        (run_dir / 'PUBLIC').touch()
+
+        captured_scenario = []
+        (run_dir / "_pups/omni/scenarios/mulch_30_sbs_map").mkdir(parents=True)
+
+        class DummyCatalog:
+            root = run_dir
+
+            def entries(self):
+                return [SimpleNamespace(path="test.parquet", fs_path=None)]
+
+            def has(self, rel_path: str) -> bool:
+                return True
+
+            def get_column_type(self, rel_path: str, column: str) -> str:
+                return "TEXT"
+
+        def fake_resolve_run_path(runid_param: str):
+            if runid_param != runid:
+                raise FileNotFoundError(runid_param)
+            return run_dir
+
+        def fake_resolve_context(
+            runid_path: str,
+            *,
+            scenario=None,
+            auto_activate: bool = True,
+            run_interchange: bool = True,
+            force_refresh: bool = False,
+        ):
+            # Capture the scenario parameter to verify it was passed
+            captured_scenario.append(Path(runid_path).name)
+            return SimpleNamespace(
+                runid=runid_path,
+                base_dir=Path(runid_path),
+                scenario=scenario,
+                catalog=DummyCatalog(),
+            )
+
+        def fake_run_query(context, payload, *, authorize=None):
+            return QueryResult(records=[{"value": 1}], schema=[], row_count=1, sql="SELECT 1")
+
+        monkeypatch.setattr(server, "resolve_run_path", fake_resolve_run_path)
+        # Downstream catalog behavior is isolated; admission uses real paths/public state.
+        from wepppy.query_engine import context as context_module
+        monkeypatch.setattr(context_module, "resolve_run_context", fake_resolve_context)
+        monkeypatch.setattr(server, "run_query", fake_run_query)
+
+        app = server.create_app()
+        client = TestClient(app)
+
+        # Query with scenario in body - this is the correct approach
+        payload = {
+            "scenario": "mulch_30_sbs_map",
+            "datasets": ["test.parquet"],
+            "limit": 1,
+        }
+
+>       response = client.post(f"/runs/{runid}/cfg/query", json=payload)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/query_engine/test_server_routes.py:314:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:552: in post
+    return super().post(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1157: in post
+    return self.request(
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:837: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:926: in send
+    response = self._send_handling_auth(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:954: in _send_handling_auth
+    response = self._send_handling_redirects(
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:991: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/httpx/_client.py:1027: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+/opt/venv/lib/python3.12/site-packages/starlette/_utils.py:85: in collapse_excgroups
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/query_engine/app/server.py:1102: in correlation_id_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/cors.py:85: in __call__
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:78: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:75: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+wepppy/query_engine/app/server.py:856: in run_query_endpoint
+    context = await run_in_threadpool(prepare_context, request, str(run_path), scenario=scenario, auto_activate=True, run_interchange=False)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py:38: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2641: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1033: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/query_engine/app/access.py:271: in prepare_context
+    entries = [replace(entry, fs_path=str(current_scope().source_path(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+obj = namespace(path='test.parquet', fs_path=None)
+changes = {'fs_path': '/tmp/pytest-of-unknown/pytest-96/test_query_endpoint_accepts_sc0/sa/sample-run/_pups/omni/scenarios/mulch_30_sbs_map/test.parquet'}
+
+    def replace(obj, /, **changes):
+        """Return a new object replacing specified fields with new values.
+
+        This is especially useful for frozen classes.  Example usage::
+
+          @dataclass(frozen=True)
+          class C:
+              x: int
+              y: int
+
+          c = C(1, 2)
+          c1 = replace(c, x=3)
+          assert c1.x == 3 and c1.y == 2
+        """
+
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(obj, **my_changes)'.
+
+        if not _is_dataclass_instance(obj):
+>           raise TypeError("replace() should be called on dataclass instances")
+E           TypeError: replace() should be called on dataclass instances
+
+/usr/local/lib/python3.12/dataclasses.py:1559: TypeError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.query_engine.app.server:server.py:540 Unhandled exception for http://testserver/runs/sample-run/cfg/query
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/query_engine/app/server.py", line 1102, in correlation_id_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/opt/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/venv/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/query_engine/app/server.py", line 856, in run_query_endpoint
+    context = await run_in_threadpool(prepare_context, request, str(run_path), scenario=scenario, auto_activate=True, run_interchange=False)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/query_engine/app/access.py", line 271, in prepare_context
+    entries = [replace(entry, fs_path=str(current_scope().source_path(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dataclasses.py", line 1559, in replace
+    raise TypeError("replace() should be called on dataclass instances")
+TypeError: replace() should be called on dataclass instances
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: 2 warnings
+tests/query_engine/test_http_access_boundary.py: 57 warnings
+tests/query_engine/test_mcp_openapi_contract.py: 1 warning
+tests/query_engine/test_mcp_router.py: 85 warnings
+tests/query_engine/test_server_routes.py: 3 warnings
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+tests/query_engine/test_catalog_refresh.py::test_catalog_wait_releases_serializer_and_refuses_deleted_tree
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=3253499) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/query_engine/test_mcp_router.py::test_validate_query_invalid_json
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[query-False]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[query-True]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[info-False]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[info-True]
+tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_trailing_slash
+tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_trailing_slash
+  /opt/venv/lib/python3.12/site-packages/starlette/templating.py:162: DeprecationWarning: The `name` is not the first parameter anymore. The first parameter should be the `Request` instance.
+  Replace `TemplateResponse(name, {"request": request})` by `TemplateResponse(request, name)`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_scenario_in_body
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=========== 1 failed, 240 passed, 2 skipped, 162 warnings in 13.29s ============

@@ -1,0 +1,8 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.weppcloud.utils.helpers
+error: wepppy.weppcloud.utils.helpers.run_lifecycle_mutation is not present in stub
+Stub: in file /workdir/wepppy/wepppy/weppcloud/utils/helpers.pyi
+MISSING
+Runtime: in file /workdir/wepppy/wepppy/weppcloud/utils/helpers.py:978
+def (func: 'Callable[..., ResponseValue]') -> 'Callable[..., ResponseValue]'
+
+Found 1 error (checked 1 module)

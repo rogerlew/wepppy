@@ -446,6 +446,10 @@ def _validate_scope(scope: CatalogScope) -> None:
 def publish_catalog(wd: str | Path, catalog: dict[str, Any], *,
                     snapshot: tuple[CatalogScope, str | None] | None = None,
                     acknowledged: Iterable[str] = ()) -> dict[str, Any]:
+    from .access_scope import current_scope
+    access = current_scope()
+    if access is not None:
+        access.checkpoint()
     base = Path(wd).resolve()
     with catalog_metadata_guard(base):
         scope = resolve_scope(base, create=True)
@@ -606,21 +610,26 @@ def _updated_catalog(base: Path, catalog: dict[str, Any] | None,
             old_entry = by_path.get(normalized)
             if old_entry and old_entry.get('fs_path'):
                 candidate = Path(old_entry['fs_path'])
-                if candidate.is_absolute() and catalog.get('root') != str(base):
-                    from .core import _resolve_dataset_path, _find_parent_run_root
-                    try:
-                        _resolve_dataset_path(base, str(candidate), normalized)
-                    except ValueError:
-                        old_root = Path(str(catalog['root'])).resolve()
-                        original = _resolve_dataset_path(old_root, str(candidate), normalized)
-                        if original.is_relative_to(old_root):
-                            candidate = base / original.relative_to(old_root)
-                        else:
-                            old_parent = _find_parent_run_root(old_root)
-                            new_parent = _find_parent_run_root(base)
-                            if old_parent is None or new_parent is None:
-                                raise ValueError('Relocated input requires an allowed parent run')
-                            candidate = new_parent / original.relative_to(old_parent)
+                from .access_scope import current_scope
+                access = current_scope()
+                if access is not None:
+                    candidate = access.source_path(candidate, catalog.get('root'))
+                else:
+                    if candidate.is_absolute() and catalog.get('root') != str(base):
+                        from .core import _resolve_dataset_path, _find_parent_run_root
+                        try:
+                            _resolve_dataset_path(base, str(candidate), normalized)
+                        except ValueError:
+                            old_root = Path(str(catalog['root'])).resolve()
+                            original = _resolve_dataset_path(old_root, str(candidate), normalized)
+                            if original.is_relative_to(old_root):
+                                candidate = base / original.relative_to(old_root)
+                            else:
+                                old_parent = _find_parent_run_root(old_root)
+                                new_parent = _find_parent_run_root(base)
+                                if old_parent is None or new_parent is None:
+                                    raise ValueError('Relocated input requires an allowed parent run')
+                                candidate = new_parent / original.relative_to(old_parent)
                 selected = candidate if candidate.is_absolute() else base / candidate
                 # A newly generated child artifact supersedes inherited parent input.
                 if not (prefer_canonical and target.exists() and not selected.resolve().is_relative_to(base)):

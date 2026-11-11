@@ -1,0 +1,173 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/query_engine tests/weppcloud/routes/test_run_0_nocfg_auth_bridge.py tests/weppcloud/routes/test_combined_watershed_viewer_security.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 348 items
+
+tests/query_engine/test_activate.py ..............                       [  4%]
+tests/query_engine/test_benchmarks.py ss                                 [  4%]
+tests/query_engine/test_catalog_refresh.py ............................. [ 12%]
+......................                                                   [ 19%]
+tests/query_engine/test_context.py ...............                       [ 23%]
+tests/query_engine/test_core.py .........................                [ 30%]
+tests/query_engine/test_formatter.py .                                   [ 31%]
+tests/query_engine/test_http_access_boundary.py ........................ [ 37%]
+...............................................................          [ 56%]
+tests/query_engine/test_mcp_auth.py .........                            [ 58%]
+tests/query_engine/test_mcp_openapi_contract.py ..                       [ 59%]
+tests/query_engine/test_mcp_router.py .................................. [ 68%]
+..........                                                               [ 71%]
+tests/query_engine/test_server_routes.py ............................... [ 80%]
+......                                                                   [ 82%]
+tests/query_engine/test_storm_event_analyzer.py ..........               [ 85%]
+tests/weppcloud/routes/test_run_0_nocfg_auth_bridge.py ................. [ 90%]
+...........                                                              [ 93%]
+tests/weppcloud/routes/test_combined_watershed_viewer_security.py ...... [ 95%]
+..F
+
+=================================== FAILURES ===================================
+___________ test_portland_member_can_enter_collection_but_not_mixed ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e0100fcdd60>
+
+    def test_portland_member_can_enter_collection_but_not_mixed(monkeypatch):
+        module = _load_module()
+        from wepppy.weppcloud.utils.portland_collections import portland_runids
+        from wepppy.weppcloud.utils import helpers
+        generator = importlib.import_module("wepppy.weppcloud.combined_watershed_viewer_generator")
+        monkeypatch.setattr(helpers, 'get_run_owners_lazy', lambda runid: [])
+        app = _build_app(module)
+        _install_template_stub(monkeypatch, module)
+        _install_public_stub(monkeypatch, module, set())
+        user = SimpleNamespace(id=51, is_authenticated=True, is_active=True, has_role=lambda role: role == 'PortlandGroup')
+        monkeypatch.setattr(module, 'current_user', user)
+        monkeypatch.setattr(generator, 'collection_metadata', lambda ids, **kw: {'ws': [{'runid': r} for r in ids]})
+        run = next(iter(portland_runids()))
+        with app.test_client() as client:
+>           assert client.get('/combined_ws_viewer', query_string={'ws': json.dumps([{'runid':run}])}).status_code == 200
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/weppcloud/routes/test_combined_watershed_viewer_security.py:211:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/opt/venv/lib/python3.12/site-packages/werkzeug/test.py:1162: in get
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/testing.py:235: in open
+    response = super().open(
+/opt/venv/lib/python3.12/site-packages/werkzeug/test.py:1116: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/werkzeug/test.py:988: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/werkzeug/test.py:1264: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:1536: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:1514: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:1511: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:919: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:809: in handle_user_exception
+    return self.ensure_sync(handler)(e)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:917: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/flask/app.py:902: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/weppcloud/routes/combined_watershed_viewer.py:151: in combined_ws_viewer
+    return _render_collection()
+           ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+template = 'combined_ws_viewer.htm', include_ids = True
+
+    def _render_collection(template="combined_ws_viewer.htm", include_ids=True):
+        if "data_uri" in request.args:
+            return error_factory("Use an explicit ws collection", status_code=400)
+        validation_error = _validate_ws_query_public_runs()
+        if validation_error is not None:
+            return validation_error
+        try:
+            options = _viewer_options()
+        except (ValueError, TypeError):
+            return error_factory('Invalid display settings', status_code=400)
+        runids = list(dict.fromkeys(item['runid'].strip().rstrip('/')
+                                   for item in json.loads(request.args.get('ws', '[]'))))
+        try:
+            from wepppy.weppcloud.combined_watershed_viewer_generator import collection_metadata
+            metadata = collection_metadata(runids, include_ids=include_ids) if runids else {'ws': []}
+        except (OSError, ValueError, KeyError, RuntimeError) as exc:
+            current_app.logger.warning('Combined viewer metadata unavailable: %s', exc)
+            return error_factory('Collection metadata is not ready. Contact the project maintainer.', status_code=409)
+        context = {'center': [39, -99], 'zoom': 5, **metadata, **options, 'sitePrefix': current_app.config.get('SITE_PREFIX', '/weppcloud')}
+        from flask import make_response
+        from wepppy.weppcloud.utils.query_cookie import set_query_cookie
+        response = make_response(render_template(template, collection=context))
+        for item in metadata['ws']:
+>           set_query_cookie(response, item['runid'], item['cfg'], omit_public=True)
+                                                      ^^^^^^^^^^^
+E           KeyError: 'cfg'
+
+wepppy/weppcloud/routes/combined_watershed_viewer.py:144: KeyError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: 2 warnings
+tests/query_engine/test_http_access_boundary.py: 86 warnings
+tests/query_engine/test_mcp_openapi_contract.py: 1 warning
+tests/query_engine/test_mcp_router.py: 85 warnings
+tests/query_engine/test_server_routes.py: 16 warnings
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+tests/query_engine/test_catalog_refresh.py::test_catalog_wait_releases_serializer_and_refuses_deleted_tree
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=3282196) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/query_engine/test_mcp_router.py::test_validate_query_invalid_json
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[query-False]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[query-True]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[info-False]
+tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[info-True]
+tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_trailing_slash
+tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_trailing_slash
+  /opt/venv/lib/python3.12/site-packages/starlette/templating.py:162: DeprecationWarning: The `name` is not the first parameter anymore. The first parameter should be the `Request` instance.
+  Replace `TemplateResponse(name, {"request": request})` by `TemplateResponse(request, name)`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/weppcloud/routes/test_combined_watershed_viewer_security.py::test_portland_member_can_enter_collection_but_not_mixed
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=========== 1 failed, 331 passed, 2 skipped, 204 warnings in 24.07s ============

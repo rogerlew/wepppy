@@ -12,6 +12,8 @@ from collections.abc import Callable, Iterable
 from wepppy.runtime_paths.parquet_sidecars import list_existing_retired_root_resources
 from .catalog_refresh import catalog_snapshot, publish_catalog, is_refresh_path
 
+from .access_scope import current_scope, check_source
+
 LOGGER = logging.getLogger(__name__)
 
 SUPPORTED_EXTENSIONS: tuple[str, ...] = (
@@ -146,7 +148,8 @@ def activate_query_engine(
         PermissionError: If the working directory is flagged read-only.
     """
 
-    checkpoint = mutation_checkpoint or (lambda: None)
+    scope = current_scope()
+    checkpoint = mutation_checkpoint or (scope.checkpoint if scope is not None else (lambda: None))
     checkpoint()
     base = Path(wd).expanduser().resolve()
     if not base.exists():
@@ -161,7 +164,7 @@ def activate_query_engine(
     if not force_refresh and catalog_path.exists():
         try:
             catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-        except Exception:  # pragma: no cover - fall back to full rebuild
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):  # derived catalog repair
             LOGGER.warning("Existing catalog unreadable for %s; rebuilding", base, exc_info=True)
         else:
             if not readonly:
@@ -400,6 +403,9 @@ def _build_catalog(base: Path) -> list[dict[str, object]]:
 
     from wepppy.wepp.interchange._rust_interchange import call_wepppyo3_interchange
 
+    scope = current_scope()
+    if scope is not None:
+        scope.before_scan(base)
     entries = call_wepppyo3_interchange(
         "query-engine catalog scan",
         "catalog_scan",
@@ -436,6 +442,7 @@ def _read_parquet_schema(path: Path) -> dict[str, object] | None:
     Returns:
         Dictionary describing schema fields, or None if unavailable.
     """
+    check_source(Path(path))
     try:
         import pyarrow.parquet as pq  # type: ignore
     except ImportError:  # pragma: no cover
@@ -470,6 +477,7 @@ def _read_geo_schema(path: Path) -> dict[str, object] | None:
     Returns:
         Dictionary describing schema fields, or None.
     """
+    check_source(Path(path))
     try:
         import duckdb
     except ImportError:  # pragma: no cover
@@ -494,6 +502,7 @@ def _build_entry(
     Returns:
         Catalog entry dictionary or None when unsupported.
     """
+    check_source(path)
     if is_refresh_path(path.relative_to(base) if path.is_relative_to(base) else path) or is_refresh_path(path.resolve()):
         return None
     suffix = path.suffix.lower()
@@ -562,6 +571,9 @@ def _is_within_directory(base: Path, target: Path) -> bool:
 
 def _find_parent_run_root(base: Path) -> Path | None:
     """Best-effort inference of the run root for `_pups` child directories."""
+    scope = current_scope()
+    if scope is not None:
+        return scope.parent if base == scope.root and scope.parent != base else None
     parts = base.parts
     try:
         idx = parts.index("_pups")
@@ -574,12 +586,15 @@ def _find_parent_run_root(base: Path) -> Path | None:
 
 def _is_allowed_target(base: Path, target: Path) -> bool:
     """Allow child run directories to reference parent-run assets."""
-    if _is_within_directory(base, target):
-        return True
     parent_root = _find_parent_run_root(base)
-    if parent_root is None:
-        return False
-    return _is_within_directory(parent_root, target)
+    native_allowed = (_is_within_directory(base, target)
+                      or (parent_root is not None and _is_within_directory(parent_root, target)))
+    if not native_allowed:
+        return False  # Preserve the scanner's skip policy for external DEM links.
+    scope = current_scope()
+    if scope is not None:
+        scope.require_path(target)
+    return True
 
 
 def _iter_catalog_files(base: Path, *, directory: Path | None = None) -> Iterable[Path]:

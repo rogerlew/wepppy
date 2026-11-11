@@ -1,0 +1,90 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/query_engine --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 251 items
+
+tests/query_engine/test_activate.py ..............                       [  5%]
+tests/query_engine/test_benchmarks.py ss                                 [  6%]
+tests/query_engine/test_catalog_refresh.py ............................. [ 17%]
+......................                                                   [ 26%]
+tests/query_engine/test_context.py ...............                       [ 32%]
+tests/query_engine/test_core.py .........................                [ 42%]
+tests/query_engine/test_formatter.py .                                   [ 43%]
+tests/query_engine/test_http_access_boundary.py ........................ [ 52%]
+.................                                                        [ 59%]
+tests/query_engine/test_mcp_auth.py .........                            [ 62%]
+tests/query_engine/test_mcp_openapi_contract.py ..                       [ 63%]
+tests/query_engine/test_mcp_router.py ..............................F
+
+=================================== FAILURES ===================================
+________ test_discovery_does_not_cache_roads_availability[schema-False] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x79000d1b1f70>
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-91/test_discovery_does_not_cache_0')
+roads = False, endpoint = 'schema'
+
+    @pytest.mark.parametrize('roads', [False, True])
+    @pytest.mark.parametrize('endpoint', ['schema', 'query', 'info', 'mcp'])
+    def test_discovery_does_not_cache_roads_availability(monkeypatch, tmp_path, roads, endpoint):
+        _set_auth_env(monkeypatch)
+        runid = 'roads-discovery'
+        files = [{'path': 'wepp/roads/output/interchange/roads_segment_loss_summary.parquet'
+                  if roads else 'a.parquet', 'extension': '.parquet',
+                  'size_bytes': 1, 'modified': '2024-01-01T00:00:00Z'}]
+        app, _ = _make_client(monkeypatch, tmp_path, runid, files=files)
+        from starlette.testclient import TestClient
+        from wepppy.query_engine.app.mcp import auth
+
+        path = (f'/mcp/runs/{runid}/catalog' if endpoint == 'mcp' else
+                f'/runs/{runid}' if endpoint == 'info' else f'/runs/{runid}/{endpoint}')
+        response = TestClient(app).get(path, headers={'Authorization': 'Bearer '+_issue_token(auth, runid)})
+>       assert response.status_code == 200, response.text
+E       AssertionError: {"error":"Invalid run/config target","status_code":400}
+E       assert 400 == 200
+E        +  where 400 = <Response [400 Bad Request]>.status_code
+
+tests/query_engine/test_mcp_router.py:1137: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  wepppy.query_engine.app.server:server.py:512 HTTPException 400 for http://testserver/runs/roads-discovery/schema: Invalid run/config target
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: 2 warnings
+tests/query_engine/test_http_access_boundary.py: 41 warnings
+tests/query_engine/test_mcp_openapi_contract.py: 1 warning
+tests/query_engine/test_mcp_router.py: 59 warnings
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+tests/query_engine/test_catalog_refresh.py::test_guard_is_shared_by_processes_and_nested_scopes
+tests/query_engine/test_catalog_refresh.py::test_catalog_wait_releases_serializer_and_refuses_deleted_tree
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=3248269) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/query_engine/test_mcp_router.py::test_validate_query_invalid_json
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/query_engine/test_mcp_router.py::test_discovery_does_not_cache_roads_availability[schema-False]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=========== 1 failed, 188 passed, 2 skipped, 111 warnings in 19.79s ============
