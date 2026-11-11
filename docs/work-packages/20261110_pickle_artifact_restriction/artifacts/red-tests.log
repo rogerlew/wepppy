@@ -23,7 +23,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e997b08ea50>
     @pytest.mark.parametrize("prefix", ["wepp/runs", "swat/TxtInOut"])
     def test_pickle_push_rejected_without_ref_or_log(tmp_path, suffix, prefix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -63,7 +63,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e997b135d00>
     @pytest.mark.parametrize("prefix", ["wepp/runs", "swat/TxtInOut"])
     def test_pickle_push_rejected_without_ref_or_log(tmp_path, suffix, prefix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -103,7 +103,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e997b163fe0>
     @pytest.mark.parametrize("prefix", ["wepp/runs", "swat/TxtInOut"])
     def test_pickle_push_rejected_without_ref_or_log(tmp_path, suffix, prefix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -143,7 +143,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e997b160e60>
     @pytest.mark.parametrize("prefix", ["wepp/runs", "swat/TxtInOut"])
     def test_pickle_push_rejected_without_ref_or_log(tmp_path, suffix, prefix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -183,7 +183,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e997b161b50>
     @pytest.mark.parametrize("prefix", ["wepp/runs", "swat/TxtInOut"])
     def test_pickle_push_rejected_without_ref_or_log(tmp_path, suffix, prefix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -223,7 +223,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e997b1614f0>
     @pytest.mark.parametrize("prefix", ["wepp/runs", "swat/TxtInOut"])
     def test_pickle_push_rejected_without_ref_or_log(tmp_path, suffix, prefix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -263,7 +263,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e997b1622a0>
     @pytest.mark.parametrize("prefix", ["wepp/runs", "swat/TxtInOut"])
     def test_pickle_push_rejected_without_ref_or_log(tmp_path, suffix, prefix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -303,7 +303,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e997af856a0>
     @pytest.mark.parametrize("prefix", ["wepp/runs", "swat/TxtInOut"])
     def test_pickle_push_rejected_without_ref_or_log(tmp_path, suffix, prefix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -344,7 +344,7 @@ suffix = '.pkl', mode = ''
     @pytest.mark.parametrize("mode", ["", "?repr=1"])
     def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix, mode):
         from unittest.mock import Mock
-    
+
         root = tmp_path / "run"
         root.mkdir()
         name = f"legacy{suffix}"
@@ -356,8 +356,8 @@ suffix = '.pkl', mode = ''
 >           response = client.get(f"/weppcloud/runs/pickle-test/cfg/browse/{name}{mode}")
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/microservices/test_browse_routes.py:591: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/microservices/test_browse_routes.py:591:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 /opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
     return super().get(
 /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
@@ -452,7 +452,7 @@ wepppy/microservices/browse/flow.py:703: in _tabular_preview
 /usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <Mock id='139212174515072'>
 args = ('/tmp/pytest-of-unknown/pytest-6/test_pickle_preview_rejected__0/run/legacy.pkl',)
@@ -461,7 +461,7 @@ kwargs = {}, effect = AssertionError('pickle reader reached')
     def _execute_mock_call(self, /, *args, **kwargs):
         # separate from _increment_mock_call so that awaited functions are
         # executed separately from their call, also AsyncMock overrides this method
-    
+
         effect = self.side_effect
         if effect is not None:
             if _is_exception(effect):
@@ -548,7 +548,7 @@ suffix = '.pickle', mode = ''
     @pytest.mark.parametrize("mode", ["", "?repr=1"])
     def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix, mode):
         from unittest.mock import Mock
-    
+
         root = tmp_path / "run"
         root.mkdir()
         name = f"legacy{suffix}"
@@ -575,7 +575,7 @@ suffix = '.PkL', mode = ''
     @pytest.mark.parametrize("mode", ["", "?repr=1"])
     def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix, mode):
         from unittest.mock import Mock
-    
+
         root = tmp_path / "run"
         root.mkdir()
         name = f"legacy{suffix}"
@@ -587,8 +587,8 @@ suffix = '.PkL', mode = ''
 >           response = client.get(f"/weppcloud/runs/pickle-test/cfg/browse/{name}{mode}")
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/microservices/test_browse_routes.py:591: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/microservices/test_browse_routes.py:591:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 /opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
     return super().get(
 /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
@@ -683,7 +683,7 @@ wepppy/microservices/browse/flow.py:703: in _tabular_preview
 /usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <Mock id='139197656179456'>
 args = ('/tmp/pytest-of-unknown/pytest-6/test_pickle_preview_rejected__2/run/legacy.PkL',)
@@ -692,7 +692,7 @@ kwargs = {}, effect = AssertionError('pickle reader reached')
     def _execute_mock_call(self, /, *args, **kwargs):
         # separate from _increment_mock_call so that awaited functions are
         # executed separately from their call, also AsyncMock overrides this method
-    
+
         effect = self.side_effect
         if effect is not None:
             if _is_exception(effect):
@@ -779,7 +779,7 @@ suffix = '.PiCkLe', mode = ''
     @pytest.mark.parametrize("mode", ["", "?repr=1"])
     def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix, mode):
         from unittest.mock import Mock
-    
+
         root = tmp_path / "run"
         root.mkdir()
         name = f"legacy{suffix}"
@@ -806,7 +806,7 @@ suffix = '.pkl', mode = '?repr=1'
     @pytest.mark.parametrize("mode", ["", "?repr=1"])
     def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix, mode):
         from unittest.mock import Mock
-    
+
         root = tmp_path / "run"
         root.mkdir()
         name = f"legacy{suffix}"
@@ -833,7 +833,7 @@ suffix = '.pickle', mode = '?repr=1'
     @pytest.mark.parametrize("mode", ["", "?repr=1"])
     def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix, mode):
         from unittest.mock import Mock
-    
+
         root = tmp_path / "run"
         root.mkdir()
         name = f"legacy{suffix}"
@@ -860,7 +860,7 @@ suffix = '.PkL', mode = '?repr=1'
     @pytest.mark.parametrize("mode", ["", "?repr=1"])
     def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix, mode):
         from unittest.mock import Mock
-    
+
         root = tmp_path / "run"
         root.mkdir()
         name = f"legacy{suffix}"
@@ -887,7 +887,7 @@ suffix = '.PiCkLe', mode = '?repr=1'
     @pytest.mark.parametrize("mode", ["", "?repr=1"])
     def test_pickle_preview_rejected(tmp_path, load_run_browse, monkeypatch, suffix, mode):
         from unittest.mock import Mock
-    
+
         root = tmp_path / "run"
         root.mkdir()
         name = f"legacy{suffix}"
@@ -915,7 +915,7 @@ suffix = '.pkl', archived = False
     def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, archived):
         import hashlib
         from unittest.mock import Mock
-    
+
         name = f"legacy{suffix}"
         content = b"inert legacy bytes\r\n\x00\xff"
         if archived:
@@ -938,8 +938,8 @@ suffix = '.pkl', archived = False
 >           preview = client.get(f"{base}/browse/{rel}")
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/microservices/test_files_routes.py:2016: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/microservices/test_files_routes.py:2016:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 /opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
     return super().get(
 /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
@@ -1034,7 +1034,7 @@ wepppy/microservices/browse/flow.py:703: in _tabular_preview
 /usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <Mock id='139197890429008'>
 args = ('/tmp/pytest-of-unknown/pytest-6/test_pickle_legacy_metadata_an0/legacy.pkl',)
@@ -1043,7 +1043,7 @@ kwargs = {}, effect = AssertionError('pickle reader reached')
     def _execute_mock_call(self, /, *args, **kwargs):
         # separate from _increment_mock_call so that awaited functions are
         # executed separately from their call, also AsyncMock overrides this method
-    
+
         effect = self.side_effect
         if effect is not None:
             if _is_exception(effect):
@@ -1131,7 +1131,7 @@ suffix = '.pickle', archived = False
     def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, archived):
         import hashlib
         from unittest.mock import Mock
-    
+
         name = f"legacy{suffix}"
         content = b"inert legacy bytes\r\n\x00\xff"
         if archived:
@@ -1175,7 +1175,7 @@ suffix = '.PkL', archived = False
     def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, archived):
         import hashlib
         from unittest.mock import Mock
-    
+
         name = f"legacy{suffix}"
         content = b"inert legacy bytes\r\n\x00\xff"
         if archived:
@@ -1198,8 +1198,8 @@ suffix = '.PkL', archived = False
 >           preview = client.get(f"{base}/browse/{rel}")
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/microservices/test_files_routes.py:2016: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/microservices/test_files_routes.py:2016:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 /opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
     return super().get(
 /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
@@ -1294,7 +1294,7 @@ wepppy/microservices/browse/flow.py:703: in _tabular_preview
 /usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <Mock id='139197658775328'>
 args = ('/tmp/pytest-of-unknown/pytest-6/test_pickle_legacy_metadata_an2/legacy.PkL',)
@@ -1303,7 +1303,7 @@ kwargs = {}, effect = AssertionError('pickle reader reached')
     def _execute_mock_call(self, /, *args, **kwargs):
         # separate from _increment_mock_call so that awaited functions are
         # executed separately from their call, also AsyncMock overrides this method
-    
+
         effect = self.side_effect
         if effect is not None:
             if _is_exception(effect):
@@ -1391,7 +1391,7 @@ suffix = '.PiCkLe', archived = False
     def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, archived):
         import hashlib
         from unittest.mock import Mock
-    
+
         name = f"legacy{suffix}"
         content = b"inert legacy bytes\r\n\x00\xff"
         if archived:
@@ -1435,7 +1435,7 @@ suffix = '.pkl', archived = True
     def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, archived):
         import hashlib
         from unittest.mock import Mock
-    
+
         name = f"legacy{suffix}"
         content = b"inert legacy bytes\r\n\x00\xff"
         if archived:
@@ -1479,7 +1479,7 @@ suffix = '.pickle', archived = True
     def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, archived):
         import hashlib
         from unittest.mock import Mock
-    
+
         name = f"legacy{suffix}"
         content = b"inert legacy bytes\r\n\x00\xff"
         if archived:
@@ -1523,7 +1523,7 @@ suffix = '.PkL', archived = True
     def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, archived):
         import hashlib
         from unittest.mock import Mock
-    
+
         name = f"legacy{suffix}"
         content = b"inert legacy bytes\r\n\x00\xff"
         if archived:
@@ -1567,7 +1567,7 @@ suffix = '.PiCkLe', archived = True
     def test_pickle_legacy_metadata_and_bytes(tmp_path, monkeypatch, load_browse, suffix, archived):
         import hashlib
         from unittest.mock import Mock
-    
+
         name = f"legacy{suffix}"
         content = b"inert legacy bytes\r\n\x00\xff"
         if archived:
@@ -1612,7 +1612,7 @@ suffix = '.pkl', archived = False
         import zipfile
         from unittest.mock import Mock
         import wepppy.microservices.browse.dtale as bridge
-    
+
         name = f"legacy{suffix}"
         if archived:
             with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
@@ -1631,8 +1631,8 @@ suffix = '.pkl', archived = False
 >           response = client.get(f"/weppcloud/runs/pickle-test/cfg/dtale/{rel}")
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/microservices/test_browse_dtale.py:858: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/microservices/test_browse_dtale.py:858:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 /opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
     return super().get(
 /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
@@ -1705,7 +1705,7 @@ wepppy/microservices/browse/dtale.py:275: in _dtale_open_for_root
 /usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <Mock id='139197667029168'>, args = ()
 kwargs = {'timeout': Timeout(connect=5.0, read=60.0, write=60.0, pool=60.0)}
@@ -1714,7 +1714,7 @@ effect = AssertionError('outbound HTTP reached')
     def _execute_mock_call(self, /, *args, **kwargs):
         # separate from _increment_mock_call so that awaited functions are
         # executed separately from their call, also AsyncMock overrides this method
-    
+
         effect = self.side_effect
         if effect is not None:
             if _is_exception(effect):
@@ -1776,7 +1776,7 @@ suffix = '.pickle', archived = False
         import zipfile
         from unittest.mock import Mock
         import wepppy.microservices.browse.dtale as bridge
-    
+
         name = f"legacy{suffix}"
         if archived:
             with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
@@ -1795,8 +1795,8 @@ suffix = '.pickle', archived = False
 >           response = client.get(f"/weppcloud/runs/pickle-test/cfg/dtale/{rel}")
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/microservices/test_browse_dtale.py:858: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/microservices/test_browse_dtale.py:858:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 /opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
     return super().get(
 /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
@@ -1869,7 +1869,7 @@ wepppy/microservices/browse/dtale.py:275: in _dtale_open_for_root
 /usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <Mock id='139197617401552'>, args = ()
 kwargs = {'timeout': Timeout(connect=5.0, read=60.0, write=60.0, pool=60.0)}
@@ -1878,7 +1878,7 @@ effect = AssertionError('outbound HTTP reached')
     def _execute_mock_call(self, /, *args, **kwargs):
         # separate from _increment_mock_call so that awaited functions are
         # executed separately from their call, also AsyncMock overrides this method
-    
+
         effect = self.side_effect
         if effect is not None:
             if _is_exception(effect):
@@ -1940,7 +1940,7 @@ suffix = '.PkL', archived = False
         import zipfile
         from unittest.mock import Mock
         import wepppy.microservices.browse.dtale as bridge
-    
+
         name = f"legacy{suffix}"
         if archived:
             with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
@@ -1959,8 +1959,8 @@ suffix = '.PkL', archived = False
 >           response = client.get(f"/weppcloud/runs/pickle-test/cfg/dtale/{rel}")
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/microservices/test_browse_dtale.py:858: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/microservices/test_browse_dtale.py:858:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 /opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
     return super().get(
 /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
@@ -2033,7 +2033,7 @@ wepppy/microservices/browse/dtale.py:275: in _dtale_open_for_root
 /usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <Mock id='139197617395360'>, args = ()
 kwargs = {'timeout': Timeout(connect=5.0, read=60.0, write=60.0, pool=60.0)}
@@ -2042,7 +2042,7 @@ effect = AssertionError('outbound HTTP reached')
     def _execute_mock_call(self, /, *args, **kwargs):
         # separate from _increment_mock_call so that awaited functions are
         # executed separately from their call, also AsyncMock overrides this method
-    
+
         effect = self.side_effect
         if effect is not None:
             if _is_exception(effect):
@@ -2104,7 +2104,7 @@ suffix = '.PiCkLe', archived = False
         import zipfile
         from unittest.mock import Mock
         import wepppy.microservices.browse.dtale as bridge
-    
+
         name = f"legacy{suffix}"
         if archived:
             with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
@@ -2123,8 +2123,8 @@ suffix = '.PiCkLe', archived = False
 >           response = client.get(f"/weppcloud/runs/pickle-test/cfg/dtale/{rel}")
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests/microservices/test_browse_dtale.py:858: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/microservices/test_browse_dtale.py:858:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 /opt/venv/lib/python3.12/site-packages/starlette/testclient.py:479: in get
     return super().get(
 /opt/venv/lib/python3.12/site-packages/httpx/_client.py:1066: in get
@@ -2197,7 +2197,7 @@ wepppy/microservices/browse/dtale.py:275: in _dtale_open_for_root
 /usr/local/lib/python3.12/unittest/mock.py:1143: in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <Mock id='139197665435360'>, args = ()
 kwargs = {'timeout': Timeout(connect=5.0, read=60.0, write=60.0, pool=60.0)}
@@ -2206,7 +2206,7 @@ effect = AssertionError('outbound HTTP reached')
     def _execute_mock_call(self, /, *args, **kwargs):
         # separate from _increment_mock_call so that awaited functions are
         # executed separately from their call, also AsyncMock overrides this method
-    
+
         effect = self.side_effect
         if effect is not None:
             if _is_exception(effect):
@@ -2268,7 +2268,7 @@ suffix = '.pkl', archived = True
         import zipfile
         from unittest.mock import Mock
         import wepppy.microservices.browse.dtale as bridge
-    
+
         name = f"legacy{suffix}"
         if archived:
             with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
@@ -2303,7 +2303,7 @@ suffix = '.pickle', archived = True
         import zipfile
         from unittest.mock import Mock
         import wepppy.microservices.browse.dtale as bridge
-    
+
         name = f"legacy{suffix}"
         if archived:
             with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
@@ -2338,7 +2338,7 @@ suffix = '.PkL', archived = True
         import zipfile
         from unittest.mock import Mock
         import wepppy.microservices.browse.dtale as bridge
-    
+
         name = f"legacy{suffix}"
         if archived:
             with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
@@ -2373,7 +2373,7 @@ suffix = '.PiCkLe', archived = True
         import zipfile
         from unittest.mock import Mock
         import wepppy.microservices.browse.dtale as bridge
-    
+
         name = f"legacy{suffix}"
         if archived:
             with zipfile.ZipFile(tmp_path / "watershed.nodir", "w") as archive:
@@ -2406,7 +2406,7 @@ suffix = '.pkl'
     def test_pickle_loader_rejects_before_fingerprint_or_dispatch(tmp_path, monkeypatch, dtale_service, suffix):
         from unittest.mock import Mock
         from werkzeug.exceptions import UnsupportedMediaType
-    
+
         module = dtale_service
         path = tmp_path / f"legacy{suffix}"
         path.write_bytes(b"N.")
@@ -2458,7 +2458,7 @@ suffix = '.pickle'
     def test_pickle_loader_rejects_before_fingerprint_or_dispatch(tmp_path, monkeypatch, dtale_service, suffix):
         from unittest.mock import Mock
         from werkzeug.exceptions import UnsupportedMediaType
-    
+
         module = dtale_service
         path = tmp_path / f"legacy{suffix}"
         path.write_bytes(b"N.")
@@ -2510,7 +2510,7 @@ suffix = '.PkL'
     def test_pickle_loader_rejects_before_fingerprint_or_dispatch(tmp_path, monkeypatch, dtale_service, suffix):
         from unittest.mock import Mock
         from werkzeug.exceptions import UnsupportedMediaType
-    
+
         module = dtale_service
         path = tmp_path / f"legacy{suffix}"
         path.write_bytes(b"N.")
@@ -2562,7 +2562,7 @@ suffix = '.PiCkLe'
     def test_pickle_loader_rejects_before_fingerprint_or_dispatch(tmp_path, monkeypatch, dtale_service, suffix):
         from unittest.mock import Mock
         from werkzeug.exceptions import UnsupportedMediaType
-    
+
         module = dtale_service
         path = tmp_path / f"legacy{suffix}"
         path.write_bytes(b"N.")

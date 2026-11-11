@@ -1,5 +1,8 @@
 # Focused validation receipt
 
+Implementation candidate: `fe0fcf916`. Transcript trailing whitespace is
+normalized for repository hygiene; command results and content are retained.
+
 Date: 2026-11-11 UTC. Base `991fc5e2c3`; contract ancestor `aeab3c3e1`;
 reviewed archive clarification `e2b9f6b35`. All tests ran through the existing
 Compose weppcloud container using wctl. No production changes were made.

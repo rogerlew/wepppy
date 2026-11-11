@@ -19,7 +19,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x723b7c8dad50>
     @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
     def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -72,7 +72,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238aeb9b800>
     @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
     def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -125,7 +125,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238ac098290>
     @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
     def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -178,7 +178,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238ac094aa0>
     @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
     def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -231,7 +231,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238ac094d40>
     @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
     def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -284,7 +284,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7238ac097ad0>
     @pytest.mark.parametrize("mode", ["main-first", "legacy-first", "fast-forward"])
     def test_merge_from_existing_remote_branch_admission(tmp_path, suffix, mode, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)

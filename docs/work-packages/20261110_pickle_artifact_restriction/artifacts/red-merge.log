@@ -18,7 +18,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x740457185ac0>
     @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe"])
     def test_pickle_merge_from_existing_remote_branch_rejected(tmp_path, suffix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)
@@ -58,7 +58,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x740189a3fbc0>
     @pytest.mark.parametrize("suffix", [".pkl", ".PiCkLe"])
     def test_pickle_merge_from_existing_remote_branch_rejected(tmp_path, suffix, monkeypatch):
         import shlex
-    
+
         source = tmp_path / "source"
         source.mkdir()
         _init_repo(source)

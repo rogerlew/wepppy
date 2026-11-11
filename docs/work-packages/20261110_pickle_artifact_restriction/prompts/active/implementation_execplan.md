@@ -83,6 +83,9 @@ Checkpoint ancestor: `aeab3c3e1` (base `991fc5e2c3`); archive clarification
 
 ## Outcomes & Retrospective
 
+Implementation candidate: `fe0fcf916`. Final evidence-only cleanup records this
+revision and removes trailing whitespace from tool transcripts.
+
 Implemented Bootstrap suffix admission, including merges and already-reachable
 ref adoption, and removed both interactive pickle readers/capability advertisements.
 Physical legacy files remain listable and downloadable byte-for-byte, including

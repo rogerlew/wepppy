@@ -8,6 +8,8 @@
 **Security impact**: high
 **Dedicated security review**: `artifacts/20261110_security_review.md`
 **Checkpoint ancestors**: `aeab3c3e1`, supplemental `e2b9f6b35`
+**Implementation candidate**: `fe0fcf916` (reviewed source and tests; no deployment)
+
 **Starting revision**: `991fc5e2c3f1cd2e5d74169e2d7bccb609203924`
 
 ## Task Board

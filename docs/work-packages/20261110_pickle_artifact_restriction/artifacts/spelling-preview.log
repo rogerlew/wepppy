@@ -14,18 +14,18 @@
 @@ -45,7 +45,7 @@
    serve requested row ranges from DuckDB/PyArrow. All non-lazy datasets delegate
    to the upstream D-Tale view.
- 
+
 -`__init__.py` re-exports everything from `dtale.py`; external consumers can keep
 +`__init__.py` reexports everything from `dtale.py`; external consumers can keep
  importing `wepppy.webservices.dtale`.
- 
+
  ## Lazy Parquet Backend
 --- docs/work-packages/20261110_pickle_artifact_restriction/artifacts/20261110_contract_decision.md
 +++ uk2us preview
 @@ -64,7 +64,7 @@
- 
+
  ## Classification and Boundaries
- 
+
 -This is an intended security behavior change, not conformance to a pre-existing
 +This is an intended security behavior change, not conformance to a preexisting
  pickle prohibition. Security impact is high: project-controlled artifacts
@@ -41,4 +41,3 @@
 +nine preexisting declaration mismatches (DatasetMeta fields and response helper
  keyword arguments). `stubtest-initial.log` retains them; declarations now match
  the existing runtime, with no authentication or execution changes.
- 
