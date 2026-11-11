@@ -1,6 +1,6 @@
 # D-Tale Run Data Viewer
 
-> Browse run tables with an eager reader for CSV/Feather/Pickle and bounded
+> Browse run tables with an eager reader for CSV/TSV/Feather/Arrow and bounded
 > Parquet pages backed by DuckDB/PyArrow.
 
 Open a file through the run's browse page. If the grid says the source changed
@@ -8,6 +8,14 @@ or is unavailable, reopen that file from browse after its upstream operation
 finishes. Reopening refreshes the table and recompiles its filter. A filter that
 references a removed column must be corrected; it is never silently discarded.
 Tabs viewing the same dataset share server state and may also need reopening.
+
+Pickle files (`.pkl` and `.pickle`, in any letter case) cannot be opened in
+D-Tale. Existing files remain visible and downloadable as original bytes in
+browse. Direct D-Tale bridge and internal loader requests return HTTP 415;
+there is no pickle reader or fallback. This prevents server-side execution of
+project-controlled pickle content. The approved
+[pickle restriction](../../../docs/schemas/browse-filesystem-contract.md#pickle-artifacts)
+is pending implementation conformance and deployment.
 
 Changing file timestamps alone does not reload identical data. Changed bytes
 refresh on the next launch even if timestamps were restored. An already loaded

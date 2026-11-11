@@ -70,6 +70,44 @@ Roads receipts cannot gate it. Existing source-byte consistency checks prevent
 a lazy viewer mixing generations and remain distinct from model freshness.
 An eager viewer remains an explicitly acquired snapshot until reopened.
 
+## Pickle artifacts
+
+Status of the 2026-11-10 Pacific amendment: approved restriction; implementation
+conformance and deployment pending.
+
+Existing `.pkl` and `.pickle` artifacts, case-insensitively, MUST remain listable
+and downloadable byte-for-byte within existing authorization, containment and
+sensitive-path controls. They MUST NOT advertise preview or D-Tale actions in
+directory listings or file metadata. Direct browse preview and browse-to-D-Tale
+requests MUST return HTTP 415 before reader invocation, NoDir materialization,
+or outbound loader calls. The D-Tale internal loader MUST also return HTTP 415
+and MUST NOT register or call a pickle reader. This applies to physical files
+and virtual archive members; raw authorized download remains available,
+including existing raw query/header byte-delivery modes. Representation or
+preview requests return 415; they must not fall through to generic text rendering.
+Existing authentication, authorization and containment decisions retain
+precedence, and missing files retain their normal 404 response.
+
+This is a security exception for interactive parsing, not a visibility or
+model-lifecycle restriction. Pickle loading can execute code, while serving the
+original bytes does not deserialize them. CSV, TSV, Feather, Arrow and Parquet
+behavior remains unchanged. No fallback parser, converter, scanner, feature
+flag, or migration is introduced. Application-owned internal serialization is
+outside this bounded contract. Restoring interactive pickle loading requires a
+new approved security decision. New Bootstrap admission follows the
+[Bootstrap Git input contract](bootstrap-git-input-contract.md).
+The [D-Tale generation contract](file-dependency-freshness-contract.md#d-tale-dataset-generations-implemented)
+explicitly permits this bounded reader removal; its source-consistency rules
+for supported formats remain unchanged.
+
+Regression evidence must cover both suffixes and case variants, absent preview
+metadata and links, 415 responses with zero reader/materializer/forwarder calls,
+byte-identical legacy downloads, and supported-format controls. Use inert bytes;
+never execute a pickle payload as a test. The operator waived full Python and
+frontend suites for the 2026-11-10 restriction in favor of focused Bootstrap,
+browse/files, D-Tale, stub, documentation and source-search checks. Separately
+authorized scoped deployment evidence is required for a rollout claim.
+
 ## Required regression evidence
 
 Exercise existing files with no Roads state, empty directories, legacy outputs,

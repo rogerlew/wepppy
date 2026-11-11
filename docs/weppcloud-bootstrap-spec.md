@@ -187,6 +187,7 @@ updates atomically:
   modifications is a command injection surface.
 
 **General safety:**
+- Reject added or modified `.pkl`/`.pickle` paths case-insensitively per the [Bootstrap Git input contract](schemas/bootstrap-git-input-contract.md); this approved restriction is pending implementation conformance and deployment.
 - Reject files outside `wepp/runs/` and `swat/TxtInOut/` paths.
 - Reject symlinks.
 - Reject files exceeding 50 MB per file.

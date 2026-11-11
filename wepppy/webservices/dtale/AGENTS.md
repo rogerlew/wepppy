@@ -11,7 +11,7 @@ usual `/dtale/...` routes.
 
 ## Loader Flow (`/internal/load`)
 1. Resolve run working directory via `get_wd(runid)`.
-2. Enforce allowed file types (Parquet/CSV/Feather/Pickle variants) and size
+2. Enforce allowed file types (Parquet/CSV/TSV/Feather/Arrow variants) and size
    limits (`DTALE_MAX_FILE_MB`, `DTALE_MAX_ROWS`).
 3. Fingerprint the target and reuse an in-memory D-Tale instance when the file
    and cached state match; otherwise refresh the cache.
@@ -20,7 +20,7 @@ usual `/dtale/...` routes.
 5. For Parquet/GeoParquet/PQ files, register a lazy Parquet backend instead of
    reading the full file into pandas. The backend reads schema/row counts with
    PyArrow/DuckDB and returns only bounded pandas slices for D-Tale grid pages.
-6. For CSV/TSV/Feather/Pickle files, load a pandas DataFrame through the eager
+6. For CSV/TSV/Feather/Arrow files, load a pandas DataFrame through the eager
    D-Tale path.
 7. Auto-create string alias columns (`WeppID`, `TopazID`, `ChannelID`, etc.) so
    D-Tale’s map dropdowns expose the identifiers even when the parquet stores
@@ -78,6 +78,7 @@ gunicorn --workers 1 --bind 0.0.0.0:9010 --log-level info wepppy.webservices.dta
 Keep workers at 1—D-Tale keeps state in-process.
 
 ## Extending
+- Follow the [browse filesystem contract](../../../docs/schemas/browse-filesystem-contract.md#pickle-artifacts): `.pkl`/`.pickle` are unsupported case-insensitively, must have no registered reader, and direct internal loads return 415. Existing artifacts remain listable/downloadable through browse. The amendment is approved; implementation conformance is pending.
 - Add new geojson assets by augmenting `_ensure_geojson_assets`.
 - Update identifier alias tuples (`_IDENTIFIER_STRING_ALIASES`) when new id
   fields surface.

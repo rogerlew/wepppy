@@ -18,6 +18,13 @@ User-selected search/sort/pagination remains available. Raw retired archive file
 are ordinary downloadable files, without virtual archive traversal. See the
 [canonical filesystem contract](../../../docs/schemas/browse-filesystem-contract.md).
 
+Pickle files (`.pkl` and `.pickle`, in any letter case) remain visible and
+downloadable as original bytes. Preview and D-Tale actions are unavailable;
+direct preview or D-Tale requests return HTTP 415. Existing raw download modes
+remain available. These restrictions prevent server-side pickle execution;
+supported table formats keep their existing behavior. This approved contract
+amendment is pending implementation conformance and deployment.
+
 ## High-level architecture
 - **Application**: `wepppy/microservices/browse/browse.py`
   - Creates a Starlette app and registers the browse UI plus compatibility download and gdalinfo helper routes.
@@ -25,7 +32,7 @@ are ordinary downloadable files, without virtual archive traversal. See the
   - Contains shims so templates that call `url_for(...)` or expect `SITE_PREFIX` still work.
 - **Async execution**
   - Directory listings (`ls -l`, `wc -l`) run via `asyncio.create_subprocess_shell` and `asyncio.gather` instead of blocking subprocess calls.
-  - CSV/TSV/pickle previews that still use pandas run in `asyncio.to_thread` so the event loop stays responsive.
+  - CSV/TSV previews that use pandas run in `asyncio.to_thread` so the event loop stays responsive.
   - Parquet previews and browse download CSV exports avoid Arrow-to-pandas conversion in `browse`; they use bounded DuckDB/PyArrow table queries and batch CSV writing.
 - **Supporting modules**
   - `_download.py`: serves compatibility file downloads, parquet-to-CSV conversion, and aria2c manifests. Exact run archive ZIP delivery can be routed to the dedicated `download` service.
@@ -56,7 +63,7 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 | `/weppcloud/runs/{runid}/{config}/browse/{subpath}` | Lists a directory or displays a file. Handles text, archives, tables, and binary downloads. | Same as above plus file-specific options: `repr=1` (management/soil annotation), `raw=1`, `download=1`. Parquet viewers additionally accept `pqf=<base64url-json-filter>`. |
 | `/weppcloud/runs/{runid}/{config}/schema/{subpath}` | Returns parquet column metadata for browse row-level schema preview. | *(no additional options; parquet files only)* |
 | `/weppcloud/runs/{runid}/{config}/download/{subpath}` | Direct file download. Exact `archives/*.zip` routes are served by the dedicated `download` service when Caddy cutover is active; browse continues to handle compatibility downloads and parquet CSV conversion. | `as_csv=1` for parquet conversion; parquet targets also accept `pqf=<...>` for filtered parquet/CSV output. |
-| `/weppcloud/runs/{runid}/{config}/dtale/{subpath}` | Loads parquet/CSV/TSV/feather/pickle into the D-Tale service and redirects to the D-Tale dataset URL. | Parquet targets accept `pqf=<...>` when filter feature flag is enabled. |
+| `/weppcloud/runs/{runid}/{config}/dtale/{subpath}` | Loads parquet/CSV/TSV/Feather/Arrow into the D-Tale service and redirects to the D-Tale dataset URL. | Parquet targets accept `pqf=<...>` when filter feature flag is enabled. |
 | `/weppcloud/runs/{runid}/{config}/aria2c.spec` | Generates an aria2c manifest for pulling the entire run. | *(no additional options)* |
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/{subpath}` | Returns `gdalinfo -json` for a raster file. | *(no additional options)* |
 | `/weppcloud/culverts/{uuid}/browse/{subpath}` | Browse culvert grouped-run artifacts. | *(same viewer params as run browse)* |
