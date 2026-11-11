@@ -100,27 +100,20 @@ openwepp.org, or any other production system.
 - Deployment to production. Forest validation is a release prerequisite, not
   production authorization.
 
-## Proposed Contract Direction (Pending Ratification)
+## Ratified Contract
 
-The starting proposal is a dedicated short-lived stream-token mint route that
-reuses the current run authorization and same-origin session/CSRF boundary. One
-token may carry the `status:read` and `preflight:read` scopes, explicit status2
-and preflight2 audiences, the exact run/config, session and token identifiers,
-issued/expiry times, and a five-minute default lifetime. The lifetime and public
-fallback are not accepted until the contract checkpoint.
+The [canonical WebSocket authorization contract](../../schemas/weppcloud-websocket-auth-contract.md)
+and ADR-0141 were ratified in standalone ancestor `6a06ad49a` after operator
+approval and two independent reviews. Tokens are service-specific, expire after
+five minutes, bind the exact run/config and live session, and use only the fixed
+plus bearer subprotocol transport. The negotiated protocol is always the fixed
+value; URLs and retained diagnostics contain no credential.
 
-Browser JavaScript cannot add an `Authorization` header to the WebSocket
-constructor. The proposed transport is `Sec-WebSocket-Protocol`: a fixed
-application protocol plus a bearer-shaped protocol value. The services parse
-the credential but negotiate and echo only the fixed application protocol.
-Tokens must never appear in the request URL, selected protocol, logs, test
-artifacts, assertion messages, or persistent browser storage.
-
-The services should share an owned, narrowly scoped validation component rather
-than duplicate claim rules. No JWT Go library is currently established in the
-two modules. Any proposed library, including `github.com/golang-jwt/jwt/v5`,
-must first pass `docs/standards/dependency-evaluation-standard.md`; custom
-cryptography is not an acceptable silent shortcut.
+The approved lifecycle policies permit no-cookie inspection only for verified
+existing ownerless/public projects, restricted Admin/Root job/channel-bound
+status inspection for pending run-sync, and selected-project diagnostics. The
+owned `services/streamauth` component uses the evaluated `jwt/v5` dependency;
+custom cryptography and anonymous fallback are excluded.
 
 ## Complexity Budget
 
@@ -151,9 +144,9 @@ cryptography is not an acceptable silent shortcut.
   insufficient.
 - **Sensitive-evidence rule**: raw JWTs, protocol headers, credentials, private
   message bodies, and secret values remain in memory and must not be persisted.
-- **Highest completion claim currently supported**: scope and acceptance gates
-  are scaffolded; no implementation, deployment, or vulnerability closure has
-  occurred.
+- **Highest completion claim currently supported**: implementation and independent
+  code reviews are complete; focused tests and the status canary pass. Full
+  regression and deployed browser acceptance remain pending.
 
 ## Stakeholders
 

@@ -71,3 +71,9 @@ retest passed. Both attempted fixtures left zero session markers. Canary log
 scan found no bearer/JWT credential pattern; the disposable container was
 stopped/removed. This proves service transport under actual mounts/identity,
 not browser authorization or deployed Caddy acceptance.
+
+Preflight startup canary also passed with UID/GID `1000:993` and image
+`sha256:db6e878e4c9610150dadc0b946681376bfc8d51896492ff25d818842d3cd42a1`.
+Its internal `/health` returned `OK`; the disposable container was removed.
+This is startup/readability evidence only; real preflight frames remain the
+browser gate. Workflow bootstrap regressions: 2 passed (8.94 seconds).

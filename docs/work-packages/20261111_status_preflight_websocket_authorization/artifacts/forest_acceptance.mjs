@@ -168,7 +168,7 @@ cdp.on('Network.webSocketWillSendHandshakeRequest', event => {
         try {
             const claims = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
             socket.claims = {runid: claims.runid, config: claims.config, aud: claims.aud, scope: claims.scope,
-                lifetime: claims.exp - claims.iat, service: claims.stream};
+                lifetime: claims.exp - claims.iat, issuedAt: claims.iat, service: claims.stream};
         } catch { socket.invalidClaims = true; }
     }
 });
@@ -231,6 +231,17 @@ with Redis(**redis_connection_kwargs(RedisDB.STATUS)) as c: print(c.publish(r+':
     check('actual-status-marker', true);
     await page.waitForFunction(marker => document.body.textContent.includes(marker), marker);
     check('status-marker-rendered', true);
+    stage = 'scheduled-renewal';
+    const initialIssued = Object.fromEntries(['status','preflight'].map(service => [service, Math.max(...[...sockets.values()].filter(s=>s.claims?.runid===a.runid && s.claims.service===service).map(s=>s.claims.issuedAt))]));
+    console.log('Initial stream checks passed; waiting for scheduled credential renewal.');
+    await until(() => ['status','preflight'].every(service => [...sockets.values()].some(s =>
+        s.claims?.runid===a.runid && s.claims.service===service && s.claims.issuedAt>=initialIssued[service]+240
+        && s.status===101 && (service!=='status' || s.url.includes(':wepp?')))), 'scheduled renewal of both streams', 310000);
+    check('both-streams-renewed-with-fresh-credentials', true);
+    check('renewed-preflight-connected', await page.evaluate(()=>window.preflightConnected===true));
+    execFileSync('wctl', ['exec','-T','weppcloud','python','-c',publish], {input:JSON.stringify([a.runid,marker+'_renewed']),stdio:['pipe','pipe','pipe']});
+    await page.waitForFunction(marker => document.body.textContent.includes(marker), marker+'_renewed');
+    check('status-marker-rendered-after-renewal', true);
     stage = 'negative-connections';
     for (const service of ['status','preflight']) {
         for (const crossRun of [false,true]) {

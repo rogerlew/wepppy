@@ -24,7 +24,7 @@ browser acceptance remain mandatory. Production deployment is not authorized.
 - [x] Record mandatory forest redeploy and browser proof for both status and
       preflight token handshakes.
 - [x] M0 discovery and two independent read-only reviews; canonical draft,
-      dependency evaluation and ADR-0141 prepared (not accepted).
+      dependency evaluation and ADR-0141 accepted at `6a06ad49a`.
 - [x] M0: ratify token/public-run/message contracts, evaluate the Go JWT option,
       obtain two independent read-only reviews, and commit a standalone
       checkpoint ancestor.
@@ -129,12 +129,12 @@ summary, negative results, and cleanup receipt.
 
 ## Review Gates
 
-- [ ] Contract and valid-state matrices accepted.
-- [ ] Two independent read-only contract reviews closed.
-- [ ] Dependency evaluation and any required parameterization ADR accepted.
-- [ ] Correctness review passed.
-- [ ] QA review passed.
-- [ ] Dedicated security review passed.
+- [x] Contract and valid-state matrices accepted.
+- [x] Two independent read-only contract reviews closed.
+- [x] Dependency evaluation and any required parameterization ADR accepted.
+- [x] Correctness review passed.
+- [x] QA review passed.
+- [x] Dedicated security review passed.
 - [ ] Forest operations/deployment review passed.
 - [ ] Audit board SEC-04 status updated from evidence, not from implementation
       intent.
@@ -142,8 +142,8 @@ summary, negative results, and cleanup receipt.
 ## Timeline
 
 - 2026-11-11 15:49 UTC: scaffold package and record the forest E2E requirement.
-- Pending: M0 contract checkpoint and dependency disposition.
-- Pending: M1-M3 implementation with focused tests.
+- 2026-11-11: M0 ratified at `6a06ad49a`.
+- 2026-11-11: M1-M3 implemented; code reviews approved; focused suites pass.
 - Pending: M4 complete local/broad validation and independent reviews.
 - Pending: M5-M6 authorized forest redeploy and end-to-end acceptance.
 
