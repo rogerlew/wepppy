@@ -1,6 +1,6 @@
 # Redis credential transport contract decision
 
-**Status**: Proposed; not ratified
+**Status**: Ratified for M0 implementation checkpoint
 **Date**: 2026-11-11 UTC
 **Starting revision**: `f0df22e5f8d2ae6255c6aa0e718394ad69a41b51`
 
@@ -10,7 +10,16 @@ Define how every WEPPcloud Redis consumer receives the existing mounted password
 without embedding it in a connection URL or process argument. Preserve current
 password, default user, topology, logical DBs, TLS options and secret lifecycle.
 
-## Proposed Contract
+## Ratified Contract
+
+The canonical [transport contract](../../../schemas/redis-credential-transport-contract.md)
+supersedes the draft bullets below where more specific. Independent M0
+correctness, security and operations reviews passed in the adjacent `m0_*_review`
+artifacts. In particular: conflicting passwords fail; LF framing is accepted;
+RQ uses an owned connection adapter plus explicit empty --url; streamauth retains
+its own timeout overrides; ACL creation restores the persistence umask.
+
+## Original Proposal (resolved by canonical contract)
 
 1. Endpoint configuration contains scheme/network, host, port, DB and TLS/query
    options only. Its string/repr form is nonsecret.
@@ -62,11 +71,12 @@ password, default user, topology, logical DBs, TLS options and secret lifecycle.
 
 ## Required Checkpoint
 
-- [ ] Python/RQ reviewer accepts constructor/config interfaces.
-- [ ] Go reviewer accepts `redis.Options` sharing/cloning.
-- [ ] Redis/operator reviewer accepts ACL/config generation and healthcheck path.
-- [ ] Legacy/conflict matrix is ratified.
-- [ ] Correctness and security reviewers approve a standalone ancestor
+- [x] Python/RQ reviewer accepts constructor/config interfaces.
+- [x] Go reviewer accepts `redis.Options` sharing/cloning.
+- [x] Redis/operator reviewer accepts ACL/config generation and healthcheck path.
+- [x] Legacy/conflict matrix is ratified.
+- [x] Correctness and security reviewers approve a standalone ancestor
       checkpoint before implementation.
 
-No implementation authority or completion claim is inferred from this draft.
+Implementation may proceed after the standalone M0 commit. No runtime acceptance
+or F5 unblock is implied.

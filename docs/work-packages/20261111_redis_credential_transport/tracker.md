@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-11-11 18:27 UTC
-**Current phase**: M0 contract and inventory checkpoint pending
+**Current phase**: M0 ratified; M1 implementation next
 **Last updated**: 2026-11-11 18:27 UTC
-**Next milestone**: ratify transport/legacy/server decisions
+**Next milestone**: Python client implementation
 **Security impact**: high
 **Starting revision**: `f0df22e5f8d2ae6255c6aa0e718394ad69a41b51`
 **Security artifact**: `artifacts/20261111_security_review.md`
@@ -21,7 +21,7 @@ service or deployment change has occurred.
       credential-bearing URL/argv paths.
 - [x] Scaffold package, active ExecPlan, contract, failure matrix and reviews.
 - [x] Record the operator's focused-validation decision and package ordering.
-- [ ] M0: ratify endpoint/credential types, legacy URL precedence, RQ adapter,
+- [x] M0: ratify endpoint/credential types, legacy URL precedence, RQ adapter,
       Redis ACL/config file and healthcheck behavior.
 - [ ] M1: convert Python native/session/async consumers with focused tests.
 - [ ] M2: convert status2/preflight2/streamauth Go clients with focused tests.
@@ -107,3 +107,11 @@ service or deployment change has occurred.
 Continue from `prompts/active/implementation_execplan.md`. Preserve unrelated
 dirty files. Do not start F5 implementation until this tracker records a green
 scoped checkpoint. Do not claim full-suite coverage or production deployment.
+
+## M0 execution receipt — 2026-11-11 UTC
+
+Canonical contract: `docs/schemas/redis-credential-transport-contract.md`.
+Independent M0 correctness, security and operations artifacts pass. Contract
+lint passes. Standalone ancestor commit contains documentation only; existing
+unrelated changes are excluded. RQ adapter/empty --url, streamauth own timeouts,
+LF file framing and explicitly isolated Compose inputs are required.

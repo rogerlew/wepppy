@@ -26,7 +26,8 @@ frontend gates.
       artifacts and independent review gates.
 - [x] (2026-11-11 18:27 UTC) Record Redis-first ordering and the scoped-test
       waiver for this package.
-- [ ] M0: ratify the transport contract and standalone checkpoint.
+- [x] (2026-11-11 UTC) M0: ratify transport contract through independent
+      correctness/security/operations reviews; standalone checkpoint follows.
 - [ ] M1: migrate Python native/session/async Redis clients.
 - [ ] M2: migrate Go status/preflight/streamauth clients.
 - [ ] M3: migrate RQ CLI, Redis server, healthchecks and operator helpers.
@@ -71,7 +72,7 @@ frontend gates.
 
 ## Outcomes & Retrospective
 
-No implementation outcome exists yet. Populate this section with exact
+M0 contract review passed; implementation and runtime acceptance remain pending. Populate this section with exact
 credential scans, connectivity evidence, compatibility limits and residual
 deployment risk after each milestone.
 
@@ -229,3 +230,7 @@ dependency evaluation standard and an amended complexity decision.
 2026-11-11: Initial plan records the Redis-first order, focused-test waiver,
 faithful current-auth behavior, no secret lifecycle/ACL redesign, and direct
 Python/Go/RQ/server/health acceptance. No implementation or deployment occurred.
+
+2026-11-11 execution revision: M0 ratified the canonical transport contract and
+recorded RQ API/Click precedence, streamauth override, secret LF framing and
+Compose isolation discoveries. No production implementation changed at M0.
