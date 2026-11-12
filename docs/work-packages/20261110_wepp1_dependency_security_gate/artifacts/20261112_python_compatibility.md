@@ -1,7 +1,61 @@
 # Python dependency compatibility remediation
 
-Status: isolated trials; final common-image build, scan and complete gates remain
-open. Deployment resume remains deferred. No production activation.
+Status: clean common image built; fresh scan and complete gates remain open.
+Deployment resume remains deferred. No production activation.
+
+## Clean image acceptance continuation
+
+Candidate `63ae6f9401bd733e0bc561f899d8953f74124250` built without cache in
+519.35 seconds as image
+`sha256:9f9e75e6515a9075769f07b6fba18c158e49cc4aec86b36553564af7f5b3920a`.
+All 187 focused consumer tests pass. The actual PATH report passes in 57.49
+seconds as UID 1002/GID 130; its decoded 864-by-1127 plot is nonblank and has
+the same SHA-256 as the earlier native candidate. A separate container without
+the checkout bind confirms installed package versions, sole libpass namespace
+ownership and seven copied-source hashes against the committed candidate.
+Private receipts are under `python-repairs-batch-20261112/validation/`.
+The fresh collector completed successfully in 775.32 seconds, with 2,717 scan
+matches and 332 ignored matches (previous native batch: 2,799/332). Scan SHA-256:
+`6d75dfd6b21777fd6b161556dbfaa6e024a45b85db54a97805a7d78943c69f40`.
+This is evidence collection, not policy clearance. The complete gate remains open.
+
+The scan caught OAuthlib 4.0.0 still affected by
+[GHSA-3jp2-3mrg-2vxc](https://github.com/oauthlib/oauthlib/security/advisories/GHSA-3jp2-3mrg-2vxc).
+The candidate pin is corrected to the upstream fixed 4.0.1 release. Six runtime
+files differ, primarily device authorization and validation; no owned device-flow
+consumer was found. The derived trial passes 717 upstream tests, two explicit
+skips and 21 subtests against the installed package; 38 existing OAuth/account
+consumer tests also pass. A direct grant/token probe with a supplied validator
+confirms missing and unknown codes issue/save tokens in 4.0.0 and are rejected
+with HTTP 400 and no saved token in 4.0.1. The first attempt to run the new
+upstream module against 4.0.0 fails collection on new constants and is not
+counted as defect reproduction. Official wheel SHA-256:
+`498a298876e996301950a5b053d12c31628bb7b895db03666430c69ce182eb61`.
+Inputs, runtime diff and source tests are retained in
+`oauthlib-followup-20261112/`. The earlier clean image remains bound to 4.0.0;
+it does not prove the corrected pin. Another clean build/scan is required.
+Independent follow-up correctness/security reviews report no High/Medium
+findings within this pin correction. Private addendum hashes:
+`ab2952237f3cdaff806b01ecfb0dfeece113badcd7ee6f28c9ad8f2905107c82`
+(correctness) and
+`00dac60c3168f5720e408de4ccc4fe506c2f876332d5b623002c0e06c1637320`
+(security). These do not approve final-image acceptance or rollout.
+
+The separate Rasterio 1.4.4 trial is not adopted. It supports NumPy 1.26 but
+fails the existing `PROJ_LIB=/usr/share/proj` configuration because its bundled
+PROJ expects a newer coordinate database layout. Removing that override only
+for diagnosis gives identical raster arrays and metadata for eight operations;
+GeoTIFF bytes differ and four drivers disappear (ARG, KML, MapInfo File and
+OGR_VRT). This is insufficient workflow parity. Retained evidence lives under
+`rasterio-compat-20261112/`; no runtime setting or package pin was changed.
+
+The system-GDAL backport remains a private build trial. Before repair, all six
+upstream hostile HDF4 fixtures crash both raster and multidimensional reads
+(12 isolated process failures); valid Deflate64 decompression succeeds. The
+probe uses bounded subprocesses and the evidence-owner UID to read private
+fixtures, so it is defect reproduction, not production-identity acceptance.
+Receipts: `gdal-repair-input-review-20261112/baseline-regressions-4.json` and
+`regression-inputs.json`. Candidate ABI, drivers and regressions remain open.
 
 ## Qualified consumer batch
 

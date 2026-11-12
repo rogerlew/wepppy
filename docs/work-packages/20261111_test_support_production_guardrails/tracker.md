@@ -23,6 +23,13 @@ hard prerequisites for that claim.
 
 ## Task Board
 
+- [x] (2026-11-12 UTC) Clean Python image `9f9e75e6515a` passes 187
+  focused tests and actual PATH artifact readback; fresh collection succeeds
+  (2,717 matches/332 ignored). Scan exposes OAuthlib 4.0.0 still affected;
+  4.0.1 follow-up passes 717 upstream and 38 application tests.
+- [ ] Rebuild the corrected pin, complete full gates and qualify remaining
+  GDAL/native repairs. Resume remains deferred.
+
 - [x] Isolated candidate `63ae6f940` implements Python/auth/Starlette and
   packaging-tool remediation; focused consumers and fresh/incremental host
   installers pass. Independent source reviews have no Medium/High findings.

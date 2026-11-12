@@ -24,6 +24,13 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Clean Python image `9f9e75e6515a` passes 187
+  focused tests and actual PATH artifact readback; fresh collection succeeds
+  (2,717 matches/332 ignored). Scan exposes OAuthlib 4.0.0 still affected;
+  4.0.1 follow-up passes 717 upstream and 38 application tests.
+- [ ] Rebuild the corrected pin, complete full gates and qualify remaining
+  GDAL/native repairs. Resume remains deferred.
+
 - [x] (2026-11-12 UTC) Commit Python/auth/Starlette, pip/bootstrap and owned
   setuptools/vendor remediation as isolated candidate `63ae6f940`. Real
   consumer/account/package-output tests and fresh/incremental disposable host
@@ -79,6 +86,12 @@ recovery without waits or retries. See the F6
 
 ## Surprises & Discoveries
 
+The clean scan caught an incomplete OAuthlib version repair (4.0.0 requires
+4.0.1). System GDAL crashes on all 12 upstream HDF4 probes. Rasterio 1.4.4
+fails the configured PROJ database and removes four drivers; do not treat
+version compatibility with NumPy as workflow acceptance. Detailed evidence is
+in F6 `artifacts/20261112_python_compatibility.md`.
+
 Shared requirements also feed dev and host installers; both must construct
 owned wheels. Existing host venvs need explicit obsolete Passlib removal. The
 full test run exposed a baseline-reproduced disabled-feature fixture, now fixed
@@ -131,6 +144,11 @@ without changing production behavior.
   Evidence: `artifacts/20261111_f1_f7_readiness_matrix.md`.
 
 ## Decision Log
+
+- Decision (2026-11-12): correct OAuthlib to upstream fixed 4.0.1; retain
+  the older image scan as failure evidence. Keep Rasterio migration isolated
+  until coordinate-database and driver parity are resolved. Existing
+  scientific behavior takes precedence over a nominal version upgrade.
 
 - Decision (2026-11-12): preserve pkg_resources with exact setuptools security
   backports and repair actual bundled vendors. Preserve Ubuntu compiler
@@ -207,6 +225,11 @@ without changing production behavior.
   Date/Author: 2026-11-12, Codex.
 
 ## Outcomes & Retrospective
+
+The clean Python batch passes focused and generated-report checks, but its
+scan requires a further OAuthlib correction. Native GDAL defect reproduction
+is now concrete; repair acceptance and full gates remain open. No activation
+or M4 closure is implied. See the F6 Python compatibility receipt.
 
 Candidate `63ae6f940` implements the Python/tooling repairs with focused and
 installer evidence. A clean common-image build is running; full acceptance and
@@ -670,3 +693,6 @@ artifact validation; retain open dependency remediation and full-gate status.
 
 Revision note (2026-11-12): retain isolated Python remediation checkpoint and
 actual shared-installer evidence, with final image/native gates still open.
+
+Revision note (2026-11-12): retain clean-image results, the scan-driven
+OAuthlib correction and concrete GDAL/Rasterio failures before final gates.
