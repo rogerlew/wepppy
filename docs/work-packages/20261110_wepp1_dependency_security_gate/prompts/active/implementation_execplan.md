@@ -24,6 +24,12 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Commit three-package parser candidate `6c0c213a2` after
+  disposable normal/boundary probes and independent correctness review. Clean
+  no-cache Compose build passes in 584.36s; isolated test image also builds.
+  Candidate `sha256:05f4d047b5460e0a867876aeff6af27b5515afab1a54b31b6b4a5df6d31931a9`
+  remains under focused and scanner validation, not final M4 acceptance.
+
 - [x] (2026-11-11 UTC) Commit reviewed M0 checkpoint `d4b175436`; preserve
       unrelated work. Prepare itemized M1 review packet with all 3,221 raw rows,
       330 narrow not-affected proposals and 2,891 unresolved rows; no clearance.
@@ -85,6 +91,31 @@ segmented substitute is not accepted.
 - [ ] M5: perform a separately authorized wepp1 rollout and closeout.
 
 ## Surprises & Discoveries
+
+- Observation (2026-11-12): independent review reproduced candidate Python
+  startup emitting forged successful inventory JSON before the mounted verifier
+  executes. Read-only root and dropped capabilities contain side effects but do
+  not establish output authority. Replace that exploratory method with trusted
+  streaming readback of a never-started container's exported filesystem; never
+  extract or execute archive contents. Preserve the failed method's receipts
+  with an explicit superseded status. This removes the inventory-only capability
+  escalation considered during the earlier traversal investigation.
+
+
+- Observation (2026-11-12): old Msgpack 1.2.1 retains 3,281,695 traced bytes
+  after 100 invalid map-key operations; 1.2.3 retains 1,595 bytes under the same
+  probe. nbconvert 7.17.1 preserves `../../outside.png` in an in-memory extracted
+  output name; 7.17.2 contains it as `outside.png`. No outside file was written.
+  Pyasn1 BER/DER compatibility probes pass on both versions; these probes do not
+  demonstrate the reported performance defect. Clean candidate builds and actual
+  dependent workflows remain required before disposition as fixed.
+  Evidence: private `small-python-trial-20261112/security-boundary.log`.
+
+- Observation (2026-11-12): Syft's output descriptor does not retain top-level
+  scientific exclusion globs. The producer must bind the exact input config and
+  qualify each matched image file against the approved path/hash manifest; a
+  matching output descriptor alone cannot prove exclusion scope.
+
 
 - Observation: a successful database refresh at 2026-11-11 06:26 UTC still
   returned Grype database build timestamp 2026-11-10 06:21:20 UTC, beyond the
@@ -732,4 +763,13 @@ and full npm tests mandatory per operator direction.
 ratified M0 policy, with 35 local tests and independent security review; component
 receipt records corrected coverage failures and remaining integration. Promoted
 the previously qualified crypto/TLS patch. No M1/M3/M4 milestone acceptance is
-claimed; authenticated CI collection remains an unanswered external prerequisite.
+claimed. Authenticated SSH/SCP via the existing trusted `runner-02` alias has
+passed a disposable synthetic bundle transfer and private import. Actual CI
+producer collection and its bounded cleanup window remain unvalidated.
+
+2026-11-12 deployment integration decision: independent review found that fresh
+no-cache rebuilds conflict with exact-image manual approval on a later invocation.
+The concrete retained-candidate resume versus same-invocation review proposal is
+in `artifacts/20261112_deploy_approval_boundary.md`. Operator selection is pending;
+no generic skip-build bypass or deployment workflow change has been implemented.
+Producer qualification and advisory review continue independently.

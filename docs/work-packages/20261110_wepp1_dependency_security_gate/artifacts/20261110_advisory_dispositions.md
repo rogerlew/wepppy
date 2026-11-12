@@ -92,3 +92,32 @@ and 22 advisory aliases in `npm-audit/review/frontend-reachability-review.json`,
 SHA-256 `9eec2dea6374a516faf5ce17fe11231687461ff6711e0ccf3541edfbc03e1aaa`.
 No accepted-risk record, fixed disposition, M1 acceptance, or production rollout
 is implied by this review packet.
+
+## Crypto candidate review continuation (2026-11-12)
+
+This separate review targets exact candidate
+`sha256:f0f3fbb48f4afe636eb8bfcc491d7fa28514543cc1fe4bc628bce8fda373da48`;
+it does not relabel the baseline or approve a final source image. The qualified
+candidate report has 3,364 raw records. Independent security review supports
+442 itemized not-affected recommendations: 330 UAPI-header records, 109 absent
+MariaDB server/tool or config-only records, and three byte-identical patched
+Python Brotli records. Three Critical MariaDB client records remain blocking;
+2,919 other records remain outside that scoped review.
+
+Private `crypto-batch-20261111/applicability-review-20261112/` retains packet v4,
+SHA-256 `b420b01e01477ff3f441f7d861947920cfb06a0d318b5b3e779803873c0a27e8`,
+and upstream patches. Direct package readback verifies 1,557 regular-file hashes
+and 1,052 symlink resolutions, with exact invocation/image/source/output receipts.
+The review corrected an earlier mistake: three new Unknown records had detailed
+related-advisory descriptions despite empty primary descriptions. Each now has
+an individual implementation-path exclusion; Unknown severities remain intact.
+No host-kernel assessment or owner risk acceptance is inferred.
+
+Independent Pillow/Mistune review is retained in private
+`crypto-batch-20261111/qa-pillow-mistune-20261112/review-packet-compact.json`,
+SHA-256 `c35861a7cf99d06c4471bb12c572a8d06e36fefd9f8586cba61567b18d92c145`.
+It supports eight additional narrowly scoped not-affected proposals (two
+Windows-only Pillow groups and an already-escaped Mistune attribute group).
+These are not approvals. Pillow 13.0.0's bundled Brotli remains unqualified;
+Mistune 3.3.0 misses later fixes, so evaluate 3.3.4 or 3.4.0 with the actual
+nbconvert renderer before choosing a final candidate.

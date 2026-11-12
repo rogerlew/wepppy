@@ -21,7 +21,11 @@ from tools.security.import_dependency_evidence import EvidenceError, _validate_m
 
 POLICY_SHA256 = '2c381b5cf53b40278a1145d8bbf32e314647be8328010aaa9005ae414cd4e6be'
 REQUIRED = {'syft.json', 'grype.json', 'npm-audit.json', 'package-lock.json',
-            'inventory.json', 'receipt.json', 'vulnerability.db'}
+            'inventory.json', 'receipt.json', 'vulnerability.db',
+            'scientific-config.json', 'scientific-manifest.json',
+            'build-receipt.json', 'archive_inventory.py'}
+SCIENTIFIC_CONFIG_HASH = '11ed929c6c6d2ef2b689eee0a6bbb14c58e3a98b1897f9115636512d5a98d3e9'
+SCIENTIFIC_MANIFEST_HASH = '593b9e98a66da5ceda2c4efbb6c12fbe08d997dd00e817ec06a3fd3fe1074812'
 TOOL_VERSIONS = {'syft': '1.57.1', 'grype': '0.121.3'}
 TOOL_HASHES = {
     'syft': 'de3982edbbc250c4a40764c7b1f30bbf54b681f9b99391ee6b85bfdfa5d4dffe',
@@ -154,7 +158,7 @@ def evaluate(bundle: Path, *, manifest_hash: str, image_id: str, lock_hash: str,
                 'evidence must be private regular files')
         data = checked_file(bundle / name, record['sha256'])
         require(len(data) == record['size_bytes'], 'evidence size mismatch')
-        if name in REQUIRED and name != 'vulnerability.db':
+        if name in REQUIRED and name.endswith('.json'):
             files[name] = read_json(data)
     require(manifest['files']['package-lock.json']['sha256'] == lock_hash, 'lock identity mismatch')
     receipt = files['receipt.json']
@@ -162,6 +166,27 @@ def evaluate(bundle: Path, *, manifest_hash: str, image_id: str, lock_hash: str,
     require(receipt['image_id'] == image_id and receipt['lock_sha256'] == lock_hash, 'receipt subject mismatch')
     require(receipt['source_revision'] == source_revision and re.fullmatch('[0-9a-f]{40}', source_revision) is not None and receipt['source_clean'] is True,
             'clean exact source identity required')
+    build = files['build-receipt.json']
+    require(build['image_id'] == image_id and build['source_revision'] == source_revision
+            and build['source_clean'] is True and type(build['exit_status']) is int
+            and build['exit_status'] == 0 and build['static_build_lock_sha256'] == lock_hash,
+            'build receipt subject/state mismatch')
+    require(receipt['build_receipt_sha256'] == manifest['files']['build-receipt.json']['sha256'],
+            'build receipt hash mismatch')
+    for role, expected in [('scientific-config.json', SCIENTIFIC_CONFIG_HASH),
+                           ('scientific-manifest.json', SCIENTIFIC_MANIFEST_HASH)]:
+        require(manifest['files'][role]['sha256'] == expected, 'unqualified scientific exclusion input')
+    require(receipt['scientific_config_sha256'] == SCIENTIFIC_CONFIG_HASH and
+            receipt['scientific_manifest_sha256'] == SCIENTIFIC_MANIFEST_HASH,
+            'scientific exclusion receipt mismatch')
+    require(receipt['inventory_method'] == 'never-started-export-v1', 'unqualified inventory authority')
+    probe_hash = digest(Path(__file__).with_name('archive_inventory.py').read_bytes())
+    require(manifest['files']['archive_inventory.py']['sha256'] == probe_hash == receipt['inventory_probe_sha256'],
+            'unqualified inventory probe')
+    require(type(receipt['scientific_files_verified']) is int and
+            receipt['scientific_files_verified'] == len(files['scientific-manifest.json']) ==
+            files['inventory.json']['scientific_files_verified'], 'incomplete scientific file verification')
+    require(files['inventory.json']['static_build_lock_sha256'] == lock_hash, 'inventory lock mismatch')
     scan_time = fresh(receipt['scanned_at'], now)
     refresh_time = fresh(receipt['database_refreshed_at'], now)
     require(refresh_time <= scan_time, 'database refresh must precede scan')

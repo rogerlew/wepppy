@@ -9,8 +9,10 @@ The governing policy is [ADR-0140](../adrs/ADR-0140-dependency-security-gate-pol
 The operator-selected protected store is
 `/workdir/weppcloud-deployments/.local/dependency-security/`. Raw reports must
 remain private. CI collection requires a confirmed authenticated operator path
-to the isolated runner and collection before cleanup; that path is not yet
-established. Do not upload raw reports to public-repository Actions artifacts.
+to the isolated runner and collection before cleanup. Authenticated SSH/SCP via
+the existing trusted `runner-02` alias has passed a disposable fixture transfer
+and private import. Collection of a CI-produced candidate bundle before cleanup
+remains unvalidated. Do not upload raw reports to public-repository Actions artifacts.
 
 ## Import contract
 
@@ -52,8 +54,8 @@ Example invocation after authorized manual collection:
       --expected-image-id sha256:<64-hex-image-id> \
       --expected-manifest-sha256 <independently-retained-manifest-hash>
 
-The importer is a component under validation. The scanner producer, policy
-evaluator, CI wiring and Compose pre-activation hook remain separate open work.
+The importer is a component under validation. The scanner producer, CI wiring and Compose pre-activation hook remain open;
+the standalone policy evaluator is described below.
 The existing npm workflow now runs `wctl run-npm lint` before `wctl run-npm test`;
 this does not constitute the isolated candidate-image security workflow.
 For local candidate test-image selection, see the
@@ -72,3 +74,24 @@ bundle itself. Exit 0 means the supplied evidence passed this component; it is
 not deployment authority. Exit 1 reports blocking findings; exit 2 means invalid
 or incomplete evidence. Producer, CI handoff and deploy-hook integration remain
 pending; see the active F6 evaluator-component receipt for the required bundle.
+
+## Collector qualification (not yet wired)
+
+`python -m tools.security.collect_image_evidence --help` describes the current
+producer. It requires an exact image/source and an independently hashed clean
+build receipt binding the static-builder lock. It snapshots the pinned scanner
+binaries and approved scientific config/manifest. A never-started container export
+is read by the retained trusted parser; candidate Python is never inventory
+authority. No archive content is extracted or executed.
+
+The producer records failed commands privately and publishes a bundle manifest
+only after required collection stages complete. It does not approve advisories.
+The evaluator requires the exact scientific input hashes, retained trusted parser,
+verified-file count, image/source/build/lock binding, raw scans and database.
+The output directory must be new; each attempt retains its own records. Recovery
+after abrupt interruption is limited to the exact uniquely named never-started
+container recorded by that attempt, never broad container or image pruning.
+
+Complete real-image producer qualification, CI integration and canonical deploy
+integration remain open. The active F6 package records the concrete deployment
+approval/resume decision; ordinary `--skip-build` has not been weakened.

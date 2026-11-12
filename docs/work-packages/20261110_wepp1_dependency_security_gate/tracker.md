@@ -164,5 +164,27 @@ main source. Standalone evaluator and 35 adversarial/positive tests now pass;
 independent security component review approved after coverage fixes. See
 [component receipt](artifacts/20261112_evaluator_component.md). Producer, CI
 handoff, deploy wiring, native/advisory dispositions and exact-image M4 remain
-open. Requested the missing authenticated CI collection method from Roger;
-no transfer or exception approval was inferred.
+open. Authenticated SSH/SCP through the existing trusted `runner-02` alias now
+passes a disposable synthetic bundle transfer, independent manifest hash check,
+private import and remote fixture cleanup. This resolves access discovery, but
+actual CI candidate collection before cleanup is still unvalidated. Receipt:
+private `remote-transfer-trial-20261112/transfer-receipt.json`.
+
+The small parser batch has disposable compatibility and boundary probes;
+Msgpack retained-memory and nbconvert output-path defects reproduce on the old
+versions and pass on candidates. These are not clean-build/final-image receipts.
+Direct MariaDB/header package inventory reconciles 1,557 regular files and
+1,052 symlinks. Advisory and native coverage approvals remain open.
+
+Clean parser candidate build passes from `6c0c213a2` (584.36s), and its isolated
+test image builds. Exact candidate focused probes/Quarto render and producer
+trial are running. Security review rejected candidate-side Python as inventory
+authority; replacement reads a never-started container export under trusted
+host Python without extracting/executing its files. M1/M3/M4 remain open.
+
+2026-11-12 deployment integration decision: independent review found that fresh
+no-cache rebuilds conflict with exact-image manual approval on a later invocation.
+The concrete retained-candidate resume versus same-invocation review proposal is
+in `artifacts/20261112_deploy_approval_boundary.md`. Operator selection is pending;
+no generic skip-build bypass or deployment workflow change has been implemented.
+Producer qualification and advisory review continue independently.

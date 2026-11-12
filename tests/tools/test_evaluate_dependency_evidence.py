@@ -17,14 +17,23 @@ POLICY = Path(__file__).resolve().parents[2] / 'docs/work-packages/20261110_wepp
 
 
 @pytest.fixture
-def evidence(tmp_path):
+def evidence(tmp_path, monkeypatch):
     artifacts = [{'id':kind, 'name':name, 'version':'1.0', 'type':kind,
                   'locations':[{'path':'/'+name}]} for kind,name in [('python','flask'),('deb','libc6')]]
     lock = {'lockfileVersion':3, 'packages':{'':{'name':'fixture'},'node_modules/example':{'version':'1.0.0'}}}
     scope = json.loads((POLICY.parents[4] / 'tools/security/scanner_scope.json').read_text())
     lock_raw = json.dumps(lock).encode()
     lock_hash = gate.digest(lock_raw)
+    scientific_config = {'exclude': ['/data/*.par']}
+    scientific_manifest = [{'path': '/data/station.par', 'size': 1, 'sha256': 'd' * 64}]
+    monkeypatch.setattr(gate, 'SCIENTIFIC_CONFIG_HASH', gate.digest(json.dumps(scientific_config).encode()))
+    monkeypatch.setattr(gate, 'SCIENTIFIC_MANIFEST_HASH', gate.digest(json.dumps(scientific_manifest).encode()))
+    probe_raw = Path(gate.__file__).with_name('archive_inventory.py').read_bytes()
     data = {
+        'scientific-config.json': scientific_config,
+        'scientific-manifest.json': scientific_manifest,
+        'build-receipt.json': {'image_id': IMAGE, 'source_revision': 'b' * 40, 'source_clean': True,
+                               'exit_status': 0, 'static_build_lock_sha256': lock_hash},
         'syft.json': {'schema':{'version':'16.1.13'}, 'descriptor':{'name':'syft','version':'1.57.1', 'configuration':scope['syft']},
                       'source':{'type':'image','metadata':{'imageID':IMAGE}}, 'artifacts':artifacts, 'files':[{'location':{'path':'/known.so'},'executable':{'format':'elf'},'digests':[{'algorithm':'sha256','value':'c'*64}]}]},
         'grype.json': {'source':{'type':'image','target':{'imageID':IMAGE}},'distro':{},
@@ -35,12 +44,16 @@ def evidence(tmp_path):
         'npm-audit.json': {'auditReportVersion':2, 'vulnerabilities':{},
                            'metadata':{'dependencies':{'total':1},'vulnerabilities':{'total':0}}},
         'package-lock.json':lock,
-        'inventory.json': {'image_id':IMAGE, 'python':[{'name':'flask','version':'1.0','path':'/flask'}],
+        'inventory.json': {'image_id':IMAGE, 'scientific_files_verified': 1, 'static_build_lock_sha256': lock_hash,
+                           'python':[{'name':'flask','version':'1.0','path':'/flask'}],
                            'deb':[{'name':'libc6','version':'1.0','path':'/libc6'}], 'native_files':[{'path':'/known.so','sha256':'c'*64}]},
         'receipt.json': {'schema_version':1, 'image_id':IMAGE,'lock_sha256':lock_hash,
                          'source_revision':'b'*40,'source_clean':True,'scanned_at':STAMP,
                          'database_refreshed_at':STAMP,'database_refresh_exit':0,'syft_exit':0,'grype_exit':0,
                          'inventory_exit':0,'npm_exit':0,'analysis_errors':[],
+                         'inventory_method':'never-started-export-v1', 'inventory_probe_sha256':gate.digest(probe_raw),
+                         'scientific_files_verified':1, 'scientific_config_sha256':gate.SCIENTIFIC_CONFIG_HASH,
+                         'scientific_manifest_sha256':gate.SCIENTIFIC_MANIFEST_HASH,
                          'tool_versions':gate.TOOL_VERSIONS, 'tool_sha256':gate.TOOL_HASHES,
                          'npm_command':gate.NPM_COMMAND, 'npm_config':gate.NPM_CONFIG, 'npm_lock_hash_before':lock_hash, 'npm_lock_hash_after':lock_hash,
                          'static_build_lock_sha256':lock_hash,'npm_audited_at':STAMP,'npm_scope':'all-lock-dependencies'},
@@ -51,9 +64,11 @@ def evidence(tmp_path):
         conn.execute('INSERT INTO db_metadata VALUES (?,6,1,10)', (STAMP,))
 
     def write():
+        (tmp_path/'archive_inventory.py').write_bytes(probe_raw)
         for name,value in data.items():
             (tmp_path/name).write_text(json.dumps(value))
         receipt = data['receipt.json']
+        receipt['build_receipt_sha256'] = gate.digest((tmp_path/'build-receipt.json').read_bytes())
         receipt['npm_report_sha256'] = gate.digest((tmp_path/'npm-audit.json').read_bytes())
         for label,name in [('database','vulnerability.db'),('sbom','syft.json')]:
             receipt[label+'_hash_before'] = receipt[label+'_hash_after'] = gate.digest((tmp_path/name).read_bytes())
@@ -235,4 +250,25 @@ def test_malformed_low_advisory_cannot_pass(evidence):
     row['vulnerability'] = {'severity':'Low'}
     data['grype.json']['matches'].append(row)
     with pytest.raises(gate.EvidenceError, match='advisory identity'):
+        gate.evaluate(**write())
+
+
+@pytest.mark.parametrize('change', ['exclude', 'manifest', 'count', 'method', 'probe', 'build', 'lock'])
+def test_producer_authority_evidence_is_required(evidence, change):
+    data, _, write = evidence
+    if change == 'exclude':
+        data['scientific-config.json']['exclude'].append('/all/**')
+    elif change == 'manifest':
+        data['scientific-manifest.json'][0]['sha256'] = 'e' * 64
+    elif change == 'count':
+        data['receipt.json']['scientific_files_verified'] = 0
+    elif change == 'method':
+        data['receipt.json']['inventory_method'] = 'candidate-python-startup'
+    elif change == 'probe':
+        data['receipt.json']['inventory_probe_sha256'] = 'e' * 64
+    elif change == 'build':
+        data['build-receipt.json']['source_clean'] = False
+    else:
+        data['inventory.json']['static_build_lock_sha256'] = 'e' * 64
+    with pytest.raises(gate.EvidenceError):
         gate.evaluate(**write())

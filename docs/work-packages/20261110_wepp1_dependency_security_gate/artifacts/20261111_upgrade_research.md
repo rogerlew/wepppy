@@ -1,8 +1,10 @@
 # Candidate upgrade research and isolated validation
 
 **Status**: M0 accepted at `d4b175436`; M1 dispositions remain open. A bounded
-crypto/TLS batch is implemented only in the detached candidate checkout.
-Primary application dependencies, workflows and production deploy code are unchanged.
+crypto/TLS batch has been promoted to main source, followed by the reviewed
+three-package parser candidate. Clean candidate builds and focused tests are
+recorded below; final advisory clearance and M4 remain open. No production
+activation has occurred.
 
 ## Initial compatible-batch candidates
 
@@ -184,3 +186,73 @@ from the detached candidate into the main source: cryptography 50.0.2, certifi
 2026.10.18, urllib3 2.8.0, and exact existing Brotli commit pin. This is the same
 retained requirements patch, not a new compatibility claim. A new final image
 from the eventual combined revision and all M4 gates remain required.
+
+## Small Python candidate batch (2026-11-12)
+
+A disposable container based on exact crypto image `f0f3fbb48...` passed the same
+operations before and after pyasn1 0.6.5, msgpack 1.2.3, nbconvert 7.17.2,
+jupyter-core 5.8.1 and Werkzeug 3.1.9. These are retained fixed-version targets
+from the qualified advisory report. pyasn1, msgpack and nbconvert are now
+promoted as candidate requirements; the two OS-specific cases below retain their
+existing versions to avoid unnecessary compatibility changes.
+ASN.1 DER and MessagePack roundtrips/malformed input, actual notebook HTML/table/
+output rendering, Jupyter secure-write permissions and Werkzeug multipart upload
+all passed. No host runtime or production dependency installation changed.
+
+Primary-source checks included [pyasn1 release metadata](https://pypi.org/project/pyasn1/0.6.5/),
+[nbconvert changes](https://nbconvert.readthedocs.io/en/latest/changelog.html),
+and [Werkzeug changes](https://werkzeug.palletsprojects.com/en/stable/changes/).
+These document releases; compatibility comes from the actual trial, with the
+final clean-image and full regression gates still outstanding. nbconvert output
+filename behavior warrants representative report-output coverage at that gate.
+
+Private evidence: `evidence/small-python-trial-20261112/` under the approved
+store. Probe SHA-256 `0cc4220b0eb9a5df544f3e1f1b680c8d06a54a09e18b8e50df47bd901177d144`;
+log SHA-256 `86aee9b13837ebc43c8bbb2af4ff1b9d6edbc5a32cdcef898e8e24ccca359406`.
+Exit 0. The mutable-container trial is not a canonical rebuild, dependency
+closure/parity proof, fresh scanner result, or M2/M4 milestone acceptance.
+
+Independent applicability review confirms the Jupyter-core and Werkzeug findings
+are Windows-specific in the upstream advisories, while this exact image is
+Linux/amd64. Retain existing 5.7.2/3.1.6 versions and prepare candidate-bound
+not-affected evidence rather than upgrade solely for those four rows:
+[Jupyter advisory](https://github.com/jupyter/jupyter_core/security/advisories/GHSA-33p9-3p43-82vq),
+[Werkzeug advisory](https://github.com/pallets/werkzeug/security/advisories/GHSA-g6x2-hccm-hh4m).
+No owner disposition approval is inferred. pyasn1 needs OID/constructed-string
+regressions; msgpack needs streaming/C-extension cases and resolution of the
+upstream affected-range discrepancy; nbconvert needs output-extraction and
+actual PATH-CE render coverage. Ordinary compatibility probes do not clear those
+security boundaries or substitute for final clean-image tests.
+
+## Clean parser candidate (2026-11-12)
+
+Committed `6c0c213a262d1ed89de8bdfa4941b5caf00cb0fa`: pyasn1 0.6.5,
+Msgpack 1.2.3, nbconvert 7.17.2. Jupyter-core 5.7.2 and Werkzeug 3.1.6 remain
+unchanged. The clean detached no-cache Compose build passes in 584.36s, producing
+`sha256:05f4d047b5460e0a867876aeff6af27b5515afab1a54b31b6b4a5df6d31931a9`.
+The isolated test image is
+`sha256:e285bdcbc5511728fe163ae022a8dfed7a3213f82e565ccf2fe2509e2d98847d`;
+all 22 common-image layers are preserved. Python and native GDAL/Rasterio sentinel
+readbacks agree across common/test images. No live forest dependency upgrade or
+production deployment was performed.
+
+Actual exact-candidate probes pass normal ASN.1/Msgpack/HTML operations, the
+retained invalid-map memory and extracted-filename checks, partial Msgpack skip
+recovery followed by another object, and nbconvert FilesWriter output containment.
+The latter reads actual PNG bytes and generated Markdown links and preserves an
+outside-directory sentinel. Pyasn1 timing remains compatibility evidence rather
+than proof of its reported performance repair.
+
+The real PATH-CE Quarto integration test passes (one test, zero skips, 208.02s).
+The generated report and exact-threshold CSV are retained privately:
+HTML SHA-256 `057af83ff2520b8f609aa0eb86bd0e454a9c31ba68a29720ab259dc7d78af49b`;
+CSV SHA-256 `2aaab2616424346ce90f9a418433d0a1990d570e16926f3247050197bd65f6b3`.
+The test verifies report assets and exact agreement between report/job selections
+and costs. First disposable database startup exceeded its health window while
+image export contended for I/O; its failed receipt is retained. After initialization
+completed, the same standard startup passed without changing the health contract.
+
+Private receipts, probe sources/logs, build inputs and artifact copies are under
+`evidence/parser-batch-20261112/`. A complete fresh scan/reconciliation remains
+required before this batch can receive fixed dispositions. These focused successes
+do not establish final full pytest/npm acceptance or F6 M4.

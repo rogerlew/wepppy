@@ -1,0 +1,30 @@
+{
+  "exclude": [
+    "/workdir/wepppy/wepppy/climates/cligen/2015_par_files/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/GHCN_Intl_Stations/10-year/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/GHCN_Intl_Stations/20-year/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/GHCN_Intl_Stations/30-year/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/GHCN_Intl_Stations/additional/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/au_par_files/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/chile/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/tenerife_par_files/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/tests/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/tests/85b86730-a9c8-4f0c-8956-85f43930a5d8/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/tests/9428fdaa-e0a1-4e51-b2c9-2e8f983d6714/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/tests/95f852b8-e084-443d-a21c-1c78ebd5fe9e/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/tests/Moscow/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/tests/a30e8b59-2085-4a35-90ef-1884386a15b4/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/tests/f88e2e15-a9de-4338-9e4f-0bf8ab615aaf/*.par",
+    "/workdir/wepppy/wepppy/webservices/tests/cligen/08b531d4-b05c-475d-a93f-36d4911ef1ae/*.par",
+    "/workdir/wepppy/wepppy/webservices/tests/cligen/4224654e-acc1-436a-86f7-37f493a81ad3/*.par",
+    "/workdir/wepppy/wepppy/webservices/tests/cligen/4cbce861-44c0-49ad-ac7b-4f30658d7520/*.par",
+    "/workdir/wepppy/wepppy/webservices/tests/cligen/8df4cc4b-ed7f-46e2-9916-843dfd7d7b6e/*.par",
+    "/workdir/wepppy/wepppy/webservices/tests/cligen/b71538bb-3010-4c02-8753-5cfcda5fe879/*.par",
+    "/workdir/wepppy/wepppy/webservices/tests/cligen/ca95e110-7d96-46c9-a553-ba4d876b6492/*.par",
+    "/workdir/wepppy/wepppy/webservices/tests/cligen/cbae02c7-2559-4c66-8628-24219c36df80/*.par",
+    "/workdir/wepppy/wepppy/webservices/tests/cligen/d40aee80-9699-4122-a7a6-29c5573b54c7/*.par",
+    "/workdir/wepppy/wepppy/webservices/tests/cligen/efed5222-8a20-4100-8843-d3620528f567/*.par",
+    "/workdir/wepppy/wepppy/wepp/management/scripts/*.par",
+    "/workdir/wepppy/wepppy/climates/cligen/GHCN_Intl_Stations/all_years/WukariNRA.par"
+  ]
+}
