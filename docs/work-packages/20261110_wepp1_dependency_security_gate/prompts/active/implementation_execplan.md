@@ -98,6 +98,11 @@ segmented substitute is not accepted.
 
 ## Surprises & Discoveries
 
+- Observation (2026-11-12): Grype reorders complete location records for 135
+  rows without changing their contents. Compare full-object multisets while
+  preserving duplicates and approval-key identity; strict list order is not a
+  semantic package identity requirement. Other artifact fields remain exact.
+
 - Observation (2026-11-12): Grype's qualified no-Go-symbol warning preserves
   conservative module-level findings, but the initial producer rejected it as
   analysis loss. Recognize only the complete diagnostic under pinned effective

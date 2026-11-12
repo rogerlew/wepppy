@@ -28,6 +28,18 @@ and pinned binaries; it retains the raw warning and a separate reason. Unknown
 warnings/errors remain blocking. Fourteen focused producer tests pass in 8.60s.
 The original bundle is immutable; a new producer run is required.
 
+The independent audit also finds 135 Grype rows across 24 artifact IDs with
+reordered, otherwise identical complete location objects. The evaluator now
+compares their complete-object multisets, retaining every field and duplicate
+count. Name/version/type and artifact ID remain exact; advisory approval keys
+are unchanged. Altered paths, layers, access paths, annotations, missing/extra
+locations and duplicate-count changes remain errors. This resolves an order-only
+compatibility defect, not a finding or inventory exception.
+All 50 evaluator tests pass in 73.36s, including eight new location comparison
+cases. Independent security review approves the correction. The full frozen-5
+audit is retained privately with SHA-256
+`765127a728ca60c33f00d58bbc03cb3d8e37fd45c4d7be7499c40860c1a98af3`.
+
 The native reachability review packet SHA-256 is
 `cb93662df24136738fe0c220d3fa2b42978f3dc4aa165ee2a553346d7b420e36`.
 It supports further investigation of a narrow MariaDB ordinary-runtime scope,

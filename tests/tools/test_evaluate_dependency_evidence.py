@@ -93,6 +93,42 @@ def finding(data):
             'vulnerability':{'id':'CVE-fixture','namespace':'nvd:cpe','severity':'High'}, 'relatedVulnerabilities':[]}
 
 
+def test_location_order_does_not_change_artifact_identity(evidence):
+    data, _, write = evidence
+    locations = data['syft.json']['artifacts'][0]['locations']
+    locations.append({'path': '/metadata', 'layerID': 'layer', 'accessPath': '/alias',
+                      'annotations': {'evidence': 'primary'}})
+    row = finding(data)
+    row['artifact']['locations'].reverse()
+    key = gate.finding_key('matches', row)
+    data['grype.json']['matches'].append(row)
+    result = gate.evaluate(**write())
+    assert result['blocking'] == {'High': 1}
+    assert result['accepted'] is False
+    assert gate.finding_key('matches', row) == key
+
+
+@pytest.mark.parametrize('mutation', ['path', 'layerID', 'accessPath', 'annotations', 'missing', 'added', 'duplicate'])
+def test_location_content_and_multiplicity_must_match(evidence, mutation):
+    data, _, write = evidence
+    locations = data['syft.json']['artifacts'][0]['locations']
+    locations.append({'path': '/metadata', 'layerID': 'layer', 'accessPath': '/alias',
+                      'annotations': {'evidence': 'primary'}})
+    row = finding(data)
+    changed = row['artifact']['locations']
+    if mutation == 'missing':
+        changed.pop()
+    elif mutation == 'added':
+        changed.append({'path': '/extra'})
+    elif mutation == 'duplicate':
+        changed.append(copy.deepcopy(changed[-1]))
+    else:
+        changed[-1][mutation] = {'evidence': 'changed'} if mutation == 'annotations' else 'changed'
+    data['grype.json']['matches'].append(row)
+    with pytest.raises(gate.EvidenceError, match='location mismatch'):
+        gate.evaluate(**write())
+
+
 def test_clean_complete_bundle(evidence):
     data, approvals, write=evidence
     assert gate.evaluate(**write())['accepted']

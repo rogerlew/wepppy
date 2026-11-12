@@ -306,8 +306,16 @@ def evaluate(bundle: Path, *, manifest_hash: str, image_id: str, lock_hash: str,
             artifact = row['artifact']
             require(artifact['id'] in artifact_by_id, 'scan artifact absent from SBOM')
             original = artifact_by_id[artifact['id']]
-            require(all(artifact[k] == original[k] for k in ('name', 'version', 'type', 'locations')),
+            require(all(artifact[k] == original[k] for k in ('name', 'version', 'type')),
                     'scan artifact identity mismatch')
+            # Grype can reorder Syft locations. Preserve all fields and duplicate
+            # multiplicity; this comparison does not alter finding approval keys.
+            require(isinstance(artifact['locations'], list) and isinstance(original['locations'], list)
+                    and all(isinstance(location, dict) for location in artifact['locations'] + original['locations']),
+                    'malformed artifact locations')
+            require(Counter(canonical_hash(location) for location in artifact['locations']) ==
+                    Counter(canonical_hash(location) for location in original['locations']),
+                    'scan artifact location mismatch')
             advisories = [row['vulnerability'], *row['relatedVulnerabilities']]
             require(all(isinstance(item.get(key), str) and item[key].strip()
                         for item in advisories for key in ('id', 'namespace')), 'missing advisory identity')

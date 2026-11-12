@@ -43,6 +43,10 @@ readback. M4 is not complete.
 
 ## Decisions and Discoveries
 
+- Real-bundle readback found an order-only Grype location mismatch. Correct
+  full-object multiset comparison preserves every location field and duplicate
+  count; finding approval keys and unresolved advisory status are unchanged.
+
 - Decision (Roger, 2026-11-11): transfer evidence **manually** to the selected
   private store; production remains Docker Compose through canonical wctl/deploy
   entry points. Verify imported report hashes/identities before acceptance.
