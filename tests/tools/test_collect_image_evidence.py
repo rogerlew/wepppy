@@ -10,8 +10,27 @@ import pytest
 
 from tools.security.collect_image_evidence import Collector, container, mount, sha, copy_regular
 from tools.security.import_dependency_evidence import EvidenceError
+from tools.security.collect_image_evidence import analysis_diagnostic, QUALIFIED_WARNINGS
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize('tool', ['syft', 'grype'])
+def test_qualified_warning_is_exact_and_tool_scoped(tool):
+    warning = QUALIFIED_WARNINGS[tool]
+    assert not analysis_diagnostic(tool, '[0002]  ' + warning, qualified_scope=True)
+    assert not analysis_diagnostic(tool, warning, qualified_scope=True)
+    assert analysis_diagnostic(tool, warning, qualified_scope=False)
+    assert analysis_diagnostic(tool, warning + ' extra failure', qualified_scope=True)
+    assert analysis_diagnostic(tool, 'ERROR something failed; ' + warning, qualified_scope=True)
+    assert analysis_diagnostic('other', warning, qualified_scope=True)
+    assert analysis_diagnostic(tool, warning.replace('WARN', 'ERROR', 1), qualified_scope=True)
+
+
+def test_other_diagnostics_remain_blocking():
+    assert not analysis_diagnostic('grype', '[0000] INFO loaded database')
+    assert analysis_diagnostic('grype', '[0001] WARN partial input')
+    assert analysis_diagnostic('syft', 'FATAL parser failed')
 
 
 @pytest.mark.parametrize('mutation', ['image', 'revision', 'dirty', 'failed', 'boolean_exit', 'lock', 'hash'])

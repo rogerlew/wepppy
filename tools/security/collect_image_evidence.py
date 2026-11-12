@@ -21,12 +21,30 @@ import uuid
 from tools.security.evaluate_dependency_evidence import (
     TOOL_HASHES, TOOL_VERSIONS, NPM_COMMAND, NPM_CONFIG, checked_file, read_json,
     SCIENTIFIC_CONFIG_HASH, SCIENTIFIC_MANIFEST_HASH,
-    require,
+    require, canonical_hash, SCOPE_HASHES,
 )
 from tools.security.import_dependency_evidence import EvidenceError
 
 SCANNER_IMAGE = 'sha256:9823645c452a9a994f575ed238e1a4f67365acbf8e842db769060820fab06449'
 NODE_IMAGE = 'docker.io/library/node:20-alpine@sha256:afdf98210b07b586eb71fa22ba2e432e058e4cd1304d31ed60888755b8c865fb'
+
+# Qualified scanner diagnostics preserve the conservative finding universe.
+# Do not enable Go symbol filtering: it can remove advisory rows.
+QUALIFIED_WARNINGS = {
+    'syft': 'WARN unable to get filesystem cache at /.cache/syft: '
+            "unable to create directory at '/.cache/syft': mkdir /.cache: read-only file system",
+    'grype': 'WARN go binary packages were found but none carry function symbols; '
+             'go vulnerability matching falls back to module granularity and may report false positives. '
+             'if scanning an SBOM, regenerate it with symbol capture enabled for more precise results.',
+}
+
+
+def analysis_diagnostic(tool, line, *, qualified_scope=False):
+    if not re.search(r'\b(?:WARN|ERROR|FATAL)\b', line):
+        return False
+    # Accept only the complete known message, optionally prefixed by elapsed time.
+    message = re.sub(r'^\[\d+\]\s+', '', line)
+    return not qualified_scope or message != QUALIFIED_WARNINGS.get(tool)
 
 
 def sha(path):
@@ -261,17 +279,21 @@ class Collector:
         # Raw diagnostics remain evidence; do not claim a clean parser result
         # merely because a tool returned zero. Evaluator also checks native rows.
         sbom_data = read_json(sbom.read_bytes())
+        grype_data = read_json((reports / 'grype.json').read_bytes())
+        grype_scope = {key: value for key, value in grype_data['descriptor']['configuration'].items()
+                       if key != 'file'}
+        qualified_scope = (canonical_hash(sbom_data['descriptor']['configuration']) == SCOPE_HASHES['syft']
+                           and canonical_hash(grype_scope) == SCOPE_HASHES['grype'])
+        receipt['qualified_diagnostics'] = []
         receipt['analysis_errors'] = [f for f in sbom_data['files'] if f.get('errors') or
             any(u != 'unknowns-labeler: no package identified in executable file' for u in f.get('unknowns', []))]
         for tool in ('syft', 'grype'):
             for line in (self.output / (tool + '.stderr')).read_text().splitlines():
-                if re.search(r'\b(?:WARN|ERROR|FATAL)\b', line):
-                    # The qualified read-only scanner cannot create its optional
-                    # cache. This exact diagnostic does not indicate lost input.
-                    known = ('WARN unable to get filesystem cache at /.cache/syft: '
-                             "unable to create directory at '/.cache/syft': mkdir /.cache: read-only file system")
-                    if tool != 'syft' or not line.endswith(known):
-                        receipt['analysis_errors'].append({'tool': tool, 'diagnostic': line})
+                if analysis_diagnostic(tool, line, qualified_scope=qualified_scope):
+                    receipt['analysis_errors'].append({'tool': tool, 'diagnostic': line})
+                elif re.search(r'\bWARN\b', line):
+                    receipt['qualified_diagnostics'].append({'tool': tool, 'diagnostic': line,
+                        'reason': 'Qualified pinned scanner scope; no input or advisory rows suppressed'})
         private_json(bundle / 'receipt.json', receipt)
         for path in self.output.iterdir():
             if path.is_file() and path.suffix in {'.stdout', '.stderr'} and path.stat().st_size:

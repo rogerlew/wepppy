@@ -24,6 +24,12 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Complete frozen real parser collection and independent
+  inventory readback. Selected parser packages have no findings; native coverage
+  and other dispositions remain open. Correct an overly broad diagnostic failure
+  classification, retaining the original receipt. See
+  `artifacts/20261112_parser_collector_acceptance.md`.
+
 - [x] (2026-11-12 UTC) Commit three-package parser candidate `6c0c213a2` after
   disposable normal/boundary probes and independent correctness review. Clean
   no-cache Compose build passes in 584.36s; isolated test image also builds.
@@ -91,6 +97,12 @@ segmented substitute is not accepted.
 - [ ] M5: perform a separately authorized wepp1 rollout and closeout.
 
 ## Surprises & Discoveries
+
+- Observation (2026-11-12): Grype's qualified no-Go-symbol warning preserves
+  conservative module-level findings, but the initial producer rejected it as
+  analysis loss. Recognize only the complete diagnostic under pinned effective
+  scope, retain its raw text, and recollect; never enable symbol filtering to
+  make advisory rows disappear.
 
 - Observation (2026-11-12): independent review reproduced candidate Python
   startup emitting forged successful inventory JSON before the mounted verifier
@@ -199,6 +211,11 @@ segmented substitute is not accepted.
 
 ## Decision Log
 
+- Decision (2026-11-12, Codex): preserve frozen collection 5 and correct the
+  producer's exact qualified warning classification for a new collection.
+  Rationale: a conservative module-level advisory warning is not parser loss;
+  changing the existing receipt would invalidate its retained manifest identity.
+
 - Decision (Roger, 2026-11-12): complete F6 through M4 as part of the F7
   continuation. Preserve the ratified evidence policy and required final-image
   gates. Production rollout (M5) and advisory-risk exceptions are not inferred
@@ -305,6 +322,12 @@ segmented substitute is not accepted.
   Date/Author: 2026-11-11, operator.
 
 ## Outcomes & Retrospective
+
+The parser candidate now has actual artifact and complete direct-inventory
+readback evidence. Its three upgraded packages have no remaining scanner rows.
+The first frozen producer bundle remains rejected on the known diagnostic
+classification defect; native ownership and remaining findings independently
+block readiness. No M1/M3/M4 completion or deployment is implied.
 
 The M3 manual importer is implemented and passes focused/local evidence checks
 and scoped independent review. Full pytest passes with 13,533 passed and 435
@@ -743,6 +766,9 @@ Compose through `scripts/deploy-production.sh`; the GHCR publication workflow
 continues to serve its existing non-deploying/Kubernetes compatibility purpose.
 
 ## Revision Note
+
+2026-11-12: Record real parser collection, independent inventory reconciliation,
+the exact conservative-warning correction and retained unresolved findings.
 
 2026-11-11: Record accepted M0 checkpoint and itemized M1 review packet. The
 preparatory image remains bound to its original source revision; documentation

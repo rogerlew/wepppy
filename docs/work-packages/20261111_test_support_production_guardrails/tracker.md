@@ -301,3 +301,10 @@ This is a failed receipt, not M6 acceptance. Docker image export overlapped;
 observed host I/O pressure motivates a quiet focused reproduction after export,
 without relaxing the threshold. No logging path is called by the marker setter.
 Receipt: `out/f7-nfs-20261112/full-pytest-failure-receipt.json`.
+
+Quiet focused follow-up passes both marker-latency cases without changing the
+50ms contract: readonly p95 delta 5.62ms; TTL 4.98ms. The preceding export-overlap
+follow-up passed readonly but failed TTL (477.92ms). This supports host I/O
+contention as the cause; it does not replace the still-required exact full rerun.
+Retained logs: `/tmp/f7-catalog-latency-quiet.log` (mixed result during export),
+`/tmp/f7-catalog-latency-no-export.log` (2 passed in 11.08s).

@@ -3,7 +3,7 @@
 ## Quick Status
 
 **Timezone**: UTC  
-**Last updated**: 2026-11-11 UTC  
+**Last updated**: 2026-11-12 UTC
 **Current phase**: M0 complete; M1 image dispositions and native coverage in progress  
 **Finding**: F6 / SEC-06 (Medium, exploitability unconfirmed)  
 **Change security impact**: high  
@@ -16,10 +16,15 @@ The M3 local manual importer passes 31 focused tests, actual private artifact
 readback and independent correctness/security review. Full pytest passes at
 2026-11-11 08:52 UTC: 13,533 passed, 435 skipped. Fresh npm lint and all 1,069
 npm tests pass. This is development-runtime component validation, not M4.
-CI retrieval remains an external prerequisite; evaluator and deploy hook are
-not yet implemented. See `artifacts/20261111_importer_validation.md`.
+The evaluator and confined collector are implemented. Actual CI producer handoff,
+deployment integration, native coverage and advisory dispositions remain open.
+See `artifacts/20261112_parser_collector_acceptance.md` for the latest candidate
+readback. M4 is not complete.
 
 ## Task Board
+
+- [x] Complete real parser candidate collection and inventory reconciliation;
+  retain blocked policy status and qualified-diagnostic correction.
 
 - [x] Confirm F6 audit scope and the wepp1 common-image production boundary.
 - [x] Discover prior dependency-upgrade and immutable-image precedent.
