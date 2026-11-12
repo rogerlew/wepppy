@@ -4,7 +4,7 @@
 
 **Timezone**: UTC
 **Started**: 2026-11-12 01:01 UTC
-**Current phase**: M0-M3 implemented; M4 NFS cleanup/runtime acceptance blocked
+**Current phase**: M4 forest acceptance passed; full regression and F6 M4 pending
 **Last updated**: 2026-11-12 UTC
 **Next milestone**: resolve M4 cleanup evidence; await F6 M4 for combined readiness
 **Finding**: F7 / SEC-07 (Low conditional; High impact when enabled)
@@ -284,3 +284,7 @@ processes and late records preserved listeners without recreating the path.
 500-record queue drain: old 0.02015s, new 0.51923s; full record readback matched.
 Correctness review found permissive lexists absence readback; changed to lstat
 with only FileNotFoundError proving absence, adding EACCES/ESTALE regressions.
+
+Forest M4 acceptance now passes; see [receipt](artifacts/20261112_forest_acceptance.md).
+The historical NFS/browser hold is resolved for the exercised workflow. F6 and
+combined candidate gates still block package closure.

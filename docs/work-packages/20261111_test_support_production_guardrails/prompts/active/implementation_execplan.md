@@ -41,9 +41,10 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
       negative coverage and no smoke-marker state.
 - [x] (2026-11-12 UTC) M3: make wctl/Playwright token handling automatic, narrow, and
       non-retaining; update all consumers and docs.
-- [ ] M4: focused configuration/route/CLI/Compose gates pass; actual production
-      URL map passes. Unmocked create/load succeeds, but NFS delete leaves a
-      directory despite 200. Automatic browser lifecycle/retention remains open.
+- [x] (2026-11-12 UTC) M4: focused configuration/routes/CLI/Compose and actual
+      production URL map pass; bounded NFS repair passes multiprocess removal.
+      Authorized forest automatic browser create/load/delete and exact-token
+      scans pass. See artifacts/20261112_forest_acceptance.md.
 - [x] (2026-11-12 UTC) Broad local Python sanity: 13,721 passed, 437 skipped,
       exit 0 in 1:04:40. Shared-worktree receipt predates final refinements;
       does not satisfy the frozen-candidate M6 gate.
@@ -596,3 +597,8 @@ Implementation revision: `c2507338fbdcd5e7156e708f84a43691942ef19f`; M4/M6/M7 re
 acceptance; execute F6 through M4 under its existing policy, without production
 rollout or implied advisory-risk acceptance. Earlier no-forest/no-cleanup text
 is superseded only within this explicitly authorized continuation.
+
+2026-11-12 forest acceptance: bounded NFS repair and live automatic browser
+workflow pass, including removal and exact-token non-retention. Full F7 regression
+is running. Historical blocker text above is superseded by the acceptance receipt;
+F6 M4 and combined M6 remain open.
