@@ -19,12 +19,26 @@ npm tests pass. This is development-runtime component validation, not M4.
 The evaluator and confined collector are implemented. Actual CI producer handoff,
 deployment integration, native coverage and advisory dispositions remain open.
 See `artifacts/20261112_parser_collector_acceptance.md` for the latest candidate
-readback. M4 is not complete.
+producer qualification and `artifacts/20261112_oauth_candidate_validation.md`
+for the later clean OAuth candidate. Its 18 Authlib rows are removed, but the
+actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
 
+- [x] Exact clean OAuth image passes 50 callback tests in 9.71s after a quiet
+  standard-stack retry; failed startup receipt is preserved. See
+  `artifacts/20261112_oauth_candidate_validation.md`.
+
+- [x] Corrected parser collection 6 passes producer/readback checks; actual
+  evaluator blocks on unresolved native coverage with empty approvals.
+
+- [x] Itemize all 2,105 native unknown paths/1,201 hashes with ownership
+  proposals; supplemental component coverage and dispositions remain open.
+  See `artifacts/20261112_native_coverage_review.md`.
+
 - [x] Independently review isolated OAuth revision `afe6e7264`; 50 component
-  tests pass, clean build underway. No forest dependency activation.
+  tests pass, clean build passes in 658.72s. Installed version delta is exactly
+  Authlib plus joserfc; native GDAL sentinels match. No forest activation.
 - [ ] Implement and prove actual CI lifecycle from
   `artifacts/20261112_ci_producer_design.md`; keep deployment workflow selection
   separate and pending.

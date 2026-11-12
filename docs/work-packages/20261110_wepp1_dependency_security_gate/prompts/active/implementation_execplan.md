@@ -24,9 +24,29 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Complete OAuth collection: all 18 prior Authlib rows are
+  removed, joserfc has no findings, inventory and artifact identities reconcile.
+  Actual evaluation blocks on native coverage. Other rows remain retained;
+  M1/M3/M4 are still open and no runtime activation is authorized by this result.
+
+- [x] (2026-11-12 UTC) Verify clean OAuth candidate's exact two-package version
+  delta and rerun all 50 callback tests successfully in 9.71s. Preserve the
+  preceding PostgreSQL startup failure during heavy export and the unchanged
+  quiet retry. See `artifacts/20261112_oauth_candidate_validation.md`.
+
+- [x] (2026-11-12 UTC) Corrected parser collection 6 passes producer readback
+  with zero analysis errors and unchanged finding counts. Actual policy
+  evaluation rejects unresolved native coverage; no approvals were invented.
+
+- [x] (2026-11-12 UTC) Independently partition all 2,105 native unknown paths
+  into 1,201 hashes with ownership proposals. Bundled/static components and
+  cache-only versions still require advisory coverage. No approvals fabricated;
+  see `artifacts/20261112_native_coverage_review.md`.
+
 - [x] (2026-11-12 UTC) Freeze independently reviewed OAuth implementation at
-  detached revision `afe6e7264`; all 50 component tests pass. Clean build is
-  underway in `/home/workdir/wepppy-security-oauth-candidate-20261112`. Keep
+  detached revision `afe6e7264`; all 50 component tests pass. Clean build passes
+  in 658.72s, image `sha256:e4e44d496fe0feead2b25e0b7833c86be2b321fcb5f8e9683fb9945c6db42e03`.
+  The checkout is `/home/workdir/wepppy-security-oauth-candidate-20261112`. Keep
   the required new dependency isolated from forest's running older environment.
 - [ ] Complete actual CI producer/import lifecycle; the reviewed bounded design
   is `artifacts/20261112_ci_producer_design.md`. A transport-only trial is not
@@ -339,8 +359,17 @@ segmented substitute is not accepted.
 The parser candidate now has actual artifact and complete direct-inventory
 readback evidence. Its three upgraded packages have no remaining scanner rows.
 The first frozen producer bundle remains rejected on the known diagnostic
-classification defect; native ownership and remaining findings independently
-block readiness. No M1/M3/M4 completion or deployment is implied.
+classification defect. Corrected collection 6 passes that boundary and rejects
+unresolved native coverage; remaining findings independently block readiness.
+No M1/M3/M4 completion or deployment is implied.
+
+The isolated OAuth candidate also builds cleanly and passes its real-library
+callback suite against that exact image. The required dependency import remains
+isolated from forest until final integration/activation is authorized and ready.
+Its fresh scan removes all 18 Authlib rows, but the actual gate rejects unresolved
+native coverage. The deployment workflow choice is still pending. CI producer
+integration, image-bound dispositions and the final exact full test commands
+remain required; this continuation does not complete M4.
 
 The M3 manual importer is implemented and passes focused/local evidence checks
 and scoped independent review. Full pytest passes with 13,533 passed and 435

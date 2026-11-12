@@ -47,3 +47,16 @@ but does not clear the affected shared/static libraries or general scripting.
 Pillow/FreeType and PyCurl/libcurl carry separate Brotli copies; ordinary PATH
 rendering does not establish image-wide non-reachability. Repair or explicit
 policy-compliant disposition remains required. No exception was approved.
+
+## Corrected collection
+
+Frozen collection 6 completes successfully with the same 3,016 matches and 330
+ignored matches, zero analysis errors, and both qualified warnings retained.
+Complete location-object reconciliation has no mismatches. Manifest SHA-256:
+`594ffdda87a9e1854c53c6ba56185627e0621dad993374496a0bca8277f5f8ba`.
+Scan SHA-256:
+`7895b7c9663da9faf9d5f204301fa977140b1cfd397d44dd32465725e33a2a81`.
+The actual evaluator with empty approvals now rejects for
+`unresolved native executable coverage`. No finding was waived to reach this
+result. Private receipts are `frozen-6-readback.json` and
+`frozen-6-evaluation.json` under the parser evidence directory.

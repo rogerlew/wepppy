@@ -308,3 +308,9 @@ follow-up passed readonly but failed TTL (477.92ms). This supports host I/O
 contention as the cause; it does not replace the still-required exact full rerun.
 Retained logs: `/tmp/f7-catalog-latency-quiet.log` (mixed result during export),
 `/tmp/f7-catalog-latency-no-export.log` (2 passed in 11.08s).
+
+2026-11-12 continuation: F6's isolated OAuth candidate builds cleanly, passes
+50 callback tests and removes 18 Authlib rows in its fresh scan. Its actual gate
+still rejects native coverage; CI/deployment integration and final broad gates
+remain open. Forest live acceptance remains passed, but this does not close F7
+M6/M7 or F6 M4. See F6 `artifacts/20261112_oauth_candidate_validation.md`.
