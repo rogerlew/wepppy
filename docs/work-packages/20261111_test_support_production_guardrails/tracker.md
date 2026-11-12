@@ -23,6 +23,11 @@ hard prerequisites for that claim.
 
 ## Task Board
 
+F6 Mistune/PyCurl candidate pins and focused consumer checks are implemented;
+clean batch build and final gates remain open. Resume stays deferred and NFS
+retained handles require manual recovery without waits.
+
+
 ### Ready / Backlog
 
 - [x] M0: amend and ratify the canonical deployment-profile, test-support JWT,

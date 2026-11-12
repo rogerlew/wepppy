@@ -24,6 +24,13 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 
 ## Progress
 
+F6 remediation continuation: Mistune/PyCurl pins and real consumer checks are
+implemented in detached candidate `0661618bf`; clean batch build is running.
+F6 M4 remains open. Deployment resume is deferred; NFS failures require manual
+recovery without waits or retries. See the F6
+[remediation receipt](../../../20261110_wepp1_dependency_security_gate/artifacts/20261112_mistune_pycurl_remediation.md).
+
+
 - [x] (2026-11-12 01:01 UTC) Confirm the F7 source, configuration, Compose,
       wctl, Playwright, and F1-F6 evidence boundaries.
 - [x] (2026-11-12 01:01 UTC) Record the operator's production-default profile,

@@ -35,6 +35,13 @@ actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
 
+- [x] (2026-11-12 UTC) Implement Mistune 3.4.0 and PyCurl 7.49.0 in the
+  isolated candidate after before/after consumer checks (19 cases each).
+  Mistune upstream checks pass 35 unittest and 65 pytest cases. Final common
+  build, scan and full gates remain open; see
+  `artifacts/20261112_mistune_pycurl_remediation.md`.
+
+
 - [x] Exact clean OAuth image passes 50 callback tests in 9.71s after a quiet
   standard-stack retry; failed startup receipt is preserved. See
   `artifacts/20261112_oauth_candidate_validation.md`.

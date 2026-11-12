@@ -24,6 +24,13 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Implement Mistune 3.4.0 and PyCurl 7.49.0 in the
+  isolated candidate after before/after consumer checks (19 cases each).
+  Mistune upstream checks pass 35 unittest and 65 pytest cases. Final common
+  build, scan and full gates remain open; see
+  `artifacts/20261112_mistune_pycurl_remediation.md`.
+
+
 - [ ] (2026-11-12 UTC) Continue dependency remediation, beginning with the
   reviewed Mistune/nbconvert boundary and qualified native-library repairs.
   Deployment-resume implementation is explicitly deferred by Roger; do not
@@ -130,6 +137,11 @@ segmented substitute is not accepted.
 - [ ] M5: perform a separately authorized wepp1 rollout and closeout.
 
 ## Surprises & Discoveries
+
+PyCurl 7.49.0 includes repaired Brotli but removes unused SMB/NTLM/TLS-SRP
+capabilities; preserve that explicit limitation. Mistune pytest limit tests are
+not collected by unittest, so both runners are required for upstream evidence.
+
 
 - Observation (2026-11-12): Grype reorders complete location records for 135
   rows without changing their contents. Compare full-object multisets while
@@ -374,6 +386,10 @@ segmented substitute is not accepted.
 
 ## Outcomes & Retrospective
 
+Mistune/PyCurl candidate pins and real consumer regressions are implemented.
+Final-image validation and native repairs remain open; resume stays deferred.
+
+
 The parser candidate now has actual artifact and complete direct-inventory
 readback evidence. Its three upgraded packages have no remaining scanner rows.
 The first frozen producer bundle remains rejected on the known diagnostic
@@ -385,7 +401,7 @@ The isolated OAuth candidate also builds cleanly and passes its real-library
 callback suite against that exact image. The required dependency import remains
 isolated from forest until final integration/activation is authorized and ready.
 Its fresh scan removes all 18 Authlib rows, but the actual gate rejects unresolved
-native coverage. The deployment workflow choice is still pending. CI producer
+native coverage. Deployment-resume implementation is explicitly deferred. CI producer
 integration, image-bound dispositions and the final exact full test commands
 remain required; this continuation does not complete M4.
 
@@ -859,3 +875,6 @@ The concrete retained-candidate resume versus same-invocation review proposal is
 in `artifacts/20261112_deploy_approval_boundary.md`. Operator selection is pending;
 no generic skip-build bypass or deployment workflow change has been implemented.
 Producer qualification and advisory review continue independently.
+
+2026-11-12: Merge current evidence tooling and manual NFS recovery direction into
+the isolated candidate; record implemented Mistune/PyCurl consumer qualification.
