@@ -68,8 +68,15 @@ work. This does not serialize deletion against active writers; a racing writer
 can cause an explicit failure. Run log sinks must not retain idle descriptors
 that prevent quiescent NFS cleanup. No smoke markers or registry are required.
 
+Cleanup MUST NOT wait, poll, or automatically retry for retained NFS handles.
+An incomplete deletion requires manual operator intervention to identify and
+release the responsible handle before an explicit retry. Automated cleanup MUST
+NOT kill processes or restart services to release those handles.
+
 Rationale: a successful HTTP response alone cannot prove NFS deletion, and
 process-local instance cleanup cannot release another worker's logging handles.
+The operator selected manual recovery for retained handles rather than a
+timing-dependent wait (Roger, 2026-11-12).
 
 ## Agent workflow and token non-retention
 

@@ -2,6 +2,11 @@
 
 ## Quick Status
 
+Operator clarification (2026-11-12): retained NFS handles require manual
+intervention, without automatic waits/retries or process restarts. Existing
+support cleanup already fails explicitly; canonical recovery guidance is now
+explicit in `docs/schemas/weppcloud-test-support-contract.md`.
+
 **Timezone**: UTC
 **Started**: 2026-11-12 01:01 UTC
 **Current phase**: M4/M5 passed; full regression failed; F6 M4 remains open

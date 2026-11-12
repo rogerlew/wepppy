@@ -2,6 +2,16 @@
 
 ## Quick Status
 
+Current direction (Roger, 2026-11-12): continue dependency remediation; defer
+deployment-resume work. Stale NFS handles require manual recovery, without
+automatic waiting. Next repair work targets Mistune and the qualified native
+library findings; deferred resume work must not block these repairs.
+
+Remediation status (2026-11-12): master includes cryptography, certifi, urllib3,
+pyasn1, msgpack and nbconvert upgrades. Authlib/joserfc are updated and tested
+in the isolated candidate. Other dependency/native repairs remain open. The
+operator redirected focus to remediation; deployment-resume design is on hold.
+
 **Timezone**: UTC  
 **Last updated**: 2026-11-12 UTC
 **Current phase**: M0 complete; M1 image dispositions and native coverage in progress  

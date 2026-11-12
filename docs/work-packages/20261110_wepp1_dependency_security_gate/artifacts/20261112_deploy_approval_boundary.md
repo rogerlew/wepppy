@@ -1,6 +1,7 @@
 # Decision proposal: approving a freshly built deployment candidate
 
-Status: concrete workflow decision required before deployment integration.
+Status: proposal on hold after the 2026-11-12 operator direction to prioritize
+dependency remediation. No resume workflow is approved or implemented.
 This document does not authorize deployment, risk exceptions, or a skip-build
 bypass. Independent correctness review identified the boundary in the existing
 canonical `scripts/deploy-production.sh` workflow.

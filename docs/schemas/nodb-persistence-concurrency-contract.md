@@ -45,6 +45,9 @@ or prevent delivery to other sinks; logging MUST NOT recreate a deleted run
 directory. Close the stream even when writing fails. RQ worker and migration
 run-file sinks share this lifecycle rule. This removes idle NFS handles; it does
 not provide cross-process exclusion between active logging and deletion.
+Retained NFS handles during run deletion require explicit failure and manual
+operator recovery; cleanup must not wait for handles or automatically restart
+their owning processes. This does not change unrelated NoDb read-retry contracts.
 
 Rationale: logger-retained handlers outlive NoDb cache membership and requests.
 Closing only cached instances cannot release direct-constructor or remote-worker

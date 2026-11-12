@@ -24,6 +24,11 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [ ] (2026-11-12 UTC) Continue dependency remediation, beginning with the
+  reviewed Mistune/nbconvert boundary and qualified native-library repairs.
+  Deployment-resume implementation is explicitly deferred by Roger; do not
+  treat that deferred choice as a blocker to dependency repair.
+
 - [x] (2026-11-12 UTC) Complete OAuth collection: all 18 prior Authlib rows are
   removed, joserfc has no findings, inventory and artifact identities reconcile.
   Actual evaluation blocks on native coverage. Other rows remain retained;
@@ -50,7 +55,7 @@ segmented substitute is not accepted.
   the required new dependency isolated from forest's running older environment.
 - [ ] Complete actual CI producer/import lifecycle; the reviewed bounded design
   is `artifacts/20261112_ci_producer_design.md`. A transport-only trial is not
-  acceptance. Deployment workflow selection remains pending separately.
+  acceptance. Deployment-resume work is explicitly deferred separately.
 
 - [x] (2026-11-12 UTC) Complete frozen real parser collection and independent
   inventory readback. Selected parser packages have no findings; native coverage
@@ -243,6 +248,19 @@ segmented substitute is not accepted.
   Evidence: `.github/forest_workflows/npm-tests.yml`.
 
 ## Decision Log
+
+- Decision (Roger, 2026-11-12): continue dependency remediation and defer the
+  resume workflow. Never wait for hours for stale NFS handles; report failure
+  and require manual recovery. Prioritize concrete package repairs and their
+  consumer regressions over further deployment workflow design. Existing
+  dependency acceptance requirements remain in force; no risk waiver is implied.
+
+- Direction (Roger, 2026-11-12): prioritize dependency remediation; NFS retained
+  handles require manual intervention and are a separate concern. Hold the
+  deployment-resume proposal while package remediation remains unfinished.
+  Six package upgrades are committed on master (cryptography, certifi, urllib3,
+  pyasn1, msgpack, nbconvert); Authlib/joserfc remain in the validated isolated
+  candidate. None of these statements implies production rollout or M4 closure.
 
 - Decision (2026-11-12, Codex): preserve frozen collection 5 and correct the
   producer's exact qualified warning classification for a new collection.

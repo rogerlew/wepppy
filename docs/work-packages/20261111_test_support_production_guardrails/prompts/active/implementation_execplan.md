@@ -106,6 +106,11 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 
 ## Decision Log
 
+- Decision (Roger, 2026-11-12): retained NFS handles require manual intervention;
+  do not wait or retry automatically. Existing support cleanup already attempts
+  removal once and fails explicitly. Record the recovery boundary in the support
+  and NoDb contracts; no runtime change is needed for this clarification.
+
 - Decision (Roger, 2026-11-12): approve the bounded NFS lifecycle repair, live
   browser acceptance on forest, and completion of F6 through M4. This supersedes
   the earlier cleanup exclusion and forest-activation hold for this acceptance
