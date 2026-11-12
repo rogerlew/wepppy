@@ -161,7 +161,8 @@ import logging
 import queue
 from logging.handlers import QueueHandler, QueueListener
 import atexit
-from logging import FileHandler, StreamHandler
+from logging import StreamHandler
+from wepppy.observability.run_logging import RunFileHandler
 from wepppy.nodb.status_messenger import StatusMessengerHandler
 from wepppy.nodb.project_config_reader import (
     ProjectConfigStatus,
@@ -1066,7 +1067,7 @@ class NoDbBase(object):
 
             # File handler for run logs
             log_path = self._nodb.replace('.nodb', '.log')  # absoloute path to log file
-            self._run_file_handler = FileHandler(log_path)
+            self._run_file_handler = RunFileHandler(log_path)
             self._run_file_handler.setLevel(try_redis_get_log_level(self.runid, logging.INFO))
             self._run_file_handler.setFormatter(formatter)
             Path(log_path).touch(exist_ok=True)

@@ -36,6 +36,10 @@ Instead of SQL queries, developers interact with rich Python objects that expose
 - **Singleton lifecycle** – `NoDbBase.getInstance(wd)` maintains one process-local cached controller per working directory for writable paths and refreshes from cache/disk when signatures drift.
 - **Distributed locking** – `with controller.locked():` acquires a Redis-backed lock (DB 0), mirrors legacy hash flags, and raises `NoDbAlreadyLockedError` when re-entrancy is unsafe.
 - **Persistence helpers** – `dump_and_unlock()` fsyncs and atomically replaces the JSON payload, releases the lock, then sanity-checks persisted state via `getInstance()` signature/hydration paths.
+- **Run-log lifetime** – RunFileHandler validates/creates the file at construction,
+  then opens and closes it for each serialized append. Idle controllers do not
+  pin NFS files. File-sink failures preserve status/console delivery and never
+  recreate a deleted run directory; active writer/deletion races can still fail.
 - **Telemetry wiring** – `_init_logging()` attaches a QueueListener fan-out to StatusMessenger, controller-scoped log files, and a console error stream; `try_redis_set_log_level()` dynamically adjusts levels via DB 15.
 - **Status channels** – `_status_channel` resolves to `<runid>:<controller>` (pup runs routed to `runid:omni`).
 - **Trigger events** – `TriggerEvents` enum documents lifecycle hooks (e.g., `LANDUSE_BUILD_COMPLETE`) that mods and UI components listen for when orchestrating runs.

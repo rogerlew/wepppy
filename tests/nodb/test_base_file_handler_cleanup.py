@@ -119,7 +119,9 @@ class TestSafeStopQueueListener:
         assert controller._run_file_handler is not None
         
         run_file_handler = controller._run_file_handler
-        # Get the underlying stream before it's closed
+        # Legacy/in-flight stream cleanup remains supported.
+        assert run_file_handler.stream is None
+        run_file_handler.stream = run_file_handler._open()
         stream = run_file_handler.stream
         assert stream is not None
         assert not stream.closed
@@ -209,7 +211,9 @@ class TestCleanupAllInstances:
         FileHandlerTrackingController._instances[str(run1)] = controller1
         FileHandlerTrackingController._instances[str(run2)] = controller2
 
-        # Get references to streams before cleanup
+        # Exercise legacy retained streams as well as the new idle lifetime.
+        controller1._run_file_handler.stream = controller1._run_file_handler._open()
+        controller2._run_file_handler.stream = controller2._run_file_handler._open()
         stream1_run = controller1._run_file_handler.stream
         stream2_run = controller2._run_file_handler.stream
 
@@ -261,7 +265,9 @@ class TestCleanupRunInstances:
         FileHandlerTrackingController._instances[str(run1)] = controller1
         FileHandlerTrackingController._instances[str(run2)] = controller2
 
-        # Get references to streams before cleanup
+        # Exercise legacy retained streams as well as the new idle lifetime.
+        controller1._run_file_handler.stream = controller1._run_file_handler._open()
+        controller2._run_file_handler.stream = controller2._run_file_handler._open()
         stream1_run = controller1._run_file_handler.stream
         stream2_run = controller2._run_file_handler.stream
 
@@ -358,6 +364,8 @@ class TestFileDescriptorCleanup:
 
         # Get the file descriptor number before cleanup
         run_handler = controller._run_file_handler
+        assert run_handler.stream is None
+        run_handler.stream = run_handler._open()
         run_fd = run_handler.stream.fileno()
 
         # Should be valid file descriptor
@@ -391,6 +399,8 @@ class TestFileDescriptorCleanup:
             controllers.append(controller)
             FileHandlerTrackingController._instances[str(run)] = controller
 
+            assert controller._run_file_handler.stream is None
+            controller._run_file_handler.stream = controller._run_file_handler._open()
             fds.append(controller._run_file_handler.stream.fileno())
 
         # All FDs should be valid
@@ -405,3 +415,14 @@ class TestFileDescriptorCleanup:
         for fd in fds:
             with pytest.raises(OSError):
                 os.fstat(fd)
+
+
+def test_direct_controller_releases_idle_log_stream(run_dir, redis_env):
+    controller = FileHandlerTrackingController(str(run_dir))
+    try:
+        controller.logger.info("direct constructor log")
+        controller._log_queue.join()
+        assert controller._run_file_handler.stream is None
+        assert "direct constructor log" in (run_dir / "tracking.log").read_text()
+    finally:
+        controller._safe_stop_queue_listener()

@@ -5,6 +5,7 @@ from __future__ import annotations
 from wepppy.observability.safe_traceback import safe_text
 from wepppy.observability.safe_logging import current_profile
 from wepppy.observability.secret_profiles import WORKER
+from wepppy.observability.run_logging import RunFileHandler
 
 import inspect
 import logging
@@ -50,10 +51,12 @@ def _setup_file_logger(wd: str) -> logging.Logger:
     logger.setLevel(logging.DEBUG)
     
     # Remove existing handlers to avoid duplicates
-    logger.handlers.clear()
+    for handler in list(logger.handlers):
+        logger.removeHandler(handler)
+        handler.close()
     
     # File handler
-    file_handler = logging.FileHandler(log_path, mode='a', encoding='utf-8')
+    file_handler = RunFileHandler(log_path, encoding='utf-8')
     file_handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)

@@ -206,3 +206,11 @@ Support calls use the shared untraced HTTP helper; ordinary application calls
 receive no support header. A valid support token can delete any resolvable run
 in that non-production environment. See the [canonical contract](../docs/schemas/weppcloud-test-support-contract.md)
 for statuses, lifetime, CSRF exemption and validation requirements.
+
+### NFS cleanup acceptance
+
+Support deletion returns 200 only after directory-absence readback. A filesystem
+error or remaining path returns 500 (`Run cleanup failed`); retain the disposable
+run ID for scoped recovery. Never treat a passing browser assertion or cleanup
+warning as evidence of removal. Run log handlers release idle file descriptors,
+but deletion concurrent with active writers can still fail.

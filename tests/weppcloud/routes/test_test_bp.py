@@ -239,3 +239,57 @@ def test_valid_bearer_without_csrf_deletes_actual_directory(monkeypatch, tmp_pat
     assert client.get('/tests/api/ping', headers=_headers()).status_code == 200
     assert client.delete('/tests/api/run/victim', headers=_headers()).status_code == 200
     assert not victim.exists()
+
+
+@pytest.mark.parametrize("failure", ["busy", "permission", "retained"])
+def test_cleanup_failure_is_explicit(monkeypatch, tmp_path, failure):
+    import errno
+    app = _configure_create_run_test_app(monkeypatch, tmp_path / "created")
+    victim = tmp_path / "victim"
+    victim.mkdir()
+    (victim / "sentinel").write_text("retained")
+    monkeypatch.setattr(test_bp_module, "get_wd", lambda *a, **kw: str(victim))
+
+    def fail_removal(path):
+        if failure != "retained":
+            raise OSError(errno.EBUSY if failure == "busy" else errno.EACCES, "blocked")
+
+    monkeypatch.setattr(test_bp_module.shutil, "rmtree", fail_removal)
+    response = app.test_client().delete("/tests/api/run/victim", headers=_headers())
+    assert response.status_code == 500
+    assert response.json == {"error": "Run cleanup failed"}
+    assert (victim / "sentinel").read_text() == "retained"
+
+
+def test_failed_creation_reports_incomplete_cleanup(monkeypatch, tmp_path):
+    run = tmp_path / "created"
+    run.mkdir()
+    app = _configure_create_run_test_app(monkeypatch, run)
+
+    def fail_creation(*args):
+        raise ValueError("failed initialization")
+
+    monkeypatch.setattr(test_bp_module, "Ron", fail_creation)
+    monkeypatch.setattr(test_bp_module.shutil, "rmtree", lambda path: None)
+    response = app.test_client().post("/tests/api/create-run", json={}, headers=_headers())
+    assert response.status_code == 500
+    assert response.json == {"error": "Run cleanup failed"}
+    assert run.exists()
+
+
+@pytest.mark.parametrize("error_number", [13, 116])
+def test_cleanup_readback_error_cannot_prove_absence(monkeypatch, tmp_path, error_number):
+    app = _configure_create_run_test_app(monkeypatch, tmp_path / "created")
+    victim = tmp_path / "victim"
+    victim.mkdir()
+    original_lstat = Path.lstat
+
+    def unavailable(self, *args, **kwargs):
+        if self == victim:
+            raise OSError(error_number, "readback unavailable")
+        return original_lstat(self, *args, **kwargs)
+
+    monkeypatch.setattr(test_bp_module.shutil, "rmtree", lambda path: None)
+    monkeypatch.setattr(Path, "lstat", unavailable)
+    with app.app_context(), pytest.raises(test_bp_module.RunCleanupError):
+        test_bp_module._cleanup_run_directory(victim)

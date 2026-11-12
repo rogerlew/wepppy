@@ -253,7 +253,8 @@ class WepppyRqWorker(Worker):
         file_handler = None
         if wd and os.path.isdir(wd):
             try:
-                file_handler = logging.FileHandler(_join(wd, 'rq.log'))
+                from wepppy.observability.run_logging import RunFileHandler
+                file_handler = RunFileHandler(_join(wd, 'rq.log'))
                 self.log.addHandler(file_handler)
             except OSError:
                 file_handler = None
@@ -284,6 +285,7 @@ class WepppyRqWorker(Worker):
                 reset_correlation_id(correlation_token)
             if file_handler:
                 self.log.removeHandler(file_handler)
+                file_handler.close()
                 
     def handle_job_failure(
         self,

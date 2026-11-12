@@ -276,3 +276,11 @@ Roger approved bounded NFS cleanup repair and live browser acceptance on forest.
 The earlier no-restart/no-cleanup hold is superseded for this workflow. F6 is
 also authorized through M4; no production rollout or advisory waiver is implied.
 Investigation is active; acceptance remains pending actual artifact evidence.
+
+NFS contract ancestor: `11a805e09`. Both independent contract reviews approved
+before implementation. Focused route/RQ tests: 33 passed; logging/NoDb/F5:
+43 passed, 2 skipped. Actual NFS removal passed with three living controller
+processes and late records preserved listeners without recreating the path.
+500-record queue drain: old 0.02015s, new 0.51923s; full record readback matched.
+Correctness review found permissive lexists absence readback; changed to lstat
+with only FileNotFoundError proving absence, adding EACCES/ESTALE regressions.

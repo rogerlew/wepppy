@@ -6,12 +6,13 @@ import os
 import math
 import time
 import shutil
+import errno
 from pathlib import Path
 from typing import Dict, Any, Tuple
 
 from flask import Blueprint, jsonify, request, current_app
 from flask_security import current_user
-from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized, InternalServerError
 from wepppy.weppcloud.utils import auth_tokens
 
 from wepppy.weppcloud.routes.run_0.run_0_bp import create_run_dir
@@ -19,6 +20,10 @@ from wepppy.weppcloud.utils.helpers import url_for_run, get_wd
 from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
 from wepppy.weppcloud.utils.runid import generate_runid
 from wepppy.nodb.core.ron import Ron
+
+
+class RunCleanupError(InternalServerError):
+    """The requested run directory could not be fully removed."""
 
 
 def _require_enabled() -> None:
@@ -60,7 +65,16 @@ def _build_cfg(config: str, overrides: Dict[str, Any]) -> str:
 
 
 def _cleanup_run_directory(path: Path) -> None:
-    shutil.rmtree(path, ignore_errors=True)
+    try:
+        shutil.rmtree(path)
+        try:
+            path.lstat()
+        except FileNotFoundError:
+            return
+        raise OSError(errno.EBUSY, "Run directory remains after cleanup")
+    except OSError:
+        current_app.logger.exception("Test run cleanup failed")
+        raise RunCleanupError("Run cleanup failed") from None
 
 
 def _spawn_run(config: str, overrides: Dict[str, Any]) -> Dict[str, Any]:
@@ -170,3 +184,8 @@ def _unauthorized(exc):
 @test_bp.errorhandler(Forbidden)
 def _forbidden(exc):
     return jsonify({"error": "Forbidden"}), 403
+
+
+@test_bp.errorhandler(RunCleanupError)
+def _cleanup_failed(exc):
+    return jsonify({"error": "Run cleanup failed"}), 500
