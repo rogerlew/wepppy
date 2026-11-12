@@ -168,6 +168,11 @@ segmented substitute is not accepted.
 
 ## Decision Log
 
+- Decision (Roger, 2026-11-12): complete F6 through M4 as part of the F7
+  continuation. Preserve the ratified evidence policy and required final-image
+  gates. Production rollout (M5) and advisory-risk exceptions are not inferred
+  from this instruction.
+
 - Decision: reaffirm production Docker Compose after the operator's explicit
   reminder. The candidate-base argument belongs only to the isolated test image;
   it neither requires a registry nor changes installed wctl/deploy-production.

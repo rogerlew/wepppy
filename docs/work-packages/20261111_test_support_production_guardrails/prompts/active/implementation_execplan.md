@@ -104,6 +104,15 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 
 ## Decision Log
 
+- Decision (Roger, 2026-11-12): approve the bounded NFS lifecycle repair, live
+  browser acceptance on forest, and completion of F6 through M4. This supersedes
+  the earlier cleanup exclusion and forest-activation hold for this acceptance
+  only. Production rollout remains unauthorized. Investigate all confirmed
+  run-log handle consumers; preserve logging semantics and prove real NFS
+  path absence, explicit cleanup failure, and browser token non-retention.
+  Rationale: the observed delete-200/path-present failure blocks the requested
+  workflow; forest provides its real mounts and service identities.
+
 - Decision (2026-11-12, Codex): retain NFS cleanup as an M4 blocker, with no
   general deletion lifecycle redesign. Rationale: M2 explicitly excludes that
   expansion; cached-instance cleanup precedent does not cover all directly
@@ -582,3 +591,8 @@ Execution update 2026-11-12 UTC: M0-M3 implemented, M4 runtime blocker retained,
 independent source reviews completed; no deployment, restart or closure.
 
 Implementation revision: `c2507338fbdcd5e7156e708f84a43691942ef19f`; M4/M6/M7 remain open.
+
+2026-11-12 continuation: operator approved bounded NFS repair and forest browser
+acceptance; execute F6 through M4 under its existing policy, without production
+rollout or implied advisory-risk acceptance. Earlier no-forest/no-cleanup text
+is superseded only within this explicitly authorized continuation.

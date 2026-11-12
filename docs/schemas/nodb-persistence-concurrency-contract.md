@@ -34,7 +34,24 @@ are separate outcomes. Do not hold controller locks for background catalog
 scans, or mirror maintenance job ownership in NoDb files. Existing synchronous
 callers retain their contracts until individually migrated with reader barriers.
 
+## Run log descriptor lifetime (implementation pending)
+
+Run-file logging MUST hold a descriptor only during a record's serialized
+open/append/flush/close operation, including direct and cached NoDb controllers.
+Keep existing format, level, asynchronous delivery and non-file sinks. Preserve
+constructor file creation/path validation, then immediately release its stream. A file
+I/O failure MUST use sanitized diagnostics and MUST NOT terminate the listener
+or prevent delivery to other sinks; logging MUST NOT recreate a deleted run
+directory. Close the stream even when writing fails. RQ worker and migration
+run-file sinks share this lifecycle rule. This removes idle NFS handles; it does
+not provide cross-process exclusion between active logging and deletion.
+
+Rationale: logger-retained handlers outlive NoDb cache membership and requests.
+Closing only cached instances cannot release direct-constructor or remote-worker
+handles. See the [support cleanup outcome](weppcloud-test-support-contract.md#run-cleanup-outcome).
+
 ## Canonical Storage Model
+
 - Each NoDb controller persists to exactly one `.nodb` JSON file under the run working directory.
 - The NoDb file is the durable state source of truth.
 - Redis cache mirrors are performance accelerators and MUST be treated as non-authoritative mirrors.

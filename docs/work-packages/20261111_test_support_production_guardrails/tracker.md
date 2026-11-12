@@ -269,3 +269,10 @@ F6 tracker recheck still shows M1 in progress; its M4 gate remains unmet.
 Before any future reload, the existing development container needs an explicit
 development profile; the Compose source edit does not change its environment.
 No reload was performed. See the validation artifact for the runtime caveat.
+
+## Authorized continuation (2026-11-12 UTC)
+
+Roger approved bounded NFS cleanup repair and live browser acceptance on forest.
+The earlier no-restart/no-cleanup hold is superseded for this workflow. F6 is
+also authorized through M4; no production rollout or advisory waiver is implied.
+Investigation is active; acceptance remains pending actual artifact evidence.

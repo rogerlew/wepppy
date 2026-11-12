@@ -56,6 +56,21 @@ The three views are explicitly CSRF-exempt under the bounded exception in
 Cookies grant no support authority. Audit logs contain only route identity and
 outcome; never credentials, claims or private payloads.
 
+## Run cleanup outcome
+
+Implementation pending the NFS lifecycle repair. Delete success (200 with the
+existing runid payload) requires direct directory-absence readback after removal.
+Filesystem errors or a retained directory return 500 with
+`{"error":"Run cleanup failed"}` and sanitized server diagnostics. A missing
+run retains 404. Failed-creation cleanup also exposes incomplete removal rather
+than silently claiming it succeeded. Authentication still precedes filesystem
+work. This does not serialize deletion against active writers; a racing writer
+can cause an explicit failure. Run log sinks must not retain idle descriptors
+that prevent quiescent NFS cleanup. No smoke markers or registry are required.
+
+Rationale: a successful HTTP response alone cannot prove NFS deletion, and
+process-local instance cleanup cannot release another worker's logging handles.
+
 ## Agent workflow and token non-retention
 
 `wctl run-playwright` mints inside its configured WEPPcloud container using

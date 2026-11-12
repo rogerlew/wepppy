@@ -151,3 +151,10 @@ again. Continue M1 dispositions and native coverage before release acceptance. U
 and unrelated dirty files. Keep raw reports in the owner-selected private store.
 The final candidate cannot be handed off unless the exact full pytest and npm
 commands pass against the reviewed dependency image and lock.
+
+## Continuation (2026-11-12 UTC)
+
+Roger requested completion through M4 with the F7 continuation. Reconcile the
+existing detached crypto candidate and private evidence before further changes.
+All policy, advisory, exact-image and final validation gates remain required;
+production rollout and risk exceptions remain separate.
