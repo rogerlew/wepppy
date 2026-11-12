@@ -23,6 +23,12 @@ hard prerequisites for that claim.
 
 ## Task Board
 
+- [x] (2026-11-12 UTC) Clean native dependency candidate `37e7dd311bbd`
+  passes 110 focused tests and the actual PATH report with decoded plot and
+  installed-library hash readback. F6 native repair artifact records evidence.
+  Further Python/GDAL repairs, fresh scan and full gates remain open; resume
+  remains deferred and stale NFS handles require immediate manual recovery.
+
 F6 Mistune/PyCurl candidate pins and focused consumer checks are implemented;
 clean batch build and final gates remain open. Resume stays deferred and NFS
 retained handles require manual recovery without waits.

@@ -24,6 +24,12 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Clean native dependency candidate `37e7dd311bbd`
+  passes 110 focused tests and the actual PATH report with decoded plot and
+  installed-library hash readback. F6 native repair artifact records evidence.
+  Further Python/GDAL repairs, fresh scan and full gates remain open; resume
+  remains deferred and stale NFS handles require immediate manual recovery.
+
 F6 remediation continuation: Mistune/PyCurl pins and real consumer checks are
 implemented in detached candidate `0661618bf`; clean batch build is running.
 F6 M4 remains open. Deployment resume is deferred; NFS failures require manual
@@ -637,3 +643,6 @@ Retained logs: `/tmp/f7-catalog-latency-quiet.log` (mixed result during export),
 still rejects native coverage; CI/deployment integration and final broad gates
 remain open. Forest live acceptance remains passed, but this does not close F7
 M6/M7 or F6 M4. See F6 `artifacts/20261112_oauth_candidate_validation.md`.
+
+Revision note (2026-11-12): record combined native image consumer and generated
+artifact validation; retain open dependency remediation and full-gate status.

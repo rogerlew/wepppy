@@ -24,6 +24,12 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Clean native dependency candidate `37e7dd311bbd`
+  passes 110 focused tests and the actual PATH report with decoded plot and
+  installed-library hash readback. F6 native repair artifact records evidence.
+  Further Python/GDAL repairs, fresh scan and full gates remain open; resume
+  remains deferred and stale NFS handles require immediate manual recovery.
+
 - [x] (2026-11-12 UTC) Implement Mistune 3.4.0 and PyCurl 7.49.0 in the
   isolated candidate after before/after consumer checks (19 cases each).
   Mistune upstream checks pass 35 unittest and 65 pytest cases. Final common
@@ -878,3 +884,6 @@ Producer qualification and advisory review continue independently.
 
 2026-11-12: Merge current evidence tooling and manual NFS recovery direction into
 the isolated candidate; record implemented Mistune/PyCurl consumer qualification.
+
+Revision note (2026-11-12): record combined native image consumer and generated
+artifact validation; retain open dependency remediation and full-gate status.
