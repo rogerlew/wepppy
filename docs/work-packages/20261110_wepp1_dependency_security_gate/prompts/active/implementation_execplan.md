@@ -24,6 +24,14 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Freeze independently reviewed OAuth implementation at
+  detached revision `afe6e7264`; all 50 component tests pass. Clean build is
+  underway in `/home/workdir/wepppy-security-oauth-candidate-20261112`. Keep
+  the required new dependency isolated from forest's running older environment.
+- [ ] Complete actual CI producer/import lifecycle; the reviewed bounded design
+  is `artifacts/20261112_ci_producer_design.md`. A transport-only trial is not
+  acceptance. Deployment workflow selection remains pending separately.
+
 - [x] (2026-11-12 UTC) Complete frozen real parser collection and independent
   inventory readback. Selected parser packages have no findings; native coverage
   and other dispositions remain open. Correct an overly broad diagnostic failure

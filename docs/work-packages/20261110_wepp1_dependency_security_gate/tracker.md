@@ -23,6 +23,12 @@ readback. M4 is not complete.
 
 ## Task Board
 
+- [x] Independently review isolated OAuth revision `afe6e7264`; 50 component
+  tests pass, clean build underway. No forest dependency activation.
+- [ ] Implement and prove actual CI lifecycle from
+  `artifacts/20261112_ci_producer_design.md`; keep deployment workflow selection
+  separate and pending.
+
 - [x] Complete real parser candidate collection and inventory reconciliation;
   retain blocked policy status and qualified-diagnostic correction.
 
