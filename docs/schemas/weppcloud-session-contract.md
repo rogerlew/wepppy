@@ -9,6 +9,36 @@
   - code is corrected to match this contract, or
   - this contract is updated in the same change set.
 
+## OAuth Dependency Compatibility
+
+Dependency upgrades MUST preserve the configured provider login flow, state and
+PKCE handling, verified-profile/account-link rules, safe next-URL handling and
+remembered-login behavior. OAuth-only providers MUST remain supported; this
+section does not add an ID-token requirement to those providers.
+
+When a configured OpenID Connect provider returns an ID token, verification MUST
+use the provider client's configured keys, issuer/audience and expected nonce.
+Signature, claim and token-format verification failures are expected login
+failures. They MUST return the established callback failure redirect to
+`SECURITY_LOGIN_ERROR_VIEW` (default `security_ui.login`) with the generic
+"Login failed while contacting the identity provider." message. They MUST NOT
+continue to profile retrieval, link/create an account or authenticate a user.
+Existing authenticated state is not revoked merely because this attempt fails.
+
+The callback MUST translate the verifier's specific JOSE exception family at the
+token-exchange boundary. It MUST NOT catch arbitrary application exceptions or
+weaken verification to preserve an older dependency's behavior. JOSE diagnostics
+MUST be value-free: no raw exception text, compact token, authorization code,
+state, nonce or provider response body in logs or user-visible messages.
+Provider cancellation retains the distinct existing cancellation message.
+Missing local PKCE/session state retains the existing "OAuth session expired.
+Please try again." warning and failure redirect.
+
+Rationale: Authlib's move to a separate JOSE implementation changes exception
+types. A rejected external token must remain an ordinary login failure rather
+than escape as a server error. This preserves valid login and existing policy;
+the verifier upgrade does not replace the owned WEPP_AUTH token implementation.
+
 ## Scope
 - Covers browser-facing WEPPcloud session lifecycle and cookies.
 - Covers Flask-side session refresh APIs and client heartbeat behavior.
