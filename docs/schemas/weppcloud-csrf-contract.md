@@ -253,3 +253,12 @@ Same-Origin Guard matrix, including its explicit Fetch Metadata rules. The
 WebSocket handshake separately requires an exact allowed Origin and an explicit
 subprotocol credential. No existing Flask CSRF exemption changes. Public
 sessionless and lifecycle cases follow the ratified stream contract.
+
+## Test-support bearer exemption
+
+Implementation conformance pending F7: only `test_bp.ping`,
+`test_bp.create_run_endpoint`, and `test_bp.delete_run_endpoint` are exempt from
+Flask CSRF under the [test-support contract](weppcloud-test-support-contract.md).
+They require the scoped non-ambient Authorization bearer before payload parsing
+or side effects; session cookies alone authorize nothing. Production must not
+register these routes. This exception adds no exemption to ordinary run APIs.

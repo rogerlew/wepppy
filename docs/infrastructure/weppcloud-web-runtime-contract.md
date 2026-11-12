@@ -207,3 +207,14 @@ changed valid access. Any recurrence reopens the error-observability assessment.
 No production failure injection or unattended monitoring is required; retain the
 normal logs and use a disposable local failure fixture for regression checks.
 See [failure observability](../schemas/browse-filesystem-contract.md#failure-observability).
+
+## Test-support startup invariants
+
+Implementation conformance pending F7: apply the
+[test-support contract](../schemas/weppcloud-test-support-contract.md) before
+secret-dependent startup. Missing/empty deployment profile means production;
+unknown profiles and production with enabled test support raise the specified
+`ValueError`. Production must have no test-support URL rules. Production Compose
+pins literal production/disabled values regardless of env-file input. Explicit
+development/test runtimes may enable the bearer-only support capability using
+existing WEPP_AUTH file-backed secrets; wctl mints transient credentials.
