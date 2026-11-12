@@ -45,7 +45,8 @@ focused sink/canary checks and the exact full Python and frontend gates.
 - [x] M2: integrated API/error factories, process hooks and logging sinks.
 - [x] M3: integrated run-file, Redis persistence/publications and audited artifact peers.
 - [x] M4: focused acceptance and independent correctness/security/QA PASS.
-- [ ] M5: pass full pytest, npm lint and full npm tests; close SEC-05.
+- [x] (2026-11-12 00:28 UTC) M5: full pytest (13687 passed, 437 skipped),
+      npm lint and npm tests (126 suites/1076 tests) PASS; SEC-05 locally verified.
 
 ## Surprises & Discoveries
 
@@ -145,13 +146,27 @@ focused sink/canary checks and the exact full Python and frontend gates.
 
 ## Outcomes & Retrospective
 
-Redis prerequisite verified. M0 canonical contract and expanded inventories are
-drafted; independent reviewers found transitive Flask secret consumption, NoDb
-queue/status formatter bypasses and additional exception-text persistence.
-Implementation is present; 40 focused canary tests pass, including actual RQ
-Redis records, pubsub, multiprocessing/spawn, and four model status-file writers.
-Synthetic read-only container mounts passed. Expanded adapters and source
-profiles await final independent M4 review; full gates remain pending.
+Redis prerequisite and M0-M4 are complete with independent correctness,
+security and QA acceptance. Actual persisted Redis/run-file/publication outputs,
+process hooks, readable auth diagnostics, read-only container mounts and bounded
+performance were verified. Regression exploration exposed test credential
+isolation, reviewed scientific-provenance hashes and repeated-marker handling;
+those repairs have focused evidence and independent reviews. The operator's
+message correction prevented opaque auth prose from becoming the accepted UX.
+
+Final implementation candidate `dfab59bb1f34be6810accf79ee1b905e039743fd`:
+exact full Python PASS (13687 passed, 437 skipped; 3829.62 seconds), npm lint
+PASS, npm tests PASS (126 suites/1076 tests), synthetic container PASS. M0-M5
+complete; SEC-05 locally verified. No production deployment occurred.
+Detailed command receipts and restart provenance:
+`artifacts/20261111_full_validation.md`.
+
+The main validation friction was test infrastructure: collection-time Redis
+aliases bypassed session stubs and credential scrubbing affected deliberate
+real-Redis tests. Shared scoped fixtures now make those boundaries explicit.
+Scientific publication hashes retain diagnostic-only review provenance and
+continue to mark historical scientific outputs stale. No model parameters,
+output schemas, authorization or secret lifecycles changed.
 
 ## Context and Orientation
 
@@ -427,3 +442,13 @@ repeated rendering from adding brackets to existing redaction placeholders.
 The shared opt-in real-Redis credential fixture passes 113 integration cases;
 Roads publication hash changes retain reviewed diagnostic-only provenance.
 See the full-validation receipt for diagnostic sweeps and pending exact gates.
+
+## Final closeout — 2026-11-12 UTC
+
+All milestones complete on `dfab59bb1f34be6810accf79ee1b905e039743fd`.
+The earlier M5 running/failure notes above are historical execution evidence;
+final exact full gates pass as recorded in Outcomes & Retrospective and the
+full-validation receipt. The dedicated synthetic Redis container is removed
+at closeout; shared services were not restarted by this package. The audit board
+records SEC-05 VERIFIED for local implementation acceptance, with live rollout
+remaining a separate operator action.

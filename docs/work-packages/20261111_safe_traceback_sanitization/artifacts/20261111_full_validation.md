@@ -1,5 +1,36 @@
 # M5 full regression receipt
 
+## Final acceptance — 2026-11-12 00:28 UTC
+
+Final reviewed implementation: `dfab59bb1f34be6810accf79ee1b905e039743fd`.
+M0 checkpoint is an ancestor. No implementation changes occurred during the
+final gates. All required commands passed:
+
+| Exact command | Final result |
+| --- | --- |
+| `wctl run-pytest tests --maxfail=1` | 13687 passed, 437 skipped, 6029 warnings; 3829.62 seconds |
+| `wctl run-npm lint` | PASS, exit 0 |
+| `wctl run-npm test` | PASS, exit 0; 126 suites, 1076 tests |
+
+The Python process continued across an agent-server restart, emitted the final
+passing summary, and exited. Its original tool session handle was lost; no
+separate shell exit-code receipt is claimed. Complete output is retained in
+`20261112_full_pytest_output.txt`; frontend and container receipts have the same
+date prefix. Receipt files normalize trailing whitespace only.
+
+Synthetic container acceptance repeated on the final candidate: PASS with the
+recorded image, UID 1000/GID 993, network disabled, read-only 0444 secret mounts
+and same-process replacement. Dedicated disposable Redis canary acceptance,
+focused artifact/readability tests and independent correctness/security/QA
+reviews remain PASS. Default full-run skips do not replace those focused gates.
+
+Docs lint, test-stub completeness and broad-exception enforcement pass.
+SEC-05 is locally verified; no production deployment or live exposure closure
+is claimed. Unrelated working-tree changes remain excluded.
+
+## Earlier attempts and repairs
+
+
 Reviewed implementation: `3fea2f06dd7bdacca6813a2b55679e8e99c7514f`.
 M0 ancestor: `d6796407f29b4dd7b05031ed89efa416b13a5665`.
 M4 independent correctness, security and QA: PASS.

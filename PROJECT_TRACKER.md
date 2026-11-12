@@ -1,6 +1,6 @@
 Completed: [Redis credential transport hardening](docs/work-packages/20261111_redis_credential_transport/package.md) - Accepted implementation db7ef7cb7 removes generated credential URLs/argv while preserving Redis auth/topology. Scoped Python/Go and isolated Compose acceptance plus all four independent reviews passed; F5 is unblocked. Shared-dev Redis recreation and job-continuity limits are documented; no production rollout.
 
-Scaffolded; queued behind Redis transport: [Safe traceback and exceptional-path secret sanitization](docs/work-packages/20261111_safe_traceback_sanitization/package.md) - F5/SEC-05 remediation preserving traceback diagnostics, absolute paths and one sanitized representation while preventing process-owned configured secret values from reaching API, log, run-file, RQ Redis, status or container-log sinks. Openwepp mounted-secret handling is mapped without adding SOPS/Kubernetes API authority. Full pytest, npm lint and full npm tests are mandatory; no implementation or runtime change yet.
+Completed locally: [Safe traceback and exceptional-path secret sanitization](docs/work-packages/20261111_safe_traceback_sanitization/package.md) - F5/SEC-05 verified at dfab59bb1. One sanitized representation preserves frames and paths, filters owned secrets across API/log/artifact/RQ/status sinks, and retains readable auth explanations. Full pytest: 13687 passed/437 skipped; npm lint and 126 suites/1076 tests pass. Independent reviews and synthetic mounted-secret acceptance pass; no production deployment.
 
 Completed on forest: [Status and preflight WebSocket run authorization](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md) - Ratified run-bound credentials, full regression, five-service cutover and 27 real-browser assertions verified; NFS cleanup recovery retained. Production rollout remains pending separate authorization.
 
@@ -892,14 +892,12 @@ the existing secret/client lifecycle. Process adapters select metadata for only
 their locally consumed sources; F5 does not decrypt SOPS, query Kubernetes
 Secrets or infer ownership from every configured `*_FILE` path.
 
-**Status**: Package, active ExecPlan, proposed contract, sink/failure inventory
-and independent review gates scaffolded. Openwepp projected-secret paths,
-compound key rings, WEPPcloudR/control-plane tokens and container stdout/stderr
-are now included in the contract and production-equivalent synthetic-mount gate.
-Implementation is queued behind the Redis credential transport checkpoint.
-Final acceptance requires full pytest, npm lint and full npm tests in addition
-to focused sanitizer and sink tests. No code, runtime or production change
-occurred.
+**Status**: Complete 2026-11-12 UTC; reviewed implementation `dfab59bb1`.
+Exact full pytest passed (13687 passed, 437 skipped); npm lint and all 126
+frontend suites/1076 tests passed. Independent correctness/security/QA reviews,
+actual artifact/Redis canaries and read-only mounted-secret container acceptance
+pass. SEC-05 is locally verified. No production deployment occurred. Exact
+receipts and repair history are retained in the package's full-validation artifact.
 
 
 

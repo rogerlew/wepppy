@@ -30,3 +30,9 @@ independent pure probes confirm synthetic bearer values remain absent.
 Implemented auth wording: PASS. Four production files change prose only; token
 parsing, reauth, statuses and filtering remain unchanged. No exemptions were
 added. All 378 focused tests pass, including appended credential canaries.
+
+Final revision binding (2026-11-12): source/focused approval applies to
+`dfab59bb1f34be6810accf79ee1b905e039743fd`; no implementation changes followed.
+M5 exact full Python and frontend gates now PASS; see
+`20261111_full_validation.md` and retained final outputs. Earlier pending-gate
+statements above describe their review-time state. No deployment is claimed.

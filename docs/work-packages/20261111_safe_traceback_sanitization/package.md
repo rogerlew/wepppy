@@ -1,6 +1,6 @@
 # Safe traceback and exceptional-path secret sanitization
 
-**Status**: Implemented; focused acceptance and final reviews active (2026-11-11 UTC). Full regression gates pending.
+**Status**: Complete — locally verified 2026-11-12 UTC at `dfab59bb1`. Full Python/frontend gates and independent reviews pass. No production deployment.
 
 **Timezone**: UTC
 
@@ -246,8 +246,10 @@ Do not substitute segmented or patch-scoped results for these gates.
 
 ## Handoff
 
-Do not implement until the Redis prerequisite and F5 contract checkpoint pass.
-The user-approved design preserves paths and one traceback representation,
+Redis prerequisite and F5 contract checkpoint passed before implementation.
+M0-M5 are complete. See `artifacts/20261111_full_validation.md` for exact
+full-gate results, candidate binding and the no-deployment boundary.
+The implemented design preserves paths and one traceback representation,
 loads configured secrets only during exception rendering, and leaves the current
 secret lifecycle unchanged. Kubernetes source selection is process-owned and
 uses mounted files only; live openwepp rollout remains a separate authorization.

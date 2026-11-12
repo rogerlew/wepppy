@@ -32,3 +32,9 @@ Implemented auth wording: PASS. Independent normalized-AST comparison confirms
 only string literal changes in all four production files. Statuses, claim
 checks, audit calls, exception chaining and expiration substring decisions are
 unchanged. Focused receipt: 378 passed, including reauth/signature distinctions.
+
+Final revision binding (2026-11-12): source/focused approval applies to
+`dfab59bb1f34be6810accf79ee1b905e039743fd`; no implementation changes followed.
+M5 exact full Python and frontend gates now PASS; see
+`20261111_full_validation.md` and retained final outputs. Earlier pending-gate
+statements above describe their review-time state. No deployment is claimed.

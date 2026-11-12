@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-11-11 18:27 UTC
-**Current phase**: M5 full regression gates
-**Last updated**: 2026-11-11 22:26 UTC
-**Next milestone**: M5 exact full regression gates
+**Current phase**: Complete — locally verified
+**Last updated**: 2026-11-12 00:28 UTC
+**Next milestone**: None within this package; live rollout is separate
 **Finding**: F5 / SEC-05
 **Security impact**: high
 **Starting revision**: `f0df22e5f8d2ae6255c6aa0e718394ad69a41b51`
@@ -31,7 +31,7 @@ Final independent reviews are recorded; no production deployment occurred.
 - [x] M2: integrate API/error-factory and logging formatter sinks.
 - [x] M3: integrate run logs, RQ persistence and publication sinks.
 - [x] M4: focused canary/performance/UI compatibility validation and reviews.
-- [ ] M5: run full pytest, npm lint and full npm tests; close SEC-05 from evidence.
+- [x] M5: exact full Python/frontend gates PASS; SEC-05 locally verified.
 
 ## Decisions
 
@@ -118,8 +118,8 @@ peers; this list is not an exhaustive closure claim.
 - [x] QA review passed (M4 source/focused).
 - [x] Dedicated security review passed (M4 source/focused).
 - [x] Focused canary and performance gates pass.
-- [ ] Full pytest, npm lint and full npm tests pass.
-- [ ] Audit board SEC-05 updated from evidence.
+- [x] Full pytest, npm lint and full npm tests pass.
+- [x] Audit board SEC-05 updated from local acceptance evidence.
 
 ## Timeline
 
@@ -128,21 +128,21 @@ peers; this list is not an exhaustive closure claim.
   SOPS decryption, implementation or deployment.
 - Redis scoped acceptance: complete.
 - M0-M3 complete; M4 final review receipts retained.
-- Pending: M5 full regression gates.
+- 2026-11-12 00:28 UTC: M5 complete; exact full gates pass.
 
-## Current execution state
+## Final acceptance
 
-Redis prerequisite, M0 checkpoint, M1-M3 implementation and M4 independent
-correctness/security/QA reviews are complete. Reviewed implementation candidate:
-`3fea2f06dd7bdacca6813a2b55679e8e99c7514f`. Exact npm lint/test and container
-acceptance passed; first exact Python run stopped after 677 passes/29 skips.
+Implementation: `dfab59bb1f34be6810accf79ee1b905e039743fd`.
+M0 contract checkpoint: `d6796407f29b4dd7b05031ed89efa416b13a5665` (ancestor).
+Independent correctness, security and QA reviews: PASS.
 
-M5 follow-up repairs cover captured Redis constructor test stubs, explicit
-real-Redis credential-source fixtures, repeated-redaction idempotence and
-reviewed Roads diagnostic-source freshness hashes. Focused renderer checks
-(141 tests), real-Redis checks (113 tests), and independent follow-up reviews
-pass. Diagnostic suite exploration is not a substitute for the pending exact
-full Python command. See `artifacts/20261111_full_validation.md`.
+- Exact full pytest: 13687 passed, 437 skipped, 6029 warnings, 3829.62 seconds.
+- Exact npm lint: PASS; exact npm test: 126 suites/1076 tests PASS.
+- Final-candidate read-only container acceptance: PASS.
+- Dedicated real-Redis canaries, artifact readback and useful-auth prose: PASS.
+- Docs lint, stub completeness and broad-exception enforcement: PASS.
 
-SEC-05 remains open. No production deployment occurred. Preserve unrelated
-working-tree changes while completing the final reviewed candidate and gates.
+Receipts and earlier failure/repair history:
+`artifacts/20261111_full_validation.md`. SEC-05 is locally VERIFIED, with no
+production deployment claimed. Disposable Redis cleanup is part of closeout;
+unrelated working-tree edits are preserved.

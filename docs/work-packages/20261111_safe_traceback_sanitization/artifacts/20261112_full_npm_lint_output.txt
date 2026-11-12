@@ -1,0 +1,3 @@
+
+> weppcloud-static@0.1.0 lint
+> eslint --config .eslintrc.cjs --resolve-plugins-relative-to . "../controllers_js/**/*.js"
