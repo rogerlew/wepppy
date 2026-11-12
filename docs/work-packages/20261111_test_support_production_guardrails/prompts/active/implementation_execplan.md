@@ -48,8 +48,9 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 - [x] (2026-11-12 UTC) Broad local Python sanity: 13,721 passed, 437 skipped,
       exit 0 in 1:04:40. Shared-worktree receipt predates final refinements;
       does not satisfy the frozen-candidate M6 gate.
-- [ ] M5: independent correctness/QA/security source reviews approved after
-      fixes; release hold remains for M4 cleanup and workflow evidence.
+- [x] (2026-11-12 UTC) M5: independent correctness/QA/security reviews
+      approved implementation and forest acceptance after evidence corrections;
+      no open medium/high findings. Combined release gates remain separate.
 - [ ] M6: after F6 M4, reconcile exact F1-F7 evidence and pass one combined full
       Python/frontend regression gate on the exact candidate.
 - [ ] M7: finalize the non-executed deployment-validation plan, update the audit
@@ -182,13 +183,14 @@ working tree and began before final refinements, so a fresh combined gate after
 F6 M4 and candidate freeze remains required. F6's tracker still reports M1 in
 progress with evaluator/deploy-hook and CI prerequisites incomplete.
 
-M4 remains open: actual create/load passed, denied delete preserved the run, but
-valid delete returned 200 with a remaining NFS directory. Scoped recovery after
-process exit removed identified fixtures and verified absence. The plan excludes
-general deletion-worker redesign; no passing runtime cleanup claim is made.
-Automatic wrapper/browser artifact scanning remains open; the forest service was
-not restarted. F6 M4 is still absent, blocking M6/M7 and package closure.
-See `artifacts/20261112_validation.md` for commands, outcomes and limitations.
+M4/M5 now pass after the authorized continuation: bounded run-log lifecycle
+repair, real multiprocess NFS removal, and automatic forest browser acceptance.
+Denied delete preserves the fixture; successful removal has direct lstat absence
+proof. Per-service log collection succeeded and exact-token scans were negative.
+Only web and rq-engine were recreated with the same image/identity to apply the
+development profile. See `artifacts/20261112_forest_acceptance.md`; earlier failure
+evidence is preserved in `artifacts/20261112_validation.md`. Full F7 regression
+failed at the run-catalog notification-latency assertion; quiet reproduction is pending. F6 M4 is still absent, blocking M6/M7 and package closure.
 
 ## Context and Orientation
 
@@ -600,5 +602,13 @@ is superseded only within this explicitly authorized continuation.
 
 2026-11-12 forest acceptance: bounded NFS repair and live automatic browser
 workflow pass, including removal and exact-token non-retention. Full F7 regression
-is running. Historical blocker text above is superseded by the acceptance receipt;
+failed at the run-catalog notification-latency assertion; quiet reproduction is pending. Historical blocker text above is superseded by the acceptance receipt;
 F6 M4 and combined M6 remain open.
+
+2026-11-12 full regression update: the exact command stopped after 13,528 passes
+and 437 skips at the run-catalog readonly-marker notification latency assertion:
+catalog p95 244.22ms versus baseline 0.65ms exceeds the 50ms delta contract.
+This is a failed receipt, not M6 acceptance. Docker image export overlapped;
+observed host I/O pressure motivates a quiet focused reproduction after export,
+without relaxing the threshold. No logging path is called by the marker setter.
+Receipt: `out/f7-nfs-20261112/full-pytest-failure-receipt.json`.

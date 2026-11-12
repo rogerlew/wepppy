@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-11-12 01:01 UTC
-**Current phase**: M4 forest acceptance passed; full regression and F6 M4 pending
+**Current phase**: M4/M5 passed; full regression failed; F6 M4 remains open
 **Last updated**: 2026-11-12 UTC
-**Next milestone**: resolve M4 cleanup evidence; await F6 M4 for combined readiness
+**Next milestone**: resolve regression failure and F6 M4 before combined readiness
 **Finding**: F7 / SEC-07 (Low conditional; High impact when enabled)
 **Change security impact**: high
 **Dedicated security review**: yes
@@ -29,9 +29,9 @@ hard prerequisites for that claim.
       add focused no-side-effect negative tests.
 - [x] M3: make `wctl run-playwright` mint/capture/inject the short-lived token;
       centralize support-route headers in Playwright smoke helpers.
-- [ ] M4: validate rendered Compose, actual route inventories, focused Python,
+- [x] M4: validate rendered Compose, actual route inventories, focused Python,
       wctl, npm/Playwright, and unmocked create/load/delete behavior.
-- [ ] M5: close correctness, QA, and security review findings.
+- [x] M5: close correctness, QA, and security review findings.
 - [ ] M6: wait for and verify F6 M4, reconcile F1-F7 evidence and exact candidate
       ancestry, then run one combined full Python/frontend regression gate.
 - [ ] M7: finalize and independently review the deployment-validation plan;
@@ -41,15 +41,13 @@ hard prerequisites for that claim.
 
 ### In Progress
 
-- [ ] M4: NFS cleanup fails direct absence; automatic browser/retention evidence
-      remains open. Source correctness/QA/security reviews passed.
+- [ ] Investigate the failed full regression latency assertion; retain the
+      required full-gate obligation after F6 candidate freeze.
 
 ### Blocked
 
-- [ ] Actual NFS delete returns 200 while path remains. General deletion-worker
-      redesign is outside M2; retain this acceptance failure pending scoped repair.
-- [ ] No running backend with the new profile has been activated; automatic
-      wctl/browser lifecycle and artifact scans remain pending.
+- [x] Historical NFS deletion and unactivated-profile holds are resolved by
+      the authorized repair and live forest acceptance receipt.
 
 - [ ] Package closeout is blocked until F6 reaches its M4 exact-image,
       full-regression, and independent-review acceptance gate.
@@ -288,3 +286,18 @@ with only FileNotFoundError proving absence, adding EACCES/ESTALE regressions.
 Forest M4 acceptance now passes; see [receipt](artifacts/20261112_forest_acceptance.md).
 The historical NFS/browser hold is resolved for the exercised workflow. F6 and
 combined candidate gates still block package closure.
+
+Live forest M5 also passes: actual Chromium runs0 page load, missing/invalid
+bearer denials, valid deletion with lstat absence, and exact minted-token scans
+across 147 output/log/trace/report items. All log collection commands returned
+zero. Independent QA closed the log-command and three-part-runid evidence gaps.
+The current full regression failed at a latency assertion; this dev-runtime receipt cannot
+substitute for F6's exact final-image M4 or F7's combined M6.
+
+2026-11-12 full regression update: the exact command stopped after 13,528 passes
+and 437 skips at the run-catalog readonly-marker notification latency assertion:
+catalog p95 244.22ms versus baseline 0.65ms exceeds the 50ms delta contract.
+This is a failed receipt, not M6 acceptance. Docker image export overlapped;
+observed host I/O pressure motivates a quiet focused reproduction after export,
+without relaxing the threshold. No logging path is called by the marker setter.
+Receipt: `out/f7-nfs-20261112/full-pytest-failure-receipt.json`.

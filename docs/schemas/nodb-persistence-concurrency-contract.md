@@ -34,7 +34,7 @@ are separate outcomes. Do not hold controller locks for background catalog
 scans, or mirror maintenance job ownership in NoDb files. Existing synchronous
 callers retain their contracts until individually migrated with reader barriers.
 
-## Run log descriptor lifetime (implementation pending)
+## Run log descriptor lifetime
 
 Run-file logging MUST hold a descriptor only during a record's serialized
 open/append/flush/close operation, including direct and cached NoDb controllers.

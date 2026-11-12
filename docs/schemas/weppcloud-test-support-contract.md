@@ -1,6 +1,6 @@
 # WEPPcloud test-support contract
 
-Implementation conformance pending F7. This is the durable authority for
+This is the durable authority for
 `/tests/api/*`; the execution record is
 `docs/work-packages/20261111_test_support_production_guardrails/`.
 
@@ -58,7 +58,7 @@ outcome; never credentials, claims or private payloads.
 
 ## Run cleanup outcome
 
-Implementation pending the NFS lifecycle repair. Delete success (200 with the
+Delete success (200 with the
 existing runid payload) requires direct directory-absence readback after removal.
 Filesystem errors or a retained directory return 500 with
 `{"error":"Run cleanup failed"}` and sanitized server diagnostics. A missing

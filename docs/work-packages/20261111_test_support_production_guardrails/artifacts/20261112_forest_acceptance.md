@@ -46,26 +46,30 @@ Invoked the actual wctl Typer command with its normal Compose environment:
 An observation wrapper called the real mint function, retaining its return only
 in memory for exact-token scans. No token replacement, signing bypass, mocked
 backend, or browser request interception was used. The latest run executed one
-test, passed in 8.6s, loaded all core controls without console errors, and removed
-`devilish-rifampin`; direct lstat raised FileNotFoundError. The earlier browser
-run also passed and removed `immutable-quince`.
+test, passed in 13.0s, loaded all core controls without console errors, and removed
+`abortive-turn-on`; trace-bound lstat raised FileNotFoundError. Earlier runs
+also passed and removed `devilish-rifampin` and `immutable-quince`.
 
 Live missing/bad bearer create requests returned 401. Missing/bad bearer delete
 requests returned 401 and preserved the actual fixture. Authorized delete
-returned 200 and lstat proved absence for `sternal-submissiveness`. Local route
+returned 200 and lstat proved absence for `capricious-kabob`. Local route
 regressions additionally prove denied create has no filesystem side effects.
 
 Exact token absent from generated run files, captured command output, web/
 rq-engine/Caddy logs, HTML report (including embedded ZIP), and trace ZIP contents:
-150 scanned artifact/log items, zero matches. Private observation scripts and
+147 scanned artifact/log items, zero matches. Private observation scripts and
 sanitized receipts are under `out/f7-nfs-20261112/`; no token was retained.
 
 ## Regression and remaining gates
 
 33 route/RQ focused tests passed. 43 NoDb/logging/F5 tests passed, two skipped
 (the opt-in isolated Redis boundary). Final readback/helper selection passed 25.
-Full `wctl run-pytest tests --maxfail=1` is running against the activated dev
-runtime. This is F7 regression, not F6 final-candidate M4 or F7 combined M6.
+Full `wctl run-pytest tests --maxfail=1` failed after 13,528 passes and 437 skips
+at the run-catalog readonly notification-latency assertion (244.22ms catalog p95
+versus 0.65ms baseline; allowed delta 50ms), in 4,280.28s. Docker image export
+was concurrent; a quiet focused reproduction remains required. The threshold
+is unchanged. This failed dev-runtime receipt is not F6 final-candidate M4 or
+F7 combined M6.
 
 F7 runtime cleanup/browser blockers are resolved for the exercised workflow.
 F6 exact-image gates, final combined revision/gates, and final deployment plan
@@ -75,3 +79,20 @@ Broad-exception enforcement passes after refreshing seven exact source-line
 references for unchanged AST-identical existing handlers in the allowlist. No
 new broad production catch was introduced. Root cause of the initial checker
 failure was line drift from imports/handler cleanup, not added broad handling.
+
+## QA evidence correction
+
+QA found that the observation script initially ignored the log collection exit
+status. Repeated observation now requires exit 0 for each service and scans both
+streams. Web: 2,646 stdout bytes/93 stderr; rq-engine: 394/93; Caddy: 0/89.
+Caddy emitted no runtime stdout in this bounded window; no file access-log sink
+is configured in the development Caddyfile. 147 items scanned, zero token matches.
+The browser test passed in 13.0s and removed `abortive-turn-on`.
+
+The first run-ID extractor did not recognize three-part slugs. The original
+receipt remains preserved, with supplemental trace-bound lstat readback in
+`out/f7-nfs-20261112/browser-path-readback.json`; trace SHA-256 is
+`7d2197cf3b4f38024abfd3db9546b98f3ea827fc8419b0817ff5424566f7950d`.
+The observer now accepts multi-part slugs and rejects an empty run-ID set.
+QA independently rechecked the trace hash/path absence and closed the Medium
+log-evidence finding. M5 has no open Medium/High review findings.
