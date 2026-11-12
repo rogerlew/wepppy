@@ -1,0 +1,428 @@
+{
+  "syft": {
+    "archive": {
+      "include-indexed-archives": true,
+      "include-unindexed-archives": false,
+      "max-depth": 0,
+      "max-disk-bytes": 107374182400,
+      "max-memory-bytes": 2147483648
+    },
+    "catalogers": {
+      "requested": {
+        "default": [
+          "image",
+          "file"
+        ]
+      },
+      "used": [
+        "alpm-db-cataloger",
+        "apk-db-cataloger",
+        "apple-app-bundle-cataloger",
+        "binary-classifier-cataloger",
+        "bitnami-cataloger",
+        "cargo-auditable-binary-cataloger",
+        "conan-info-cataloger",
+        "dotnet-deps-binary-cataloger",
+        "dotnet-packages-lock-cataloger",
+        "dpkg-db-cataloger",
+        "elf-binary-package-cataloger",
+        "file-content-cataloger",
+        "file-digest-cataloger",
+        "file-executable-cataloger",
+        "file-metadata-cataloger",
+        "gguf-cataloger",
+        "go-module-binary-cataloger",
+        "graalvm-native-image-cataloger",
+        "homebrew-cataloger",
+        "java-archive-cataloger",
+        "java-jvm-cataloger",
+        "javascript-package-cataloger",
+        "linux-kernel-cataloger",
+        "lua-rock-cataloger",
+        "nix-cataloger",
+        "pe-binary-package-cataloger",
+        "perl-cpan-installed-cataloger",
+        "php-composer-installed-cataloger",
+        "php-interpreter-cataloger",
+        "php-pear-serialized-cataloger",
+        "portage-cataloger",
+        "python-installed-package-cataloger",
+        "r-package-cataloger",
+        "rpm-db-cataloger",
+        "ruby-installed-gemspec-cataloger",
+        "safetensors-cataloger",
+        "snap-cataloger",
+        "wordpress-plugins-cataloger"
+      ]
+    },
+    "data-generation": {
+      "generate-cpes": true
+    },
+    "files": {
+      "content": {
+        "globs": null,
+        "skip-files-above-size": 0
+      },
+      "hashers": [
+        "sha-1",
+        "sha-256"
+      ],
+      "selection": "owned-by-package"
+    },
+    "licenses": {
+      "coverage": 75,
+      "include-content": "none"
+    },
+    "packages": {
+      "binary": [
+        "python-binary",
+        "python-binary-lib",
+        "pypy-binary-lib",
+        "go-binary",
+        "julia-binary",
+        "julia-binary",
+        "helm",
+        "redis-binary",
+        "valkey-binary",
+        "nodejs-binary",
+        "busybox-binary",
+        "util-linux-binary",
+        "haproxy-binary",
+        "perl-binary",
+        "php-composer-binary",
+        "httpd-binary",
+        "memcached-binary",
+        "traefik-binary",
+        "arangodb-binary",
+        "postgresql-binary",
+        "mysql-binary",
+        "mysql-binary",
+        "mysql-binary",
+        "mysqld-mysql-cluster-legacy-binary",
+        "mysqld-binary",
+        "ndbd-binary",
+        "ndbmtd-binary",
+        "ndb_mgmd-binary",
+        "xtrabackup-binary",
+        "mariadb-binary",
+        "rust-standard-library-linux",
+        "rust-standard-library-macos",
+        "ruby-binary",
+        "erlang-binary",
+        "erlang-alpine-binary",
+        "erlang-library",
+        "swipl-binary",
+        "dart-binary",
+        "deno-binary",
+        "bun-binary",
+        "haskell-ghc-binary",
+        "haskell-cabal-binary",
+        "haskell-stack-binary",
+        "consul-binary",
+        "hashicorp-vault-binary",
+        "nginx-binary",
+        "bash-binary",
+        "openssl-binary",
+        "openldap-search-binary",
+        "qt-qtbase-lib",
+        "gcc-binary",
+        "fluent-bit-binary",
+        "wordpress-cli-binary",
+        "curl-binary",
+        "lighttpd-binary",
+        "proftpd-binary",
+        "zstd-binary",
+        "xz-binary",
+        "gzip-binary",
+        "sqlcipher-binary",
+        "jq-binary",
+        "chrome-binary",
+        "firefox-binary",
+        "ffmpeg-binary",
+        "ffmpeg-library",
+        "ffmpeg-library",
+        "elixir-binary",
+        "elixir-library",
+        "istio-binary",
+        "istio-binary",
+        "grafana-binary",
+        "grafana-binary",
+        "envoy-binary",
+        "mongodb-binary",
+        "ingress-nginx-binary",
+        "filebeat-binary",
+        "metricbeat-binary",
+        "heartbeat-binary",
+        "packetbeat-binary",
+        "auditbeat-binary",
+        "elastic-agent-binary",
+        "krb5-library",
+        "heimdal-krb5-library",
+        "java-binary",
+        "java-jdb-binary"
+      ],
+      "cpp": {
+        "vcpkg-allow-git-clone": false
+      },
+      "dotnet": {
+        "dep-packages-must-claim-dll": true,
+        "dep-packages-must-have-dll": false,
+        "exclude-project-references": true,
+        "propagate-dll-claims-to-parents": true,
+        "relax-dll-claims-when-bundling-detected": true
+      },
+      "golang": {
+        "capture-symbols": "none",
+        "local-mod-cache-dir": "/go/pkg/mod",
+        "local-vendor-dir": "",
+        "main-module-version": {
+          "from-build-settings": true,
+          "from-contents": false,
+          "from-ld-flags": true
+        },
+        "proxies": [
+          "https://proxy.golang.org",
+          "direct"
+        ],
+        "search-local-mod-cache-licenses": false,
+        "search-local-vendor-licenses": false,
+        "search-remote-licenses": false,
+        "use-packages-lib": true
+      },
+      "java-archive": {
+        "include-indexed-archives": true,
+        "include-unindexed-archives": false,
+        "maven-base-url": "https://repo1.maven.org/maven2",
+        "maven-localrepository-dir": "/.m2/repository",
+        "max-depth": 0,
+        "max-disk-bytes": 0,
+        "max-memory-bytes": 0,
+        "max-parent-recursive-depth": 0,
+        "resolve-transitive-dependencies": false,
+        "use-maven-localrepository": false,
+        "use-network": false
+      },
+      "javascript": {
+        "include-dev-dependencies": false,
+        "npm-base-url": "https://registry.npmjs.org",
+        "search-remote-licenses": false
+      },
+      "linux-kernel": {
+        "catalog-modules": true
+      },
+      "nix": {
+        "capture-owned-files": false
+      },
+      "python": {
+        "guess-unpinned-requirements": false,
+        "pypi-base-url": "https://pypi.org/pypi",
+        "search-remote-licenses": false
+      }
+    },
+    "relationships": {
+      "exclude-binary-packages-with-file-ownership-overlap": true,
+      "package-file-ownership": true,
+      "package-file-ownership-overlap": true
+    },
+    "search": {
+      "scope": "squashed"
+    }
+  },
+  "grype": {
+    "output": [
+      "json"
+    ],
+    "pretty": false,
+    "distro": "",
+    "add-cpes-if-none": false,
+    "output-template-file": "",
+    "check-for-app-update": false,
+    "only-fixed": false,
+    "only-notfixed": false,
+    "ignore-wontfix": "",
+    "platform": "",
+    "search": {
+      "scope": "squashed",
+      "unindexed-archives": false,
+      "indexed-archives": true
+    },
+    "ignore": [
+      {
+        "vulnerability": "",
+        "include-aliases": false,
+        "reason": "",
+        "namespace": "",
+        "fix-state": "",
+        "package": {
+          "name": "kernel-headers",
+          "version": "",
+          "language": "",
+          "type": "rpm",
+          "location": "",
+          "upstream-name": "kernel"
+        },
+        "vex-status": "",
+        "vex-justification": "",
+        "match-type": "exact-indirect-match"
+      },
+      {
+        "vulnerability": "",
+        "include-aliases": false,
+        "reason": "",
+        "namespace": "",
+        "fix-state": "",
+        "package": {
+          "name": "linux(-.*)?-headers-.*",
+          "version": "",
+          "language": "",
+          "type": "deb",
+          "location": "",
+          "upstream-name": "linux.*"
+        },
+        "vex-status": "",
+        "vex-justification": "",
+        "match-type": "exact-indirect-match"
+      },
+      {
+        "vulnerability": "",
+        "include-aliases": false,
+        "reason": "",
+        "namespace": "",
+        "fix-state": "",
+        "package": {
+          "name": "linux-libc-dev",
+          "version": "",
+          "language": "",
+          "type": "deb",
+          "location": "",
+          "upstream-name": "linux"
+        },
+        "vex-status": "",
+        "vex-justification": "",
+        "match-type": "exact-indirect-match"
+      },
+      {
+        "vulnerability": "",
+        "include-aliases": false,
+        "reason": "",
+        "namespace": "",
+        "fix-state": "",
+        "package": {
+          "name": "linux-kbuild-.*",
+          "version": "",
+          "language": "",
+          "type": "deb",
+          "location": "",
+          "upstream-name": "linux.*"
+        },
+        "vex-status": "",
+        "vex-justification": "",
+        "match-type": "exact-indirect-match"
+      }
+    ],
+    "exclude": [],
+    "externalSources": {
+      "enable": false,
+      "maven": {
+        "searchUpstreamBySha1": true,
+        "baseUrl": "https://search.maven.org/solrsearch/select",
+        "rateLimit": 300000000
+      }
+    },
+    "match": {
+      "java": {
+        "using-cpes": false
+      },
+      "jvm": {
+        "using-cpes": true
+      },
+      "dotnet": {
+        "using-cpes": false
+      },
+      "golang": {
+        "using-cpes": false,
+        "always-use-cpe-for-stdlib": false,
+        "allow-main-module-pseudo-version-comparison": false
+      },
+      "javascript": {
+        "using-cpes": false
+      },
+      "python": {
+        "using-cpes": false
+      },
+      "ruby": {
+        "using-cpes": false
+      },
+      "rust": {
+        "using-cpes": false
+      },
+      "hex": {
+        "using-cpes": false
+      },
+      "stock": {
+        "using-cpes": true
+      },
+      "dpkg": {
+        "using-cpes": false,
+        "missing-epoch-strategy": "zero",
+        "use-cpes-for-eol": false
+      },
+      "rpm": {
+        "using-cpes": false,
+        "missing-epoch-strategy": "auto",
+        "use-cpes-for-eol": false
+      }
+    },
+    "fail-on-severity": "",
+    "registry": {
+      "insecure-skip-tls-verify": false,
+      "insecure-use-http": false,
+      "ca-cert": ""
+    },
+    "show-suppressed": false,
+    "include-matcher-suppressions": true,
+    "by-cve": false,
+    "SortBy": {
+      "sort-by": "risk"
+    },
+    "name": "",
+    "default-image-pull-source": "",
+    "from": null,
+    "vex-documents": [],
+    "vex-add": [],
+    "match-upstream-kernel-headers": false,
+    "fix-channel": {
+      "redhat-eus": {
+        "apply": "auto",
+        "versions": ">= 8.0"
+      },
+      "ubuntu-esm": {
+        "apply": "auto",
+        "versions": ""
+      }
+    },
+    "timestamp": true,
+    "alerts": {
+      "enable-eol-distro-warnings": true
+    },
+    "db": {
+      "cache-dir": "/cache",
+      "update-url": "https://grype.anchore.io/databases",
+      "ca-cert": "",
+      "auto-update": false,
+      "validate-by-hash-on-start": true,
+      "validate-age": true,
+      "max-allowed-built-age": 432000000000000,
+      "require-update-check": false,
+      "update-available-timeout": 30000000000,
+      "update-download-timeout": 300000000000,
+      "max-update-check-frequency": 7200000000000
+    },
+    "exp": {},
+    "dev": {
+      "db": {
+        "debug": false
+      }
+    }
+  }
+}

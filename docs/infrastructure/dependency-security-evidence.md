@@ -61,3 +61,14 @@ For local candidate test-image selection, see the
 Ordinary CI evidence requires 90-day retention; activated-image evidence requires
 at least 365 days and the entire rollback-eligibility period. The importer does
 not implement deletion or infer which images have been activated.
+
+## Policy evaluator component (not yet wired)
+
+Run `python -m tools.security.evaluate_dependency_evidence --help` from the
+repository root for the standalone verifier. It requires an independently
+trusted manifest hash, approved policy/disposition hashes, and exact candidate
+source/image/lock identities. Never derive approval arguments from the candidate
+bundle itself. Exit 0 means the supplied evidence passed this component; it is
+not deployment authority. Exit 1 reports blocking findings; exit 2 means invalid
+or incomplete evidence. Producer, CI handoff and deploy-hook integration remain
+pending; see the active F6 evaluator-component receipt for the required bundle.

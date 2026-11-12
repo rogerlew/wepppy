@@ -158,3 +158,11 @@ Roger requested completion through M4 with the F7 continuation. Reconcile the
 existing detached crypto candidate and private evidence before further changes.
 All policy, advisory, exact-image and final validation gates remain required;
 production rollout and risk exceptions remain separate.
+
+2026-11-12: promoted the previously validated crypto/TLS requirement patch to
+main source. Standalone evaluator and 35 adversarial/positive tests now pass;
+independent security component review approved after coverage fixes. See
+[component receipt](artifacts/20261112_evaluator_component.md). Producer, CI
+handoff, deploy wiring, native/advisory dispositions and exact-image M4 remain
+open. Requested the missing authenticated CI collection method from Roger;
+no transfer or exception approval was inferred.
