@@ -129,12 +129,12 @@ mizani==0.11.4
 monotonic==1.6
 more-itertools==8.10.0
 mpmath==1.3.0
-msgpack==1.2.1
+msgpack==1.2.3
 mypy==1.18.2
 mypy-extensions==1.1.0
 narwhals==2.27.1
 nbclient==0.10.2
-nbconvert==7.17.1
+nbconvert==7.17.2
 nbformat==5.10.4
 nest-asyncio==1.5.4
 netCDF4==1.7.3
@@ -176,7 +176,7 @@ pure-eval==0.2.3
 py>=1.11.0
 pyarrow==23.0.1
 pyarrow-hotfix==0.6
-pyasn1==0.6.3
+pyasn1==0.6.5
 pyasn1-modules==0.4.0
 pycparser==2.22
 pycurl==7.45.6
