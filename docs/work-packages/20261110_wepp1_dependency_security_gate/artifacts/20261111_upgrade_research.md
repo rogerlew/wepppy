@@ -176,3 +176,11 @@ Authlib and its new joserfc dependency are excluded from this first batch pendin
 the OAuth contract checkpoint. This separates compatible TLS/crypto repairs from
 the confirmed callback error-contract change without silently dropping that
 authentication finding.
+
+## Authorized continuation (2026-11-12)
+
+Promoted the previously clean-built, independently reviewed crypto/TLS batch
+from the detached candidate into the main source: cryptography 50.0.2, certifi
+2026.10.18, urllib3 2.8.0, and exact existing Brotli commit pin. This is the same
+retained requirements patch, not a new compatibility claim. A new final image
+from the eventual combined revision and all M4 gates remain required.
