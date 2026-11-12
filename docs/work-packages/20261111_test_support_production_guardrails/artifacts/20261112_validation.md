@@ -33,8 +33,11 @@ Configuration unit fixtures clear inherited profile/flag values for isolation.
   passed. No browser lifecycle acceptance is implied.
 - Broad-exception enforcement against the contract ancestor: PASS, net zero.
 - Code-quality observability: generated local observe-only report; no gate.
-- Unsegmented broad Python run: in progress at documentation update. This is a
-  local sanity receipt, not M6: F6 M4 and an exact combined freeze are absent.
+- Unsegmented broad Python sanity: **13,721 passed, 437 skipped, 6,029 warnings**
+  in 3,880.31 seconds (1:04:40), exit 0. Command:
+  `wctl exec -T weppcloud env WEPPCLOUD_DEPLOYMENT_PROFILE=test /opt/venv/bin/pytest tests --maxfail=1`.
+  Local log: `/tmp/f7-full-pytest.log`. This is a local sanity receipt, not M6:
+  F6 M4 and an exact combined freeze are absent; see the candidate caveat below.
 
 ## Rendered configuration and actual application inventory
 
@@ -145,3 +148,11 @@ unrelated edits, and began before final focused test/transport refinements.
 It must not be presented as the exact frozen M6 candidate receipt. Those final
 changes have their separate focused receipts above; M6 requires a fresh combined
 run after F6 M4 and candidate freeze.
+
+Existing-runtime constraint: the running dev container has support enabled but
+no deployment profile. A subsequent worker reload against the new source will
+therefore reject startup until its environment receives the explicit development
+profile. Updating Compose source alone does not change an existing container's
+environment. Apply the reviewed configuration through a separately authorized
+normal activation before reloading; no restart/deployment command was executed
+here. This also prevents treating the old live backend as new-code acceptance.

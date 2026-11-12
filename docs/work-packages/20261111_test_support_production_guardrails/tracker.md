@@ -262,3 +262,10 @@ F6 M4, exact combined gates and final deployment-plan acceptance remain blocked.
 The ExecPlan stays active; no pre-deployment readiness is claimed.
 
 Implementation revision: `c2507338fbdcd5e7156e708f84a43691942ef19f`.
+
+Final local sanity receipt: **13,721 passed, 437 skipped**, exit 0 in 1:04:40.
+This shared-worktree run began before final refinements and does not satisfy M6.
+F6 tracker recheck still shows M1 in progress; its M4 gate remains unmet.
+Before any future reload, the existing development container needs an explicit
+development profile; the Compose source edit does not change its environment.
+No reload was performed. See the validation artifact for the runtime caveat.

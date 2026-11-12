@@ -44,6 +44,9 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 - [ ] M4: focused configuration/route/CLI/Compose gates pass; actual production
       URL map passes. Unmocked create/load succeeds, but NFS delete leaves a
       directory despite 200. Automatic browser lifecycle/retention remains open.
+- [x] (2026-11-12 UTC) Broad local Python sanity: 13,721 passed, 437 skipped,
+      exit 0 in 1:04:40. Shared-worktree receipt predates final refinements;
+      does not satisfy the frozen-candidate M6 gate.
 - [ ] M5: independent correctness/QA/security source reviews approved after
       fixes; release hold remains for M4 cleanup and workflow evidence.
 - [ ] M6: after F6 M4, reconcile exact F1-F7 evidence and pass one combined full
@@ -163,6 +166,11 @@ M0-M3 are implemented after the reviewed contract ancestor. Production Compose
 and the actual production app (484 total rules) expose no support routes.
 Focused auth/CSRF/side-effect and CLI tests pass; frontend gates pass. Independent
 source reviews closed all changed-code medium/high findings.
+
+Broad local Python sanity passed (13,721 passed, 437 skipped). It used the shared
+working tree and began before final refinements, so a fresh combined gate after
+F6 M4 and candidate freeze remains required. F6's tracker still reports M1 in
+progress with evaluator/deploy-hook and CI prerequisites incomplete.
 
 M4 remains open: actual create/load passed, denied delete preserved the run, but
 valid delete returned 200 with a remaining NFS directory. Scoped recovery after
