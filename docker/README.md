@@ -762,3 +762,33 @@ an empty `--url` override. Do not put the password in URLs or arguments.
 For `docker-compose.canary-smoke.yml`, set `WEPPCLOUD_SMOKE_REDIS_PASSWORD_FILE`
 to a private synthetic secret file; the previous plaintext environment setting
 is no longer consumed.
+
+## Test-support authentication
+
+Production defaults to `WEPPCLOUD_DEPLOYMENT_PROFILE=production` and never
+registers `/tests/api/*`. Explicit `development` or `test` plus
+`TEST_SUPPORT_ENABLED=true` enables the privileged support API. Production
+with support enabled refuses startup; unknown profiles also fail. Dev Compose
+selects development explicitly; production Compose pins production/disabled.
+
+Use `wctl run-playwright` for automatic one-hour WEPP_AUTH bearer minting and
+injection, including runs using `--no-create-run`. No login, cookie, manual
+token copying or smoke markers are needed for support provisioning/cleanup.
+Remote targets require verified HTTPS; localhost/loopback may use HTTP.
+The wrapper must target the environment whose container issued its token.
+Direct npm smoke needs transient `SMOKE_TEST_SUPPORT_TOKEN` injection by a
+trusted harness. Never save it to env files, reports, argv or URLs.
+
+Support calls use the shared untraced HTTP helper; ordinary application calls
+receive no support header. A valid support token can delete any resolvable run
+in that non-production environment. See the [canonical contract](../docs/schemas/weppcloud-test-support-contract.md)
+for statuses, lifetime, CSRF exemption and validation requirements.
+
+Legacy `docker-compose.dev.hpc.yml` is unsupported for support smoke: absent
+profile remains production and enabling support fails. Canary Compose does not
+enable support. Forest1 uses production Compose and inherits production absence.
+
+The shared dev profile applies to every service that lazily imports Flask for
+ownership/auth checks, including browse, download, D-Tale, query-engine,
+rq-engine and workers. Production and worker shared environments pin
+production/disabled too; web-only profile configuration is insufficient.

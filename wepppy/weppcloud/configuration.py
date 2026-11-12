@@ -263,6 +263,14 @@ def config_app(app: Any):
     """
     Configure the Flask application instance using environment variables.
     """
+    profile = (os.getenv("WEPPCLOUD_DEPLOYMENT_PROFILE") or "").strip().lower() or "production"
+    if profile not in {"production", "development", "test"}:
+        raise ValueError("WEPPCLOUD_DEPLOYMENT_PROFILE must be production, development, or test")
+    test_support_enabled = os.getenv("TEST_SUPPORT_ENABLED", "false").strip().lower() in {"1", "true", "yes"}
+    if profile == "production" and test_support_enabled:
+        raise ValueError("TEST_SUPPORT_ENABLED requires development or test deployment profile")
+    app.config["WEPPCLOUD_DEPLOYMENT_PROFILE"] = profile
+    app.config["TEST_SUPPORT_ENABLED"] = test_support_enabled
     app.config["WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION"] = allow_anonymous_project_creation()
     app.config.update(_resolve_mail_config())
 
@@ -278,8 +286,6 @@ def config_app(app: Any):
         "GL_DASHBOARD_BATCH_ENABLED", False
     )
 
-    test_support_enabled = os.getenv("TEST_SUPPORT_ENABLED", "false").strip().lower()
-    app.config["TEST_SUPPORT_ENABLED"] = test_support_enabled in {"1", "true", "yes"}
 
     # Flask-Security configuration
     app.config["SECRET_KEY"] = require_secret("SECRET_KEY")

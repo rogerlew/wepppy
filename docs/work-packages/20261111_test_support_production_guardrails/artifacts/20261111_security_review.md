@@ -3,8 +3,8 @@
 ## Metadata
 
 - **Package**: `docs/work-packages/20261111_test_support_production_guardrails/`
-- **Reviewer**: unassigned; must be independent of implementation author
-- **Date**: pending
+- **Reviewer**: contract_security (security_reviewer)
+- **Date**: 2026-11-12 UTC
 - **Scope reviewed**: deployment profile, Flask registration/routes, WEPP_AUTH
   bearer use, CSRF exemption, wctl/Playwright transport, Compose, evidence
   handling, and F1-F7 readiness/deploy planning
@@ -163,3 +163,16 @@ run directories and retained validation records.
 Reference:
 `docs/standards/artifact-observability-standard.md` and
 `docs/standards/generated-artifact-validation-standard.md`.
+
+## Implementation review disposition
+
+Reviewer: `contract_security (security_reviewer)`; read-only independent review on 2026-11-12 UTC,
+against the scoped implementation after contract ancestor `21a75b794`.
+
+Ambient Python/Node proxy forwarding and Node insecure TLS override medium findings were fixed and independently rechecked with local proxy and self-signed TLS endpoints. Numeric lifetime overflow was repaired with bounded comparisons. No open medium/high findings in changed auth/transport code. Residual environment-wide deletion is recommended for acceptance under the operator no-marker decision and owner acknowledgment.
+
+Verdict: source review approved; release acceptance HOLD. Real NFS deletion
+returned 200 with a remaining directory. Full automatic browser lifecycle and
+artifact token scan remain unproven. See [validation](20261112_validation.md).
+The final combined revision and F6 M4 remain unavailable; this is not final
+F1-F7 release approval.

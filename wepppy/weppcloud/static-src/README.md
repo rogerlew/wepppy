@@ -6,7 +6,7 @@
 - Third-party browser libraries (Leaflet, Bootstrap, PureCSS, etc.) are managed from `wepppy/weppcloud/static-src` via `npm` plus a small `vendor-sources/` fallback for assets that are not published on npm.
 - `npm run build:dev` produces readable development assets under `static-src/dist/`; `npm run build` produces minified production assets.
 - `npm run smoke` runs the Playwright smoke suite (backend must be reachable at `SMOKE_BASE_URL`; test-support endpoints are only required when auto-provisioning runs). Useful environment variables:
-  - `TEST_SUPPORT_ENABLED=true` on the backend to expose `/weppcloud/tests/api/*` endpoints for run provisioning.
+  - `WEPPCLOUD_DEPLOYMENT_PROFILE=development` and `TEST_SUPPORT_ENABLED=true` on the backend (use `wctl run-playwright` for bearer authentication) to expose `/weppcloud/tests/api/*` endpoints for run provisioning.
   - `SMOKE_CREATE_RUN` (`true` by default) to auto-provision a run via the test-support create-run endpoint.
   - `SMOKE_RUN_CONFIG` (default `dev_unit_1`) selects the configuration used when provisioning.
   - `SMOKE_RUN_OVERRIDES` optional JSON for config query params (e.g., `{ "general:dem_db": "ned1/2016" }`).
@@ -72,3 +72,24 @@ const DEFAULT_REPORT_DIR = path.join('test-results', 'theme-metrics');
 ```
 
 If test artifacts mysteriously disappear despite successful `fs.writeFile()` calls, check if they're being written to a directory that Playwright cleans asynchronously after test completion.
+
+## Test-support authentication
+
+Production defaults to `WEPPCLOUD_DEPLOYMENT_PROFILE=production` and never
+registers `/tests/api/*`. Explicit `development` or `test` plus
+`TEST_SUPPORT_ENABLED=true` enables the privileged support API. Production
+with support enabled refuses startup; unknown profiles also fail. Dev Compose
+selects development explicitly; production Compose pins production/disabled.
+
+Use `wctl run-playwright` for automatic one-hour WEPP_AUTH bearer minting and
+injection, including runs using `--no-create-run`. No login, cookie, manual
+token copying or smoke markers are needed for support provisioning/cleanup.
+Remote targets require verified HTTPS; localhost/loopback may use HTTP.
+The wrapper must target the environment whose container issued its token.
+Direct npm smoke needs transient `SMOKE_TEST_SUPPORT_TOKEN` injection by a
+trusted harness. Never save it to env files, reports, argv or URLs.
+
+Support calls use the shared untraced HTTP helper; ordinary application calls
+receive no support header. A valid support token can delete any resolvable run
+in that non-production environment. See the [canonical contract](../../../docs/schemas/weppcloud-test-support-contract.md)
+for statuses, lifetime, CSRF exemption and validation requirements.

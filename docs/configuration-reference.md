@@ -83,7 +83,8 @@ production and Kubernetes topology changes are outside this implementation.
 | `SITE_PREFIX` | `python: /weppcloud`; `compose(dev|prod): /weppcloud` | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.*` | URL prefix where the app is mounted (also used for redirect/cookie paths). |
 | `FLASK_DEBUG` | `python: false` | `wepppy.weppcloud.configuration` | Enables Flask debug mode. |
 | `DEBUG` | `python: false` | `wepppy.weppcloud.configuration` | Fallback debug toggle when `FLASK_DEBUG` is unset. |
-| `TEST_SUPPORT_ENABLED` | `python: false`; `compose(dev): false` | `wepppy.weppcloud.configuration`; compose (common env) | Enables test/support-only behaviors in WEPPcloud. |
+| `WEPPCLOUD_DEPLOYMENT_PROFILE` | `python: production`; `compose(dev): development` | `wepppy.weppcloud.configuration`; compose common env | Trimmed production/development/test enum; unknown values fail startup. |
+| `TEST_SUPPORT_ENABLED` | `python: false`; `compose(dev): false` | `wepppy.weppcloud.configuration`; compose (common env) | Enables bearer-only support in explicit development/test profile; production rejects true. |
 | `ENABLE_LOCAL_LOGIN` | `python: true`; `compose(dev): true`; `compose(prod): false` | `wepppy.weppcloud.configuration`; compose (common env) | Enables local login flow. |
 | `GL_DASHBOARD_BATCH_ENABLED` | `python: false`; `compose(dev|prod): false` | `wepppy.weppcloud.configuration`; compose (common env) | Enables GL dashboard batch features. |
 | `SECRET_KEY` | required | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Flask `SECRET_KEY` (secret; prefers `SECRET_KEY_FILE`). |
@@ -365,3 +366,24 @@ use `--write` only when intentionally normalizing those tracked sources.
 |---|---:|---|---|
 | `SESSION_REDIS_HOST` | `python: localhost` | legacy (dead code in `wepppy.weppcloud.configuration`) | Legacy session Redis host override (superseded by `SESSION_REDIS_URL`). |
 | `SESSION_REDIS_PORT` | `python: 6379` | legacy (dead code in `wepppy.weppcloud.configuration`) | Legacy session Redis port override (superseded by `SESSION_REDIS_URL`). |
+
+## Test-support authentication
+
+Production defaults to `WEPPCLOUD_DEPLOYMENT_PROFILE=production` and never
+registers `/tests/api/*`. Explicit `development` or `test` plus
+`TEST_SUPPORT_ENABLED=true` enables the privileged support API. Production
+with support enabled refuses startup; unknown profiles also fail. Dev Compose
+selects development explicitly; production Compose pins production/disabled.
+
+Use `wctl run-playwright` for automatic one-hour WEPP_AUTH bearer minting and
+injection, including runs using `--no-create-run`. No login, cookie, manual
+token copying or smoke markers are needed for support provisioning/cleanup.
+Remote targets require verified HTTPS; localhost/loopback may use HTTP.
+The wrapper must target the environment whose container issued its token.
+Direct npm smoke needs transient `SMOKE_TEST_SUPPORT_TOKEN` injection by a
+trusted harness. Never save it to env files, reports, argv or URLs.
+
+Support calls use the shared untraced HTTP helper; ordinary application calls
+receive no support header. A valid support token can delete any resolvable run
+in that non-production environment. See the [canonical contract](schemas/weppcloud-test-support-contract.md)
+for statuses, lifetime, CSRF exemption and validation requirements.

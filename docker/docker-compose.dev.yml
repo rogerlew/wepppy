@@ -37,6 +37,7 @@ x-wepppy-service: &wepppy-service
     SITE_PREFIX: /weppcloud
     CAO_BASE_URL: ${CAO_BASE_URL:-http://host.docker.internal:9889}
     DTALE_SERVICE_URL: ${DTALE_SERVICE_URL:-http://dtale:9010}
+    WEPPCLOUD_DEPLOYMENT_PROFILE: development
     TEST_SUPPORT_ENABLED: ${TEST_SUPPORT_ENABLED:-false}
     GL_DASHBOARD_BATCH_ENABLED: ${GL_DASHBOARD_BATCH_ENABLED:-false}
     ENABLE_LOCAL_LOGIN: ${ENABLE_LOCAL_LOGIN:-true}

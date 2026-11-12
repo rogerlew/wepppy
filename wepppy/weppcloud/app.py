@@ -629,4 +629,7 @@ from wepppy.weppcloud.routes.weppcloud_site import register_csrf_exemptions as r
 
 register_bootstrap_csrf_exemptions(csrf)
 register_site_csrf_exemptions(csrf)
+if "test_bp" in app.blueprints:
+    from wepppy.weppcloud.routes.test_bp import register_csrf_exemptions as register_test_csrf_exemptions
+    register_test_csrf_exemptions(csrf)
 register_context_processors(app, get_all_runs, User, Run)

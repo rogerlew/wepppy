@@ -46,6 +46,7 @@ from .context import CLIContext
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "allow_extra_args": True, "ignore_unknown_options": True}
 app = typer.Typer(
+    pretty_exceptions_show_locals=False,  # Command frames can contain transient credentials.
     add_completion=False,
     context_settings=CONTEXT_SETTINGS,
     help="wctl2 – Python-based control wrapper for the WEPPcloud docker compose stack.",

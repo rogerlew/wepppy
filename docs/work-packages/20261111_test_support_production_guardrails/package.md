@@ -1,6 +1,6 @@
 # Test-support production guardrails and F1-F7 readiness
 
-**Status**: Open (2026-11-12 UTC); scaffolded, contract checkpoint pending
+**Status**: Open (2026-11-12 UTC); M0-M3 implemented; M4 cleanup/runtime hold; F6 M4 pending
 
 **Timezone**: UTC
 
@@ -212,9 +212,8 @@ non-production boundary.
 ## Parameterization ADR Gate
 
 - **Parameterization change present**: no scientific/model parameterization.
-- **ADR required**: assess at M0 whether the JWT lifetime is already governed by
-  an existing auth-token contract. Add an ADR only if this package introduces a
-  new configurable security threshold rather than reusing an existing value.
+- **ADR required**: no; fixed 3600 seconds reuses the WEPP_AUTH default, introduces no
+  configurable threshold and changes no model parameterization.
 - **Decision provenance captured**: yes, initially in
   `artifacts/20261111_contract_decision.md`; durable rules must be promoted to
   canonical documentation before implementation.
@@ -323,4 +322,3 @@ non-production boundary.
   authorization and exact-candidate review.
 - Keep F8/SEC-08 port-binding hardening separate unless the operator later
   authorizes a combined deployment package.
-

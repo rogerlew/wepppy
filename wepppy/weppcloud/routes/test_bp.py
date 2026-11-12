@@ -3,13 +3,16 @@ from __future__ import annotations
 from wepppy.weppcloud.routes._common import parse_json_payload, RequestPayloadError
 
 import os
+import math
+import time
 import shutil
 from pathlib import Path
 from typing import Dict, Any, Tuple
 
 from flask import Blueprint, jsonify, request, current_app
 from flask_security import current_user
-from werkzeug.exceptions import BadRequest, Forbidden, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
+from wepppy.weppcloud.utils import auth_tokens
 
 from wepppy.weppcloud.routes.run_0.run_0_bp import create_run_dir
 from wepppy.weppcloud.utils.helpers import url_for_run, get_wd
@@ -19,8 +22,30 @@ from wepppy.nodb.core.ron import Ron
 
 
 def _require_enabled() -> None:
-    if not current_app.config.get("TEST_SUPPORT_ENABLED", False):
-        raise Forbidden("Test support endpoints are disabled")
+    if (current_app.config.get("WEPPCLOUD_DEPLOYMENT_PROFILE") not in {"development", "test"}
+            or not current_app.config.get("TEST_SUPPORT_ENABLED", False)):
+        raise NotFound()
+
+    parts = request.headers.get("Authorization", "").split()
+    try:
+        if len(parts) != 2 or parts[0].lower() != "bearer":
+            raise auth_tokens.JWTDecodeError("Missing bearer")
+        claims = auth_tokens.decode_token(parts[1], audience="weppcloud-test-support")
+        issued, expires = claims.get("iat"), claims.get("exp")
+        if (any(isinstance(value, bool) or not isinstance(value, (int, float))
+                or (isinstance(value, float) and not math.isfinite(value)) for value in (issued, expires))
+                or not issued < expires <= issued + 3600 or expires <= time.time()):
+            raise auth_tokens.JWTDecodeError("Invalid support lifetime")
+    except auth_tokens.JWTDecodeError:
+        current_app.logger.info("test_support outcome=unauthorized route=%s", request.endpoint)
+        raise Unauthorized() from None
+    scopes = claims.get("scope", "")
+    if isinstance(scopes, str):
+        scopes = scopes.split(auth_tokens.get_jwt_config().scope_separator)
+    if not isinstance(scopes, (list, tuple)) or "test:support" not in scopes:
+        current_app.logger.info("test_support outcome=forbidden route=%s", request.endpoint)
+        raise Forbidden()
+    current_app.logger.info("test_support outcome=authorized route=%s", request.endpoint)
 
 
 def _build_cfg(config: str, overrides: Dict[str, Any]) -> str:
@@ -129,3 +154,19 @@ def delete_run_endpoint(runid: str):
 
     _cleanup_run_directory(path)
     return jsonify({"runid": runid}), 200
+
+
+def register_csrf_exemptions(csrf) -> None:
+    # Non-ambient scoped bearer is required before every operation.
+    for view in (ping, create_run_endpoint, delete_run_endpoint):
+        csrf.exempt(view)
+
+
+@test_bp.errorhandler(Unauthorized)
+def _unauthorized(exc):
+    return jsonify({"error": "Unauthorized"}), 401
+
+
+@test_bp.errorhandler(Forbidden)
+def _forbidden(exc):
+    return jsonify({"error": "Forbidden"}), 403

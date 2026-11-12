@@ -222,3 +222,27 @@ def register(app: typer.Typer) -> None:
         else:
             result = compose_exec(context, "weppcloud", command, check=False)
         _exit_from_result(result)
+
+
+def mint_test_support_token(context: CLIContext) -> str:
+    """Capture a one-hour support credential without emitting issuer output."""
+    command = _compose_python_command([
+        _PYTHON_BIN, _ISSUE_SCRIPT, "wctl-playwright",
+        "--audience", "weppcloud-test-support", "--scope", "test:support",
+        "--expires-in", "3600",
+    ])
+    try:
+        result = subprocess.run(
+            ["docker", "compose", *context.compose_base_args(), "exec", "-T",
+             "weppcloud", "bash", "-lc", command],
+            cwd=str(context.project_dir), env=context.environment,
+            capture_output=True, text=True, check=False,
+        )
+    except OSError:
+        typer.echo("[wctl2] Cannot execute token issuer; check Docker and the WEPPcloud service.", err=True)
+        raise typer.Exit(1) from None
+    token = result.stdout.strip()
+    if result.returncode or len(token.split(".")) != 3 or any(c.isspace() for c in token):
+        typer.echo("[wctl2] Support token mint failed; check WEPPcloud and WEPP_AUTH signing configuration.", err=True)
+        raise typer.Exit(1)
+    return token

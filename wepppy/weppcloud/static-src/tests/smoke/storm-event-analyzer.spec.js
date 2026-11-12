@@ -1,3 +1,4 @@
+import { supportRequest } from './support-request.js';
 import { promises as fs } from 'fs';
 import { test, expect } from '@playwright/test';
 
@@ -24,7 +25,7 @@ let targetRunPath = process.env.SMOKE_RUN_PATH || '';
 let createdRunId = null;
 let skipSuite = false;
 let skipReason =
-  'Smoke run target unavailable. Set SMOKE_RUN_PATH or enable SMOKE_CREATE_RUN (requires TEST_SUPPORT_ENABLED=true).';
+  'Smoke run target unavailable. Set SMOKE_RUN_PATH or enable SMOKE_CREATE_RUN (requires explicit development/test profile and wctl support bearer).';
 
 function buildUrl(path) {
   const base = baseURL.replace(/\/$/, '');
@@ -87,7 +88,7 @@ async function waitForEventRows(page) {
 }
 
 test.describe('storm event analyzer smoke', () => {
-  test.beforeAll(async ({ request }) => {
+  test.beforeAll(async () => {
     if (targetRunPath) {
       targetRunPath = ensureStormEventAnalyzerPath(resolveRunPath(targetRunPath));
       return;
@@ -101,7 +102,7 @@ test.describe('storm event analyzer smoke', () => {
     const createUrl = buildUrl('/weppcloud/tests/api/create-run');
     let response;
     try {
-      response = await request.post(createUrl, {
+      response = await supportRequest.post(createUrl, {
         data: { config: configSlug },
       });
     } catch (error) {
@@ -132,12 +133,12 @@ test.describe('storm event analyzer smoke', () => {
     }
   });
 
-  test.afterAll(async ({ request }) => {
+  test.afterAll(async () => {
     if (createdRunId && !keepRun && !skipSuite) {
       try {
-        await request.delete(buildUrl(`/weppcloud/tests/api/run/${createdRunId}`));
+        await supportRequest.delete(buildUrl(`/weppcloud/tests/api/run/${createdRunId}`));
       } catch (err) {
-        console.warn('Failed to delete smoke run', err);
+        console.warn('Failed to delete smoke run', createdRunId, err);
       }
     }
   });

@@ -2,12 +2,12 @@
 
 ## Overview
 
-The `wctl2 run-playwright` command encapsulates the complexity of running Playwright smoke tests against various WEPPcloud environments (local dev, staging, production) while maintaining flexibility for CI/CD pipelines and developer workflows.
+The `wctl2 run-playwright` command encapsulates the complexity of running Playwright smoke tests against various WEPPcloud environments (explicit development/test runtimes) while maintaining flexibility for CI/CD pipelines and developer workflows.
 
 ## Goals
 
 1. **Simplify execution**: Reduce the verbose command invocation to a single concise command
-2. **Environment flexibility**: Support local dev, remote staging, and production testing
+2. **Environment flexibility**: Support explicit development/test targets
 3. **Sensible defaults**: Work out-of-the-box for common use cases while allowing overrides
 4. **CI/CD ready**: Support both interactive development and automated pipeline usage
 5. **Future-proof**: Accommodate profile-based testing and additional test suites
@@ -49,7 +49,7 @@ Pre-configured environment presets for common testing targets:
 | `local` | `http://localhost:8080` | Local docker-compose dev stack via Caddy |
 | `local-direct` | `http://localhost:8000/weppcloud` | Direct Flask app (no Caddy proxy) |
 | `staging` | _(from env var `PLAYWRIGHT_STAGING_URL`)_ | Staging environment |
-| `prod` | _(from env var `PLAYWRIGHT_PROD_URL`)_ | Production (requires explicit opt-in) |
+| `prod` | _(from env var `PLAYWRIGHT_PROD_URL`)_ | Legacy URL alias; production profile has no support routes |
 | `custom` | _(requires `--base-url`)_ | User-specified URL |
 
 Environment URLs can be overridden via:
@@ -139,319 +139,17 @@ def register(app: typer.Typer) -> None:
     playwright.register(app)
 ```
 
-### Core Implementation
+### Support authentication implementation
 
-```python
-from __future__ import annotations
-
-import json
-import shlex
-import subprocess
-import urllib.parse
-import urllib.request
-from pathlib import Path
-from typing import TYPE_CHECKING, List, Literal, Optional
-
-import typer
-
-from ..context import CLIContext
-
-if TYPE_CHECKING:
-    EnvironmentPreset = Literal["local", "local-direct", "dev", "staging", "prod", "custom"]
-    SuitePreset = Literal["full", "smoke", "controllers"]
-else:
-    EnvironmentPreset = str
-    SuitePreset = str
-
-# Environment URL mappings
-_ENV_URLS = {
-    "dev": "https://wc.bearhive.duckdns.org/weppcloud",
-    "local": "http://localhost:8080",
-    "local-direct": "http://localhost:8000/weppcloud",
-}
-
-SUITE_PATTERNS = {
-    "full": None,
-    "smoke": "page load",
-    "controllers": "controller regression",
-}
-
-
-def _context(ctx: typer.Context) -> CLIContext:
-    context = ctx.obj
-    if not isinstance(context, CLIContext):
-        raise RuntimeError("CLIContext is not initialised.")
-    return context
-
-
-def _resolve_base_url(
-    context: CLIContext,
-    env: EnvironmentPreset,
-    base_url: Optional[str],
-) -> str:
-    """Resolve base URL from preset, env vars, or explicit override."""
-    if base_url:
-        return base_url
-    
-    if env == "staging":
-        url = context.env_value("PLAYWRIGHT_STAGING_URL")
-        if not url:
-            typer.echo("PLAYWRIGHT_STAGING_URL not set in environment.", err=True)
-            raise typer.Exit(1)
-        return url
-    
-    if env == "prod":
-        url = context.env_value("PLAYWRIGHT_PROD_URL")
-        if not url:
-            typer.echo("PLAYWRIGHT_PROD_URL not set in environment.", err=True)
-            raise typer.Exit(1)
-        return url
-    
-    if env == "custom":
-        typer.echo("--env=custom requires --base-url to be specified.", err=True)
-        raise typer.Exit(1)
-    
-    # Check for env-specific override in .env or host env
-    env_var_name = f"PLAYWRIGHT_{env.upper().replace('-', '_')}_URL"
-    override = context.env_value(env_var_name)
-    if override:
-        return override
-    
-    return _ENV_URLS.get(env, _ENV_URLS["dev"])
-
-
-def _ping_test_support(base_url: str) -> None:
-    """Fail fast if /tests/api/ping is unavailable."""
-    ping_url = urllib.parse.urljoin(
-        base_url if base_url.endswith("/") else f"{base_url}/",
-        "tests/api/ping",
-    )
-    try:
-        req = urllib.request.Request(ping_url, method="GET")
-        with urllib.request.urlopen(req, timeout=5) as response:
-            if response.status != 200:
-                typer.echo(
-                    f"[wctl2] Test support endpoint returned {response.status}. "
-                    f"Ensure TEST_SUPPORT_ENABLED=true in backend.",
-                    err=True,
-                )
-                raise typer.Exit(1)
-    except urllib.error.URLError as exc:
-        typer.echo(
-            f"[wctl2] Cannot reach {ping_url}: {exc.reason}. "
-            f"Is the backend running?",
-            err=True,
-        )
-        raise typer.Exit(1)
-    except Exception as exc:
-        typer.echo(f"[wctl2] Ping check failed: {exc}", err=True)
-        raise typer.Exit(1)
-
-
-def _build_overrides_json(overrides: List[str]) -> Optional[str]:
-    if not overrides:
-        return None
-
-    payload = {}
-    for item in overrides:
-        if "=" not in item:
-            typer.echo(f"[wctl2] Invalid override '{item}'. Use key=value syntax.", err=True)
-            raise typer.Exit(1)
-        key, value = item.split("=", 1)
-        payload[key] = value
-    return json.dumps(payload)
-
-
-def register(app: typer.Typer) -> None:
-    @app.command(
-        "run-playwright",
-        help="Run Playwright smoke tests against WEPPcloud environments.",
-    )
-    def run_playwright(
-        ctx: typer.Context,
-        # Environment & Target
-        env: EnvironmentPreset = typer.Option(
-            "dev",
-            "--env",
-            "-e",
-            help="Environment preset (dev, local, local-direct, staging, prod, custom).",
-        ),
-        base_url: Optional[str] = typer.Option(
-            None,
-            "--base-url",
-            help="Override base URL (implies --env=custom).",
-        ),
-        config: str = typer.Option(
-            "disturbed9002_wbt",
-            "--config",
-            "-c",
-            help="WEPPcloud config slug for provisioning.",
-        ),
-        run_path: Optional[str] = typer.Option(
-            None,
-            "--run-path",
-            help="Reuse existing run path (skips provisioning).",
-        ),
-        create_run: bool = typer.Option(
-            True,
-            "--create-run/--no-create-run",
-            help="Auto-provision run via test API.",
-        ),
-        keep_run: bool = typer.Option(
-            False,
-            "--keep-run",
-            help="Preserve provisioned run after tests.",
-        ),
-        run_root: Optional[str] = typer.Option(
-            None,
-            "--run-root",
-            help="Optional root directory for provisioning.",
-        ),
-        suite: SuitePreset = typer.Option(
-            "full",
-            "--suite",
-            "-s",
-            help="Suite preset: full (default), smoke, controllers.",
-        ),
-        # Playwright Execution
-        project: str = typer.Option(
-            "runs0",
-            "--project",
-            "-p",
-            help="Playwright project name.",
-        ),
-        workers: int = typer.Option(
-            1,
-            "--workers",
-            "-w",
-            help="Number of parallel workers.",
-        ),
-        headed: bool = typer.Option(
-            False,
-            "--headed",
-            help="Run in headed mode (visible browser).",
-        ),
-        grep: Optional[str] = typer.Option(
-            None,
-            "--grep",
-            "-g",
-            help="Filter tests by pattern.",
-        ),
-        debug: bool = typer.Option(
-            False,
-            "--debug",
-            help="Run in debug mode.",
-        ),
-        ui: bool = typer.Option(
-            False,
-            "--ui",
-            help="Launch Playwright UI mode.",
-        ),
-        report: bool = typer.Option(
-            False,
-            "--report",
-            help="Open HTML report after run.",
-        ),
-        report_path: str = typer.Option(
-            "playwright-report",
-            "--report-path",
-            help="Directory for Playwright HTML reports.",
-        ),
-        # Pass-through
-        playwright_args: Optional[str] = typer.Option(
-            None,
-            "--playwright-args",
-            help="Additional Playwright CLI arguments.",
-        ),
-        overrides: List[str] = typer.Option(
-            [],
-            "--overrides",
-            help="Repeatable key=value overrides (converted to SMOKE_RUN_OVERRIDES JSON).",
-        ),
-    ) -> None:
-        """
-        Run Playwright smoke tests against WEPPcloud.
-        
-        Examples:
-          wctl2 run-playwright
-          wctl2 run-playwright --env dev --config ltcalibration_wb
-          wctl2 run-playwright --base-url https://custom.com/weppcloud --headed
-        
-        Note: When --run-path is provided, provisioning is automatically disabled
-        (SMOKE_CREATE_RUN=false) regardless of --create-run flag.
-        """
-        context = _context(ctx)
-
-        # Resolve effective environment & verify test-support
-        effective_env = "custom" if base_url else env
-        resolved_url = _resolve_base_url(context, effective_env, base_url)
-        _ping_test_support(resolved_url)
-
-        # Determine active grep pattern (suite or explicit grep)
-        if suite not in SUITE_PATTERNS:
-            typer.echo(f"[wctl2] Unknown suite preset '{suite}'.", err=True)
-            raise typer.Exit(1)
-        
-        suite_pattern = SUITE_PATTERNS[suite]
-        overrides_json = _build_overrides_json(overrides)
-
-        # Build environment variables
-        test_env = dict(context.environment)
-        test_env["SMOKE_BASE_URL"] = resolved_url
-        test_env["SMOKE_RUN_CONFIG"] = config
-        test_env["SMOKE_HEADLESS"] = "false" if headed else "true"
-        test_env["SMOKE_KEEP_RUN"] = "true" if keep_run else "false"
-
-        final_create_run = create_run and not run_path
-        test_env["SMOKE_CREATE_RUN"] = "true" if final_create_run else "false"
-
-        if run_path:
-            test_env["SMOKE_RUN_PATH"] = run_path
-        if run_root:
-            test_env["SMOKE_RUN_ROOT"] = run_root
-        if overrides_json:
-            test_env["SMOKE_RUN_OVERRIDES"] = overrides_json
-
-        # Build Playwright command
-        effective_workers = 1 if headed else workers
-        pw_args = ["--project", project, "--workers", str(effective_workers)]
-
-        active_grep = grep or suite_pattern
-        if active_grep:
-            pw_args.extend(["--grep", active_grep])
-        if debug:
-            pw_args.append("--debug")
-        if ui:
-            pw_args.append("--ui")
-        if report:
-            pw_args.extend(["--reporter", "html", "--output", report_path])
-
-        if playwright_args:
-            pw_args.extend(shlex.split(playwright_args))
-
-        # Execute via npm
-        static_src = context.project_dir / "wepppy" / "weppcloud" / "static-src"
-        npm_cmd = ["npm", "run", "test:playwright", "--", *pw_args]
-
-        typer.echo(f"[wctl2] Running Playwright tests against {resolved_url}")
-        typer.echo(f"[wctl2] Config: {config}, Project: {project}, Workers: {effective_workers}, Suite: {suite}")
-
-        result = subprocess.run(
-            npm_cmd,
-            cwd=str(static_src),
-            env=test_env,
-        )
-
-        if report and result.returncode == 0:
-            typer.echo(f"[wctl2] Opening report from {report_path}")
-            subprocess.run(
-                ["npx", "playwright", "show-report", report_path],
-                cwd=str(static_src),
-                env=test_env,
-            )
-
-        raise typer.Exit(result.returncode)
-```
+The implementation is `commands/playwright.py` and `commands/auth.py`. See
+[the canonical support contract](../../../docs/schemas/weppcloud-test-support-contract.md).
+The wrapper validates transport before minting a one-hour container-local
+WEPP_AUTH bearer, then authenticates its mandatory ping (even --no-create-run).
+It passes `SMOKE_TEST_SUPPORT_TOKEN` only to the test child, never the report
+viewer. Both HTTP clients reject redirects; remote targets require verified
+HTTPS, loopback permits HTTP. Support requests use the untraced Node helper
+and never global Playwright headers. Mint failures stop before ping/npm.
+Production has no support routes and is unsupported by this wrapper.
 
 ## Usage Examples
 
@@ -504,7 +202,7 @@ wctl2 run-playwright --env staging --workers 4
 # Specific test subset for PR checks
 wctl2 run-playwright --suite smoke --workers 2
 
-# Production smoke test (pre-configured URL)
+# Legacy prod URL alias (target must actually use development/test profile)
 wctl2 run-playwright --env prod --config dev_unit_1
 
 # Custom deployment target

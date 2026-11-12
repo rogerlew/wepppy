@@ -139,3 +139,24 @@ All commands print the HTTP target and payload to stderr before streaming the se
 - Integrate the new CLI into CI pipelines (`wctl run-pytest`, `wctl docker compose config --quiet`, etc.).
 - Remove any downstream references to the legacy `profile_playback_cli.py` helpers; the Typer commands are the new canonical interface.
 - Keep an eye on `tools/wctl2/docs/SPEC.md` for additional enhancements (command grouping, completion scripts, richer logging).
+
+## Test-support authentication
+
+Production defaults to `WEPPCLOUD_DEPLOYMENT_PROFILE=production` and never
+registers `/tests/api/*`. Explicit `development` or `test` plus
+`TEST_SUPPORT_ENABLED=true` enables the privileged support API. Production
+with support enabled refuses startup; unknown profiles also fail. Dev Compose
+selects development explicitly; production Compose pins production/disabled.
+
+Use `wctl run-playwright` for automatic one-hour WEPP_AUTH bearer minting and
+injection, including runs using `--no-create-run`. No login, cookie, manual
+token copying or smoke markers are needed for support provisioning/cleanup.
+Remote targets require verified HTTPS; localhost/loopback may use HTTP.
+The wrapper must target the environment whose container issued its token.
+Direct npm smoke needs transient `SMOKE_TEST_SUPPORT_TOKEN` injection by a
+trusted harness. Never save it to env files, reports, argv or URLs.
+
+Support calls use the shared untraced HTTP helper; ordinary application calls
+receive no support header. A valid support token can delete any resolvable run
+in that non-production environment. See the [canonical contract](../docs/schemas/weppcloud-test-support-contract.md)
+for statuses, lifetime, CSRF exemption and validation requirements.

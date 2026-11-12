@@ -1,6 +1,6 @@
 # F7 failure-class and consumer matrix
 
-**Status**: Initial discovery; verify all rows at M0  
+**Status**: Initial discovery; verify all rows at M0
 **Date**: 2026-11-12 UTC
 
 The broken shared assumption is: enabling a support-only feature flag is
@@ -57,3 +57,35 @@ evidence. Every unresolved deployment variant must remain named in the final
 readiness/deployment plan. Route status alone cannot prove absence or lack of a
 filesystem side effect.
 
+
+## Execution assessment
+
+All six smoke consumers now use the shared support helper. Both credential
+transports explicitly reject redirects and ambient proxies; Node also forces
+TLS verification despite environment overrides. These were confirmed shared
+transport consumers and both were repaired. Production and wepp1 rendered
+values and the full production Flask URL map pass. See
+[validation](20261112_validation.md) for exact evidence and limits.
+
+Additional confirmed lifecycle assumption: successful recursive cleanup means
+path absence even with run log handles open on NFS. The shared support cleanup
+helper is called by create failure and delete. Delete failed actual path absence;
+create-failure cleanup under open handles remains unresolved. Ordinary project
+delete already calls NoDbBase.cleanup_run_instances before queueing deletion;
+that worker and broader lifecycle redesign are outside this package. Existing
+NFS packages describe storage constraints but provide no proof that support
+cleanup is safe. M4 remains blocked; no route status substitutes for readback.
+
+Direct precedent: F4's
+`20261111_status_preflight_websocket_authorization/artifacts/20261111_validation.md`,
+section "Forest acceptance and cleanup", already records deferred NFS `.nfs`
+files held by web processes and scoped recovery. This supports retaining the
+same lifecycle class here; its recovery receipt does not establish that F7
+immediate deletion now satisfies path absence.
+
+Compose consumer regression found and closed during review: enabling the common
+dev support flag with a profile only on web broke lazy Flask imports in browse,
+download, dtale, query-engine, rq-engine and both worker roles. The dev profile
+now lives in the common anchor; production/worker anchors pin production/false.
+All eight full-stack Flask consumers and both worker-only consumers were rendered
+and tested. No service was restarted to apply this change.

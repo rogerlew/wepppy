@@ -2,14 +2,14 @@
 
 ## Quick Status
 
-**Timezone**: UTC  
-**Started**: 2026-11-12 01:01 UTC  
-**Current phase**: M0 reviewed; standalone checkpoint commit  
-**Last updated**: 2026-11-12 01:15 UTC  
-**Next milestone**: ratify the profile/JWT/CSRF contract and commit its standalone ancestor  
-**Finding**: F7 / SEC-07 (Low conditional; High impact when enabled)  
-**Change security impact**: high  
-**Dedicated security review**: yes  
+**Timezone**: UTC
+**Started**: 2026-11-12 01:01 UTC
+**Current phase**: M0-M3 implemented; M4 NFS cleanup/runtime acceptance blocked
+**Last updated**: 2026-11-12 01:15 UTC
+**Next milestone**: resolve M4 cleanup evidence; await F6 M4 for combined readiness
+**Finding**: F7 / SEC-07 (Low conditional; High impact when enabled)
+**Change security impact**: high
+**Dedicated security review**: yes
 **Security artifact**: `artifacts/20261111_security_review.md`
 
 Package closure means F1-F7 are ready for an authorized combined deployment
@@ -22,12 +22,12 @@ hard prerequisites for that claim.
 
 - [x] M0: amend and ratify the canonical deployment-profile, test-support JWT,
       response, and CSRF contract; obtain two independent read-only reviews.
-- [ ] Commit the M0 contract/review checkpoint as a standalone ancestor and
+- [x] Commit the M0 contract/review checkpoint as a standalone ancestor and
       record its exact revision here and in the ExecPlan.
-- [ ] M1: implement production-default profile parsing and startup rejection.
-- [ ] M2: require the existing scoped WEPP_AUTH bearer on test-support routes;
+- [x] M1: implement production-default profile parsing and startup rejection.
+- [x] M2: require the existing scoped WEPP_AUTH bearer on test-support routes;
       add focused no-side-effect negative tests.
-- [ ] M3: make `wctl run-playwright` mint/capture/inject the short-lived token;
+- [x] M3: make `wctl run-playwright` mint/capture/inject the short-lived token;
       centralize support-route headers in Playwright smoke helpers.
 - [ ] M4: validate rendered Compose, actual route inventories, focused Python,
       wctl, npm/Playwright, and unmocked create/load/delete behavior.
@@ -41,9 +41,15 @@ hard prerequisites for that claim.
 
 ### In Progress
 
-- [ ] None. Implementation is blocked by the required M0 checkpoint.
+- [ ] M4: NFS cleanup fails direct absence; automatic browser/retention evidence
+      remains open. Source correctness/QA/security reviews passed.
 
 ### Blocked
+
+- [ ] Actual NFS delete returns 200 while path remains. General deletion-worker
+      redesign is outside M2; retain this acceptance failure pending scoped repair.
+- [ ] No running backend with the new profile has been activated; automatic
+      wctl/browser lifecycle and artifact scans remain pending.
 
 - [ ] Package closeout is blocked until F6 reaches its M4 exact-image,
       full-regression, and independent-review acceptance gate.
@@ -238,3 +244,17 @@ Execute
 every stopping point. Preserve unrelated dirty work, especially generated
 `docs_index.json` and the controller-input-validation package. Do not deploy or
 restart forest/wepp1/wepp2 services without explicit authority.
+
+M0 standalone contract ancestor: `21a75b7944573f6b41f6c091349458b5b9ab1e4b` (2026-11-12 UTC).
+
+## Execution update (2026-11-12 UTC)
+
+M0-M3 implementation and independent source reviews are complete. See
+[validation](artifacts/20261112_validation.md) for 77 focused Python tests,
+59 CLI tests, 1,076 Jest tests and three native HTTP tests, actual production
+URL map (zero support rules), and production/wepp1 Compose override resistance.
+M4 create/load succeeds with real objects; delete fails path-absence on NFS.
+All identified disposable fixtures were recovered after process exit. General
+cleanup redesign remains excluded. No service restart or deployment occurred.
+F6 M4, exact combined gates and final deployment-plan acceptance remain blocked.
+The ExecPlan stays active; no pre-deployment readiness is claimed.

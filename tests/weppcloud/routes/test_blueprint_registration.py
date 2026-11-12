@@ -66,3 +66,21 @@ def test_all_blueprints_registered():
     missing -= optional_only_blueprints
 
     assert not missing, f"Blueprints missing from register_blueprints: {sorted(missing)}"
+
+
+@pytest.mark.parametrize("profile", [None, "production", "development", "test", "unknown"])
+@pytest.mark.parametrize("enabled", [False, True])
+def test_support_actual_url_map(monkeypatch, profile, enabled):
+    from flask import Flask
+    from wepppy.weppcloud import _blueprints_context as context
+    app = Flask(__name__)
+    app.config.update(WEPPCLOUD_DEPLOYMENT_PROFILE=profile, TEST_SUPPORT_ENABLED=enabled)
+    # Unrelated blueprints have their own registration coverage above.
+    monkeypatch.setattr(context, "_BLUEPRINT_ATTRS", [])
+    context.register_blueprints(app)
+    rules = {rule.rule for rule in app.url_map.iter_rules() if rule.rule.startswith('/tests/api/')}
+    if enabled and profile in {'development', 'test'}:
+        assert rules == {'/tests/api/ping', '/tests/api/create-run', '/tests/api/run/<runid>'}
+    else:
+        assert rules == set()
+        assert app.test_client().get('/tests/api/ping').status_code == 404

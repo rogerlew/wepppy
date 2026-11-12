@@ -4,6 +4,8 @@ Completed locally: [Safe traceback and exceptional-path secret sanitization](doc
 
 Completed on forest: [Status and preflight WebSocket run authorization](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md) - Ratified run-bound credentials, full regression, five-service cutover and 27 real-browser assertions verified; NFS cleanup recovery retained. Production rollout remains pending separate authorization.
 
+Implemented; runtime acceptance blocked: [Test-support production guardrails and F1-F7 readiness](docs/work-packages/20261111_test_support_production_guardrails/package.md) - F7 defaults the runtime profile to production, excludes support routes from production, and reuses short-lived WEPP_AUTH credentials through automatic wctl/Playwright injection. No smoke markers or new static secret. Closure requires F6 M4, one combined F1-F7 regression receipt, and a reviewed non-executed deployment-validation plan.
+
 Ready for canary handoff: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — reviewed implementation and inactive open-wepp-org receiving package committed. Lifecycle/artifact/failure gates pass; broad continuations retain one confirmed unrelated baseline assertion. Live image/runtime/viewing acceptance and package closure remain pending.
 
 Verified on forest: [Culvert catalog contention and stateless WBT](docs/work-packages/20261109_culvert_catalog_contention/package.md) — two fresh 33/33 parallel replays; model/artifact/download checks pass; 296 focused tests and 230 WBT tests pass. Broad suite: 13,236 pass, one confirmed baseline template failure. Production unchanged.
@@ -850,6 +852,27 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+
+### Test-Support Production Guardrails and F1-F7 Readiness
+
+**Started**: 2026-11-11 Pacific / 2026-11-12 UTC
+
+**Priority/Security**: Low conditional F7 finding / `high` change impact
+
+**Link**: [docs/work-packages/20261111_test_support_production_guardrails/](docs/work-packages/20261111_test_support_production_guardrails/)
+
+**Scope**: Close F7 by defaulting the deployment profile to production,
+refusing production test-support registration, and authenticating intentional
+development/test support calls with a short-lived existing WEPP_AUTH token that
+`wctl run-playwright` injects automatically. No smoke markers, static token,
+new identity system, or production deployment is included.
+
+**Status**: M0-M3 implemented after reviewed checkpoint `21a75b794`; independent
+source reviews and component/frontend gates pass. Production URL map has no
+support routes. M4 real create/load passes but NFS cleanup returns 200 with a
+remaining directory; automatic browser/retention evidence remains open. F6 M4
+and exact combined gates block closure. No service restart or deployment.
 
 
 ### Redis Credential Transport Hardening

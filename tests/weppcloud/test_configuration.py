@@ -10,6 +10,12 @@ from wepppy.config import redis_settings
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def isolated_support_environment(monkeypatch):
+    monkeypatch.delenv("WEPPCLOUD_DEPLOYMENT_PROFILE", raising=False)
+    monkeypatch.delenv("TEST_SUPPORT_ENABLED", raising=False)
+
+
 class _DummyApp:
     def __init__(self) -> None:
         self.config = {}
@@ -304,3 +310,50 @@ def test_creation_policy_rejects_invalid_configuration(monkeypatch, raw):
     monkeypatch.setenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", raw)
     with pytest.raises(ValueError, match="WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION"):
         _build_configured_app(monkeypatch)
+
+
+@pytest.mark.parametrize("profile", [None, "", "  ", "production", " Development ", "TEST", "unknown"])
+@pytest.mark.parametrize("enabled", [False, True])
+def test_support_profile_matrix(monkeypatch, profile, enabled):
+    if profile is None:
+        monkeypatch.delenv("WEPPCLOUD_DEPLOYMENT_PROFILE", raising=False)
+    else:
+        monkeypatch.setenv("WEPPCLOUD_DEPLOYMENT_PROFILE", profile)
+    monkeypatch.setenv("TEST_SUPPORT_ENABLED", str(enabled))
+    normalized = (profile or "").strip().lower() or "production"
+    if normalized == "unknown" or (normalized == "production" and enabled):
+        monkeypatch.setattr(configuration, "_resolve_mail_config", lambda: pytest.fail("guard ran after secret resolution"))
+        with pytest.raises(ValueError, match="WEPPCLOUD_DEPLOYMENT_PROFILE" if normalized == "unknown" else "TEST_SUPPORT_ENABLED"):
+            configuration.config_app(_DummyApp())
+    else:
+        app = _build_configured_app(monkeypatch)
+        assert app.config["WEPPCLOUD_DEPLOYMENT_PROFILE"] == normalized
+        assert app.config["TEST_SUPPORT_ENABLED"] is enabled
+
+
+@pytest.mark.parametrize('compose_name', ['dev', 'prod', 'prod.worker'])
+def test_compose_lazy_flask_consumers_share_valid_profile(monkeypatch, compose_name):
+    """Support-enabled dev auth imports must work outside the web container too."""
+    import importlib.util
+    from pathlib import Path
+    import yaml
+    root = Path(__file__).resolve().parents[2]
+    spec = importlib.util.spec_from_file_location('compose_contract', root / 'scripts/compose_deploy_contract.py')
+    contract = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(contract)
+    source = (root / f'docker/docker-compose.{compose_name}.yml').read_text()
+    # Match the hostile/intentional support=true input independently rendered with wctl.
+    source = source.replace('${TEST_SUPPORT_ENABLED:-false}', '"true"')
+    services = yaml.safe_load(source)['services']
+    for name in contract.FLASK_CONSUMERS & services.keys():
+        environment = services[name].get('environment', {})
+        profile = environment.get('WEPPCLOUD_DEPLOYMENT_PROFILE')
+        flag = environment.get('TEST_SUPPORT_ENABLED', 'true')
+        if profile is None:
+            monkeypatch.delenv('WEPPCLOUD_DEPLOYMENT_PROFILE', raising=False)
+        else:
+            monkeypatch.setenv('WEPPCLOUD_DEPLOYMENT_PROFILE', profile)
+        monkeypatch.setenv('TEST_SUPPORT_ENABLED', flag)
+        app = _build_configured_app(monkeypatch)
+        assert app.config['WEPPCLOUD_DEPLOYMENT_PROFILE'] == ('development' if compose_name == 'dev' else 'production'), name
+        assert app.config['TEST_SUPPORT_ENABLED'] is (compose_name == 'dev'), name

@@ -4,7 +4,7 @@ This document explains how to run the UI smoke suite, provision disposable runs,
 
 ## 1. Prerequisites
 - Backend running (dev stack or staging).
-- `TEST_SUPPORT_ENABLED=true` set for the backend service (either in `docker/.env` or exported manually) so `/tests/api/*` endpoints are available.
+- `WEPPCLOUD_DEPLOYMENT_PROFILE=development` and `TEST_SUPPORT_ENABLED=true` in the backend environment so `/tests/api/*` endpoints are available. `wctl run-playwright` supplies bearer authentication transiently; never store the bearer in `docker/.env`.
 - Inside `wepppy/weppcloud/static-src` run:
   ```bash
   npm install
@@ -79,37 +79,17 @@ wctl2 run-playwright \
 `--run-path` now auto-appends `/gl-dashboard` for that suite; you can also pass `--gl-dashboard-url` or `--gl-dashboard-path` directly. The wrapper defaults `PLAYWRIGHT_BROWSERS_PATH` to `./.playwright-browsers` (override via `--browsers-path` when sharing a cache).
 Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_CONFIG`, etc.) and support advanced toggles like `--headed`, `--run-root`, and `--playwright-args`. See `tools/wctl2/docs/playwright.SPEC.md` for the full option table.
 
-### Manual env export (legacy)
-- From repository root:
-  ```bash
-  export TEST_SUPPORT_ENABLED=true
-  export SMOKE_CREATE_RUN=true
-  export SMOKE_RUN_CONFIG=dev_unit_1
-  # optional overrides:
-  export SMOKE_RUN_OVERRIDES='{"general:dem_db":"ned1/2016"}'
-  wctl run-npm smoke
-  ```
-- Alternatively, run locally inside `static-src`: `npm run smoke`.
-- **For testing against dev/staging environments**, ensure `TEST_SUPPORT_ENABLED=true` is set in the backend environment and restart the service. Then:
-  ```bash
-  cd wepppy/weppcloud/static-src
-  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org \
-  SMOKE_SITE_PREFIX=/weppcloud \
-  SMOKE_RUN_CONFIG=disturbed9002_wbt \
-  npm run test:playwright -- --project=runs0
-  ```
-  **Note:** The dev domain (wc.bearhive.duckdns.org) uses HTTPS with a `/weppcloud` prefix. Use `SMOKE_SITE_PREFIX=/weppcloud` to keep route resolution explicit. Example run with all tests passing (8 passed, 1 skipped):
-  ```bash
-  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org \
-  SMOKE_SITE_PREFIX=/weppcloud \
-  SMOKE_RUN_CONFIG=disturbed9002_wbt \
-  npm run test:playwright -- --project=runs0 --workers=1
-  ```
+### Direct npm execution
+
+Prefer `wctl run-playwright`. A trusted harness invoking npm directly must
+inject `SMOKE_TEST_SUPPORT_TOKEN` transiently and set `SMOKE_BASE_URL` to the
+correct application prefix. The backend requires explicit development/test
+profile and enabled support. Do not store tokens in shell history or env files.
 
 ### Environment Variables
 | Variable | Default | Description |
 | --- | --- | --- |
-| `TEST_SUPPORT_ENABLED` | `false` | Must be `true` for `/tests/api/*` endpoints. |
+| `TEST_SUPPORT_ENABLED` | `false` | Requires explicit development/test profile and support bearer. |
 | `SMOKE_CREATE_RUN` | `true` | When `true`, auto-provisions a run via `/tests/api/create-run`. Set to `false` to reuse an existing run. |
 | `SMOKE_RUN_CONFIG` | `dev_unit_1` | Config slug for provisioning. |
 | `SMOKE_RUN_OVERRIDES` | _(unset)_ | JSON string of config overrides (e.g., `{ "general:dem_db": "ned1/2016" }`). |
@@ -159,7 +139,7 @@ All tests use request interception to mock 500 errors instead of backend failure
 ### Playwright Controller Regression Suite
 `controller-regression.spec.js` is now its own suite (`--suite controllers`) that exercises every controller listed in `static-src/tests/smoke/controller-cases.js`. Important details:
 
-- **Prerequisites:** Same as other smoke specs plus `TEST_SUPPORT_ENABLED=true`. The `/tests/api/create-run` endpoint automatically adds `playwright_load_all=true` to the runs0 URL so optional controllers (observed, debris_flow, etc.) render even when the config would normally hide them.
+- **Prerequisites:** Same profile and automatic bearer prerequisites as other smoke specs. The `/tests/api/create-run` endpoint automatically adds `playwright_load_all=true` to the runs0 URL so optional controllers (observed, debris_flow, etc.) render even when the config would normally hide them.
 - **RQ vs synchronous controllers:** Cases with `workflow: "rq_job"` run through `runRqJobWorkflow`, which stubs a successful `job_id` response followed by a failure response. Synchronous controllers (lacking the flag) simply intercept the HTTP request and inject a 500 payload.
 - **Controller metadata:** `controller-cases.js` defines per-controller selectors and optional hooks (`prepareAction` for form setup, `failureStatus` for non-500 responses, `expectJobHint` to skip hint assertions, `requireHintVisible` to ensure a job hint is actually shown). Keep helpers in that file lightweight; if more bespoke helpers accumulate, fold them into a small config module.
 - **Adding cases:** Provide `formSelector`, `actionSelector`, `stacktraceLocator`, and `hintLocator`. Set `workflow: "rq_job"` if the real controller enqueues an RQ task so the suite can validate both job-hint updates and failure stacktraces. Consider `requireHintVisible` whenever the UI should keep the job hint visible (for example, after switching modes).
@@ -173,7 +153,7 @@ All tests use request interception to mock 500 errors instead of backend failure
 
 ### Cleanup / Provisioning
 - Both specs provision via `/tests/api/create-run` when `SMOKE_CREATE_RUN=true`; runs are deleted automatically unless `SMOKE_KEEP_RUN=true`.
-- Manual cleanup remains available via `DELETE /tests/api/run/<runid>`.
+- Manual cleanup requires the same scoped bearer at `DELETE /tests/api/run/<runid>`; verify path absence, especially on NFS.
 
 ---
 
@@ -205,3 +185,24 @@ and `STATUS2_SMOKE_CHANNEL`. Overall timeout is at most 290 seconds. The nightly
 workflow invokes this wrapper; its runner must provision the configured secret
 files. Latency summaries contain no credentials; never enable shell tracing or
 upload secret files.
+
+## Test-support authentication
+
+Production defaults to `WEPPCLOUD_DEPLOYMENT_PROFILE=production` and never
+registers `/tests/api/*`. Explicit `development` or `test` plus
+`TEST_SUPPORT_ENABLED=true` enables the privileged support API. Production
+with support enabled refuses startup; unknown profiles also fail. Dev Compose
+selects development explicitly; production Compose pins production/disabled.
+
+Use `wctl run-playwright` for automatic one-hour WEPP_AUTH bearer minting and
+injection, including runs using `--no-create-run`. No login, cookie, manual
+token copying or smoke markers are needed for support provisioning/cleanup.
+Remote targets require verified HTTPS; localhost/loopback may use HTTP.
+The wrapper must target the environment whose container issued its token.
+Direct npm smoke needs transient `SMOKE_TEST_SUPPORT_TOKEN` injection by a
+trusted harness. Never save it to env files, reports, argv or URLs.
+
+Support calls use the shared untraced HTTP helper; ordinary application calls
+receive no support header. A valid support token can delete any resolvable run
+in that non-production environment. See the [canonical contract](../docs/schemas/weppcloud-test-support-contract.md)
+for statuses, lifetime, CSRF exemption and validation requirements.

@@ -1,3 +1,4 @@
+import { supportRequest } from './support-request.js';
 import { test, expect } from '@playwright/test';
 import controllerTestCases from './controller-test-cases.js';
 
@@ -9,7 +10,7 @@ const keepRun = process.env.SMOKE_KEEP_RUN === 'true';
 let targetRunPath = process.env.SMOKE_RUN_PATH || '';
 let createdRunId = null;
 let skipSuite = false;
-let skipReason = 'Smoke run target unavailable. Set SMOKE_RUN_PATH or enable SMOKE_CREATE_RUN (requires TEST_SUPPORT_ENABLED=true).';
+let skipReason = 'Smoke run target unavailable. Set SMOKE_RUN_PATH or enable SMOKE_CREATE_RUN (requires explicit development/test profile and wctl support bearer).';
 
 const controllerSelectors = {
   map: 'form#setloc_form .wc-map',
@@ -79,7 +80,7 @@ async function expectStacktracePanelOpen(page, controller) {
 }
 
 test.describe('runs0 smoke', () => {
-  test.beforeAll(async ({ request }) => {
+  test.beforeAll(async () => {
     if (!targetRunPath && shouldProvision) {
       const overrides = parseOverrides();
       if (skipSuite) {
@@ -87,7 +88,7 @@ test.describe('runs0 smoke', () => {
       }
 
       const createUrl = buildUrl('/weppcloud/tests/api/create-run');
-      const response = await request.post(createUrl, {
+      const response = await supportRequest.post(createUrl, {
         data: {
           config: configSlug,
           overrides
@@ -116,12 +117,12 @@ test.describe('runs0 smoke', () => {
     }
   });
 
-  test.afterAll(async ({ request }) => {
+  test.afterAll(async () => {
     if (createdRunId && !keepRun && !skipSuite) {
       try {
-        await request.delete(buildUrl(`/weppcloud/tests/api/run/${createdRunId}`));
+        await supportRequest.delete(buildUrl(`/weppcloud/tests/api/run/${createdRunId}`));
       } catch (err) {
-        console.warn('Failed to delete smoke run', err);
+        console.warn('Failed to delete smoke run', createdRunId, err);
       }
     }
   });

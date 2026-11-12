@@ -82,5 +82,6 @@ def register_blueprints(app):
     for attr in _BLUEPRINT_ATTRS:
         _register_from_routes(app, attr)
 
-    if app.config.get("TEST_SUPPORT_ENABLED"):
+    if (app.config.get("WEPPCLOUD_DEPLOYMENT_PROFILE") in {"development", "test"}
+            and app.config.get("TEST_SUPPORT_ENABLED")):
         _register_from_routes(app, "test_bp")

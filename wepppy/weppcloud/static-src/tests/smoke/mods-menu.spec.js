@@ -1,3 +1,4 @@
+import { supportRequest } from './support-request.js';
 /* eslint-env browser, node */
 import { test, expect } from '@playwright/test';
 
@@ -65,13 +66,13 @@ function parseOverrides() {
 }
 
 test.describe('run header mods menu', () => {
-  test.beforeAll(async ({ request }) => {
+  test.beforeAll(async () => {
     if (!targetRunPath && shouldProvision) {
       const overrides = parseOverrides();
       if (skipSuite) return;
 
       const createUrl = buildUrl('/weppcloud/tests/api/create-run');
-      const response = await request.post(createUrl, {
+      const response = await supportRequest.post(createUrl, {
         data: {
           config: configSlug,
           overrides
@@ -103,12 +104,12 @@ test.describe('run header mods menu', () => {
     targetRunPath = sanitizeRunUrl(targetRunPath);
   });
 
-  test.afterAll(async ({ request }) => {
+  test.afterAll(async () => {
     if (createdRunId && !keepRun && !skipSuite) {
       try {
-        await request.delete(buildUrl(`/weppcloud/tests/api/run/${createdRunId}`));
+        await supportRequest.delete(buildUrl(`/weppcloud/tests/api/run/${createdRunId}`));
       } catch (err) {
-        console.warn('Failed to delete mods smoke run', err);
+        console.warn('Failed to delete mods smoke run', createdRunId, err);
       }
     }
   });

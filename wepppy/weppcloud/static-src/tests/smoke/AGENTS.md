@@ -130,7 +130,8 @@ wctl run-playwright --suite full --grep "axe accessibility" --workers 1
 - Typical sequence:
   - login to `/weppcloud/login` with stored credentials and a solved Cap.js token
     when the login page requires one
-  - request a protected run route (or use `/weppcloud/tests/api/create-run` in smoke flows)
+  - request a protected run route for UI checks; support provisioning/cleanup uses
+    the shared supportRequest bearer helper and does not depend on that session
   - verify `#cap-gate` is absent before continuing assertions
 
 ## Using `dev-agent` for RQ-Engine API
@@ -202,3 +203,24 @@ PY
   - `SMOKE_AGENT_EMAIL`
   - `SMOKE_AGENT_PASSWORD`
 - Keep account names stable so smoke suites and docs do not drift.
+
+## Test-support authentication
+
+Production defaults to `WEPPCLOUD_DEPLOYMENT_PROFILE=production` and never
+registers `/tests/api/*`. Explicit `development` or `test` plus
+`TEST_SUPPORT_ENABLED=true` enables the privileged support API. Production
+with support enabled refuses startup; unknown profiles also fail. Dev Compose
+selects development explicitly; production Compose pins production/disabled.
+
+Use `wctl run-playwright` for automatic one-hour WEPP_AUTH bearer minting and
+injection, including runs using `--no-create-run`. No login, cookie, manual
+token copying or smoke markers are needed for support provisioning/cleanup.
+Remote targets require verified HTTPS; localhost/loopback may use HTTP.
+The wrapper must target the environment whose container issued its token.
+Direct npm smoke needs transient `SMOKE_TEST_SUPPORT_TOKEN` injection by a
+trusted harness. Never save it to env files, reports, argv or URLs.
+
+Support calls use the shared untraced HTTP helper; ordinary application calls
+receive no support header. A valid support token can delete any resolvable run
+in that non-production environment. See the [canonical contract](../../../../../docs/schemas/weppcloud-test-support-contract.md)
+for statuses, lifetime, CSRF exemption and validation requirements.

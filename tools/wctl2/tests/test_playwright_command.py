@@ -37,8 +37,8 @@ def test_build_overrides_json_invalid_format_exits() -> None:
 
 
 def test_resolve_base_url_prefers_override(monkeypatch: pytest.MonkeyPatch) -> None:
-    context = _dummy_context({"PLAYWRIGHT_LOCAL_URL": "http://override.local"})
-    assert playwright_cmd._resolve_base_url(context, "local", None) == "http://override.local"
+    context = _dummy_context({"PLAYWRIGHT_LOCAL_URL": "https://override.local"})
+    assert playwright_cmd._resolve_base_url(context, "local", None) == "https://override.local"
 
 
 def test_resolve_base_url_requires_custom_base() -> None:
@@ -53,7 +53,7 @@ def test_run_path_disables_provisioning(monkeypatch: pytest.MonkeyPatch, temp_pr
     captured_env: Dict[str, str] = {}
     ping_targets: List[str] = []
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         ping_targets.append(url)
 
     def fake_run(cmd, cwd=None, env=None):
@@ -101,7 +101,7 @@ def test_gl_dashboard_url_and_browsers_path(monkeypatch: pytest.MonkeyPatch, tem
     captured_env: Dict[str, str] = {}
     calls: List[List[str]] = []
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         return None
 
     def fake_run(cmd, cwd=None, env=None):
@@ -141,7 +141,7 @@ def test_report_triggers_show_report_on_success(monkeypatch: pytest.MonkeyPatch,
     runner = CliRunner()
     calls: List[List[str]] = []
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         return None
 
     def fake_run(cmd, cwd=None, env=None):
@@ -174,7 +174,7 @@ def test_report_skips_show_report_on_failure(monkeypatch: pytest.MonkeyPatch, te
     runner = CliRunner()
     calls: List[List[str]] = []
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         return None
 
     def fake_run(cmd, cwd=None, env=None):
@@ -207,7 +207,7 @@ def test_project_env_override(monkeypatch: pytest.MonkeyPatch, temp_project) -> 
     runner = CliRunner()
     calls: List[List[str]] = []
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         return None
 
     def fake_run(cmd, cwd=None, env=None):
@@ -236,7 +236,7 @@ def test_explicit_project_wins(monkeypatch: pytest.MonkeyPatch, temp_project) ->
     runner = CliRunner()
     calls: List[List[str]] = []
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         return None
 
     def fake_run(cmd, cwd=None, env=None):
@@ -274,30 +274,30 @@ def test_ping_support_success(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(
         playwright_cmd.urllib.request,
-        "urlopen",
-        lambda request, timeout=0: _Response(),
+        "build_opener",
+        lambda *args: SimpleNamespace(open=lambda request, timeout=0: _Response()),
     )
 
     # Should not raise
-    playwright_cmd._ping_test_support("http://localhost:9999/weppcloud")
+    playwright_cmd._ping_test_support("http://localhost:9999/weppcloud", "test.token.signature")
 
 
 def test_ping_support_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         playwright_cmd.urllib.request,
-        "urlopen",
-        lambda *args, **kwargs: (_ for _ in ()).throw(urllib.error.URLError("down")),
+        "build_opener",
+        lambda *args: SimpleNamespace(open=lambda *args, **kwargs: (_ for _ in ()).throw(urllib.error.URLError("down"))),
     )
 
     with pytest.raises(typer.Exit):
-        playwright_cmd._ping_test_support("http://localhost:9999/weppcloud")
+        playwright_cmd._ping_test_support("http://localhost:9999/weppcloud", "test.token.signature")
 
 
 def test_report_path_without_report_opens_no_viewer(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
     runner = CliRunner()
     calls: List[List[str]] = []
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         return None
 
     def fake_run(cmd, cwd=None, env=None):
@@ -342,7 +342,7 @@ def test_profile_mode_sets_run_path(monkeypatch: pytest.MonkeyPatch, temp_projec
     subprocess_calls: List[Dict[str, Any]] = []
     ping_targets: List[str] = []
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         ping_targets.append(url)
 
     def fake_run(cmd, cwd=None, env=None):
@@ -391,7 +391,7 @@ def test_profile_mode_sets_run_path(monkeypatch: pytest.MonkeyPatch, temp_projec
 def test_profile_missing_capture(monkeypatch: pytest.MonkeyPatch, temp_project: Path) -> None:
     runner = CliRunner()
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         return None
 
     def fake_run(cmd, cwd=None, env=None):
@@ -425,7 +425,7 @@ def test_profile_keep_run_skips_cleanup(monkeypatch: pytest.MonkeyPatch, temp_pr
     runner = CliRunner()
     subprocess_calls: List[Dict[str, Any]] = []
 
-    def fake_ping(url: str) -> None:
+    def fake_ping(url: str, token: str) -> None:
         return None
 
     def fake_run(cmd, cwd=None, env=None):
@@ -461,3 +461,133 @@ def test_profile_keep_run_skips_cleanup(monkeypatch: pytest.MonkeyPatch, temp_pr
 
     assert result.exit_code == 0, result.output
     assert (run_root / "sand45").exists()
+
+
+@pytest.fixture(autouse=True)
+def automatic_support_mint(monkeypatch):
+    monkeypatch.setattr(playwright_cmd, "mint_test_support_token", lambda ctx: "test.token.signature")
+
+
+@pytest.mark.parametrize("url", ["http://remote.example", "https://user:pass@example.com", "file:///tmp/x"])
+def test_unsafe_support_url_rejected_before_mint(monkeypatch, temp_project, url):
+    monkeypatch.setattr(playwright_cmd, "mint_test_support_token", lambda ctx: pytest.fail("mint before URL validation"))
+    result = CliRunner().invoke(app, ['--project-dir', str(temp_project), 'run-playwright', '--base-url', url])
+    assert result.exit_code == 1
+
+
+def test_mint_failure_stops_ping_and_npm(monkeypatch, temp_project):
+    def fail(ctx):
+        raise typer.Exit(1)
+    monkeypatch.setattr(playwright_cmd, 'mint_test_support_token', fail)
+    monkeypatch.setattr(playwright_cmd, '_ping_test_support', lambda *a: pytest.fail('ping after mint failure'))
+    monkeypatch.setattr(playwright_cmd.subprocess, 'run', lambda *a, **kw: pytest.fail('npm after mint failure'))
+    result = CliRunner().invoke(app, ['--project-dir', str(temp_project), 'run-playwright', '--base-url', 'http://localhost:9999'])
+    assert result.exit_code == 1
+
+
+def test_support_mint_captures_output_and_bounds_claims(monkeypatch, capsys, tmp_path):
+    from tools.wctl2.commands.auth import mint_test_support_token
+    seen = {}
+    def run(args, **kwargs):
+        seen.update(args=args, **kwargs)
+        return SimpleNamespace(returncode=0, stdout='private.jwt.signature\n')
+    monkeypatch.setattr(playwright_cmd.subprocess, 'run', run)
+    ctx = SimpleNamespace(compose_base_args=lambda: [], project_dir=tmp_path, environment={})
+    assert mint_test_support_token(ctx) == 'private.jwt.signature'
+    assert seen['capture_output'] and '-T' in seen['args']
+    assert '--expires-in 3600' in seen['args'][-1]
+    assert '--audience weppcloud-test-support' in seen['args'][-1]
+    assert '--scope test:support' in seen['args'][-1]
+    assert 'private.jwt.signature' not in repr(seen)
+    assert 'private.jwt.signature' not in capsys.readouterr().out
+
+
+def test_ping_does_not_forward_bearer_on_redirect(monkeypatch):
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    from threading import Thread
+    seen = []
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            seen.append((self.path, self.headers.get('Authorization')))
+            self.send_response(302)
+            self.send_header('Location', '/unrelated')
+            self.end_headers()
+        def log_message(self, *args):
+            pass
+    server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        with pytest.raises(typer.Exit):
+            playwright_cmd._ping_test_support(f'http://127.0.0.1:{server.server_port}', 'test.token.signature')
+        assert seen == [('/tests/api/ping', 'Bearer test.token.signature')]
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()
+
+
+@pytest.mark.parametrize('returncode,stdout', [(1, 'private.jwt.signature'), (0, 'private output')])
+def test_real_mint_failure_suppresses_output(monkeypatch, capsys, tmp_path, returncode, stdout):
+    from tools.wctl2.commands.auth import mint_test_support_token
+    monkeypatch.setattr(playwright_cmd.subprocess, 'run', lambda *a, **kw: SimpleNamespace(returncode=returncode, stdout=stdout, stderr=stdout))
+    ctx = SimpleNamespace(compose_base_args=lambda: [], project_dir=tmp_path, environment={})
+    with pytest.raises(typer.Exit):
+        mint_test_support_token(ctx)
+    output = capsys.readouterr()
+    assert stdout not in output.out + output.err
+    assert 'signing configuration' in output.err
+
+
+def test_only_test_child_receives_token(monkeypatch, temp_project):
+    seen = []
+    monkeypatch.setattr(playwright_cmd, '_ping_test_support', lambda *a: None)
+    def run(args, **kwargs):
+        seen.append((list(args), dict(kwargs['env'])))
+        return _DummyResult()
+    monkeypatch.setattr(playwright_cmd.subprocess, 'run', run)
+    result = CliRunner().invoke(app, ['--project-dir', str(temp_project), 'run-playwright', '--base-url', 'http://localhost:9999', '--report'])
+    assert result.exit_code == 0, result.output
+    assert seen[0][1]['SMOKE_TEST_SUPPORT_TOKEN'] == 'test.token.signature'
+    assert 'SMOKE_TEST_SUPPORT_TOKEN' not in seen[1][1]
+    assert 'test.token.signature' not in result.output
+    assert all('test.token.signature' not in repr(args) for args, env in seen)
+
+
+def test_npm_failure_is_token_free(monkeypatch, temp_project):
+    monkeypatch.setattr(playwright_cmd, '_ping_test_support', lambda *a: None)
+    def run(*args, **kwargs):
+        raise FileNotFoundError('test.token.signature')
+    monkeypatch.setattr(playwright_cmd.subprocess, 'run', run)
+    result = CliRunner().invoke(app, ['--project-dir', str(temp_project), 'run-playwright', '--base-url', 'http://localhost:9999'])
+    assert result.exit_code == 1
+    assert 'test.token.signature' not in result.output
+    assert 'Cannot launch Playwright' in result.output
+    assert app.pretty_exceptions_show_locals is False
+
+
+def test_ping_ignores_ambient_proxy(monkeypatch):
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    from threading import Thread
+    seen = []
+    class Proxy(BaseHTTPRequestHandler):
+        def do_GET(self):
+            seen.append(self.path)
+            self.send_response(200)
+            self.end_headers()
+        def log_message(self, *args):
+            pass
+    server = ThreadingHTTPServer(('127.0.0.1', 0), Proxy)
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    monkeypatch.setenv('http_proxy', f'http://127.0.0.1:{server.server_port}')
+    monkeypatch.setenv('no_proxy', '')
+    monkeypatch.setenv('NO_PROXY', '')
+    try:
+        with pytest.raises(typer.Exit):
+            playwright_cmd._ping_test_support('http://127.0.0.1:1', 'private.jwt.signature')
+        assert seen == []
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()

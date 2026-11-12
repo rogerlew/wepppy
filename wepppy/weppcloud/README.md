@@ -130,7 +130,7 @@ See `docs/infrastructure/secrets.md` for the authoritative inventory.
 | `REDIS_HOST` | `redis` | Redis server hostname |
 | `REDIS_PORT` | `6379` | Redis server port |
 | `WEPPCLOUD_RUNS_DIR` | `/geodata/weppcloud_runs` | Directory for run storage |
-| `TEST_SUPPORT_ENABLED` | `false` | Enable test support endpoints |
+| `TEST_SUPPORT_ENABLED` | `false` | Enable bearer-only support in explicit development/test profile |
 | `DTALE_INTERNAL_TOKEN` | *(optional)* | Token for D-Tale integration |
 | `SESSION_COOKIE_SAMESITE` | `Lax` | Flask session cookie SameSite policy (`Lax`, `Strict`, or `None`) |
 | `SESSION_COOKIE_NAME` | `session` | Cookie name written by Flask; changed to `__Host-weppcloud_session` at activation |
@@ -470,3 +470,24 @@ University of Idaho (2015-Present), Swansea University (2019-Present)
 Contributors: Roger Lew, Mariana Dobre, William Elliot, Pete Robichaud, Erin Brooks, Anurag Srivastava, Jim Frankenberger, Jonay Neris, Stefan Doerr, Cristina Santin, Mary E. Miller
 
 License: BSD-3 Clause (see [license.txt](../../license.txt))
+
+## Test-support authentication
+
+Production defaults to `WEPPCLOUD_DEPLOYMENT_PROFILE=production` and never
+registers `/tests/api/*`. Explicit `development` or `test` plus
+`TEST_SUPPORT_ENABLED=true` enables the privileged support API. Production
+with support enabled refuses startup; unknown profiles also fail. Dev Compose
+selects development explicitly; production Compose pins production/disabled.
+
+Use `wctl run-playwright` for automatic one-hour WEPP_AUTH bearer minting and
+injection, including runs using `--no-create-run`. No login, cookie, manual
+token copying or smoke markers are needed for support provisioning/cleanup.
+Remote targets require verified HTTPS; localhost/loopback may use HTTP.
+The wrapper must target the environment whose container issued its token.
+Direct npm smoke needs transient `SMOKE_TEST_SUPPORT_TOKEN` injection by a
+trusted harness. Never save it to env files, reports, argv or URLs.
+
+Support calls use the shared untraced HTTP helper; ordinary application calls
+receive no support header. A valid support token can delete any resolvable run
+in that non-production environment. See the [canonical contract](../../docs/schemas/weppcloud-test-support-contract.md)
+for statuses, lifetime, CSRF exemption and validation requirements.

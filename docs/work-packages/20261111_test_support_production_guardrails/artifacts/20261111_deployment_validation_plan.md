@@ -1,7 +1,7 @@
 # F1-F7 deployment-validation plan
 
-**Status**: Scaffold only; candidate and execution authority absent  
-**Date**: 2026-11-12 UTC  
+**Status**: Source-informed draft; M4/F6/candidate hold; execution authority absent
+**Date**: 2026-11-12 UTC
 **Execution authorization**: none
 
 This document will become the reviewed runbook for validating the combined
@@ -201,3 +201,90 @@ owning package/incident record.
 - [ ] Production execution authority is recorded separately with timestamp and
       exact targets.
 
+## Source reconciliation (2026-11-12 UTC; no execution)
+
+Re-read `scripts/deploy-production.sh`, `wctl/install.sh`, production Compose,
+wepp1 overlay and worker Compose. Installed preset `wepp1` selects production
+plus `docker-compose.prod.wepp1.yml`; `worker` selects
+`docker-compose.prod.worker.yml` for wepp2. Host installation and running image
+IDs still require separately authorized read-only verification before approval.
+
+| Change | Source-defined consumers | Activation constraint |
+| --- | --- | --- |
+| F1 | weppcloud, query-engine, Caddy/browser credential integration | check valid/private/public workflows and static/proxy source |
+| F2 | browse, dtale, Bootstrap admission in web/common-image consumers | all loader/admission consumers must share accepted revision |
+| F3 | browse plus deployed static assets | preserve valid filename navigation |
+| F4 | weppcloud, rq-engine, status, preflight, served frontend assets | Go service names in Compose are status/preflight |
+| F5/F6 | WEPPCLOUD_IMAGE consumers in full and worker presets | Python workers must receive reviewed common image too |
+| F7 | weppcloud; host wctl/browser tooling for non-production validation | production remains route-absent; do not mint support token there |
+
+The common-image full preset contains weppcloud, browse, download, dtale,
+profile-playback, elevationquery, metquery, wmesque, wmesque2, query-engine,
+shape-converter, rq-engine, webpush, rq-worker, rq-worker-batch and scheduler.
+The wepp1 overlay disables the dedicated fork/archive role. The worker preset
+contains rq-worker, rq-worker-batch and separately imaged weppcloudr. Whether
+weppcloudr imports changed Python code must be inspected on the exact candidate;
+its distinct image is not covered merely by a common-image rebuild.
+
+`--targeted-web` recreates only weppcloud/rq-engine and is insufficient for the
+combined F1-F7 rollout. The full/worker paths derive their service maps, build,
+verify topology, retain Redis/static-assets/health behavior and observe restart
+counts. Use `scripts/deploy-production.sh --print-plan` under each correct
+installed preset to review the concrete activation before authorization.
+Do not substitute raw Compose recreation or a registry/Kubernetes workflow.
+Preserve queue data and require `--no-flush-rq-db --skip-docker-prune` for this
+reviewed retention window; no cancellation or Redis flush is implied.
+
+Known-good image IDs/configuration, F6 evaluator acceptance, service drain
+policy and exact rollback invocation are unresolved inputs, not placeholders
+that may be ignored at execution. The batch-only rollback option does not
+provide a general full-stack rollback. The future operator must verify a
+containment-preserving retained-image/configuration recovery through the
+canonical entry point before approving activation.
+
+Hold conditions now include the F7 NFS cleanup failure: even the actual local
+create/load/delete sequence cannot yet satisfy direct path absence. Rehearsal
+must prove repair under production-equivalent mounts and identity. A 200
+cleanup response is explicitly insufficient. No final approval is sought while
+M4, F6 M4, exact combined tests, image IDs and rollback inputs are absent.
+
+## Draft review corrections and final gate blockers
+
+Operations reviewer `deployment_review` and security reviewer
+`contract_security` identified the following required safeguards. These are
+planning requirements; no deploy-script change or execution is authorized here.
+
+- Require `--skip-docker-prune` for every rehearsal and production activation
+  while rollback images/observation are retained. The script defaults to
+  `docker system prune -a -f`, which can remove unused known-good images.
+  Pruning requires a separate decision after the rollback/observation window.
+- Inventory every host/worker sharing Redis DB9 before the global RQ fence.
+  Record fence owner, heartbeat, paused/drained worker identities and final
+  resume receipt across hosts. Script error recovery can resume the fence after
+  partial activation; rehearsal must prove coordinated safe worker recovery,
+  including mixed-image failure, before accepting local health as sufficient.
+- Existing `compose_deploy_contract.validate_runtime_config` validates secret
+  wiring, not F6 dependency evidence or F7 profile/flag invariants. Required
+  pre-disruption image/advisory and profile/route checks must become concrete,
+  reviewed blocking steps before activation. They are currently unimplemented
+  final-gate prerequisites, not assumed protections of the current script.
+
+Final runbook approval remains withheld until exact candidate/image/rollback
+identities, these pre-disruption gates, the cross-host fence recovery receipt,
+F6 M4 and F7 NFS/browser acceptance are supplied. No current draft verdict
+permits service activation or production mutation.
+
+Freeze the reviewed checkout and verify its full revision immediately before
+activation; require supported `--skip-pull` so the script's default pull cannot
+replace the evidence-bound source. Any pull or source change invalidates the
+candidate/image/gate receipts and returns to review before activation.
+
+Independent recheck: `deployment_review` (operations/security control) and
+`contract_security` (security reviewer) confirmed these draft corrections on
+2026-11-12 UTC. No open medium/high draft-quality findings; approved only as a
+nonexecuted HOLD document. Final runbook/execution approval remains withheld.
+
+The operations review also found the common dev support flag reached lazy Flask
+consumers without the new profile. M1 now sets development on the common anchor;
+production and worker common anchors pin production/false. All source-defined
+Flask consumers pass configured-startup tests and rendered-value checks.

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import ipaddress
+import http.client
 import shlex
 import subprocess
 import urllib.error
@@ -14,6 +16,7 @@ from uuid import uuid4
 
 import typer
 
+from .auth import mint_test_support_token
 from ..context import CLIContext
 if TYPE_CHECKING:
     EnvironmentPreset = Literal["local", "local-direct", "dev", "staging", "prod", "custom"]
@@ -227,32 +230,39 @@ def _resolve_gl_dashboard_targets(
     return url_value, path_value
 
 
-def _ping_test_support(base_url: str) -> None:
-    """Ensure /tests/api/ping is reachable before running Playwright."""
+def _validate_support_url(base_url: str) -> None:
+    parsed = urllib.parse.urlparse(base_url)
+    host = parsed.hostname or ""
+    try:
+        loopback = ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        loopback = host.lower() == "localhost"
+    if (parsed.username is not None or parsed.password is not None or not host
+            or parsed.query or parsed.fragment
+            or not (parsed.scheme == "https" or (parsed.scheme == "http" and loopback))):
+        typer.echo("[wctl2] Support URL requires HTTPS (HTTP only on loopback), without userinfo/query/fragment.", err=True)
+        raise typer.Exit(1)
 
+
+class _NoSupportRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def _ping_test_support(base_url: str, token: str) -> None:
+    """Authenticate preflight without forwarding a credential on redirects."""
+    _validate_support_url(base_url)
     prefix = base_url if base_url.endswith("/") else f"{base_url}/"
     ping_url = urllib.parse.urljoin(prefix, "tests/api/ping")
+    request = urllib.request.Request(ping_url, headers={"Authorization": f"Bearer {token}"}, method="GET")
     try:
-        request = urllib.request.Request(ping_url, method="GET")
-        with urllib.request.urlopen(request, timeout=5) as response:  # nosec B310 - controlled URL
+        with urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoSupportRedirect()).open(request, timeout=5) as response:
             if response.status != 200:
-                typer.echo(
-                    f"[wctl2] Test support endpoint returned {response.status}. "
-                    "Ensure TEST_SUPPORT_ENABLED=true in backend.",
-                    err=True,
-                )
-                raise typer.Exit(1)
-    except urllib.error.URLError as exc:
-        reason = getattr(exc, "reason", exc)
-        typer.echo(
-            f"[wctl2] Cannot reach {ping_url}: {reason}. "
-            "Is the backend running?",
-            err=True,
-        )
-        raise typer.Exit(1)
-    except Exception as exc:  # pragma: no cover - defensive catch-all
-        typer.echo(f"[wctl2] Ping check failed: {exc}", err=True)
-        raise typer.Exit(1)
+                raise urllib.error.URLError("Support unavailable")
+    except (urllib.error.URLError, OSError, ValueError, http.client.HTTPException):
+        # Transport exceptions may retain request data; emit only a fixed diagnostic.
+        typer.echo("[wctl2] Support ping failed; check development/test profile, enabled support, URL and WEPP_AUTH configuration.", err=True)
+        raise typer.Exit(1) from None
 
 
 def _build_overrides_json(overrides: List[str]) -> Optional[str]:
@@ -405,7 +415,9 @@ def register(app: typer.Typer) -> None:
 
         effective_env = "custom" if base_url else env_value
         resolved_url = _resolve_base_url(context, effective_env, base_url)
-        _ping_test_support(resolved_url)
+        _validate_support_url(resolved_url)
+        support_token = mint_test_support_token(context)
+        _ping_test_support(resolved_url, support_token)
 
         if suite_value not in SUITE_PATTERNS:
             typer.echo(f"[wctl2] Unknown suite preset '{suite}'.", err=True)
@@ -426,6 +438,7 @@ def register(app: typer.Typer) -> None:
         env_vars = dict(context.environment)
         env_vars["PLAYWRIGHT_BROWSERS_PATH"] = browsers_path or DEFAULT_BROWSERS_PATH
         env_vars["SMOKE_BASE_URL"] = resolved_url
+        env_vars["SMOKE_TEST_SUPPORT_TOKEN"] = support_token
         env_vars["SMOKE_RUN_CONFIG"] = config
         env_vars["SMOKE_HEADLESS"] = "false" if headed else "true"
         env_vars["SMOKE_KEEP_RUN"] = "true" if keep_run else "false"
@@ -497,7 +510,11 @@ def register(app: typer.Typer) -> None:
                 cwd=str(static_src),
                 env=env_vars,
             )
+        except OSError:
+            typer.echo("[wctl2] Cannot launch Playwright; check npm installation and static-src path.", err=True)
+            raise typer.Exit(1) from None
         finally:
+            env_vars.pop("SMOKE_TEST_SUPPORT_TOKEN", None)
             if cloned_run:
                 _cleanup_cloned_run(Path(cloned_run["run_dir"]), keep_run)
 

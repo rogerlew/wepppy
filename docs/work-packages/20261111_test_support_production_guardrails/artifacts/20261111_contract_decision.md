@@ -1,8 +1,8 @@
 # F7 test-support and deployment-profile contract decision
 
-**Status**: Draft for M0 ratification; implementation blocked  
-**Date**: 2026-11-12 UTC  
-**Starting revision**: `cfa1fc6e79ad1db643bd70c95bc8d44dc7083367`  
+**Status**: Ratified in standalone ancestor 21a75b794; implementation follows
+**Date**: 2026-11-12 UTC
+**Starting revision**: `cfa1fc6e79ad1db643bd70c95bc8d44dc7083367`
 **Remediation**: F7 / SEC-07
 
 ## Operator Authority
@@ -98,13 +98,13 @@ The proposed rules are:
 
 Before implementation:
 
-- [ ] Author the canonical documents and exact error/TTL contract.
-- [ ] Obtain operator confirmation of the exact matrix if review changes it.
-- [ ] Obtain two independent read-only contract reviews.
-- [ ] Disposition every review finding.
-- [ ] Commit package decision, canonical contracts, reviews, and disposition as
+- [x] Author the canonical documents and exact error/TTL contract.
+- [x] Matrix unchanged; user execution authority covers the checkpoint.
+- [x] Obtain two independent read-only contract reviews.
+- [x] Disposition every review finding.
+- [x] Commit package decision, canonical contracts, reviews, and disposition as
       a standalone ancestor.
-- [ ] Record the full checkpoint revision in tracker and ExecPlan.
+- [x] Record the full checkpoint revision in tracker and ExecPlan.
 
 No code edit may precede this gate.
 

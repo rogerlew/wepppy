@@ -1,3 +1,4 @@
+import { supportRequest } from './support-request.js';
 import { test, expect } from '@playwright/test';
 import controllerCases from './controller-cases.js';
 
@@ -89,12 +90,12 @@ async function ensureControlExpanded(page, formSelector) {
 }
 
 test.describe('controller regression suite', () => {
-  test.beforeAll(async ({ request }) => {
+  test.beforeAll(async () => {
     if (targetRunPath || !shouldProvision) {
       return;
     }
 
-    const response = await request.post(buildUrl('/weppcloud/tests/api/create-run'), {
+    const response = await supportRequest.post(buildUrl('/weppcloud/tests/api/create-run'), {
       data: { config: configSlug }
     });
     if (!response.ok()) {
@@ -108,12 +109,12 @@ test.describe('controller regression suite', () => {
     targetRunPath = buildUrl(payload.run.url);
   });
 
-  test.afterAll(async ({ request }) => {
+  test.afterAll(async () => {
     if (createdRunId && !keepRun) {
       try {
-        await request.delete(buildUrl(`/weppcloud/tests/api/run/${createdRunId}`));
+        await supportRequest.delete(buildUrl(`/weppcloud/tests/api/run/${createdRunId}`));
       } catch (err) {
-        console.warn('Failed to delete smoke run', err);
+        console.warn('Failed to delete smoke run', createdRunId, err);
       }
     }
   });

@@ -1,3 +1,4 @@
+import { supportRequest } from '../support-request.js';
 import fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
@@ -200,13 +201,7 @@ async function readCsrfToken(page) {
   return String(token || '').trim();
 }
 
-function csrfHeaders(token) {
-  const headers = { ...forwardedProtoHeader };
-  if (token) {
-    headers['X-CSRFToken'] = token;
-  }
-  return headers;
-}
+
 
 async function probeAuthenticatedSession(page) {
   let csrfToken = await readCsrfToken(page);
@@ -557,21 +552,8 @@ async function ensureRunTarget(page) {
       return;
     }
 
-    let csrfToken = await readCsrfToken(page);
-    if (!csrfToken) {
-      await page.goto(buildUrl(withSitePrefix('/interfaces/')), { waitUntil: 'domcontentloaded' });
-      csrfToken = await readCsrfToken(page);
-    }
-    if (!csrfToken) {
-      skipRunScan = true;
-      runSkipReason = 'Run scan skipped: could not resolve CSRF token after authenticated login.';
-      runTargetPrepared = true;
-      return;
-    }
-
-    const response = await page.request.post(buildUrl(withSitePrefix('/tests/api/create-run')), {
+    const response = await supportRequest.post(buildUrl(withSitePrefix('/tests/api/create-run')), {
       data: { config: configSlug },
-      headers: csrfHeaders(csrfToken),
     });
 
     if (!response.ok()) {
@@ -599,19 +581,12 @@ async function ensureRunTarget(page) {
   await runTargetPromise;
 }
 
-async function cleanupProvisionedRun(page) {
+async function cleanupProvisionedRun() {
   if (!createdRunId || keepRun) {
     return;
   }
   try {
-    let csrfToken = await readCsrfToken(page);
-    if (!csrfToken) {
-      await page.goto(buildUrl(withSitePrefix('/interfaces/')), { waitUntil: 'domcontentloaded' });
-      csrfToken = await readCsrfToken(page);
-    }
-    const response = await page.request.delete(buildUrl(withSitePrefix(`/tests/api/run/${createdRunId}`)), {
-      headers: csrfHeaders(csrfToken),
-    });
+    const response = await supportRequest.delete(buildUrl(withSitePrefix(`/tests/api/run/${createdRunId}`)));
     if (!response.ok()) {
       const body = (await response.text()).trim();
       console.warn(`[axe] Failed to delete run ${createdRunId}: ${response.status()} ${response.statusText()} ${body}`);
@@ -1075,7 +1050,7 @@ test.describe('axe accessibility smoke', () => {
         await expect(launcher).toBeFocused();
       }
     } finally {
-      await cleanupProvisionedRun(page);
+      await cleanupProvisionedRun();
     }
   });
 });

@@ -36,20 +36,31 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 - [x] (2026-11-12 UTC) M0: promote and ratify the canonical profile, test-support JWT, response,
       and CSRF contract; obtain two independent reviews; commit the standalone
       checkpoint ancestor.
-- [ ] M1: implement fail-closed configuration and route registration.
-- [ ] M2: implement scoped existing-JWT authentication with no-side-effect
+- [x] (2026-11-12 UTC) M1: implement fail-closed configuration and route registration.
+- [x] (2026-11-12 UTC) M2: implement scoped existing-JWT authentication with no-side-effect
       negative coverage and no smoke-marker state.
-- [ ] M3: make wctl/Playwright token handling automatic, narrow, and
+- [x] (2026-11-12 UTC) M3: make wctl/Playwright token handling automatic, narrow, and
       non-retaining; update all consumers and docs.
-- [ ] M4: pass focused configuration, route, CLI, Compose, and unmocked smoke
-      gates.
-- [ ] M5: close correctness, QA, security, and deployment-plan review findings.
+- [ ] M4: focused configuration/route/CLI/Compose gates pass; actual production
+      URL map passes. Unmocked create/load succeeds, but NFS delete leaves a
+      directory despite 200. Automatic browser lifecycle/retention remains open.
+- [ ] M5: independent correctness/QA/security source reviews approved after
+      fixes; release hold remains for M4 cleanup and workflow evidence.
 - [ ] M6: after F6 M4, reconcile exact F1-F7 evidence and pass one combined full
       Python/frontend regression gate on the exact candidate.
 - [ ] M7: finalize the non-executed deployment-validation plan, update the audit
       board and project tracker to evidence-supported readiness, and close.
 
 ## Surprises & Discoveries
+
+- Actual forest `/wc1` is NFS4: deletion can return 200 while open-file cleanup
+  yields EBUSY and the run directory remains. Existing local-filesystem tests
+  did not establish mount parity. Direct readback prevented false acceptance.
+- Ambient proxies affect both urllib and modern Node HTTP global agents; both
+  were explicitly isolated. Node TLS verification is explicitly required even
+  when its ambient insecure override is set. Real endpoint tests cover both.
+- The running container predates profile configuration. Validation used an
+  explicit process-local profile through wctl exec, without a service restart.
 
 - Observation: the current route registration is already conditional on
   `TEST_SUPPORT_ENABLED`, so the defect is not a default-on route. The missing
@@ -89,6 +100,14 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
   Evidence: `artifacts/20261111_f1_f7_readiness_matrix.md`.
 
 ## Decision Log
+
+- Decision (2026-11-12, Codex): retain NFS cleanup as an M4 blocker, with no
+  general deletion lifecycle redesign. Rationale: M2 explicitly excludes that
+  expansion; cached-instance cleanup precedent does not cover all directly
+  constructed initialization objects. Any follow-up must prove handle lifecycle.
+- Decision (2026-11-12, Codex): no parameterization ADR is required: the fixed
+  3600-second lifetime reuses WEPP_AUTH's existing default, adds no configurable
+  threshold and changes no scientific/model parameterization.
 
 - Decision: `WEPPCLOUD_DEPLOYMENT_PROFILE` recognizes `production`,
   `development`, and `test`; absence means `production`; unknown values fail
@@ -140,12 +159,18 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 
 ## Outcomes & Retrospective
 
-M0 canonical contracts and two independent reviews are complete. The security
-transport finding was fixed and rechecked. No implementation or deployment
-has occurred; the standalone checkpoint is being committed. Fill this section after each
-milestone with the exact result, gaps, and evidence grade. At closeout, compare
-the final result with the observable outcomes in `Purpose / Big Picture` and
-state explicitly which deployment/recovery steps remain.
+M0-M3 are implemented after the reviewed contract ancestor. Production Compose
+and the actual production app (484 total rules) expose no support routes.
+Focused auth/CSRF/side-effect and CLI tests pass; frontend gates pass. Independent
+source reviews closed all changed-code medium/high findings.
+
+M4 remains open: actual create/load passed, denied delete preserved the run, but
+valid delete returned 200 with a remaining NFS directory. Scoped recovery after
+process exit removed identified fixtures and verified absence. The plan excludes
+general deletion-worker redesign; no passing runtime cleanup claim is made.
+Automatic wrapper/browser artifact scanning remains open; the forest service was
+not restarted. F6 M4 is still absent, blocking M6/M7 and package closure.
+See `artifacts/20261112_validation.md` for commands, outcomes and limitations.
 
 ## Context and Orientation
 
@@ -542,3 +567,8 @@ Initial scaffold created 2026-11-12 01:01 UTC to capture the operator's
 production-default profile, low-friction agent authentication, no-marker, and
 F1-F7 pre-deployment wrap-up decisions. No implementation or deployment has
 occurred.
+
+M0 standalone contract ancestor: `21a75b7944573f6b41f6c091349458b5b9ab1e4b` (2026-11-12 UTC).
+
+Execution update 2026-11-12 UTC: M0-M3 implemented, M4 runtime blocker retained,
+independent source reviews completed; no deployment, restart or closure.

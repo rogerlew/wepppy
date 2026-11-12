@@ -15,6 +15,8 @@ x-wepppy-image: &wepppy-image
       APP_GID: "993"
 
 x-wepppy-env: &wepppy-env
+  WEPPCLOUD_DEPLOYMENT_PROFILE: production
+  TEST_SUPPORT_ENABLED: "false"
   PYTHONUNBUFFERED: "1"
   WMESQUE_ENDPOINTS: ${WMESQUE_ENDPOINTS:-}
   WMESQUE_SYNC_ENABLED: ${WMESQUE_SYNC_ENABLED:-false}

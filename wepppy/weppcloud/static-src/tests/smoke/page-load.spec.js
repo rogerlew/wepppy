@@ -1,3 +1,4 @@
+import { supportRequest } from './support-request.js';
 import { test, expect } from '@playwright/test';
 
 const baseURL = process.env.SMOKE_BASE_URL || 'http://localhost:8080';
@@ -15,7 +16,7 @@ function buildUrl(path) {
 }
 
 test.describe('runs0 page load', () => {
-  test.beforeAll(async ({ request }) => {
+  test.beforeAll(async () => {
     if (targetRunPath || !shouldProvision) {
       if (!targetRunPath && !shouldProvision) {
         skipSuite = true;
@@ -23,7 +24,7 @@ test.describe('runs0 page load', () => {
       return;
     }
 
-    const response = await request.post(buildUrl('/tests/api/create-run'), {
+    const response = await supportRequest.post(buildUrl('/tests/api/create-run'), {
       data: { config: configSlug }
     });
     if (!response.ok()) {
@@ -41,12 +42,12 @@ test.describe('runs0 page load', () => {
     targetRunPath = buildUrl(payload.run.url);
   });
 
-  test.afterAll(async ({ request }) => {
+  test.afterAll(async () => {
     if (createdRunId && !keepRun && !skipSuite) {
       try {
-        await request.delete(buildUrl(`/tests/api/run/${createdRunId}`));
+        await supportRequest.delete(buildUrl(`/tests/api/run/${createdRunId}`));
       } catch (err) {
-        console.warn('Failed to delete smoke run', err);
+        console.warn('Failed to delete smoke run', createdRunId, err);
       }
     }
   });
