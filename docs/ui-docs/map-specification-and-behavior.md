@@ -506,7 +506,7 @@ Checklist:
 - Unit (Jest): new controller tests under `controllers_js/__tests__`.
 - UI (Playwright): extend `static-src/tests/smoke` with map_pure_gl cases.
 - Note: hover interactions are flaky in Playwright; prefer Jest for hover-specific checks.
-- E2E run: create run via `/tests/api/create-run`, step through outlet -> channel -> subcatchments -> landuse -> soils -> wepp.
+- E2E run: use `wctl run-playwright` and the shared authenticated support helper in an explicit development/test profile to create the run, then step through outlet -> channel -> subcatchments -> landuse -> soils -> wepp. Follow the [support contract](../schemas/weppcloud-test-support-contract.md).
 - Keep old Leaflet path running in CI as regression baseline until parity is proven.
 
 ## Testing quickstart (Phase 0)

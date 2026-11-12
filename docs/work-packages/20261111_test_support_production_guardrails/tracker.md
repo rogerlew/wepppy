@@ -5,7 +5,7 @@
 **Timezone**: UTC
 **Started**: 2026-11-12 01:01 UTC
 **Current phase**: M0-M3 implemented; M4 NFS cleanup/runtime acceptance blocked
-**Last updated**: 2026-11-12 01:15 UTC
+**Last updated**: 2026-11-12 UTC
 **Next milestone**: resolve M4 cleanup evidence; await F6 M4 for combined readiness
 **Finding**: F7 / SEC-07 (Low conditional; High impact when enabled)
 **Change security impact**: high
@@ -137,7 +137,7 @@ hard prerequisites for that claim.
 | Token appears in command/log/test artifact | High | Low | capture output in memory; never argv/URL/log; scan retained evidence | Open |
 | Wrapper attaches bearer to unrelated traffic | High | Low | support-route helper only; explicit request-capture tests | Open |
 | Smoke client omits auth and silently skips | Medium | Medium | fail fast with actionable wctl error; no anonymous fallback | Open |
-| Test token deletes a non-smoke run in non-production | Medium | Low | explicit environment-wide capability; issuer requires authorized host/container access; production route exclusion | Accepted design pending security sign-off |
+| Test token deletes a non-smoke run in non-production | Medium | Low | explicit environment-wide capability; issuer requires authorized host/container access; production route exclusion | Accepted design; reviewer recommendation and owner acknowledgment recorded |
 | Default-production breaks raw local startup | Low | Medium | dev Compose sets explicit development; documentation and startup errors | Open |
 | F1-F7 readiness overstates F6 or rollout evidence | High | Medium | exact evidence matrix; F6 M4 hard dependency; separate deployed status | Open |
 | F8 scope leaks into F7 | Medium | Low | explicit exclusion and separate follow-up | Mitigated by scope |
@@ -158,13 +158,15 @@ hard prerequisites for that claim.
 
 ## Review Gates
 
-- [ ] Operator-approved contract delta captured in canonical documents.
-- [ ] Two independent M0 contract reviews closed before implementation.
-- [ ] Standalone M0 ancestor recorded.
-- [ ] Correctness review passes with no unresolved medium/high findings.
-- [ ] QA review passes with no unresolved medium/high findings.
-- [ ] Security review passes with no unresolved medium/high findings.
-- [ ] Deployment-validation plan receives independent operations/security review.
+Source/draft approvals below do not waive M4 or authorize release/deployment.
+
+- [x] Operator-approved contract delta captured in canonical documents.
+- [x] Two independent M0 contract reviews closed before implementation.
+- [x] Standalone M0 ancestor recorded.
+- [x] Correctness review passes with no unresolved medium/high findings.
+- [x] QA review passes with no unresolved medium/high findings.
+- [x] Security review passes with no unresolved medium/high findings.
+- [x] Deployment-validation plan receives independent operations/security review.
 - [ ] F1-F7 readiness matrix contains exact candidate/evidence identities.
 
 ## Verification Checklist
@@ -258,3 +260,5 @@ All identified disposable fixtures were recovered after process exit. General
 cleanup redesign remains excluded. No service restart or deployment occurred.
 F6 M4, exact combined gates and final deployment-plan acceptance remain blocked.
 The ExecPlan stays active; no pre-deployment readiness is claimed.
+
+Implementation revision: `c2507338fbdcd5e7156e708f84a43691942ef19f`.

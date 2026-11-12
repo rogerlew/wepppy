@@ -5,9 +5,7 @@ remain open. No service restart or deployment occurred.
 
 ## Revision and environment
 
-Contract ancestor: `21a75b794` (full revision in tracker). Implementation is the
-subsequent scoped working diff; final implementation revision will be recorded
-at commit. Host is forest, running development Compose. Tests use the existing
+Contract ancestor: `21a75b794` (full revision in tracker). Implementation revision: `c2507338fbdcd5e7156e708f84a43691942ef19f`. Host is forest, running development Compose. Tests use the existing
 WEPPcloud container, UID 1000/GID 993, and its real mounts. `/wc1` is NFS4.
 The existing container has support enabled and no profile; no service environment
 was changed. New Python processes explicitly selected test or production.
@@ -122,3 +120,28 @@ candidate freeze and M7 final runbook acceptance cannot complete here.
 - Scoped markdown lint passed all package/canonical/workflow docs, root AGENTS
   size passed (160 lines), and diff whitespace checks passed. Spelling previews
   were inspected; brand/code terms such as axe were deliberately preserved.
+
+Final Playwright collection: 142 tests in 28 files; native HTTP tests are not
+executed by discovery. No live browser workflow is claimed by this listing.
+
+## Tooling feedback (separate follow-up)
+
+Confirmed local painpoint: `wctl run-npm test:playwright -- --list` loses the
+separator and constructs `npm ... run test:playwright --list`. A QA discovery
+attempt therefore started smoke execution; it was immediately interrupted,
+without a support credential or provisioned run. A mocked CLI reproduction
+confirmed the exact argv without executing npm. Discovery was subsequently run
+through the direct Playwright CLI and completed successfully. Smallest follow-up:
+preserve npm's argument separator in run-npm and add an argv forwarding test.
+This unrelated wrapper behavior was not changed by F7.
+
+Configuration exception assertions were tightened to the full canonical messages;
+the configuration selection passed 51 tests in 9.28 seconds. Node syntax checks
+passed all eight changed JS/MJS files. A controlled Node HTTP debug-mode probe
+also found no canary token in captured output.
+
+The broad sanity run uses the shared working tree, including pre-existing
+unrelated edits, and began before final focused test/transport refinements.
+It must not be presented as the exact frozen M6 candidate receipt. Those final
+changes have their separate focused receipts above; M6 requires a fresh combined
+run after F6 M4 and candidate freeze.

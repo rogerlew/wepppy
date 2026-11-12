@@ -323,7 +323,10 @@ def test_support_profile_matrix(monkeypatch, profile, enabled):
     normalized = (profile or "").strip().lower() or "production"
     if normalized == "unknown" or (normalized == "production" and enabled):
         monkeypatch.setattr(configuration, "_resolve_mail_config", lambda: pytest.fail("guard ran after secret resolution"))
-        with pytest.raises(ValueError, match="WEPPCLOUD_DEPLOYMENT_PROFILE" if normalized == "unknown" else "TEST_SUPPORT_ENABLED"):
+        message = ("WEPPCLOUD_DEPLOYMENT_PROFILE must be production, development, or test"
+                   if normalized == "unknown"
+                   else "TEST_SUPPORT_ENABLED requires development or test deployment profile")
+        with pytest.raises(ValueError, match=f"^{message}$"):
             configuration.config_app(_DummyApp())
     else:
         app = _build_configured_app(monkeypatch)

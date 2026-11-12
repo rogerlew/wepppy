@@ -89,3 +89,8 @@ download, dtale, query-engine, rq-engine and both worker roles. The dev profile
 now lives in the common anchor; production/worker anchors pin production/false.
 All eight full-stack Flask consumers and both worker-only consumers were rendered
 and tested. No service was restarted to apply this change.
+
+Final reference search also found live flag-only smoke guidance in the control
+UI styling AGENTS and map behavior spec; both now point to the profile/bearer
+workflow. Dated acceptance reports and issued accessibility evidence remain
+historical records and were not rewritten.

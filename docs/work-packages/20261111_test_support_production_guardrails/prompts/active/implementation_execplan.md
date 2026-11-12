@@ -572,3 +572,5 @@ M0 standalone contract ancestor: `21a75b7944573f6b41f6c091349458b5b9ab1e4b` (202
 
 Execution update 2026-11-12 UTC: M0-M3 implemented, M4 runtime blocker retained,
 independent source reviews completed; no deployment, restart or closure.
+
+Implementation revision: `c2507338fbdcd5e7156e708f84a43691942ef19f`; M4/M6/M7 remain open.

@@ -49,7 +49,7 @@ _Last updated: 2025-10-18_
 - Pure shell styling lives in `ui-foundation.css`; no inline styles in templates.
 - Checkbox/radio styling: reuse shared classes (`.wc-choice`, `.wc-choice--checkbox`, `.wc-run-header__toggle`) so accent colors and spacing stay consistent; blue system toggles mean the class is missing.
 - Dark mode is explicitly out-of-scope for this iteration; stay focused on polishing the light theme tokens and contrast ratios.
-- UI smoke tests: run `npm run smoke` from `wepppy/weppcloud/static-src` (requires `TEST_SUPPORT_ENABLED=true` on the backend. The harness can auto-provision runs via `POST /tests/api/create-run`; `GET /tests/api/ping` verifies availability). Useful environment variables:
+- UI smoke tests: use `wctl run-playwright` for automatic short-lived support bearer authentication. The backend requires explicit `WEPPCLOUD_DEPLOYMENT_PROFILE=development` (or `test`) and `TEST_SUPPORT_ENABLED=true`; production never exposes support routes. Use the shared support-request helper for provisioning/cleanup and verify path absence. See [the support contract](../../schemas/weppcloud-test-support-contract.md). Useful environment variables:
   - `SMOKE_CREATE_RUN` (default `true`) – auto-create a run via the test support endpoint.
   - `SMOKE_RUN_CONFIG` (default `dev_unit_1`) – config slug for the generated run.
   - `SMOKE_RUN_OVERRIDES` – JSON string of query overrides (e.g., `{ "general:dem_db": "ned1/2016" }`).
