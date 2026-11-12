@@ -23,6 +23,13 @@ hard prerequisites for that claim.
 
 ## Task Board
 
+- [x] Isolated candidate `63ae6f940` implements Python/auth/Starlette and
+  packaging-tool remediation; focused consumers and fresh/incremental host
+  installers pass. Independent source reviews have no Medium/High findings.
+- [ ] Finish clean image/full gates and remaining GDAL/native dispositions;
+  deployment resume remains deferred.
+
+
 - [x] (2026-11-12 UTC) Clean native dependency candidate `37e7dd311bbd`
   passes 110 focused tests and the actual PATH report with decoded plot and
   installed-library hash readback. F6 native repair artifact records evidence.

@@ -44,6 +44,12 @@ wheel and Brotli 1.2.1 source by SHA-256. The official wheel alone is insufficie
 its bundled decoder still contains the demonstrated unfixed Brotli code. The
 helper builds only the decoder/common pair and verifies their exported ABI,
 loader dependencies, private aliases, GLIBC requirements and baseline x86 ISA.
+Imports must remain identical except that Ubuntu host compilers may add
+`__memcpy_chk@GLIBC_2.3.4` and `__stack_chk_fail@GLIBC_2.4`. These are qualified
+libc hardening imports below the existing manylinux GLIBC floor; no original
+import may disappear. Preserve compiler hardening rather than disabling it to
+make the host binary match the Debian build. Every other import difference,
+export/loader difference and excessive GLIBC or ISA requirement still fails.
 The other 24 ELF members remain byte-identical to the official wheel. Existing
 codec/font features must be preserved.
 
@@ -82,3 +88,27 @@ controls pass with those actual artifacts, preserve consumer and ABI behavior,
 and remove the corresponding helper, local pin and Docker wiring together.
 The F6 work package retains trial receipts; this document owns the ongoing build
 and maintenance contract.
+
+## Python tooling and shared installers
+
+The common image upgrades both system pip and the ensurepip bootstrap wheel to
+26.3 through `docker/python_security/upgrade_bootstrap.py`. Exact source/input
+hash guards require requalification when the Python base changes. Host virtualenv
+setup never applies this system-Python modification.
+
+`build_setuptools_wheel.py` produces `80.10.2+wepp1`: preserve `pkg_resources`
+for current consumers, apply the four hash-qualified upstream Unicode-manifest,
+archive containment and namespace-install patches, and replace the actual
+vendored wheel/jaraco.context with 0.48.0/6.1.2. Top-level vendor pins do not repair
+bundled copies. Original licenses, rebuilt RECORDs and patch/source provenance
+remain in the owned wheel. Retire the local version only after consumers can
+use an upstream release with equivalent fixes and compatibility.
+
+Both Dockerfiles and `scripts/setup_host_venv.sh` build/install the owned Pillow
+and setuptools wheels before resolving shared requirements. Host prerequisites
+include Python 3.12, uv, a C compiler, cmake, readelf, strip and patch, plus the
+existing GDAL/native development packages. Existing host virtualenvs explicitly
+remove Passlib, reinstall libpass and verify sole ownership of the `passlib`
+namespace. Temporary wheels are removed on exit; no waiting/retry recovery is
+introduced. Docker dependency installation disables uv caches so stale build-only
+copies are not retained in new images.

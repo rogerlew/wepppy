@@ -24,6 +24,14 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Commit Python/auth/Starlette, pip/bootstrap and owned
+  setuptools/vendor remediation as isolated candidate `63ae6f940`. Real
+  consumer/account/package-output tests and fresh/incremental disposable host
+  installers pass; two independent reviews have no remaining Medium/High
+  source findings. See F6 `artifacts/20261112_python_compatibility.md`.
+- [ ] Clean candidate image build/scan and full regression acceptance; remaining
+  GDAL/native coverage and dispositions. Resume remains deferred.
+
 - [x] (2026-11-12 UTC) Clean native dependency candidate `37e7dd311bbd`
   passes 110 focused tests and the actual PATH report with decoded plot and
   installed-library hash readback. F6 native repair artifact records evidence.
@@ -70,6 +78,11 @@ recovery without waits or retries. See the F6
       board and project tracker to evidence-supported readiness, and close.
 
 ## Surprises & Discoveries
+
+Shared requirements also feed dev and host installers; both must construct
+owned wheels. Existing host venvs need explicit obsolete Passlib removal. The
+full test run exposed a baseline-reproduced disabled-feature fixture, now fixed
+without changing production behavior.
 
 - Actual forest `/wc1` is NFS4: deletion can return 200 while open-file cleanup
   yields EBUSY and the run directory remains. Existing local-filesystem tests
@@ -118,6 +131,10 @@ recovery without waits or retries. See the F6
   Evidence: `artifacts/20261111_f1_f7_readiness_matrix.md`.
 
 ## Decision Log
+
+- Decision (2026-11-12): preserve pkg_resources with exact setuptools security
+  backports and repair actual bundled vendors. Preserve Ubuntu compiler
+  hardening through a qualified two-import allowance, not weaker compile flags.
 
 - Decision (Roger, 2026-11-12): retained NFS handles require manual intervention;
   do not wait or retry automatically. Existing support cleanup already attempts
@@ -190,6 +207,10 @@ recovery without waits or retries. See the F6
   Date/Author: 2026-11-12, Codex.
 
 ## Outcomes & Retrospective
+
+Candidate `63ae6f940` implements the Python/tooling repairs with focused and
+installer evidence. A clean common-image build is running; full acceptance and
+GDAL/native coverage remain open. Production is unchanged by this candidate.
 
 M0-M3 are implemented after the reviewed contract ancestor. Production Compose
 and the actual production app (484 total rules) expose no support routes.
@@ -646,3 +667,6 @@ M6/M7 or F6 M4. See F6 `artifacts/20261112_oauth_candidate_validation.md`.
 
 Revision note (2026-11-12): record combined native image consumer and generated
 artifact validation; retain open dependency remediation and full-gate status.
+
+Revision note (2026-11-12): retain isolated Python remediation checkpoint and
+actual shared-installer evidence, with final image/native gates still open.

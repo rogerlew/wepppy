@@ -24,6 +24,14 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-12 UTC) Commit Python/auth/Starlette, pip/bootstrap and owned
+  setuptools/vendor remediation as isolated candidate `63ae6f940`. Real
+  consumer/account/package-output tests and fresh/incremental disposable host
+  installers pass; two independent reviews have no remaining Medium/High
+  source findings. See F6 `artifacts/20261112_python_compatibility.md`.
+- [ ] Clean candidate image build/scan and full regression acceptance; remaining
+  GDAL/native coverage and dispositions. Resume remains deferred.
+
 - [x] (2026-11-12 UTC) Clean native dependency candidate `37e7dd311bbd`
   passes 110 focused tests and the actual PATH report with decoded plot and
   installed-library hash readback. F6 native repair artifact records evidence.
@@ -143,6 +151,11 @@ segmented substitute is not accepted.
 - [ ] M5: perform a separately authorized wepp1 rollout and closeout.
 
 ## Surprises & Discoveries
+
+Shared requirements also feed dev and host installers; both must construct
+owned wheels. Existing host venvs need explicit obsolete Passlib removal. The
+full test run exposed a baseline-reproduced disabled-feature fixture, now fixed
+without changing production behavior.
 
 PyCurl 7.49.0 includes repaired Brotli but removes unused SMB/NTLM/TLS-SRP
 capabilities; preserve that explicit limitation. Mistune pytest limit tests are
@@ -266,6 +279,10 @@ not collected by unittest, so both runners are required for upstream evidence.
   Evidence: `.github/forest_workflows/npm-tests.yml`.
 
 ## Decision Log
+
+- Decision (2026-11-12): preserve pkg_resources with exact setuptools security
+  backports and repair actual bundled vendors. Preserve Ubuntu compiler
+  hardening through a qualified two-import allowance, not weaker compile flags.
 
 - Decision (Roger, 2026-11-12): continue dependency remediation and defer the
   resume workflow. Never wait for hours for stale NFS handles; report failure
@@ -391,6 +408,10 @@ not collected by unittest, so both runners are required for upstream evidence.
   Date/Author: 2026-11-11, operator.
 
 ## Outcomes & Retrospective
+
+Candidate `63ae6f940` implements the Python/tooling repairs with focused and
+installer evidence. A clean common-image build is running; full acceptance and
+GDAL/native coverage remain open. Production is unchanged by this candidate.
 
 Mistune/PyCurl candidate pins and real consumer regressions are implemented.
 Final-image validation and native repairs remain open; resume stays deferred.
@@ -887,3 +908,6 @@ the isolated candidate; record implemented Mistune/PyCurl consumer qualification
 
 Revision note (2026-11-12): record combined native image consumer and generated
 artifact validation; retain open dependency remediation and full-gate status.
+
+Revision note (2026-11-12): retain isolated Python remediation checkpoint and
+actual shared-installer evidence, with final image/native gates still open.
