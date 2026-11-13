@@ -15,7 +15,8 @@ from osgeo import gdal
 from .file_digest import sha256_file
 
 __all__ = ["RasterDependencyObservation", "observe_raster_dependencies",
-           "raster_dependency_signature", "raster_dependency_signatures"]
+           "raster_companion_paths", "raster_dependency_signature",
+           "raster_dependency_signatures"]
 
 
 @dataclass(frozen=True)
@@ -103,6 +104,11 @@ def _companions(path):
                 if suffix and entry.path != path:
                     found[entry.path] = suffix
     return tuple(sorted(found.items()))
+
+
+def raster_companion_paths(path):
+    """Return recognized adjacent GDAL companion paths for one raster."""
+    return tuple(Path(member) for member, _suffix in _companions(os.fspath(path)))
 
 
 class _Observation:

@@ -14,6 +14,10 @@ from typing import IO, Callable, Optional, Sequence
 
 from werkzeug.utils import secure_filename
 
+from wepppy.all_your_base.raster_freshness import (
+    raster_companion_paths as _raster_companion_paths,
+)
+
 UPLOAD_STREAM_CHUNK_BYTES = 64 * 1024
 RASTER_EXTENSION_DRIVERS = {
     ".tif": "GTiff",
@@ -80,28 +84,7 @@ def resolve_contained_raster_path(path: Path | str, root: Path | str) -> Path:
 
 def raster_companion_paths(path: Path | str) -> tuple[Path, ...]:
     """Return adjacent GDAL sidecars that could alter a later raster open."""
-    raster_path = Path(path)
-    if not raster_path.parent.is_dir():
-        return ()
-    name = raster_path.name.lower()
-    stem = raster_path.stem.lower()
-    bases = {name, stem}
-    suffixes = {
-        ".prj", ".wld", ".tfw", ".tifw", ".tab", ".hdr", ".aux",
-        ".aux.xml", ".xml", ".rpb", "_rpc.txt", ".rpc.txt", ".imd",
-        ".rrd", ".ige", ".msk", ".ovr",
-    }
-    extension = raster_path.suffix.lower().lstrip(".")
-    if extension:
-        suffixes.update({f".{extension}w", f".{extension[0]}{extension[-1]}w"})
-    candidate_names = {base + suffix for base in bases for suffix in suffixes}
-    return tuple(
-        sorted(
-            entry
-            for entry in raster_path.parent.iterdir()
-            if entry != raster_path and entry.name.lower() in candidate_names
-        )
-    )
+    return _raster_companion_paths(path)
 
 
 def reject_raster_companions(path: Path | str) -> None:

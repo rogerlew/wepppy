@@ -120,6 +120,23 @@ def test_copy_preserves_observed_newer_upload(tmp_path, monkeypatch):
     assert target.read_bytes() == b'class-one'
 
 
+def test_copy_rejects_preexisting_target_gdal_companion(tmp_path):
+    _, definition, source = owner(tmp_path)
+    execution = freshness.SbsExecution.capture(definition)
+    target = tmp_path / 'copied.tif'
+    target.write_bytes(b'cloned base raster')
+    external_mask = tmp_path / 'copied.tif.msk'
+    external_mask.write_bytes(b'cloned external mask')
+
+    with pytest.raises(OSError) as error:
+        execution.copy_to(target)
+
+    assert error.value.errno == errno.ESTALE
+    assert source.read_bytes() == b'class-one'
+    assert target.read_bytes() == b'cloned base raster'
+    assert external_mask.read_bytes() == b'cloned external mask'
+
+
 def test_path_input_and_reserved_receipt_do_not_change_definition(tmp_path):
     omni, definition, source = owner(tmp_path)
     definition['sbs_file_path'] = source

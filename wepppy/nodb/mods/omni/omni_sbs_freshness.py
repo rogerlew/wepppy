@@ -12,6 +12,7 @@ import shutil
 import copy
 
 from wepppy.all_your_base.file_digest import sha256_file
+from wepppy.all_your_base.raster_freshness import raster_companion_paths
 
 
 _RECEIPT = '_sbs_content'
@@ -19,6 +20,11 @@ _RECEIPT = '_sbs_content'
 
 def _changed():
     return OSError(errno.ESTALE, 'Omni SBS input changed during scenario execution')
+
+
+def _reject_companions(path):
+    if raster_companion_paths(path):
+        raise _changed()
 
 
 def is_sbs(definition):
@@ -151,6 +157,7 @@ class SbsExecution:
     def copy_to(self, target):
         source = Path(self.receipt['source_path'])
         target = Path(target)
+        _reject_companions(target)
         digest = hashlib.sha256()
         with source.open('rb') as incoming:
             before = _fd_version(incoming, source)
@@ -180,6 +187,7 @@ class SbsExecution:
                     raise _changed()
         if sha256_file(target) != self.receipt['sha256']:
             raise _changed()
+        _reject_companions(target)
         self.copied_path = target
         self.copied_version = _version(target)
         # Existing upload/copy has no conditional-unlink lock. Reject observable
@@ -194,6 +202,7 @@ class SbsExecution:
         if self.copied_path is None or self.copied_version is None:
             raise ValueError('Omni SBS copy has not completed')
         try:
+            _reject_companions(self.copied_path)
             if (_version(self.copied_path) != self.copied_version
                     or sha256_file(self.copied_path) != self.receipt['sha256']
                     or _version(self.copied_path) != self.copied_version):
