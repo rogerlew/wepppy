@@ -24,6 +24,17 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [ ] (2026-11-13 UTC) Exact three-host preparation exposed two fail-closed
+  blockers before activation. Roger approved removal of legacy credential-bearing
+  `DATABASE_URL` and `SQLALCHEMY_DATABASE_URI` values on wepp1/wepp2 after exact
+  URL/file equivalence checks; protected backups exist, secret-safe Compose
+  rendering passes, and disposable production-identity `SELECT 1` probes pass
+  with `POSTGRES_PASSWORD_FILE` only. The first exact broad rerun then stopped at
+  3,880 passing tests because an Omni facade fake retained the pre-validator
+  signature from before `F6-RU-01`; the test now asserts forwarding of the
+  validator and its 13 focused cases pass. Commit, rerun the exact broad gate,
+  and rebuild source-bound retained candidates before M4 can close.
+
 - [ ] (2026-11-13 UTC) Deployment preparation now includes wepp3. Retained
   candidate support is implemented for its single fork/archive worker with
   exact-image recovery, global dequeue fencing, fork-only drain accounting,

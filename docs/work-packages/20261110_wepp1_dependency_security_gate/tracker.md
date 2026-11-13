@@ -44,6 +44,15 @@ actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
 
+- [ ] (2026-11-13 UTC) Complete the new exact broad rerun and rebuild all
+  source-bound candidates after correcting the stale Omni facade fake. The first
+  rerun stopped at 3,880 passes when the fake rejected the newly forwarded
+  `precommit_validator`; all 13 focused facade cases now pass and production
+  behavior is unchanged. Roger separately approved removing the two legacy
+  credential-bearing PostgreSQL URL variables on wepp1/wepp2. Protected backups,
+  secret-safe rendered configs, and file-backed production-identity database
+  probes pass; running services were not recreated.
+
 - [ ] (2026-11-13 UTC) Complete focused/broad validation and review of wepp3
   retained-candidate support. The implementation uses the shared immutable-image
   and recovery contract, drains only active fork/archive work under the global

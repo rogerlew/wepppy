@@ -143,17 +143,27 @@ def test_parse_scenarios_delegates_to_input_parser_service(
     omni = _new_detached_omni(tmp_path, "tests.omni.facade.parse_scenarios.delegate")
     captured: dict[str, object] = {}
 
-    def _fake_parse(instance: omni_module.Omni, parsed_inputs) -> None:
+    def _fake_parse(
+        instance: omni_module.Omni,
+        parsed_inputs,
+        *,
+        precommit_validator=None,
+    ) -> None:
         captured["instance"] = instance
         captured["parsed_inputs"] = list(parsed_inputs)
+        captured["precommit_validator"] = precommit_validator
 
     monkeypatch.setattr(omni_module._OMNI_INPUT_PARSER, "parse_scenarios", _fake_parse)
     payload = [(omni_module.OmniScenario.UniformLow, {"type": "uniform_low"})]
 
-    omni.parse_scenarios(payload)
+    def validator() -> None:
+        return None
+
+    omni.parse_scenarios(payload, precommit_validator=validator)
 
     assert captured["instance"] is omni
     assert captured["parsed_inputs"] == payload
+    assert captured["precommit_validator"] is validator
 
 
 def test_parse_scenarios_rejects_missing_required_fields(tmp_path: Path) -> None:
