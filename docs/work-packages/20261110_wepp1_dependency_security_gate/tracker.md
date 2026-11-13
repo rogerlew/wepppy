@@ -35,6 +35,20 @@ actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
 
+- (2026-11-13 UTC) The operator raised concern that compiling GDAL had become
+  a rabbit hole. The agent stopped the clean native build (exit 130), preserved
+  implementation `967a085f4` as deferred work, and separated it from Python
+  candidate `64cc736c2` / image `af7643725c95`. Do not resume custom GDAL/Rasterio
+  build work automatically. Evaluate a compatible supported packaged upgrade or
+  retain an explicit native blocker; bespoke backport maintenance needs a
+  separate scope decision. Deployment resume remains deferred.
+
+- [x] (2026-11-13 UTC) Native helper/test implementation committed as isolated
+  candidate `967a085f4`; independent source reviews have no open Medium/High
+  findings. Frontend lint/all 1,079 tests pass.
+- [ ] Native clean build is deferred after the scope concern; no final native
+  image acceptance. Python full gate and native coverage remain open.
+
 - [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
   `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
   lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).

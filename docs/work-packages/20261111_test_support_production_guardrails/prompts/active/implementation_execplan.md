@@ -24,6 +24,20 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 
 ## Progress
 
+- (2026-11-13 UTC) The operator raised concern that compiling GDAL had become
+  a rabbit hole. The agent stopped the clean native build (exit 130), preserved
+  implementation `967a085f4` as deferred work, and separated it from Python
+  candidate `64cc736c2` / image `af7643725c95`. Do not resume custom GDAL/Rasterio
+  build work automatically. Evaluate a compatible supported packaged upgrade or
+  retain an explicit native blocker; bespoke backport maintenance needs a
+  separate scope decision. Deployment resume remains deferred.
+
+- [x] (2026-11-13 UTC) Native helper/test implementation committed as isolated
+  candidate `967a085f4`; independent source reviews have no open Medium/High
+  findings. Frontend lint/all 1,079 tests pass.
+- [ ] Native clean build is deferred after the scope concern; no final native
+  image acceptance. Python full gate and native coverage remain open.
+
 - [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
   `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
   lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).
@@ -101,6 +115,8 @@ recovery without waits or retries. See the F6
 
 ## Surprises & Discoveries
 
+- (2026-11-13 UTC) Security backports plus a source-linked Rasterio wheel expanded dependency updates into custom native-stack maintenance. Real regression evidence does not by itself justify that operational cost.
+
 - (2026-11-13 UTC) The corrected Python full run reached 6,304 passes before the isolated checkout lacked the ignored ASRIS cache directory; the existing main checkout already has it. Creating that directory makes all 25 affected-module tests pass.
 
 The GDAL trial proved zero-fuzz patch placement can still be wrong in repeated
@@ -167,6 +183,8 @@ without changing production behavior.
   Evidence: `artifacts/20261111_f1_f7_readiness_matrix.md`.
 
 ## Decision Log
+
+- (2026-11-13 UTC) Defer custom native builds after the operator scope concern. Preserve completed Python dependency remediation separately; assess supported package compatibility before further native implementation.
 
 - (2026-11-13 UTC) Retain the failed full-gate receipt, correct only isolated runtime setup, and qualify pending native repairs before another full sweep. Do not change ASRIS behavior or report full acceptance.
 
@@ -255,6 +273,8 @@ without changing production behavior.
   Date/Author: 2026-11-12, Codex.
 
 ## Outcomes & Retrospective
+
+- (2026-11-13 UTC) Clean native build intentionally stopped, not accepted. No candidate deployment occurred. Python full-suite acceptance and native advisory/coverage blockers remain open.
 
 - (2026-11-13 UTC) Qualified private Rasterio TLS runtime closes the cross-thread
   finding by supersession; 53 owned tests pass. Upstream selection retains one

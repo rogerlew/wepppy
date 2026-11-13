@@ -1,6 +1,7 @@
 # GDAL and Rasterio remediation qualification
 
-Status: private qualification and packaging drafts; not integrated or activated.
+Status: custom native implementation deferred after operator scope concern.
+Clean build stopped with exit 130; no accepted final native image or activation.
 Deployment resume remains deferred. No M4 closure or risk acceptance.
 
 ## System GDAL
@@ -149,3 +150,38 @@ for both; input I/O is zero versus 1,640 blocks (cache conditions differ).
 This bounded synthetic workload is consumer evidence, not a general performance
 guarantee. Smaller 2048-grid receipts are retained separately. Private evidence:
 `rasterio-system-link-trial-20261112/consumer-benchmark8192/comparison.json`.
+
+## Frozen clean-build candidate
+
+Implementation commit `967a085f4` remains isolated from the live main checkout.
+The clean common-image build was stopped with the retained immutable base/vendor
+inputs under `gdal-rasterio-batch-20261113/`. Node 20 lint and all 1,079 frontend
+tests pass for that source. Scoped broad-exception enforcement covers all six
+new Python files and passes with zero broad handlers. Observe-only quality
+telemetry reports one yellow 104-line build function; its sequential validation,
+compilation and wheel packaging keep fail-closed steps in execution order.
+
+Independent security implementation packet SHA-256:
+`826d89fbe9a000501d914a172350bc66b1b77265f932d673c0d89d7823312c53`.
+The Low linkage-check gap is closed: parse exact NEEDED names, reject every other
+GDAL name and require both core extensions to link libgdal.so.36. No open
+Medium/High source findings. Final build must exercise the latest guard and
+compiler provenance; earlier wheel tests are not relabeled as that proof.
+
+## Scope correction after operator concern
+
+The operator questioned both compiling GDAL and the expansion into a rabbit
+hole. The agent stopped the clean build at GDAL compilation and retained its
+exit-130 receipt. No compilation remains active. Custom native implementation
+`967a085f4` is deferred; Python candidate `64cc736c2` and image `af7643725c95`
+remain the separate completed-upgrade checkpoint (full Python gate still open).
+
+The reason for compiling was to apply upstream fixes while retaining the
+existing GDAL ABI and scientific stack: the original native library crashes on
+retained inputs, and Python pin changes cannot replace that code. The resulting
+custom GDAL packages, Rasterio patch/build, ongoing backport upkeep and expanded
+acceptance burden exceeded a routine dependency update. Prefer evaluating a
+compatible supported binary package set next; if no such set is qualified,
+retain an explicit blocker and make the maintenance tradeoff a separate scope
+decision. Do not restart this custom build automatically. No risk waiver or M4
+closure is implied. Deployment resume and manual-only NFS recovery are unchanged.
