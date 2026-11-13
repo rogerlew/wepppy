@@ -2,9 +2,10 @@
 
 Status: custom native implementation deferred after operator scope concern.
 Clean build stopped with exit 130; no accepted final native image or activation.
-Roger subsequently deferred both any GDAL upgrade and upload-boundary format
-enforcement before GDAL open. No such mitigation is part of this continuation.
-Deployment resume remains deferred. No M4 closure or risk acceptance.
+Roger deferred the GDAL upgrade/custom compilation but authorized
+upload-boundary format/driver enforcement as `F6-RU-01`. The earlier record that
+deferred both paths was an agent misinterpretation and is superseded. Deployment
+resume remains deferred. No M4 closure or risk acceptance.
 
 ## System GDAL
 
@@ -191,12 +192,12 @@ closure is implied. Deployment resume and manual-only NFS recovery are unchanged
 
 ## Final scope direction for this continuation
 
-Roger explicitly deferred both paths considered after the stopped build: a
-GDAL upgrade, including a supported packaged-upgrade evaluation, and enforcing
-that uploaded content matches its declared raster format before GDAL opens it.
-Do not add signature sniffing, a GDAL allowed-driver restriction, or another
-pre-open upload gate as a substitute. Existing upload and scientific behavior
-remain unchanged.
+Roger explicitly deferred a GDAL upgrade, including custom compilation and a
+supported packaged-upgrade evaluation, but authorized enforcing that uploaded
+content matches its declared raster format before native consumers receive it.
+Implement that input boundary as `F6-RU-01`; do not restart the custom native
+build. The earlier statement deferring both paths was incorrect and is
+superseded.
 
 This is a scope deferral, not evidence that the retained native library is safe
 for malformed untrusted inputs. The affected advisory/native-coverage item

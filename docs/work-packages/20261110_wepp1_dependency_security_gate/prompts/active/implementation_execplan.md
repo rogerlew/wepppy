@@ -24,6 +24,12 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-13 UTC) `F6-RU-01` contract checkpoint revised and approved after independent
+  correctness/security review: preserve valid GTiff/HFA, reject mismatches and
+  general VRT, require request-wide prevalidation and run-root-safe reuse, and
+  extend DEM upload to self-contained IMG. Both post-fix reviews report zero
+  unresolved checkpoint findings; the standalone checkpoint is ready to commit.
+
 - [x] (2026-11-13 UTC) The corrected dependency image completes the exact
   `wctl run-pytest tests --maxfail=1` gate: 13,735 passed, 641 skipped and zero
   failures in 3,881.73 seconds. Retained log SHA-256 is
@@ -32,12 +38,11 @@ segmented substitute is not accepted.
   runtime code or dependency changed. This closes only independent Python
   validation; the deferred GDAL/native disposition still blocks M4.
 
-- (2026-11-13 UTC) Roger explicitly deferred both a GDAL upgrade and the
-  proposed upload-boundary format enforcement before GDAL open. Do not resume
-  the custom native candidate, evaluate a packaged GDAL upgrade, or add file
-  signature/driver restrictions in this continuation. Keep the affected GDAL
-  advisory and native-coverage disposition open; this is not a risk exception
-  or M4 acceptance. Continue only independent Python candidate validation.
+- (2026-11-13 UTC, corrected) Roger deferred the GDAL upgrade/custom compilation
+  only and explicitly authorized upload-boundary format/driver enforcement as
+  `F6-RU-01`. The earlier entry deferring both paths was an agent
+  misinterpretation and is superseded. Keep the affected GDAL advisory and
+  native-coverage disposition open; this is not M4 acceptance.
 
 - (2026-11-13 UTC) The operator raised concern that compiling GDAL had become
   a rabbit hole. The agent stopped the clean native build (exit 130), preserved
@@ -203,6 +208,13 @@ segmented substitute is not accepted.
 
 ## Surprises & Discoveries
 
+- Observation: existing upload hardening checks extensions, but confirmed raster
+  routes still hand saved bytes to unrestricted GDAL/raster consumers. The DEM
+  route accepts only `.tif`, while other user-facing workflows promise `.img` and
+  several canonical rows still admit VRT without a referenced-file package.
+  Evidence: `docs/schemas/upload-endpoint-contract.md` and
+  `wepppy/microservices/rq_engine/watershed_routes.py`.
+
 - (2026-11-13 UTC) Importing the production app in an earlier test registers a
   run-context URL preprocessor on the shared agent blueprint. A later standalone
   route test reused that mutated blueprint and returned 404 before payload
@@ -353,19 +365,25 @@ not collected by unittest, so both runners are required for upstream evidence.
 
 ## Decision Log
 
+- Decision: implement a shared self-contained GTiff/HFA upload boundary and
+  remove general VRT admission; preserve the separately validated postfire dNBR
+  identity-VRT contract.
+  Rationale: the user explicitly selected input containment instead of private
+  GDAL compilation, and ordinary multipart routes cannot prove a safe VRT graph.
+  Date/Author: 2026-11-13, Roger direction recorded by Codex.
+
 - Decision (2026-11-13): retain the smallest test-only isolation correction
   discovered during the exact gate. Do not weaken the production run-context
   preprocessor or create a fake run merely to satisfy this payload unit boundary.
   Rationale: the fixture owns a standalone Flask app and must not inherit
   registration state from an earlier production-app import.
 
-- Decision (Roger, 2026-11-13): defer the GDAL upgrade and defer enforcing a
-  declared raster format before handing an upload to GDAL. Preserve existing
-  upload and scientific behavior; make no GDAL, Rasterio, upload-parser, or
-  driver-selection change in this continuation. Rationale: both proposed
-  mitigations are outside the bounded Python dependency-remediation scope.
-  Retain the unresolved advisory/native-coverage item as an explicit blocker;
-  do not reinterpret deferral as acceptance.
+- Decision (Roger, corrected 2026-11-13): defer the GDAL upgrade and custom
+  compilation, but implement declared raster format/driver enforcement before
+  native consumers. The earlier decision entry deferring both was an agent
+  misinterpretation and is superseded by `F6-RU-01`. Preserve scientific raster
+  semantics; retain the unresolved advisory/native-coverage item as an explicit
+  blocker and do not reinterpret input containment as native-library acceptance.
 
 - (2026-11-13 UTC) Defer custom native builds after the operator scope concern. Preserve completed Python dependency remediation separately; assess supported package compatibility before further native implementation.
 
@@ -517,11 +535,11 @@ not collected by unittest, so both runners are required for upstream evidence.
   is test-only. F6 M4 remains open solely because the operator-deferred
   GDAL/native advisory disposition is unresolved.
 
-- (2026-11-13 UTC) The GDAL upgrade and upload-format enforcement are now
-  explicitly deferred. No code or runtime configuration was changed for either
-  approach. The corrected Python image may be validated independently, but F6
-  M4 remains blocked on the retained GDAL/native disposition unless the operator
-  later authorizes remediation or a policy-compliant exception.
+- (2026-11-13 UTC, corrected) The GDAL upgrade/custom compilation remains
+  deferred, while upload-format enforcement is authorized as `F6-RU-01`. The
+  prior statement deferring both was incorrect. F6 M4 remains blocked on the
+  retained GDAL/native disposition after input containment is implemented and
+  reviewed.
 
 - (2026-11-13 UTC) Clean native build intentionally stopped, not accepted. No
   candidate deployment occurred. Python full-suite acceptance now passes;
@@ -1054,3 +1072,8 @@ OAuthlib correction and concrete GDAL/Rasterio failures before final gates.
 
 Revision note (2026-11-13): record corrected clean Python acceptance and
 qualified native prototype boundaries, including the rejected Rasterio trial.
+
+Revision note (2026-11-13): add the operator-approved `F6-RU-01` raster upload
+contract checkpoint. The change preserves GDAL pinning while requiring exact
+GTiff/HFA content-to-extension validation and restricted opening before native
+consumers; implementation remains gated on two independent reviews.

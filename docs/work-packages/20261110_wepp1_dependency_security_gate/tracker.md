@@ -2,11 +2,12 @@
 
 ## Quick Status
 
-Current direction (Roger, 2026-11-13): continue only independent Python
-candidate validation. Defer the GDAL upgrade, custom GDAL/Rasterio work, and
-upload-boundary format enforcement before GDAL open. These deferrals preserve
-current behavior but do not clear the affected advisory/native-coverage item or
-authorize M4 acceptance. Deployment-resume work also remains deferred.
+Current direction (Roger, corrected 2026-11-13): defer the GDAL upgrade and
+custom GDAL/Rasterio compilation, but implement upload-boundary format/driver
+enforcement as `F6-RU-01`. The earlier record that deferred both paths was an
+agent misinterpretation and is superseded. Input containment does not clear the
+affected advisory/native-coverage item or authorize M4 acceptance.
+Deployment-resume work remains deferred.
 
 Remediation status (2026-11-12): master includes cryptography, certifi, urllib3,
 pyasn1, msgpack and nbconvert upgrades. Authlib/joserfc are updated and tested
@@ -36,6 +37,15 @@ actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
 
+- [ ] (2026-11-13 UTC) Implement `F6-RU-01`: exact `.tif/.tiff`→`GTiff` and
+  `.img`→`HFA` content/driver enforcement before general raster upload consumers.
+  Operator scope and the proposed contract checkpoint are recorded in
+  `artifacts/20261113_raster_upload_contract_decision.md`; two independent
+  read-only reviews and the standalone checkpoint commit precede code edits.
+  Review findings and dispositions are retained in
+  `artifacts/20261113_raster_upload_correctness_review.md` and
+  `artifacts/20261113_raster_upload_security_review.md`.
+
 - [x] (2026-11-13 UTC) Exact Python gate passes against corrected dependency
   image `af7643725c95`: 13,735 passed, 641 skipped, zero failures in 3,881.73
   seconds. The retained receipt SHA-256 is
@@ -43,11 +53,10 @@ actual gate rejects native coverage. M4 is not complete.
   One test-only blueprint isolation correction was required; runtime code and
   dependencies are unchanged. GDAL/native coverage remains the M4 blocker.
 
-- (2026-11-13 UTC) Roger explicitly deferred both a GDAL upgrade and enforcing
-  a declared raster format before handing uploads to GDAL. Do not implement
-  file-signature checks, driver restrictions, GDAL/Rasterio changes, or a
-  packaged-upgrade trial in this continuation. Continue the corrected Python
-  image's independent full gate; retain GDAL/native coverage as an open blocker.
+- (2026-11-13 UTC, corrected) Roger deferred a GDAL upgrade/custom compilation
+  only and explicitly authorized declared raster format/driver enforcement
+  before native consumers. The prior statement deferring both was incorrect and
+  is superseded by `F6-RU-01`. Retain GDAL/native coverage as an open blocker.
 
 - (2026-11-13 UTC) The operator raised concern that compiling GDAL had become
   a rabbit hole. The agent stopped the clean native build (exit 130), preserved

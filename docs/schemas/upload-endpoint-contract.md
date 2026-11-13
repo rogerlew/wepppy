@@ -24,6 +24,61 @@
 - Canonical ZIP helper authority remains in:
   - `wepppy/microservices/shape_converter/archive_validation.py`
 
+## Raster Content and Driver Boundary
+
+**F6-RU-01 amendment status:** accepted behavior proposal; implementation
+conformance pending. The standalone contract checkpoint must be an ancestor of
+route, helper, template, controller, test, and user-facing documentation edits.
+
+General raster upload endpoints accept only self-contained files whose content
+matches their declared extension:
+
+| Extension | Required GDAL driver |
+| --- | --- |
+| `.tif`, `.tiff` | `GTiff` |
+| `.img` | `HFA` |
+
+Before any route-specific parser, metadata reader, raster stacker, NoDb
+validator, or other native consumer receives the file, the upload boundary must
+stage the bytes as a regular nonsymlink file in private scratch space, open that
+snapshot with only the required driver enabled, verify the reported driver is
+exact, and force an actual read of every raster band. The driver-restricted read
+must report no dependent files other than the staged primary file. A renamed
+raster, malformed/truncated file, external HFA sidecar dependency, or unsupported
+driver is a validation failure.
+
+Successful exact-driver full-band decoding plus the recorded byte hash is the
+format trust boundary: it materializes a validated immutable upload snapshot
+(trusted only for format/driver identity, not scientific semantics). That
+snapshot is the only uploaded pathname route-specific native validators may
+consume. Its byte hash and filesystem identity must remain unchanged through
+those validators. Only those exact validated bytes may be
+atomically published as a run-owned artifact. A persisted accepted artifact may
+be reused only from server-authoritative state beneath its approved run-owned
+upload root; absolute paths, traversal, symlink escape, and a client-selected
+replacement pathname are invalid. Reuse must prove the same byte identity under
+the owning mutation/read lock immediately before consumption. These invariants
+prove that an unrestricted legacy semantic validator never receives unvalidated
+or replaceable bytes. Direct GDAL opens added or touched by this remediation must
+use `OpenEx(..., allowed_drivers=[expected])` or equivalent.
+
+All raster parts in one request must pass scratch validation before any part is
+published, controller state is mutated, or work is enqueued. A later failure
+must remove request scratch files and leave earlier accepted destinations and
+controller state unchanged. Publication and mutation then follow the canonical
+NoDb composite-operation rules; this boundary does not add distributed rollback.
+
+General raster upload endpoints do not accept VRT because their multipart
+contracts do not collect and prove a closed referenced-file graph. The narrowly
+validated postfire dNBR identity-VRT contract is separate and unchanged. A
+previously stored user raster must pass this boundary before reuse; an old VRT or
+mismatched file requires re-upload rather than unrestricted native opening.
+
+This contract composes with, without changing, the canonical RQ response/error
+contract in `docs/schemas/rq-response-contract.md` and the failed-mutation and
+composite-operation rules in
+`docs/schemas/nodb-persistence-concurrency-contract.md`.
+
 ## Route Prefix Notes
 - FastAPI routes below are served under the rq-engine API prefix (`/rq-engine/api/...`).
 - Flask Roads routes are listed as defined in the blueprint and are mounted by WEPPcloud route registration.
@@ -33,12 +88,12 @@
 | Endpoint | Handler module | Upload field(s) | Allowed extensions/types | Max size | Additional validation |
 | --- | --- | --- | --- | --- | --- |
 | `/api/runs/{runid}/{config}/tasks/upload-cli/` | `wepppy/microservices/rq_engine/upload_climate_routes.py` | `input_upload_cli` | `.cli` | `25 * 1024 * 1024` (25 MB) | Saved via `save_upload_file`; enqueue `upload_cli_rq` |
-| `/api/runs/{runid}/{config}/tasks/upload-sbs/` | `wepppy/microservices/rq_engine/upload_disturbed_routes.py` | `input_upload_sbs` | `.tif`, `.tiff`, `.img`, `.vrt` | `100 * 1024 * 1024` (100 MB) | `sbs_map_sanity_check`, `baer.validate(...)` |
+| `/api/runs/{runid}/{config}/tasks/upload-sbs/` | `wepppy/microservices/rq_engine/upload_disturbed_routes.py` | `input_upload_sbs` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation, then `sbs_map_sanity_check`, `baer.validate(...)` |
 | `/api/runs/{runid}/{config}/tasks/upload-cover-transform` | `wepppy/microservices/rq_engine/upload_disturbed_routes.py` | `input_upload_cover_transform` | `.csv` | `10 * 1024 * 1024` (10 MB) | `Revegetation.validate_user_defined_cover_transform(...)` |
-| `/api/runs/{runid}/{config}/tasks/upload-dem/` | `wepppy/microservices/rq_engine/watershed_routes.py` | `input_upload_dem` | `.tif` | `100 * 1024 * 1024` (100 MB) | DEM install/metadata validation in `_install_uploaded_dem(...)` |
-| `/api/huc-fire/tasks/upload-sbs/` | `wepppy/microservices/rq_engine/upload_huc_fire_routes.py` | `input_upload_sbs` | `.tif`, `.tiff`, `.img`, `.vrt` | `100 * 1024 * 1024` (100 MB) | `Disturbed.validate(...)` after save |
+| `/api/runs/{runid}/{config}/tasks/upload-dem/` | `wepppy/microservices/rq_engine/watershed_routes.py` | `input_upload_dem` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation before DEM install/metadata validation in `_install_uploaded_dem(...)` |
+| `/api/huc-fire/tasks/upload-sbs/` | `wepppy/microservices/rq_engine/upload_huc_fire_routes.py` | `input_upload_sbs` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation, then `Disturbed.validate(...)` |
 | `/api/batch/_/{batch_name}/upload-geojson` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `geojson_file` or `file` | `.geojson`, `.json` | default `30 * 1024 * 1024` (30 MiB); override via Flask `BATCH_GEOJSON_MAX_MB` | `WatershedCollection(...)` parse + feature-count checks |
-| `/api/batch/_/{batch_name}/upload-sbs-map` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `sbs_map` or `file` | `.tif`, `.tiff`, `.img`, `.vrt` | `100 * 1024 * 1024` (100 MB) | `sbs_map_sanity_check(...)`; optional burn-class summary |
+| `/api/batch/_/{batch_name}/upload-sbs-map` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `sbs_map` or `file` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation, then `sbs_map_sanity_check(...)`; optional burn-class summary |
 | `/api/runs/{runid}/{config}/agfields/boundaries` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `field_boundaries` | `.geojson`, `.json` | `10 * 1024 * 1024` (10 MB) | `save_upload_file(...)`; controller validation stages GeoJSON + Parquet before canonical replacement |
 | `/api/runs/{runid}/{config}/agfields/plant-database` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `plant_database` | ZIP containing `.man` members only | compressed `100 * 1024 * 1024` (100 MB); uncompressed 600 MB; 200 members | `read_upload_bytes_with_limit(...)` + `validate_and_extract_zip_archive(...)`; unique server filename; RQ processing removes the staged archive |
 | `/api/culverts-wepp-batch/` | `wepppy/microservices/rq_engine/culvert_routes.py` | `payload.zip` or `payload` or `file` | ZIP archive | compressed payload cap `2 * 1024 * 1024 * 1024` (2 GiB) | **Must** use `read_upload_bytes_with_limit(...)` + `validate_and_extract_zip_archive(...)`; `ArchiveLimits(max_compressed_bytes=2 GiB, max_uncompressed_bytes=6 GiB, max_member_count=1200)`; semantic checks via `validate_payload_root(...)` |
@@ -50,10 +105,10 @@ These routes combine non-file params with optional/conditional upload parts.
 
 | Endpoint | Handler module | Upload field(s) | Allowed extensions/types | Max size | Upload condition |
 | --- | --- | --- | --- | --- | --- |
-| `/api/runs/{runid}/{config}/build-landuse` | `wepppy/microservices/rq_engine/landuse_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img`, `.vrt` | `500 * 1024 * 1024` (500 MB) | Used when `landuse.mode == UserDefined` |
-| `/api/runs/{runid}/{config}/build-treatments` | `wepppy/microservices/rq_engine/treatments_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img`, `.vrt` | `500 * 1024 * 1024` (500 MB) | Used when `treatments.mode == UserDefinedMap` |
-| `/api/runs/{runid}/{config}/run-ash` | `wepppy/microservices/rq_engine/ash_routes.py` | `input_upload_ash_load` (required), `input_upload_ash_type_map` (optional) | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Used when `ash_depth_mode == 2` |
-| `/api/runs/{runid}/{config}/run-omni` | `wepppy/microservices/rq_engine/omni_routes.py` | `scenarios[{idx}][sbs_file]` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Per-scenario upload when scenario type requires SBS map |
+| `/api/runs/{runid}/{config}/build-landuse` | `wepppy/microservices/rq_engine/landuse_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img` | `500 * 1024 * 1024` (500 MB) | Restricted format/driver validation; used when `landuse.mode == UserDefined` |
+| `/api/runs/{runid}/{config}/build-treatments` | `wepppy/microservices/rq_engine/treatments_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img` | `500 * 1024 * 1024` (500 MB) | Restricted format/driver validation; used when `treatments.mode == UserDefinedMap` |
+| `/api/runs/{runid}/{config}/run-ash` | `wepppy/microservices/rq_engine/ash_routes.py` | `input_upload_ash_load` (required), `input_upload_ash_type_map` (optional) | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation; used when `ash_depth_mode == 2` |
+| `/api/runs/{runid}/{config}/run-omni` | `wepppy/microservices/rq_engine/omni_routes.py` | `scenarios[{idx}][sbs_file]` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation per uploaded SBS scenario |
 | `/api/runs/{runid}/{config}/run-omni-contrasts` | `wepppy/microservices/rq_engine/omni_routes.py` | `omni_contrast_geojson` (optional/required by mode) | `.geojson`, `.json` | `100 * 1024 * 1024` (100 MB) | Required for `user_defined_areas` when no path provided |
 | `/api/runs/{runid}/{config}/run-omni-contrasts-dry-run` | `wepppy/microservices/rq_engine/omni_routes.py` | `omni_contrast_geojson` (optional/required by mode) | `.geojson`, `.json` | `100 * 1024 * 1024` (100 MB) | Same upload rules as `run-omni-contrasts` |
 
