@@ -324,6 +324,26 @@ def test_huc_fire_upload_sbs_rejects_invalid_extension(
     assert payload["error"]["message"].startswith("Invalid file extension.")
 
 
+def test_huc_fire_preserves_driver_mismatch_rejection(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from tests.factories.raster import raster_bytes
+
+    hfa = tmp_path / "source.img"
+    raw = raster_bytes(hfa, driver="HFA")
+    response, _run_dir = _post_upload_sbs(
+        monkeypatch,
+        tmp_path,
+        apply_nodir=False,
+        upload_filename="renamed.tif",
+        upload_bytes=raw,
+    )
+
+    assert response.status_code == 400
+    assert "does not match .tif (GTiff)" in response.json()["error"]["message"]
+
+
 def test_huc_fire_upload_sbs_rejects_oversize_upload(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

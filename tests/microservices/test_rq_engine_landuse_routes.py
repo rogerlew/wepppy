@@ -1735,16 +1735,22 @@ def test_build_landuse_propagates_nodir_preflight_errors(monkeypatch: pytest.Mon
 
 def test_build_landuse_user_defined_propagates_mutation_nodir_errors(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     _stub_auth(monkeypatch)
-    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: str(tmp_path))
+    from tests.factories.raster import raster_bytes
+
+    landuse_dir = tmp_path / "landuse"
+    landuse_dir.mkdir()
+    raster_bytes(landuse_dir / "_existing.tif", driver="GTiff")
 
     class DummyLanduse:
         run_group = "default"
         mods: set[str] = set()
         mode = landuse_routes.LanduseMode.UserDefined
-        lc_dir = "/tmp"
-        lc_fn = "/tmp/lc.tif"
+        lc_dir = str(landuse_dir)
+        lc_fn = str(landuse_dir / "lc.tif")
         mapping = None
         user_defined_landcover_fn = "existing.tif"
 
@@ -1772,7 +1778,6 @@ def test_build_landuse_user_defined_propagates_mutation_nodir_errors(
         raise NoDirError(http_status=503, code="NODIR_LOCKED", message="locked")
 
     monkeypatch.setattr(landuse_routes, "mutate_root", _raise_nodir)
-    monkeypatch.setattr(landuse_routes, "_exists", lambda path: True)
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -1782,6 +1787,44 @@ def test_build_landuse_user_defined_propagates_mutation_nodir_errors(
 
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "NODIR_LOCKED"
+
+
+def test_build_landuse_rejects_invalid_persisted_raster_before_state_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: str(tmp_path))
+    landuse_dir = tmp_path / "landuse"
+    landuse_dir.mkdir()
+    (landuse_dir / "_legacy.tif").write_text(
+        '<VRTDataset rasterXSize="1" rasterYSize="1" />'
+    )
+    mutations: list[str] = []
+
+    class DummyLanduse:
+        run_group = "batch"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.UserDefined
+        lc_dir = str(landuse_dir)
+        lc_fn = str(landuse_dir / "lc.tif")
+        mapping = None
+        user_defined_landcover_fn = "legacy.tif"
+
+        def parse_inputs(self, payload) -> None:
+            mutations.append("parse_inputs")
+
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={"landuse_management_mapping_selection": "disturbed"},
+        )
+
+    assert response.status_code == 400
+    assert "does not match" in response.json()["error"]["message"]
+    assert mutations == []
 
 
 def test_build_landuse_user_defined_rejects_invalid_extension(

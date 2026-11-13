@@ -105,9 +105,19 @@ def open_raster_with_expected_driver(path: Path):
         raise UploadError(str(exc), status_code=exc.status_code) from exc
 
 
-def resolve_run_owned_raster_path(path: Path, root: Path) -> Path:
+def resolve_run_owned_raster_path(
+    path: Path, root: Path, *, trusted_run_root: Path
+) -> Path:
     """Resolve a persisted raster beneath its server-authoritative run root."""
     try:
+        resolved_trusted = trusted_run_root.resolve(strict=True)
+        resolved_root = root.resolve(strict=True)
+        try:
+            resolved_root.relative_to(resolved_trusted)
+        except ValueError as exc:
+            raise UploadBoundaryError(
+                "Stored raster upload root is outside the trusted run root."
+            ) from exc
         return _resolve_contained_raster_path(path, root)
     except UploadBoundaryError as exc:
         raise UploadError(str(exc), status_code=exc.status_code) from exc

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 from wepppy.nodb.base import NoDbAlreadyLockedError, nodb_setter
 
 if TYPE_CHECKING:
-    from typing import Dict, Iterable, List, Optional, Set, Tuple
+    from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple
 
     from wepppy.nodb.mods.omni.omni import (
         ContrastDependency,
@@ -105,8 +105,15 @@ class OmniStateContrastMixin:
     def scenario_run_state(self, value: List[Dict[str, Any]]) -> None:
         self._scenario_run_state = value
 
-    def parse_scenarios(self, parsed_inputs: Iterable[Tuple[OmniScenario, ScenarioDef]]) -> None:
-        _OMNI_INPUT_PARSER.parse_scenarios(self, parsed_inputs)
+    def parse_scenarios(
+        self,
+        parsed_inputs: Iterable[Tuple[OmniScenario, ScenarioDef]],
+        *,
+        precommit_validator: Optional[Callable[[], None]] = None,
+    ) -> None:
+        _OMNI_INPUT_PARSER.parse_scenarios(
+            self, parsed_inputs, precommit_validator=precommit_validator
+        )
 
     def delete_scenarios(self, scenario_names: Iterable[str]) -> Dict[str, List[str]]:
         """

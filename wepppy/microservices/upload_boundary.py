@@ -78,6 +78,25 @@ def resolve_contained_raster_path(path: Path | str, root: Path | str) -> Path:
     return candidate
 
 
+def raster_companion_paths(path: Path | str) -> tuple[Path, ...]:
+    """Return GDAL sidecar names that could alter a later raster open."""
+    raster_path = Path(path)
+    return (
+        Path(f"{raster_path}.aux.xml"),
+        Path(f"{raster_path}.ovr"),
+        raster_path.with_suffix(".ige"),
+        raster_path.with_suffix(".rrd"),
+    )
+
+
+def reject_raster_companions(path: Path | str) -> None:
+    """Require a raster snapshot to remain independent of adjacent sidecars."""
+    if any(candidate.exists() or candidate.is_symlink() for candidate in raster_companion_paths(path)):
+        raise UploadBoundaryError(
+            "Uploaded raster has companion files; provide a self-contained file."
+        )
+
+
 def _regular_nonsymlink_stat(path: Path) -> os.stat_result:
     try:
         result = path.lstat()
@@ -119,6 +138,7 @@ def validate_raster_upload(path: Path | str) -> RasterUploadIdentity:
     from osgeo import gdal
 
     raster_path = Path(path)
+    reject_raster_companions(raster_path)
     before = _regular_nonsymlink_stat(raster_path)
     before_hash = _file_sha256(raster_path)
     previous_readdir = gdal.GetThreadLocalConfigOption("GDAL_DISABLE_READDIR_ON_OPEN")
@@ -352,6 +372,8 @@ def save_upload_from_stream(
             write_stream_to_destination(stream, staged, max_bytes=max_bytes,
                                         chunk_bytes=chunk_bytes, size_error_message=size_error_message)
             post_save(staged)
+            if isolated_post_save:
+                reject_raster_companions(destination)
             with staged.open("rb") as validated:
                 write_stream_to_destination(validated, destination, overwrite=overwrite,
                                             chunk_bytes=chunk_bytes)
@@ -379,6 +401,8 @@ __all__ = [
     "normalize_extensions",
     "open_raster_with_expected_driver",
     "prepare_filename",
+    "raster_companion_paths",
+    "reject_raster_companions",
     "raster_driver_for_path",
     "resolve_contained_raster_path",
     "save_upload_from_stream",

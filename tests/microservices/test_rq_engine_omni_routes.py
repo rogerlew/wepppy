@@ -296,23 +296,28 @@ def test_prepare_omni_scenarios_reuses_only_server_authoritative_sbs(tmp_path: P
     source = scenario_root / "severity.tif"
     sbs_raster_bytes(source)
 
-    parsed = omni_routes._prepare_omni_scenarios(
-        payload={
+    payload = {
             "scenarios": [
                 {"type": "sbs_map", "sbs_file_path": str(source.resolve())}
             ]
-        },
+        }
+    receipts = omni_routes._prevalidate_omni_sbs_inputs(
+        payload, None, FormData({}), wd=str(wd)
+    )
+    parsed = omni_routes._prepare_omni_scenarios(
+        payload=payload,
         raw_json=None,
         form=FormData({}),
         runid="run-1",
         config="cfg",
         wd=str(wd),
+        reuse_receipts=receipts,
     )
 
     assert parsed[0][1]["sbs_file_path"] == str(source.resolve())
 
 
-def test_prepare_omni_scenarios_rejects_client_path_substitution(tmp_path: Path) -> None:
+def test_omni_reuse_ignores_client_path_and_derives_server_candidate(tmp_path: Path) -> None:
     from tests.factories.raster import sbs_raster_bytes
 
     wd = tmp_path / "run"
@@ -321,19 +326,25 @@ def test_prepare_omni_scenarios_rejects_client_path_substitution(tmp_path: Path)
     source = scenario_root / "severity.tif"
     sbs_raster_bytes(source)
 
-    with pytest.raises(ValueError, match="does not match server state"):
-        omni_routes._prepare_omni_scenarios(
-            payload={
+    payload = {
                 "scenarios": [
                     {"type": "sbs_map", "sbs_file_path": "/etc/passwd"}
                 ]
-            },
+            }
+    receipts = omni_routes._prevalidate_omni_sbs_inputs(
+        payload, None, FormData({}), wd=str(wd)
+    )
+    parsed = omni_routes._prepare_omni_scenarios(
+            payload=payload,
             raw_json=None,
             form=FormData({}),
             runid="run-1",
             config="cfg",
             wd=str(wd),
+            reuse_receipts=receipts,
         )
+
+    assert parsed[0][1]["sbs_file_path"] == str(source.resolve())
 
 
 def test_prevalidate_omni_reuse_rejects_before_any_upload_is_published(
@@ -360,6 +371,50 @@ def test_prevalidate_omni_reuse_rejects_before_any_upload_is_published(
         )
 
     assert not (wd / "omni" / "_limbo" / "00").exists()
+
+
+def test_prevalidate_omni_missing_later_sbs_before_any_upload_is_published(
+    tmp_path: Path,
+) -> None:
+    from tests.factories.raster import sbs_raster_bytes
+
+    wd = tmp_path / "run"
+    new_source = tmp_path / "new.tif"
+    raw = sbs_raster_bytes(new_source)
+    form = FormData(
+        {"scenarios[0][sbs_file]": UploadFile(io.BytesIO(raw), filename="new.tif")}
+    )
+    payload = {"scenarios": [{"type": "sbs_map"}, {"type": "sbs_map"}]}
+
+    with pytest.raises(ValueError, match="Missing SBS file for scenario 1"):
+        omni_routes._prevalidate_omni_sbs_inputs(
+            payload, None, form, wd=str(wd)
+        )
+
+    assert not (wd / "omni" / "_limbo" / "00").exists()
+
+
+def test_prevalidate_omni_rejects_symlinked_server_upload_root(
+    tmp_path: Path,
+) -> None:
+    from tests.factories.raster import sbs_raster_bytes
+
+    wd = tmp_path / "run"
+    (wd / "omni").mkdir(parents=True)
+    outside = tmp_path / "outside"
+    scenario_root = outside / "00"
+    scenario_root.mkdir(parents=True)
+    source = scenario_root / "severity.tif"
+    sbs_raster_bytes(source)
+    (wd / "omni" / "_limbo").symlink_to(outside, target_is_directory=True)
+    payload = {
+        "scenarios": [{"type": "sbs_map", "sbs_file_path": "reuse"}]
+    }
+
+    with pytest.raises(omni_routes.UploadError, match="outside the trusted"):
+        omni_routes._prevalidate_omni_sbs_inputs(
+            payload, None, FormData({}), wd=str(wd)
+        )
 
 
 def test_prepare_omni_contrasts_normalizes_integer_slope_percentages(tmp_path: Path) -> None:

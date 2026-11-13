@@ -693,6 +693,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                         existing_source_path = resolve_run_owned_raster_path(
                             Path(_join(landuse.lc_dir, f"_{existing}")),
                             Path(landuse.lc_dir),
+                            trusted_run_root=Path(wd),
                         )
                         existing_source_identity = validate_raster_upload(
                             existing_source_path
@@ -789,6 +790,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                         source_path = resolve_run_owned_raster_path(
                             Path(user_defined_fn),
                             Path(landuse.lc_dir),
+                            trusted_run_root=Path(wd),
                         )
                         if existing_source_identity is not None:
                             assert_validated_raster_identity(

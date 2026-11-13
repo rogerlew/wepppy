@@ -106,7 +106,12 @@ class Omni(NoDbBase):
     @scenario_run_state.setter
     def scenario_run_state(self, value: List[Dict[str, Any]]) -> None: ...
 
-    def parse_scenarios(self, parsed_inputs: Iterable[Tuple[OmniScenario, ScenarioDef]]) -> None: ...
+    def parse_scenarios(
+        self,
+        parsed_inputs: Iterable[Tuple[OmniScenario, ScenarioDef]],
+        *,
+        precommit_validator: Optional[Callable[[], None]] = ...,
+    ) -> None: ...
 
     def delete_scenarios(self, scenario_names: Iterable[str]) -> Dict[str, List[str]]: ...
 

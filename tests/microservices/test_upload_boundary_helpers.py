@@ -205,6 +205,40 @@ def test_validate_raster_upload_rejects_vrt_disguised_as_tiff(tmp_path):
         validate_raster_upload(disguised)
 
 
+@pytest.mark.parametrize("companion_suffix", (".aux.xml", ".ovr", ".ige", ".rrd"))
+def test_raster_boundary_rejects_destination_companions(
+    tmp_path, companion_suffix
+):
+    from tests.factories.raster import raster_bytes
+
+    source = tmp_path / "source" / "map.tif"
+    source.parent.mkdir()
+    raw = raster_bytes(source, driver="GTiff")
+    destination_dir = tmp_path / "accepted"
+    destination_dir.mkdir()
+    destination = destination_dir / "map.tif"
+    companion = (
+        Path(f"{destination}{companion_suffix}")
+        if companion_suffix in {".aux.xml", ".ovr"}
+        else destination.with_suffix(companion_suffix)
+    )
+    companion.write_text("untrusted sidecar")
+
+    with pytest.raises(UploadBoundaryError, match="companion files"):
+        save_upload_from_stream(
+            raw_filename="map.tif",
+            stream=io.BytesIO(raw),
+            dest_dir=destination_dir,
+            allowed_extensions=("tif",),
+            overwrite=True,
+            post_save=validate_raster_upload,
+            isolated_post_save=True,
+        )
+
+    assert not destination.exists()
+    assert companion.read_text() == "untrusted sidecar"
+
+
 def test_assert_raster_upload_identity_rejects_replacement(tmp_path):
     from tests.factories.raster import raster_bytes
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Set, Tuple
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.omni.omni import Omni, OmniScenario, ScenarioDef
@@ -17,8 +17,12 @@ class OmniInputParsingService:
         self,
         omni: "Omni",
         parsed_inputs: Iterable[Tuple["OmniScenario", "ScenarioDef"]],
+        *,
+        precommit_validator: Optional[Callable[[], None]] = None,
     ) -> None:
         with omni.locked():
+            if precommit_validator is not None:
+                precommit_validator()
             omni._scenarios = []
 
             for scenario_enum, params in parsed_inputs:
