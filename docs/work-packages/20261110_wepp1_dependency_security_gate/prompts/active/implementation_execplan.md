@@ -24,14 +24,14 @@ segmented substitute is not accepted.
 
 ## Progress
 
-- [ ] (2026-11-13 UTC) Roger selected the explicit retained-candidate Compose
-  resume workflow and directed the remaining deployment work to proceed. Record
+- [ ] (2026-11-13 UTC) Roger explicitly selected the retained-candidate Compose
+  resume workflow by answering the concrete authorization question. Record
   and independently review the contract checkpoint, implement fail-closed
   build-only/resume modes in the canonical deployment script, validate the exact
-  candidate, collect and approve exact-image evidence, then activate wepp1 before
-  wepp2. Production preflight currently shows one active default-queue job, so
-  no service stop or activation is permitted until it completes naturally or
-  Roger explicitly approves interruption.
+  candidate, and collect and approve exact-image evidence. M5 interruption and
+  activation remain separately unauthorized. Production preflight currently
+  shows one active default-queue job; drain is necessary but does not itself
+  authorize rollout.
 
 - [x] (2026-11-13 UTC) `F6-RU-01` implementation `cb839e7d7` enforces
   `.tif/.tiff`→`GTiff` and `.img`→`HFA`, full-band decode, complete companion
@@ -393,6 +393,16 @@ not collected by unittest, so both runners are required for upstream evidence.
   unconditional no-cache rebuild on a later invocation, while holding one
   privileged deployment process open across manual review is operationally
   brittle.
+
+- Decision (2026-11-13): activation consumes a retained private Compose
+  projection plus an override whose image values are the approved immutable
+  `sha256:` IDs, with pull and build disabled. Bind the receipt to hostname,
+  machine ID, Docker Engine ID, installed `wctl`, source/build inputs and the
+  effective configuration. Derive the separate operator approval only from the
+  protected authority root and receipt hash.
+  Rationale: checking a mutable tag before and after activation leaves a
+  check/use race in which an unapproved image can run. Candidate-controlled
+  approval paths likewise collapse the required authority separation.
 
 - Decision: implement a shared self-contained GTiff/HFA upload boundary and
   remove general VRT admission; preserve the separately validated postfire dNBR
@@ -849,18 +859,28 @@ job-local image/report cleanup. Publishing remains restricted to the existing
 trusted workflow. Do not run untrusted PR code with a production Docker socket
 or credentials; the selected scanner execution design must pass security review.
 
-In `scripts/deploy-production.sh`, integrate the same policy interface after a
-candidate common image exists and before Step 3 stops/recreates services. Resolve
-the actual image name/ID from rendered Compose. Write evidence under a 0700/0600
-deployment-state directory and avoid environment/secret output. A missing tool,
-database refresh failure, report mismatch, expired exception, or blocking
-finding exits nonzero while leaving the current stack running. Do not apply the
-common-image gate to unrelated targeted CAP/batch operations unless their
-resolved deployment set actually selects a newly built common image.
+In `scripts/deploy-production.sh`, add mutually exclusive build-only and retained
+resume modes. Build-only performs the canonical no-cache build and runtime
+validation, then atomically publishes a host/daemon-bound receipt, rendered
+Compose activation file and immutable-ID override beneath the protected candidate
+root before exiting without stopping services. Resume recomputes every bound
+identity, derives its approval path from the protected approval root and receipt
+hash, and runs the shared evaluator before any service change.
 
-Test the deploy hook with a fake scanner/policy fixture and a disposable image;
-do not stop local or production services merely to test control flow. Verify the
-gate's location by asserting no stop/up command occurs on failure.
+Activation uses the retained Compose projection and ID override with pull/build
+disabled. Revalidate receipt, approval, evidence freshness and ID availability
+again after a warm wait immediately before every `up`; reject rather than fall
+back to mutable tags. A missing tool, database refresh failure, report mismatch,
+expired exception, changed daemon/configuration or blocking finding exits
+nonzero. Do not apply the common-image gate to unrelated targeted CAP operations.
+
+Test the deploy hook with a fake scanner/policy fixture and disposable images;
+do not stop local or production services merely to test control flow. Cover
+private atomic publication, symlink/mode/owner rejection, host/daemon/wctl/config
+drift, receipt copying, malformed approval records, stale evidence, missing IDs,
+generic skip-build rejection and mutation of a source tag at cutover. The tag
+mutation regression must prove the unapproved image never starts. Assert no
+stop/up command occurs on the pre-cutover failure paths.
 
 Milestone acceptance is deterministic local/CI behavior, generated workflow
 parity, least-privilege review, and a pre-activation failure that preserves the
@@ -1054,6 +1074,15 @@ The final implementation must expose stable, non-runtime interfaces under
 - machine-readable policy/exception fixtures whose accepted-risk entries require
   advisory/package identity, owner, rationale, compensating control, expiry, and
   review trigger.
+- a versioned retained-candidate receipt plus private rendered Compose and
+  immutable-ID override files, atomically published below the canonical candidate
+  root with 0700 directories and 0600 non-symlink files;
+- a versioned operator approval record below the separate canonical approval
+  root, named from the candidate-receipt hash and binding evidence-manifest,
+  policy and disposition hashes; no CLI, environment or candidate field may
+  redirect this lookup;
+- canonical script flags for build-only receipt creation and same-host resume;
+  they are mutually exclusive and do not weaken generic `--skip-build`.
 
 Exact filenames may be finalized at M0, but CI and deployment must call the same
 repository-owned policy interface. The scanner is a build/security tool, not an
@@ -1068,6 +1097,10 @@ Compose through `scripts/deploy-production.sh`; the GHCR publication workflow
 continues to serve its existing non-deploying/Kubernetes compatibility purpose.
 
 ## Revision Note
+
+2026-11-13: Record Roger's explicit retained-candidate workflow authorization,
+immutable-ID activation input, host/daemon/private-authority receipt contract,
+cutover mutation tests, and continued separate M5 authorization requirement.
 
 2026-11-12: Record real parser collection, independent inventory reconciliation,
 the exact conservative-warning correction and retained unresolved findings.

@@ -7,7 +7,9 @@ custom GDAL/Rasterio compilation, but implement upload-boundary format/driver
 enforcement as `F6-RU-01`. The earlier record that deferred both paths was an
 agent misinterpretation and is superseded. Input containment does not clear the
 affected advisory/native-coverage item or authorize M4 acceptance.
-Deployment-resume work remains deferred.
+Roger explicitly authorized implementation of retained-candidate resume on
+2026-11-13. Immutable-ID activation and private approval authority are at the
+contract checkpoint; M5 production interruption/activation remains unauthorized.
 
 Remediation status (2026-11-12): master includes cryptography, certifi, urllib3,
 pyasn1, msgpack and nbconvert upgrades. Authlib/joserfc are updated and tested
@@ -133,8 +135,8 @@ actual gate rejects native coverage. M4 is not complete.
   tests pass, clean build passes in 658.72s. Installed version delta is exactly
   Authlib plus joserfc; native GDAL sentinels match. No forest activation.
 - [ ] Implement and prove actual CI lifecycle from
-  `artifacts/20261112_ci_producer_design.md`; keep deployment workflow selection
-  separate and pending.
+  `artifacts/20261112_ci_producer_design.md`; retained-candidate workflow is
+  selected, but implementation review and separate M5 rollout authority remain.
 
 - [x] Complete real parser candidate collection and inventory reconciliation;
   retain blocked policy status and qualified-diagnostic correction.
@@ -310,5 +312,5 @@ Roger selected the retained-candidate resume proposal in
 `artifacts/20261112_deploy_approval_boundary.md` for the host-local Compose
 workflow. Implement and independently review fail-closed build-only/resume modes;
 generic skip-build remains rejected. Production preflight found one executing
-default-queue job, so activation must wait for natural completion or explicit
-operator approval to interrupt it.
+default-queue job. Queue drain is required but does not authorize service
+interruption or M5 activation, which remain separately gated.

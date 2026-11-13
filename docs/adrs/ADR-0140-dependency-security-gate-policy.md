@@ -62,11 +62,33 @@ For host-local Compose deployment, build and record the candidate before any
 service stop, then exit for independent evidence collection and review. A later
 resume must bind to a host-specific private receipt and reject before service
 changes unless the source revision and cleanliness, dependency lock, deploy
-script, effective Compose service/image selection, and every immutable local
-image ID still match. Immediately before activation, rerun the independent
-evidence policy and freshness checks against those exact IDs and approved
-disposition hashes. Generic `--skip-build` remains invalid for locally built
-services; a retained receipt is not transferable between hosts.
+script, installed `wctl` identity, deploy mode/options, secret-safe canonical
+rendered Compose projection, and every service-to-image ID still match. Bind the
+host with `/etc/machine-id`, hostname, and Docker Engine ID; all three must match
+on resume.
+
+Store candidate directories beneath
+`/workdir/weppcloud-deployments/.local/dependency-security/candidates/` and
+operator approvals beneath the sibling `approvals/` authority. Directories are
+0700 and files 0600, owned by the invoking operator, non-symlinked, atomically
+published and fsynced. The receipt schema includes its version, creation time,
+host/daemon identities, source/build identities, effective configuration hash,
+selected services, immutable image map and retained activation-file hashes. The
+approval path is derived only from the protected authority root plus the
+candidate-receipt hash; it is never accepted from the candidate receipt, CLI or
+environment. That separate record binds the candidate hash to evidence manifest,
+policy and disposition hashes.
+
+Activation must consume the frozen IDs, not mutable tags. Retain the rendered
+Compose configuration and an override mapping every selected locally built
+service to its `sha256:` image ID. After validating the current projection,
+activate through the canonical deploy script using only those private retained
+files with build and pull disabled. Revalidate the receipt and independent
+evidence policy before the first service change and again after any warm wait,
+immediately before each activation attempt. Verify running container IDs after
+activation as defense in depth, not as the primary substitution control. Generic
+`--skip-build` remains invalid; a retained receipt is not transferable between
+hosts or Docker daemons.
 
 ## Decision Provenance
 
@@ -77,6 +99,13 @@ Participants Present: Roger Lew; Codex.
 Decision Owner: Roger Lew.  
 Implementer: Codex; implementation pending the required baseline.  
 Review: independent correctness, security, and wepp1 operations agents.
+
+Amendment Venue: Codex execution session, 2026-11-13 UTC. Roger answered
+“yes” to the explicit question authorizing retained-candidate resume: build once,
+pin activation to immutable image IDs, independently review evidence, and resume
+the same host-local Compose candidate without rebuilding. This authorizes the
+workflow implementation and validation; it does not authorize M5 production
+service interruption or activation.
 
 ## Change Summary
 
