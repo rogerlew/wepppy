@@ -134,6 +134,35 @@ def test_create_uses_once_resolved_expected_ids_instead_of_mutable_tags(
     assert inspected == [_IMAGE_ID] * len(args.recreated_service)
 
 
+def test_create_accepts_wepp3_fork_archive_common_image(
+    candidate_environment,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    project, deploy_script, _ = candidate_environment
+    config = {
+        "name": "docker",
+        "services": {
+            "rq-worker-fork-archive": {
+                "image": "wepppy:test",
+                "build": {"context": ".."},
+            },
+        },
+    }
+    monkeypatch.setattr(candidate, "compose_config", lambda: config)
+    args = _args(project, deploy_script)
+    args.deploy_mode = "wepp3-fork-archive"
+    args.build_service = ["rq-worker-fork-archive"]
+    args.recreated_service = ["rq-worker-fork-archive"]
+
+    assert candidate.create_candidate(args) == 0
+    receipt = Path(json.loads(capsys.readouterr().out)["receipt"])
+    value = json.loads(receipt.read_text(encoding="utf-8"))
+    assert value["deploy_mode"] == "wepp3-fork-archive"
+    assert value["dependency_service"] == "rq-worker-fork-archive"
+    assert value["image_id"] == _IMAGE_ID
+
+
 @pytest.mark.parametrize("drift", ["engine", "image", "dirty"])
 def test_validate_rejects_host_source_or_image_drift(
     candidate_environment,

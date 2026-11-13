@@ -394,6 +394,16 @@ configure_deploy_topology() {
         exit 1
     fi
 
+    if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+        RQ_CONTROL_SERVICE="rq-worker-fork-archive"
+        RQ_DRAIN_DESCRIPTION="fork-archive"
+        RQ_DRAIN_REGISTRIES="fork-archive"
+    else
+        RQ_CONTROL_SERVICE="rq-worker"
+        RQ_DRAIN_DESCRIPTION="default and batch"
+        RQ_DRAIN_REGISTRIES="default,batch"
+    fi
+
     BUILD_OUTPUT="$(
         wctl docker compose config --format json \
             | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
@@ -469,8 +479,9 @@ validate_deploy_topology() {
         exit 1
     fi
     if [ "${BUILD_RETAINED_CANDIDATE}" = true ] || [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
-        if [ "${DEPLOY_MODE}" != "full" ] && [ "${DEPLOY_MODE}" != "worker" ]; then
-            echo "✗ Retained-candidate mode currently supports only full and worker stacks." >&2
+        if [ "${DEPLOY_MODE}" != "full" ] && [ "${DEPLOY_MODE}" != "worker" ] \
+            && [ "${DEPLOY_MODE}" != "wepp3-fork-archive" ]; then
+            echo "✗ Retained-candidate mode does not support this deployment topology." >&2
             exit 1
         fi
         if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ] \
@@ -492,7 +503,9 @@ validate_deploy_topology() {
     fi
     if [ "${PRINT_PLAN}" = false ] \
         && { [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_BATCH}" = true ] \
-            || [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; }; then
+            || { [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
+                && [ "${BUILD_RETAINED_CANDIDATE}" = false ] \
+                && [ -z "${RESUME_RETAINED_CANDIDATE}" ]; }; }; then
         echo "✗ This common-image scope is fail-closed until retained-candidate support is reviewed." >&2
         exit 1
     fi
@@ -691,28 +704,30 @@ PY
 }
 
 active_rq_job_count() {
-    if ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "rq-worker"; then
+    if ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "${RQ_CONTROL_SERVICE}"; then
         echo 0
         return 0
     fi
     run_rq_control_program '
 import redis
+import sys
 from rq.registry import StartedJobRegistry
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
-print(sum(connection.zcard(StartedJobRegistry(name, connection=connection).key) for name in ("default", "batch")))
-'
+queue_names = tuple(filter(None, sys.argv[1].split(",")))
+print(sum(connection.zcard(StartedJobRegistry(name, connection=connection).key) for name in queue_names))
+' "${RQ_DRAIN_REGISTRIES}"
 }
 
 assert_no_active_rq_jobs() {
-    echo "    Verifying no default or batch RQ jobs are executing..."
+    echo "    Verifying no ${RQ_DRAIN_DESCRIPTION} RQ jobs are executing..."
     ACTIVE_RQ_JOBS="$(active_rq_job_count)"
     [[ "${ACTIVE_RQ_JOBS}" =~ ^[0-9]+$ ]] || {
         echo "✗ Unable to determine active RQ job count." >&2
         return 1
     }
     [ "${ACTIVE_RQ_JOBS}" -eq 0 ] || {
-        echo "✗ Refusing deployment while ${ACTIVE_RQ_JOBS} default/batch RQ jobs are executing." >&2
+        echo "✗ Refusing deployment while ${ACTIVE_RQ_JOBS} ${RQ_DRAIN_DESCRIPTION} RQ jobs are executing." >&2
         return 1
     }
 }
@@ -727,14 +742,14 @@ wait_for_active_rq_jobs() {
             return 1
         }
         if [ "${active_jobs}" -eq 0 ]; then
-            echo "    Default and batch RQ registries are drained."
+            echo "    ${RQ_DRAIN_DESCRIPTION} RQ registries are drained."
             return 0
         fi
         if [ "${SECONDS}" -ge "${deadline}" ]; then
-            echo "✗ Timed out draining ${active_jobs} active default/batch RQ jobs." >&2
+            echo "✗ Timed out draining ${active_jobs} active ${RQ_DRAIN_DESCRIPTION} RQ jobs." >&2
             return 1
         fi
-        echo "    Waiting for ${active_jobs} active default/batch RQ jobs to finish..."
+        echo "    Waiting for ${active_jobs} active ${RQ_DRAIN_DESCRIPTION} RQ jobs to finish..."
         sleep 5
         assert_rq_fence
     done
@@ -756,7 +771,7 @@ run_rq_control_program() {
     shift
     if timeout --foreground --kill-after=5 \
         "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
-        wctl docker compose exec -T rq-worker /opt/venv/bin/python -c \
+        wctl docker compose exec -T "${RQ_CONTROL_SERVICE}" /opt/venv/bin/python -c \
         "${program}" "$@"; then
         return 0
     else
@@ -773,12 +788,12 @@ run_rq_control_program() {
                 "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
                 docker compose -f "${KNOWN_GOOD_CONFIG}" -f "${KNOWN_GOOD_OVERRIDE}" \
                 run --rm --no-deps --entrypoint /opt/venv/bin/python \
-                rq-worker -c "${program}" "$@"
+                "${RQ_CONTROL_SERVICE}" -c "${program}" "$@"
         else
             timeout --foreground --kill-after=5 \
                 "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
                 wctl docker compose run --rm --no-deps \
-                --entrypoint /opt/venv/bin/python rq-worker -c "${program}" "$@"
+                --entrypoint /opt/venv/bin/python "${RQ_CONTROL_SERVICE}" -c "${program}" "$@"
         fi
     fi
 }
@@ -826,7 +841,7 @@ print("yes" if owned and is_suspended(connection) else "no")
 }
 
 suspend_rq_dequeue() {
-    if ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "rq-worker"; then
+    if ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "${RQ_CONTROL_SERVICE}"; then
         return 0
     fi
     if [ "${RQ_FENCE_ACTIVE}" = true ]; then
@@ -1102,6 +1117,22 @@ print("{}:{}".format(
 ))
 ' "${default_hostname}" "${batch_hostname}")"
         [[ "${registration}" =~ ^[1-9][0-9]*:[1-9][0-9]*$ ]] || return 1
+    elif printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "rq-worker-fork-archive"; then
+        local fork_hostname registration
+        fork_hostname="$(wctl docker compose exec -T rq-worker-fork-archive hostname)"
+        registration="$(run_rq_control_program '
+import redis
+import sys
+from rq import Worker
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+workers = [worker for worker in Worker.all(connection=connection) if connection.ttl(worker.key) > 0 and "fork-archive" in worker.queue_names()]
+print("{}:{}".format(
+    len(workers),
+    sum(worker.hostname == sys.argv[1] for worker in workers),
+))
+' "${fork_hostname}")"
+        [ "${registration}" = "1:1" ] || return 1
     fi
 }
 
@@ -1415,6 +1446,7 @@ elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
     && wctl docker compose ps --status running --services 2>/dev/null \
         | grep -q '^rq-worker-fork-archive$'; then
     FORK_ARCHIVE_STOP_TIMEOUT_SECONDS="${FORK_ARCHIVE_STOP_TIMEOUT_SECONDS:-216000}"
+    prepare_retained_cutover
     echo "    Requesting warm shutdown of rq-worker-fork-archive..."
     run_wctl_with_retry \
         "$((FORK_ARCHIVE_STOP_TIMEOUT_SECONDS + 30))" \
@@ -1695,6 +1727,7 @@ else
             echo "✗ Expected one global/current-container fork-archive worker; found '${REGISTERED_FORK_ARCHIVE_WORKERS:-query failed}'." >&2
             false
         fi
+        assert_rq_fence
         run_wctl_with_retry \
             "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
             "${WCTL_COMPOSE_RETRIES}" \

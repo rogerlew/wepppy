@@ -24,6 +24,23 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [ ] (2026-11-13 UTC) Deployment preparation now includes wepp3. Retained
+  candidate support is implemented for its single fork/archive worker with
+  exact-image recovery, global dequeue fencing, fork-only drain accounting,
+  pre-stop identity recheck, `1002:130` runtime identity and sole-registration
+  acceptance. All 195 focused deploy/evidence tests pass in the canonical
+  disposable Compose runtime. Wepp3 secret, `1002:130`, writable NFS and clock
+  preflights pass; all three private authority/tool roots and pinned tool hashes
+  reconcile. Final review, exact-host candidates/evidence and broad gates remain
+  open; no host activation is authorized by preparation.
+
+- [x] (2026-11-13 UTC) Roger explicitly authorized the time-bounded residual-risk
+  exception for `GHSA-r5m4-5vww-w9f5` / `CVE-2026-8212` rather than custom GDAL
+  compilation. The normative decision is
+  `artifacts/20261113_gdal_residual_risk_exception.md`. Its private disposition
+  must still bind each fresh final image, finding key, installed version/path and
+  evidence identity before approval; expiry is 2026-12-13T22:16:59Z.
+
 - [ ] (2026-11-13 UTC) Retained-candidate implementation is staged for
   independent review: canonical build/resume flags, private host/daemon-bound
   receipts, protected approval derivation, immutable-ID activation, pre-stop RQ
@@ -241,6 +258,12 @@ segmented substitute is not accepted.
 
 ## Surprises & Discoveries
 
+- (2026-11-13 UTC) Wepp3's pre-existing dependency-security store root was mode
+  0755 even though its children were newly created as 0700. The retained helper
+  correctly rejects that authority boundary. The root is now 0700 on wepp1,
+  wepp2 and wepp3, and the pinned Syft, Grype and scientific-manifest hashes are
+  independently identical on all three hosts.
+
 - Observation: existing upload hardening checks extensions, but confirmed raster
   routes still hand saved bytes to unrestricted GDAL/raster consumers. The DEM
   route accepts only `.tif`, while other user-facing workflows promise `.img` and
@@ -397,6 +420,17 @@ not collected by unittest, so both runners are required for upstream evidence.
   Evidence: `.github/forest_workflows/npm-tests.yml`.
 
 ## Decision Log
+
+- Decision (2026-11-13): extend the reviewed retained-candidate contract to the
+  dedicated wepp3 fork/archive worker instead of bypassing the new common-image
+  activation guard. Hold the global dequeue fence, count/drain only the
+  `fork-archive` started registry, recheck the running map immediately before
+  warm stop, and require exact-image recovery plus `1002:130` and sole current
+  registration.
+  Rationale: the raster/security candidate uses the common image on all three
+  Compose hosts; leaving wepp3 fail-closed would make an all-host rollout
+  impossible, while an ad hoc deployment would discard the reviewed recovery
+  and evidence controls.
 
 - Decision (Roger, 2026-11-13): implement the explicit retained-candidate resume
   workflow for `wepp.cloud` host-local Docker Compose deployment. Build and
@@ -1017,11 +1051,10 @@ All commands run from `/home/workdir/wepppy` unless stated otherwise.
    and approval paths are derived from the fixed authority root. `--skip-build`,
    both retained flags together, a receipt outside the candidate root, or any
    targeted/source/rollback option not encoded by the receipt fails before
-   mutation. Initial implementation supports full-stack and worker-stack scopes
-   required for wepp1/wepp2. Targeted CAP remains excluded. Targeted web,
-   fork/archive, targeted batch, source-overlay and rollback common-image
-   activation fail closed until their exact retained scope is implemented and
-   reviewed.
+  mutation. The implementation supports full-stack, worker-stack, and dedicated
+  wepp3 fork/archive scopes. Targeted CAP remains excluded. Targeted web,
+  targeted batch, source-overlay and rollback common-image activation fail
+  closed until their exact retained scope is implemented and reviewed.
 
 7. Build the final candidate and run M4 exactly. Store raw reports outside Git;
    store tracked hashes and summaries under this work package.

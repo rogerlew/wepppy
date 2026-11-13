@@ -74,8 +74,8 @@ bundle itself. Exit 0 means the supplied evidence passed this component; it is
 not deployment authority. Exit 1 reports blocking findings; exit 2 means invalid
 or incomplete evidence.
 
-The canonical deploy script separates build from activation for full and worker
-stacks:
+The canonical deploy script separates build from activation for the full stack,
+worker stack, and dedicated wepp3 fork/archive worker:
 
 ```bash
 scripts/deploy-production.sh --build-retained-candidate
@@ -126,10 +126,14 @@ then revalidates the record and runs the evaluator. Successful activation writes
 an immutable ledger below `activations/<host-id>/` and protects the prior image
 IDs with retained rollback tags so ordinary Docker pruning cannot remove them.
 
-Targeted CAP remains on its distinct excluded-image recovery contract. Targeted
-web, targeted batch/source-overlay/rollback, and wepp3 fork/archive common-image
-activation currently fail closed until their retained scopes are implemented and
-reviewed. A passing resume gate is not M5 rollout authorization.
+On wepp3, resume acquires the same global dequeue fence, drains only the
+`fork-archive` started registry while the known-good worker remains online,
+rechecks the exact running image immediately before warm shutdown, and requires
+the restored or candidate worker to run as `1002:130` with exactly one current
+`fork-archive` registration. Targeted CAP remains on its distinct excluded-image
+recovery contract. Targeted web and targeted batch/source-overlay/rollback
+common-image activation remain fail closed until their retained scopes are
+implemented and reviewed. A passing resume gate is not M5 rollout authorization.
 
 ## Collector qualification (not yet wired)
 

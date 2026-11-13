@@ -10,6 +10,10 @@ affected advisory/native-coverage item or authorize M4 acceptance.
 Roger explicitly authorized implementation of retained-candidate resume on
 2026-11-13. Immutable-ID activation and private approval authority are at the
 contract checkpoint; M5 production interruption/activation remains unauthorized.
+Roger also authorized the exact, 30-day GDAL residual-risk exception recorded in
+`artifacts/20261113_gdal_residual_risk_exception.md`; private final dispositions
+must still bind fresh candidate evidence. Deployment preparation now includes
+retained-candidate coverage for the dedicated wepp3 fork/archive worker.
 
 Historical remediation status (2026-11-12; the resume-design hold was
 superseded by Roger's explicit 2026-11-13 authorization): master includes
@@ -39,6 +43,20 @@ for the later clean OAuth candidate. Its 18 Authlib rows are removed, but the
 actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
+
+- [ ] (2026-11-13 UTC) Complete focused/broad validation and review of wepp3
+  retained-candidate support. The implementation uses the shared immutable-image
+  and recovery contract, drains only active fork/archive work under the global
+  fence, and verifies `1002:130` plus sole current-worker registration. All 195
+  focused deploy/evidence tests pass in disposable Compose. Wepp3 secret,
+  identity, NFS and time preflights pass; private authority roots and pinned tool
+  hashes reconcile across all three hosts. Broad gates, review and exact-host
+  evidence remain open. Host activation remains separate.
+
+- [x] (2026-11-13 UTC) Record Roger's explicit residual-risk exception for
+  `GHSA-r5m4-5vww-w9f5` / `CVE-2026-8212`, expiring
+  2026-12-13T22:16:59Z. Final private records remain image/path/finding-key bound
+  and must pass the unchanged evaluator before approval.
 
 - [ ] (2026-11-13 UTC) Implement the explicitly selected retained-candidate
   workflow after checkpoint approval. Drain RQ jobs while known-good containers
@@ -275,6 +293,9 @@ candidate dependency changes are confined to the detached checkout.
   importer, candidate test-image wiring and npm lint checkpoint. The detached
   crypto/TLS batch has clean-build, fresh-scan and focused compatibility evidence;
   the final candidate, advisory decisions and deployment integration remain open.
+- 2026-11-13 22:31 UTC: 195 focused deploy/evidence tests pass with wepp3
+  retained-candidate coverage; all three host authority/tool roots are private
+  and hash-verified. Exact candidate builds/evidence and broad gates remain.
 - Pending: exact-image inventory, triage, compatible batches, and gate wiring.
 - Pending: complete final regression gates and independent reviews.
 - Pending: separately authorized rollout; no production action performed.

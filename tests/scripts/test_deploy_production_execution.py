@@ -1212,14 +1212,53 @@ def test_worker_rejects_missing_current_host_registration_before_prune_or_succes
     assert "Deployment complete!" not in result.stdout
 
 
-def test_wepp3_execution_fails_closed_until_retained_scope_is_reviewed(tmp_path: Path) -> None:
+def test_wepp3_retained_execution_drains_and_activates_immutable_image(tmp_path: Path) -> None:
     services = {"rq-worker-fork-archive": _service("wepppy:test")}
     result, commands = _run_deploy(tmp_path, services)
 
+    assert result.returncode == 0, result.stdout + result.stderr
+    build = _position(commands, "wctl|build --no-cache rq-worker-fork-archive")
+    suspend = _position(commands, _RQ_SUSPEND)
+    stop = _position(commands, "stop --timeout 216000 rq-worker-fork-archive")
+    down = _position(commands, "wctl|down")
+    activation = _position(commands, "docker|compose -f")
+    registration = _position(commands, "Worker.all")
+    resume = _position(commands, _RQ_RESUME)
+    assert build < suspend < stop < down < activation < registration < resume
+    assert "fork-archive RQ registries are drained" in result.stdout
+    assert "retained|record-activation" in commands
+    assert any("wepppy-retained-rollback:" in command for command in commands)
+    assert not any(command.startswith("docker|system prune") for command in commands)
+    assert "Deployment complete!" in result.stdout
+
+
+def test_wepp3_active_job_timeout_releases_fence_without_stopping_worker(tmp_path: Path) -> None:
+    services = {"rq-worker-fork-archive": _service("wepppy:test")}
+    result, commands = _run_deploy(tmp_path, services, rq_probe_result="1")
+
     assert result.returncode != 0
-    assert "supports only full and worker stacks" in result.stderr
+    assert "Timed out draining 1 active fork-archive RQ jobs" in result.stderr
+    assert _position(commands, _RQ_SUSPEND) < _position(commands, _RQ_RESUME)
     assert not any("stop --timeout" in command for command in commands)
-    assert not any("up -d" in command for command in commands)
+    assert not any(command.startswith("docker|compose -f") and " up -d " in command for command in commands)
+
+
+def test_wepp3_registration_failure_restores_known_good_and_retains_fence_on_failure(
+    tmp_path: Path,
+) -> None:
+    services = {"rq-worker-fork-archive": _service("wepppy:test")}
+    result, commands = _run_deploy(
+        tmp_path,
+        services,
+        local_worker_registration_failure=True,
+        recovery_failure=True,
+    )
+
+    assert result.returncode == 88
+    assert "KNOWN_GOOD_RESTORE_FAILED" in result.stderr
+    assert any("wepppy-known-good" in command and "up -d" in command for command in commands)
+    assert not any(command.startswith("docker|system prune") for command in commands)
+    assert "Deployment complete!" not in result.stdout
 
 
 def test_targeted_cap_execution_validates_before_short_stop_and_functional_canary(tmp_path: Path) -> None:
@@ -1337,7 +1376,7 @@ def test_active_job_probe_preserves_gate_with_stopped_worker(
         assert not any("docker compose stop" in command for command in commands)
         assert not any("up -d" in command for command in commands)
         if probe_result == "2":
-            assert "Timed out draining 2 active default/batch RQ jobs" in result.stderr
+            assert "Timed out draining 2 active default and batch RQ jobs" in result.stderr
         elif probe_result == "invalid":
             assert "Unable to determine active RQ job count" in result.stderr
         else:
@@ -1387,6 +1426,7 @@ def test_active_job_probe_never_cleans_registry(monkeypatch, capsys):
     monkeypatch.setattr(redis, "Redis", lambda **kwargs: connection)
     monkeypatch.setattr(settings, "redis_connection_kwargs", lambda db: {})
     monkeypatch.setattr(rq.registry, "StartedJobRegistry", Registry)
+    monkeypatch.setattr(sys, "argv", [str(_DEPLOY), "default,batch"])
     exec(compile(program, str(_DEPLOY), "exec"), {})
     assert calls == ["rq:wip:default", "rq:wip:batch"]
     assert capsys.readouterr().out.strip() == "1"

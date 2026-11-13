@@ -121,7 +121,8 @@ The script restarts itself when a pull updates its implementation and validates
 the post-pull Compose topology before building. It fails closed when an active
 worker-only wctl preset does not expose a supported service set.
 
-Full and worker deployments are two-phase retained-candidate operations:
+Full, worker-pool, and dedicated wepp3 fork/archive deployments are two-phase
+retained-candidate operations:
 
 ```bash
 ./scripts/deploy-production.sh --build-retained-candidate

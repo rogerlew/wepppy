@@ -33,6 +33,7 @@ DEPENDENCY_SERVICES = (
     "weppcloud",
     "rq-worker",
     "rq-worker-batch",
+    "rq-worker-fork-archive",
 )
 RECEIPT_FIELDS = {
     "schema_version", "created_at", "hostname", "machine_id_sha256",
@@ -585,7 +586,11 @@ def parser() -> argparse.ArgumentParser:
         command = commands.add_parser(name)
         command.add_argument("--project-root", type=Path, required=True)
         command.add_argument("--deploy-script", type=Path, required=True)
-        command.add_argument("--deploy-mode", choices=("full", "worker"), required=True)
+        command.add_argument(
+            "--deploy-mode",
+            choices=("full", "worker", "wepp3-fork-archive"),
+            required=True,
+        )
         command.add_argument("--deploy-option", action="append", default=[])
         command.add_argument("--build-service", action="append", required=True)
         command.add_argument("--recreated-service", action="append", required=True)

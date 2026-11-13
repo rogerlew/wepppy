@@ -60,8 +60,15 @@ RQ registration:
 
 ```bash
 ./wctl/install.sh wepp3
-./scripts/deploy-production.sh
+./scripts/deploy-production.sh --build-retained-candidate
+# After exact evidence is imported, reviewed, and approved:
+./scripts/deploy-production.sh --resume-retained-candidate <receipt-path>
 ```
+
+Build mode leaves the running fork/archive worker and RQ state unchanged. Resume
+holds the global dequeue fence, drains the active `fork-archive` registry while
+the known-good worker remains online, activates only the approved immutable
+image ID, and restores the exact prior image on a post-stop failure.
 
 The deploy script re-resolves the effective Compose services after `git pull`.
 If the pull changes the deployment script itself, the running process re-execs
