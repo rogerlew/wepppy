@@ -348,6 +348,25 @@ describe("Channel Delineation controller", () => {
         expect(document.getElementById("hint_build_channels_en").textContent).toContain("job-99");
     });
 
+    test.each(["dem.tif", "dem.tiff", "dem.img"])(
+        "accepts supported DEM upload extension %s",
+        async (filename) => {
+            const input = document.getElementById("input_upload_dem");
+            Object.defineProperty(input, "files", {
+                configurable: true,
+                value: [new File(["raster"], filename)],
+            });
+
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            await new Promise((resolve) => setTimeout(resolve, 0));
+
+            expect(requestMock).toHaveBeenCalledWith(
+                expect.stringContaining("tasks/upload-dem/"),
+                expect.objectContaining({ method: "POST" }),
+            );
+        },
+    );
+
     test("build sends map object payload when Set Map Object is selected", async () => {
         document.getElementById("set_extent_mode_map").checked = false;
         document.getElementById("set_extent_mode_manual").checked = false;

@@ -31,7 +31,7 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
-from .upload_helpers import UploadError, save_upload_file
+from .upload_helpers import UploadError, save_upload_file, validate_raster_upload
 from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
-TREATMENTS_USER_DEFINED_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
+TREATMENTS_USER_DEFINED_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 TREATMENTS_USER_DEFINED_MAX_BYTES = 500 * 1024 * 1024
 
 
@@ -185,7 +185,11 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
                     filename_transform=lambda _value: filename,
                     overwrite=True,
                     max_bytes=TREATMENTS_USER_DEFINED_MAX_BYTES,
-                    post_save=Treatments.validate_upload_raster,
+                    post_save=lambda path: validate_raster_upload(
+                        path,
+                        semantic_validator=Treatments.validate_upload_raster,
+                    ),
+                    isolated_post_save=True,
                 )
             except UploadError as exc:
                 return error_response(str(exc), status_code=_upload_status_from_message(str(exc)))

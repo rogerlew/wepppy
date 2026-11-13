@@ -16,3 +16,24 @@ def sbs_raster_bytes(path: Path, *, nodata_only: bool = False) -> bytes:
     band = None
     dataset = None
     return path.read_bytes()
+
+
+def raster_bytes(path: Path, *, driver: str, spill: bool = False) -> bytes:
+    """Write a small real raster with the requested GDAL driver."""
+    import numpy as np
+    from osgeo import gdal, osr
+
+    options = ["USE_SPILL=YES"] if spill else []
+    side = 200 if spill else 2
+    dataset = gdal.GetDriverByName(driver).Create(
+        str(path), side, side, 1, gdal.GDT_Float32, options=options
+    )
+    spatial_reference = osr.SpatialReference()
+    spatial_reference.ImportFromEPSG(32611)
+    dataset.SetProjection(spatial_reference.ExportToWkt())
+    dataset.SetGeoTransform((500000, 30, 0, 4500000, 0, -30))
+    dataset.GetRasterBand(1).WriteArray(
+        np.ones((side, side), dtype=np.float32)
+    )
+    dataset = None
+    return path.read_bytes()

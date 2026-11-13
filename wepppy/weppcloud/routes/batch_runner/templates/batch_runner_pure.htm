@@ -250,8 +250,8 @@
       {{ ui.file_upload(
         'sbs_map',
         'SBS Map',
-        accept='.tif,.tiff,.img,.vrt',
-        help='GeoTIFF/IMG/VRT up to several GB. Stored once per batch and cropped per run.',
+        accept='.tif,.tiff,.img',
+        help='GeoTIFF or self-contained IMG up to 100 MB. Stored once per batch and cropped per run.',
         attrs=sbs_upload_attrs,
         max_width='100%'
       ) }}

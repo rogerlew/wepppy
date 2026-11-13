@@ -70,7 +70,14 @@ from wepppy.nodb.single_input_policy import SingleInputPolicyError, require_sing
 from .payloads import parse_request_payload
 from .responses import error_response, validation_error_response
 from wepppy.wepp.management.managements import InvalidManagementKey
-from .upload_helpers import UploadError, save_upload_file, validate_upload_file
+from .upload_helpers import (
+    UploadError,
+    prevalidate_raster_upload_file,
+    resolve_run_owned_raster_path,
+    save_upload_file,
+    validate_raster_upload,
+    validate_upload_file,
+)
 from .webhooks import reject_unsupported as reject_unsupported_webhook, reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
@@ -86,7 +93,7 @@ LANDUSE_ALLOWED_MAPPING_SELECTIONS = frozenset(
     for option in landuse_management_mapping_options
     if str(option.get("Key") or "").strip()
 )
-LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
+LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 LANDUSE_USER_DEFINED_MAX_BYTES = 500 * 1024 * 1024
 LANDUSE_MAPPING_MAX_KEY_LENGTH = 128
 LANDUSE_MAPPING_BATCH_MAX_EDITS = 500
@@ -684,6 +691,11 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                         validate_upload_file(upload,
                             allowed_extensions=LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS,
                             max_bytes=LANDUSE_USER_DEFINED_MAX_BYTES)
+                        prevalidate_raster_upload_file(
+                            upload,
+                            allowed_extensions=LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS,
+                            max_bytes=LANDUSE_USER_DEFINED_MAX_BYTES,
+                        )
                     except UploadError as exc:
                         return error_response(str(exc), status_code=_upload_status_from_message(str(exc)))
 
@@ -744,6 +756,8 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                                     filename_transform=lambda _value: f"_{filename}",
                                     overwrite=True,
                                     max_bytes=LANDUSE_USER_DEFINED_MAX_BYTES,
+                                    post_save=validate_raster_upload,
+                                    isolated_post_save=True,
                                 )
                             except UploadError as exc:
                                 raise ValueError(str(exc)) from exc
@@ -757,7 +771,12 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                                     "input_upload_landuse is required when no existing user-defined landuse file is available."
                                 )
 
-                        raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
+                        source_path = resolve_run_owned_raster_path(
+                            Path(user_defined_fn),
+                            Path(landuse.lc_dir),
+                        )
+                        validate_raster_upload(source_path)
+                        raster_stacker(str(source_path), watershed.subwta, landuse.lc_fn)
 
                         if not _exists(landuse.lc_fn):
                             raise RuntimeError("Failed creating landuse file")

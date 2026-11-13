@@ -61,7 +61,14 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
-from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success
+from .upload_helpers import (
+    UploadError,
+    open_raster_with_expected_driver,
+    save_upload_file,
+    upload_failure,
+    upload_success,
+    validate_raster_upload,
+)
 from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
@@ -72,7 +79,7 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 FETCH_DEM_AND_BUILD_CHANNELS_TIMEOUT = int(os.getenv("RQ_ENGINE_FETCH_DEM_BUILD_CHANNELS_TIMEOUT", "600"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 UPLOAD_DEM_MAX_DIMENSION = 2560
-UPLOAD_DEM_ALLOWED_EXTENSIONS = ("tif",)
+UPLOAD_DEM_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 UPLOAD_DEM_MAX_BYTES = 100 * 1024 * 1024
 TOPAZ_UPLOAD_DEM_NODATA_MESSAGE = (
     "TOPAZ requires maps without NoData values. Please start a new project with the "
@@ -364,10 +371,25 @@ def _ensure_square_pixels(transform: tuple[float, ...]) -> float:
 
 
 def _validate_float_dem(dem_path: Path) -> None:
-    ds = gdal.Open(str(dem_path))
-    if ds is None:
-        raise UploadError("Unable to read uploaded DEM.")
+    ds = open_raster_with_expected_driver(dem_path)
     try:
+        band = ds.GetRasterBand(1)
+        dtype = gdal.GetDataTypeName(band.DataType) if band is not None else ""
+        if "float" not in dtype.lower():
+            raise UploadError(
+                f"DEM must be floating point (Float32/Float64). Detected {dtype or 'unknown'}."
+            )
+    finally:
+        ds = None
+
+
+def _validate_uploaded_dem_source(dem_path: Path) -> None:
+    ds = open_raster_with_expected_driver(dem_path)
+    try:
+        _validate_dem_dimensions(ds)
+        _require_spatial_reference(ds)
+        transform = ds.GetGeoTransform()
+        _ensure_square_pixels(transform)
         band = ds.GetRasterBand(1)
         dtype = gdal.GetDataTypeName(band.DataType) if band is not None else ""
         if "float" not in dtype.lower():
@@ -475,9 +497,7 @@ def _install_uploaded_dem(
     watershed: Watershed,
     saved_path: Path,
 ) -> dict[str, Any]:
-    ds = gdal.Open(str(saved_path))
-    if ds is None:
-        raise UploadError("Unable to read uploaded DEM.")
+    ds = open_raster_with_expected_driver(saved_path)
 
     try:
         _validate_dem_dimensions(ds)
@@ -492,9 +512,7 @@ def _install_uploaded_dem(
     dem_path = saved_path
     utm_srs = None
     if utm_zone is not None and utm_northern is not None:
-        ds = gdal.Open(str(saved_path))
-        if ds is None:
-            raise UploadError("Unable to read uploaded DEM.")
+        ds = open_raster_with_expected_driver(saved_path)
         try:
             transform = ds.GetGeoTransform()
             cellsize = _ensure_square_pixels(transform)
@@ -512,10 +530,14 @@ def _install_uploaded_dem(
             dstSRS=f"EPSG:{epsg}",
             resampleAlg="bilinear",
         )
-        warped = gdal.Warp(str(dem_path), str(saved_path), options=warp_options)
-        if warped is None:
-            raise UploadError("Failed to warp DEM to UTM.")
-        warped = None
+        source_ds = open_raster_with_expected_driver(saved_path)
+        try:
+            warped = gdal.Warp(str(dem_path), source_ds, options=warp_options)
+            if warped is None:
+                raise UploadError("Failed to warp DEM to UTM.")
+            warped = None
+        finally:
+            source_ds = None
 
         ds = gdal.Open(str(dem_path))
         if ds is None:
@@ -648,6 +670,11 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
                 filename_transform=lambda value: filename,
                 overwrite=True,
                 max_bytes=UPLOAD_DEM_MAX_BYTES,
+                post_save=lambda path: validate_raster_upload(
+                    path,
+                    semantic_validator=_validate_uploaded_dem_source,
+                ),
+                isolated_post_save=True,
             )
             return _install_uploaded_dem(
                 ron=ron,

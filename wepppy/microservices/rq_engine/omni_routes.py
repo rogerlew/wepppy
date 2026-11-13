@@ -43,7 +43,13 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
-from .upload_helpers import UploadError, save_upload_file
+from .upload_helpers import (
+    UploadError,
+    prevalidate_raster_upload_file,
+    resolve_run_owned_raster_path,
+    save_upload_file,
+    validate_raster_upload,
+)
 from .webhooks import reject_unsupported as reject_unsupported_webhook, reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
@@ -398,6 +404,8 @@ def _prepare_omni_scenarios(
                         dest_dir=limbo_dir / f"{idx:02d}",
                         max_bytes=SBS_MAX_BYTES,
                         overwrite=True,
+                        post_save=validate_raster_upload,
+                        isolated_post_save=True,
                     )
                 except UploadError as exc:
                     raise UploadError(
@@ -406,7 +414,24 @@ def _prepare_omni_scenarios(
                     ) from exc
                 scenario_params["sbs_file_path"] = str(upload_path)
             elif scenario_params.get("sbs_file_path"):
-                scenario_params["sbs_file_path"] = str(scenario_params["sbs_file_path"])
+                scenario_root = limbo_dir / f"{idx:02d}"
+                candidates = sorted(
+                    path
+                    for path in scenario_root.glob("*")
+                    if path.suffix.lower().lstrip(".") in SBS_ALLOWED_EXTENSIONS
+                ) if scenario_root.is_dir() else []
+                if len(candidates) != 1:
+                    raise ValueError(
+                        f"Scenario {idx} requires a new SBS upload; stored raster state is missing or ambiguous."
+                    )
+                upload_path = resolve_run_owned_raster_path(candidates[0], scenario_root)
+                claimed_path = Path(str(scenario_params["sbs_file_path"]))
+                if not claimed_path.is_absolute() or claimed_path != upload_path:
+                    raise ValueError(
+                        f"Scenario {idx} stored SBS path does not match server state; upload it again."
+                    )
+                validate_raster_upload(upload_path)
+                scenario_params["sbs_file_path"] = str(upload_path)
             else:
                 raise ValueError(f"Missing SBS file for scenario {idx}")
 
@@ -415,6 +440,21 @@ def _prepare_omni_scenarios(
         parsed_inputs.append((scenario_enum, scenario_params))
 
     return parsed_inputs
+
+
+def _prevalidate_omni_sbs_uploads(form: FormData) -> None:
+    """Validate every SBS multipart field before any scenario file is published."""
+    for key in form:
+        if not (str(key).startswith("scenarios[") and str(key).endswith("][sbs_file]")):
+            continue
+        upload = _extract_upload(form, str(key))
+        if upload is None or not upload.filename:
+            continue
+        prevalidate_raster_upload_file(
+            upload,
+            allowed_extensions=SBS_ALLOWED_EXTENSIONS,
+            max_bytes=SBS_MAX_BYTES,
+        )
 
 
 def _prepare_omni_contrasts(
@@ -594,6 +634,7 @@ async def _run_omni(
         return JSONResponse({"message": "Set omni inputs for batch processing"})
 
     try:
+        _prevalidate_omni_sbs_uploads(form)
         parsed_inputs = _prepare_omni_scenarios(
             payload,
             raw_json,

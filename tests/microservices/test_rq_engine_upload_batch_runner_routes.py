@@ -175,6 +175,8 @@ def test_upload_geojson_rejects_invalid_extension(
 
 
 def test_upload_sbs_map_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    from tests.factories.raster import sbs_raster_bytes
+
     batch_runner = DummyBatchRunner(tmp_path)
 
     monkeypatch.setattr(
@@ -195,7 +197,7 @@ def test_upload_sbs_map_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/batch/_/demo/upload-sbs-map",
-            files={"sbs_map": ("map.tif", b"data")},
+            files={"sbs_map": ("map.tif", sbs_raster_bytes(tmp_path / "source.tif"))},
             headers={"Authorization": "Bearer token"},
         )
 
@@ -215,6 +217,8 @@ def test_upload_sbs_map_retries_grouped_update_after_lock_clear(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
+    from tests.factories.raster import sbs_raster_bytes
+
     batch_runner = DummyBatchRunner(tmp_path)
 
     monkeypatch.setattr(
@@ -253,7 +257,7 @@ def test_upload_sbs_map_retries_grouped_update_after_lock_clear(
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/batch/_/demo/upload-sbs-map",
-            files={"sbs_map": ("map.tif", b"data")},
+            files={"sbs_map": ("map.tif", sbs_raster_bytes(tmp_path / "source.tif"))},
             headers={"Authorization": "Bearer token"},
         )
 
@@ -364,6 +368,8 @@ def test_upload_geojson_load_error_redacts_traceback(
 
 @pytest.mark.parametrize("operation", ["sbs_map_sanity_check", "SoilBurnSeverityMap"])
 def test_upload_sbs_native_failure_is_not_published(monkeypatch, tmp_path, operation):
+    from tests.factories.raster import sbs_raster_bytes
+
     runner = DummyBatchRunner(tmp_path)
     monkeypatch.setattr(upload_batch_runner_routes, "require_jwt", lambda *args, **kwargs: {"sub": "2", "roles": ["Admin"]})
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
@@ -373,7 +379,7 @@ def test_upload_sbs_native_failure_is_not_published(monkeypatch, tmp_path, opera
         raise RuntimeError("native unavailable")
     monkeypatch.setattr(upload_batch_runner_routes, operation, fail)
     with TestClient(rq_engine.app) as client:
-        response = client.post("/api/batch/_/demo/upload-sbs-map", files={"sbs_map": ("map.tif", b"data")}, headers={"Authorization": "Bearer token"})
+        response = client.post("/api/batch/_/demo/upload-sbs-map", files={"sbs_map": ("map.tif", sbs_raster_bytes(tmp_path / "source.tif"))}, headers={"Authorization": "Bearer token"})
     assert response.status_code == 500
     assert response.json()["error"]["message"] == "SBS raster processing failed."
     assert runner.sbs_grouped_update_calls == []

@@ -16,11 +16,12 @@ Channel delineation extracts channels from a DEM using either TOPAZ or Weppcloud
 | Use map extent | Most runs | Current map view | Uses the visible map bounds. Build may be disabled until you zoom in. |
 | Specify extent | You know the exact bounds | Manual bounds entry | Enter **south, west, north, east** in decimal degrees (WGS84). |
 | Set Map Object | Reuse an exact grid | Map object JSON | Paste the `_map` JSON from `ron.nodb` to reuse the exact grid, cellsize, and UTM metadata. |
-| Upload DEM | You already have a DEM | GeoTIFF upload | Validates and installs the uploaded DEM, then uses its extent for delineation. |
+| Upload DEM | You already have a DEM | GeoTIFF or self-contained IMG upload | Validates and installs the uploaded DEM, then uses its extent for delineation. |
 
 ## Upload DEM Requirements
 Your DEM must meet all of the following:
-- GeoTIFF (`.tif`) with a valid spatial reference.
+- GeoTIFF (`.tif`/`.tiff`) or self-contained ERDAS Imagine (`.img`) with a valid
+  spatial reference. The raster content must match its extension.
 - Floating point data (`Float32` or `Float64`).
 - No larger than **2560 x 2560** pixels.
 - North-up with **no rotation**.

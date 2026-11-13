@@ -29,8 +29,13 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
-from .upload_helpers import validate_upload_file
-from .upload_helpers import UploadError, save_upload_file
+from .upload_helpers import (
+    UploadError,
+    prevalidate_raster_upload_file,
+    save_upload_file,
+    validate_raster_upload,
+    validate_upload_file,
+)
 from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 logger = logging.getLogger(__name__)
@@ -101,6 +106,8 @@ def _task_upload_ash_map(
         dest_dir=destination_dir,
         max_bytes=ASH_MAX_BYTES,
         overwrite=overwrite,
+        post_save=validate_raster_upload,
+        isolated_post_save=True,
     )
     return saved_path.name
 
@@ -302,6 +309,11 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
                     upload = _extract_upload(form, field)
                     if upload is not None and upload.filename:
                         validate_upload_file(upload, allowed_extensions=ASH_ALLOWED_EXTENSIONS, max_bytes=ASH_MAX_BYTES)
+                        prevalidate_raster_upload_file(
+                            upload,
+                            allowed_extensions=ASH_ALLOWED_EXTENSIONS,
+                            max_bytes=ASH_MAX_BYTES,
+                        )
             except UploadError as exc:
                 return error_response(str(exc), status_code=_upload_status(exc))
 

@@ -285,6 +285,55 @@ def test_prepare_omni_scenarios_rejects_decimal_filter_slope(tmp_path: Path) -> 
         )
 
 
+def test_prepare_omni_scenarios_reuses_only_server_authoritative_sbs(tmp_path: Path) -> None:
+    from tests.factories.raster import sbs_raster_bytes
+
+    wd = tmp_path / "run"
+    scenario_root = wd / "omni" / "_limbo" / "00"
+    scenario_root.mkdir(parents=True)
+    source = scenario_root / "severity.tif"
+    sbs_raster_bytes(source)
+
+    parsed = omni_routes._prepare_omni_scenarios(
+        payload={
+            "scenarios": [
+                {"type": "sbs_map", "sbs_file_path": str(source.resolve())}
+            ]
+        },
+        raw_json=None,
+        form=FormData({}),
+        runid="run-1",
+        config="cfg",
+        wd=str(wd),
+    )
+
+    assert parsed[0][1]["sbs_file_path"] == str(source.resolve())
+
+
+def test_prepare_omni_scenarios_rejects_client_path_substitution(tmp_path: Path) -> None:
+    from tests.factories.raster import sbs_raster_bytes
+
+    wd = tmp_path / "run"
+    scenario_root = wd / "omni" / "_limbo" / "00"
+    scenario_root.mkdir(parents=True)
+    source = scenario_root / "severity.tif"
+    sbs_raster_bytes(source)
+
+    with pytest.raises(ValueError, match="does not match server state"):
+        omni_routes._prepare_omni_scenarios(
+            payload={
+                "scenarios": [
+                    {"type": "sbs_map", "sbs_file_path": "/etc/passwd"}
+                ]
+            },
+            raw_json=None,
+            form=FormData({}),
+            runid="run-1",
+            config="cfg",
+            wd=str(wd),
+        )
+
+
 def test_prepare_omni_contrasts_normalizes_integer_slope_percentages(tmp_path: Path) -> None:
     wd = tmp_path / "run"
     wd.mkdir(parents=True, exist_ok=True)
@@ -534,10 +583,13 @@ def test_run_omni_batch_without_scenarios_returns_input_message(
 
 def test_run_omni_batch_multipart_returns_input_message_without_enqueue(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
+    from tests.factories.raster import sbs_raster_bytes
+
     _stub_auth(monkeypatch)
     _stub_omni(monkeypatch, run_group="batch")
-    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: str(tmp_path / "run"))
 
     queue_called = {"called": False}
 
@@ -565,7 +617,7 @@ def test_run_omni_batch_multipart_returns_input_message_without_enqueue(
             files={
                 "scenarios[0][sbs_file]": (
                     "severity.tif",
-                    b"fake-tif-bytes",
+                    sbs_raster_bytes(tmp_path / "severity.tif"),
                     "image/tiff",
                 )
             },
@@ -574,6 +626,37 @@ def test_run_omni_batch_multipart_returns_input_message_without_enqueue(
     assert response.status_code == 200
     assert response.json()["message"] == "Set omni inputs for batch processing"
     assert queue_called["called"] is False
+
+
+def test_run_omni_invalid_second_sbs_publishes_no_scenario_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from tests.factories.raster import sbs_raster_bytes
+
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch, run_group="batch")
+    run_root = tmp_path / "run"
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: str(run_root))
+    valid = sbs_raster_bytes(tmp_path / "severity.tif")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            data={"scenarios": '[{"type":"sbs_map"},{"type":"sbs_map"}]'},
+            files={
+                "scenarios[0][sbs_file]": ("first.tif", valid, "image/tiff"),
+                "scenarios[1][sbs_file]": (
+                    "renamed.img",
+                    valid,
+                    "application/octet-stream",
+                ),
+            },
+        )
+
+    assert response.status_code == 400
+    assert "does not match" in response.json()["error"]["message"]
+    assert not (run_root / "omni" / "_limbo").exists()
 
 
 def test_run_omni_requires_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -616,7 +699,7 @@ def test_run_omni_rejects_oversize_sbs_upload_with_413(
 
     assert response.status_code == 413
     payload = response.json()
-    assert payload["error"]["message"].startswith("Invalid SBS file for scenario 0:")
+    assert payload["error"]["message"] == "File exceeds maximum allowed size"
     assert "maximum allowed size" in payload["error"]["message"]
 
 

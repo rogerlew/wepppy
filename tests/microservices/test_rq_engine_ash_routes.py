@@ -331,10 +331,13 @@ def test_run_ash_runid_base_suffix_returns_input_message_without_enqueue(
 
 def test_run_ash_batch_multipart_returns_input_message_without_enqueue(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
 ) -> None:
+    from tests.factories.raster import raster_bytes
+
     _stub_auth(monkeypatch)
     _stub_ash(monkeypatch, run_group="batch")
-    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: str(tmp_path / "run"))
 
     queue_called = {"called": False}
 
@@ -366,7 +369,7 @@ def test_run_ash_batch_multipart_returns_input_message_without_enqueue(
             files={
                 "input_upload_ash_load": (
                     "ash-load.tif",
-                    b"fake-tif-bytes",
+                    raster_bytes(tmp_path / "ash-load.tif", driver="GTiff"),
                     "image/tiff",
                 )
             },
@@ -375,6 +378,40 @@ def test_run_ash_batch_multipart_returns_input_message_without_enqueue(
     assert response.status_code == 200
     assert response.json()["message"] == "Set ash inputs for batch processing"
     assert queue_called["called"] is False
+
+
+def test_run_ash_invalid_second_raster_preserves_state_and_publishes_nothing(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    from tests.factories.raster import raster_bytes
+
+    _stub_auth(monkeypatch)
+    parsed_payload: dict = {}
+    ash = _stub_ash(monkeypatch, run_group="batch", parsed_payload=parsed_payload)
+    run_root = tmp_path / "run"
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: str(run_root))
+    valid = raster_bytes(tmp_path / "ash-load.tif", driver="GTiff")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-ash",
+            data={"ash_depth_mode": "2"},
+            files={
+                "input_upload_ash_load": ("ash-load.tif", valid, "image/tiff"),
+                "input_upload_ash_type_map": (
+                    "renamed.img",
+                    valid,
+                    "application/octet-stream",
+                ),
+            },
+        )
+
+    assert response.status_code == 400
+    assert "does not match" in response.json()["error"]["message"]
+    assert parsed_payload == {}
+    assert ash._ash_load_fn is None
+    assert not (run_root / "ash").exists()
 
 
 @pytest.mark.parametrize(

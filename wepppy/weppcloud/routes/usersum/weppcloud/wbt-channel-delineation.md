@@ -23,7 +23,7 @@ Build channels after creating a project and before selecting an outlet or
 delineating subcatchments. Return to this control when you need to:
 
 - enlarge, reduce, or exactly reproduce the terrain grid;
-- use a local GeoTIFF DEM;
+- use a local GeoTIFF or self-contained IMG DEM;
 - make the channel network denser or sparser;
 - change how short headwater tributaries are removed; or
 - test a different way of filling or breaching depressions in the DEM.
@@ -54,7 +54,7 @@ any nondefault settings when comparing runs.
 | **Use map extent** | The current map view | Normal interactive setup | Pan and zoom until the area of interest is framed and **Build Channels** is enabled. |
 | **Specify extent** | South, west, north, east bounds | You know the exact geographic limits | Enter four comma-separated decimal-degree coordinates in that order. |
 | **Set Map Object** | `_map` JSON from another run's `ron.nodb` | You need the same grid as an earlier run | Reuses extent, center, zoom, Universal Transverse Mercator (UTM) zone, cell size, rows, and columns. |
-| **Upload DEM** | A local GeoTIFF | You need to use your own elevation data | The upload establishes the extent, projection, cell size, and grid dimensions. |
+| **Upload DEM** | A local GeoTIFF or self-contained IMG | You need to use your own elevation data | The upload establishes the extent, projection, cell size, and grid dimensions. |
 
 ### Manual extent
 
@@ -84,7 +84,9 @@ choices; review the other settings before building.
 
 The uploaded DEM must be:
 
-- a GeoTIFF with a `.tif` extension;
+- a GeoTIFF with a `.tif` or `.tiff` extension, or a self-contained ERDAS
+  Imagine raster with an `.img` extension;
+- actual raster content that matches the filename extension;
 - Float32 or Float64 elevation data;
 - 2,560 by 2,560 pixels or smaller;
 - tagged with a valid coordinate reference system;
@@ -301,8 +303,8 @@ work.
 - **Map object is rejected** — copy the complete `_map` JSON object, including
   its extent, center, zoom, cell size, UTM information, rows, and columns.
 - **DEM upload is rejected** — confirm the file is a georeferenced floating
-  point GeoTIFF, no larger than 2,560 by 2,560 pixels, with a north-up square
-  grid.
+  point GeoTIFF or self-contained IMG whose content matches its extension, no
+  larger than 2,560 by 2,560 pixels, with a north-up square grid.
 - **MCL or CSA is rejected** — enter numeric values in the units displayed by
   the form.
 - **The network is too dense or sparse** — adjust one threshold at a time,

@@ -1211,8 +1211,8 @@ var ChannelDelineation = (function () {
             }
             var name = file.name || "";
             var ext = name.split(".").pop().toLowerCase();
-            if (ext !== "tif") {
-                throw new Error("DEM uploads must be .tif files.");
+            if (["tif", "tiff", "img"].indexOf(ext) === -1) {
+                throw new Error("DEM uploads must be GeoTIFF (.tif/.tiff) or self-contained IMG (.img) files.");
             }
         }
 

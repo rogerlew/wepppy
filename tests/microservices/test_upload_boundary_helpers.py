@@ -6,13 +6,9 @@ from pathlib import Path
 import pytest
 
 from wepppy.microservices.upload_boundary import (
-    UploadBoundaryError,
-    enforce_extension,
-    prepare_filename,
-    save_upload_from_stream,
-    write_stream_to_destination,
-)
-
+    UploadBoundaryError, assert_raster_upload_identity, enforce_extension,
+    prepare_filename, resolve_contained_raster_path, save_upload_from_stream,
+    validate_raster_upload, write_stream_to_destination)
 
 pytestmark = pytest.mark.microservice
 
@@ -103,8 +99,9 @@ def test_stream_failure_preserves_existing_source(tmp_path, failure):
 
 
 def test_staged_vrt_preserves_relative_raster_dependencies(tmp_path):
-    from tests.factories.raster import sbs_raster_bytes
     from osgeo import gdal
+
+    from tests.factories.raster import sbs_raster_bytes
     from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
     sbs_raster_bytes(tmp_path / 'source.tif')
     vrt = tmp_path / 'map.vrt'
@@ -118,3 +115,115 @@ def test_staged_vrt_preserves_relative_raster_dependencies(tmp_path):
         dest_dir=tmp_path, allowed_extensions=('vrt',), overwrite=True, post_save=validate)
     assert vrt.read_bytes() == raw
     assert sorted(p.name for p in tmp_path.iterdir()) == ['map.vrt', 'source.tif']
+
+
+@pytest.mark.parametrize(
+    ("suffix", "driver"),
+    ((".tif", "GTiff"), (".tiff", "GTiff"), (".img", "HFA")),
+)
+def test_validate_raster_upload_accepts_exact_driver(tmp_path, suffix, driver):
+    from tests.factories.raster import raster_bytes
+
+    path = tmp_path / f"source{suffix}"
+    raster_bytes(path, driver=driver)
+
+    identity = validate_raster_upload(path)
+
+    assert identity.driver == driver
+    assert_raster_upload_identity(path, identity)
+
+
+@pytest.mark.parametrize(
+    ("actual_driver", "declared_suffix"),
+    (("GTiff", ".img"), ("HFA", ".tif")),
+)
+def test_validate_raster_upload_rejects_driver_extension_mismatch(
+    tmp_path, actual_driver, declared_suffix
+):
+    from tests.factories.raster import raster_bytes
+
+    actual_suffix = ".tif" if actual_driver == "GTiff" else ".img"
+    source = tmp_path / f"source{actual_suffix}"
+    raster_bytes(source, driver=actual_driver)
+    renamed = tmp_path / f"renamed{declared_suffix}"
+    renamed.write_bytes(source.read_bytes())
+
+    with pytest.raises(UploadBoundaryError, match="does not match"):
+        validate_raster_upload(renamed)
+
+
+def test_validate_raster_upload_rejects_companion_dependent_hfa(tmp_path):
+    from tests.factories.raster import raster_bytes
+
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    source = source_dir / "spill.img"
+    raster_bytes(source, driver="HFA", spill=True)
+    assert (source_dir / "spill.ige").is_file()
+    isolated = tmp_path / "isolated"
+    isolated.mkdir()
+    detached = isolated / "spill.img"
+    detached.write_bytes(source.read_bytes())
+
+    with pytest.raises(UploadBoundaryError, match="companion files"):
+        validate_raster_upload(detached)
+
+
+def test_assert_raster_upload_identity_rejects_replacement(tmp_path):
+    from tests.factories.raster import raster_bytes
+
+    path = tmp_path / "source.tif"
+    raster_bytes(path, driver="GTiff")
+    identity = validate_raster_upload(path)
+    replacement = tmp_path / "replacement.tif"
+    raster_bytes(replacement, driver="GTiff")
+    path.unlink()
+    replacement.rename(path)
+
+    with pytest.raises(UploadBoundaryError, match="changed after validation"):
+        assert_raster_upload_identity(path, identity)
+
+
+def test_isolated_post_save_hides_sibling_files(tmp_path):
+    from tests.factories.raster import raster_bytes
+
+    source = tmp_path / "source.tif"
+    raw = raster_bytes(source, driver="GTiff")
+    sibling = tmp_path / "unrelated.txt"
+    sibling.write_text("unrelated")
+
+    def validate(path):
+        assert sorted(item.name for item in path.parent.iterdir()) == ["source.tif"]
+        validate_raster_upload(path)
+
+    saved = save_upload_from_stream(
+        raw_filename="source.tif",
+        stream=io.BytesIO(raw),
+        dest_dir=tmp_path,
+        allowed_extensions=("tif",),
+        overwrite=True,
+        post_save=validate,
+        isolated_post_save=True,
+    )
+
+    assert saved == source
+    assert sorted(item.name for item in tmp_path.iterdir()) == [
+        "source.tif",
+        "unrelated.txt",
+    ]
+
+
+def test_resolve_contained_raster_path_rejects_escape_and_symlink(tmp_path):
+    from tests.factories.raster import raster_bytes
+
+    root = tmp_path / "uploads"
+    root.mkdir()
+    outside = tmp_path / "outside.tif"
+    raster_bytes(outside, driver="GTiff")
+    symlink = root / "linked.tif"
+    symlink.symlink_to(outside)
+
+    with pytest.raises(UploadBoundaryError, match="outside the approved"):
+        resolve_contained_raster_path(outside, root)
+    with pytest.raises(UploadBoundaryError, match="outside the approved"):
+        resolve_contained_raster_path(symlink, root)

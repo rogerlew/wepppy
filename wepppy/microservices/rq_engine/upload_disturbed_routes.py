@@ -22,14 +22,21 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response
-from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success
+from .upload_helpers import (
+    UploadError,
+    open_raster_with_expected_driver,
+    save_upload_file,
+    upload_failure,
+    upload_success,
+    validate_raster_upload,
+)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(route_class=PayloadRoute)
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
-UPLOAD_SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
+UPLOAD_SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 UPLOAD_SBS_MAX_BYTES = 100 * 1024 * 1024
 UPLOAD_COVER_TRANSFORM_ALLOWED_EXTENSIONS = ("csv",)
 UPLOAD_COVER_TRANSFORM_MAX_BYTES = 10 * 1024 * 1024
@@ -113,8 +120,7 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
                 raise UploadError(description)
             if "baer" in ron.mods:
                 import numpy as np
-                from osgeo import gdal
-                dataset = gdal.Open(str(path))
+                dataset = open_raster_with_expected_driver(path)
                 band = dataset.GetRasterBand(1)
                 values = np.unique(np.array(band.ReadAsArray(), dtype=np.int64))
                 nodata = band.GetNoDataValue()
@@ -141,7 +147,11 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
             filename_transform=lambda value: filename,
             overwrite=True,
             max_bytes=UPLOAD_SBS_MAX_BYTES,
-            post_save=validate_sbs,
+            post_save=lambda path: validate_raster_upload(
+                path,
+                semantic_validator=validate_sbs,
+            ),
+            isolated_post_save=True,
         )
 
         try:

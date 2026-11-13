@@ -568,6 +568,26 @@ describe("ChannelDelineation GL controller", () => {
         expect(channel.labelLayer.props.getSize()).toBe(16);
     });
 
+    test.each(["dem.tif", "dem.tiff", "dem.img"])(
+        "accepts supported DEM upload extension %s",
+        async (filename) => {
+            window.ChannelDelineation.getInstance();
+            const input = document.getElementById("input_upload_dem");
+            Object.defineProperty(input, "files", {
+                configurable: true,
+                value: [new File(["raster"], filename)],
+            });
+
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            await new Promise((resolve) => setTimeout(resolve, 0));
+
+            expect(requestMock).toHaveBeenCalledWith(
+                expect.stringContaining("tasks/upload-dem/"),
+                expect.objectContaining({ method: "POST" }),
+            );
+        },
+    );
+
     test("hover labels render when channel labels are hidden", async () => {
         const channel = window.ChannelDelineation.getInstance();
 

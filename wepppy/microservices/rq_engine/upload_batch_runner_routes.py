@@ -23,7 +23,7 @@ from wepppy.topo.watershed_collection.watershed_collection import WatershedColle
 from .feature_access import require_feature_access
 from .auth import AuthError, require_jwt
 from .responses import error_response
-from .upload_helpers import UploadError, save_upload_file
+from .upload_helpers import UploadError, save_upload_file, validate_raster_upload
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ router = APIRouter(route_class=PayloadRoute)
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
 GEOJSON_MAX_BYTES = 30 * 1024 * 1024
 SBS_MAP_MAX_BYTES = 100 * 1024 * 1024
-SBS_MAP_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
+SBS_MAP_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 
 
 def _geojson_max_bytes() -> int:
@@ -284,8 +284,8 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
         return error_response("Filename contains no safe characters.", status_code=400)
 
     lower_name = safe_name.lower()
-    if not lower_name.endswith((".tif", ".tiff", ".img", ".vrt")):
-        return error_response("Only GeoTIFF/IMG/VRT rasters are supported.", status_code=400)
+    if not lower_name.endswith((".tif", ".tiff", ".img")):
+        return error_response("Only GeoTIFF or self-contained IMG rasters are supported.", status_code=400)
 
     resources_dir = batch_runner.resources_dir
     dest_path = os.path.join(resources_dir, safe_name)
@@ -300,7 +300,11 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
     try:
         save_upload_file(upload, allowed_extensions=SBS_MAP_ALLOWED_EXTENSIONS,
             dest_dir=Path(resources_dir), filename_transform=lambda _value: safe_name,
-            overwrite=True, max_bytes=SBS_MAP_MAX_BYTES, post_save=validate_sbs)
+            overwrite=True, max_bytes=SBS_MAP_MAX_BYTES,
+            post_save=lambda path: validate_raster_upload(
+                path, semantic_validator=validate_sbs
+            ),
+            isolated_post_save=True)
         size_bytes = os.path.getsize(dest_path)
     except UploadError as exc:
         return error_response(str(exc), status_code=_upload_error_status(exc))

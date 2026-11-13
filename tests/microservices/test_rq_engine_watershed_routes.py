@@ -835,6 +835,8 @@ def test_upload_dem_requires_file(monkeypatch: pytest.MonkeyPatch, tmp_path) -> 
 
 
 def test_upload_dem_success(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    from tests.factories.raster import raster_bytes
+
     _stub_auth(monkeypatch)
     monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: str(tmp_path))
 
@@ -855,12 +857,83 @@ def test_upload_dem_success(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/tasks/upload-dem/",
-            files={"input_upload_dem": ("sample.tif", b"demo", "image/tiff")},
+            files={
+                "input_upload_dem": (
+                    "sample.tif",
+                    raster_bytes(tmp_path / "source.tif", driver="GTiff"),
+                    "image/tiff",
+                )
+            },
         )
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["result"]["dem_filename"] == "uploaded.tif"
+
+
+def test_upload_dem_accepts_self_contained_img(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    from tests.factories.raster import raster_bytes
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: str(tmp_path))
+
+    class DummyRon:
+        dem_dir = str(tmp_path)
+
+    class DummyWatershed:
+        pass
+
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(watershed_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(
+        watershed_routes,
+        "_install_uploaded_dem",
+        lambda **kwargs: {"dem_filename": kwargs["saved_path"].name},
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-dem/",
+            files={
+                "input_upload_dem": (
+                    "sample.img",
+                    raster_bytes(tmp_path / "source.img", driver="HFA"),
+                    "application/octet-stream",
+                )
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["result"]["dem_filename"] == "sample.img"
+
+
+def test_upload_dem_rejects_renamed_driver_before_install(monkeypatch, tmp_path) -> None:
+    from tests.factories.raster import raster_bytes
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: str(tmp_path))
+
+    class DummyRon:
+        dem_dir = str(tmp_path)
+
+    class DummyWatershed:
+        pass
+
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(watershed_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+    install = pytest.fail
+    monkeypatch.setattr(watershed_routes, "_install_uploaded_dem", install)
+    raw = raster_bytes(tmp_path / "source.img", driver="HFA")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-dem/",
+            files={"input_upload_dem": ("renamed.tif", raw, "image/tiff")},
+        )
+
+    assert response.status_code == 400
+    assert "does not match" in response.json()["error"]["message"]
+    assert not (tmp_path / "renamed.tif").exists()
 
 
 def test_upload_dem_rejects_oversize_file(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
@@ -922,7 +995,7 @@ def test_validate_float_dem_rejects_int(monkeypatch: pytest.MonkeyPatch, tmp_pat
         def GetRasterBand(_index: int):
             return DummyBand()
 
-    monkeypatch.setattr(watershed_routes.gdal, "Open", lambda _path: DummyDs())
+    monkeypatch.setattr(watershed_routes, "open_raster_with_expected_driver", lambda _path: DummyDs())
     monkeypatch.setattr(watershed_routes.gdal, "GetDataTypeName", lambda _dtype: "Int32")
 
     dem_path = tmp_path / "dem.tif"
@@ -941,7 +1014,7 @@ def test_validate_float_dem_accepts_float64(monkeypatch: pytest.MonkeyPatch, tmp
         def GetRasterBand(_index: int):
             return DummyBand()
 
-    monkeypatch.setattr(watershed_routes.gdal, "Open", lambda _path: DummyDs())
+    monkeypatch.setattr(watershed_routes, "open_raster_with_expected_driver", lambda _path: DummyDs())
     monkeypatch.setattr(watershed_routes.gdal, "GetDataTypeName", lambda _dtype: "Float64")
 
     dem_path = tmp_path / "dem.tif"

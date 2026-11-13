@@ -28,14 +28,20 @@ from wepppy.weppcloud.user_preferences import (
 
 from .auth import AuthError, require_jwt
 from .responses import error_response
-from .upload_helpers import UploadError, save_upload_file, validate_upload_file, upload_failure
+from .upload_helpers import (
+    UploadError,
+    save_upload_file,
+    upload_failure,
+    validate_raster_upload,
+    validate_upload_file,
+)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(route_class=PayloadRoute)
 
 RQ_UPLOAD_SCOPES = ["rq:enqueue"]
-UPLOAD_HUC_FIRE_SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
+UPLOAD_HUC_FIRE_SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 UPLOAD_HUC_FIRE_SBS_MAX_BYTES = 100 * 1024 * 1024
 
 
@@ -126,14 +132,20 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
 
         from wepppy.all_your_base.geo import validate_srs
         from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
+        def validate_sbs_source(path: Path) -> None:
+            if not validate_srs(str(path)):
+                raise ValueError("Map contains an invalid projection. Try reprojecting to UTM.")
+            SoilBurnSeverityMap(str(path), breaks=None, nodata_vals=None, color_map=None)
+
         try:
             with tempfile.TemporaryDirectory(prefix="huc-fire-upload-") as staging:
                 staged = save_upload_file(upload,
                     allowed_extensions=UPLOAD_HUC_FIRE_SBS_ALLOWED_EXTENSIONS,
-                    dest_dir=Path(staging), max_bytes=UPLOAD_HUC_FIRE_SBS_MAX_BYTES)
-                if not validate_srs(str(staged)):
-                    return upload_failure("Map contains an invalid projection. Try reprojecting to UTM.")
-                SoilBurnSeverityMap(str(staged), breaks=None, nodata_vals=None, color_map=None)
+                    dest_dir=Path(staging), max_bytes=UPLOAD_HUC_FIRE_SBS_MAX_BYTES,
+                    post_save=lambda path: validate_raster_upload(
+                        path, semantic_validator=validate_sbs_source
+                    ),
+                    isolated_post_save=True)
         except (ValueError, RuntimeError) as exc:
             logger.info("HUC fire source rejected before project creation", exc_info=True)
             return upload_failure("Invalid SBS map.")
@@ -193,6 +205,8 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
                 filename_transform=lambda _value: filename,
                 overwrite=True,
                 max_bytes=UPLOAD_HUC_FIRE_SBS_MAX_BYTES,
+                post_save=validate_raster_upload,
+                isolated_post_save=True,
             )
         except UploadError as exc:
             status_code = int(getattr(exc, "status_code", 400))
