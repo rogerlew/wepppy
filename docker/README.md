@@ -33,9 +33,10 @@ at startup; rq-engine creation responds with `503 creation_policy_configuration_
 
 For local development, apply the environment with `wctl up -d --no-deps
 --force-recreate weppcloud rq-engine`. A restart alone does not update container
-environment. For production, follow `scripts/deploy-production.sh --targeted-web`
-with the installed production preset and its documented preflights; do not use
-a separate deployment workflow. Verify the nonsecret variable in both containers,
+environment. In production, targeted web activation fails closed pending
+retained-scope support. Use the reviewed full-stack retained workflow with the
+installed production preset; do not use a separate deployment workflow. Verify
+the nonsecret variable in both containers,
 then check anonymous API denial (`403 anonymous_creation_disabled`), hidden
 anonymous interface controls, and successful authenticated creation with normal
 ownership. Verify unset/default anonymous CAPTCHA creation in staging before
@@ -74,13 +75,13 @@ for behavioral parity; wepp1 and wepp2 must not consume the production serial
 queue. Track rollout evidence in the
 [Fork/Archive Serial Queue Isolation work package](../docs/work-packages/20260803_fork_archive_serial_queue/package.md).
 
-Install the wepp3 preset once, then use the same production deploy entry point
-as the other production hosts. It auto-detects the dedicated single-service
-topology and deploys only `rq-worker-fork-archive`:
+Install the wepp3 preset once. The canonical entry point recognizes the dedicated
+topology but currently fails closed before mutation until immutable retained
+fork/archive activation is implemented and reviewed:
 
 ```bash
 ./wctl/install.sh wepp3
-./scripts/deploy-production.sh
+./scripts/deploy-production.sh --print-plan
 ```
 
 Project-owned configuration rollout uses four independent, strict boolean
@@ -92,19 +93,8 @@ values in the host's gitignored `docker/.env`:
 all four to its web and RQ services and defaults each to `false`; enable them
 only under the initiative's accepted rollout work package.
 
-For a web-boundary hotfix that changes only WEPPcloud and rq-engine, use the
-targeted mode. It pulls and builds their shared `WEPPCLOUD_IMAGE` once through
-the `weppcloud` build definition, rebuilds static assets, and recreates both
-services with `--no-deps`; Redis, PostgreSQL, Caddy, schedulers, and RQ workers
-remain running:
-
-```bash
-./scripts/deploy-production.sh --targeted-web --no-flush-rq-db
-```
-
-The mode is accepted only for a full Compose topology containing both
-`weppcloud` and `rq-engine`. It rejects `--flush-rq-db`, verifies both public
-health endpoints, and skips the broad runtime prune.
+Targeted web activation currently fails closed pending immutable retained-scope
+support. Do not substitute generic `--skip-build` or direct Compose commands.
 
 For a CAP-only repair, use `--targeted-cap`. It preserves a host-local rescue
 tag for the running image, validates the candidate against disposable fresh,
@@ -131,17 +121,35 @@ The script restarts itself when a pull updates its implementation and validates
 the post-pull Compose topology before building. It fails closed when an active
 worker-only wctl preset does not expose a supported service set.
 
+Full and worker deployments are two-phase retained-candidate operations:
+
+```bash
+./scripts/deploy-production.sh --build-retained-candidate
+# independently collect/review evidence and publish the protected approval
+./scripts/deploy-production.sh --resume-retained-candidate \
+  /workdir/weppcloud-deployments/.local/dependency-security/candidates/<host-id>/<candidate-id>/receipt.json
+```
+
+Build mode does not fence RQ or stop services. Resume accepts only the canonical
+private receipt, validates the same host/Docker daemon/source/wctl/configuration,
+drains jobs while current containers remain running, and activates the frozen
+image IDs with pull/build disabled. A post-stop failure restores and verifies the
+exact prior image map before dequeue resumes. See
+[dependency-security-evidence.md](../docs/infrastructure/dependency-security-evidence.md).
+
 ### Test Production (forest1.local)
 
 The test production server at `forest1.local` (accessible via `wc-prod.bearhive.duckdns.org`) should **always** use the production compose file:
 
 ```bash
 cd /workdir/wepppy
-./scripts/deploy-production.sh
+./scripts/deploy-production.sh --build-retained-candidate
+# after the forest1 evidence approval is published:
+./scripts/deploy-production.sh --resume-retained-candidate <receipt-path>
 ```
 
-Forest1 release evidence must use that exact no-argument command twice. A
-targeted deploy is not a substitute. Between the two runs, verify interactive
+Forest1 release evidence must use the exact build/resume pair. A targeted deploy
+is not a substitute. After resume, verify interactive
 CAPTCHA in Safari and Chrome, local and OAuth login, continuity of a pre-deploy
 session, and a real RQ-submitted DEVAL render with its published artifact and
 receipt. Rehearse rollback and confirm targeted modes preserve non-selected

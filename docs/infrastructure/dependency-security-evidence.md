@@ -64,7 +64,7 @@ Ordinary CI evidence requires 90-day retention; activated-image evidence require
 at least 365 days and the entire rollback-eligibility period. The importer does
 not implement deletion or infer which images have been activated.
 
-## Policy evaluator component (not yet wired)
+## Policy evaluator and retained candidate activation
 
 Run `python -m tools.security.evaluate_dependency_evidence --help` from the
 repository root for the standalone verifier. It requires an independently
@@ -72,8 +72,31 @@ trusted manifest hash, approved policy/disposition hashes, and exact candidate
 source/image/lock identities. Never derive approval arguments from the candidate
 bundle itself. Exit 0 means the supplied evidence passed this component; it is
 not deployment authority. Exit 1 reports blocking findings; exit 2 means invalid
-or incomplete evidence. Producer, CI handoff and deploy-hook integration remain
-pending; see the active F6 evaluator-component receipt for the required bundle.
+or incomplete evidence.
+
+The canonical deploy script separates build from activation for full and worker
+stacks:
+
+```bash
+scripts/deploy-production.sh --build-retained-candidate
+# collect/import evidence and publish the independently reviewed approval
+scripts/deploy-production.sh --resume-retained-candidate \
+  /workdir/weppcloud-deployments/.local/dependency-security/candidates/<host-id>/<candidate-id>/receipt.json
+```
+
+Build mode performs the no-cache build and runtime validators, atomically writes
+the private receipt/configuration/immutable-ID override, and exits without RQ
+fencing or service stop. Resume derives its approval path from the protected
+store and receipt hash; no evidence or approval path is accepted from CLI or the
+candidate. It drains under the owned RQ fence while known-good containers remain
+running, reruns the complete gate, activates only receipt `sha256:` IDs with
+pull/build disabled, and restores the exact pre-cutover image map on later
+failure. Generic `--skip-build` remains rejected.
+
+Targeted CAP remains on its distinct excluded-image recovery contract. Targeted
+web, targeted batch/source-overlay/rollback, and wepp3 fork/archive common-image
+activation currently fail closed until their retained scopes are implemented and
+reviewed. A passing resume gate is not M5 rollout authorization.
 
 ## Collector qualification (not yet wired)
 
@@ -92,6 +115,7 @@ The output directory must be new; each attempt retains its own records. Recovery
 after abrupt interruption is limited to the exact uniquely named never-started
 container recorded by that attempt, never broad container or image pruning.
 
-Complete real-image producer qualification, CI integration and canonical deploy
-integration remain open. The active F6 package records the concrete deployment
-approval/resume decision; ordinary `--skip-build` has not been weakened.
+Complete real-image producer qualification, CI integration, production-host
+receipt creation, evidence approval and production-equivalent recovery remain
+open. The canonical deploy integration is implemented but not yet authorized for
+M5 rollout. Ordinary `--skip-build` has not been weakened.

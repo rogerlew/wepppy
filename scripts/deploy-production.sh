@@ -1,6 +1,6 @@
 #!/bin/bash
 # Production Deployment Script for WEPPcloud
-# Usage: ./scripts/deploy-production.sh [--targeted-web|--targeted-cap|--targeted-batch] [--source-overlay-manifest PATH|--batch-rollback-image-id ID] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
+# Usage: ./scripts/deploy-production.sh [--build-retained-candidate|--resume-retained-candidate RECEIPT] [--targeted-web|--targeted-cap|--targeted-batch] [--source-overlay-manifest PATH|--batch-rollback-image-id ID] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
 # The installed wctl preset selects full production, worker-pool, or the
 # dedicated wepp3 fork/archive deployment automatically.
 
@@ -264,6 +264,8 @@ TARGETED_BATCH=false
 SOURCE_OVERLAY_MANIFEST=""
 BATCH_ROLLBACK_IMAGE_ID=""
 PRINT_PLAN=false
+BUILD_RETAINED_CANDIDATE=false
+RESUME_RETAINED_CANDIDATE=""
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 RQ_ENGINE_HEALTHCHECK_URL="${RQ_ENGINE_HEALTHCHECK_URL:-}"
 CAP_HEALTHCHECK_URL="${CAP_HEALTHCHECK_URL:-}"
@@ -299,6 +301,14 @@ while [[ $# -gt 0 ]]; do
         --print-plan)
             PRINT_PLAN=true
             shift
+            ;;
+        --build-retained-candidate)
+            BUILD_RETAINED_CANDIDATE=true
+            shift
+            ;;
+        --resume-retained-candidate)
+            RESUME_RETAINED_CANDIDATE="${2:?--resume-retained-candidate requires a receipt path}"
+            shift 2
             ;;
         --skip-pull)
             SKIP_PULL=true
@@ -336,7 +346,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--targeted-web|--targeted-cap] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis] [--skip-docker-prune] [--docker-prune-volumes]"
+            echo "Usage: $0 [--build-retained-candidate|--resume-retained-candidate RECEIPT] [--targeted-web|--targeted-cap] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis] [--skip-docker-prune] [--docker-prune-volumes]"
             exit 1
             ;;
     esac
@@ -454,6 +464,37 @@ configure_deploy_topology() {
 configure_deploy_topology
 
 validate_deploy_topology() {
+    if [ "${BUILD_RETAINED_CANDIDATE}" = true ] && [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        echo "✗ Select build-only or retained resume, not both." >&2
+        exit 1
+    fi
+    if [ "${BUILD_RETAINED_CANDIDATE}" = true ] || [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        if [ "${DEPLOY_MODE}" != "full" ] && [ "${DEPLOY_MODE}" != "worker" ]; then
+            echo "✗ Retained-candidate mode currently supports only full and worker stacks." >&2
+            exit 1
+        fi
+        if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ] \
+            || [ "${TARGETED_BATCH}" = true ] \
+            || [ -n "${SOURCE_OVERLAY_MANIFEST}${BATCH_ROLLBACK_IMAGE_ID}" ]; then
+            echo "✗ Retained-candidate mode does not support targeted/source/rollback options." >&2
+            exit 1
+        fi
+        if [ "${SKIP_BUILD}" = true ]; then
+            echo "✗ Generic --skip-build cannot be combined with retained-candidate mode." >&2
+            exit 1
+        fi
+    elif [ "${PRINT_PLAN}" = false ] \
+        && [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ] \
+        && [ "${TARGETED_BATCH}" = false ] \
+        && { [ "${DEPLOY_MODE}" = "full" ] || [ "${DEPLOY_MODE}" = "worker" ]; }; then
+        echo "✗ Common-image activation requires --build-retained-candidate or --resume-retained-candidate." >&2
+        exit 1
+    fi
+    if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_BATCH}" = true ] \
+        || [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+        echo "✗ This common-image scope is fail-closed until retained-candidate support is reviewed." >&2
+        exit 1
+    fi
     if [ "${TARGETED_BATCH}" = true ]; then
         if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ] \
             || [ "${DOCKER_PRUNE_VOLUMES}" = true ]; then
@@ -548,7 +589,8 @@ echo ""
 
 # Capture the running topology before a pull can change Compose semantics.
 PRE_PULL_CAP_CONFIG=""
-if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap" \
+if [ "${BUILD_RETAINED_CANDIDATE}" = false ] \
+    && printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap" \
     && [ -n "$(wctl docker compose ps -q cap)" ]; then
     PRE_PULL_CAP_CONFIG="$(mktemp "${DEPLOY_STATE_DIR%/}/wepppy-cap-prepull-config.XXXXXX.yml")"
     wctl docker compose config > "${PRE_PULL_CAP_CONFIG}"
@@ -582,18 +624,70 @@ if [ "${SKIP_BUILD}" = true ] && [ "${#BUILD_SERVICES[@]}" -gt 0 ]; then
     exit 1
 fi
 
-assert_no_active_rq_jobs() {
+RETAINED_CANDIDATE_HELPER="${PROJECT_ROOT}/tools/security/retained_candidate.py"
+RETAINED_ACTIVATION_CONFIG=""
+RETAINED_IMAGE_OVERRIDE=""
+retained_candidate_args() {
+    RETAINED_ARGS=(
+        --project-root "${PROJECT_ROOT}"
+        --deploy-script "${SCRIPT_DIR}/deploy-production.sh"
+        --deploy-mode "${DEPLOY_MODE}"
+    )
+    for service in "${BUILD_SERVICES[@]}"; do
+        RETAINED_ARGS+=(--build-service "${service}")
+    done
+    for service in "${RECREATED_SERVICES[@]}"; do
+        RETAINED_ARGS+=(--recreated-service "${service}")
+    done
+}
+
+run_retained_candidate_check() {
+    local command="$1"
+    local result
+    retained_candidate_args
+    if ! result="$(
+        wctl docker compose config --format json \
+            | python3 "${RETAINED_CANDIDATE_HELPER}" "${command}" \
+                "${RETAINED_ARGS[@]}" \
+                --receipt "${RESUME_RETAINED_CANDIDATE}"
+    )"; then
+        return 1
+    fi
+    RETAINED_ACTIVATION_CONFIG="$(
+        python3 -c 'import json,sys; print(json.load(sys.stdin)["activation_config"])' <<< "${result}"
+    )"
+    RETAINED_IMAGE_OVERRIDE="$(
+        python3 -c 'import json,sys; print(json.load(sys.stdin)["image_override"])' <<< "${result}"
+    )"
+}
+
+create_retained_candidate() {
+    local result
+    retained_candidate_args
+    result="$(
+        wctl docker compose config --format json \
+            | python3 "${RETAINED_CANDIDATE_HELPER}" create "${RETAINED_ARGS[@]}"
+    )"
+    echo "${result}"
+}
+
+active_rq_job_count() {
     if ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "rq-worker"; then
+        echo 0
         return 0
     fi
-    echo "    Verifying no default or batch RQ jobs are executing..."
-    ACTIVE_RQ_JOBS="$(run_rq_control_program '
+    run_rq_control_program '
 import redis
 from rq.registry import StartedJobRegistry
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
 print(sum(connection.zcard(StartedJobRegistry(name, connection=connection).key) for name in ("default", "batch")))
-')"
+'
+}
+
+assert_no_active_rq_jobs() {
+    echo "    Verifying no default or batch RQ jobs are executing..."
+    ACTIVE_RQ_JOBS="$(active_rq_job_count)"
     [[ "${ACTIVE_RQ_JOBS}" =~ ^[0-9]+$ ]] || {
         echo "✗ Unable to determine active RQ job count." >&2
         return 1
@@ -602,6 +696,29 @@ print(sum(connection.zcard(StartedJobRegistry(name, connection=connection).key) 
         echo "✗ Refusing deployment while ${ACTIVE_RQ_JOBS} default/batch RQ jobs are executing." >&2
         return 1
     }
+}
+
+wait_for_active_rq_jobs() {
+    local active_jobs
+    local deadline=$((SECONDS + ${RQ_DRAIN_TIMEOUT_SECONDS:-216000}))
+    while true; do
+        active_jobs="$(active_rq_job_count)"
+        [[ "${active_jobs}" =~ ^[0-9]+$ ]] || {
+            echo "✗ Unable to determine active RQ job count during drain." >&2
+            return 1
+        }
+        if [ "${active_jobs}" -eq 0 ]; then
+            echo "    Default and batch RQ registries are drained."
+            return 0
+        fi
+        if [ "${SECONDS}" -ge "${deadline}" ]; then
+            echo "✗ Timed out draining ${active_jobs} active default/batch RQ jobs." >&2
+            return 1
+        fi
+        echo "    Waiting for ${active_jobs} active default/batch RQ jobs to finish..."
+        sleep 5
+        assert_rq_fence
+    done
 }
 
 RQ_SUSPENDED_BY_DEPLOY=false
@@ -672,6 +789,10 @@ print("yes" if owned and is_suspended(connection) else "no")
 
 suspend_rq_dequeue() {
     if ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "rq-worker"; then
+        return 0
+    fi
+    if [ "${RQ_FENCE_ACTIVE}" = true ]; then
+        assert_rq_fence
         return 0
     fi
     RQ_FENCE_TOKEN="$(hostname)-$$-$(date +%s)"
@@ -814,7 +935,32 @@ if result != 1:
     echo "    Resumed global RQ dequeue."
 }
 
-if [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ]; then
+stop_rq_heartbeat_preserve_fence() {
+    if [ -n "${RQ_FENCE_STOP_FILE}" ]; then
+        : > "${RQ_FENCE_STOP_FILE}"
+    fi
+    if [ -n "${RQ_FENCE_HEARTBEAT_PID}" ]; then
+        kill "${RQ_FENCE_HEARTBEAT_PID}" 2>/dev/null || true
+        wait "${RQ_FENCE_HEARTBEAT_PID}" 2>/dev/null || true
+        RQ_FENCE_HEARTBEAT_PID=""
+    fi
+}
+
+if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+    echo "    Validating retained candidate and independent approval before RQ drain..."
+    run_retained_candidate_check gate
+    suspend_rq_dequeue
+    if ! wait_for_active_rq_jobs; then
+        resume_rq_if_owned
+        exit 1
+    fi
+    echo "    Revalidating retained candidate and evidence after RQ drain..."
+    if ! run_retained_candidate_check gate; then
+        resume_rq_if_owned
+        exit 1
+    fi
+elif [ "${BUILD_RETAINED_CANDIDATE}" = false ] \
+    && [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ]; then
     assert_no_active_rq_jobs
 fi
 
@@ -824,7 +970,67 @@ CAP_RESCUE_OVERRIDE=""
 CAP_ACTIVATION_STARTED=false
 STAGED_CONTROLLERS_JS=""
 BACKUP_CONTROLLERS_JS=""
-if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
+KNOWN_GOOD_DIR=""
+KNOWN_GOOD_CONFIG=""
+KNOWN_GOOD_OVERRIDE=""
+KNOWN_GOOD_ROWS=""
+CUTOVER_STARTED=false
+
+capture_known_good_state() {
+    KNOWN_GOOD_DIR="$(mktemp -d "${DEPLOY_STATE_DIR%/}/wepppy-known-good.XXXXXX")"
+    chmod 0700 "${KNOWN_GOOD_DIR}"
+    KNOWN_GOOD_CONFIG="${KNOWN_GOOD_DIR}/activation-compose.json"
+    KNOWN_GOOD_OVERRIDE="${KNOWN_GOOD_DIR}/image-override.json"
+    KNOWN_GOOD_ROWS="${KNOWN_GOOD_DIR}/images.tsv"
+    wctl docker compose config --format json > "${KNOWN_GOOD_CONFIG}"
+    chmod 0600 "${KNOWN_GOOD_CONFIG}"
+    : > "${KNOWN_GOOD_ROWS}"
+    chmod 0600 "${KNOWN_GOOD_ROWS}"
+    for service in "${RECREATED_SERVICES[@]}"; do
+        mapfile -t containers < <(wctl docker compose ps -q "${service}")
+        [ "${#containers[@]}" -gt 0 ] || {
+            echo "✗ Cannot retain known-good state: ${service} has no container." >&2
+            return 1
+        }
+        expected_id=""
+        for container in "${containers[@]}"; do
+            image_id="$(docker inspect --format '{{.Image}}' "${container}")"
+            [[ "${image_id}" =~ ^sha256:[a-f0-9]{64}$ ]] || return 1
+            if [ -n "${expected_id}" ] && [ "${expected_id}" != "${image_id}" ]; then
+                echo "✗ ${service} replicas do not share one known-good image." >&2
+                return 1
+            fi
+            expected_id="${image_id}"
+        done
+        printf '%s\t%s\n' "${service}" "${expected_id}" >> "${KNOWN_GOOD_ROWS}"
+    done
+    python3 - "${KNOWN_GOOD_ROWS}" > "${KNOWN_GOOD_OVERRIDE}" <<'PY'
+import json
+import pathlib
+import sys
+
+rows = {}
+for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
+    service, image_id = line.split("\t")
+    rows[service] = {"image": image_id}
+json.dump({"services": rows}, sys.stdout, sort_keys=True, separators=(",", ":"))
+sys.stdout.write("\n")
+PY
+    chmod 0600 "${KNOWN_GOOD_OVERRIDE}"
+}
+
+verify_known_good_state() {
+    while IFS=$'\t' read -r service expected_id; do
+        [ -n "${service}" ] || continue
+        while IFS= read -r container; do
+            [ -n "${container}" ] || continue
+            [ "$(docker inspect --format '{{.Image}}' "${container}")" = "${expected_id}" ] || return 1
+        done < <(wctl docker compose ps -q "${service}")
+        [ -n "$(wctl docker compose ps -q "${service}")" ] || return 1
+    done < "${KNOWN_GOOD_ROWS}"
+}
+if [ "${BUILD_RETAINED_CANDIDATE}" = false ] \
+    && printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
     CURRENT_CAP_CONTAINER="$(wctl docker compose ps -q cap)"
     if [ "${TARGETED_CAP}" = true ] && [ -z "${CURRENT_CAP_CONTAINER}" ]; then
         echo "✗ Targeted CAP requires a currently running known-good CAP container." >&2
@@ -858,6 +1064,23 @@ recover_targeted_cap() {
         mv -f -- "${BACKUP_CONTROLLERS_JS}" "${CONTROLLERS_JS_TARGET}"
         BACKUP_CONTROLLERS_JS=""
         echo "✓ Restored the pre-deploy controllers bundle" >&2
+    fi
+    if [ "${CUTOVER_STARTED}" = true ] && [ -n "${KNOWN_GOOD_CONFIG}" ]; then
+        echo "✗ Cutover failed; restoring the exact pre-cutover image map" >&2
+        if docker compose -f "${KNOWN_GOOD_CONFIG}" -f "${KNOWN_GOOD_OVERRIDE}" \
+            up -d --force-recreate --no-build --pull never \
+            && verify_known_good_state; then
+            CUTOVER_STARTED=false
+            if ! resume_rq_if_owned; then
+                echo "✗ RQ_RESUME_FAILED after known-good restoration" >&2
+                return 87
+            fi
+            echo "✓ Exact pre-cutover workload restored and verified" >&2
+            return "${recovery_exit}"
+        fi
+        echo "✗ KNOWN_GOOD_RESTORE_FAILED: RQ fence retained for bounded recovery" >&2
+        stop_rq_heartbeat_preserve_fence
+        return 88
     fi
     if [ "${CAP_ACTIVATION_STARTED}" != true ] || [ -z "${CAP_RESCUE_IMAGE}" ]; then
         if ! resume_rq_if_owned; then
@@ -955,7 +1178,7 @@ if [ "${TARGETED_BATCH}" = true ]; then
     fi
     wctl docker compose run --rm --no-deps --entrypoint /opt/venv/bin/python \
         rq-worker-batch -B -c 'from wepppy.rq import query_catalog_rq; import wepppyo3; print(query_catalog_rq.catalog_worker_configuration())'
-elif [ "${SKIP_BUILD}" = false ]; then
+elif [ "${SKIP_BUILD}" = false ] && [ -z "${RESUME_RETAINED_CANDIDATE}" ]; then
     echo ">>> Step 2: Building Docker images..."
     BASE_BUILD_SERVICES=()
     DEPENDENT_BUILD_SERVICES=()
@@ -979,7 +1202,7 @@ elif [ "${SKIP_BUILD}" = false ]; then
     docker builder prune -af
     echo ""
 else
-    echo ">>> Step 2: Skipping Docker build (--skip-build)"
+    echo ">>> Step 2: Reusing the immutable retained candidate (no rebuild)"
     echo ""
 fi
 
@@ -995,6 +1218,17 @@ if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
     "${CAP_RUNTIME_PREPARER}" --secret-only
 fi
 
+if [ "${BUILD_RETAINED_CANDIDATE}" = true ]; then
+    echo ">>> Retaining immutable candidate without stopping services..."
+    create_retained_candidate
+    echo "✓ Retained candidate build complete; no service or RQ state changed"
+    exit 0
+fi
+if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+    echo "    Capturing exact pre-cutover known-good image map..."
+    capture_known_good_state
+fi
+
 # Stop services. For wepp3, SIGTERM initiates an RQ warm shutdown before
 # Compose removes the container: the worker stops dequeuing first and any job
 # already running is allowed to finish, closing the check-then-stop race.
@@ -1007,6 +1241,7 @@ fi
 if [ "${DEPLOY_MODE}" = "worker" ] && [ "${TARGETED_BATCH}" = false ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
+    [ -z "${RESUME_RETAINED_CANDIDATE}" ] || CUTOVER_STARTED=true
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
 if [ "${TARGETED_BATCH}" = true ]; then
@@ -1133,6 +1368,7 @@ if [ "${DEPLOY_MODE}" = "full" ] \
     && [ "${TARGETED_BATCH}" = false ] && [ "${FLUSH_RQ_DB}" = false ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
+    [ -z "${RESUME_RETAINED_CANDIDATE}" ] || CUTOVER_STARTED=true
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
 assert_rq_fence
@@ -1180,11 +1416,21 @@ else
     if [ -n "${CAP_RESCUE_IMAGE}" ]; then
         CAP_ACTIVATION_STARTED=true
     fi
-    run_wctl_with_retry \
-        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
-        "${WCTL_COMPOSE_RETRIES}" \
-        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
-        up -d --force-recreate
+    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        # Final post-drain identity/freshness check. Activation consumes only
+        # retained immutable IDs; mutable Compose tags are never an input.
+        run_retained_candidate_check gate
+        run_with_timeout "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+            docker compose -f "${RETAINED_ACTIVATION_CONFIG}" \
+                -f "${RETAINED_IMAGE_OVERRIDE}" \
+                up -d --force-recreate --no-build --pull never
+    else
+        run_wctl_with_retry \
+            "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+            "${WCTL_COMPOSE_RETRIES}" \
+            "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+            up -d --force-recreate
+    fi
 fi
 echo ""
 
@@ -1352,14 +1598,25 @@ done
 echo "✓ All recreated services are running and healthy where healthchecks exist"
 
 echo "    Verifying candidate image identity for locally built services..."
-CANDIDATE_IMAGE_ROWS="$(
-    wctl docker compose config --format json \
-        | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
-            candidate-images "${EXPECTED_SERVICE_ARGS[@]}"
-)"
+if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+    CANDIDATE_IMAGE_ROWS="$(
+        python3 -c 'import json,sys; value=json.load(open(sys.argv[1], encoding="utf-8")); [print(name, row["image"], sep="\t") for name,row in value["services"].items()]' \
+            "${RETAINED_IMAGE_OVERRIDE}"
+    )"
+else
+    CANDIDATE_IMAGE_ROWS="$(
+        wctl docker compose config --format json \
+            | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
+                candidate-images "${EXPECTED_SERVICE_ARGS[@]}"
+    )"
+fi
 while IFS=$'\t' read -r service image; do
     [ -n "${service}" ] || continue
-    CANDIDATE_IMAGE_ID="$(docker image inspect --format '{{.Id}}' "${image}")"
+    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        CANDIDATE_IMAGE_ID="${image}"
+    else
+        CANDIDATE_IMAGE_ID="$(docker image inspect --format '{{.Id}}' "${image}")"
+    fi
     while IFS= read -r container; do
         [ -n "${container}" ] || continue
         RUNNING_IMAGE_ID="$(docker inspect --format '{{.Image}}' "${container}")"
@@ -1419,11 +1676,17 @@ print("{}:{}".format(
     assert_rq_fence
 fi
 
+CUTOVER_STARTED=false
 resume_rq_if_owned
 
 if [ -n "${BACKUP_CONTROLLERS_JS}" ]; then
     rm -f -- "${BACKUP_CONTROLLERS_JS}"
     BACKUP_CONTROLLERS_JS=""
+fi
+if [ -n "${KNOWN_GOOD_DIR}" ] && [ -d "${KNOWN_GOOD_DIR}" ]; then
+    rm -f -- "${KNOWN_GOOD_CONFIG}" "${KNOWN_GOOD_OVERRIDE}" "${KNOWN_GOOD_ROWS}"
+    rmdir -- "${KNOWN_GOOD_DIR}"
+    KNOWN_GOOD_DIR=""
 fi
 
 if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ] \

@@ -24,6 +24,15 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [ ] (2026-11-13 UTC) Retained-candidate implementation is staged for
+  independent review: canonical build/resume flags, private host/daemon-bound
+  receipts, protected approval derivation, immutable-ID activation, pre-stop RQ
+  drain, and exact known-good restoration are implemented. The local isolated
+  worktree passes 143 focused deploy/evidence tests, including post-drain gate
+  rejection and failed-restoration fencing. Canonical-container validation,
+  independent source reviews, exact-host build/evidence and M4 remain open; M5
+  rollout remains unauthorized.
+
 - [ ] (2026-11-13 UTC) Roger explicitly selected the retained-candidate Compose
   resume workflow by answering the concrete authorization question. Record
   and independently review the contract checkpoint, implement fail-closed

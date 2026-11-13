@@ -4,6 +4,7 @@ import fcntl
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -56,6 +57,7 @@ def _run_deploy(
     rq_acquire_reply_lost: bool = False,
     controller_backup_failure: bool = False,
     caddy_inspection_failure: bool = False,
+    gate_failure_call: int = 0,
     controller_build_failure: bool = False,
     lock_held: bool = False,
     skip_docker_prune: bool = True,
@@ -226,23 +228,27 @@ if [ "${1:-}" = "inspect" ]; then
             if [ "${container}" = "cid-rq-worker-batch" ] && [[ "${FAKE_CONFIG}" == *"wepppy:rollback-test"* ]]; then
                 printf 'sha256:%064d\n' 0
             elif [ "${FAKE_CANDIDATE_MISMATCH:-0}" = 1 ] && [ "${container}" = "cid-cap" ]; then
-                printf 'sha-known-good\n'
+                printf 'sha256:%064d\n' 0
             else
-                printf 'sha-candidate\n'
+                printf 'sha256:%064d\n' 1
             fi
             ;;
         *Mounts*) printf 'cap-data\n' ;;
-        *) printf 'sha-candidate\n' ;;
+        *) printf 'sha256:%064d\n' 1 ;;
     esac
 elif [ "${1:-}" = "image" ] && [ "${2:-}" = "inspect" ]; then
     if [ "${3:-}" = "--format" ]; then
         if [ "${5:-}" = 'wepppy:rollback-test' ]; then
             printf 'sha256:%064d\n' 0
         else
-            printf 'sha-candidate\n'
+            printf 'sha256:%064d\n' 1
         fi
     fi
 elif [ "${1:-}" = "compose" ]; then
+    if [[ "$*" == *"wepppy-known-good"* ]] \
+        && [ "${FAKE_RECOVERY_FAILURE:-0}" = 1 ]; then
+        exit 73
+    fi
     if [[ "$*" == *" up -d --no-deps --force-recreate cap"* ]] \
         && [ "${FAKE_RECOVERY_FAILURE:-0}" = 1 ]; then
         exit 73
@@ -259,6 +265,35 @@ else
     echo "unexpected docker call: $*" >&2
     exit 91
 fi
+''',
+    )
+    _write_executable(
+        bin_dir / "python3",
+        r'''#!/bin/bash
+set -euo pipefail
+if [[ "${1:-}" == *"tools/security/retained_candidate.py" ]]; then
+    /bin/cat >/dev/null
+    printf 'retained|%s\n' "${2:-}" >> "${FAKE_COMMAND_LOG}"
+    if [ "${2:-}" = "create" ]; then
+        printf '{"approval":"%s","receipt":"%s","receipt_sha256":"%064d"}\n' \
+            "${FAKE_APPROVAL}" "${FAKE_RECEIPT}" 1
+        exit 0
+    fi
+    if [ "${2:-}" = "gate" ]; then
+        count=0
+        [ ! -f "${FAKE_GATE_COUNT}" ] || count="$(cat "${FAKE_GATE_COUNT}")"
+        count=$((count + 1))
+        printf '%s\n' "${count}" > "${FAKE_GATE_COUNT}"
+        if [ "${FAKE_GATE_FAILURE_CALL:-0}" = "${count}" ]; then
+            exit 2
+        fi
+    fi
+    printf '{"activation_config":"%s","approval":"%s","image_override":"%s","receipt":"%s"}\n' \
+        "${FAKE_ACTIVATION_CONFIG}" "${FAKE_APPROVAL}" \
+        "${FAKE_IMAGE_OVERRIDE}" "${FAKE_RECEIPT}"
+    exit 0
+fi
+exec "${REAL_PYTHON}" "$@"
 ''',
     )
     _write_executable(
@@ -326,6 +361,25 @@ exec /bin/cp "$@"
     )
     controller_target = tmp_path / "controllers-gl.js"
     controller_target.write_text("known-good controllers", encoding="utf-8")
+    fake_receipt = state_dir / "receipt.json"
+    fake_receipt.write_text("{}\n", encoding="utf-8")
+    fake_approval = state_dir / "approval.json"
+    fake_approval.write_text("{}\n", encoding="utf-8")
+    fake_activation = state_dir / "activation-compose.json"
+    fake_activation.write_text(json.dumps({"services": services}), encoding="utf-8")
+    fake_override = state_dir / "image-override.json"
+    fake_override.write_text(
+        json.dumps(
+            {
+                "services": {
+                    name: {"image": "sha256:" + "0" * 63 + "1"}
+                    for name, definition in services.items()
+                    if isinstance(definition, dict) and definition.get("image")
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
 
     records = [
         {
@@ -394,6 +448,14 @@ exec /bin/cp "$@"
             "RQ_ENGINE_HEALTHCHECK_URL": "https://forest.invalid/rq-engine/health",
             "CAP_HEALTHCHECK_URL": "https://forest.invalid/cap/health",
             "WCTL_COMPOSE_RETRIES": "1",
+            "RQ_DRAIN_TIMEOUT_SECONDS": "10" if rq_probe_result == "0" else "0",
+            "REAL_PYTHON": sys.executable,
+            "FAKE_RECEIPT": str(fake_receipt),
+            "FAKE_APPROVAL": str(fake_approval),
+            "FAKE_ACTIVATION_CONFIG": str(fake_activation),
+            "FAKE_IMAGE_OVERRIDE": str(fake_override),
+            "FAKE_GATE_COUNT": str(state_dir / "gate-count"),
+            "FAKE_GATE_FAILURE_CALL": str(gate_failure_call),
         }
     )
     lock_handle = (tmp_path / "deploy.lock").open("a", encoding="utf-8")
@@ -408,15 +470,48 @@ exec /bin/cp "$@"
         if skip_docker_prune:
             deploy_arguments.append("--skip-docker-prune")
         deploy_arguments.extend(arguments)
-        result = subprocess.run(
-            deploy_arguments,
-            cwd=_REPO_ROOT,
-            env=environment,
-            text=True,
-            capture_output=True,
-            check=False,
-            timeout=20,
-        )
+        retained_scope = not any(
+            option in arguments
+            for option in ("--targeted-web", "--targeted-cap", "--targeted-batch", "--print-plan")
+        ) and "--skip-build" not in arguments
+        if retained_scope:
+            build_result = subprocess.run(
+                [*deploy_arguments, "--build-retained-candidate"],
+                cwd=_REPO_ROOT,
+                env=environment,
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=20,
+            )
+            if build_result.returncode != 0:
+                result = build_result
+            else:
+                resume_result = subprocess.run(
+                    [*deploy_arguments, "--resume-retained-candidate", str(fake_receipt)],
+                    cwd=_REPO_ROOT,
+                    env=environment,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                    timeout=20,
+                )
+                result = subprocess.CompletedProcess(
+                    resume_result.args,
+                    resume_result.returncode,
+                    build_result.stdout + resume_result.stdout,
+                    build_result.stderr + resume_result.stderr,
+                )
+        else:
+            result = subprocess.run(
+                deploy_arguments,
+                cwd=_REPO_ROOT,
+                env=environment,
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=20,
+            )
     finally:
         lock_handle.close()
     commands = command_log.read_text(encoding="utf-8").splitlines()
@@ -470,7 +565,7 @@ def test_full_execution_builds_then_stops_workers_and_recreates_without_down(tmp
     suspend = _position(commands, _RQ_SUSPEND)
     stop = _position(commands, "stop --timeout 216000 rq-worker rq-worker-batch")
     cap_stop = _position(commands, "wctl|docker compose stop cap")
-    start = _position(commands, "wctl|up -d --force-recreate")
+    start = _position(commands, "docker|compose -f")
     registration = _position(commands, "Worker.all")
     resume = _position(commands, _RQ_RESUME)
     fence_assertions = _rq_assert_positions(commands)
@@ -504,6 +599,51 @@ def test_stale_renderer_is_rejected_before_cap_preparation_or_activation(tmp_pat
     assert "Deployment complete!" not in result.stdout
 
 
+def test_post_drain_gate_failure_releases_fence_without_stopping_services(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_cap_and_renderer(),
+        gate_failure_call=2,
+    )
+
+    assert result.returncode != 0
+    assert _position(commands, _RQ_SUSPEND) < _position(commands, _RQ_RESUME)
+    assert not any("stop --timeout" in command for command in commands)
+    assert not any("docker compose stop" in command for command in commands)
+    assert not any(command.startswith("docker|compose -f") for command in commands)
+
+
+def test_gate_failure_after_stop_restores_prior_map_before_fence_release(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_cap_and_renderer(),
+        gate_failure_call=3,
+    )
+
+    assert result.returncode != 0
+    stop = _position(commands, "stop --timeout 216000 rq-worker rq-worker-batch")
+    recovery = _position(commands, "docker|compose -f")
+    resume = _position(commands, _RQ_RESUME)
+    assert stop < recovery < resume
+    assert "Exact pre-cutover workload restored and verified" in result.stderr
+    compose_commands = [command for command in commands if command.startswith("docker|compose -f")]
+    assert len(compose_commands) == 1
+    assert "wepppy-known-good" in compose_commands[0]
+
+
+def test_failed_known_good_restore_returns_distinct_signal_and_retains_fence(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_cap_and_renderer(),
+        candidate_mismatch=True,
+        recovery_failure=True,
+    )
+
+    assert result.returncode == 88
+    assert "KNOWN_GOOD_RESTORE_FAILED" in result.stderr
+    assert not any(_RQ_RESUME in command for command in commands)
+
+
 def test_full_candidate_failure_recovers_cap_and_never_reports_success_or_prunes(tmp_path: Path) -> None:
     result, commands = _run_deploy(
         tmp_path,
@@ -513,19 +653,19 @@ def test_full_candidate_failure_recovers_cap_and_never_reports_success_or_prunes
 
     assert result.returncode != 0
     suspend = _position(commands, _RQ_SUSPEND)
-    activation = _position(commands, "wctl|up -d --force-recreate")
+    activations = _positions(commands, "docker|compose -f")
+    activation = activations[0]
     resume = _position(commands, _RQ_RESUME)
-    recovery = _position(commands, "docker|compose -f")
-    caddy_check = _position(commands, "ps -q caddy")
-    assert suspend < activation < recovery < caddy_check < resume
-    assert "Known-good CAP rescue image restored" in result.stderr
+    recovery = activations[1]
+    assert suspend < activation < recovery < resume
+    assert "Exact pre-cutover workload restored and verified" in result.stderr
     assert (tmp_path / "controllers-gl.js").read_text(encoding="utf-8") == "known-good controllers"
     assert "Restored the pre-deploy controllers bundle" in result.stderr
     assert not any(command.startswith("docker|system prune") for command in commands)
     assert "Deployment complete!" not in result.stdout
 
 
-def test_targeted_web_recreates_only_web_boundaries_and_leaves_cap_workers_and_renderer_untouched(
+def test_targeted_web_fails_closed_until_retained_scope_is_reviewed(
     tmp_path: Path,
 ) -> None:
     result, commands = _run_deploy(
@@ -534,22 +674,10 @@ def test_targeted_web_recreates_only_web_boundaries_and_leaves_cap_workers_and_r
         "--targeted-web",
     )
 
-    assert result.returncode == 0, result.stdout + result.stderr
-    assert any("wctl|build --no-cache weppcloud" in command for command in commands)
-    assert any(
-        "up -d --no-deps --force-recreate weppcloud rq-engine" in command
-        for command in commands
-    )
-    assert not any(command.startswith("weppcloudr-validator|") for command in commands)
-    assert not any(command.startswith("cap-validator|") for command in commands)
-    assert not any(command.startswith("cap-preparer|") for command in commands)
-    assert not any("stop --timeout 216000 rq-worker" in command for command in commands)
-    assert not any("docker compose stop cap" in command for command in commands)
-    assert not any(_RQ_SUSPEND in command or _RQ_RESUME in command for command in commands)
-    assert not any(command.endswith(" down") for command in commands)
-    assert not any(command.startswith("docker|system prune") for command in commands)
-    assert "rq-engine is healthy" in result.stdout
-    assert "Deployment complete!" in result.stdout
+    assert result.returncode != 0
+    assert "fail-closed" in result.stderr
+    assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
 
 
 def test_concurrent_deploy_lock_fails_before_build_or_activation(tmp_path: Path) -> None:
@@ -591,7 +719,7 @@ def test_controller_backup_failure_preserves_old_bundle_recovers_cap_and_resumes
     assert recovery < resume
     assert (tmp_path / "controllers-gl.js").read_text(encoding="utf-8") == "known-good controllers"
     assert not any(command == "wctl|up -d --force-recreate" for command in commands)
-    assert "Known-good CAP rescue image restored" in result.stderr
+    assert "Exact pre-cutover workload restored and verified" in result.stderr
     assert "Deployment complete!" not in result.stdout
 
 
@@ -607,7 +735,7 @@ def test_worker_execution_warm_stops_before_down_and_recreates_worker_stack(tmp_
     suspend = _position(commands, _RQ_SUSPEND)
     stop = _position(commands, "stop --timeout 216000 rq-worker rq-worker-batch")
     down = _position(commands, "wctl|down")
-    start = _position(commands, "wctl|up -d --force-recreate")
+    start = _position(commands, "docker|compose -f")
     registration = _position(commands, "Worker.all")
     resume = _position(commands, _RQ_RESUME)
     assert suspend < stop < down < start < registration < resume
@@ -887,17 +1015,14 @@ def test_worker_rejects_missing_current_host_registration_before_prune_or_succes
     assert "Deployment complete!" not in result.stdout
 
 
-def test_wepp3_execution_warm_stops_and_checks_identity_and_registration(tmp_path: Path) -> None:
+def test_wepp3_execution_fails_closed_until_retained_scope_is_reviewed(tmp_path: Path) -> None:
     services = {"rq-worker-fork-archive": _service("wepppy:test")}
     result, commands = _run_deploy(tmp_path, services)
 
-    assert result.returncode == 0, result.stdout + result.stderr
-    stop = _position(commands, "stop --timeout 216000 rq-worker-fork-archive")
-    down = _position(commands, "wctl|down")
-    start = _position(commands, "wctl|up -d --force-recreate")
-    assert stop < down < start
-    assert any("exec -T rq-worker-fork-archive id -u" in command for command in commands)
-    assert "running as 1002:130 and registered with RQ" in result.stdout
+    assert result.returncode != 0
+    assert "supports only full and worker stacks" in result.stderr
+    assert not any("stop --timeout" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
 
 
 def test_targeted_cap_execution_validates_before_short_stop_and_functional_canary(tmp_path: Path) -> None:
@@ -964,7 +1089,7 @@ def test_targeted_cap_recovery_failure_returns_distinct_rescue_signal(tmp_path: 
     assert "CAP_RESCUE_FAILED" in result.stderr
 
 
-def test_full_caddy_inspection_failure_returns_distinct_rescue_signal_and_resumes(tmp_path: Path) -> None:
+def test_full_failure_uses_exact_map_recovery_without_legacy_caddy_rescue(tmp_path: Path) -> None:
     result, commands = _run_deploy(
         tmp_path,
         _full_services_with_cap_and_renderer(),
@@ -972,11 +1097,15 @@ def test_full_caddy_inspection_failure_returns_distinct_rescue_signal_and_resume
         caddy_inspection_failure=True,
     )
 
-    assert result.returncode == 86
-    caddy = _position(commands, "ps -q caddy")
+    assert result.returncode != 0
     resume = _position(commands, _RQ_RESUME)
-    assert caddy < resume
-    assert "CAP_RESCUE_FAILED: unable to inspect Caddy" in result.stderr
+    recovery = _positions(commands, "docker|compose -f")[1]
+    assert recovery < resume
+    assert "Exact pre-cutover workload restored and verified" in result.stderr
+    assert not any(
+        command.startswith("docker|compose -f") and "ps -q caddy" in command
+        for command in commands
+    )
     assert not any(command.startswith("docker|system prune") for command in commands)
     assert "Deployment complete!" not in result.stdout
 
@@ -1000,14 +1129,15 @@ def test_active_job_probe_preserves_gate_with_stopped_worker(
     assert ("rq-probe|run" in commands) is (worker_stopped or probe_result == "error")
     if probe_result == "0":
         assert result.returncode == 0, result.stdout + result.stderr
-        assert _position(commands, "rq-probe|exec") < _position(commands, "build --no-cache")
+        assert _position(commands, "build --no-cache") < _position(commands, "rq-probe|exec")
     else:
         assert result.returncode != 0
-        assert not any("build --no-cache" in command for command in commands)
+        assert not any("stop --timeout" in command for command in commands)
+        assert not any("docker|compose -f" in command for command in commands)
         assert not any("docker compose stop" in command for command in commands)
         assert not any("up -d" in command for command in commands)
         if probe_result == "2":
-            assert "2 default/batch RQ jobs are executing" in result.stderr
+            assert "Timed out draining 2 active default/batch RQ jobs" in result.stderr
         elif probe_result == "invalid":
             assert "Unable to determine active RQ job count" in result.stderr
         else:
@@ -1015,20 +1145,17 @@ def test_active_job_probe_preserves_gate_with_stopped_worker(
 
 
 @pytest.mark.parametrize("worker_only", [False, True])
-def test_targeted_batch_preserves_other_services_and_owned_fence(tmp_path: Path, worker_only: bool) -> None:
+def test_targeted_batch_fails_closed_until_retained_scope_is_reviewed(tmp_path: Path, worker_only: bool) -> None:
     services = _full_services_with_cap_and_renderer()
     if worker_only:
         services = {k: v for k, v in services.items() if k in {"rq-worker", "rq-worker-batch", "weppcloudr"}}
     services["rq-worker-batch"]["image"] = "wepppy:rollback-test"
     result, commands = _run_deploy(tmp_path, services, "--targeted-batch",
                                    "--batch-rollback-image-id", "sha256:" + "0" * 64)
-    assert result.returncode == 0, result.stdout + result.stderr
-    stop = _position(commands, "stop --timeout 216000 rq-worker-batch")
-    start = _position(commands, "up -d --no-deps --force-recreate rq-worker-batch")
-    assert _position(commands, _RQ_SUSPEND) < stop < start < _position(commands, _RQ_RESUME)
-    assert not any("wctl|down" in c or "wctl|build" in c or "prune" in c for c in commands)
-    assert not any("stop --timeout 216000 rq-worker rq-worker-batch" in c for c in commands)
-    assert not any("cap-validator|" in c or "controllers-builder|" in c for c in commands)
+    assert result.returncode != 0
+    assert "fail-closed" in result.stderr
+    assert not any("stop --timeout" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
 
 
 def test_active_job_probe_never_cleans_registry(monkeypatch, capsys):
@@ -1038,7 +1165,10 @@ def test_active_job_probe_never_cleans_registry(monkeypatch, capsys):
     import wepppy.config.redis_settings as settings
 
     source = _DEPLOY.read_text(encoding="utf-8")
-    program = source.split("ACTIVE_RQ_JOBS=\"$(run_rq_control_program '\n", 1)[1].split("\n')\"", 1)[0]
+    active_function = source.split("active_rq_job_count() {", 1)[1].split(
+        "\n}\n\nassert_no_active_rq_jobs", 1
+    )[0]
+    program = active_function.split("run_rq_control_program '\n", 1)[1].split("\n'", 1)[0]
     calls = []
     class Connection:
         def zcard(self, key):
