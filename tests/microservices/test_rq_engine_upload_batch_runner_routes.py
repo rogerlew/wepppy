@@ -333,7 +333,7 @@ def test_upload_sbs_map_rejects_invalid_extension(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["error"]["message"] == "Only GeoTIFF/IMG/VRT rasters are supported."
+    assert payload["error"]["message"] == "Only GeoTIFF or self-contained IMG rasters are supported."
 
 
 def test_upload_geojson_load_error_redacts_traceback(
