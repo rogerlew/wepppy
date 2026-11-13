@@ -124,9 +124,28 @@ installed-provenance/import-order/isolation cases. All 71 wheel RECORD entries
 validate. The added GDAL regression module passes 13 cases (12 bounded malformed
 HDF4 reads plus valid Deflate64 seek/read control). The wheel helper subsequently
 adds compiler identity/config/environment provenance; final-image validation must
-exercise that latest source. Full GDAL helper execution is still in progress.
+exercise that latest source. Full GDAL helper execution now passes, including exact unrelated-package and
+APT-selection restoration. The installed shared-library hash is
+`9571b83b5c12dbba8202da893dc4af8ff8c46316fb42e7a218a9cd6b1a97a297`;
+this independently built artifact differs from the earlier staged prototype,
+so final-image runtime probes remain required. Receipts and both attempt logs
+are retained under `gdal-repair-input-review-20261112/full-helper-trial/`.
 
 Independent correctness source review has no remaining Medium/High findings;
 packet SHA-256
 `6fe6e854acf02cb9752e64aeee61e9b18a4e225333acf7663120693223459cf2`.
 The review is bounded source/artifact evidence, not release acceptance.
+
+The review also found the valid Deflate64 archive was excluded by the root ZIP
+ignore rule. The exact fixture is explicitly force-added; the ignore rule is
+unchanged. Closure addendum SHA-256:
+`a83c0a6a3753623a57e6d5071684a1c75ce0bcf47bbf394a766ab9f46c106215`.
+
+Owned `raster_stacker` comparison on an 8192-by-8192 categorical raster matched
+to a 4096-by-4096 grid preserves exact arrays/metadata across three runs each.
+Median operation time is 0.907 seconds baseline versus 0.958 seconds candidate;
+peak process RSS is 1,733,460 versus 1,720,808 KiB. Output I/O is 53,688 blocks
+for both; input I/O is zero versus 1,640 blocks (cache conditions differ).
+This bounded synthetic workload is consumer evidence, not a general performance
+guarantee. Smaller 2048-grid receipts are retained separately. Private evidence:
+`rasterio-system-link-trial-20261112/consumer-benchmark8192/comparison.json`.

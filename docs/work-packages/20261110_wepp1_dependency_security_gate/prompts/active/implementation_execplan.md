@@ -34,7 +34,9 @@ segmented substitute is not accepted.
   repair passes 12 crash probes and exact ABI/normal controls; coherent package
   integration remains open. Rasterio TLS runtime isolation, eight-array parity
   and 53 owned consumer tests pass; exact trial security finding is closed by
-  supersession. Full build helpers/final image acceptance remain open.
+  supersession. Full GDAL helper and owned Rasterio wheel build pass; 57
+  consumer/security tests and 13 GDAL regressions pass. Final image acceptance
+  remains open.
   See F6 `artifacts/20261113_gdal_qualification.md`. Resume remains deferred.
 
 - [x] (2026-11-12 UTC) Clean Python image `9f9e75e6515a` passes 187
