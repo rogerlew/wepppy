@@ -75,7 +75,7 @@ value/class rules, reprojection, queue topology, authentication, and deployment.
 | Optional upload absent where the route permits reuse | conditional | Validate the persisted raster before its next native consumer |
 | Previously stored valid GTiff/HFA | yes | Preserve the established workflow after restricted validation |
 | Previously stored VRT or mismatched content | no | Explicit re-upload guidance; never pass it to an unrestricted native open |
-| Client path is absolute, traversing, symlinked, outside the approved root, or differs from server state | no | Reject; the client does not select a persisted server pathname |
+| Client attempts to select a persisted pathname | no | Ignore a legacy absolute-path value as a non-authoritative reuse signal and derive the sole candidate from server state; reject traversal, symlink escape, missing, or ambiguous server state |
 | Multi-raster request has a valid first file and invalid later file | no | Reject all parts; preserve prior destinations and controller state |
 
 ## Compatibility and regression plan

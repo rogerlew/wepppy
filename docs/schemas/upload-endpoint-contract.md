@@ -55,8 +55,10 @@ consume. Its byte hash and filesystem identity must remain unchanged through
 those validators. Only those exact validated bytes may be
 atomically published as a run-owned artifact. A persisted accepted artifact may
 be reused only from server-authoritative state beneath its approved run-owned
-upload root; absolute paths, traversal, symlink escape, and a client-selected
-replacement pathname are invalid. Reuse must prove the same byte identity under
+upload root; traversal, symlink escape, and a client-selected replacement
+pathname are invalid. A legacy absolute-path field may be accepted only as a
+non-authoritative reuse signal when the server ignores its value and derives the
+sole candidate from run-owned state. Reuse must prove the same byte identity under
 the owning mutation/read lock immediately before consumption. These invariants
 prove that an unrestricted legacy semantic validator never receives unvalidated
 or replaceable bytes. Direct GDAL opens added or touched by this remediation must
