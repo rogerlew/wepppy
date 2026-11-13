@@ -54,7 +54,7 @@ _DEFAULTS = {
 }
 # Unknown companion mechanisms are not inferred from GDAL's final file list.
 _ORDINARY = (".prj", ".wld", ".tfw", ".tifw", ".tab", ".hdr")
-_OPAQUE = (".aux", ".aux.xml", ".xml", ".rpb", "_rpc.txt", ".rpc.txt", ".imd", ".rrd")
+_OPAQUE = (".aux", ".aux.xml", ".xml", ".rpb", "_rpc.txt", ".rpc.txt", ".imd", ".rrd", ".ige")
 _RASTERS = (".msk", ".ovr")
 
 
