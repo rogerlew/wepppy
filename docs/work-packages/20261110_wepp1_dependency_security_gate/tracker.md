@@ -37,14 +37,18 @@ actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
 
-- [ ] (2026-11-13 UTC) Implement `F6-RU-01`: exact `.tif/.tiff`→`GTiff` and
+- [x] (2026-11-13 UTC) Implement `F6-RU-01`: exact `.tif/.tiff`→`GTiff` and
   `.img`→`HFA` content/driver enforcement before general raster upload consumers.
   Operator scope and the proposed contract checkpoint are recorded in
   `artifacts/20261113_raster_upload_contract_decision.md`; two independent
   read-only reviews and the standalone checkpoint commit precede code edits.
   Review findings and dispositions are retained in
   `artifacts/20261113_raster_upload_correctness_review.md` and
-  `artifacts/20261113_raster_upload_security_review.md`.
+  `artifacts/20261113_raster_upload_security_review.md`. Implementation
+  `cb839e7d7` passed both independent re-reviews, 239 focused regressions,
+  1,955 microservice tests, 1,082 frontend tests, controller lint, and
+  broad-exception enforcement. Production-equivalent rollout evidence and the
+  separate native advisory exception remain open.
 
 - [x] (2026-11-13 UTC) Exact Python gate passes against corrected dependency
   image `af7643725c95`: 13,735 passed, 641 skipped, zero failures in 3,881.73

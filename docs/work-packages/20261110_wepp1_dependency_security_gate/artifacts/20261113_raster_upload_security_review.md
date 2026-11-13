@@ -29,11 +29,11 @@
 
 | ID | Severity | Surface | Required action and disposition | Status |
 | --- | --- | --- | --- | --- |
-| F6-RU-S1 | High | Operator authority | Correct false active records and explicitly supersede the earlier agent interpretation | Resolved; recheck pending |
-| F6-RU-S2 | High | Native parser chain | Require restricted full-band decode, immutable snapshot/byte identity through semantic consumers, and restricted direct GDAL opens touched by this remediation | Resolved in contract; implementation pending |
-| F6-RU-S3 | Medium | Persisted/Omni reuse | Use server-authoritative run-owned paths only; reject absolute/traversal/symlink/client substitution and ambiguous state | Resolved in contract; implementation pending |
-| F6-RU-S4 | Medium | Multi-file requests | Prevalidate every raster in private scratch before any publication or controller mutation; prove late-file failure | Resolved in contract; implementation pending |
-| F6-RU-S5 | Medium | Review governance | Retain this dedicated exact-scope security review and post-fix reviewer confirmation | Resolved; recheck pending |
+| F6-RU-S1 | High | Operator authority | Correct false active records and explicitly supersede the earlier agent interpretation | Resolved |
+| F6-RU-S2 | High | Native parser chain | Restricted decode, identity receipts, complete companion rejection, and restricted touched opens preserve the validated snapshot | Resolved |
+| F6-RU-S3 | Medium | Persisted/Omni reuse | Server-derived run-owned candidates are trusted-root-contained and reasserted under the Omni lock | Resolved |
+| F6-RU-S4 | Medium | Multi-file requests | Every new/persisted request raster is prevalidated before publication or controller mutation | Resolved |
+| F6-RU-S5 | Medium | Review governance | Dedicated checkpoint and iterative post-fix security re-reviews are retained | Resolved |
 
 ## Surface checks
 
@@ -51,8 +51,10 @@
 ## Verdict
 
 - **Checkpoint gate:** pass after post-fix security confirmation
-- **Release recommendation:** hold until implementation conformance and deployment
-  evidence are independently reviewed
+- **Implementation gate:** pass at `cb839e7d7` after independent security
+  re-review
+- **Release recommendation:** production-equivalent deployment evidence and the
+  separate time-bounded native advisory disposition remain required
 - **Unresolved design findings:** High 0; Medium 0; Low 0
 
 ## Residual risk
@@ -68,3 +70,13 @@ No new artifact class is created. Existing project authorization, run artifact
 visibility, archive/restore membership, and recovery mechanics remain applicable;
 implementation tests must retain visible failing-boundary evidence without
 publishing hostile inputs into accepted run state.
+
+## Implementation re-review
+
+The security reviewer reproduced and rejected intermediate sidecar bypasses at
+the accepted destination and cloned Omni target. The approved implementation
+uses the repository-authoritative case-insensitive GDAL companion inventory for
+upload publication, persisted reuse, identity assertion, async Omni copy, and
+final admission. Real external-mask, HFA spill, trusted-root, identity-race, and
+late-request regressions pass in the 239-test focused receipt. No implementation
+security blocker remains for `F6-RU-01`.

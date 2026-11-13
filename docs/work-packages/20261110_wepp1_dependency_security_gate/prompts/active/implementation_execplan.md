@@ -24,6 +24,15 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-13 UTC) `F6-RU-01` implementation `cb839e7d7` enforces
+  `.tif/.tiff`→`GTiff` and `.img`→`HFA`, full-band decode, complete companion
+  rejection, request-wide new/persisted prevalidation, trusted-root reuse, and
+  locked identity receipts through async Omni admission. Independent correctness
+  and security re-reviews approve with no unresolved finding. Focused tests pass
+  239; microservices pass 1,955; frontend passes 1,082; controller lint and
+  broad-exception enforcement pass. Production-equivalent rollout evidence and
+  the separately bound native advisory exception remain open.
+
 - [x] (2026-11-13 UTC) `F6-RU-01` contract checkpoint revised and approved after independent
   correctness/security review: preserve valid GTiff/HFA, reject mismatches and
   general VRT, require request-wide prevalidation and run-root-safe reuse, and
@@ -372,6 +381,14 @@ not collected by unittest, so both runners are required for upstream evidence.
   GDAL compilation, and ordinary multipart routes cannot prove a safe VRT graph.
   Date/Author: 2026-11-13, Roger direction recorded by Codex.
 
+- Decision (2026-11-13): a legacy Omni absolute-path field is only a
+  non-authoritative reuse signal. The server ignores its value, derives the sole
+  candidate from run-owned state, anchors it beneath the trusted run root, and
+  reasserts its identity under the owning lock. Reject every recognized GDAL
+  companion at publication, persisted reuse, async copy, and admission.
+  Rationale: preserve the existing client workflow without granting pathname
+  authority or allowing unvalidated sidecars into later native opens.
+
 - Decision (2026-11-13): retain the smallest test-only isolation correction
   discovered during the exact gate. Do not weaken the production run-context
   preprocessor or create a fake run merely to satisfy this payload unit boundary.
@@ -527,6 +544,13 @@ not collected by unittest, so both runners are required for upstream evidence.
   Date/Author: 2026-11-11, operator.
 
 ## Outcomes & Retrospective
+
+- (2026-11-13 UTC) `F6-RU-01` is implemented and independently approved at
+  `cb839e7d7`. Iterative review found that selected-driver opening alone was
+  insufficient when GDAL could discover adjacent sidecars or an Omni clone
+  retained an old target companion. One shared inventory now closes both direct
+  and async paths. This completes input containment but does not accept the
+  pinned native advisory or authorize deployment.
 
 - (2026-11-13 UTC) Independent Python compatibility acceptance is complete:
   the exact broad command passes 13,735 tests with 641 skips. The full rerun
@@ -1077,3 +1101,7 @@ Revision note (2026-11-13): add the operator-approved `F6-RU-01` raster upload
 contract checkpoint. The change preserves GDAL pinning while requiring exact
 GTiff/HFA content-to-extension validation and restricted opening before native
 consumers; implementation remains gated on two independent reviews.
+
+Revision note (2026-11-13): record completed `F6-RU-01` implementation,
+iterative independent re-review, shared GDAL companion containment, and the
+remaining production-evidence/native-exception boundary.

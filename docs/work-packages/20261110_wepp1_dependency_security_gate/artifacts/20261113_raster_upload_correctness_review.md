@@ -36,26 +36,37 @@ native opens safe. Confirmed consumers are DEM, disturbed/HUC/batch SBS,
 landuse, treatments, Ash, and Omni SBS. The contract requires request-wide
 scratch validation before mutation/publication, exact driver/full-band read,
 immutable byte identity through semantic validation, run-root containment for
-reuse, and late-part failure coverage. Implementation evidence remains pending.
+reuse, and late-part failure coverage. The descendant implementation at
+`cb839e7d7` satisfies those requirements.
 
 ## Findings and disposition
 
 | ID | Severity | Finding | Disposition | Status |
 | --- | --- | --- | --- | --- |
-| COR-01 | High | Active records falsely deferred both GDAL work and input enforcement | Corrected every active F6 authority record; only GDAL upgrade/custom compilation is deferred | Resolved; recheck pending |
-| COR-02 | High | Per-file `post_save` cannot prove request-wide no-mutation for landuse/Ash/Omni | Contract now requires all request rasters pass private scratch validation before any mutation/publication and requires late-second-file evidence | Resolved; implementation pending |
-| COR-03 | High | One restricted probe did not constrain later native consumers | Contract now requires full-band restricted decode, same immutable snapshot for semantic validators, byte/filesystem identity proof, and restricted direct GDAL opens touched here | Resolved; implementation pending |
+| COR-01 | High | Active records falsely deferred both GDAL work and input enforcement | Corrected every active F6 authority record; only GDAL upgrade/custom compilation is deferred | Resolved |
+| COR-02 | High | Per-file `post_save` cannot prove request-wide no-mutation for landuse/Ash/Omni | Request-wide boundary prevalidation now covers new and persisted raster inputs before publication/mutation | Resolved |
+| COR-03 | High | One restricted probe did not constrain later native consumers | Restricted decode, identity receipts, complete companion rejection, and restricted touched opens preserve the validated snapshot | Resolved |
 | COR-04 | Medium | Shared helper ownership and applicable contracts were incomplete | Shared implementation assigned to `microservices/upload_boundary.py`; rq wrapper, RQ response, and NoDb contracts are explicit | Resolved |
-| COR-05 | Medium | Self-contained HFA evidence omitted a companion-dependent raster | Regression plan now requires a real `.ige`-dependent HFA with forced band read | Resolved; implementation pending |
-| COR-06 | Medium | VRT compatibility removal and UI were incomplete | Operator direction is recorded as authority; batch UI correction is required in the descendant implementation; generated/internal and dNBR VRT remain | Resolved in contract; implementation pending |
-| COR-07 | Low | WBT overview still said GeoTIFF only | GeoTIFF/IMG documentation correction is required in the descendant implementation | Resolved in contract; implementation pending |
+| COR-05 | Medium | Self-contained HFA evidence omitted a companion-dependent raster | Real `.ige`-dependent HFA coverage forces a read and rejects the detached primary | Resolved |
+| COR-06 | Medium | VRT compatibility removal and UI were incomplete | General VRT admission is removed; generated/internal and dNBR VRT remain; batch UI is corrected | Resolved |
+| COR-07 | Low | WBT overview still said GeoTIFF only | User documentation now describes GeoTIFF/IMG and format matching | Resolved |
+
+## Implementation re-review
+
+The reviewer iteratively rejected Landuse mutation ordering, Omni request-wide
+prevalidation, overbroad rollback wording, and incomplete target-sidecar
+coverage. Commit `cb839e7d7` was approved after the implementation added
+server-authoritative reuse receipts, owning-lock identity assertion, trusted
+run-root containment, and one shared companion inventory applied through the
+async Omni copy/admission path. The final focused receipt is 239 passed.
 
 ## Verdict
 
 - **Checkpoint gate:** pass after post-fix confirmation; production UI and user
   documentation edits were removed from this ancestor checkpoint
-- **Implementation/release gate:** hold until implementation, real-driver tests,
-  full F6 validation, and production-equivalent workflow evidence pass
+- **Implementation gate:** pass at `cb839e7d7`
+- **Release gate:** full F6 and production-equivalent deployment evidence remain
+  separate rollout requirements
 - **Unresolved design findings:** High 0; Medium 0; Low 0
 
 No new generated artifact class is introduced. Existing run artifacts and
