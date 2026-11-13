@@ -23,6 +23,14 @@ hard prerequisites for that claim.
 
 ## Task Board
 
+- [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
+  `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
+  lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).
+- [ ] Exact-image full Python gate is running. Qualified private GDAL staged
+  repair passes 12 crash probes and exact ABI/normal controls; coherent package
+  integration and Rasterio constructor-only TLS runtime proof remain open.
+  See F6 `artifacts/20261113_gdal_qualification.md`. Resume remains deferred.
+
 - [x] (2026-11-12 UTC) Clean Python image `9f9e75e6515a` passes 187
   focused tests and actual PATH artifact readback; fresh collection succeeds
   (2,717 matches/332 ignored). Scan exposes OAuthlib 4.0.0 still affected;

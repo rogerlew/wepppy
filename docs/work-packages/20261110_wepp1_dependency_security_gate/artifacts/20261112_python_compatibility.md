@@ -1,7 +1,30 @@
 # Python dependency compatibility remediation
 
-Status: clean common image built; fresh scan and complete gates remain open.
-Deployment resume remains deferred. No production activation.
+Status: corrected clean image and scan complete; full Python gate running.
+Native remediation remains open. Deployment resume is deferred; no activation.
+
+## Corrected clean image
+
+Revision `64cc736c2cc5217b6ae7eccdfd83ce936d80e3d4` builds clean image
+`sha256:af7643725c95242e874a0ae218ecf8395a9641120aebcfb26822ad61aa50ee15`
+in 534.85 seconds. All 187 focused tests pass. Actual PATH report generation
+passes in 50.73 seconds, and decoded plot bytes match the earlier validated
+artifact. Separate installed-package/source readback confirms OAuthlib 4.0.1,
+sole libpass ownership and all seven selected copied-source hashes.
+
+Fresh collection completes in 718.05 seconds with 2,716 matches/332 ignored and
+zero OAuthlib matches. Manifest SHA-256:
+`9f66a9c241686d763324517cbc345b3d4b1f6bf9d56f73f0be4c4545b6e40869`;
+scan SHA-256:
+`381e994b0dd421b39739bc37183365e2dc7a39e761d15d1025bfad81b961f53b`.
+Private root: `python-repairs-final-20261112/`. This does not clear remaining
+native coverage or advisory dispositions. Node 20 lint and all 1,076 Jest plus
+three Node tests pass. The exact-image full Python suite is running without
+overlapping heavy builds; receipt is `/tmp/f6-python-final-full-pytest.log`.
+
+Later native work is recorded in
+[GDAL/Rasterio qualification](20261113_gdal_qualification.md). Those private
+drafts are not included in this frozen Python image or its acceptance evidence.
 
 ## Clean image acceptance continuation
 

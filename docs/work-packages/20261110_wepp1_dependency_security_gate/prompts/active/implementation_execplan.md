@@ -24,6 +24,14 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
+  `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
+  lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).
+- [ ] Exact-image full Python gate is running. Qualified private GDAL staged
+  repair passes 12 crash probes and exact ABI/normal controls; coherent package
+  integration and Rasterio constructor-only TLS runtime proof remain open.
+  See F6 `artifacts/20261113_gdal_qualification.md`. Resume remains deferred.
+
 - [x] (2026-11-12 UTC) Clean Python image `9f9e75e6515a` passes 187
   focused tests and actual PATH artifact readback; fresh collection succeeds
   (2,717 matches/332 ignored). Scan exposes OAuthlib 4.0.0 still affected;
@@ -159,6 +167,12 @@ segmented substitute is not accepted.
 
 ## Surprises & Discoveries
 
+The GDAL trial proved zero-fuzz patch placement can still be wrong in repeated
+source blocks. Exact final file hashes, real malformed fixtures, hardening flags
+and staged loader contracts are all necessary. Rasterio 1.4.4 source linkage
+exposes a global MEM flag during warps; its narrower 1.3.10 alternative remains
+a private TLS-scope draft pending runtime proof.
+
 The clean scan caught an incomplete OAuthlib version repair (4.0.0 requires
 4.0.1). System GDAL crashes on all 12 upstream HDF4 probes. Rasterio 1.4.4
 fails the configured PROJ database and removes four drivers; do not treat
@@ -293,6 +307,11 @@ not collected by unittest, so both runners are required for upstream evidence.
 
 ## Decision Log
 
+- Decision (2026-11-13): qualify coherent system-GDAL packages and retain the
+  existing Rasterio API through a constructor-only TLS scope. Reject a global
+  MEM override and the unqualified 1.4.4 shared-library behavior. Do not overlap
+  further native builds with the exact-image full Python gate.
+
 - Decision (2026-11-12): correct OAuthlib to upstream fixed 4.0.1; retain
   the older image scan as failure evidence. Keep Rasterio migration isolated
   until coordinate-database and driver parity are resolved. Existing
@@ -426,6 +445,11 @@ not collected by unittest, so both runners are required for upstream evidence.
   Date/Author: 2026-11-11, operator.
 
 ## Outcomes & Retrospective
+
+The corrected Python image is built and scanned with zero OAuthlib findings;
+full acceptance is still running. Staged system-GDAL defects are repaired and
+independently qualified, but package integration and Rasterio isolation proof
+remain open. No production activation, resume or M4 completion is implied.
 
 The clean Python batch passes focused and generated-report checks, but its
 scan requires a further OAuthlib correction. Native GDAL defect reproduction
@@ -937,3 +961,6 @@ actual shared-installer evidence, with final image/native gates still open.
 
 Revision note (2026-11-12): retain clean-image results, the scan-driven
 OAuthlib correction and concrete GDAL/Rasterio failures before final gates.
+
+Revision note (2026-11-13): record corrected clean Python acceptance and
+qualified native prototype boundaries, including the rejected Rasterio trial.
