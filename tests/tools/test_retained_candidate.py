@@ -110,6 +110,30 @@ def test_create_is_atomic_private_and_validate_rechecks_all_identities(
     }
 
 
+def test_create_uses_once_resolved_expected_ids_instead_of_mutable_tags(
+    candidate_environment,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    project, deploy_script, _ = candidate_environment
+    original_run = candidate.run
+    inspected: list[str] = []
+
+    def recording_run(*command: str, cwd: Path) -> str:
+        if command[:3] == ("docker", "image", "inspect"):
+            inspected.append(command[-1])
+        return original_run(*command, cwd=cwd)
+
+    monkeypatch.setattr(candidate, "run", recording_run)
+    args = _args(project, deploy_script)
+    args.expected_image = [
+        f"{service}={_IMAGE_ID}" for service in args.recreated_service
+    ]
+    assert candidate.create_candidate(args) == 0
+    capsys.readouterr()
+    assert inspected == [_IMAGE_ID] * len(args.recreated_service)
+
+
 @pytest.mark.parametrize("drift", ["engine", "image", "dirty"])
 def test_validate_rejects_host_source_or_image_drift(
     candidate_environment,
@@ -170,7 +194,10 @@ def test_validate_rejects_mode_change(
     "environment",
     [
         {"SECRET_KEY": "plaintext"},
+        {"JWT_SECRET": "plaintext"},
+        {"AGENT_JWT_TOKEN": "plaintext"},
         {"RQ_REDIS_URL": "redis://user:password@redis:6379/9"},
+        {"SERVICE_URL": "https://service.invalid/path?api_token=plaintext"},
     ],
 )
 def test_create_rejects_plaintext_or_url_embedded_secrets(
@@ -185,6 +212,38 @@ def test_create_rejects_plaintext_or_url_embedded_secrets(
 
     with pytest.raises(candidate.CandidateError, match="plaintext|embeds credentials"):
         candidate.create_candidate(_args(project, deploy_script))
+
+
+def test_secret_file_and_public_values_are_not_persisted_as_secrets() -> None:
+    candidate.require_secret_safe_config({
+        "services": {
+            "weppcloud": {
+                "environment": {
+                    "JWT_SECRET_FILE": "/run/secrets/jwt",
+                    "PUBLIC_SIGNING_PUBLIC_KEY": "not-secret",
+                    "SERVICE_URL": "https://service.invalid/path?mode=public",
+                }
+            }
+        }
+    })
+
+
+def test_atomic_private_json_refuses_late_concurrent_destination(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    destination = tmp_path / "approval.json"
+    real_link = candidate.os.link
+
+    def race_link(source, target, *, follow_symlinks):
+        destination.write_text('{"winner":true}\n', encoding="utf-8")
+        destination.chmod(0o600)
+        return real_link(source, target, follow_symlinks=follow_symlinks)
+
+    monkeypatch.setattr(candidate.os, "link", race_link)
+    with pytest.raises(candidate.CandidateError, match="refusing to overwrite"):
+        candidate.atomic_private_json(destination, {"winner": False})
+    assert json.loads(destination.read_text(encoding="utf-8")) == {"winner": True}
 
 
 def test_approval_is_derived_from_receipt_hash_and_invokes_exact_subject(

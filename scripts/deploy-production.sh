@@ -490,8 +490,9 @@ validate_deploy_topology() {
         echo "✗ Common-image activation requires --build-retained-candidate or --resume-retained-candidate." >&2
         exit 1
     fi
-    if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_BATCH}" = true ] \
-        || [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+    if [ "${PRINT_PLAN}" = false ] \
+        && { [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_BATCH}" = true ] \
+            || [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; }; then
         echo "✗ This common-image scope is fail-closed until retained-candidate support is reviewed." >&2
         exit 1
     fi
@@ -671,9 +672,22 @@ create_retained_candidate() {
     retained_candidate_args
     result="$(
         wctl docker compose config --format json \
-            | python3 "${RETAINED_CANDIDATE_HELPER}" create "${RETAINED_ARGS[@]}"
+            | python3 "${RETAINED_CANDIDATE_HELPER}" create "${RETAINED_ARGS[@]}" \
+                "${RETAINED_EXPECTED_IMAGE_ARGS[@]}"
     )"
     echo "${result}"
+}
+
+retained_image_for_service() {
+    local service="$1"
+    python3 - "${RETAINED_IMAGE_OVERRIDE}" "${service}" <<'PY'
+import json
+import pathlib
+import sys
+
+config = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(config["services"][sys.argv[2]]["image"])
+PY
 }
 
 active_rq_job_count() {
@@ -738,14 +752,21 @@ RQ_FENCE_RENEW_RETRIES="${RQ_FENCE_RENEW_RETRIES:-20}"
 RQ_FENCE_RETRY_DELAY_SECONDS="${RQ_FENCE_RETRY_DELAY_SECONDS:-3}"
 run_rq_control_program() {
     local program="$1"
+    local control_status
     shift
-    if ! timeout --foreground --kill-after=5 \
+    if timeout --foreground --kill-after=5 \
         "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
         wctl docker compose exec -T rq-worker /opt/venv/bin/python -c \
         "${program}" "$@"; then
-        if [ "${CUTOVER_STARTED:-false}" = true ]; then
+        return 0
+    else
+        control_status="$?"
+        if [ "${control_status}" -eq 79 ] || [ "${control_status}" -eq 80 ]; then
+            return "${control_status}"
+        fi
+        if [ -n "${RESUME_RETAINED_CANDIDATE:-}" ]; then
             [ -n "${KNOWN_GOOD_CONFIG:-}" ] && [ -n "${KNOWN_GOOD_OVERRIDE:-}" ] || {
-                echo "✗ Immutable known-good RQ control image is unavailable after cutover began." >&2
+                echo "✗ Immutable known-good RQ control image is unavailable." >&2
                 return 1
             }
             timeout --foreground --kill-after=5 \
@@ -981,7 +1002,11 @@ capture_known_good_state() {
     KNOWN_GOOD_CONFIG="${KNOWN_GOOD_DIR}/activation-compose.json"
     KNOWN_GOOD_OVERRIDE="${KNOWN_GOOD_DIR}/image-override.json"
     KNOWN_GOOD_ROWS="${KNOWN_GOOD_DIR}/images.tsv"
-    wctl docker compose config --format json > "${KNOWN_GOOD_CONFIG}"
+    [ -n "${RETAINED_ACTIVATION_CONFIG}" ] || {
+        echo "✗ Approved retained activation configuration is unavailable." >&2
+        return 1
+    }
+    cp -- "${RETAINED_ACTIVATION_CONFIG}" "${KNOWN_GOOD_CONFIG}"
     chmod 0600 "${KNOWN_GOOD_CONFIG}"
     : > "${KNOWN_GOOD_ROWS}"
     chmod 0600 "${KNOWN_GOOD_ROWS}"
@@ -1018,7 +1043,7 @@ PY
     chmod 0600 "${KNOWN_GOOD_OVERRIDE}"
 }
 
-verify_known_good_state() {
+verify_known_good_state_once() {
     local expected_args=()
     while IFS=$'\t' read -r service expected_id expected_count; do
         [ -n "${service}" ] || continue
@@ -1051,6 +1076,20 @@ print("{}:{}".format(
 ' "${default_hostname}" "${batch_hostname}")"
         [[ "${registration}" =~ ^[1-9][0-9]*:[1-9][0-9]*$ ]] || return 1
     fi
+}
+
+verify_known_good_state() {
+    local attempt
+    local attempts="${KNOWN_GOOD_READINESS_ATTEMPTS:-60}"
+    local delay="${KNOWN_GOOD_READINESS_DELAY_SECONDS:-2}"
+    for attempt in $(seq 1 "${attempts}"); do
+        if verify_known_good_state_once; then
+            return 0
+        fi
+        [ "${attempt}" -lt "${attempts}" ] && sleep "${delay}"
+    done
+    echo "✗ Known-good workload did not become healthy and registered after ${attempts} checks." >&2
+    return 1
 }
 
 protect_known_good_images() {
@@ -1212,6 +1251,9 @@ trap 'echo "✗ Deployment interrupted" >&2; false' INT TERM
 if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
     echo "    Validating retained candidate and independent approval before RQ drain..."
     run_retained_candidate_check gate
+    echo "    Capturing exact pre-cutover known-good image map..."
+    capture_known_good_state
+    protect_known_good_images
     suspend_rq_dequeue
     if ! wait_for_active_rq_jobs; then
         resume_rq_if_owned
@@ -1273,14 +1315,41 @@ else
     echo ""
 fi
 
+RETAINED_EXPECTED_IMAGE_ARGS=()
+declare -A RETAINED_RESOLVED_IMAGES=()
+if [ "${BUILD_RETAINED_CANDIDATE}" = true ]; then
+    RETAINED_CONFIG_JSON="$(wctl docker compose config --format json)"
+    for service in "${RECREATED_SERVICES[@]}"; do
+        source_image="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["services"][sys.argv[1]]["image"])' "${service}" <<< "${RETAINED_CONFIG_JSON}")"
+        image_id="$(docker image inspect --format '{{.Id}}' "${source_image}")"
+        [[ "${image_id}" =~ ^sha256:[a-f0-9]{64}$ ]]
+        RETAINED_RESOLVED_IMAGES["${service}"]="${image_id}"
+        RETAINED_EXPECTED_IMAGE_ARGS+=(--expected-image "${service}=${image_id}")
+    done
+fi
+
 if printf "%s\n" "${BUILD_SERVICES[@]}" | grep -qx "weppcloudr"; then
-    WEPPCLOUDR_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; c=json.load(sys.stdin); print(c["services"]["weppcloudr"]["image"])')"
-    WORKER_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; c=json.load(sys.stdin); print(c["services"]["rq-worker"]["image"])')"
+    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        WEPPCLOUDR_IMAGE="$(retained_image_for_service weppcloudr)"
+        WORKER_IMAGE="$(retained_image_for_service rq-worker)"
+    elif [ "${BUILD_RETAINED_CANDIDATE}" = true ]; then
+        WEPPCLOUDR_IMAGE="${RETAINED_RESOLVED_IMAGES[weppcloudr]}"
+        WORKER_IMAGE="${RETAINED_RESOLVED_IMAGES[rq-worker]}"
+    else
+        WEPPCLOUDR_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; c=json.load(sys.stdin); print(c["services"]["weppcloudr"]["image"])')"
+        WORKER_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; c=json.load(sys.stdin); print(c["services"]["rq-worker"]["image"])')"
+    fi
     "${WEPPCLOUDR_RUNTIME_VALIDATOR}" "${WEPPCLOUDR_IMAGE}" "${WORKER_IMAGE}"
 fi
 
 if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
-    CAP_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["cap"]["image"])')"
+    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        CAP_IMAGE="$(retained_image_for_service cap)"
+    elif [ "${BUILD_RETAINED_CANDIDATE}" = true ]; then
+        CAP_IMAGE="${RETAINED_RESOLVED_IMAGES[cap]}"
+    else
+        CAP_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["cap"]["image"])')"
+    fi
     "${CAP_RUNTIME_VALIDATOR}" "${CAP_IMAGE}"
     "${CAP_RUNTIME_PREPARER}" --secret-only
 fi
@@ -1291,11 +1360,6 @@ if [ "${BUILD_RETAINED_CANDIDATE}" = true ]; then
     echo "✓ Retained candidate build complete; no service or RQ state changed"
     exit 0
 fi
-if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
-    echo "    Capturing exact pre-cutover known-good image map..."
-    capture_known_good_state
-fi
-
 # Stop services. For wepp3, SIGTERM initiates an RQ warm shutdown before
 # Compose removes the container: the worker stops dequeuing first and any job
 # already running is allowed to finish, closing the check-then-stop race.
@@ -1303,12 +1367,21 @@ echo ">>> Step 3: Stopping services..."
 if [ "${DEPLOY_MODE}" = "full" ] && [ "${FLUSH_RQ_DB}" = true ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
+    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        echo "    Running the final complete gate immediately before first stop..."
+        run_retained_candidate_check gate
+        CUTOVER_STARTED=true
+    fi
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
 if [ "${DEPLOY_MODE}" = "worker" ] && [ "${TARGETED_BATCH}" = false ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
-    [ -z "${RESUME_RETAINED_CANDIDATE}" ] || CUTOVER_STARTED=true
+    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        echo "    Running the final complete gate immediately before first stop..."
+        run_retained_candidate_check gate
+        CUTOVER_STARTED=true
+    fi
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
 if [ "${TARGETED_BATCH}" = true ]; then
@@ -1435,7 +1508,11 @@ if [ "${DEPLOY_MODE}" = "full" ] \
     && [ "${TARGETED_BATCH}" = false ] && [ "${FLUSH_RQ_DB}" = false ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
-    [ -z "${RESUME_RETAINED_CANDIDATE}" ] || CUTOVER_STARTED=true
+    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        echo "    Running the final complete gate immediately before first stop..."
+        run_retained_candidate_check gate
+        CUTOVER_STARTED=true
+    fi
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
 assert_rq_fence
@@ -1744,7 +1821,6 @@ print("{}:{}".format(
 fi
 
 if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
-    protect_known_good_images
     record_retained_activation
 fi
 CUTOVER_STARTED=false

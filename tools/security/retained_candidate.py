@@ -17,7 +17,7 @@ import subprocess
 import sys
 import tempfile
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, urlsplit
 
 
 STORE_ROOT = Path("/workdir/weppcloud-deployments/.local/dependency-security")
@@ -157,7 +157,11 @@ def atomic_private_json(path: Path, value: dict[str, Any]) -> None:
             stream.write(canonical_json(value) + b"\n")
             stream.flush()
             os.fsync(stream.fileno())
-        os.rename(temporary, path)
+        try:
+            os.link(temporary, path, follow_symlinks=False)
+        except FileExistsError as error:
+            raise CandidateError(f"refusing to overwrite {path}") from error
+        temporary.unlink()
         fsync_directory(path.parent)
     finally:
         if temporary.exists():
@@ -192,12 +196,11 @@ def require_secret_safe_config(config: dict[str, Any]) -> None:
     services = config.get("services")
     if not isinstance(services, dict):
         raise CandidateError("Compose configuration has no services object")
-    plaintext_keys = {
-        "SECRET_KEY",
-        "SECURITY_PASSWORD_SALT",
-        "POSTGRES_PASSWORD",
-        "REDIS_PASSWORD",
-    }
+    secret_name = re.compile(
+        r"(?:^|_)(?:SECRET|PASSWORD|PASSWD|TOKEN|API_KEY|PRIVATE_KEY|"
+        r"CLIENT_SECRET|ACCESS_KEY|CREDENTIALS?)(?:_|$)",
+        re.IGNORECASE,
+    )
     for service_name, service in services.items():
         if not isinstance(service, dict):
             continue
@@ -207,13 +210,19 @@ def require_secret_safe_config(config: dict[str, Any]) -> None:
         for key, value in environment.items():
             if value in (None, ""):
                 continue
-            if key in plaintext_keys:
+            normalized_key = str(key).upper()
+            if secret_name.search(normalized_key) and not (
+                normalized_key.endswith("_FILE")
+                or normalized_key.startswith("PUBLIC_")
+                or normalized_key.endswith("_PUBLIC_KEY")
+            ):
                 raise CandidateError(
                     f"service {service_name!r} uses plaintext {key}; a *_FILE binding is required"
                 )
             if key.endswith("_URL") or key.endswith("_URI"):
                 parsed = urlsplit(str(value))
-                if parsed.password is not None:
+                secret_query = any(secret_name.search(name) for name, _ in parse_qsl(parsed.query))
+                if parsed.username is not None or parsed.password is not None or secret_query:
                     raise CandidateError(
                         f"service {service_name!r} embeds credentials in {key}"
                     )
@@ -232,6 +241,11 @@ def base_state(args: argparse.Namespace, config: dict[str, Any]) -> tuple[dict[s
     services = config.get("services")
     if not isinstance(services, dict):
         raise CandidateError("Compose configuration has no services object")
+    expected_images = dict(
+        item.split("=", 1) for item in getattr(args, "expected_image", [])
+    )
+    if expected_images and set(expected_images) != set(args.recreated_service):
+        raise CandidateError("expected image map must exactly cover recreated services")
     built_images: dict[str, str] = {}
     for service_name in args.build_service:
         service = services.get(service_name)
@@ -240,7 +254,8 @@ def base_state(args: argparse.Namespace, config: dict[str, Any]) -> tuple[dict[s
         source_image = service.get("image")
         if not isinstance(source_image, str) or not source_image:
             raise CandidateError(f"build service {service_name!r} has no image")
-        built_images[source_image] = immutable_image_id(source_image, project_root)
+        if not expected_images:
+            built_images[source_image] = immutable_image_id(source_image, project_root)
 
     images: list[dict[str, str]] = []
     override_services: dict[str, dict[str, str]] = {}
@@ -251,7 +266,13 @@ def base_state(args: argparse.Namespace, config: dict[str, Any]) -> tuple[dict[s
         source_image = service.get("image")
         if not isinstance(source_image, str) or not source_image:
             raise CandidateError(f"recreated service {service_name!r} has no image")
-        image_id = built_images.get(source_image)
+        image_id = expected_images.get(service_name)
+        if image_id is not None:
+            if IMAGE_ID_RE.fullmatch(image_id) is None \
+                    or immutable_image_id(image_id, project_root) != image_id:
+                raise CandidateError(f"expected image for {service_name!r} is unavailable")
+        else:
+            image_id = built_images.get(source_image)
         if image_id is None:
             image_id = immutable_image_id(source_image, project_root)
         images.append({
@@ -568,6 +589,8 @@ def parser() -> argparse.ArgumentParser:
         command.add_argument("--deploy-option", action="append", default=[])
         command.add_argument("--build-service", action="append", required=True)
         command.add_argument("--recreated-service", action="append", required=True)
+        if name == "create":
+            command.add_argument("--expected-image", action="append", default=[])
         if name != "create":
             command.add_argument("--receipt", type=Path, required=True)
     approval = commands.add_parser("publish-approval")

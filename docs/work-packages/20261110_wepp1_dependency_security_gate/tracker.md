@@ -147,7 +147,9 @@ actual gate rejects native coverage. M4 is not complete.
   Authlib plus joserfc; native GDAL sentinels match. No forest activation.
 - [ ] Implement and prove actual CI lifecycle from
   `artifacts/20261112_ci_producer_design.md`; retained-candidate workflow is
-  selected, but implementation review and separate M5 rollout authority remain.
+  selected. Review-driven recovery/identity hardening passes 152 focused tests
+  on the host and in disposable Compose; independent re-review and separate M5
+  rollout authority remain.
 
 - [x] Complete real parser candidate collection and inventory reconciliation;
   retain blocked policy status and qualified-diagnostic correction.
@@ -322,6 +324,14 @@ no-cache rebuilds conflict with exact-image manual approval on a later invocatio
 Roger selected the retained-candidate resume proposal in
 `artifacts/20261112_deploy_approval_boundary.md` for the host-local Compose
 workflow. Implement and independently review fail-closed build-only/resume modes;
-generic skip-build remains rejected. Production preflight found one executing
-default-queue job. Queue drain is required but does not authorize service
+generic skip-build remains rejected. Production preflight found executing
+default-queue work. Queue drain is required but does not authorize service
 interruption or M5 activation, which remain separately gated.
+
+2026-11-13 retained-candidate hardening: all resume validators and RQ fallback
+containers consume immutable IDs, recovery uses the approved retained Compose
+configuration, rollback tags are installed before any stop, readiness polls are
+bounded, approval publication is atomic no-replace, and secret-bearing
+environment names/query credentials are rejected. Host and disposable Compose
+focused suites each pass 152 tests. Correctness/security re-review, exact-host
+candidate evidence, broad M4 gates and separately authorized M5 remain open.

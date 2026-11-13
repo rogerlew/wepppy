@@ -50,6 +50,7 @@ def _run_deploy(
     rq_renew_block_at_resume: bool = False,
     rq_renew_hangs_once: bool = False,
     rq_heartbeat_failure: bool = False,
+    rq_renew_after_stop: bool = False,
     rq_resume_failure: bool = False,
     rq_resume_reply_lost: bool = False,
     rq_pre_suspended: bool = False,
@@ -62,6 +63,8 @@ def _run_deploy(
     controller_build_failure: bool = False,
     lock_held: bool = False,
     skip_docker_prune: bool = True,
+    recovery_health_delay_checks: int = 0,
+    recovery_registration_delay_checks: int = 0,
 ) -> tuple[subprocess.CompletedProcess[str], list[str]]:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(parents=True)
@@ -90,7 +93,17 @@ elif [[ "${args}" == *"docker compose config"* ]]; then
 elif [[ "${args}" == *"ps --status running --services"* ]]; then
     printf '%s\n' "${FAKE_SERVICES}"
 elif [[ "${args}" == *"ps --all --format json"* ]]; then
-    printf '%s\n' "${FAKE_PS}"
+    count=0
+    [ ! -f "${FAKE_RECOVERY_HEALTH_COUNT}" ] \
+        || count="$(cat "${FAKE_RECOVERY_HEALTH_COUNT}")"
+    if [ -f "${FAKE_RECOVERY_STARTED_MARKER}" ] \
+        && [ "${count}" -lt "${FAKE_RECOVERY_HEALTH_DELAY_CHECKS}" ]; then
+        count=$((count + 1))
+        printf '%s\n' "${count}" > "${FAKE_RECOVERY_HEALTH_COUNT}"
+        printf '%s\n' "${FAKE_PS_STARTING}"
+    else
+        printf '%s\n' "${FAKE_PS}"
+    fi
 elif [[ "${args}" == *" ps "* && "${args}" == *" -q "* ]] \
     || [[ "${args}" == *" ps -q "* ]]; then
     service="${!#}"
@@ -185,7 +198,15 @@ elif [[ "${args}" == *"# rq-fence-resume"* ]]; then
         exit 78
     fi
 elif [[ "${args}" == *"Worker.all"* ]]; then
-    if [ "${FAKE_LOCAL_WORKER_REGISTRATION_FAILURE:-0}" = 1 ]; then
+    count=0
+    [ ! -f "${FAKE_RECOVERY_REGISTRATION_COUNT}" ] \
+        || count="$(cat "${FAKE_RECOVERY_REGISTRATION_COUNT}")"
+    if [ -f "${FAKE_RECOVERY_STARTED_MARKER}" ] \
+        && [ "${count}" -lt "${FAKE_RECOVERY_REGISTRATION_DELAY_CHECKS}" ]; then
+        count=$((count + 1))
+        printf '%s\n' "${count}" > "${FAKE_RECOVERY_REGISTRATION_COUNT}"
+        printf '0:0\n'
+    elif [ "${FAKE_LOCAL_WORKER_REGISTRATION_FAILURE:-0}" = 1 ]; then
         printf '0:1\n'
     else
         printf '1:1\n'
@@ -250,22 +271,63 @@ elif [ "${1:-}" = "image" ] && [ "${2:-}" = "inspect" ]; then
     if [ "${3:-}" = "--format" ]; then
         if [ "${5:-}" = 'wepppy:rollback-test' ]; then
             printf 'sha256:%064d\n' 0
+        elif [[ "${5:-}" == wepppy-retained-rollback:* ]]; then
+            printf 'sha256:%s\n' "${5#wepppy-retained-rollback:}"
         else
             printf 'sha256:%064d\n' 1
         fi
     fi
 elif [ "${1:-}" = "compose" ]; then
+    if [[ "$*" == *"# rq-fence-renew"* ]]; then
+        printf 'rq-fallback|renew|%s\n' "$*" >> "${FAKE_COMMAND_LOG}"
+    fi
     if [[ "$*" == *"wepppy-known-good"* ]] \
         && [ "${FAKE_RECOVERY_FAILURE:-0}" = 1 ]; then
         exit 73
     fi
-    if [[ "$*" == *" run "* && "$*" == *"from rq.suspension import is_suspended"* ]]; then
+    if [[ "$*" == *" run "* && "$*" == *"StartedJobRegistry"* ]]; then
+        echo 'rq-probe|run' >> "${FAKE_COMMAND_LOG}"
+        if [ "${FAKE_RQ_PROBE_RESULT}" = error ]; then
+            echo 'Redis connection unavailable' >&2
+            exit 1
+        fi
+        printf '%s\n' "${FAKE_RQ_PROBE_RESULT}"
+    elif [[ "$*" == *" run "* && "$*" == *"# rq-fence-acquire"* ]]; then
+        token="${!#}"
+        printf 'rq-token|acquire|%s\n' "${token}" >> "${FAKE_COMMAND_LOG}"
+        if [ "${FAKE_RQ_ACQUIRE_REPLY_LOST:-0}" = 1 ] \
+            && mkdir "${FAKE_RQ_ACQUIRE_REPLY_MARKER}" 2>/dev/null; then
+            exit 124
+        fi
+        printf 'no\n'
+    elif [[ "$*" == *" run "* && "$*" == *"# rq-fence-renew"* ]]; then
+        token="${!#}"
+        printf 'rq-token|renew|%s\n' "${token}" >> "${FAKE_COMMAND_LOG}"
+        : > "${FAKE_RENEWAL_SEEN}"
+        if [ "${FAKE_HEARTBEAT_FAILURE:-0}" = 1 ]; then
+            exit 75
+        fi
+    elif [[ "$*" == *" run "* && "$*" == *"from rq.suspension import is_suspended"* ]]; then
+        printf 'rq-token|assert|%s\n' "${!#}" >> "${FAKE_COMMAND_LOG}"
         printf 'yes\n'
+    elif [[ "$*" == *" run "* && "$*" == *"# rq-fence-resume"* ]]; then
+        token="${!#}"
+        printf 'rq-token|resume|%s\n' "${token}" >> "${FAKE_COMMAND_LOG}"
+        if [ "${FAKE_RQ_RESUME_REPLY_LOST:-0}" = 1 ] \
+            && mkdir "${FAKE_RQ_RESUME_REPLY_MARKER}" 2>/dev/null; then
+            exit 124
+        fi
+        if [ "${FAKE_RQ_RESUME_FAILURE:-0}" = 1 ]; then
+            exit 78
+        fi
     elif [[ "$*" == *" run "* && "$*" == *"Worker.all"* ]]; then
         printf '1:1\n'
     fi
     if [[ "$*" == *" up -d "* ]]; then
         rm -f "${FAKE_WORKER_STOPPED_MARKER}"
+        if [[ "$*" == *"wepppy-known-good"* ]]; then
+            : > "${FAKE_RECOVERY_STARTED_MARKER}"
+        fi
     fi
     if [[ "$*" == *" up -d --no-deps --force-recreate cap"* ]] \
         && [ "${FAKE_RECOVERY_FAILURE:-0}" = 1 ]; then
@@ -334,6 +396,12 @@ if [ "${FAKE_RENEW_ONCE:-0}" = 1 ] || [ "${FAKE_HEARTBEAT_FAILURE:-0}" = 1 ]; th
         exit 0
     fi
 fi
+if [ "${FAKE_RQ_RENEW_AFTER_STOP:-0}" = 1 ]; then
+    for _attempt in $(seq 1 500); do
+        [ -f "${FAKE_WORKER_STOPPED_MARKER}" ] && exit 0
+        /bin/sleep 0.01
+    done
+fi
 deployment_parent="$(awk '{print $4}' "/proc/${PPID}/stat")"
 while kill -0 "${deployment_parent}" 2>/dev/null; do
     /bin/sleep 0.02
@@ -344,7 +412,8 @@ done
         bin_dir / "cp",
         r'''#!/bin/bash
 set -euo pipefail
-if [ "${FAKE_CONTROLLER_BACKUP_FAILURE:-0}" = 1 ]; then
+if [ "${FAKE_CONTROLLER_BACKUP_FAILURE:-0}" = 1 ] \
+    && [[ "$*" == *"controllers-gl.js"* ]]; then
     exit 77
 fi
 exec /bin/cp "$@"
@@ -410,6 +479,7 @@ exec /bin/cp "$@"
         if not isinstance(definition, dict)
         or (definition.get("deploy") or {}).get("replicas") != 0
     ]
+    starting_records = [dict(record, Health="starting") for record in records]
     environment = os.environ.copy()
     environment.update(
         {
@@ -436,6 +506,7 @@ exec /bin/cp "$@"
             ),
             "FAKE_RQ_RENEW_HANGS_ONCE": "1" if rq_renew_hangs_once else "0",
             "FAKE_HEARTBEAT_FAILURE": "1" if rq_heartbeat_failure else "0",
+            "FAKE_RQ_RENEW_AFTER_STOP": "1" if rq_renew_after_stop else "0",
             "FAKE_RQ_RESUME_FAILURE": "1" if rq_resume_failure else "0",
             "FAKE_RQ_RESUME_REPLY_LOST": "1" if rq_resume_reply_lost else "0",
             "FAKE_RQ_PRE_SUSPENDED": "1" if rq_pre_suspended else "0",
@@ -476,6 +547,14 @@ exec /bin/cp "$@"
             "FAKE_GATE_FAILURE_CALL": str(gate_failure_call),
             "FAKE_STOPPED_WORKER_AFTER_STOP": "1" if worker_stops_after_stop else "0",
             "FAKE_WORKER_STOPPED_MARKER": str(state_dir / "worker-stopped"),
+            "FAKE_RECOVERY_STARTED_MARKER": str(state_dir / "recovery-started"),
+            "FAKE_RECOVERY_HEALTH_COUNT": str(state_dir / "recovery-health-count"),
+            "FAKE_RECOVERY_REGISTRATION_COUNT": str(state_dir / "recovery-registration-count"),
+            "FAKE_RECOVERY_HEALTH_DELAY_CHECKS": str(recovery_health_delay_checks),
+            "FAKE_RECOVERY_REGISTRATION_DELAY_CHECKS": str(recovery_registration_delay_checks),
+            "FAKE_PS_STARTING": json.dumps(starting_records),
+            "KNOWN_GOOD_READINESS_ATTEMPTS": "10",
+            "KNOWN_GOOD_READINESS_DELAY_SECONDS": "0.01",
         }
     )
     lock_handle = (tmp_path / "deploy.lock").open("a", encoding="utf-8")
@@ -579,9 +658,9 @@ def test_full_execution_builds_then_stops_workers_and_recreates_without_down(tmp
     build = _position(commands, "wctl|build --no-cache weppcloud weppcloudr cap")
     renderer_validation = _position(
         commands,
-        "weppcloudr-validator|weppcloudr:test wepppy:test",
+        "weppcloudr-validator|sha256:" + "0" * 63 + "1 sha256:" + "0" * 63 + "1",
     )
-    cap_validation = _position(commands, "cap-validator|cap:test")
+    cap_validation = _position(commands, "cap-validator|sha256:" + "0" * 63 + "1")
     suspend = _position(commands, _RQ_SUSPEND)
     stop = _position(commands, "stop --timeout 216000 rq-worker rq-worker-batch")
     cap_stop = _position(commands, "wctl|docker compose stop cap")
@@ -639,7 +718,7 @@ def test_gate_failure_after_stop_restores_prior_map_before_fence_release(tmp_pat
     result, commands = _run_deploy(
         tmp_path,
         _full_services_with_cap_and_renderer(),
-        gate_failure_call=3,
+        gate_failure_call=4,
     )
 
     assert result.returncode != 0
@@ -685,6 +764,51 @@ def test_stopped_worker_rq_control_uses_known_good_immutable_override(tmp_path: 
         index > stop and "wctl|docker compose run" in command and "rq-worker" in command
         for index, command in enumerate(commands)
     )
+
+
+def test_post_stop_heartbeat_renewal_uses_known_good_immutable_override(
+    tmp_path: Path,
+) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_cap_and_renderer(),
+        worker_stops_after_stop=True,
+        rq_renew_after_stop=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    stop = _position(commands, "stop --timeout 216000 rq-worker rq-worker-batch")
+    renew = _position(commands, "rq-fallback|renew|compose -f")
+    assert stop < renew
+    assert "wepppy-known-good" in commands[renew]
+
+
+def test_recovery_waits_for_health_and_worker_registration_before_resume(
+    tmp_path: Path,
+) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_cap_and_renderer(),
+        gate_failure_call=4,
+        recovery_health_delay_checks=2,
+        recovery_registration_delay_checks=2,
+    )
+
+    assert result.returncode != 0
+    recovery = _position(commands, "docker|compose -f")
+    resume = _position(commands, _RQ_RESUME)
+    recovery_ps = [
+        index for index, command in enumerate(commands)
+        if index > recovery and "ps --all --format json" in command
+    ]
+    recovery_registration = [
+        index for index, command in enumerate(commands)
+        if index > recovery and "Worker.all" in command
+    ]
+    assert len(recovery_ps) >= 3
+    assert len(recovery_registration) >= 3
+    assert max(recovery_registration) < resume
+    assert "Exact pre-cutover workload restored and verified" in result.stderr
 
 
 def test_full_candidate_failure_recovers_cap_and_never_reports_success_or_prunes(tmp_path: Path) -> None:
@@ -749,7 +873,7 @@ def test_controller_builder_failure_removes_staged_bundle_before_cutover(tmp_pat
     assert not any("up -d" in command for command in commands)
 
 
-def test_controller_backup_failure_preserves_old_bundle_recovers_cap_and_resumes(tmp_path: Path) -> None:
+def test_controller_backup_failure_preserves_old_bundle_recovers_and_resumes(tmp_path: Path) -> None:
     result, commands = _run_deploy(
         tmp_path,
         _full_services_with_cap_and_renderer(),
@@ -759,7 +883,7 @@ def test_controller_backup_failure_preserves_old_bundle_recovers_cap_and_resumes
     assert result.returncode != 0
     recovery = _position(commands, "docker|compose -f")
     resume = _position(commands, _RQ_RESUME)
-    assert recovery < resume
+    assert _position(commands, _RQ_SUSPEND) < recovery < resume
     assert (tmp_path / "controllers-gl.js").read_text(encoding="utf-8") == "known-good controllers"
     assert not any(command == "wctl|up -d --force-recreate" for command in commands)
     assert "Exact pre-cutover workload restored and verified" in result.stderr
@@ -1178,7 +1302,10 @@ def test_active_job_probe_preserves_gate_with_stopped_worker(
     else:
         assert result.returncode != 0
         assert not any("stop --timeout" in command for command in commands)
-        assert not any("docker|compose -f" in command for command in commands)
+        assert not any(
+            command.startswith("docker|compose -f") and " up -d " in command
+            for command in commands
+        )
         assert not any("docker compose stop" in command for command in commands)
         assert not any("up -d" in command for command in commands)
         if probe_result == "2":

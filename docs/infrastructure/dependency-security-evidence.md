@@ -50,7 +50,7 @@ Example invocation after authorized manual collection:
 
     python3 tools/security/import_dependency_evidence.py \
       --source /private/collected-bundle \
-      --store /workdir/weppcloud-deployments/.local/dependency-security/imports \
+      --store /workdir/weppcloud-deployments/.local/dependency-security/evidence \
       --expected-image-id sha256:<64-hex-image-id> \
       --expected-manifest-sha256 <independently-retained-manifest-hash>
 

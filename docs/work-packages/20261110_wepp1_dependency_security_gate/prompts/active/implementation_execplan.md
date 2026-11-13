@@ -27,12 +27,16 @@ segmented substitute is not accepted.
 - [ ] (2026-11-13 UTC) Retained-candidate implementation is staged for
   independent review: canonical build/resume flags, private host/daemon-bound
   receipts, protected approval derivation, immutable-ID activation, pre-stop RQ
-  drain, and exact known-good restoration are implemented. The local isolated
-  worktree passes 148 focused deploy/evidence tests, including real evaluator
-  output isolation, option/secret drift, post-drain rejection, immutable RQ
-  fallback, activation ledger retention and failed-restoration fencing. Canonical-container validation,
-  independent source reviews, exact-host build/evidence and M4 remain open; M5
-  rollout remains unauthorized.
+  drain, and exact known-good restoration are implemented. Review-driven
+  hardening now pins build validation and all retained one-off containers to
+  once-resolved IDs, copies only the approved activation configuration into
+  recovery, protects rollback images before cutover, polls recovery health and
+  worker registration, rejects the canonical secret inventory by name pattern,
+  and publishes approvals with atomic no-replace semantics. The isolated host
+  and canonical disposable Compose runs pass 152 focused deploy/evidence tests,
+  including delayed recovery readiness and a post-stop heartbeat renewal.
+  Independent source re-reviews, exact-host build/evidence and M4 remain open;
+  M5 rollout remains unauthorized.
 
 - [ ] (2026-11-13 UTC) Roger explicitly selected the retained-candidate Compose
   resume workflow by answering the concrete authorization question. Record
@@ -40,7 +44,7 @@ segmented substitute is not accepted.
   build-only/resume modes in the canonical deployment script, validate the exact
   candidate, and collect and approve exact-image evidence. M5 interruption and
   activation remain separately unauthorized. Production preflight currently
-  shows one active default-queue job; drain is necessary but does not itself
+  shows active default-queue work; drain is necessary but does not itself
   authorize rollout.
 
 - [x] (2026-11-13 UTC) `F6-RU-01` implementation `cb839e7d7` enforces
