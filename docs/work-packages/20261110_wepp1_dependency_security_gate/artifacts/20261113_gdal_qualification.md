@@ -70,5 +70,63 @@ Private evidence: `rasterio-system-link-trial-20261112/`. Security design packet
 SHA-256 `2e3ce6002b58d2267a6cbaaa8ed86adfec55030584427d1a0324e7fdc8f10f0b`;
 1.3.10 source-design addendum
 `5eeba26dbbc93ecbc40627e5e0954624a5d135dc525d1904070e817dfed65d63`.
-The confirmed Medium finding on the rejected 1.4.4 trial remains open until the
-alternative's runtime isolation is demonstrated and its supersession recorded.
+The confirmed Medium finding on the rejected 1.4.4 trial is closed by
+supersession for the exact 1.3.10 TLS trial described below. The rejected 1.4.4
+implementation remains unsuitable without its own repair.
+
+## Compiled TLS and package qualification (2026-11-13 UTC)
+
+Private trial image
+`0ef9fdc408506c8fa677c6ade83ef0092b9b7141149c61e4614967d1b712a2c1`
+contains the qualified staged GDAL and compiled three-file Rasterio 1.3.10 patch.
+All nine global/TLS state combinations pass, including nested/exception cleanup,
+restoration of absent TLS and deterministic child-thread raw-memory denial while
+the parent scope is held open. A real two-thread warp exposes no global access
+window. Installed extension hashes match the reviewed wheel; only the repaired
+system GDAL is mapped. PROJ_LIB and GDAL_DATA remain unchanged. Eight generated
+array hashes and metadata match the baseline. All 53 selected WEPPpy consumer
+tests pass in 64.78 seconds.
+
+Independent security closure addendum SHA-256:
+`aad8c0733019d0de340d8dd09a0be87249b857196edabcf1d7eec17ddda7f6d0`.
+This closes F6-NATIVE-SEC-01 by supersession only for this exact private trial;
+it is not final-image acceptance or risk acceptance. Readback and logs live in
+`rasterio-system-link-trial-20261112/tls-runtime/`.
+
+Upstream warp/GCP/RPC/features/VRT selection: 315 passed, two skipped, seven
+expected failures, two unexpected passes, one deselected, one failed. The failure
+expects two HTTP retry log messages but receives three; the expected warp error
+still occurs. The same count mismatch reproduces on the independent Rasterio
+1.4.4/system-GDAL trial. Retain this compatibility difference explicitly; do not
+claim an all-green upstream suite. Initial harness failures (missing optional
+boto3, obsolete fixture-mark warning and local hostname resolution) are retained.
+Optional test dependencies are separate from runtime site-packages and tests
+have no external network. Registered driver delta is 67 added names and ARG
+removed; added names include vector drivers.
+
+Repackaging the staged GDAL installs only the intended two package-version
+changes. Runtime payload comparison permits only the repaired shared library
+and added provenance; all 81 development-package members remain identical.
+Receipts are under `gdal-repair-input-review-20261112/package-trial/`.
+Full build-helper execution initially found absent APT indices in the final
+image; explicit signed-metadata refresh now precedes exact package resolution.
+The corrected full helper and owned Rasterio wheel helper are being qualified.
+Candidate helper sources/tests/docs are staged; Docker wiring, final rebuild,
+installed-byte acceptance and complete gates remain open.
+
+## Candidate implementation checkpoint
+
+The detached candidate now wires both helpers into common/development builds.
+The owned Rasterio wheel is installed in the requirements layer, then staging
+and APT indices are removed. Shared host requirements/installers stay unchanged.
+Private owned-wheel image `d6798f60b22a` passes 57 focused tests, including four
+installed-provenance/import-order/isolation cases. All 71 wheel RECORD entries
+validate. The added GDAL regression module passes 13 cases (12 bounded malformed
+HDF4 reads plus valid Deflate64 seek/read control). The wheel helper subsequently
+adds compiler identity/config/environment provenance; final-image validation must
+exercise that latest source. Full GDAL helper execution is still in progress.
+
+Independent correctness source review has no remaining Medium/High findings;
+packet SHA-256
+`6fe6e854acf02cb9752e64aeee61e9b18a4e225333acf7663120693223459cf2`.
+The review is bounded source/artifact evidence, not release acceptance.

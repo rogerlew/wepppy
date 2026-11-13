@@ -27,9 +27,14 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 - [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
   `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
   lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).
-- [ ] Exact-image full Python gate is running. Qualified private GDAL staged
+- [ ] Exact-image full Python gate stopped after 6,304 passes/380 skips on
+  missing ASRIS cache-directory setup in the isolated bind mount. Creating the
+  ignored directory restores all 25 module tests; full rerun remains required.
+  Qualified private GDAL staged
   repair passes 12 crash probes and exact ABI/normal controls; coherent package
-  integration and Rasterio constructor-only TLS runtime proof remain open.
+  integration remains open. Rasterio TLS runtime isolation, eight-array parity
+  and 53 owned consumer tests pass; exact trial security finding is closed by
+  supersession. Full build helpers/final image acceptance remain open.
   See F6 `artifacts/20261113_gdal_qualification.md`. Resume remains deferred.
 
 - [x] (2026-11-12 UTC) Clean Python image `9f9e75e6515a` passes 187
@@ -93,6 +98,8 @@ recovery without waits or retries. See the F6
       board and project tracker to evidence-supported readiness, and close.
 
 ## Surprises & Discoveries
+
+- (2026-11-13 UTC) The corrected Python full run reached 6,304 passes before the isolated checkout lacked the ignored ASRIS cache directory; the existing main checkout already has it. Creating that directory makes all 25 affected-module tests pass.
 
 The GDAL trial proved zero-fuzz patch placement can still be wrong in repeated
 source blocks. Exact final file hashes, real malformed fixtures, hardening flags
@@ -158,6 +165,8 @@ without changing production behavior.
   Evidence: `artifacts/20261111_f1_f7_readiness_matrix.md`.
 
 ## Decision Log
+
+- (2026-11-13 UTC) Retain the failed full-gate receipt, correct only isolated runtime setup, and qualify pending native repairs before another full sweep. Do not change ASRIS behavior or report full acceptance.
 
 - Decision (2026-11-13): qualify coherent system-GDAL packages and retain the
   existing Rasterio API through a constructor-only TLS scope. Reject a global
@@ -244,6 +253,13 @@ without changing production behavior.
   Date/Author: 2026-11-12, Codex.
 
 ## Outcomes & Retrospective
+
+- (2026-11-13 UTC) Qualified private Rasterio TLS runtime closes the cross-thread
+  finding by supersession; 53 owned tests pass. Upstream selection retains one
+  HTTP retry-log-count difference reproduced on a separate system-GDAL trial.
+  GDAL package payload/install checks pass; helper and final gates remain open.
+
+- (2026-11-13 UTC) The full Python gate remains open after an isolated filesystem setup failure. Focused recovery passes; native integration and complete regression acceptance remain required.
 
 The corrected Python image is built and scanned with zero OAuthlib findings;
 full acceptance is still running. Staged system-GDAL defects are repaired and

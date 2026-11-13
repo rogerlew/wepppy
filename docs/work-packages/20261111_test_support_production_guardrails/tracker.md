@@ -26,9 +26,14 @@ hard prerequisites for that claim.
 - [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
   `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
   lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).
-- [ ] Exact-image full Python gate is running. Qualified private GDAL staged
+- [ ] Exact-image full Python gate stopped after 6,304 passes/380 skips on
+  missing ASRIS cache-directory setup in the isolated bind mount. Creating the
+  ignored directory restores all 25 module tests; full rerun remains required.
+  Qualified private GDAL staged
   repair passes 12 crash probes and exact ABI/normal controls; coherent package
-  integration and Rasterio constructor-only TLS runtime proof remain open.
+  integration remains open. Rasterio TLS runtime isolation, eight-array parity
+  and 53 owned consumer tests pass; exact trial security finding is closed by
+  supersession. Full build helpers/final image acceptance remain open.
   See F6 `artifacts/20261113_gdal_qualification.md`. Resume remains deferred.
 
 - [x] (2026-11-12 UTC) Clean Python image `9f9e75e6515a` passes 187

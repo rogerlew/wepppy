@@ -185,3 +185,14 @@ Both have no unresolved Medium/High source findings; their final-image and nativ
 coverage limits remain explicit. Packets live under the private Python batch
 root in `correctness-implementation-20261112/` and
 `security-host-abi-20261112T232239Z/` respectively.
+
+## Full-suite setup failure (2026-11-13 UTC)
+
+The exact corrected image/source run stopped after 6,304 passes and 380 skips
+in 2,197 seconds. ASRIS imports create a source-adjacent cache directory; the
+isolated bind mount lacked that ignored directory and UID 1002 could not create
+it. The main checkout already contains it. Creating only the empty ignored
+directory, with no tracked-source or runtime-identity change, makes all 25
+tests in `test_soils_gridded_root_creation.py` pass in 9.43 seconds. This is
+a setup correction, not a full-gate pass. Logs and hashes are retained under
+`python-repairs-final-20261112/validation/full-pytest-setup-failure.json`.
