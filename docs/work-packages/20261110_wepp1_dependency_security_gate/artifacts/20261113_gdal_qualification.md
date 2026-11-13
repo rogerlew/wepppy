@@ -2,6 +2,8 @@
 
 Status: custom native implementation deferred after operator scope concern.
 Clean build stopped with exit 130; no accepted final native image or activation.
+Roger subsequently deferred both any GDAL upgrade and upload-boundary format
+enforcement before GDAL open. No such mitigation is part of this continuation.
 Deployment resume remains deferred. No M4 closure or risk acceptance.
 
 ## System GDAL
@@ -174,7 +176,8 @@ The operator questioned both compiling GDAL and the expansion into a rabbit
 hole. The agent stopped the clean build at GDAL compilation and retained its
 exit-130 receipt. No compilation remains active. Custom native implementation
 `967a085f4` is deferred; Python candidate `64cc736c2` and image `af7643725c95`
-remain the separate completed-upgrade checkpoint (full Python gate still open).
+remain the separate completed-upgrade checkpoint. Its independent full Python
+gate now passes; this does not resolve the native blocker documented here.
 
 The reason for compiling was to apply upstream fixes while retaining the
 existing GDAL ABI and scientific stack: the original native library crashes on
@@ -185,3 +188,18 @@ compatible supported binary package set next; if no such set is qualified,
 retain an explicit blocker and make the maintenance tradeoff a separate scope
 decision. Do not restart this custom build automatically. No risk waiver or M4
 closure is implied. Deployment resume and manual-only NFS recovery are unchanged.
+
+## Final scope direction for this continuation
+
+Roger explicitly deferred both paths considered after the stopped build: a
+GDAL upgrade, including a supported packaged-upgrade evaluation, and enforcing
+that uploaded content matches its declared raster format before GDAL opens it.
+Do not add signature sniffing, a GDAL allowed-driver restriction, or another
+pre-open upload gate as a substitute. Existing upload and scientific behavior
+remain unchanged.
+
+This is a scope deferral, not evidence that the retained native library is safe
+for malformed untrusted inputs. The affected advisory/native-coverage item
+remains open and prevents F6 M4 acceptance unless later remediation or an
+explicit policy-compliant exception is authorized. Independent Python candidate
+validation can proceed without reopening this native work.

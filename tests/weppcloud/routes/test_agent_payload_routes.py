@@ -1,4 +1,5 @@
 """Agent payload validation before token/spawn/publish boundaries."""
+from collections import defaultdict
 from types import SimpleNamespace
 import pytest
 from flask import Flask
@@ -15,6 +16,7 @@ def test_invalid_ttl_has_no_external_effect_and_valid_followup(monkeypatch, endp
     app = Flask(__name__)
     app.config.update(TESTING=True, SECRET_KEY='test')
     app.config[routes.AGENT_JWT_SECRET_KEY] = 'test'
+    monkeypatch.setattr(routes.agent_bp, 'url_value_preprocessors', defaultdict(list))
     app.register_blueprint(routes.agent_bp)
     login = LoginManager(app)
     login.request_loader(lambda req: SimpleNamespace(is_authenticated=True, get_id=lambda: '1'))

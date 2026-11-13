@@ -1,6 +1,6 @@
 # Python dependency compatibility remediation
 
-Status: corrected clean image and scan complete; full Python gate running.
+Status: corrected clean image, scan and full Python gate complete.
 Native remediation remains open. Deployment resume is deferred; no activation.
 
 ## Corrected clean image
@@ -19,8 +19,10 @@ scan SHA-256:
 `381e994b0dd421b39739bc37183365e2dc7a39e761d15d1025bfad81b961f53b`.
 Private root: `python-repairs-final-20261112/`. This does not clear remaining
 native coverage or advisory dispositions. Node 20 lint and all 1,076 Jest plus
-three Node tests pass. The exact-image full Python suite is running without
-overlapping heavy builds; receipt is `/tmp/f6-python-final-full-pytest.log`.
+three Node tests pass. The exact dependency image completes the required full
+Python command with 13,735 passes, 641 skips and zero failures in 3,881.73
+seconds. The source bind is candidate `64cc736c2` plus one test-only collection
+isolation correction; runtime code and dependency contents are unchanged.
 
 Later native work is recorded in
 [GDAL/Rasterio qualification](20261113_gdal_qualification.md). Those private
@@ -196,3 +198,26 @@ directory, with no tracked-source or runtime-identity change, makes all 25
 tests in `test_soils_gridded_root_creation.py` pass in 9.43 seconds. This is
 a setup correction, not a full-gate pass. Logs and hashes are retained under
 `python-repairs-final-20261112/validation/full-pytest-setup-failure.json`.
+
+## Full-suite acceptance (2026-11-13 UTC)
+
+After correcting only isolated test-runtime prerequisites, the exact command
+`wctl run-pytest tests --maxfail=1` exits zero against image
+`sha256:af7643725c95242e874a0ae218ecf8395a9641120aebcfb26822ad61aa50ee15`:
+13,735 passed, 641 skipped and 5,586 warnings in 3,881.73 seconds. The retained
+log SHA-256 is
+`8eea1261daff7f30663c339b34feead5c476d2454f1a79816b41cc1ffae81106`.
+
+The isolated runtime supplied the ignored ASRIS cache directory, candidate
+DuckDB spatial extension, isolated `/wc1`, lockfile-identical read-only npm
+modules and a disposable PostgreSQL schema. A collection-order defect was
+confirmed after the admin route test mutates the shared agent blueprint with a
+run-context preprocessor. The retained test-only fix clears that preprocessor
+before registering the blueprint in its standalone Flask app; the ordered pair
+passes 27 tests and the complete gate passes. No production code changed.
+
+Private receipts are
+`python-repairs-final-20261112/validation/f6-python-final-full-pytest-pass.log`
+and `f6-python-final-full-pytest-pass.json`. This closes the independent Python
+full-suite item only. The deferred GDAL/native advisory remains an explicit F6
+M4 blocker, and no deployment or risk acceptance is implied.

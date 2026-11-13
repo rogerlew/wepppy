@@ -2,15 +2,16 @@
 
 ## Quick Status
 
-Operator clarification (2026-11-12): retained NFS handles require manual
-intervention, without automatic waits/retries or process restarts. Existing
-support cleanup already fails explicitly; canonical recovery guidance is now
-explicit in `docs/schemas/weppcloud-test-support-contract.md`.
+Operator direction (2026-11-13): defer both a GDAL upgrade and enforcing a
+declared raster format before GDAL open. Continue only independent Python
+candidate validation; retain the affected F6 advisory/native-coverage item and
+M4 blocker. Retained NFS handles still require manual intervention without
+automatic waits/retries or process restarts.
 
 **Timezone**: UTC
 **Started**: 2026-11-12 01:01 UTC
 **Current phase**: M4/M5 passed; full regression failed; F6 M4 remains open
-**Last updated**: 2026-11-12 UTC
+**Last updated**: 2026-11-13 UTC
 **Next milestone**: resolve regression failure and F6 M4 before combined readiness
 **Finding**: F7 / SEC-07 (Low conditional; High impact when enabled)
 **Change security impact**: high
@@ -22,6 +23,16 @@ validation, not deployed. F6 M4 and the final combined regression receipt are
 hard prerequisites for that claim.
 
 ## Task Board
+
+- [x] (2026-11-13 UTC) F6's corrected dependency image passes the exact Python
+  gate: 13,735 passed, 641 skipped and zero failures in 3,881.73 seconds. This
+  closes only the independent Python full-suite item. The deferred GDAL/native
+  advisory still blocks F6 M4 and combined F1-F7 readiness.
+
+- (2026-11-13 UTC) No GDAL, Rasterio, upload-parser, pre-open format check, or
+  driver-selection change is authorized in this continuation. F6's corrected
+  Python image may complete its independent full gate, but deferred native risk
+  continues to block F6 M4 and combined F1-F7 readiness.
 
 - (2026-11-13 UTC) The operator raised concern that compiling GDAL had become
   a rabbit hole. The agent stopped the clean native build (exit 130), preserved
@@ -35,14 +46,14 @@ hard prerequisites for that claim.
   candidate `967a085f4`; independent source reviews have no open Medium/High
   findings. Frontend lint/all 1,079 tests pass.
 - [ ] Native clean build is deferred after the scope concern; no final native
-  image acceptance. Python full gate and native coverage remain open.
+  image acceptance. The Python full gate passes; native coverage remains open.
 
 - [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
   `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
   lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).
-- [ ] Exact-image full Python gate stopped after 6,304 passes/380 skips on
-  missing ASRIS cache-directory setup in the isolated bind mount. Creating the
-  ignored directory restores all 25 module tests; full rerun remains required.
+- [x] Exact dependency-image full Python gate passes after supplying the
+  isolated runtime's ignored/generated prerequisites and disposable database.
+  The earlier ASRIS stop remains retained as setup evidence.
   Qualified private GDAL staged
   repair passes 12 crash probes and exact ABI/normal controls; coherent package
   integration remains open. Rasterio TLS runtime isolation, eight-array parity

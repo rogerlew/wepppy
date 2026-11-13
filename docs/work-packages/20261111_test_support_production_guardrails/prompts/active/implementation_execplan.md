@@ -24,6 +24,18 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
 
 ## Progress
 
+- [x] (2026-11-13 UTC) F6's independent corrected-image Python gate passes the
+  exact broad command: 13,735 passed, 641 skipped and zero failures in 3,881.73
+  seconds. This removes the Python full-suite item from F7 coordination but
+  does not satisfy F6 M4 or authorize combined M6; the deferred GDAL/native
+  advisory disposition remains open.
+
+- (2026-11-13 UTC) Roger explicitly deferred both a GDAL upgrade and the
+  proposed upload-boundary format enforcement before GDAL open. No GDAL,
+  Rasterio, upload-parser, or driver-selection change is authorized in this
+  continuation. F6 may continue independent Python candidate validation, but
+  its GDAL advisory/native-coverage item and M4 gate remain open.
+
 - (2026-11-13 UTC) The operator raised concern that compiling GDAL had become
   a rabbit hole. The agent stopped the clean native build (exit 130), preserved
   implementation `967a085f4` as deferred work, and separated it from Python
@@ -36,14 +48,14 @@ does not deploy to forest, forest1, wepp1, wepp2, wepp3, or openwepp.org.
   candidate `967a085f4`; independent source reviews have no open Medium/High
   findings. Frontend lint/all 1,079 tests pass.
 - [ ] Native clean build is deferred after the scope concern; no final native
-  image acceptance. Python full gate and native coverage remain open.
+  image acceptance. The Python full gate passes; native coverage remains open.
 
 - [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
   `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
   lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).
-- [ ] Exact-image full Python gate stopped after 6,304 passes/380 skips on
-  missing ASRIS cache-directory setup in the isolated bind mount. Creating the
-  ignored directory restores all 25 module tests; full rerun remains required.
+- [x] Exact dependency-image full Python gate passes after supplying the
+  isolated runtime's ignored/generated prerequisites and disposable database.
+  The earlier ASRIS stop remains retained as setup evidence.
   Qualified private GDAL staged
   repair passes 12 crash probes and exact ABI/normal controls; coherent package
   integration remains open. Rasterio TLS runtime isolation, eight-array parity
@@ -115,6 +127,11 @@ recovery without waits or retries. See the F6
 
 ## Surprises & Discoveries
 
+- (2026-11-13 UTC) F6's full gate exposed collection-order leakage: an earlier
+  production-app import mutates the shared agent blueprint with a run-context
+  preprocessor, so its later standalone payload test returned 404. The retained
+  fixture-only reset restores isolation and leaves runtime behavior unchanged.
+
 - (2026-11-13 UTC) Security backports plus a source-linked Rasterio wheel expanded dependency updates into custom native-stack maintenance. Real regression evidence does not by itself justify that operational cost.
 
 - (2026-11-13 UTC) The corrected Python full run reached 6,304 passes before the isolated checkout lacked the ignored ASRIS cache directory; the existing main checkout already has it. Creating that directory makes all 25 affected-module tests pass.
@@ -183,6 +200,15 @@ without changing production behavior.
   Evidence: `artifacts/20261111_f1_f7_readiness_matrix.md`.
 
 ## Decision Log
+
+- Decision (2026-11-13): accept F6's fixture-only blueprint isolation repair as
+  part of the independent Python gate evidence. It neither changes the F7
+  production guardrail contract nor advances combined M6.
+
+- Decision (Roger, 2026-11-13): defer the GDAL upgrade and defer enforcing a
+  declared raster format before handing an upload to GDAL. Preserve existing
+  behavior and retain F6's affected advisory/native-coverage disposition as an
+  explicit blocker; this does not waive F6 M4 or combined M6 requirements.
 
 - (2026-11-13 UTC) Defer custom native builds after the operator scope concern. Preserve completed Python dependency remediation separately; assess supported package compatibility before further native implementation.
 
@@ -274,17 +300,29 @@ without changing production behavior.
 
 ## Outcomes & Retrospective
 
-- (2026-11-13 UTC) Clean native build intentionally stopped, not accepted. No candidate deployment occurred. Python full-suite acceptance and native advisory/coverage blockers remain open.
+- (2026-11-13 UTC) F6's independent Python gate now passes completely. This
+  narrows the F7 coordination blocker to F6's deferred GDAL/native advisory
+  disposition plus this package's existing combined-regression work; it does
+  not authorize M6, M7 or deployment.
+
+- (2026-11-13 UTC) No GDAL upgrade or upload-format enforcement will be added
+  in this continuation. Independent Python validation can proceed, while F6 M4
+  and this package's combined M6 remain blocked on the retained native item.
+
+- (2026-11-13 UTC) Clean native build intentionally stopped, not accepted. No
+  candidate deployment occurred. Python full-suite acceptance now passes;
+  native advisory/coverage blockers remain open.
 
 - (2026-11-13 UTC) Qualified private Rasterio TLS runtime closes the cross-thread
   finding by supersession; 53 owned tests pass. Upstream selection retains one
   HTTP retry-log-count difference reproduced on a separate system-GDAL trial.
   GDAL package payload/install checks pass; helper and final gates remain open.
 
-- (2026-11-13 UTC) The full Python gate remains open after an isolated filesystem setup failure. Focused recovery passes; native integration and complete regression acceptance remain required.
+- (2026-11-13 UTC) The earlier isolated filesystem setup failure is superseded
+  by the passing complete Python gate; native advisory acceptance remains open.
 
 The corrected Python image is built and scanned with zero OAuthlib findings;
-full acceptance is still running. Staged system-GDAL defects are repaired and
+full Python acceptance passes. Staged system-GDAL defects are repaired and
 independently qualified, but package integration and Rasterio isolation proof
 remain open. No production activation, resume or M4 completion is implied.
 

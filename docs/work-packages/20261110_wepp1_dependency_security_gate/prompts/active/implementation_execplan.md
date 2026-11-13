@@ -24,6 +24,21 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-13 UTC) The corrected dependency image completes the exact
+  `wctl run-pytest tests --maxfail=1` gate: 13,735 passed, 641 skipped and zero
+  failures in 3,881.73 seconds. Retained log SHA-256 is
+  `8eea1261daff7f30663c339b34feead5c476d2454f1a79816b41cc1ffae81106`.
+  Candidate source includes one test-only collection-isolation correction; no
+  runtime code or dependency changed. This closes only independent Python
+  validation; the deferred GDAL/native disposition still blocks M4.
+
+- (2026-11-13 UTC) Roger explicitly deferred both a GDAL upgrade and the
+  proposed upload-boundary format enforcement before GDAL open. Do not resume
+  the custom native candidate, evaluate a packaged GDAL upgrade, or add file
+  signature/driver restrictions in this continuation. Keep the affected GDAL
+  advisory and native-coverage disposition open; this is not a risk exception
+  or M4 acceptance. Continue only independent Python candidate validation.
+
 - (2026-11-13 UTC) The operator raised concern that compiling GDAL had become
   a rabbit hole. The agent stopped the clean native build (exit 130), preserved
   implementation `967a085f4` as deferred work, and separated it from Python
@@ -36,14 +51,14 @@ segmented substitute is not accepted.
   candidate `967a085f4`; independent source reviews have no open Medium/High
   findings. Frontend lint/all 1,079 tests pass.
 - [ ] Native clean build is deferred after the scope concern; no final native
-  image acceptance. Python full gate and native coverage remain open.
+  image acceptance. The Python full gate passes; native coverage remains open.
 
 - [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
   `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
   lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).
-- [ ] Exact-image full Python gate stopped after 6,304 passes/380 skips on
-  missing ASRIS cache-directory setup in the isolated bind mount. Creating the
-  ignored directory restores all 25 module tests; full rerun remains required.
+- [x] Exact dependency-image full Python gate passes after supplying the
+  isolated runtime's required ignored/generated assets and disposable database.
+  The earlier ASRIS stop remains retained as setup evidence.
   Qualified private GDAL staged
   repair passes 12 crash probes and exact ABI/normal controls; coherent package
   integration remains open. Rasterio TLS runtime isolation, eight-array parity
@@ -187,6 +202,12 @@ segmented substitute is not accepted.
 - [ ] M5: perform a separately authorized wepp1 rollout and closeout.
 
 ## Surprises & Discoveries
+
+- (2026-11-13 UTC) Importing the production app in an earlier test registers a
+  run-context URL preprocessor on the shared agent blueprint. A later standalone
+  route test reused that mutated blueprint and returned 404 before payload
+  validation. Clearing the preprocessor inside the standalone fixture makes the
+  test collection-order independent without changing runtime behavior.
 
 - (2026-11-13 UTC) Security backports plus a source-linked Rasterio wheel expanded dependency updates into custom native-stack maintenance. Real regression evidence does not by itself justify that operational cost.
 
@@ -332,6 +353,20 @@ not collected by unittest, so both runners are required for upstream evidence.
 
 ## Decision Log
 
+- Decision (2026-11-13): retain the smallest test-only isolation correction
+  discovered during the exact gate. Do not weaken the production run-context
+  preprocessor or create a fake run merely to satisfy this payload unit boundary.
+  Rationale: the fixture owns a standalone Flask app and must not inherit
+  registration state from an earlier production-app import.
+
+- Decision (Roger, 2026-11-13): defer the GDAL upgrade and defer enforcing a
+  declared raster format before handing an upload to GDAL. Preserve existing
+  upload and scientific behavior; make no GDAL, Rasterio, upload-parser, or
+  driver-selection change in this continuation. Rationale: both proposed
+  mitigations are outside the bounded Python dependency-remediation scope.
+  Retain the unresolved advisory/native-coverage item as an explicit blocker;
+  do not reinterpret deferral as acceptance.
+
 - (2026-11-13 UTC) Defer custom native builds after the operator scope concern. Preserve completed Python dependency remediation separately; assess supported package compatibility before further native implementation.
 
 - (2026-11-13 UTC) Retain the failed full-gate receipt, correct only isolated runtime setup, and qualify pending native repairs before another full sweep. Do not change ASRIS behavior or report full acceptance.
@@ -475,17 +510,34 @@ not collected by unittest, so both runners are required for upstream evidence.
 
 ## Outcomes & Retrospective
 
-- (2026-11-13 UTC) Clean native build intentionally stopped, not accepted. No candidate deployment occurred. Python full-suite acceptance and native advisory/coverage blockers remain open.
+- (2026-11-13 UTC) Independent Python compatibility acceptance is complete:
+  the exact broad command passes 13,735 tests with 641 skips. The full rerun
+  also exposed and repaired a collection-order defect in a standalone agent
+  route test after the production app mutates the shared blueprint. The repair
+  is test-only. F6 M4 remains open solely because the operator-deferred
+  GDAL/native advisory disposition is unresolved.
+
+- (2026-11-13 UTC) The GDAL upgrade and upload-format enforcement are now
+  explicitly deferred. No code or runtime configuration was changed for either
+  approach. The corrected Python image may be validated independently, but F6
+  M4 remains blocked on the retained GDAL/native disposition unless the operator
+  later authorizes remediation or a policy-compliant exception.
+
+- (2026-11-13 UTC) Clean native build intentionally stopped, not accepted. No
+  candidate deployment occurred. Python full-suite acceptance now passes;
+  native advisory/coverage blockers remain open.
 
 - (2026-11-13 UTC) Qualified private Rasterio TLS runtime closes the cross-thread
   finding by supersession; 53 owned tests pass. Upstream selection retains one
   HTTP retry-log-count difference reproduced on a separate system-GDAL trial.
   GDAL package payload/install checks pass; helper and final gates remain open.
 
-- (2026-11-13 UTC) The full Python gate remains open after an isolated filesystem setup failure. Focused recovery passes; native integration and complete regression acceptance remain required.
+- (2026-11-13 UTC) The earlier isolated filesystem setup failure is superseded
+  by the complete passing Python gate; native advisory acceptance remains
+  required for M4.
 
 The corrected Python image is built and scanned with zero OAuthlib findings;
-full acceptance is still running. Staged system-GDAL defects are repaired and
+full Python acceptance passes. Staged system-GDAL defects are repaired and
 independently qualified, but package integration and Rasterio isolation proof
 remain open. No production activation, resume or M4 completion is implied.
 

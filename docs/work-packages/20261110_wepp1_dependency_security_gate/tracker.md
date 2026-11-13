@@ -2,10 +2,11 @@
 
 ## Quick Status
 
-Current direction (Roger, 2026-11-12): continue dependency remediation; defer
-deployment-resume work. Stale NFS handles require manual recovery, without
-automatic waiting. Next repair work targets Mistune and the qualified native
-library findings; deferred resume work must not block these repairs.
+Current direction (Roger, 2026-11-13): continue only independent Python
+candidate validation. Defer the GDAL upgrade, custom GDAL/Rasterio work, and
+upload-boundary format enforcement before GDAL open. These deferrals preserve
+current behavior but do not clear the affected advisory/native-coverage item or
+authorize M4 acceptance. Deployment-resume work also remains deferred.
 
 Remediation status (2026-11-12): master includes cryptography, certifi, urllib3,
 pyasn1, msgpack and nbconvert upgrades. Authlib/joserfc are updated and tested
@@ -13,7 +14,7 @@ in the isolated candidate. Other dependency/native repairs remain open. The
 operator redirected focus to remediation; deployment-resume design is on hold.
 
 **Timezone**: UTC  
-**Last updated**: 2026-11-12 UTC
+**Last updated**: 2026-11-13 UTC
 **Current phase**: M0 complete; M1 image dispositions and native coverage in progress  
 **Finding**: F6 / SEC-06 (Medium, exploitability unconfirmed)  
 **Change security impact**: high  
@@ -35,6 +36,19 @@ actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
 
+- [x] (2026-11-13 UTC) Exact Python gate passes against corrected dependency
+  image `af7643725c95`: 13,735 passed, 641 skipped, zero failures in 3,881.73
+  seconds. The retained receipt SHA-256 is
+  `8eea1261daff7f30663c339b34feead5c476d2454f1a79816b41cc1ffae81106`.
+  One test-only blueprint isolation correction was required; runtime code and
+  dependencies are unchanged. GDAL/native coverage remains the M4 blocker.
+
+- (2026-11-13 UTC) Roger explicitly deferred both a GDAL upgrade and enforcing
+  a declared raster format before handing uploads to GDAL. Do not implement
+  file-signature checks, driver restrictions, GDAL/Rasterio changes, or a
+  packaged-upgrade trial in this continuation. Continue the corrected Python
+  image's independent full gate; retain GDAL/native coverage as an open blocker.
+
 - (2026-11-13 UTC) The operator raised concern that compiling GDAL had become
   a rabbit hole. The agent stopped the clean native build (exit 130), preserved
   implementation `967a085f4` as deferred work, and separated it from Python
@@ -47,14 +61,14 @@ actual gate rejects native coverage. M4 is not complete.
   candidate `967a085f4`; independent source reviews have no open Medium/High
   findings. Frontend lint/all 1,079 tests pass.
 - [ ] Native clean build is deferred after the scope concern; no final native
-  image acceptance. Python full gate and native coverage remain open.
+  image acceptance. The Python full gate passes; native coverage remains open.
 
 - [x] (2026-11-13 UTC) Corrected Python image `af7643725c95` from
   `64cc736c2` passes 187 focused tests, actual PATH plot readback and frontend
   lint/all 1,079 tests. Fresh scan has zero OAuthlib rows (2,716/332 total).
-- [ ] Exact-image full Python gate stopped after 6,304 passes/380 skips on
-  missing ASRIS cache-directory setup in the isolated bind mount. Creating the
-  ignored directory restores all 25 module tests; full rerun remains required.
+- [x] Exact dependency-image full Python gate passes after the isolated runtime
+  supplies its ignored/generated prerequisites and disposable database. The
+  earlier ASRIS stop remains retained as setup evidence.
   Qualified private GDAL staged
   repair passes 12 crash probes and exact ABI/normal controls; coherent package
   integration remains open. Rasterio TLS runtime isolation, eight-array parity
