@@ -6,7 +6,7 @@ Completed on forest: [Status and preflight WebSocket run authorization](docs/wor
 
 Implemented; runtime acceptance blocked: [Test-support production guardrails and F1-F7 readiness](docs/work-packages/20261111_test_support_production_guardrails/package.md) - F7 defaults the runtime profile to production, excludes support routes from production, and reuses short-lived WEPP_AUTH credentials through automatic wctl/Playwright injection. No smoke markers or new static secret. Closure requires F6 M4, one combined F1-F7 regression receipt, and a reviewed non-executed deployment-validation plan.
 
-Ready for canary handoff: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — reviewed implementation and inactive open-wepp-org receiving package committed. Lifecycle/artifact/failure gates pass; broad continuations retain one confirmed unrelated baseline assertion. Live image/runtime/viewing acceptance and package closure remain pending.
+Completed 2026-11-11 UTC: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — corrected immutable runtime and notification schema deployed; real DEM, HTTP/archive and owned fault gates passed; temporary workers removed and ordinary fleet healthy. Exact test limitations and retained incomplete fault projects are documented.
 
 Verified on forest: [Culvert catalog contention and stateless WBT](docs/work-packages/20261109_culvert_catalog_contention/package.md) — two fresh 33/33 parallel replays; model/artifact/download checks pass; 296 focused tests and 230 WBT tests pass. Broad suite: 13,236 pass, one confirmed baseline template failure. Production unchanged.
 

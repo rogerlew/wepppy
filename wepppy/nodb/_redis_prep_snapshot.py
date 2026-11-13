@@ -64,11 +64,17 @@ def publish_snapshot(directory_fd: int, payload: dict, *, target_mode: int | Non
                 current = os.fstat(fd)
                 if (current.st_uid, current.st_gid) != (original.st_uid, original.st_gid):
                     os.fchown(fd, original.st_uid, original.st_gid)
+                # NFS exposes mode-derived ACLs and inherited labels that may be
+                # readable but not settable. Preserve identical metadata in place.
+                os.fchmod(fd, stat.S_IMODE(original.st_mode))
                 for attr in set(os.listxattr(fd)) - attributes.keys():
                     os.removexattr(fd, attr)
+                current_attributes = {attr: os.getxattr(fd, attr) for attr in os.listxattr(fd)}
                 for attr, value in attributes.items():
-                    os.setxattr(fd, attr, value)
-                os.fchmod(fd, stat.S_IMODE(original.st_mode))
+                    if current_attributes.get(attr) != value:
+                        os.setxattr(fd, attr, value)
+                if stat.S_IMODE(os.fstat(fd).st_mode) != stat.S_IMODE(original.st_mode):
+                    raise PermissionError('Cannot preserve RedisPrep snapshot mode')
                 if {attr: os.getxattr(fd, attr) for attr in os.listxattr(fd)} != attributes:
                     raise PermissionError('Cannot preserve RedisPrep snapshot access attributes')
             if target_mode is not None:

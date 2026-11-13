@@ -118,7 +118,7 @@ def submit(payload):
         _state(wd, dispatch_intent=True)
         try:
             Queue(queue, connection=connection()).enqueue(
-                execute_dem, runid, job_id=admission["attempt_id"], job_timeout=600,
+                "wepppy.declarative.adapter.execute_dem", runid, job_id=admission["attempt_id"], job_timeout=600,
                 result_ttl=604800, failure_ttl=604800,
             )
         except Exception:  # broad-except: private orchestration boundary
@@ -223,7 +223,7 @@ def finalize(submission_id, evidence):
         if not state.get("finalization_intent"):
             _state(wd, processing=outcome, finalization_intent=True)
             Queue(admission["queue"], connection=connection()).enqueue(
-                finalize_dem, admission["runid"], job_id=admission["finalizer_id"],
+                "wepppy.declarative.adapter.finalize_dem", admission["runid"], job_id=admission["finalizer_id"],
                 job_timeout=600, result_ttl=604800, failure_ttl=604800,
             )
     return status(submission_id)

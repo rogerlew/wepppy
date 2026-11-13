@@ -1,36 +1,36 @@
 # Vertical slice validation ledger
 
-**Status**: Ready for controlled canary handoff; local gates complete with one confirmed unrelated baseline assertion. Cluster acceptance pending (2026-11-10).
+**Status**: Bounded live receiving acceptance and final review complete (2026-11-11 UTC). See [receiving evidence](receiving_acceptance.md) for exact image, migration, runtime and fault receipts. Historical full-suite baseline limitation remains explicit.
 
 ## Fixture registration (M1)
 
 Public `ned1/2024`, 30 m, `disturbed9002`, extent
 `[-116.10,46.70,-116.09,46.71]`; output `dem/dem.tif`. Consumer is the
 existing elevation-query HTTP endpoint (zero-write), with `_sample_dem` used for
-local direct readback. Exact runtime and mounted-identity evidence remains a
-cluster gate. Protected state is root NoDb plus the complete DEM tree and immutable
+local direct readback. Exact runtime and mounted-identity evidence is retained in receiving
+artifacts. Protected state is root NoDb plus the complete DEM tree and immutable
 provenance; operational/catalog/manifest writes follow the canonical v1 contract.
 
 ## Acceptance evidence
 
 | ID | Case | Required direct evidence | Status |
 | --- | --- | --- | --- |
-| V01 | Valid fresh definition | Actual request, normal project creation and NoDb readback | Local real initialization/RQ passed; cluster pending |
-| V02 | Real acquisition | Source response/selection, retrieval time, raster hash and semantic parse | Real ordinary provider acquired; declarative source fixture passed |
-| V03 | Identity/admission | Approved schema/digest, observed runtime binding; mismatch and missing-evidence refusal | Strict refusal and Pod mutation tests passed; live identity pending |
+| V01 | Valid fresh definition | Actual request, normal project creation and NoDb readback | Live canonical initialization and actual RQ passed |
+| V02 | Real acquisition | Source response/selection, retrieval time, raster hash and semantic parse | Live approved provider, raster semantics/hash and timings retained |
+| V03 | Identity/admission | Approved schema/digest, observed runtime binding; mismatch and missing-evidence refusal | Live exact Pod/Node/container/image plus mismatch/missing evidence refusal passed |
 | V04 | Git publication | Exact tracked paths, attempt record/commit association; no secrets/bulk data | Real Git exact-path/checkpoint tests passed |
-| V05 | Successful finalization | Writer completion, catalog/manifest validity, durable readonly and completion ordering | Real finalizer/manifest success and failure passed; cluster pending |
-| V06 | Subsequent viewing | Real task consumes acquired raster; fresh visible output; protected paths unchanged | Real raster consumer + unchanged fingerprints passed; HTTP/browser pending |
-| V07 | Mutation boundaries | UI/API/queued protected writes denied; valid derived writes allowed | Direct NoDb/Bootstrap/Flask/RQ refusal passed; cluster endpoints pending |
+| V05 | Successful finalization | Writer completion, catalog/manifest validity, durable readonly and completion ordering | Live success and manifest-failure finalization passed truthfully |
+| V06 | Subsequent viewing | Real task consumes acquired raster; fresh visible output; protected paths unchanged | Actual authenticated HTTP elevation/read/download passed; unchanged fingerprints |
+| V07 | Mutation boundaries | UI/API/queued protected writes denied; valid derived writes allowed | Live authenticated API/Bootstrap and real queued refusal passed |
 | V08 | Ordinary projects | Absent legacy metadata, valid optional empty state, ordinary DEM and Bootstrap behavior preserved | Ordinary acquisition, read-only and Bootstrap regressions passed |
-| V09 | Duplicate/uncertain attempts | Duplicate submission/delivery and lost worker produce no unintended replay | Duplicate submission/claim/completion passed; live worker loss pending |
-| V10 | Failure/cancellation | Source failure, commit failure, cancellation and finalization failure retain truthful outcomes | Real RQ source/commit/init/finalizer failures and queued cancellation passed |
-| V11 | Recovery | Old writers stopped; explicit full rerun allocates new project | Unique UUID projects tested; live interrupted-writer cleanup pending |
+| V09 | Duplicate/uncertain attempts | Duplicate submission/delivery and lost worker produce no unintended replay | Live duplicate admission and worker loss passed; duplicate delivery covered by source tests |
+| V10 | Failure/cancellation | Source failure, commit failure, cancellation and finalization failure retain truthful outcomes | Live source/checkpoint/finalizer faults and actual running cancellation passed |
+| V11 | Recovery | Old writers stopped; explicit full rerun allocates new project | Live canceled cleanup verified; lost-worker cleanup stays unknown with no replay |
 | V12 | Access and redaction | Public-only admission; ordinary private behavior preserved, hostile paths/images rejected, logs/records omit secrets | Public-only contract; path/image/Git/redaction tests passed |
-| V13 | Artifact observability | Live browser/download; archive/restore membership and record byte equality | Canonical archive/restore byte/fence tests passed; live browse/download pending |
-| V14 | Runtime compatibility error | Visible later report failure leaves build history/protection intact | No compatibility layer; live optional report error pending |
+| V13 | Artifact observability | Live browser/download; archive/restore membership and record byte equality | Actual HTTP browse/download and queued archive/restore passed byte/fingerprint checks |
+| V14 | Runtime compatibility error | Visible later report failure leaves build history/protection intact | Live climate report HTTP200 HTML; unchanged fingerprints, no shim/error invented |
 | V15 | Cost | Acquisition baseline versus added hashing/commit time and storage | Small real fixture measured below; large ordinary DEM cost pending |
-| V16 | Bootstrap exclusion | Declarative enable/push/checkout/no-prep rejected through actual entry points | Direct Bootstrap mutation and API regression gates passed |
+| V16 | Bootstrap exclusion | Declarative enable/push/checkout/no-prep rejected through actual entry points | Live authenticated enable/checkout/no-prep protection 409 passed |
 
 ## Evidence recording rules
 
@@ -168,3 +168,13 @@ and no new production defect remains. The unrelated assertion stays outside this
 package. Live image/platform identity, mounted runtime parity, actual HTTP/browser
 and archive/download workflow, running cancellation and worker-loss evidence remain
 M5 receiving gates. The package is **open**, not closed or deployed.
+
+## Receiving final full-scope disposition
+
+[Final full-suite record](final_full_suite.txt) and
+[actual terminal failure](final_full_suite_failure.txt) retain13793-item collection,
+failed-first ordering with no exclusions and the exact unchanged TTL-help baseline
+assertion. Corrected source focused106/0skip and broad5586/182skip pass. These are
+separate coverage statements, not a fabricated full-suite pass. Receiving runtime,
+HTTP/archive, mutation and fault evidence closes V01–V16 for the bounded fixture;
+large-raster cost remains deferred, not implicitly certified.

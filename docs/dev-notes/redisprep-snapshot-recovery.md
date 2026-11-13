@@ -88,3 +88,13 @@ Regression entry point: `wctl run-pytest tests/nodb/test_redis_prep_snapshots.py
 The suite uses a disposable local redis-server or an explicitly marked disposable
 `RQ212_TEST_REDIS_SOCKET`; it never flushes shared Redis. Retain skipped service
 checks as skipped, not passed.
+
+## NFS inherited attributes (2026-11-10 receiving correction)
+
+Replacement establishes the original mode before comparing extended attributes.
+NFS may expose mode-derived ACLs and inherited security labels that cannot be set
+explicitly. Already-identical values need no write; different values still must
+be copied successfully. Exact final mode and attribute comparison remains
+mandatory before replacement. Do not delete ACLs, ignore an unsupported differing
+attribute, or grant extra privileges to bypass a publication failure. Validate
+initialization and repeated snapshots under the real mounted UID/GID and umask.

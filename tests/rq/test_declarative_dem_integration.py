@@ -36,7 +36,8 @@ def test_worker_refusal_uses_failed_registry(project, monkeypatch):
 
 
 @pytest.mark.parametrize('fault', [None, 'source', 'checkpoint', 'finalization', 'drift', 'manifest', 'cancel', 'initialize', 'invalid_grid'])
-def test_adapter_full_lifecycle_with_fixture_runtime_identity(tmp_path, definition, monkeypatch, fault):
+@pytest.mark.parametrize('module_main', [False, True])
+def test_adapter_full_lifecycle_with_fixture_runtime_identity(tmp_path, definition, monkeypatch, fault, module_main):
     """Real RQ/NoDb/Git/read-only/view flow; source and Pod evidence are fixtures."""
     import numpy as np
     import rasterio
@@ -47,6 +48,12 @@ def test_adapter_full_lifecycle_with_fixture_runtime_identity(tmp_path, definiti
     from wepppy.weppcloud.utils import helpers
     from wepppy.weppcloud import user_preferences
     from wepppy.microservices.elevationquery import _sample_dem
+
+    if module_main:
+        # python -m defines these functions in __main__; RQ rejects function
+        # objects from that module. Exercise the actual queue validation path.
+        monkeypatch.setattr(adapter.execute_dem, '__module__', '__main__')
+        monkeypatch.setattr(adapter.finalize_dem, '__module__', '__main__')
 
     connection = redis.StrictRedis(**redis_connection_kwargs(RedisDB.RQ))
     connection.ping()

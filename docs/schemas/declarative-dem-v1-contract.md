@@ -1,13 +1,16 @@
 # Declarative DEM v1 contract
 
-Status: implemented and locally validated, 2026-11-10; cluster conformance pending.
+Status: implemented; bounded cluster conformance validated 2026-11-11 UTC.
+See [receiving evidence](../work-packages/20261110_declarative_dem_vertical_slice/artifacts/receiving_acceptance.md).
 This bounded contract specializes [declarative model builds](declarative-model-build-spec.md).
 
 ## Scope and authority
 
 The operator requested execution of the DEM vertical slice and a deployment-ready
 handoff before deployment. Use existing science, normal projects and deployment
-credentials. No live deployment is authorized by this checkpoint. The initial
+credentials. The initial checkpoint did not authorize deployment; Roger subsequently
+authorized the recorded receiving deployment and migrations. Future deployments
+still require explicit operator authorization and receiving verification. The initial
 source and project are public; private projects and sources are rejected by this
 protocol. Existing ordinary project visibility and authorization remain unchanged.
 This restriction avoids claiming private access enforcement in the existing
