@@ -11,10 +11,11 @@ Roger explicitly authorized implementation of retained-candidate resume on
 2026-11-13. Immutable-ID activation and private approval authority are at the
 contract checkpoint; M5 production interruption/activation remains unauthorized.
 
-Remediation status (2026-11-12): master includes cryptography, certifi, urllib3,
-pyasn1, msgpack and nbconvert upgrades. Authlib/joserfc are updated and tested
-in the isolated candidate. Other dependency/native repairs remain open. The
-operator redirected focus to remediation; deployment-resume design is on hold.
+Historical remediation status (2026-11-12; the resume-design hold was
+superseded by Roger's explicit 2026-11-13 authorization): master includes
+cryptography, certifi, urllib3, pyasn1, msgpack and nbconvert upgrades.
+Authlib/joserfc are updated and tested in the isolated candidate. Other
+dependency/native repairs remain open.
 
 **Timezone**: UTC  
 **Last updated**: 2026-11-13 UTC
@@ -38,6 +39,12 @@ for the later clean OAuth candidate. Its 18 Authlib rows are removed, but the
 actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
+
+- [ ] (2026-11-13 UTC) Implement the explicitly selected retained-candidate
+  workflow after checkpoint approval. Drain RQ jobs while known-good containers
+  remain running, gate before stop, pin candidate activation to immutable IDs,
+  and automatically restore the exact prior image map on post-stop failure.
+  M5 rollout remains separately unauthorized.
 
 - [x] (2026-11-13 UTC) Implement `F6-RU-01`: exact `.tif/.tiff`→`GTiff` and
   `.img`→`HFA` content/driver enforcement before general raster upload consumers.
@@ -70,7 +77,9 @@ actual gate rejects native coverage. M4 is not complete.
   candidate `64cc736c2` / image `af7643725c95`. Do not resume custom GDAL/Rasterio
   build work automatically. Evaluate a compatible supported packaged upgrade or
   retain an explicit native blocker; bespoke backport maintenance needs a
-  separate scope decision. Deployment resume remains deferred.
+  separate scope decision. The deployment-resume deferral in this dated entry
+  was superseded by Roger's explicit retained-workflow authorization on
+  2026-11-13; M5 activation remains separate.
 
 - [x] (2026-11-13 UTC) Native helper/test implementation committed as isolated
   candidate `967a085f4`; independent source reviews have no open Medium/High

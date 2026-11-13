@@ -42,6 +42,16 @@ depth. Recheck receipt, tag-to-ID drift, approval authority and evidence
 freshness before the first service change and again after a warm wait before
 every activation attempt.
 
+Warm drain occurs before service stop. The deploy-owned RQ fence prevents new
+default/batch dequeue while existing jobs finish in the still-running known-good
+containers. Rerun the complete gate after drain; rejection releases the owned
+fence and changes no container. Before the first stop, capture a private
+known-good rendered config and running container image map. Any later failure
+automatically recreates that exact prior map with pull/build disabled, verifies
+its running IDs, and releases the fence only after restoration. If restoration
+fails, return a distinct recovery error and retain the bounded fence instead of
+resuming work into a partial stack.
+
 The receipt binds schema/time, hostname, `/etc/machine-id`, Docker Engine ID,
 source cleanliness/revision, lock and deploy-script hashes, installed `wctl`
 identity, deploy mode/options, canonical secret-safe Compose projection, selected

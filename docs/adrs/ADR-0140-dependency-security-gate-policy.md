@@ -90,6 +90,17 @@ activation as defense in depth, not as the primary substitution control. Generic
 `--skip-build` remains invalid; a retained receipt is not transferable between
 hosts or Docker daemons.
 
+Drain default/batch work while the current containers remain running: acquire
+the owned RQ dequeue fence, wait for started registries to reach zero, and rerun
+the complete receipt/evidence gate before stopping any service. A gate failure
+releases only the deployment-owned fence and leaves the prior workload running.
+Immediately before cutover, also retain the current rendered configuration and
+running service-to-image ID map. Once any service stop begins, every error path
+must restore that unchanged known-good map with build/pull disabled, verify the
+restored container IDs, and only then release the RQ fence. Failed restoration
+keeps the bounded fence and returns an explicit recovery signal; it never starts
+an unapproved candidate or resumes dequeue into a partial stack.
+
 ## Decision Provenance
 
 Decision Venue: Codex execution session, 2026-11-11 UTC; approval recorded at

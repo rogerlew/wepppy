@@ -869,10 +869,14 @@ hash, and runs the shared evaluator before any service change.
 
 Activation uses the retained Compose projection and ID override with pull/build
 disabled. Revalidate receipt, approval, evidence freshness and ID availability
-again after a warm wait immediately before every `up`; reject rather than fall
-back to mutable tags. A missing tool, database refresh failure, report mismatch,
-expired exception, changed daemon/configuration or blocking finding exits
-nonzero. Do not apply the common-image gate to unrelated targeted CAP operations.
+after draining started default/batch jobs while the prior containers remain
+running. Only a passing post-drain gate permits service stop. Before stop, retain
+the current rendered configuration and running image map. Once cutover begins,
+the error trap restores that exact known-good map with pull/build disabled,
+verifies container IDs, then releases the owned RQ fence. Restoration failure
+returns a distinct signal and leaves the bounded fence in place. Never fall back
+to mutable tags. A missing tool, stale evidence, report mismatch, changed
+daemon/configuration or blocking finding exits nonzero.
 
 Test the deploy hook with a fake scanner/policy fixture and disposable images;
 do not stop local or production services merely to test control flow. Cover
@@ -881,6 +885,11 @@ drift, receipt copying, malformed approval records, stale evidence, missing IDs,
 generic skip-build rejection and mutation of a source tag at cutover. The tag
 mutation regression must prove the unapproved image never starts. Assert no
 stop/up command occurs on the pre-cutover failure paths.
+Add fake-ledger cases that expire evidence or change approval/daemon identity
+after drain. They must prove no candidate starts, the prior workload remains
+running, and the owned RQ fence is released. Inject a failure after service stop
+and prove the exact prior image map is restored before fence release; a failed
+restore must return the dedicated recovery code and retain the bounded fence.
 
 Milestone acceptance is deterministic local/CI behavior, generated workflow
 parity, least-privilege review, and a pre-activation failure that preserves the
@@ -981,6 +990,24 @@ All commands run from `/home/workdir/wepppy` unless stated otherwise.
        python3 scripts/build_forest_workflows.py
        python3 scripts/build_forest_workflows.py --check
 
+   The concrete retained workflow is:
+
+       scripts/deploy-production.sh --build-retained-candidate
+       # collect/import evidence and publish the separately reviewed approval
+       scripts/deploy-production.sh \
+         --resume-retained-candidate /workdir/weppcloud-deployments/.local/dependency-security/candidates/<host-id>/<candidate-id>/receipt.json
+
+   Build mode prints the exact receipt and derived approval paths and exits
+   before RQ fencing or service stop. Resume takes only the receipt path; evidence
+   and approval paths are derived from the fixed authority root. `--skip-build`,
+   both retained flags together, a receipt outside the candidate root, or any
+   targeted/source/rollback option not encoded by the receipt fails before
+   mutation. Initial implementation supports full-stack and worker-stack scopes
+   required for wepp1/wepp2. Targeted CAP remains excluded. Targeted web,
+   fork/archive, targeted batch, source-overlay and rollback common-image
+   activation fail closed until their exact retained scope is implemented and
+   reviewed.
+
 7. Build the final candidate and run M4 exactly. Store raw reports outside Git;
    store tracked hashes and summaries under this work package.
 
@@ -999,6 +1026,9 @@ Acceptance is based on the following observable behaviors:
 - A stale report, changed image, missing database identity, malformed/expired
   exception, or synthetic blocking finding causes a nonzero gate result.
 - The deploy-path failure occurs before any service stop/recreate command.
+- Post-drain rejection leaves the known-good containers running and releases the
+  owned RQ fence; any later failure restores and verifies their exact image map
+  before dequeue resumes.
 - Compatible upgrade batches preserve their actual application boundaries and
   clean no-cache image construction.
 - `wctl run-pytest tests --maxfail=1`, `wctl run-npm lint`, and
@@ -1028,9 +1058,14 @@ package.
 If a dependency batch fails, retain the failing manifest diff and evidence,
 revert only that uncommitted batch with `apply_patch`, and rebuild from the last
 reviewed candidate. Do not weaken tests or the scanner policy to make the batch
-pass. If the deploy gate fails, it exits before activation; correct evidence or
-disposition and rerun. A scanner outage is an explicit failure, not a clean
-fallback.
+pass. Drain occurs under the deployment-owned RQ fence while known-good
+containers keep running. If the post-drain gate fails, release that fence and
+change no service. Immediately before the first stop, atomically retain the
+known-good rendered configuration and running image map. Any subsequent error
+restores and verifies that exact map with pull/build disabled before releasing
+the fence. Failed restoration returns the dedicated recovery signal and leaves
+the bounded fence in place. Correct evidence or disposition before retrying. A
+scanner outage is an explicit failure, not a clean fallback.
 
 For a deployed compatibility regression, restore the exact retained known-good
 image through the canonical deployment recovery path. Record whether the
@@ -1084,8 +1119,30 @@ The final implementation must expose stable, non-runtime interfaces under
 - canonical script flags for build-only receipt creation and same-host resume;
   they are mutually exclusive and do not weaken generic `--skip-build`.
 
-Exact filenames may be finalized at M0, but CI and deployment must call the same
-repository-owned policy interface. The scanner is a build/security tool, not an
+`receipt.json` schema version 1 has exactly these fields: `schema_version`,
+`created_at`, `hostname`, `machine_id_sha256`, `docker_engine_id`,
+`source_revision`, `source_clean`, `exit_status`, `static_build_lock_sha256`,
+`deploy_script_sha256`, `wctl_path`, `wctl_sha256`, `deploy_mode`,
+`deploy_options`, `compose_config_sha256`, `activation_config_sha256`,
+`image_override_sha256`, `build_services`, `recreated_services`, `images`,
+`dependency_service`, and `image_id`. Each `images` row has exactly `service`,
+`source_image`, and immutable `image_id`. `activation-compose.json` is the exact
+private rendered input; `image-override.json` maps every recreated locally built
+service to its receipt ID.
+
+The separately owned approval schema version 1 has exactly `schema_version`,
+`candidate_receipt_sha256`, `evidence_bundle`, `evidence_manifest_sha256`,
+`policy_sha256`, `dispositions_sha256`, `approved_at`, `approver`, and
+`review_trigger`. Its canonical path is
+`approvals/<machine-id-hash>/<candidate-receipt-sha256>.json`. Referenced bundle,
+policy and disposition files remain independently hash-checked by the evaluator.
+Receipt reuse is permitted only on the original host/daemon while every bound
+input and approval remains current; every retry reruns validation and freshness.
+Successful activation writes a separate immutable ledger record and does not
+rewrite the candidate or approval.
+
+These filenames and schemas are final for this implementation checkpoint. CI
+and deployment must call the same repository-owned policy interface. The scanner is a build/security tool, not an
 application dependency. Do not import it into WEPPcloud, add it to
 `docker/requirements-uv.txt`, expose a service endpoint, or grant it access to
 runtime secrets and mounts.
@@ -1100,6 +1157,7 @@ continues to serve its existing non-deploying/Kubernetes compatibility purpose.
 
 2026-11-13: Record Roger's explicit retained-candidate workflow authorization,
 immutable-ID activation input, host/daemon/private-authority receipt contract,
+pre-stop drain, known-good automatic restoration, exact CLI/schema lifecycle,
 cutover mutation tests, and continued separate M5 authorization requirement.
 
 2026-11-12: Record real parser collection, independent inventory reconciliation,
