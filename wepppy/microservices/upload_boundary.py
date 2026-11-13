@@ -79,13 +79,28 @@ def resolve_contained_raster_path(path: Path | str, root: Path | str) -> Path:
 
 
 def raster_companion_paths(path: Path | str) -> tuple[Path, ...]:
-    """Return GDAL sidecar names that could alter a later raster open."""
+    """Return adjacent GDAL sidecars that could alter a later raster open."""
     raster_path = Path(path)
-    return (
-        Path(f"{raster_path}.aux.xml"),
-        Path(f"{raster_path}.ovr"),
-        raster_path.with_suffix(".ige"),
-        raster_path.with_suffix(".rrd"),
+    if not raster_path.parent.is_dir():
+        return ()
+    name = raster_path.name.lower()
+    stem = raster_path.stem.lower()
+    bases = {name, stem}
+    suffixes = {
+        ".prj", ".wld", ".tfw", ".tifw", ".tab", ".hdr", ".aux",
+        ".aux.xml", ".xml", ".rpb", "_rpc.txt", ".rpc.txt", ".imd",
+        ".rrd", ".ige", ".msk", ".ovr",
+    }
+    extension = raster_path.suffix.lower().lstrip(".")
+    if extension:
+        suffixes.update({f".{extension}w", f".{extension[0]}{extension[-1]}w"})
+    candidate_names = {base + suffix for base in bases for suffix in suffixes}
+    return tuple(
+        sorted(
+            entry
+            for entry in raster_path.parent.iterdir()
+            if entry != raster_path and entry.name.lower() in candidate_names
+        )
     )
 
 
@@ -204,6 +219,7 @@ def assert_raster_upload_identity(
 ) -> None:
     """Reject replacement or mutation after restricted raster validation."""
     raster_path = Path(path)
+    reject_raster_companions(raster_path)
     current = _regular_nonsymlink_stat(raster_path)
     if (
         current.st_size != identity.size

@@ -205,9 +205,12 @@ def test_validate_raster_upload_rejects_vrt_disguised_as_tiff(tmp_path):
         validate_raster_upload(disguised)
 
 
-@pytest.mark.parametrize("companion_suffix", (".aux.xml", ".ovr", ".ige", ".rrd"))
+@pytest.mark.parametrize(
+    "companion_name",
+    ("map.tif.aux.xml", "map.tif.ovr", "map.ige", "map.rrd", "map.tif.msk", "map.tfw"),
+)
 def test_raster_boundary_rejects_destination_companions(
-    tmp_path, companion_suffix
+    tmp_path, companion_name
 ):
     from tests.factories.raster import raster_bytes
 
@@ -217,11 +220,7 @@ def test_raster_boundary_rejects_destination_companions(
     destination_dir = tmp_path / "accepted"
     destination_dir.mkdir()
     destination = destination_dir / "map.tif"
-    companion = (
-        Path(f"{destination}{companion_suffix}")
-        if companion_suffix in {".aux.xml", ".ovr"}
-        else destination.with_suffix(companion_suffix)
-    )
+    companion = destination_dir / companion_name
     companion.write_text("untrusted sidecar")
 
     with pytest.raises(UploadBoundaryError, match="companion files"):
@@ -237,6 +236,56 @@ def test_raster_boundary_rejects_destination_companions(
 
     assert not destination.exists()
     assert companion.read_text() == "untrusted sidecar"
+
+
+@pytest.mark.parametrize("companion_name", ("map.tif.msk", "map.tfw"))
+def test_persisted_raster_reuse_rejects_unvalidated_companion(
+    tmp_path, companion_name
+):
+    from tests.factories.raster import raster_bytes
+
+    raster = tmp_path / "map.tif"
+    raster_bytes(raster, driver="GTiff")
+    (tmp_path / companion_name).write_text("untrusted sidecar")
+
+    with pytest.raises(UploadBoundaryError, match="companion files"):
+        validate_raster_upload(raster)
+
+
+def test_raster_boundary_rejects_real_external_gdal_mask(tmp_path):
+    from osgeo import gdal
+    from tests.factories.raster import raster_bytes
+
+    destination = tmp_path / "map.tif"
+    raster_bytes(destination, driver="GTiff")
+    replacement = tmp_path / "replacement.tif"
+    replacement_bytes = raster_bytes(replacement, driver="GTiff")
+    previous_mask_mode = gdal.GetConfigOption("GDAL_TIFF_INTERNAL_MASK")
+    try:
+        gdal.SetConfigOption("GDAL_TIFF_INTERNAL_MASK", "NO")
+        dataset = gdal.Open(str(destination), gdal.GA_Update)
+        assert dataset.GetRasterBand(1).CreateMaskBand(gdal.GMF_PER_DATASET) == 0
+        dataset = None
+    finally:
+        gdal.SetConfigOption("GDAL_TIFF_INTERNAL_MASK", previous_mask_mode)
+    external_mask = tmp_path / "map.tif.msk"
+    assert external_mask.is_file()
+    accepted = destination.read_bytes()
+
+    with pytest.raises(UploadBoundaryError, match="companion files"):
+        save_upload_from_stream(
+            raw_filename="map.tif",
+            stream=io.BytesIO(replacement_bytes),
+            dest_dir=tmp_path,
+            allowed_extensions=("tif",),
+            overwrite=True,
+            post_save=validate_raster_upload,
+            isolated_post_save=True,
+        )
+
+    assert destination.read_bytes() == accepted
+    with pytest.raises(UploadBoundaryError, match="companion files"):
+        validate_raster_upload(destination)
 
 
 def test_assert_raster_upload_identity_rejects_replacement(tmp_path):
