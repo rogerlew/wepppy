@@ -169,6 +169,42 @@ def test_validate_raster_upload_rejects_companion_dependent_hfa(tmp_path):
         validate_raster_upload(detached)
 
 
+@pytest.mark.parametrize("suffix", (".tif", ".img"))
+def test_validate_raster_upload_rejects_malformed_and_truncated_content(
+    tmp_path, suffix
+):
+    malformed = tmp_path / f"malformed{suffix}"
+    malformed.write_bytes(b"not a raster")
+    with pytest.raises(UploadBoundaryError, match="does not match"):
+        validate_raster_upload(malformed)
+
+    from tests.factories.raster import raster_bytes
+
+    driver = "GTiff" if suffix == ".tif" else "HFA"
+    valid = tmp_path / f"valid{suffix}"
+    raw = raster_bytes(valid, driver=driver)
+    truncated = tmp_path / f"truncated{suffix}"
+    truncated.write_bytes(raw[: max(1, len(raw) // 3)])
+    with pytest.raises(UploadBoundaryError):
+        validate_raster_upload(truncated)
+
+
+def test_validate_raster_upload_rejects_vrt_disguised_as_tiff(tmp_path):
+    from osgeo import gdal
+    from tests.factories.raster import raster_bytes
+
+    source = tmp_path / "source.tif"
+    raster_bytes(source, driver="GTiff")
+    vrt = tmp_path / "source.vrt"
+    dataset = gdal.Translate(str(vrt), str(source), format="VRT")
+    dataset = None
+    disguised = tmp_path / "disguised.tif"
+    disguised.write_bytes(vrt.read_bytes())
+
+    with pytest.raises(UploadBoundaryError, match="does not match"):
+        validate_raster_upload(disguised)
+
+
 def test_assert_raster_upload_identity_rejects_replacement(tmp_path):
     from tests.factories.raster import raster_bytes
 

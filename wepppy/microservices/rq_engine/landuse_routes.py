@@ -72,6 +72,7 @@ from .responses import error_response, validation_error_response
 from wepppy.wepp.management.managements import InvalidManagementKey
 from .upload_helpers import (
     UploadError,
+    assert_validated_raster_identity,
     prevalidate_raster_upload_file,
     resolve_run_owned_raster_path,
     save_upload_file,
@@ -682,10 +683,24 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
             if requested_mode == LanduseMode.UserDefined:
                 form = await request_form(request)
                 upload = _extract_upload(form, "input_upload_landuse")
+                existing_source_path: Path | None = None
+                existing_source_identity = None
                 if upload is None:
                     existing = landuse.user_defined_landcover_fn
                     if not existing or not _exists(_join(landuse.lc_dir, f"_{existing}")):
                         return error_response("input_upload_landuse is required when no existing user-defined landuse file is available.", status_code=400)
+                    try:
+                        existing_source_path = resolve_run_owned_raster_path(
+                            Path(_join(landuse.lc_dir, f"_{existing}")),
+                            Path(landuse.lc_dir),
+                        )
+                        existing_source_identity = validate_raster_upload(
+                            existing_source_path
+                        )
+                    except UploadError as exc:
+                        return error_response(
+                            str(exc), status_code=_upload_status_from_message(str(exc))
+                        )
                 else:
                     try:
                         validate_upload_file(upload,
@@ -764,9 +779,9 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                             user_defined_fn = str(saved_path)
                         else:
                             filename = landuse.user_defined_landcover_fn
-                            if filename:
-                                user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
-                            if not filename or not user_defined_fn or not _exists(user_defined_fn):
+                            if existing_source_path is not None:
+                                user_defined_fn = str(existing_source_path)
+                            if not filename or not user_defined_fn or existing_source_identity is None:
                                 raise FileNotFoundError(
                                     "input_upload_landuse is required when no existing user-defined landuse file is available."
                                 )
@@ -775,7 +790,12 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                             Path(user_defined_fn),
                             Path(landuse.lc_dir),
                         )
-                        validate_raster_upload(source_path)
+                        if existing_source_identity is not None:
+                            assert_validated_raster_identity(
+                                source_path, existing_source_identity
+                            )
+                        else:
+                            validate_raster_upload(source_path)
                         raster_stacker(str(source_path), watershed.subwta, landuse.lc_fn)
 
                         if not _exists(landuse.lc_fn):

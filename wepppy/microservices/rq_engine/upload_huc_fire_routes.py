@@ -146,6 +146,9 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
                         path, semantic_validator=validate_sbs_source
                     ),
                     isolated_post_save=True)
+        except UploadError as exc:
+            logger.info("HUC fire raster boundary rejected source", exc_info=True)
+            return upload_failure(str(exc), status=exc.status_code)
         except (ValueError, RuntimeError) as exc:
             logger.info("HUC fire source rejected before project creation", exc_info=True)
             return upload_failure("Invalid SBS map.")

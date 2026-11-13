@@ -1,9 +1,11 @@
+import io
 import json
 from pathlib import Path
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 FormData = pytest.importorskip("starlette.datastructures").FormData
+UploadFile = pytest.importorskip("starlette.datastructures").UploadFile
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import omni_routes
@@ -332,6 +334,32 @@ def test_prepare_omni_scenarios_rejects_client_path_substitution(tmp_path: Path)
             config="cfg",
             wd=str(wd),
         )
+
+
+def test_prevalidate_omni_reuse_rejects_before_any_upload_is_published(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from tests.factories.raster import sbs_raster_bytes
+
+    wd = tmp_path / "run"
+    new_source = tmp_path / "new.tif"
+    raw = sbs_raster_bytes(new_source)
+    form = FormData(
+        {"scenarios[0][sbs_file]": UploadFile(io.BytesIO(raw), filename="new.tif")}
+    )
+    payload = {
+        "scenarios": [
+            {"type": "sbs_map"},
+            {"type": "sbs_map", "sbs_file_path": "/etc/passwd"},
+        ]
+    }
+
+    with pytest.raises(ValueError, match="missing or ambiguous"):
+        omni_routes._prevalidate_omni_sbs_inputs(
+            payload, None, form, wd=str(wd)
+        )
+
+    assert not (wd / "omni" / "_limbo" / "00").exists()
 
 
 def test_prepare_omni_contrasts_normalizes_integer_slope_percentages(tmp_path: Path) -> None:

@@ -86,6 +86,17 @@ def validate_raster_upload(
         raise UploadError(str(exc), status_code=exc.status_code) from exc
 
 
+def assert_validated_raster_identity(
+    path: Path,
+    identity: RasterUploadIdentity,
+) -> None:
+    """Prove that a previously validated run-owned raster is unchanged."""
+    try:
+        assert_raster_upload_identity(path, identity)
+    except UploadBoundaryError as exc:
+        raise UploadError(str(exc), status_code=exc.status_code) from exc
+
+
 def open_raster_with_expected_driver(path: Path):
     """Open through the rq-engine error contract with one allowed GDAL driver."""
     try:
@@ -165,6 +176,7 @@ def upload_failure(error: str, status: int = 400, **extras: Any) -> JSONResponse
 
 __all__ = [
     "UploadError",
+    "assert_validated_raster_identity",
     "open_raster_with_expected_driver",
     "prevalidate_raster_upload_file",
     "resolve_run_owned_raster_path",
