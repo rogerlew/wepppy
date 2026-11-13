@@ -62,11 +62,13 @@ prove that an unrestricted legacy semantic validator never receives unvalidated
 or replaceable bytes. Direct GDAL opens added or touched by this remediation must
 use `OpenEx(..., allowed_drivers=[expected])` or equivalent.
 
-All raster parts in one request must pass scratch validation before any part is
-published, controller state is mutated, or work is enqueued. A later failure
-must remove request scratch files and leave earlier accepted destinations and
-controller state unchanged. Publication and mutation then follow the canonical
-NoDb composite-operation rules; this boundary does not add distributed rollback.
+All raster parts and persisted raster reuses in one request must pass boundary
+validation before any part is published, controller state is mutated, or work
+is enqueued. A failure during that request-wide boundary-validation phase must
+remove request scratch files and leave accepted destinations and controller
+state unchanged. Failures after boundary validation follow the canonical NoDb
+composite-operation rules; this upload-format boundary does not add a new
+distributed rollback guarantee.
 
 General raster upload endpoints do not accept VRT because their multipart
 contracts do not collect and prove a closed referenced-file graph. The narrowly
