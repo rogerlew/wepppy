@@ -58,6 +58,16 @@ Recheck selected image IDs immediately before activation; a rollback flag grants
 no policy bypass. This decision does not authorize production rollout or any
 specific advisory-risk exception.
 
+For host-local Compose deployment, build and record the candidate before any
+service stop, then exit for independent evidence collection and review. A later
+resume must bind to a host-specific private receipt and reject before service
+changes unless the source revision and cleanliness, dependency lock, deploy
+script, effective Compose service/image selection, and every immutable local
+image ID still match. Immediately before activation, rerun the independent
+evidence policy and freshness checks against those exact IDs and approved
+disposition hashes. Generic `--skip-build` remains invalid for locally built
+services; a retained receipt is not transferable between hosts.
+
 ## Decision Provenance
 
 Decision Venue: Codex execution session, 2026-11-11 UTC; approval recorded at
@@ -94,6 +104,9 @@ of the running stack. Retained evidence supports review and rollback decisions.
    unresolved exposure and invalidate the release evidence boundary.
 4. A new hosted vulnerability service: unnecessary; reuse the private store,
    existing build/test tooling, and a bounded command-line gate.
+5. Waiting for manual review within one deployment invocation: rejected because
+   it leaves a long-running privileged process open across an unbounded human
+   review interval and complicates interruption and recovery semantics.
 
 ## Consequences
 

@@ -1,9 +1,10 @@
 # Decision proposal: approving a freshly built deployment candidate
 
-Status: proposal on hold after the 2026-11-12 operator direction to prioritize
-dependency remediation. No resume workflow is approved or implemented.
-This document does not authorize deployment, risk exceptions, or a skip-build
-bypass. Independent correctness review identified the boundary in the existing
+Status: retained-candidate resume selected by Roger on 2026-11-13 through the
+direction to proceed with the remaining Docker Compose deployment work. The
+selection authorizes implementation and validation of this workflow, not a
+generic skip-build bypass or activation without the ratified evidence gate.
+Independent correctness review identified the boundary in the existing
 canonical `scripts/deploy-production.sh` workflow.
 
 ## Confirmed conflict
@@ -21,7 +22,7 @@ at the actual activation boundary, not only after the build. The existing error
 trap does not restore stopped common-image services; it handles CAP/controllers
 and its owned RQ fence only.
 
-## Recommended option: explicit retained-candidate resume
+## Selected option: explicit retained-candidate resume
 
 Add a dedicated resume mode to the canonical deploy script, distinct from generic
 `--skip-build`. The initial build/collection may stop before any service stop.
@@ -51,7 +52,10 @@ behavior and still needs the later freshness checks.
 
 Root AGENTS requires explicit operator approval for changes to established
 workflows. The F6 ratified policy separately prohibits candidate-controlled
-approval and image-identity substitution. Neither option is inferred from a
-request for generic hardening or from the earlier NFS approval. Select one
-concrete workflow before implementing its canonical contract and independent
-checkpoint. Producer qualification and advisory review can continue meanwhile.
+approval and image-identity substitution. Roger selected retained-candidate
+resume when directing the remaining production Compose deployment work to
+proceed on 2026-11-13, after clarifying that `wepp.cloud` uses host-local Compose
+while `open-wepp.org` consumes registry-published images. Implement this contract
+behind an independent checkpoint, then re-review the exact implementation before
+production use. The selection does not itself approve a specific image,
+exception record, or service interruption.

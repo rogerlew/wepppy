@@ -304,9 +304,11 @@ trial are running. Security review rejected candidate-side Python as inventory
 authority; replacement reads a never-started container export under trusted
 host Python without extracting/executing its files. M1/M3/M4 remain open.
 
-2026-11-12 deployment integration decision: independent review found that fresh
+2026-11-13 deployment integration decision: independent review found that fresh
 no-cache rebuilds conflict with exact-image manual approval on a later invocation.
-The concrete retained-candidate resume versus same-invocation review proposal is
-in `artifacts/20261112_deploy_approval_boundary.md`. Operator selection is pending;
-no generic skip-build bypass or deployment workflow change has been implemented.
-Producer qualification and advisory review continue independently.
+Roger selected the retained-candidate resume proposal in
+`artifacts/20261112_deploy_approval_boundary.md` for the host-local Compose
+workflow. Implement and independently review fail-closed build-only/resume modes;
+generic skip-build remains rejected. Production preflight found one executing
+default-queue job, so activation must wait for natural completion or explicit
+operator approval to interrupt it.

@@ -24,6 +24,15 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [ ] (2026-11-13 UTC) Roger selected the explicit retained-candidate Compose
+  resume workflow and directed the remaining deployment work to proceed. Record
+  and independently review the contract checkpoint, implement fail-closed
+  build-only/resume modes in the canonical deployment script, validate the exact
+  candidate, collect and approve exact-image evidence, then activate wepp1 before
+  wepp2. Production preflight currently shows one active default-queue job, so
+  no service stop or activation is permitted until it completes naturally or
+  Roger explicitly approves interruption.
+
 - [x] (2026-11-13 UTC) `F6-RU-01` implementation `cb839e7d7` enforces
   `.tif/.tiff`→`GTiff` and `.img`→`HFA`, full-band decode, complete companion
   rejection, request-wide new/persisted prevalidation, trusted-root reuse, and
@@ -373,6 +382,17 @@ not collected by unittest, so both runners are required for upstream evidence.
   Evidence: `.github/forest_workflows/npm-tests.yml`.
 
 ## Decision Log
+
+- Decision (Roger, 2026-11-13): implement the explicit retained-candidate resume
+  workflow for `wepp.cloud` host-local Docker Compose deployment. Build and
+  receipt the candidate without stopping services; resume only on the same host
+  after exact-input/image validation and an independent fresh evidence-policy
+  check. Keep generic skip-build rejection and do not substitute the
+  registry-image workflow used by `open-wepp.org`.
+  Rationale: exact-image manual review cannot survive the canonical script's
+  unconditional no-cache rebuild on a later invocation, while holding one
+  privileged deployment process open across manual review is operationally
+  brittle.
 
 - Decision: implement a shared self-contained GTiff/HFA upload boundary and
   remove general VRT admission; preserve the separately validated postfire dNBR
@@ -1075,12 +1095,12 @@ claimed. Authenticated SSH/SCP via the existing trusted `runner-02` alias has
 passed a disposable synthetic bundle transfer and private import. Actual CI
 producer collection and its bounded cleanup window remain unvalidated.
 
-2026-11-12 deployment integration decision: independent review found that fresh
+2026-11-13 deployment integration decision: independent review found that fresh
 no-cache rebuilds conflict with exact-image manual approval on a later invocation.
-The concrete retained-candidate resume versus same-invocation review proposal is
-in `artifacts/20261112_deploy_approval_boundary.md`. Operator selection is pending;
-no generic skip-build bypass or deployment workflow change has been implemented.
-Producer qualification and advisory review continue independently.
+Roger selected the retained-candidate resume proposal in
+`artifacts/20261112_deploy_approval_boundary.md` and directed implementation for
+the host-local Compose production workflow. Generic skip-build remains rejected;
+implementation and independent review are pending.
 
 2026-11-12: Merge current evidence tooling and manual NFS recovery direction into
 the isolated candidate; record implemented Mistune/PyCurl consumer qualification.
