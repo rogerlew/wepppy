@@ -93,6 +93,39 @@ running, reruns the complete gate, activates only receipt `sha256:` IDs with
 pull/build disabled, and restores the exact pre-cutover image map on later
 failure. Generic `--skip-build` remains rejected.
 
+Provision the operator-owned authority once with a restrictive umask. Do not run
+these commands as a different account from the deployment operator:
+
+```bash
+umask 077
+install -d -m 0700 \
+  /workdir/weppcloud-deployments/.local/dependency-security/{candidates,evidence,approvals,activations}
+install -d -m 0700 \
+  /workdir/weppcloud-deployments/.local/dependency-security/approvals/dispositions
+```
+
+After independently reviewing the exact evidence and disposition JSON, store the
+disposition as `approvals/dispositions/<sha256>.json` with mode 0600. Publish the
+approval atomically through the repository tool; never hand-author the derived
+approval pathname:
+
+```bash
+python3 tools/security/retained_candidate.py publish-approval \
+  --project-root /workdir/wepppy \
+  --receipt <candidate-receipt-path> \
+  --evidence-bundle <private-imported-bundle-path> \
+  --evidence-manifest-sha256 <independently-retained-manifest-hash> \
+  --dispositions-sha256 <reviewed-disposition-file-hash> \
+  --approver <operator-identity> \
+  --review-trigger "new advisory, evidence, configuration, or candidate identity"
+```
+
+The tool validates canonical roots, ownership, modes, manifest/disposition
+hashes, and the current policy hash before exclusive 0600 publication. Resume
+then revalidates the record and runs the evaluator. Successful activation writes
+an immutable ledger below `activations/<host-id>/` and protects the prior image
+IDs with retained rollback tags so ordinary Docker pruning cannot remove them.
+
 Targeted CAP remains on its distinct excluded-image recovery contract. Targeted
 web, targeted batch/source-overlay/rollback, and wepp3 fork/archive common-image
 activation currently fail closed until their retained scopes are implemented and

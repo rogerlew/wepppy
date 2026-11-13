@@ -28,8 +28,9 @@ segmented substitute is not accepted.
   independent review: canonical build/resume flags, private host/daemon-bound
   receipts, protected approval derivation, immutable-ID activation, pre-stop RQ
   drain, and exact known-good restoration are implemented. The local isolated
-  worktree passes 143 focused deploy/evidence tests, including post-drain gate
-  rejection and failed-restoration fencing. Canonical-container validation,
+  worktree passes 148 focused deploy/evidence tests, including real evaluator
+  output isolation, option/secret drift, post-drain rejection, immutable RQ
+  fallback, activation ledger retention and failed-restoration fencing. Canonical-container validation,
   independent source reviews, exact-host build/evidence and M4 remain open; M5
   rollout remains unauthorized.
 

@@ -58,6 +58,7 @@ def _run_deploy(
     controller_backup_failure: bool = False,
     caddy_inspection_failure: bool = False,
     gate_failure_call: int = 0,
+    worker_stops_after_stop: bool = False,
     controller_build_failure: bool = False,
     lock_held: bool = False,
     skip_docker_prune: bool = True,
@@ -74,6 +75,12 @@ def _run_deploy(
 set -euo pipefail
 printf 'wctl|%s\n' "$*" >> "${FAKE_COMMAND_LOG}"
 args="$*"
+if [[ "${args}" == *"exec -T rq-worker"* ]] \
+    && [ "${FAKE_STOPPED_WORKER_AFTER_STOP:-0}" = 1 ] \
+    && [ -f "${FAKE_WORKER_STOPPED_MARKER}" ]; then
+    echo 'service "rq-worker" is not running' >&2
+    exit 1
+fi
 if [[ "${args}" == *"config --services"* ]]; then
     printf '%s\n' "${FAKE_SERVICES}"
 elif [[ "${args}" == *"config --format json"* ]]; then
@@ -199,6 +206,9 @@ elif [[ "${args}" == *"docker compose run"* ]]; then
 elif [[ "${args}" == *"docker compose exec -T cap"* ]]; then
     :
 elif [[ "${args}" == *"docker compose stop"* ]]; then
+    if [[ "${args}" == *"rq-worker"* ]]; then
+        : > "${FAKE_WORKER_STOPPED_MARKER}"
+    fi
     if [ "${FAKE_RQ_RENEW_HANGS_ONCE:-0}" = 1 ]; then
         /bin/sleep 2
     fi
@@ -248,6 +258,14 @@ elif [ "${1:-}" = "compose" ]; then
     if [[ "$*" == *"wepppy-known-good"* ]] \
         && [ "${FAKE_RECOVERY_FAILURE:-0}" = 1 ]; then
         exit 73
+    fi
+    if [[ "$*" == *" run "* && "$*" == *"from rq.suspension import is_suspended"* ]]; then
+        printf 'yes\n'
+    elif [[ "$*" == *" run "* && "$*" == *"Worker.all"* ]]; then
+        printf '1:1\n'
+    fi
+    if [[ "$*" == *" up -d "* ]]; then
+        rm -f "${FAKE_WORKER_STOPPED_MARKER}"
     fi
     if [[ "$*" == *" up -d --no-deps --force-recreate cap"* ]] \
         && [ "${FAKE_RECOVERY_FAILURE:-0}" = 1 ]; then
@@ -456,6 +474,8 @@ exec /bin/cp "$@"
             "FAKE_IMAGE_OVERRIDE": str(fake_override),
             "FAKE_GATE_COUNT": str(state_dir / "gate-count"),
             "FAKE_GATE_FAILURE_CALL": str(gate_failure_call),
+            "FAKE_STOPPED_WORKER_AFTER_STOP": "1" if worker_stops_after_stop else "0",
+            "FAKE_WORKER_STOPPED_MARKER": str(state_dir / "worker-stopped"),
         }
     )
     lock_handle = (tmp_path / "deploy.lock").open("a", encoding="utf-8")
@@ -578,6 +598,8 @@ def test_full_execution_builds_then_stops_workers_and_recreates_without_down(tmp
     assert "Published controllers-gl.js atomically" in result.stdout
     assert "CAP readiness and functional canary passed" in result.stdout
     assert "Skipping broad Docker runtime prune" in result.stdout
+    assert "retained|record-activation" in commands
+    assert any(command.startswith("docker|tag sha256:") for command in commands)
     assert "Deployment complete!" in result.stdout
 
 
@@ -642,6 +664,27 @@ def test_failed_known_good_restore_returns_distinct_signal_and_retains_fence(tmp
     assert result.returncode == 88
     assert "KNOWN_GOOD_RESTORE_FAILED" in result.stderr
     assert not any(_RQ_RESUME in command for command in commands)
+
+
+def test_stopped_worker_rq_control_uses_known_good_immutable_override(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_cap_and_renderer(),
+        worker_stops_after_stop=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    stop = _position(commands, "stop --timeout 216000 rq-worker rq-worker-batch")
+    pinned_runs = [
+        index for index, command in enumerate(commands)
+        if command.startswith("docker|compose -f") and " run " in command
+    ]
+    assert pinned_runs and all(stop < index for index in pinned_runs)
+    assert all("wepppy-known-good" in commands[index] for index in pinned_runs)
+    assert not any(
+        index > stop and "wctl|docker compose run" in command and "rq-worker" in command
+        for index, command in enumerate(commands)
+    )
 
 
 def test_full_candidate_failure_recovers_cap_and_never_reports_success_or_prunes(tmp_path: Path) -> None:
@@ -1008,8 +1051,10 @@ def test_worker_rejects_missing_current_host_registration_before_prune_or_succes
     assert any("exec -T rq-worker hostname" in command for command in commands)
     assert any("exec -T rq-worker-batch hostname" in command for command in commands)
     registration = _position(commands, "Worker.all")
-    resume = _position(commands, _RQ_RESUME)
-    assert suspend < registration < resume
+    assert suspend < registration
+    assert result.returncode == 88
+    assert "KNOWN_GOOD_RESTORE_FAILED" in result.stderr
+    assert not any(_RQ_RESUME in command for command in commands)
     assert "RQ default/batch worker registration is incomplete: 0:1" in result.stderr
     assert not any(command.startswith("docker|system prune") for command in commands)
     assert "Deployment complete!" not in result.stdout

@@ -17,6 +17,7 @@ import subprocess
 import sys
 import tempfile
 from typing import Any
+from urllib.parse import urlsplit
 
 
 STORE_ROOT = Path("/workdir/weppcloud-deployments/.local/dependency-security")
@@ -145,6 +146,24 @@ def fsync_directory(path: Path) -> None:
         os.close(descriptor)
 
 
+def atomic_private_json(path: Path, value: dict[str, Any]) -> None:
+    if path.exists() or path.is_symlink():
+        raise CandidateError(f"refusing to overwrite {path}")
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        os.fchmod(descriptor, 0o600)
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(canonical_json(value) + b"\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.rename(temporary, path)
+        fsync_directory(path.parent)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
 def machine_id_hash() -> str:
     raw = Path("/etc/machine-id").read_bytes().strip()
     if not raw:
@@ -169,8 +188,40 @@ def immutable_image_id(image: str, project_root: Path) -> str:
     return image_id
 
 
+def require_secret_safe_config(config: dict[str, Any]) -> None:
+    services = config.get("services")
+    if not isinstance(services, dict):
+        raise CandidateError("Compose configuration has no services object")
+    plaintext_keys = {
+        "SECRET_KEY",
+        "SECURITY_PASSWORD_SALT",
+        "POSTGRES_PASSWORD",
+        "REDIS_PASSWORD",
+    }
+    for service_name, service in services.items():
+        if not isinstance(service, dict):
+            continue
+        environment = service.get("environment") or {}
+        if not isinstance(environment, dict):
+            raise CandidateError(f"service {service_name!r} environment is not an object")
+        for key, value in environment.items():
+            if value in (None, ""):
+                continue
+            if key in plaintext_keys:
+                raise CandidateError(
+                    f"service {service_name!r} uses plaintext {key}; a *_FILE binding is required"
+                )
+            if key.endswith("_URL") or key.endswith("_URI"):
+                parsed = urlsplit(str(value))
+                if parsed.password is not None:
+                    raise CandidateError(
+                        f"service {service_name!r} embeds credentials in {key}"
+                    )
+
+
 def base_state(args: argparse.Namespace, config: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
     project_root = args.project_root.resolve(strict=True)
+    require_secret_safe_config(config)
     revision = run("git", "rev-parse", "HEAD", cwd=project_root)
     if REVISION_RE.fullmatch(revision) is None:
         raise CandidateError("source revision is not an exact Git commit")
@@ -271,6 +322,29 @@ def approval_path(receipt_path: Path) -> Path:
     return host_approvals / f"{sha256_file(receipt_path)}.json"
 
 
+def load_canonical_receipt(receipt_path: Path) -> tuple[dict[str, Any], Path, Path]:
+    receipt_path = receipt_path.absolute()
+    receipt_raw = private_file(receipt_path)
+    host_root = candidate_host_root(create=False)
+    resolved_receipt = receipt_path.resolve(strict=True)
+    try:
+        resolved_receipt.relative_to(host_root)
+    except ValueError as error:
+        raise CandidateError("receipt is outside the canonical host candidate root") from error
+    if resolved_receipt.name != "receipt.json":
+        raise CandidateError("candidate receipt must be named receipt.json")
+    candidate_dir = private_directory(resolved_receipt.parent)
+    receipt = load_object(receipt_raw, "candidate receipt")
+    if set(receipt) != RECEIPT_FIELDS or receipt.get("schema_version") != 1:
+        raise CandidateError("unsupported candidate receipt schema")
+    images = receipt.get("images")
+    if not isinstance(images, list) or not images or any(
+        not isinstance(row, dict) or set(row) != IMAGE_FIELDS for row in images
+    ):
+        raise CandidateError("invalid candidate image map")
+    return receipt, resolved_receipt, candidate_dir
+
+
 def create_candidate(args: argparse.Namespace) -> int:
     config = compose_config()
     state, files = base_state(args, config)
@@ -305,25 +379,8 @@ def create_candidate(args: argparse.Namespace) -> int:
 
 
 def validate_candidate(args: argparse.Namespace) -> tuple[dict[str, Any], Path, Path, Path]:
-    receipt_path = args.receipt.absolute()
-    receipt_raw = private_file(receipt_path)
-    host_root = candidate_host_root(create=False)
-    resolved_receipt = receipt_path.resolve(strict=True)
-    try:
-        resolved_receipt.relative_to(host_root)
-    except ValueError as error:
-        raise CandidateError("receipt is outside the canonical host candidate root") from error
-    if resolved_receipt.name != "receipt.json":
-        raise CandidateError("candidate receipt must be named receipt.json")
-    candidate_dir = private_directory(resolved_receipt.parent)
-    receipt = load_object(receipt_raw, "candidate receipt")
-    if set(receipt) != RECEIPT_FIELDS or receipt.get("schema_version") != 1:
-        raise CandidateError("unsupported candidate receipt schema")
-    images = receipt.get("images")
-    if not isinstance(images, list) or not images or any(
-        not isinstance(row, dict) or set(row) != IMAGE_FIELDS for row in images
-    ):
-        raise CandidateError("invalid candidate image map")
+    receipt, resolved_receipt, candidate_dir = load_canonical_receipt(args.receipt)
+    images = receipt["images"]
     activation_path = candidate_dir / "activation-compose.json"
     override_path = candidate_dir / "image-override.json"
     activation_raw = private_file(activation_path)
@@ -389,7 +446,14 @@ def validate_approval(receipt: dict[str, Any], receipt_path: Path, project_root:
         "--dispositions", str(dispositions),
         "--dispositions-hash", approval["dispositions_sha256"],
     ]
-    result = subprocess.run(command, cwd=project_root, check=False)
+    result = subprocess.run(
+        command,
+        cwd=project_root,
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     if result.returncode != 0:
         raise CandidateError("dependency evidence policy rejected the candidate")
     return path
@@ -407,6 +471,92 @@ def validate_command(args: argparse.Namespace, *, gate: bool) -> int:
     return 0
 
 
+def publish_approval(args: argparse.Namespace) -> int:
+    receipt, receipt_path, _ = load_canonical_receipt(args.receipt)
+    project_root = args.project_root.resolve(strict=True)
+    evidence_root = private_directory(STORE_ROOT / "evidence")
+    bundle = args.evidence_bundle.resolve(strict=True)
+    try:
+        bundle.relative_to(evidence_root)
+    except ValueError as error:
+        raise CandidateError("evidence bundle is outside the canonical private store") from error
+    manifest_hash = sha256_file(bundle / "manifest.json")
+    if manifest_hash != args.evidence_manifest_sha256:
+        raise CandidateError("independently reviewed evidence manifest hash mismatch")
+    if HASH_RE.fullmatch(args.dispositions_sha256) is None:
+        raise CandidateError("invalid dispositions hash")
+    dispositions_dir = private_directory(STORE_ROOT / "approvals" / "dispositions")
+    dispositions = dispositions_dir / f"{args.dispositions_sha256}.json"
+    if sha256_bytes(private_file(dispositions)) != args.dispositions_sha256:
+        raise CandidateError("disposition record hash mismatch")
+    policy_hash = sha256_file((project_root / POLICY_PATH).resolve(strict=True))
+    approvals = private_directory(STORE_ROOT / "approvals")
+    host_approvals = private_directory(approvals / machine_id_hash(), create=True)
+    path = host_approvals / f"{sha256_file(receipt_path)}.json"
+    approval = {
+        "schema_version": 1,
+        "candidate_receipt_sha256": sha256_file(receipt_path),
+        "evidence_bundle": str(bundle),
+        "evidence_manifest_sha256": manifest_hash,
+        "policy_sha256": policy_hash,
+        "dispositions_sha256": args.dispositions_sha256,
+        "approved_at": datetime.now(timezone.utc).isoformat(),
+        "approver": args.approver,
+        "review_trigger": args.review_trigger,
+    }
+    if not args.approver.strip() or not args.review_trigger.strip():
+        raise CandidateError("approver and review trigger are required")
+    if receipt["image_id"] == "":
+        raise CandidateError("candidate has no dependency image identity")
+    atomic_private_json(path, approval)
+    print(json.dumps({"approval": str(path), "sha256": sha256_file(path)}, sort_keys=True))
+    return 0
+
+
+def record_activation(args: argparse.Namespace) -> int:
+    receipt, receipt_path, _ = load_canonical_receipt(args.receipt)
+    sources = {
+        "known-good-compose.json": args.known_good_config,
+        "known-good-override.json": args.known_good_override,
+        "known-good-images.tsv": args.known_good_rows,
+    }
+    raw_files = {name: private_file(path) for name, path in sources.items()}
+    store = private_directory(STORE_ROOT)
+    activations = private_directory(store / "activations", create=True)
+    host_activations = private_directory(activations / machine_id_hash(), create=True)
+    temporary = Path(tempfile.mkdtemp(prefix=".activation-", dir=host_activations))
+    os.chmod(temporary, 0o700)
+    try:
+        hashes: dict[str, str] = {}
+        for name, raw in raw_files.items():
+            write_private(temporary / name, raw)
+            hashes[name] = sha256_bytes(raw)
+        ledger = {
+            "schema_version": 1,
+            "activated_at": datetime.now(timezone.utc).isoformat(),
+            "candidate_receipt_sha256": sha256_file(receipt_path),
+            "source_revision": receipt["source_revision"],
+            "image_id": receipt["image_id"],
+            "known_good_files": hashes,
+        }
+        write_private(temporary / "activation.json", canonical_json(ledger) + b"\n")
+        fsync_directory(temporary)
+        destination = host_activations / (
+            datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-")
+            + sha256_file(receipt_path)[:16]
+            + f"-{temporary.name[-6:]}"
+        )
+        os.rename(temporary, destination)
+        fsync_directory(host_activations)
+    finally:
+        if temporary.exists():
+            for child in temporary.iterdir():
+                child.unlink()
+            temporary.rmdir()
+    print(json.dumps({"activation_ledger": str(destination / "activation.json")}, sort_keys=True))
+    return 0
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     commands = result.add_subparsers(dest="command", required=True)
@@ -420,6 +570,19 @@ def parser() -> argparse.ArgumentParser:
         command.add_argument("--recreated-service", action="append", required=True)
         if name != "create":
             command.add_argument("--receipt", type=Path, required=True)
+    approval = commands.add_parser("publish-approval")
+    approval.add_argument("--project-root", type=Path, required=True)
+    approval.add_argument("--receipt", type=Path, required=True)
+    approval.add_argument("--evidence-bundle", type=Path, required=True)
+    approval.add_argument("--evidence-manifest-sha256", required=True)
+    approval.add_argument("--dispositions-sha256", required=True)
+    approval.add_argument("--approver", required=True)
+    approval.add_argument("--review-trigger", required=True)
+    activation = commands.add_parser("record-activation")
+    activation.add_argument("--receipt", type=Path, required=True)
+    activation.add_argument("--known-good-config", type=Path, required=True)
+    activation.add_argument("--known-good-override", type=Path, required=True)
+    activation.add_argument("--known-good-rows", type=Path, required=True)
     return result
 
 
@@ -428,6 +591,10 @@ def main() -> int:
     try:
         if args.command == "create":
             return create_candidate(args)
+        if args.command == "publish-approval":
+            return publish_approval(args)
+        if args.command == "record-activation":
+            return record_activation(args)
         return validate_command(args, gate=args.command == "gate")
     except (
         CandidateError,

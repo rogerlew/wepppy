@@ -632,6 +632,11 @@ retained_candidate_args() {
         --project-root "${PROJECT_ROOT}"
         --deploy-script "${SCRIPT_DIR}/deploy-production.sh"
         --deploy-mode "${DEPLOY_MODE}"
+        --deploy-option "skip_themes=${SKIP_THEMES}"
+        --deploy-option "flush_rq_db=${FLUSH_RQ_DB}"
+        --deploy-option "require_rq_redis=${REQUIRE_RQ_REDIS}"
+        --deploy-option "skip_docker_prune=${SKIP_DOCKER_PRUNE}"
+        --deploy-option "docker_prune_volumes=${DOCKER_PRUNE_VOLUMES}"
     )
     for service in "${BUILD_SERVICES[@]}"; do
         RETAINED_ARGS+=(--build-service "${service}")
@@ -738,10 +743,22 @@ run_rq_control_program() {
         "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
         wctl docker compose exec -T rq-worker /opt/venv/bin/python -c \
         "${program}" "$@"; then
-        timeout --foreground --kill-after=5 \
-            "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
-            wctl docker compose run --rm --no-deps \
-            --entrypoint /opt/venv/bin/python rq-worker -c "${program}" "$@"
+        if [ "${CUTOVER_STARTED:-false}" = true ]; then
+            [ -n "${KNOWN_GOOD_CONFIG:-}" ] && [ -n "${KNOWN_GOOD_OVERRIDE:-}" ] || {
+                echo "✗ Immutable known-good RQ control image is unavailable after cutover began." >&2
+                return 1
+            }
+            timeout --foreground --kill-after=5 \
+                "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
+                docker compose -f "${KNOWN_GOOD_CONFIG}" -f "${KNOWN_GOOD_OVERRIDE}" \
+                run --rm --no-deps --entrypoint /opt/venv/bin/python \
+                rq-worker -c "${program}" "$@"
+        else
+            timeout --foreground --kill-after=5 \
+                "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
+                wctl docker compose run --rm --no-deps \
+                --entrypoint /opt/venv/bin/python rq-worker -c "${program}" "$@"
+        fi
     fi
 }
 
@@ -946,24 +963,6 @@ stop_rq_heartbeat_preserve_fence() {
     fi
 }
 
-if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
-    echo "    Validating retained candidate and independent approval before RQ drain..."
-    run_retained_candidate_check gate
-    suspend_rq_dequeue
-    if ! wait_for_active_rq_jobs; then
-        resume_rq_if_owned
-        exit 1
-    fi
-    echo "    Revalidating retained candidate and evidence after RQ drain..."
-    if ! run_retained_candidate_check gate; then
-        resume_rq_if_owned
-        exit 1
-    fi
-elif [ "${BUILD_RETAINED_CANDIDATE}" = false ] \
-    && [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ]; then
-    assert_no_active_rq_jobs
-fi
-
 CAP_RESCUE_IMAGE=""
 CAP_RESCUE_CONFIG=""
 CAP_RESCUE_OVERRIDE=""
@@ -1002,7 +1001,7 @@ capture_known_good_state() {
             fi
             expected_id="${image_id}"
         done
-        printf '%s\t%s\n' "${service}" "${expected_id}" >> "${KNOWN_GOOD_ROWS}"
+        printf '%s\t%s\t%s\n' "${service}" "${expected_id}" "${#containers[@]}" >> "${KNOWN_GOOD_ROWS}"
     done
     python3 - "${KNOWN_GOOD_ROWS}" > "${KNOWN_GOOD_OVERRIDE}" <<'PY'
 import json
@@ -1011,7 +1010,7 @@ import sys
 
 rows = {}
 for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
-    service, image_id = line.split("\t")
+    service, image_id, _count = line.split("\t")
     rows[service] = {"image": image_id}
 json.dump({"services": rows}, sys.stdout, sort_keys=True, separators=(",", ":"))
 sys.stdout.write("\n")
@@ -1020,14 +1019,64 @@ PY
 }
 
 verify_known_good_state() {
-    while IFS=$'\t' read -r service expected_id; do
+    local expected_args=()
+    while IFS=$'\t' read -r service expected_id expected_count; do
         [ -n "${service}" ] || continue
+        expected_args+=(--expected-service "${service}")
+        mapfile -t restored_containers < <(wctl docker compose ps -q "${service}")
+        [ "${#restored_containers[@]}" -eq "${expected_count}" ] || return 1
         while IFS= read -r container; do
             [ -n "${container}" ] || continue
             [ "$(docker inspect --format '{{.Image}}' "${container}")" = "${expected_id}" ] || return 1
-        done < <(wctl docker compose ps -q "${service}")
-        [ -n "$(wctl docker compose ps -q "${service}")" ] || return 1
+        done < <(printf '%s\n' "${restored_containers[@]}")
     done < "${KNOWN_GOOD_ROWS}"
+    wctl docker compose ps --all --format json \
+        | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
+            validate-ps "${expected_args[@]}" || return 1
+    if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "rq-worker"; then
+        local default_hostname batch_hostname registration
+        default_hostname="$(wctl docker compose exec -T rq-worker hostname)"
+        batch_hostname="$(wctl docker compose exec -T rq-worker-batch hostname)"
+        registration="$(run_rq_control_program '
+import redis
+import sys
+from rq import Worker
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+workers = [worker for worker in Worker.all(connection=connection) if connection.ttl(worker.key) > 0]
+print("{}:{}".format(
+    sum(worker.hostname == sys.argv[1] and "default" in worker.queue_names() for worker in workers),
+    sum(worker.hostname == sys.argv[2] and "batch" in worker.queue_names() for worker in workers),
+))
+' "${default_hostname}" "${batch_hostname}")"
+        [[ "${registration}" =~ ^[1-9][0-9]*:[1-9][0-9]*$ ]] || return 1
+    fi
+}
+
+protect_known_good_images() {
+    local service image_id expected_count retained_tag existing_id
+    while IFS=$'\t' read -r service image_id expected_count; do
+        [ -n "${service}" ] || continue
+        retained_tag="wepppy-retained-rollback:${image_id#sha256:}"
+        existing_id="$(docker image inspect --format '{{.Id}}' "${retained_tag}" 2>/dev/null || true)"
+        if [ -n "${existing_id}" ]; then
+            [ "${existing_id}" = "${image_id}" ] || {
+                echo "✗ Retained rollback tag collision for ${image_id}." >&2
+                return 1
+            }
+        else
+            docker tag "${image_id}" "${retained_tag}"
+        fi
+        [ "$(docker image inspect --format '{{.Id}}' "${retained_tag}")" = "${image_id}" ] || return 1
+    done < "${KNOWN_GOOD_ROWS}"
+}
+
+record_retained_activation() {
+    python3 "${RETAINED_CANDIDATE_HELPER}" record-activation \
+        --receipt "${RESUME_RETAINED_CANDIDATE}" \
+        --known-good-config "${KNOWN_GOOD_CONFIG}" \
+        --known-good-override "${KNOWN_GOOD_OVERRIDE}" \
+        --known-good-rows "${KNOWN_GOOD_ROWS}"
 }
 if [ "${BUILD_RETAINED_CANDIDATE}" = false ] \
     && printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
@@ -1159,6 +1208,24 @@ recover_targeted_cap() {
 }
 trap recover_targeted_cap ERR
 trap 'echo "✗ Deployment interrupted" >&2; false' INT TERM
+
+if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+    echo "    Validating retained candidate and independent approval before RQ drain..."
+    run_retained_candidate_check gate
+    suspend_rq_dequeue
+    if ! wait_for_active_rq_jobs; then
+        resume_rq_if_owned
+        exit 1
+    fi
+    echo "    Revalidating retained candidate and evidence after RQ drain..."
+    if ! run_retained_candidate_check gate; then
+        resume_rq_if_owned
+        exit 1
+    fi
+elif [ "${BUILD_RETAINED_CANDIDATE}" = false ] \
+    && [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ]; then
+    assert_no_active_rq_jobs
+fi
 
 # Build Docker images
 if [ "${TARGETED_BATCH}" = true ]; then
@@ -1676,6 +1743,10 @@ print("{}:{}".format(
     assert_rq_fence
 fi
 
+if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+    protect_known_good_images
+    record_retained_activation
+fi
 CUTOVER_STARTED=false
 resume_rq_if_owned
 

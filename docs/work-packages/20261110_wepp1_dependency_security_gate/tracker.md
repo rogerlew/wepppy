@@ -44,7 +44,7 @@ actual gate rejects native coverage. M4 is not complete.
   workflow after checkpoint approval. Drain RQ jobs while known-good containers
   remain running, gate before stop, pin candidate activation to immutable IDs,
   and automatically restore the exact prior image map on post-stop failure.
-  Implementation is staged and 143 focused local tests pass; independent source
+  Implementation is staged and 148 focused local tests pass; independent source
   review and canonical-container validation remain open. M5 rollout remains
   separately unauthorized.
 

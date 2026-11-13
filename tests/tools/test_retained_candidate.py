@@ -141,6 +141,19 @@ def test_validate_rejects_symlinked_receipt(
         candidate.validate_candidate(_args(project, deploy_script, link))
 
 
+def test_validate_rejects_deploy_option_drift(
+    candidate_environment,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    project, deploy_script, _ = candidate_environment
+    receipt = _create(candidate_environment, capsys)
+    args = _args(project, deploy_script, receipt)
+    args.deploy_option = ["skip_themes=true"]
+
+    with pytest.raises(candidate.CandidateError, match="no longer matches"):
+        candidate.validate_candidate(args)
+
+
 def test_validate_rejects_mode_change(
     candidate_environment,
     capsys: pytest.CaptureFixture[str],
@@ -151,6 +164,27 @@ def test_validate_rejects_mode_change(
 
     with pytest.raises(candidate.CandidateError, match="0600"):
         candidate.validate_candidate(_args(project, deploy_script, receipt))
+
+
+@pytest.mark.parametrize(
+    "environment",
+    [
+        {"SECRET_KEY": "plaintext"},
+        {"RQ_REDIS_URL": "redis://user:password@redis:6379/9"},
+    ],
+)
+def test_create_rejects_plaintext_or_url_embedded_secrets(
+    candidate_environment,
+    monkeypatch: pytest.MonkeyPatch,
+    environment: dict[str, str],
+) -> None:
+    project, deploy_script, _ = candidate_environment
+    config = _config()
+    config["services"]["weppcloud"]["environment"] = environment
+    monkeypatch.setattr(candidate, "compose_config", lambda: config)
+
+    with pytest.raises(candidate.CandidateError, match="plaintext|embeds credentials"):
+        candidate.create_candidate(_args(project, deploy_script))
 
 
 def test_approval_is_derived_from_receipt_hash_and_invokes_exact_subject(
@@ -180,28 +214,25 @@ def test_approval_is_derived_from_receipt_hash_and_invokes_exact_subject(
     disposition = disposition_dir / f"{disposition_hash}.json"
     disposition.write_bytes(disposition_raw)
     disposition.chmod(0o600)
-    host_approvals = candidate.STORE_ROOT / "approvals" / ("a" * 64)
-    host_approvals.mkdir(mode=0o700)
-    approval_path = host_approvals / f"{candidate.sha256_file(receipt_path)}.json"
-    approval = {
-        "schema_version": 1,
-        "candidate_receipt_sha256": candidate.sha256_file(receipt_path),
-        "evidence_bundle": str(bundle),
-        "evidence_manifest_sha256": candidate.sha256_file(manifest),
-        "policy_sha256": candidate.sha256_file(policy),
-        "dispositions_sha256": disposition_hash,
-        "approved_at": candidate.datetime.now(candidate.timezone.utc).isoformat(),
-        "approver": "reviewer",
-        "review_trigger": "new evidence or candidate identity",
-    }
-    approval_path.write_bytes(candidate.canonical_json(approval) + b"\n")
-    approval_path.chmod(0o600)
+    publish_args = argparse.Namespace(
+        project_root=project,
+        receipt=receipt_path,
+        evidence_bundle=bundle,
+        evidence_manifest_sha256=candidate.sha256_file(manifest),
+        dispositions_sha256=disposition_hash,
+        approver="reviewer",
+        review_trigger="new evidence or candidate identity",
+    )
+    assert candidate.publish_approval(publish_args) == 0
+    approval_path = Path(json.loads(capsys.readouterr().out)["approval"])
+    assert approval_path.stat().st_mode & 0o777 == 0o600
     calls: list[list[str]] = []
+    run_kwargs: list[dict[str, object]] = []
 
     def fake_subprocess_run(command, **kwargs):
-        del kwargs
         calls.append(command)
-        return subprocess.CompletedProcess(command, 0)
+        run_kwargs.append(kwargs)
+        return subprocess.CompletedProcess(command, 0, stdout='{"accepted":true}\n', stderr="")
 
     monkeypatch.setattr(candidate.subprocess, "run", fake_subprocess_run)
 
@@ -209,3 +240,46 @@ def test_approval_is_derived_from_receipt_hash_and_invokes_exact_subject(
     command = calls[0]
     assert command[command.index("--image-id") + 1] == _IMAGE_ID
     assert command[command.index("--source-revision") + 1] == _REVISION
+    assert run_kwargs[0]["stdout"] is subprocess.PIPE
+    assert run_kwargs[0]["stderr"] is subprocess.PIPE
+
+    assert candidate.validate_command(
+        _args(project, deploy_script, receipt_path), gate=True
+    ) == 0
+    assert json.loads(capsys.readouterr().out)["receipt"] == str(receipt_path)
+
+
+def test_record_activation_atomically_retains_known_good_files(
+    candidate_environment,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _project, _deploy_script, _ = candidate_environment
+    receipt_path = _create(candidate_environment, capsys)
+    known_files = []
+    for name, raw in (
+        ("compose.json", b'{"services":{}}\n'),
+        ("override.json", b'{"services":{}}\n'),
+        ("images.tsv", b"weppcloud\t" + _IMAGE_ID.encode() + b"\t1\n"),
+    ):
+        path = receipt_path.parent / name
+        path.write_bytes(raw)
+        path.chmod(0o600)
+        known_files.append(path)
+    args = argparse.Namespace(
+        receipt=receipt_path,
+        known_good_config=known_files[0],
+        known_good_override=known_files[1],
+        known_good_rows=known_files[2],
+    )
+
+    assert candidate.record_activation(args) == 0
+    ledger_path = Path(json.loads(capsys.readouterr().out)["activation_ledger"])
+    assert ledger_path.stat().st_mode & 0o777 == 0o600
+    assert ledger_path.parent.stat().st_mode & 0o777 == 0o700
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    assert ledger["candidate_receipt_sha256"] == candidate.sha256_file(receipt_path)
+    assert set(ledger["known_good_files"]) == {
+        "known-good-compose.json",
+        "known-good-override.json",
+        "known-good-images.tsv",
+    }
