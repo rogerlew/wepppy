@@ -65,6 +65,7 @@ def _run_deploy(
     skip_docker_prune: bool = True,
     recovery_health_delay_checks: int = 0,
     recovery_registration_delay_checks: int = 0,
+    running_map_drift_before_stop: bool = False,
 ) -> tuple[subprocess.CompletedProcess[str], list[str]]:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(parents=True)
@@ -256,7 +257,13 @@ if [ "${1:-}" = "inspect" ]; then
         *State.Running*) printf 'true\n' ;;
         *RestartCount*) printf 'container-%s 0\n' "${container}" ;;
         *Image*)
-            if [ "${container}" = "cid-rq-worker-batch" ] && [[ "${FAKE_CONFIG}" == *"wepppy:rollback-test"* ]]; then
+            gate_count=0
+            [ ! -f "${FAKE_GATE_COUNT}" ] || gate_count="$(cat "${FAKE_GATE_COUNT}")"
+            if [ "${FAKE_RUNNING_MAP_DRIFT:-0}" = 1 ] \
+                && [ "${container}" = "cid-rq-worker" ] \
+                && [ "${gate_count}" -ge 3 ]; then
+                printf 'sha256:%064d\n' 2
+            elif [ "${container}" = "cid-rq-worker-batch" ] && [[ "${FAKE_CONFIG}" == *"wepppy:rollback-test"* ]]; then
                 printf 'sha256:%064d\n' 0
             elif [ "${FAKE_CANDIDATE_MISMATCH:-0}" = 1 ] && [ "${container}" = "cid-cap" ]; then
                 printf 'sha256:%064d\n' 0
@@ -555,6 +562,7 @@ exec /bin/cp "$@"
             "FAKE_PS_STARTING": json.dumps(starting_records),
             "KNOWN_GOOD_READINESS_ATTEMPTS": "10",
             "KNOWN_GOOD_READINESS_DELAY_SECONDS": "0.01",
+            "FAKE_RUNNING_MAP_DRIFT": "1" if running_map_drift_before_stop else "0",
         }
     )
     lock_handle = (tmp_path / "deploy.lock").open("a", encoding="utf-8")
@@ -712,6 +720,26 @@ def test_post_drain_gate_failure_releases_fence_without_stopping_services(tmp_pa
     assert not any("stop --timeout" in command for command in commands)
     assert not any("docker compose stop" in command for command in commands)
     assert not any(command.startswith("docker|compose -f") for command in commands)
+
+
+def test_running_map_drift_after_drain_refuses_cutover_and_releases_fence(
+    tmp_path: Path,
+) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_cap_and_renderer(),
+        running_map_drift_before_stop=True,
+    )
+
+    assert result.returncode != 0
+    assert "rq-worker image changed after known-good capture" in result.stderr
+    assert _position(commands, _RQ_SUSPEND) < _position(commands, _RQ_RESUME)
+    assert not any("stop --timeout" in command for command in commands)
+    assert not any("docker compose stop" in command for command in commands)
+    assert not any(
+        command.startswith("docker|compose -f") and " up -d " in command
+        for command in commands
+    )
 
 
 def test_gate_failure_after_stop_restores_prior_map_before_fence_release(tmp_path: Path) -> None:

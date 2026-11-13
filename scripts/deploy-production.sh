@@ -1043,6 +1043,33 @@ PY
     chmod 0600 "${KNOWN_GOOD_OVERRIDE}"
 }
 
+assert_known_good_state_unchanged() {
+    local service expected_id expected_count container current_id
+    while IFS=$'\t' read -r service expected_id expected_count; do
+        [ -n "${service}" ] || continue
+        mapfile -t containers < <(wctl docker compose ps -q "${service}")
+        if [ "${#containers[@]}" -ne "${expected_count}" ]; then
+            echo "✗ ${service} replica count changed after known-good capture." >&2
+            return 1
+        fi
+        for container in "${containers[@]}"; do
+            current_id="$(docker inspect --format '{{.Image}}' "${container}")"
+            if [ "${current_id}" != "${expected_id}" ]; then
+                echo "✗ ${service} image changed after known-good capture." >&2
+                return 1
+            fi
+        done
+    done < "${KNOWN_GOOD_ROWS}"
+}
+
+prepare_retained_cutover() {
+    [ -n "${RESUME_RETAINED_CANDIDATE}" ] || return 0
+    echo "    Running the final complete gate immediately before first stop..."
+    run_retained_candidate_check gate
+    assert_known_good_state_unchanged
+    CUTOVER_STARTED=true
+}
+
 verify_known_good_state_once() {
     local expected_args=()
     while IFS=$'\t' read -r service expected_id expected_count; do
@@ -1367,21 +1394,13 @@ echo ">>> Step 3: Stopping services..."
 if [ "${DEPLOY_MODE}" = "full" ] && [ "${FLUSH_RQ_DB}" = true ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
-    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
-        echo "    Running the final complete gate immediately before first stop..."
-        run_retained_candidate_check gate
-        CUTOVER_STARTED=true
-    fi
+    prepare_retained_cutover
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
 if [ "${DEPLOY_MODE}" = "worker" ] && [ "${TARGETED_BATCH}" = false ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
-    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
-        echo "    Running the final complete gate immediately before first stop..."
-        run_retained_candidate_check gate
-        CUTOVER_STARTED=true
-    fi
+    prepare_retained_cutover
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
 if [ "${TARGETED_BATCH}" = true ]; then
@@ -1508,11 +1527,7 @@ if [ "${DEPLOY_MODE}" = "full" ] \
     && [ "${TARGETED_BATCH}" = false ] && [ "${FLUSH_RQ_DB}" = false ]; then
     suspend_rq_dequeue
     assert_no_active_rq_jobs
-    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
-        echo "    Running the final complete gate immediately before first stop..."
-        run_retained_candidate_check gate
-        CUTOVER_STARTED=true
-    fi
+    prepare_retained_cutover
     run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
 fi
 assert_rq_fence

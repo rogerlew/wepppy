@@ -33,8 +33,9 @@ segmented substitute is not accepted.
   recovery, protects rollback images before cutover, polls recovery health and
   worker registration, rejects the canonical secret inventory by name pattern,
   and publishes approvals with atomic no-replace semantics. The isolated host
-  and canonical disposable Compose runs pass 152 focused deploy/evidence tests,
-  including delayed recovery readiness and a post-stop heartbeat renewal.
+  and canonical disposable Compose runs pass 153 focused deploy/evidence tests,
+  including delayed recovery readiness, a post-stop heartbeat renewal and
+  refusal when the running image/count map changes during the queue drain.
   Independent source re-reviews, exact-host build/evidence and M4 remain open;
   M5 rollout remains unauthorized.
 
