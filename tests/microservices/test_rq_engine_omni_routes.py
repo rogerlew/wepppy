@@ -190,7 +190,9 @@ def _stub_omni(monkeypatch: pytest.MonkeyPatch, *, run_group: str = "") -> None:
     class DummyOmni:
         run_group = ""
 
-        def parse_scenarios(self, scenarios) -> None:
+        def parse_scenarios(self, scenarios, *, precommit_validator=None) -> None:
+            if precommit_validator is not None:
+                precommit_validator()
             return None
 
         def parse_inputs(self, payload) -> None:
