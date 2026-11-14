@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 UTC (independent slice)
-**Current phase**: Dedicated image implementation; sandbox/release gates open
+**Last updated**: 2026-11-14 UTC (reproducible dedicated image locally qualified)
+**Current phase**: Dedicated image re-review; sandbox/release gates open
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **GitHub issues**: [#655](https://github.com/rogerlew/wepppy/issues/655),
@@ -27,12 +27,15 @@
 - [ ] M1: add focused failing IPC, driver, archive, semantic, and sandbox tests.
 - [x] M2: replace pickle with bounded schema-validated data-only IPC.
 - [x] M3 slice: exact driver, NFC/case-fold collisions, and extra prefixes.
-- [ ] Build and qualify the minimal shape-converter-only GDAL 3.12.4/Fiona
-      1.10.1 image; do not change the common WEPPpy image.
+- [x] Build and locally qualify the minimal shape-converter-only GDAL 3.12.4/
+      Fiona 1.10.1 image; common WEPPpy image unchanged.
 - [ ] M3 remainder: compression policy and broader semantic validation.
 - [ ] M4: implement and attest the effective second parser sandbox.
-- [ ] M5: capture the unchanged common-image baseline and dedicated candidate
-      dependency/linkage/scan evidence.
+- [x] M5 candidate: dedicated image dependency/linkage/scan, resolved Compose,
+      and exact-image artifact evidence captured; operator-approved one-worker
+      command passes limiter, metadata, conversion, and cleanup qualification.
+- [x] Dedicated-image correctness, QA, and security re-reviews pass after the
+      one-worker repair; broader M6 and rollout gates remain open.
 - [ ] M6: run change-scoped shape-converter and production-equivalent gates; no
       full repository or unrelated suite.
 - [ ] M6: close code, QA, correctness, and security reviews.
@@ -93,6 +96,32 @@
   source-built Fiona 1.10.1 is the bounded candidate; this does not waive the
   second-sandbox or deployment gates.
 
+- 2026-11-14 06:56 UTC: reproducible dedicated candidate
+  `sha256:d515d75ea603f174aa7b6b36c075f42fb0406cdb17901d60997aa0bbdbb0dff6`
+  passed the then-preserved two-worker command, health, CORS, abuse-control,
+  GeoJSON, GeoParquet, cleanup, and inert legacy-pickle rejection probes. The
+  base digest and Ubuntu snapshot are immutable. Syft/Grype reports 0 Critical,
+  1 High, 315 Medium, 13 Low, and 3 Negligible package records; grouped
+  request-path non-reachability and evidence hashes are retained for independent
+  security review. Trivy's smaller result is supplemental because its matcher
+  omitted a known GDAL advisory.
+
+- 2026-11-14: exact two-worker QA blocked the candidate. In-memory rate/in-flight
+  limits apply once per worker, and conversion metadata can return 404 when the
+  lookup reaches the other worker. The recommended bounded repair is one Uvicorn
+  worker; this finding prompted the explicit operator decision recorded below.
+
+- 2026-11-14: operator approved the recommended one-worker repair. Resolved
+  Compose locks the full command. Exact-image requalification passed health,
+  CORS, GeoJSON, GeoParquet, scratch cleanup, twenty consecutive metadata reads,
+  rate outcomes 200/429/429, and held/competing/released inflight outcomes
+  200/503/200 without disconnected-client tracebacks.
+
+- 2026-11-14: independent correctness, QA, and security re-reviews passed the
+  dedicated-image slice. Persisting complete scan evidence outside `/tmp` remains
+  a Low package-closeout provenance item. The second sandbox remains a release
+  blocker.
+
 ## Handoff
 
 Independent slice proceeds under the operator-approved sequencing amendment.
@@ -104,5 +133,6 @@ candidate under unchanged protections; do not infer approval for privileges or
 topology changes. Compression-policy decision, broader semantic matrix, current
 release dependency evidence, and full conformance review remain open.
 
-Next checkpoint: implement and qualify the dedicated image while preserving the
-existing service/API topology. Keep the common image unchanged and do not deploy.
+Next checkpoint: continue the separately selected second-sandbox work. Before
+full package closeout, persist complete scan evidence outside `/tmp`. Keep the
+common image unchanged and do not deploy.

@@ -41,15 +41,54 @@ common WEPPpy image remains unchanged.
       exact driver, and bounded fixed worker error mapping implemented.
 - [x] (2026-11-14) Independent M3 slice: NFC/case-fold aliases and extra
       incomplete/optional prefixes rejected.
-- [ ] (2026-11-14) Implement and qualify the operator-approved minimal dedicated
-      shape-converter image using GDAL 3.12.4 and Fiona 1.10.1.
+- [x] (2026-11-14 06:56 UTC) Implement and locally qualify the operator-approved
+      minimal dedicated shape-converter image using GDAL 3.12.4 and Fiona 1.10.1.
 - [ ] M3 remainder: compression decision and broader semantic matrix.
 - [ ] M4: implement effective second sandbox and runtime-derived readiness.
-- [ ] M5: capture the unchanged common-image baseline and the dedicated-image
-      dependency/linkage/scan evidence.
+- [x] (2026-11-14) M5 dedicated candidate: image identity,
+      dependency/linkage, resolved Compose, artifact, and vulnerability-scan
+      evidence captured; operator-approved one-worker command passed exact-image
+      abuse-control, metadata, conversion, and cleanup requalification.
+      Common-image source/config was unchanged; rollout evidence remains open.
+- [x] (2026-11-14) Dedicated-image correctness, QA, and security re-reviews pass
+      after the one-worker repair. This does not close broader M6, sandbox, or
+      rollout gates.
 - [ ] M6: validate, review, update GitHub issues, and prepare separate rollout.
 
 ## Surprises & Discoveries
+
+- Starlette 1.3.1 removed the `@app.middleware` convenience decorator. The
+  dedicated image caught this at startup even though the common runtime tests
+  passed. Explicit `BaseHTTPMiddleware` registration is compatible with both
+  runtimes; the rebuilt exact image passed health and real multipart conversions.
+- Trivy's Python constraint matcher omits a known GDAL advisory and therefore is
+  supplemental only. Pinned Syft 1.57.1 / Grype 0.121.3 inventory of exact image
+  `sha256:d515d75ea603f174aa7b6b36c075f42fb0406cdb17901d60997aa0bbdbb0dff6`
+  reports 0 Critical, 1 High, 315 Medium, 13 Low, and 3 Negligible package
+  records. The 315 Medium records collapse to 105 unique advisory IDs because
+  Ubuntu source findings repeat across binary packages. Grouped request-path
+  non-reachability and immutable evidence hashes are retained in the image
+  qualification artifact; independent security review remains required.
+- Initial image review exposed two reproducibility gaps: mutable Ubuntu package
+  resolution and an overridable base-image argument. The final Dockerfile uses
+  the immutable GDAL base digest directly in both stages, resolves APT from
+  snapshot `20261114T060000Z`, labels that snapshot, and asserts the final copied
+  Fiona/GDAL runtime before completing the build.
+- Exact two-worker QA exposed a preexisting cross-process contract defect that
+  unit tests did not reveal. Rate/in-flight state and conversion metadata live in
+  each Starlette application process. The service therefore admits limits once
+  per worker and can return 404 for metadata created by the other worker. One
+  worker is the smallest repair; shared state would violate the package's
+  complexity budget without evidence that one worker misses acceptance needs.
+- The one-worker requalification closed that defect without rebuilding the image:
+  rate count one yielded 200/429/429, a held request forced a competing 503 and
+  then released cleanly, twenty metadata reads all returned 200, and health,
+  CORS, GeoJSON, GeoParquet, and scratch cleanup remained correct. Completing the
+  held request also avoided the earlier disconnected-client traceback noise.
+- Independent correctness, QA, and security re-reviews pass the dedicated-image
+  slice. Security retains one Low package-closeout provenance item: persist the
+  complete 105-unique-advisory scan appendix/raw reports outside `/tmp` and state
+  the embedded-native vulnerability-matching limitation.
 
 - Independent review identified real MultiPatch GeometryCollections. Removing
   Fiona's inactive null coordinates repairs a preexisting Shapely construction
@@ -79,6 +118,24 @@ common WEPPpy image remains unchanged.
   worker. Sandbox claims must not be overstated for that endpoint.
 
 ## Decision Log
+
+- Decision: change the production command from two Uvicorn workers to one.
+  Rationale: exact-command QA proved that the current in-memory abuse controls
+  and conversion metadata cannot satisfy service-level behavior across two
+  processes. One worker preserves the isolated topology and avoids introducing
+  a datastore, but command preservation was an explicit package constraint and
+  therefore needed operator approval. The resolved Compose regression locks the
+  complete one-worker command, and any future worker-count increase requires a
+  reviewed shared-state contract.
+  Date/Author: 2026-11-14, operator and Codex.
+
+- Decision: refactor middleware registration and retain Starlette 1.3.1 in the
+  dedicated image.
+  Rationale: all Starlette versions before 1.3.1 are affected by the form-limit
+  advisory, while 1.3.1 removed the decorator used by the service. Explicit
+  `add_middleware(BaseHTTPMiddleware, dispatch=...)` is the former decorator's
+  underlying behavior, preserves ordering, and works in both runtime versions.
+  Date/Author: 2026-11-14, Codex; operator requested assessment.
 
 - Decision: build a minimal dedicated shape-converter image and upgrade only its
   GDAL/Fiona stack.
@@ -149,6 +206,13 @@ and independent code/correctness/QA/security approvals. No parser dependency or
 container protection changed. The sandbox/readiness gate, compression decision,
 broader semantic matrix, current release evidence, and production deployment
 remain pending; the package is not fully conformant or complete.
+
+The dedicated candidate is now locally qualified. See
+[dedicated-image evidence](../../artifacts/20261114_dedicated_image_qualification.md).
+The image split removed common secrets, mounts, datastore coupling, and unrelated
+source from the resolved service while preserving the outer container controls.
+Exact-image health, GeoJSON, GeoParquet, cleanup, and hostile-IPC probes passed.
+This outcome does not change the open second-sandbox or deployment gates.
 
 ## Context and Orientation
 

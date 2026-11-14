@@ -1,6 +1,6 @@
 # Sandboxed Shapefile Conversion Security Contract
 Status: Implemented with open conformance gaps
-Last Updated: 2026-11-13
+Last Updated: 2026-11-14
 Primary Areas: `docker/docker-compose.dev.yml`, `docker/caddy/Caddyfile`, `wepppy/microservices/*`, `wepppy/all_your_base/geo/geo.py`, `wepppy/weppcloud/*`
 
 ## Contract Status and Conformance
@@ -28,7 +28,7 @@ state; this table does not assert deployed behavior:
 | Parser process boundary | Convert runs Fiona/GDAL in a subprocess with a hard timeout and process-group termination. | Data-only JSON IPC is implemented with byte/depth/value/schema validation and fixed exit-code errors. Second-sandbox containment remains nonconformant. |
 | Runtime containment | Compose enforces non-root, read-only root, dropped capabilities, resource limits, hardened tmpfs, and an internal network. | Partial: production defaults active and required sandbox mode to `container`; the required second parser sandbox in the worker lock-up prevention contract is not provisioned. |
 | Semantic and adversarial validation | Feature and per-feature vertex limits are enforced on convert; focused ZIP, cleanup, timeout, and API tests exist. | Partial: the comprehensive malformed-file fuzz, record-count, geometry-validity, coordinate-range, collision, and dependency-sidecar test matrix below is not fully implemented. |
-| Dependency qualification | April 2026 evidence records Fiona linked to GDAL 3.10.3 and a targeted CVE disposition. | Partial: build and qualify the operator-approved shape-converter-only GDAL 3.12.4/Fiona 1.10.1 image without changing the common WEPPpy image. Capture exact runtime/image/linkage and reachable-vulnerability evidence before release. |
+| Dependency qualification | The dedicated image is locally built from digest-pinned GDAL 3.12.4 with source-built Fiona 1.10.1, hash-locked Python dependencies, exact linkage evidence, real artifact readback, and a final-image scan. The common image is unchanged. | Locally qualified, not deployed: residual findings have request-path non-reachability dispositions pending independent security approval; sandbox and release gates remain open. |
 
 Until the nonconformant and partial items are closed or explicitly risk-accepted,
 the service must not be represented as fully conformant with this contract.
@@ -179,7 +179,7 @@ Property/geometry lengths must match and obey the existing feature limit; each
 geometry obeys the existing vertex limit in both worker and parent.
 
 The existing payload byte cap (default 256 MiB) remains authoritative; read at
-most cap + 1 bytes and reject oversized/non-regular/symlink payloads. Before JSON
+most cap + 1 bytes and reject oversize/non-regular/symlink payloads. Before JSON
 object allocation, scan for container nesting beyond 16 and more than 2,000,000
 JSON values. Reject duplicate keys, trailing data, invalid UTF-8, non-finite
 numbers, and extra/missing fields. A duplicate-key detector may return plain
@@ -228,6 +228,12 @@ build context. Qualification must inspect the resolved Compose service, final
 image, and running container. Matching `container/container` readiness strings
 remain non-evidence for sandbox containment; production readiness is
 nonconformant until the second boundary exists.
+
+Starlette 1.3.1 is required in the dedicated image to close the form-limit
+advisory affecting earlier releases. Register HTTP middleware explicitly through
+`add_middleware(BaseHTTPMiddleware, dispatch=...)`; the removed decorator API is
+not a compatibility reason to retain a vulnerable Starlette release. Preserve
+the existing abuse-control and relay-CORS middleware order and public behavior.
 
 ## Non-Functional Requirements
 - Dedicated container/service (no embedding conversion in existing web app process).
@@ -338,6 +344,10 @@ handle_path /utils/shape-converter/* {
   - Validate parser subprocess sandbox mode (production hard requirement).
 
 #### Performance and concurrency contract
+- Production runs one Uvicorn application worker. Abuse-control counters and
+  conversion metadata are intentionally process-local, so multiple workers would
+  multiply configured limits and make metadata lookup nondeterministic. Scale-up
+  requires a reviewed shared-state contract before increasing the worker count.
 - Bound active requests with middleware abuse controls:
   - `SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL` (default `32`) with immediate `503 service_saturated` when global slots are exhausted.
   - `SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP` (default `8`) with immediate `429 rate_limited` when per-client slots are exhausted.

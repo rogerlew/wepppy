@@ -865,16 +865,22 @@ When resuming Kubernetes work:
 **Link**: [docs/work-packages/20261113_shape_converter_security_conformance/](docs/work-packages/20261113_shape_converter_security_conformance/)
 
 **Scope**: Replace executable parser-worker pickle with bounded data-only IPC,
-enforce exact Shapefile driver identity, close archive/dataset/semantic gaps, and
-run native parsing in an effective second sandbox with runtime-derived readiness.
-Capture exact current parser dependency/linkage evidence without upgrading GDAL.
+enforce exact Shapefile driver identity, close archive/dataset/semantic gaps, run
+native parsing in an effective second sandbox, and isolate the service in its
+operator-approved dedicated GDAL image. The common WEPPpy image remains unchanged.
 
 **Status**: Operator-approved independent slice implements bounded JSON IPC,
 exact-driver enforcement, normalized alias rejection, and extra-prefix rejection.
-Scoped artifact readback and independent reviews are recorded in the package
-slice receipt. Sandbox/readiness, broader semantics, compression policy, dependency
-release evidence, and deployment remain gated. Issues #655/#656 remain open;
-no dependency upgrade or production deployment occurred.
+Scoped artifact readback and independent slice reviews are recorded. Reproducible
+dedicated GDAL 3.12.4/Fiona 1.10.1 image
+`sha256:d515d75ea603f174aa7b6b36c075f42fb0406cdb17901d60997aa0bbdbb0dff6`
+has qualified build/dependency evidence. Exact two-worker QA exposed process-local
+abuse controls and conversion metadata; the operator-approved one-worker command
+now passes exact-image limiter, metadata, conversion, and cleanup requalification.
+Independent correctness, QA, and security image reviews pass. The effective
+second parser sandbox, durable full-scan provenance, broader semantics,
+compression policy, and deployment remain gated. Issues #655/#656 remain open;
+no production deployment occurred.
 
 
 ### Test-Support Production Guardrails and F1-F7 Readiness

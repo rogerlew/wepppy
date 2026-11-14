@@ -1,0 +1,69 @@
+# syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.12.4@sha256:9acfdf967ece13a9a1d9622a494d726aad6b9759aeaae40bbd4d8cb74c843971 AS python-builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update --snapshot 20261114T060000Z && \
+    apt-get install -y --no-install-recommends --snapshot 20261114T060000Z \
+        build-essential \
+        python3-dev \
+        python3-venv && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY docker/requirements-shape-converter-build.txt /tmp/requirements-build.txt
+COPY docker/requirements-shape-converter.txt /tmp/requirements-runtime.txt
+
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install \
+        --disable-pip-version-check \
+        --no-cache-dir \
+        --require-hashes \
+        --requirement /tmp/requirements-build.txt && \
+    GDAL_CONFIG=/usr/bin/gdal-config /opt/venv/bin/pip install \
+        --disable-pip-version-check \
+        --no-build-isolation \
+        --no-binary=fiona \
+        --no-cache-dir \
+        --require-hashes \
+        --requirement /tmp/requirements-runtime.txt && \
+    /opt/venv/bin/python -c \
+        "import fiona; assert fiona.__gdal_version__ == '3.12.4', fiona.__gdal_version__" && \
+    /opt/venv/bin/pip uninstall --yes cython pip setuptools
+
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.12.4@sha256:9acfdf967ece13a9a1d9622a494d726aad6b9759aeaae40bbd4d8cb74c843971 AS runtime
+
+LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy" \
+      org.opencontainers.image.title="WEPPpy shape converter" \
+      org.opencontainers.image.description="Minimal runtime for untrusted shapefile conversion" \
+      org.opencontainers.image.base.name="ghcr.io/osgeo/gdal:ubuntu-small-3.12.4" \
+      org.opencontainers.image.base.digest="sha256:9acfdf967ece13a9a1d9622a494d726aad6b9759aeaae40bbd4d8cb74c843971" \
+      org.opencontainers.image.ubuntu.snapshot="20261114T060000Z"
+
+RUN apt-get update --snapshot 20261114T060000Z && \
+    apt-get upgrade -y --no-install-recommends --snapshot 20261114T060000Z && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd --gid 10001 shape-converter && \
+    useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin shape-converter && \
+    mkdir -p /opt/app && \
+    chown 10001:10001 /opt/app
+
+COPY --from=python-builder /opt/venv /opt/venv
+RUN /opt/venv/bin/python -c \
+        "import fiona; assert fiona.__gdal_version__ == '3.12.4', fiona.__gdal_version__" && \
+    test "$(gdal-config --version)" = "3.12.4"
+COPY --chown=10001:10001 wepppy/__init__.py /opt/app/wepppy/__init__.py
+COPY --chown=10001:10001 wepppy/microservices/__init__.py /opt/app/wepppy/microservices/__init__.py
+COPY --chown=10001:10001 wepppy/microservices/shape_converter /opt/app/wepppy/microservices/shape_converter
+COPY --chown=10001:10001 wepppy/observability /opt/app/wepppy/observability
+
+ENV PATH="/opt/venv/bin:${PATH}" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/opt/app
+
+WORKDIR /opt/app
+USER 10001:10001
+EXPOSE 8060
+
+CMD ["uvicorn", "wepppy.microservices.shape_converter:app", "--host", "0.0.0.0", "--port", "8060", "--timeout-keep-alive", "5"]

@@ -1,8 +1,9 @@
 # Shape-converter security conformance closure
 
-**Status**: Independent IPC/driver/archive slice implemented and locally validated;
-sandbox and release gates remain open. See
-[slice evidence](artifacts/20261114_independent_slice.md).
+**Status**: Independent IPC/driver/archive slice and dedicated image are locally
+validated; sandbox and release gates remain open. See
+[slice evidence](artifacts/20261114_independent_slice.md) and
+[image evidence](artifacts/20261114_dedicated_image_qualification.md).
 
 **Started**: 2026-11-13 Pacific / 2026-11-14 UTC
 
@@ -18,11 +19,11 @@ driver-identity, semantic-validation, adversarial-test, and dependency-evidence
 gaps.
 
 This package preserves the current API, request-scoped cleanup, output formats,
-outer-container hardening, and independent inspect/convert uploads. It does not
-authorize a GDAL upgrade. The shipped GDAL/Fiona linkage and reachable
-vulnerability disposition must be recorded as evidence, but changing the GDAL
-version, build, package source, or ABI belongs to a separate operator-approved
-package.
+outer-container hardening, and independent inspect/convert uploads. The original
+dependency freeze was superseded by the operator only for a minimal
+shape-converter image. The common image remains unchanged. The dedicated image's
+GDAL/Fiona linkage, immutable base/Ubuntu snapshot, and Syft/Grype
+reachable-vulnerability disposition are required evidence.
 
 ## Objectives
 
@@ -60,7 +61,7 @@ package.
 ### Explicitly Out of Scope
 
 - Upgrading, downgrading, rebuilding, repinning, or replacing GDAL, Fiona, PROJ,
-  GEOS, or their system packages.
+  GEOS, or their system packages outside the authorized dedicated image.
 - Adding a parser service, queue, datastore, daemon, network protocol, or new
   deployment topology without a separate operator decision.
 - Shape-converter UI/product features, cross-request staging, or changes to
@@ -129,8 +130,9 @@ The primary failure signatures are:
       no request scratch residue.
 - [ ] Valid point, line, polygon, multipart, null-geometry, GeoJSON, and
       GeoParquet controls retain semantic parity.
-- [ ] Exact current GDAL/Fiona/PROJ/GEOS versions, native linkage, image identity,
-      and reachable-vulnerability dispositions are retained without an upgrade.
+- [x] Exact dedicated-image GDAL/Fiona/PROJ/GEOS versions, native linkage, image
+      identity, and request-path vulnerability dispositions are retained locally;
+      independent review and rollout evidence remain open.
 - [ ] Change-scoped shape-converter tests, production-equivalent runtime checks,
       documentation/static checks, and independent reviews pass.
 
@@ -154,9 +156,9 @@ The primary failure signatures are:
 - The package must capture the running container's `ogr2ogr --version`, Fiona
   linkage, native-library linkage, image identity, package provenance, and
   vulnerability scan/triage.
-- **GDAL upgrades are deferred by operator direction.** Do not edit Dockerfiles,
-  requirements, lockfiles, apt pins, or copied binaries to change GDAL/Fiona/
-  PROJ/GEOS versions in this package.
+- **Common-image GDAL upgrades remain deferred by operator direction.** The
+  dedicated shape-converter image is the sole authorized exception and uses the
+  reviewed GDAL 3.12.4/Fiona 1.10.1 contract.
 - A confirmed reachable Critical dependency issue blocks conformance closure and
   is reported with evidence. It does not authorize an automatic upgrade; open a
   separate decision/package for remediation.
