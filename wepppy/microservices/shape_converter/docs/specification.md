@@ -405,8 +405,11 @@ handle_path /utils/shape-converter/* {
   multiply configured limits and make metadata lookup nondeterministic. Scale-up
   requires a reviewed shared-state contract before increasing the worker count.
 - Bound active requests with middleware abuse controls:
-  - `SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL` (default `32`) with immediate `503 service_saturated` when global slots are exhausted.
-  - `SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP` (default `8`) with immediate `429 rate_limited` when per-client slots are exhausted.
+  - `SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL` (default `1`) with immediate `503 service_saturated` when the single resource envelope is occupied.
+  - `SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP` (default `1`) with immediate `429 rate_limited` when that client already has an active request.
+  - The single-flight defaults are part of the aggregate memory invariant. Do
+    not raise either value without exact-image concurrent near-ceiling evidence
+    and a revised cgroup/resource ADR.
   - `SHAPE_CONVERTER_RATE_LIMIT_COUNT` / `SHAPE_CONVERTER_RATE_LIMIT_WINDOW_SECONDS` (defaults `120` / `60`) for sliding-window request throttling.
 - Per-request timeout:
   - Metadata inspect timeout: 30 seconds.

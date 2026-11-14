@@ -12,8 +12,10 @@ execution mechanism but needs bounded allocation and a strict primitive schema.
 
 Use a configurable 16 MiB parser JSON cap, 128 MiB uncompressed/parser-input
 cap, 320 MiB request-scratch cap, 384 MiB parser address-space limit, and 32 MiB
-serialized-output cap inside a 1.5 GiB container. Retain the feature and vertex
-limits. Apply a maximum JSON container depth of 16 and 2,000,000 JSON values,
+serialized-output cap inside a 1.5 GiB container. Admit one inspect or conversion
+request at a time globally and per client; this single-flight limit is part of
+the memory invariant. Retain the feature and vertex limits. Apply a maximum JSON
+container depth of 16 and 2,000,000 JSON values,
 checked lexically before decoding. Count each container and scalar value (object
 keys are not values). Reject rather than truncate. Empty arrays/objects count as
 one.
@@ -40,8 +42,10 @@ Supported shapefile geometry nesting needs fewer than 16 containers. The
 independent review showed the initial independently configured maxima could
 exceed the cgroup when tmpfs charging, parser RSS, retained archive bytes, JSON
 bytes/text/objects, Shapely objects, and serialized output overlapped. The lower
-limits plus larger cgroup create a conservative envelope for exact-image
-near-ceiling validation. They are not a maximum-workload throughput guarantee.
+limits, larger cgroup, and single-flight admission prevent independently bounded
+requests from multiplying parser address-space and scratch ceilings. They create
+a conservative envelope for exact-image near-ceiling validation, not a
+maximum-workload throughput guarantee.
 
 ## Alternatives Considered
 

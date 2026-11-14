@@ -140,6 +140,8 @@ def test_resolved_shape_converter_uses_isolated_dedicated_image(
     assert shape_service["environment"]["SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES"] == "134217728"
     assert shape_service["environment"]["SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES"] == "402653184"
     assert shape_service["environment"]["SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES"] == "335544320"
+    assert shape_service["environment"]["SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL"] == "1"
+    assert shape_service["environment"]["SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP"] == "1"
     assert shape_service.get("volumes") in (None, [])
     for inherited_key in ("secrets", "env_file", "depends_on"):
         assert not shape_service.get(inherited_key)

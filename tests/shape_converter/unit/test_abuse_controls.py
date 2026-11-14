@@ -13,6 +13,7 @@ from wepppy.microservices.shape_converter.abuse_controls import (
     ClientIdentityResolver,
     InflightRequestLimiter,
     SlidingWindowRateLimiter,
+    load_abuse_control_config,
 )
 
 
@@ -21,6 +22,18 @@ pytestmark = [pytest.mark.unit, pytest.mark.microservice]
 
 def _run(coro):  # noqa: ANN001
     return asyncio.run(coro)
+
+
+def test_default_inflight_limits_preserve_single_request_resource_envelope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL", raising=False)
+    monkeypatch.delenv("SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP", raising=False)
+
+    config = load_abuse_control_config()
+
+    assert config.max_inflight_global == 1
+    assert config.max_inflight_per_ip == 1
 
 
 def test_client_identity_ignores_forwarded_header_when_source_is_untrusted() -> None:

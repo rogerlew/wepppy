@@ -199,6 +199,16 @@ gate; it is not the final parser architecture.
   other services.
   Date/Author: 2026-11-14, operator and Codex.
 
+- Decision: admit one active inspect or conversion request per service and per
+  client by default.
+  Rationale: parser address-space, request scratch, retained input, decoded JSON,
+  geometry, and serialized output ceilings form a conservative envelope only
+  when requests cannot multiply them concurrently beneath the 1.5 GiB cgroup.
+  Raising concurrency requires a revised resource ADR and exact-image concurrent
+  near-ceiling proof; availability does not override the fail-closed invariant.
+  Date/Author: 2026-11-14, Codex under the operator-approved secure-or-stop
+  direction.
+
 - Decision: implement M4 as one lightweight service-local Rust CLI crate, not as
   a `wepppyo3` component, Python extension, or new parser microservice.
   Rationale: the operator set the goal to replace GDAL/Fiona with a safer,

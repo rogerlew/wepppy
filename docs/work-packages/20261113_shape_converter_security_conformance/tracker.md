@@ -95,6 +95,9 @@ pre-cutover oracle
   GDAL/Fiona, PyO3, or another unreviewed parser fallback. This operator decision
   favors converter unavailability over an insecure service and does not affect
   other services.
+- The 1.5 GiB cgroup resource model admits one active inspect or conversion
+  request globally and per client. Increasing concurrency requires a revised ADR
+  and exact-image concurrent near-ceiling evidence.
 - Validation is change-scoped by operator direction. Do not run or claim the full
   repository suite; list every focused module and boundary probe that ran.
 

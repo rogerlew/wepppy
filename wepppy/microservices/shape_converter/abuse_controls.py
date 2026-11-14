@@ -288,12 +288,12 @@ def load_abuse_control_config() -> AbuseControlConfig:
         ),
         max_inflight_global=_safe_int_env(
             "SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL",
-            default=32,
+            default=1,
             minimum=1,
         ),
         max_inflight_per_ip=_safe_int_env(
             "SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP",
-            default=8,
+            default=1,
             minimum=1,
         ),
         trusted_proxy_hops=_safe_int_env(
