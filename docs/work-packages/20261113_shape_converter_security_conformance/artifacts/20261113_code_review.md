@@ -33,3 +33,11 @@
 
 **Decision**: Not reviewed. Critical/High findings must be closed; Medium findings
 require owner, rationale, target date, and operator acceptance.
+
+## Independent slice review - 2026-11-14
+
+Reviewer: `/root/ipc_contract_correctness`. Approved the independent IPC/driver/archive slice,
+conditional on final scoped tests passing. Findings and fixes are recorded in
+[the slice receipt](20261114_independent_slice.md#independent-review-disposition).
+This is not full package approval; sandbox, resource, dependency, and release gates
+remain open. The earlier pending gate applies to full conformance closure.

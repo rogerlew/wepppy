@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 05:13 UTC
-**Current phase**: M0 incomplete; namespace sandbox prerequisite blocked
+**Last updated**: 2026-11-14 UTC (independent slice)
+**Current phase**: Independent IPC/driver/archive slice implemented; sandbox/release gates open
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **GitHub issues**: [#655](https://github.com/rogerlew/wepppy/issues/655),
@@ -22,10 +22,12 @@
 - [ ] M0: complete remaining red matrix and sandbox feasibility gate.
 - [ ] M0: evaluate the proposed sandbox mechanism and approve any dependency.
 - [ ] M0: author/approve the compression-ratio threshold ADR before code changes.
-- [ ] M0: commit a reviewed contract/decision checkpoint before implementation.
+- [x] Independent slice contract checkpoint committed before code: `6712ba631`.
+- [ ] Full M0 sandbox/compression contract decisions remain open.
 - [ ] M1: add focused failing IPC, driver, archive, semantic, and sandbox tests.
-- [ ] M2: replace pickle with bounded schema-validated data-only IPC.
-- [ ] M3: close driver/archive/semantic validation gaps.
+- [x] M2: replace pickle with bounded schema-validated data-only IPC.
+- [x] M3 slice: exact driver, NFC/case-fold collisions, and extra prefixes.
+- [ ] M3 remainder: compression policy and broader semantic validation.
 - [ ] M4: implement and attest the effective second parser sandbox.
 - [ ] M5: capture current dependency/linkage/scan evidence without upgrading GDAL.
 - [ ] M6: run change-scoped shape-converter and production-equivalent gates; no
@@ -75,12 +77,18 @@
   Independent security review supports stopping at M0. See the
   [M0 receipt](artifacts/20261114_m0_baseline_and_sandbox_probe.md).
 
+- 2026-11-14: independent slice approved by operator, contract checkpoint committed,
+  184 consolidated tests passed plus 45 IPC-module tests after the last regression
+  addition; four disposable-container semantic cases passed. Independent reviews
+  approved the slice; full conformance remains open.
+
 ## Handoff
 
-M0 is incomplete. Read the [M0 receipt](artifacts/20261114_m0_baseline_and_sandbox_probe.md)
-before resuming. Decide whether to authorize a bounded alternative mechanism
-evaluation under unchanged protections or amend sequencing for independent
-IPC/archive fixes. Do not infer authorization for privilege or topology changes.
-Remaining red matrix, dependency evaluation, compression-policy decision,
-contract checkpoint, M1-M6, and closure reviews remain pending. No production
-code, candidate build, dependency upgrade, deployment, or issue closure occurred.
+Independent slice proceeds under the operator-approved sequencing amendment.
+Reviewed contract checkpoint: `6712ba631`. See
+[slice evidence](artifacts/20261114_independent_slice.md) for implementation,
+validation, independent reviews, and remaining risks. No production deployment
+or dependency upgrade occurred. Continue with a separately selected sandbox
+candidate under unchanged protections; do not infer approval for privileges or
+topology changes. Compression-policy decision, broader semantic matrix, current
+release dependency evidence, and full conformance review remain open.

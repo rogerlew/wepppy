@@ -16,14 +16,15 @@ issues #655 and #656. By operator decision, that package must record current
 GDAL/Fiona linkage and reachable-vulnerability evidence but must not upgrade,
 rebuild, or repin GDAL; dependency replacement belongs to a separate package.
 
-The 2026-11-13 review found the following current state:
+The 2026-11-14 independent remediation slice has the following source/local-test
+state; this table does not assert deployed behavior:
 
 | Boundary | Current evidence | Status |
 | --- | --- | --- |
-| ZIP admission and extraction | Size/member quotas, path containment, extension policy, case-insensitive duplicate detection, special-file rejection, and request-scoped extraction are implemented in `archive_validation.py`. | Partial: no compression-ratio policy or Unicode-normalized collision check despite requirements below. |
-| Dataset selection | `select_single_shapefile_dataset(...)` requires one complete shared-prefix `.shp/.shx/.dbf` set and rejects multiple complete datasets. | Implemented. |
-| Format/driver identity | Convert opens only through Fiona with `enabled_drivers=["ESRI Shapefile"]`; `.shp` and DBF headers also receive limited direct checks. | Partial: retain an explicit exact-driver assertion and disguised non-shapefile regression so extension alone never becomes the trust boundary. |
-| Parser process boundary | Convert runs Fiona/GDAL in a subprocess with a hard timeout and process-group termination. | Nonconformant: worker output uses `pickle`, so a compromised parser can send an executable payload to the parent. |
+| ZIP admission and extraction | Size/member quotas, path containment, extension policy, case-insensitive duplicate detection, special-file rejection, and request-scoped extraction are implemented in `archive_validation.py`. | Partial: NFC/case-fold collision rejection is implemented; compression-ratio policy remains pending. |
+| Dataset selection | `select_single_shapefile_dataset(...)` requires one complete shared-prefix `.shp/.shx/.dbf` set and rejects additional complete or incomplete prefixes. | Implemented. |
+| Format/driver identity | Convert opens only through Fiona with `enabled_drivers=["ESRI Shapefile"]`; `.shp` and DBF headers also receive limited direct checks. | Locally validated: opened driver identity is asserted before data access; disguised GeoJSON is rejected. |
+| Parser process boundary | Convert runs Fiona/GDAL in a subprocess with a hard timeout and process-group termination. | Data-only JSON IPC is implemented with byte/depth/value/schema validation and fixed exit-code errors. Second-sandbox containment remains nonconformant. |
 | Runtime containment | Compose enforces non-root, read-only root, dropped capabilities, resource limits, hardened tmpfs, and an internal network. | Partial: production defaults active and required sandbox mode to `container`; the required second parser sandbox in the worker lock-up prevention contract is not provisioned. |
 | Semantic and adversarial validation | Feature and per-feature vertex limits are enforced on convert; focused ZIP, cleanup, timeout, and API tests exist. | Partial: the comprehensive malformed-file fuzz, record-count, geometry-validity, coordinate-range, collision, and dependency-sidecar test matrix below is not fully implemented. |
 | Dependency qualification | April 2026 evidence records Fiona linked to GDAL 3.10.3 and a targeted CVE disposition. | Partial: capture exact current runtime/image/linkage and reachable-vulnerability evidence. A GDAL upgrade is explicitly deferred to a separate package. |
@@ -183,7 +184,10 @@ JSON values. Reject duplicate keys, trailing data, invalid UTF-8, non-finite
 numbers, and extra/missing fields. A duplicate-key detector may return plain
 JSON dictionaries only; no extensible object construction hooks are permitted.
 Worker output is atomically renamed within request scratch. Parser decode/schema
-errors use fixed messages without uploaded values or filesystem paths.
+errors use fixed messages without uploaded values or filesystem paths. The
+parent discards worker stdout/stderr rather than buffering untrusted diagnostics;
+exit codes 4 and 5 select the existing feature/vertex quota errors, and other
+nonzero exits select a fixed parse error. Standalone worker stderr stays generic.
 See [ADR-0142](../../../../docs/adrs/ADR-0142-shape-parser-ipc-bounds.md).
 
 Immediately after Fiona open with the ESRI Shapefile allowlist, assert the opened
@@ -196,6 +200,11 @@ requires one logical NFC/case-folded prefix across all admitted shapefile sideca
 including optional and incomplete prefixes; stripped `.shp.xml`/`.qmd` files
 remain excluded. Reject ambiguity with `invalid_shapefile`. Existing quotas remain;
 no new compression-ratio threshold is introduced in this independent slice.
+For users: archives must contain one dataset, and duplicate filename aliases or
+additional sidecar prefixes are rejected. Very large valid conversions can now
+reach the JSON value budget before the older byte/feature caps; errors are
+explicit and no partial output is returned. Operators must ship parent and worker
+together and must not interpret matching readiness mode strings as containment.
 
 Compatibility and regression plan: this is request-internal IPC, with no persisted
 run-data migration. Parent and worker must ship together; legacy pickle is rejected

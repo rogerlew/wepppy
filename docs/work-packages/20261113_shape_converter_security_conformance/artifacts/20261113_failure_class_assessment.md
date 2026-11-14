@@ -38,3 +38,12 @@ FC-11 requires parity evidence but does not justify routing inspect through GDAL
 If discovery identifies another parser output consumer, native open, archive
 extractor, or readiness claimant, add it before implementation continues. Closure
 of only the originally reported call site is insufficient.
+
+## Independent slice disposition - 2026-11-14
+
+FC-01, FC-04, FC-05, and FC-07 have source fixes and focused local evidence in
+[the slice receipt](20261114_independent_slice.md). FC-12 diagnostic ingestion,
+decoder errors, and CRS/multipart error mapping are repaired; full resource and
+containment acceptance remains pending. FC-02/03/06/08/10 remain open. FC-09/11
+retain scoped baseline coverage. Shared archive consumers are assessed in the
+receipt; this does not assert their full workflow validation.

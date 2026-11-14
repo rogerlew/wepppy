@@ -9,7 +9,6 @@ install_safe_logging(SHAPE)
 
 import argparse
 import collections.abc as cabc
-import pickle
 import sys
 from pathlib import Path
 
@@ -17,6 +16,7 @@ import fiona
 import fiona.errors as fiona_errors
 
 from .crs import parse_source_crs
+from .parser_ipc import write_payload
 
 _PARSER_GDAL_OPTIONS = {
     "CPL_VSIL_CURL_ALLOWED_EXTENSIONS": "",
@@ -44,6 +44,8 @@ def _load_shapefile_payload(
                 shp_path.as_posix(),
                 enabled_drivers=_ALLOWED_OGR_DRIVERS,
             ) as dataset:
+                if dataset.driver != "ESRI Shapefile":
+                    raise ValueError("Unexpected parser driver.")
                 raw_bounds = dataset.bounds
                 source_bounds = (
                     float(raw_bounds[0]),
@@ -64,19 +66,17 @@ def _load_shapefile_payload(
                     if raw_properties is None:
                         normalized_properties: dict[str, object] = {}
                     elif isinstance(raw_properties, cabc.Mapping):
-                        normalized_properties = {
-                            str(key): value for key, value in raw_properties.items()
-                        }
+                        normalized_properties = dict(raw_properties)
+                        if any(type(key) is not str for key in normalized_properties):
+                            raise ValueError("Invalid property key.")
                     else:
-                        normalized_properties = {
-                            str(key): value for key, value in dict(raw_properties).items()
-                        }
+                        raise ValueError("Invalid properties object.")
 
                     geometry_payload = feature.get("geometry")
                     if geometry_payload is None:
                         normalized_geometry = None
                     elif isinstance(geometry_payload, cabc.Mapping):
-                        normalized_geometry = dict(geometry_payload)
+                        normalized_geometry = _normalize_geometry(geometry_payload)
                         vertex_count = _count_feature_vertices(normalized_geometry)
                         if vertex_count > max_vertices_per_feature:
                             raise OverflowError(
@@ -115,6 +115,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--shp-path", required=True)
     parser.add_argument("--output-path", required=True)
+    parser.add_argument("--max-payload-bytes", required=True, type=int)
     parser.add_argument("--max-features", required=True, type=int)
     parser.add_argument("--max-vertices-per-feature", required=True, type=int)
     return parser
@@ -142,19 +143,40 @@ def main(argv: list[str] | None = None) -> int:
             max_vertices_per_feature=max_vertices_per_feature,
         )
     except Exception as exc:  # noqa: BLE001
-        # Worker boundary: parent maps this stderr text into canonical API errors.
-        print(safe_text(exc, source_profile=current_profile(SHAPE)), file=sys.stderr)
+        # Worker boundary: fixed exit codes map to canonical parent errors.
+        if isinstance(exc, OverflowError) and str(exc).startswith("vertex_limit_exceeded:"):
+            print("vertex_limit_exceeded: configured vertex limit exceeded.", file=sys.stderr)
+            return 5
+        elif isinstance(exc, OverflowError):
+            print("Feature count exceeded limit.", file=sys.stderr)
+            return 4
+        else:
+            print("Parser worker failed to parse the dataset.", file=sys.stderr)
         return 1
 
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with output_path.open("wb") as handle:
-            pickle.dump(payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    except OSError as exc:
-        print(safe_text(f"Failed to write parser payload: {exc}", source_profile=current_profile(SHAPE)), file=sys.stderr)
+        write_payload(output_path, payload, max_bytes=args.max_payload_bytes,
+                      max_features=max_features, max_vertices=max_vertices_per_feature)
+    except (OSError, ValueError, TypeError, OverflowError, RecursionError):
+        print("Failed to write valid parser payload.", file=sys.stderr)
         return 3
 
     return 0
+
+def _normalize_geometry(geometry: cabc.Mapping) -> dict:
+    normalized = dict(geometry)
+    if normalized.get("type") == "GeometryCollection":
+        if normalized.get("coordinates") is None:
+            normalized.pop("coordinates", None)
+        members = normalized.get("geometries")
+        if not isinstance(members, (list, tuple)):
+            raise ValueError("Invalid geometry collection.")
+        normalized["geometries"] = [_normalize_geometry(member) for member in members]
+    elif normalized.get("geometries") is None:
+        normalized.pop("geometries", None)
+    return normalized
+
 
 def _count_feature_vertices(geometry: dict[str, object]) -> int:
     geometry_type = geometry.get("type")

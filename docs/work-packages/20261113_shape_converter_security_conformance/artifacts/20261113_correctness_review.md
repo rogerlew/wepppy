@@ -32,3 +32,11 @@ publishing a partial or stale output and must preserve canonical error behavior.
 
 **Decision**: Not reviewed. File existence, HTTP success, or job completion alone
 does not establish correctness.
+
+## Independent slice review - 2026-11-14
+
+Reviewer: `/root/ipc_contract_correctness`. Approved the independent IPC/driver/archive slice,
+conditional on final scoped tests passing. Findings and fixes are recorded in
+[the slice receipt](20261114_independent_slice.md#independent-review-disposition).
+This is not full package approval; sandbox, resource, dependency, and release gates
+remain open. The earlier pending gate applies to full conformance closure.

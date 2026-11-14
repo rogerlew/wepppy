@@ -7,6 +7,7 @@ import io
 import re
 import shutil
 import stat
+import unicodedata
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
@@ -150,7 +151,7 @@ def validate_and_extract_zip_archive(
 
             for member in members:
                 normalized_path = _validate_member_path(member.filename, limits=active_limits)
-                normalized_key = normalized_path.as_posix().lower()
+                normalized_key = normalized_path.as_posix().casefold()
                 if normalized_key in normalized_paths_seen:
                     raise ShapeConverterError(
                         code="invalid_archive",
@@ -278,7 +279,7 @@ def _validate_archive_file_type(*, archive_name: str, archive_bytes: bytes) -> N
 
 
 def _validate_member_path(raw_name: str, *, limits: ArchiveLimits) -> PurePosixPath:
-    normalized = raw_name.replace("\\", "/")
+    normalized = unicodedata.normalize("NFC", raw_name.replace("\\", "/"))
     normalized = normalized.strip()
 
     if not normalized:

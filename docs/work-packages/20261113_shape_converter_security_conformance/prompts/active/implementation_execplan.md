@@ -33,15 +33,27 @@ PROJ, or GEOS.
 - [ ] M0: approve a sandbox mechanism. Bubblewrap startup prerequisite failed
       under existing restrictions; independent security review confirms stop gate.
 - [ ] M0: approve a compression-ratio threshold ADR if the control is retained.
-- [ ] M0: amend/review the canonical contract and commit a checkpoint ancestor.
+- [x] (2026-11-14) Independent slice contract reviewed and committed as
+      checkpoint ancestor `6712ba631`; full sandbox/compression decisions pending.
 - [ ] M1: retain focused failing tests at each confirmed boundary.
-- [ ] M2: implement bounded data-only IPC and exact-driver enforcement.
-- [ ] M3: close archive, dataset, and semantic-validation gaps.
+- [x] (2026-11-14) Independent M2: data-only JSON IPC, structural budgets,
+      exact driver, and bounded fixed worker error mapping implemented.
+- [x] (2026-11-14) Independent M3 slice: NFC/case-fold aliases and extra
+      incomplete/optional prefixes rejected.
+- [ ] M3 remainder: compression decision and broader semantic matrix.
 - [ ] M4: implement effective second sandbox and runtime-derived readiness.
 - [ ] M5: capture current dependency evidence without upgrading GDAL.
 - [ ] M6: validate, review, update GitHub issues, and prepare separate rollout.
 
 ## Surprises & Discoveries
+
+- Independent review identified real MultiPatch GeometryCollections. Removing
+  Fiona's inactive null coordinates repairs a preexisting Shapely construction
+  failure; both output formats now receive direct artifact readback coverage.
+- Review also exposed uncaught CRSError/EmptyPartError/IndexError at post-decode
+  construction. Narrow catches now return fixed canonical errors. Worker output
+  pipes were replaced with DEVNULL plus fixed quota exit codes, removing parent
+  diagnostic allocation and UTF-8 decoding exposure.
 
 - (2026-11-14) Both user-namespace `unshare` and actual Bubblewrap startup
   failed with permission errors under current container restrictions. This is
@@ -113,14 +125,13 @@ PROJ, or GEOS.
 
 ## Outcomes & Retrospective
 
-M0 is incomplete at the sandbox feasibility gate. The nine scoped modules pass
-(136 tests); direct probes reproduce executable IPC, Unicode/case-fold alias,
-and extra-prefix admission. Bubblewrap cannot initialize under the tested
-restrictions. The [M0 receipt](../../artifacts/20261114_m0_baseline_and_sandbox_probe.md)
-records image identity, commands, results, independent security review, and
-resume options. No production code, contract checkpoint, candidate build, full
-conformance validation, dependency upgrade, issue closure, or deployment occurred.
-M1-M6 remain pending; do not bypass M0 on resume.
+The authorized independent slice is implemented after reviewed contract checkpoint
+`6712ba631`. See [slice evidence](../../artifacts/20261114_independent_slice.md)
+for red/green tests, real-worker artifacts, disposable hardened-container probes,
+and independent code/correctness/QA/security approvals. No parser dependency or
+container protection changed. The sandbox/readiness gate, compression decision,
+broader semantic matrix, current release evidence, and production deployment
+remain pending; the package is not fully conformant or complete.
 
 ## Context and Orientation
 
@@ -442,3 +453,6 @@ gates.
 
 Revision note (2026-11-14): recorded scoped baseline, direct red observations,
 failed sandbox prerequisite, and independent review; retained M0 stop gate.
+
+Revision note (2026-11-14, independent slice): operator-approved sequencing is
+implemented; record local evidence separately from remaining sandbox/release gates.

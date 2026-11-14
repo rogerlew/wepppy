@@ -1,7 +1,8 @@
 # Shape-converter security conformance closure
 
-**Status**: M0 incomplete; namespace sandbox prerequisite blocked.
-See [baseline and probe evidence](artifacts/20261114_m0_baseline_and_sandbox_probe.md).
+**Status**: Independent IPC/driver/archive slice implemented and locally validated;
+sandbox and release gates remain open. See
+[slice evidence](artifacts/20261114_independent_slice.md).
 
 **Started**: 2026-11-13 Pacific / 2026-11-14 UTC
 
