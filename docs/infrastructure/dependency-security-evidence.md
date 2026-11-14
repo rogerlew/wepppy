@@ -93,6 +93,11 @@ running, reruns the complete gate, activates only receipt `sha256:` IDs with
 pull/build disabled, and restores the exact pre-cutover image map on later
 failure. Generic `--skip-build` remains rejected.
 
+Receipt configuration excludes top-level Compose `x-` extensions after Compose
+has expanded their anchors. These are unused metadata and can contain wctl's
+random temporary env-file path. All effective services, environment values,
+mounts, secrets, networks and volumes remain bound by the configuration hash.
+
 Provision the operator-owned authority once with a restrictive umask. Do not run
 these commands as a different account from the deployment operator:
 

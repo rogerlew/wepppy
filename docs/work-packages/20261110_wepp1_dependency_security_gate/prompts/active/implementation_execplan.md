@@ -24,6 +24,16 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-14 UTC) Exact f6 validation passed: 13,904 Python tests,
+  437 skipped, 197 focused tests, frontend lint and 1,082 Jest tests. Fresh
+  three-host evidence passed with Roger's explicit accepted-risk findings and
+  accepted native coverage gaps; no coverage was falsely labeled clean.
+- [ ] (2026-11-14 UTC) Execute Roger-authorized wepp1/wepp2/wepp3 deployment
+  and coordinated Redis rotation. First attempt stopped before service changes
+  on unused Compose extension metadata containing a random env-file path.
+  Correct the comparison, run focused regressions only, rebuild exact candidates
+  and record their activation and credential-rotation readbacks.
+
 - [ ] (2026-11-13 UTC) Exact three-host preparation exposed two fail-closed
   blockers before activation. Roger approved removal of legacy credential-bearing
   `DATABASE_URL` and `SQLALCHEMY_DATABASE_URI` values on wepp1/wepp2 after exact
@@ -279,6 +289,13 @@ segmented substitute is not accepted.
 
 ## Surprises & Discoveries
 
+Rendered Compose retains `x-wepppy-service.env_file` with wctl's randomly named
+temporary file even though service environments are already expanded. Hashing
+that unused metadata made every retained resume reject unchanged services.
+Exclude top-level `x-` metadata from new receipts; retain effective settings.
+The installed RQ CLI also rejects `rq-info --detailed`; direct read-only registry
+checks confirmed 21 idle workers and zero queued/started jobs before rollout.
+
 - (2026-11-13 UTC) Wepp3's pre-existing dependency-security store root was mode
   0755 even though its children were newly created as 0700. The retained helper
   correctly rejects that authority boundary. The root is now 0700 on wepp1,
@@ -441,6 +458,13 @@ not collected by unittest, so both runners are required for upstream evidence.
   Evidence: `.github/forest_workflows/npm-tests.yml`.
 
 ## Decision Log
+
+- Decision (Roger, 2026-11-14 UTC): deploy the security-fix release under the
+  amended residual-risk exception and rotate shared Redis credentials across
+  all three hosts. Do not rerun the full suite. Apply the bounded receipt fix
+  with focused checks and fresh source-bound evidence; retain the original
+  receipt history. Existing unresolved findings should not delay identified
+  security fixes. See `artifacts/20261113_gdal_residual_risk_exception.md`.
 
 - Decision (2026-11-13): extend the reviewed retained-candidate contract to the
   dedicated wepp3 fork/archive worker instead of bypassing the new common-image
@@ -644,6 +668,11 @@ not collected by unittest, so both runners are required for upstream evidence.
   Date/Author: 2026-11-11, operator.
 
 ## Outcomes & Retrospective
+
+2026-11-14 execution is authorized and underway. The first activation correctly
+left running services untouched on a configuration mismatch, but the mismatch
+was nonruntime metadata. Deployment completion and Redis rotation remain open;
+the prior full-suite result is retained rather than rerun.
 
 - (2026-11-13 UTC) `F6-RU-01` is implemented and independently approved at
   `cb839e7d7`. Iterative review found that selected-driver opening alone was

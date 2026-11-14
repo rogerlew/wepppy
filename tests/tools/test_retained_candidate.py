@@ -134,6 +134,22 @@ def test_create_uses_once_resolved_expected_ids_instead_of_mutable_tags(
     assert inspected == [_IMAGE_ID] * len(args.recreated_service)
 
 
+def test_extension_temp_path_drift_preserves_gate_but_service_drift_fails(
+    candidate_environment, capsys, monkeypatch,
+) -> None:
+    project, deploy_script, _ = candidate_environment
+    config = _config()
+    config["x-wepppy-service"] = {"env_file": ["/tmp/wctl2-env-first.env"]}
+    monkeypatch.setattr(candidate, "compose_config", lambda: config)
+    receipt = _create(candidate_environment, capsys)
+    config["x-wepppy-service"]["env_file"] = ["/tmp/wctl2-env-next.env"]
+    _, _, activation, _ = candidate.validate_candidate(_args(project, deploy_script, receipt))
+    assert "x-wepppy-service" not in json.loads(activation.read_text())
+    config["services"]["weppcloud"]["environment"] = {"CHANGED": "true"}
+    with pytest.raises(candidate.CandidateError, match="no longer matches"):
+        candidate.validate_candidate(_args(project, deploy_script, receipt))
+
+
 def test_create_accepts_wepp3_fork_archive_common_image(
     candidate_environment,
     capsys: pytest.CaptureFixture[str],

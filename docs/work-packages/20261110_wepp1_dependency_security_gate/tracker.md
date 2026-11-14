@@ -2,6 +2,16 @@
 
 ## Quick Status
 
+Current execution (2026-11-14 UTC): Roger authorizes deployment and coordinated
+Redis rotation on wepp1/wepp2/wepp3 under the amended release exception. The
+exact f6 candidate passed 13,904 Python tests (437 skipped), focused checks and
+frontend checks; do not rerun the full suite. All three fresh evidence bundles
+passed with explicit accepted findings and native coverage gaps. First wepp1
+activation stopped before service changes on random temporary-path drift in
+unused Compose metadata. Correct that receipt comparison, run focused deploy
+regressions, rebuild source-bound candidates and resume rollout. Earlier
+unauthorized/blocking status below is historical and superseded by this entry.
+
 Current direction (Roger, corrected 2026-11-13): defer the GDAL upgrade and
 custom GDAL/Rasterio compilation, but implement upload-boundary format/driver
 enforcement as `F6-RU-01`. The earlier record that deferred both paths was an

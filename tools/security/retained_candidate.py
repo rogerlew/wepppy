@@ -231,6 +231,9 @@ def require_secret_safe_config(config: dict[str, Any]) -> None:
 
 def base_state(args: argparse.Namespace, config: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
     project_root = args.project_root.resolve(strict=True)
+    # Compose has already expanded anchors into services. Extension metadata
+    # has no runtime effect and can retain wctl's per-invocation temp env path.
+    config = {key: value for key, value in config.items() if not key.startswith("x-")}
     require_secret_safe_config(config)
     revision = run("git", "rev-parse", "HEAD", cwd=project_root)
     if REVISION_RE.fullmatch(revision) is None:
