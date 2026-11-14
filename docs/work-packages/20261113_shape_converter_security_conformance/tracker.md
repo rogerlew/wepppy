@@ -33,7 +33,8 @@
 - [ ] M6: run change-scoped shape-converter and production-equivalent gates; no
       full repository or unrelated suite.
 - [ ] M6: close code, QA, correctness, and security reviews.
-- [ ] Comment on or close #655/#656 with exact candidate evidence.
+- [x] Comment on #655/#656 with local implementation and bounded evidence;
+      both remain open pending their remaining acceptance/disposition.
 - [ ] Complete authorized rollout separately; do not imply deployment from local
       or forest1 validation.
 

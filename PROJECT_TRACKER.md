@@ -4,6 +4,8 @@ Completed locally: [Safe traceback and exceptional-path secret sanitization](doc
 
 Completed on forest: [Status and preflight WebSocket run authorization](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md) - Ratified run-bound credentials, full regression, five-service cutover and 27 real-browser assertions verified; NFS cleanup recovery retained. Production rollout remains pending separate authorization.
 
+Independent IPC/driver/archive slice locally validated: [Shape-converter security conformance closure](docs/work-packages/20261113_shape_converter_security_conformance/package.md) - High parser-boundary remediation for executable worker IPC (#655), the ineffective second sandbox (#656), and related archive/driver/semantic gaps. Validation is change-scoped; GDAL upgrade is explicitly deferred; JSON IPC and admission fixes implemented; sandbox prototype remains blocked; no deployment.
+
 Implemented; runtime acceptance blocked: [Test-support production guardrails and F1-F7 readiness](docs/work-packages/20261111_test_support_production_guardrails/package.md) - F7 defaults the runtime profile to production, excludes support routes from production, and reuses short-lived WEPP_AUTH credentials through automatic wctl/Playwright injection. No smoke markers or new static secret. Closure requires F6 M4, one combined F1-F7 regression receipt, and a reviewed non-executed deployment-validation plan.
 
 Ready for canary handoff: [Declarative DEM vertical slice](docs/work-packages/20261110_declarative_dem_vertical_slice/package.md) — reviewed implementation and inactive open-wepp-org receiving package committed. Lifecycle/artifact/failure gates pass; broad continuations retain one confirmed unrelated baseline assertion. Live image/runtime/viewing acceptance and package closure remain pending.
@@ -852,6 +854,27 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+
+### Shape-Converter Security Conformance Closure
+
+**Started**: 2026-11-13 Pacific / 2026-11-14 UTC
+
+**Priority/Security**: High / `severity:high`
+
+**Link**: [docs/work-packages/20261113_shape_converter_security_conformance/](docs/work-packages/20261113_shape_converter_security_conformance/)
+
+**Scope**: Replace executable parser-worker pickle with bounded data-only IPC,
+enforce exact Shapefile driver identity, close archive/dataset/semantic gaps, and
+run native parsing in an effective second sandbox with runtime-derived readiness.
+Capture exact current parser dependency/linkage evidence without upgrading GDAL.
+
+**Status**: Operator-approved independent slice implements bounded JSON IPC,
+exact-driver enforcement, normalized alias rejection, and extra-prefix rejection.
+Scoped artifact readback and independent reviews are recorded in the package
+slice receipt. Sandbox/readiness, broader semantics, compression policy, dependency
+release evidence, and deployment remain gated. Issues #655/#656 remain open;
+no dependency upgrade or production deployment occurred.
 
 
 ### Test-Support Production Guardrails and F1-F7 Readiness

@@ -27,8 +27,7 @@ The earlier M0 disposable executable canary remains the direct FC-01 red evidenc
 
 ## Implementation and validation
 
-Contract checkpoint: `6712ba631`. Implementation is the following local commit
-(recorded in Git history); no code was changed before that checkpoint.
+Contract checkpoint: `6712ba631`. Implementation commit: `031facf92`; no code was changed before that checkpoint.
 
 Implemented strict JSON IPC (no pickle imports), descriptor-based payload file
 admission, byte/depth/value/schema/finite-number/cardinality/coordinate checks,
@@ -97,3 +96,10 @@ Scoped package/specification/PROJECT_TRACKER Markdown lint passed. ADR date
 validation and ADR lint passed at the checkpoint. Test-stub validation passed;
 broad-exception enforcement introduced no new broad catches. The package and
 PROJECT_TRACKER are updated; unrelated preexisting edits remain preserved.
+
+## Issue updates
+
+Posted scoped evidence to [#655](https://github.com/rogerlew/wepppy/issues/655#issuecomment-6872406840)
+and retained the sandbox blocker on
+[#656](https://github.com/rogerlew/wepppy/issues/656#issuecomment-6872407090).
+Both remain open. Commits are local; this session did not push or deploy them.
