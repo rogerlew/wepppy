@@ -50,7 +50,7 @@ loader. Fiona and pip were absent from the final runtime.
 
 The no-mount candidate returned a valid one-feature GeoJSON Point with
 `NAME=demo`, metadata feature count one, and bounds `[10, 20, 10, 20]`; request
-scratch was empty afterward. The same image also returned a 2,435-byte
+scratch was empty afterwards. The same image also returned a 2,435-byte
 GeoParquet artifact with `PAR1` framing.
 
 A retained 235,000-record request exercised the active aggregate envelope. While
