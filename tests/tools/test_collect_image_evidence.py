@@ -8,7 +8,15 @@ import sys
 
 import pytest
 
-from tools.security.collect_image_evidence import Collector, container, mount, sha, copy_regular
+from tools.security.collect_image_evidence import (
+    Collector,
+    NODE_IMAGE,
+    SCANNER_IMAGE,
+    container,
+    mount,
+    sha,
+    copy_regular,
+)
 from tools.security.import_dependency_evidence import EvidenceError
 from tools.security.collect_image_evidence import analysis_diagnostic, QUALIFIED_WARNINGS
 
@@ -87,6 +95,13 @@ def test_scanner_container_confinement():
     assert mount('/private/image.tar', '/image.tar')[-1].endswith(',readonly')
     with pytest.raises(EvidenceError):
         mount('/private/evil,readonly=false', '/image.tar')
+
+
+def test_scanner_carrier_is_source_addressable_and_has_no_implicit_volume():
+    assert SCANNER_IMAGE == NODE_IMAGE
+    assert SCANNER_IMAGE.startswith('docker.io/library/node:20-alpine@sha256:')
+    start, _ = container(SCANNER_IMAGE, '/syft')
+    assert '/data:ro,nosuid,nodev,noexec,size=1m' not in start
 
 
 @pytest.mark.parametrize('kind', ['symlink', 'fifo'])

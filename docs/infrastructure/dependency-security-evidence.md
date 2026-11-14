@@ -152,6 +152,13 @@ The output directory must be new; each attempt retains its own records. Recovery
 after abrupt interruption is limited to the exact uniquely named never-started
 container recorded by that attempt, never broad container or image pruning.
 
+The scanner carrier is the same immutable, source-addressable Node image pinned
+for npm collection. Syft and Grype remain separate hash-pinned static
+executables mounted read-only. Do not replace the carrier with a local Docker
+image ID: local IDs cannot be pulled after pruning. The recovery rationale and
+production-host version readback are recorded in
+`../work-packages/20261110_wepp1_dependency_security_gate/artifacts/20261114_scanner_carrier_recovery.md`.
+
 Complete real-image producer qualification, CI integration, production-host
 receipt creation, evidence approval and production-equivalent recovery remain
 open. The canonical deploy integration is implemented but not yet authorized for

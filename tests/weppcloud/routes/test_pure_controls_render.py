@@ -1516,7 +1516,7 @@ def test_channel_template_submits_and_hydrates_channel_configuration(
         )
 
     assert re.search(r'<input[^>]*id="input_upload_dem"[^>]*name="input_upload_dem"', rendered)
-    assert 'accept=".tif"' in rendered
+    assert 'accept=".tif,.tiff,.img"' in rendered
     assert "uploaded-dem.tif" in rendered
     assert re.search(r'<input[^>]*id="set_extent_mode_upload_dem"[^>]*checked', rendered)
     assert re.search(r'<input[^>]*id="input_mcl"[^>]*name="input_mcl"[^>]*value="61"', rendered)

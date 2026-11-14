@@ -44,6 +44,16 @@ actual gate rejects native coverage. M4 is not complete.
 
 ## Task Board
 
+- [ ] (2026-11-14 UTC) Rebuild and rerun after the second exact broad-gate
+  correction and scanner-carrier recovery. The run passed 12,453 tests before a
+  duplicate `.tif`-only channel-template assertion contradicted the already
+  tested `.tif,.tiff,.img` contract; its focused case now passes. Exact-image
+  collection separately rejected a pruned, unrecoverable local scanner image
+  ID. The collector now reuses its immutable Node carrier with unchanged pinned
+  Syft/Grype bytes and production-host version readback. See
+  `artifacts/20261114_scanner_carrier_recovery.md`. Existing candidate receipts
+  are stale and cannot be approved.
+
 - [ ] (2026-11-13 UTC) Complete the new exact broad rerun and rebuild all
   source-bound candidates after correcting the stale Omni facade fake. The first
   rerun stopped at 3,880 passes when the fake rejected the newly forwarded

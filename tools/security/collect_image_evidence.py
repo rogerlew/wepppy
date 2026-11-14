@@ -25,8 +25,11 @@ from tools.security.evaluate_dependency_evidence import (
 )
 from tools.security.import_dependency_evidence import EvidenceError
 
-SCANNER_IMAGE = 'sha256:9823645c452a9a994f575ed238e1a4f67365acbf8e842db769060820fab06449'
 NODE_IMAGE = 'docker.io/library/node:20-alpine@sha256:afdf98210b07b586eb71fa22ba2e432e058e4cd1304d31ed60888755b8c865fb'
+# Use the already pinned, source-addressable npm carrier for the static Syft and
+# Grype binaries too. The former scanner carrier was recorded only by local
+# Docker image ID and could not be recovered after an ordinary image prune.
+SCANNER_IMAGE = NODE_IMAGE
 
 # Qualified scanner diagnostics preserve the conservative finding universe.
 # Do not enable Go symbol filtering: it can remove advisory rows.
@@ -86,10 +89,6 @@ def container(image, entrypoint, *, network=False, root=False):
                '--memory', '2g', '--cpus', '2']
     if not network:
         command += ['--network', 'none']
-    if image == SCANNER_IMAGE:
-        # The qualified Redis-based scanner carrier declares /data. Override
-        # that exact unused path so Docker cannot create a writable volume.
-        command += ['--tmpfs', '/data:ro,nosuid,nodev,noexec,size=1m']
     # Image and entrypoint are appended after explicit per-command mounts/env.
     return command, ['--entrypoint', entrypoint, image]
 
@@ -151,9 +150,7 @@ class Collector:
             metadata_path, _ = self.run(role + '-image-metadata', ['docker', 'image', 'inspect',
                 '--format', '{"id":{{json .Id}},"volumes":{{json (index .Config "Volumes")}}}', reference])
             metadata = read_json(metadata_path.read_bytes())
-            expected_volumes = {'/data': {}} if role == 'scanner' else None
-            require(metadata['volumes'] == expected_volumes or
-                    (expected_volumes is None and metadata['volumes'] == {}),
+            require(metadata['volumes'] in (None, {}),
                     'image declares unqualified implicit volumes')
             if role == 'candidate':
                 require(metadata['id'] == args.image_id, 'candidate image identity changed')

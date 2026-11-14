@@ -35,6 +35,16 @@ segmented substitute is not accepted.
   validator and its 13 focused cases pass. Commit, rerun the exact broad gate,
   and rebuild source-bound retained candidates before M4 can close.
 
+- [ ] (2026-11-14 UTC) The next exact broad run cleared the Omni regression,
+  then stopped after 12,453 passes on one remaining `.tif`-only template
+  assertion; the same file already asserted the intended `.tif,.tiff,.img`
+  contract. The corrected focused case passes. Initial exact-image collection
+  also failed closed because the qualified scanner carrier was retained only by
+  a pruned local image ID. Replace it with the collector's existing immutable
+  Node carrier after successful production-host Syft/Grype readback; see
+  `artifacts/20261114_scanner_carrier_recovery.md`. Commit and repeat all
+  source-bound builds/gates/evidence; no stale candidate may be approved.
+
 - [ ] (2026-11-13 UTC) Deployment preparation now includes wepp3. Retained
   candidate support is implemented for its single fork/archive worker with
   exact-image recovery, global dequeue fencing, fork-only drain accounting,
