@@ -33,7 +33,7 @@ entry points and access requirements are unchanged.
 
 ## Treatments (`treatments`)
 - Purpose: Apply treatment scenarios (mulch, thinning, prescribed fire, and related mappings) to selected hillslopes or an uploaded treatment raster.
-- Use when: You need scenario-ready treatment edits to landuse/soils before WEPP runs (including Omni workflows).
+- Use when: You need treatment edits to landuse/soils for a treated WEPP run. For Omni comparisons, start from an undisturbed or burned baseline and define treatments within Omni; an already treated baseline is unsupported.
 - Outputs: Treatment rasters under `treatments/` (for example `treatments.tif`) and persisted mapping/state in `treatments.nodb`.
 - README: [Treatments](../../../../nodb/mods/treatments/README.md)
 
@@ -67,7 +67,7 @@ entry points and access requirements are unchanged.
 
 ## Omni (`omni`)
 - Purpose: Build and run scenario clones (uniform severity, treatments, SBS-map variants, and contrasts) from one base run.
-- Use when: You need side-by-side scenario and targeted contrast comparisons.
+- Use when: You need side-by-side scenario and targeted contrast comparisons from an undisturbed or burned baseline with no applied treatments. See [Before You Begin](../../../../nodb/mods/omni/ENDUSER.md#before-you-begin).
 - Outputs: Scenario/contrast run trees under `_pups/omni/` and summary tables such as `_pups/omni/scenarios.out.parquet` and `_pups/omni/contrasts.out.parquet`.
 - README: [Omni](../../../../nodb/mods/omni/README.md)
 

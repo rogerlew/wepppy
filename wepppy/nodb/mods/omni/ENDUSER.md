@@ -37,6 +37,16 @@ For a burned-versus-unburned comparison, prefer adding an Omni `undisturbed` sce
 
 ## Before You Begin
 
+Use an **undisturbed or burned project as the baseline**, with no treatments
+already applied. The baseline is the reference condition against which Omni
+compares alternative burn severities and treatments.
+
+Define treatments within Omni Scenarios. Starting Omni from a project that
+already has treatment modifications is unsupported because it mixes treatment
+effects into the reference condition. If your project is already treated, use
+an untreated project or a saved copy from before treatment, and build and
+review its baseline results before creating scenarios.
+
 Before using Omni, make sure you have:
 
 - a project that already runs successfully,

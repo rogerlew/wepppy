@@ -19,6 +19,9 @@ The Treatments module enables land managers and hydrologists to model how rehabi
 
 ## Getting Started (Web Interface)
 
+For Omni comparisons, define treatments within Omni using an undisturbed or
+burned baseline. See [Preparing an Omni baseline](../omni/ENDUSER.md#before-you-begin).
+
 ### Enabling the Treatments Module
 
 Treatments is an optional module that must be added to your project:
