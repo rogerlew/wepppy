@@ -8,6 +8,7 @@ security reviews passed; not deployed
 ## Candidate identity
 
 - Contract checkpoint: `613e832fc`
+- Reviewed implementation checkpoint: `73ed430d4`
 - Base: `ghcr.io/osgeo/gdal:ubuntu-small-3.12.4@sha256:9acfdf967ece13a9a1d9622a494d726aad6b9759aeaae40bbd4d8cb74c843971`
 - Final local image: `sha256:d515d75ea603f174aa7b6b36c075f42fb0406cdb17901d60997aa0bbdbb0dff6`
 - Uncompressed Docker image size: 744,851,897 bytes

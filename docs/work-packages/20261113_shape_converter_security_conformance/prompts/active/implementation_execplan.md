@@ -53,6 +53,8 @@ common WEPPpy image remains unchanged.
 - [x] (2026-11-14) Dedicated-image correctness, QA, and security re-reviews pass
       after the one-worker repair. This does not close broader M6, sandbox, or
       rollout gates.
+- [x] (2026-11-14) Commit the reviewed dedicated-image implementation as
+      `73ed430d4`; no image publication or deployment occurred.
 - [ ] M6: validate, review, update GitHub issues, and prepare separate rollout.
 
 ## Surprises & Discoveries

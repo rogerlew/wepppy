@@ -7,6 +7,7 @@
 **Current phase**: Dedicated image re-review; sandbox/release gates open
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
+**Dedicated-image implementation**: `73ed430d4`
 **GitHub issues**: [#655](https://github.com/rogerlew/wepppy/issues/655),
 [#656](https://github.com/rogerlew/wepppy/issues/656)
 **GDAL decision**: dedicated shape image authorized; common image unchanged
@@ -121,6 +122,9 @@
   dedicated-image slice. Persisting complete scan evidence outside `/tmp` remains
   a Low package-closeout provenance item. The second sandbox remains a release
   blocker.
+
+- 2026-11-14: reviewed dedicated-image implementation committed as `73ed430d4`.
+  No image publication or deployment occurred.
 
 ## Handoff
 
