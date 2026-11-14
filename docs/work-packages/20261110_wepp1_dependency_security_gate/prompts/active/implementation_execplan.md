@@ -24,6 +24,15 @@ segmented substitute is not accepted.
 
 ## Progress
 
+- [x] (2026-11-14 UTC) Roger rejected excessive deployment governance after
+  reporting approximately 25% weekly quota consumption. The controlling policy
+  is now `docs/infrastructure/production-deployment-policy.md`; earlier conflicting
+  milestones below are superseded. Protected release decisions and separate
+  tooling bindings pass 83 focused deploy tests without new scans/full-suite runs.
+- [ ] (2026-11-14 UTC) Finish wepp3 activation and coordinated Redis rotation,
+  install the corrected governance tooling without rebuilding application images,
+  and retain final runtime/queue checks. wepp1 and wepp2 are deployed successfully.
+
 - [x] (2026-11-14 UTC) Exact f6 validation passed: 13,904 Python tests,
   437 skipped, 197 focused tests, frontend lint and 1,082 Jest tests. Fresh
   three-host evidence passed with Roger's explicit accepted-risk findings and
@@ -458,6 +467,13 @@ not collected by unittest, so both runners are required for upstream evidence.
   Evidence: `.github/forest_workflows/npm-tests.yml`.
 
 ## Decision Log
+
+- Decision (Roger, 2026-11-14 UTC): finish the deployment and implement sane
+  governance now. Reuse approved release evidence across explicitly scoped images,
+  separate deployment-tool changes from application identity, and do not multiply
+  scans/full-suite runs by host count. The previous workflow consumed excessive
+  time and quota. Keep host/configuration, expiry, source compatibility and rollback
+  checks; use a small protected release decision rather than repeated raw audits.
 
 - Decision (Roger, 2026-11-14 UTC): deploy the security-fix release under the
   amended residual-risk exception and rotate shared Redis credentials across

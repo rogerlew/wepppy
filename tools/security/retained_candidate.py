@@ -48,6 +48,13 @@ APPROVAL_FIELDS = {
     "evidence_manifest_sha256", "policy_sha256", "dispositions_sha256",
     "approved_at", "approver", "review_trigger",
 }
+RELEASE_APPROVAL_FIELDS = {
+    "schema_version", "candidate_receipt_sha256", "release_sha256", "reviewed_tooling",
+}
+RELEASE_FIELDS = {
+    "schema_version", "source_revision", "image_ids", "owner", "approver",
+    "rationale", "evidence", "accepted_risks", "created_at", "expires_at", "review_trigger",
+}
 IMAGE_FIELDS = {"service", "source_image", "image_id"}
 
 
@@ -347,6 +354,11 @@ def approval_path(receipt_path: Path) -> Path:
     return host_approvals / f"{sha256_file(receipt_path)}.json"
 
 
+def release_approval_path(receipt_path: Path, project_root: Path) -> Path:
+    tooling_hash = sha256_bytes(canonical_json(reviewed_tooling(project_root)))
+    return STORE_ROOT / "approvals" / machine_id_hash() / f"{sha256_file(receipt_path)}-{tooling_hash}.release.json"
+
+
 def load_canonical_receipt(receipt_path: Path) -> tuple[dict[str, Any], Path, Path]:
     receipt_path = receipt_path.absolute()
     receipt_raw = private_file(receipt_path)
@@ -415,6 +427,16 @@ def validate_candidate(args: argparse.Namespace) -> tuple[dict[str, Any], Path, 
     if sha256_bytes(override_raw) != receipt["image_override_sha256"]:
         raise CandidateError("retained image override hash mismatch")
     current, _ = base_state(args, compose_config())
+    authority = release_approval_path(resolved_receipt, args.project_root.resolve(strict=True))
+    if authority.exists():
+        private_directory(authority.parent)
+        approval = load_object(private_file(authority), "operator approval")
+        if approval.get("schema_version") == 2:
+            validate_release_approval(receipt, resolved_receipt, args.project_root.resolve(strict=True), approval)
+            # Tooling provenance is reviewed separately; application differences
+            # still reject reuse of an existing image/receipt.
+            for key in ("source_revision", "deploy_script_sha256", "wctl_path", "wctl_sha256"):
+                current[key] = receipt[key]
     created_at = receipt.pop("created_at")
     if not isinstance(created_at, str) or receipt != current:
         raise CandidateError("candidate no longer matches host, source, configuration, or images")
@@ -426,8 +448,14 @@ def validate_candidate(args: argparse.Namespace) -> tuple[dict[str, Any], Path, 
 
 
 def validate_approval(receipt: dict[str, Any], receipt_path: Path, project_root: Path) -> Path:
-    path = approval_path(receipt_path)
+    path = release_approval_path(receipt_path, project_root)
+    if not path.exists():
+        path = approval_path(receipt_path)
+    private_directory(path.parent)
     approval = load_object(private_file(path), "operator approval")
+    if approval.get("schema_version") == 2:
+        validate_release_approval(receipt, receipt_path, project_root, approval)
+        return path
     if set(approval) != APPROVAL_FIELDS or approval.get("schema_version") != 1:
         raise CandidateError("unsupported operator approval schema")
     if approval["candidate_receipt_sha256"] != sha256_file(receipt_path):
@@ -482,6 +510,84 @@ def validate_approval(receipt: dict[str, Any], receipt_path: Path, project_root:
     if result.returncode != 0:
         raise CandidateError("dependency evidence policy rejected the candidate")
     return path
+
+
+def require_application_equivalence(project_root: Path, before: str, after: str) -> None:
+    if not all(isinstance(revision, str) and REVISION_RE.fullmatch(revision) for revision in (before, after)):
+        raise CandidateError("release requires exact source revisions")
+    if before == after:
+        return
+    changed = run("git", "diff", "--name-only", "--no-renames", before, after, "--", cwd=project_root).splitlines()
+    prefixes = ("docs/", "tests/", "tools/security/", "tools/wctl2/", "wctl/")
+    files = {".gitignore", "AGENTS.md", "scripts/deploy-production.sh"}
+    if any(name not in files and not name.endswith("/AGENTS.md") and not name.startswith(prefixes) for name in changed):
+        raise CandidateError("application/build inputs changed; existing release cannot authorize this source")
+
+
+def reviewed_tooling(project_root: Path) -> dict[str, str]:
+    wctl = shutil.which("wctl")
+    if wctl is None:
+        raise CandidateError("installed wctl executable cannot be identified")
+    path = Path(wctl).resolve(strict=True)
+    if run("git", "status", "--porcelain=v1", "--untracked-files=all", cwd=project_root):
+        raise CandidateError("source worktree must be clean")
+    return {
+        "source_revision": run("git", "rev-parse", "HEAD", cwd=project_root),
+        "deploy_script_sha256": sha256_file(project_root / "scripts/deploy-production.sh"),
+        "wctl_path": str(path), "wctl_sha256": sha256_file(path),
+    }
+
+
+def validate_release_approval(receipt: dict[str, Any], receipt_path: Path, project_root: Path,
+                              approval: dict[str, Any]) -> None:
+    if set(approval) != RELEASE_APPROVAL_FIELDS or approval.get("schema_version") != 2:
+        raise CandidateError("unsupported release approval schema")
+    if approval["candidate_receipt_sha256"] != sha256_file(receipt_path):
+        raise CandidateError("operator approval targets another candidate")
+    release_hash = approval["release_sha256"]
+    if not isinstance(release_hash, str) or HASH_RE.fullmatch(release_hash) is None:
+        raise CandidateError("invalid release hash")
+    root = private_directory(STORE_ROOT / "approvals" / "releases")
+    raw = private_file(root / f"{release_hash}.json")
+    if sha256_bytes(raw) != release_hash:
+        raise CandidateError("release approval hash mismatch")
+    release = load_object(raw, "release decision")
+    if set(release) != RELEASE_FIELDS or release.get("schema_version") != 1:
+        raise CandidateError("unsupported release decision schema")
+    for key in ("owner", "approver", "rationale", "evidence", "accepted_risks", "review_trigger"):
+        if not isinstance(release[key], str) or not release[key].strip():
+            raise CandidateError(f"release decision requires {key}")
+    images = release["image_ids"]
+    if not isinstance(images, list) or not images or any(not isinstance(item, str) or IMAGE_ID_RE.fullmatch(item) is None for item in images):
+        raise CandidateError("invalid release image scope")
+    if receipt["image_id"] not in images:
+        raise CandidateError("release does not authorize this image")
+    created = datetime.fromisoformat(str(release["created_at"]).replace("Z", "+00:00"))
+    expires = datetime.fromisoformat(str(release["expires_at"]).replace("Z", "+00:00"))
+    now = datetime.now(timezone.utc)
+    if (created.tzinfo is None or expires.tzinfo is None or not created <= now + timedelta(minutes=5)
+            or not created < expires or not now < expires or expires - created > timedelta(days=30)):
+        raise CandidateError("expired, future or overlong release decision")
+    tooling = reviewed_tooling(project_root)
+    if approval["reviewed_tooling"] != tooling:
+        raise CandidateError("deployment tooling changed since operator review")
+    require_application_equivalence(project_root, receipt["source_revision"], tooling["source_revision"])
+    require_application_equivalence(project_root, release["source_revision"], receipt["source_revision"])
+
+
+def publish_release_approval(args: argparse.Namespace) -> int:
+    receipt, path, _ = load_canonical_receipt(args.receipt)
+    project_root = args.project_root.resolve(strict=True)
+    approval = {
+        "schema_version": 2, "candidate_receipt_sha256": sha256_file(path),
+        "release_sha256": args.release_sha256, "reviewed_tooling": reviewed_tooling(project_root),
+    }
+    validate_release_approval(receipt, path, project_root, approval)
+    private_directory(STORE_ROOT / "approvals" / machine_id_hash(), create=True)
+    target = release_approval_path(path, project_root)
+    atomic_private_json(target, approval)
+    print(json.dumps({"approval": str(target), "sha256": sha256_file(target)}, sort_keys=True))
+    return 0
 
 
 def validate_command(args: argparse.Namespace, *, gate: bool) -> int:
@@ -609,6 +715,10 @@ def parser() -> argparse.ArgumentParser:
     approval.add_argument("--dispositions-sha256", required=True)
     approval.add_argument("--approver", required=True)
     approval.add_argument("--review-trigger", required=True)
+    release = commands.add_parser("publish-release-approval")
+    release.add_argument("--project-root", type=Path, required=True)
+    release.add_argument("--receipt", type=Path, required=True)
+    release.add_argument("--release-sha256", required=True)
     activation = commands.add_parser("record-activation")
     activation.add_argument("--receipt", type=Path, required=True)
     activation.add_argument("--known-good-config", type=Path, required=True)
@@ -624,11 +734,14 @@ def main() -> int:
             return create_candidate(args)
         if args.command == "publish-approval":
             return publish_approval(args)
+        if args.command == "publish-release-approval":
+            return publish_release_approval(args)
         if args.command == "record-activation":
             return record_activation(args)
         return validate_command(args, gate=args.command == "gate")
     except (
         CandidateError,
+        ValueError,
         json.JSONDecodeError,
         OSError,
         subprocess.SubprocessError,

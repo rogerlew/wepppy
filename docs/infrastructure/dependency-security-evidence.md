@@ -4,7 +4,12 @@ Production on wepp.cloud continues to use the installed `wctl` preset and
 `scripts/deploy-production.sh`, with host-local Docker Compose builds. This
 evidence utility does not build, publish, deploy, or approve an image.
 
-The governing policy is [ADR-0140](../adrs/ADR-0140-dependency-security-gate-policy.md).
+The governing deployment policy is
+[production deployment policy](production-deployment-policy.md), which supersedes
+conflicting requirements in the original
+[ADR-0140](../adrs/ADR-0140-dependency-security-gate-policy.md).
+The commands below describe existing tooling, not a requirement to rebuild and
+rescan separately for each host or for deployment-helper/documentation changes.
 
 The operator-selected protected store is
 `/workdir/weppcloud-deployments/.local/dependency-security/`. Raw reports must
@@ -64,7 +69,48 @@ Ordinary CI evidence requires 90-day retention; activated-image evidence require
 at least 365 days and the entire rollback-eligibility period. The importer does
 not implement deletion or infer which images have been activated.
 
-## Policy evaluator and retained candidate activation
+## Release approval (normal deployment path)
+
+Use a small, operator-owned release decision instead of repeating image exports,
+scans and full-bundle verification at each host/cutover. Store its exact JSON bytes
+as `approvals/releases/<sha256>.json` with a 0700 directory and 0600 file, outside
+candidate-controlled inputs. The same decision can authorize multiple explicitly
+reviewed immutable image IDs; record relevant inventory comparison or accepted
+uncertainty in its evidence/rationale. Do not infer equivalence from a tag.
+
+The version-1 decision has exactly these fields: `schema_version` (1),
+`source_revision` (full application-source Git SHA), `image_ids` (nonempty list of
+immutable common-image IDs), `owner`, `approver`, `rationale`, `evidence`,
+`accepted_risks` (or an explicit "none"), `created_at`, `expires_at` and
+`review_trigger`. Text fields must be nonempty; timestamps need timezones and
+the decision may last at most 30 days. Evidence names retained release tests,
+scan results and/or the operator's explicit exception; this record is an approval,
+not a claim that the scanner reported no findings.
+
+After reviewing its hash, publish a lightweight host binding:
+
+```bash
+python3 tools/security/retained_candidate.py publish-release-approval \
+  --project-root /workdir/wepppy --receipt <retained-receipt> \
+  --release-sha256 <reviewed-release-decision-hash>
+scripts/deploy-production.sh --resume-retained-candidate <retained-receipt> \
+  --skip-pull --skip-docker-prune
+```
+
+Version-2 bindings retain the receipt hash and separately reviewed current
+tooling provenance. They are immutable and named by receipt/tooling hashes;
+earlier bindings remain available. Resume verifies the small decision, expiry,
+exact image scope, host/configuration and source compatibility without invoking
+the scanner or rereading multi-gigabyte evidence. Deployment tooling changes need
+a new small binding, not a rebuilt image. Source differences are limited to
+docs, tests, security/deployment tooling, wctl and generated-file ignore rules;
+application, Dockerfile and dependency changes reject old-image reuse. Dirty
+source and effective configuration/image drift still fail.
+
+## Optional strict scan evaluator and retained candidate activation
+
+The legacy version-1 scan-bound approval path below remains available for an
+explicit strict evaluation. It is not the default release-governance requirement.
 
 Run `python -m tools.security.evaluate_dependency_evidence --help` from the
 repository root for the standalone verifier. It requires an independently

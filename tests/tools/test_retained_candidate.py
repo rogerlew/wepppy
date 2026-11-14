@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -64,7 +65,7 @@ def candidate_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     def fake_run(*command: str, cwd: Path) -> str:
         del cwd
         if command[:3] == ("git", "rev-parse", "HEAD"):
-            return _REVISION
+            return state.get("revision", _REVISION)
         if command[:2] == ("git", "status"):
             return state["dirty"]
         if command[:3] == ("docker", "image", "inspect"):
@@ -148,6 +149,91 @@ def test_extension_temp_path_drift_preserves_gate_but_service_drift_fails(
     config["services"]["weppcloud"]["environment"] = {"CHANGED": "true"}
     with pytest.raises(candidate.CandidateError, match="no longer matches"):
         candidate.validate_candidate(_args(project, deploy_script, receipt))
+
+
+def _release(candidate_environment, capsys, **updates):
+    project, deploy_script, _ = candidate_environment
+    receipt = _create(candidate_environment, capsys)
+    root = candidate.STORE_ROOT / "approvals"
+    root.mkdir(mode=0o700)
+    releases = root / "releases"
+    releases.mkdir(mode=0o700)
+    now = datetime.now(timezone.utc)
+    value = dict(schema_version=1, source_revision=_REVISION, image_ids=[_IMAGE_ID],
+                 owner="operator", approver="operator", rationale="security fix rollout",
+                 evidence="retained release test and scan hashes; compared host inventory",
+                 accepted_risks="explicit residual native coverage acceptance",
+                 created_at=now.isoformat(), expires_at=(now+timedelta(days=7)).isoformat(),
+                 review_trigger="material artifact changes or new relevant evidence")
+    value.update(updates)
+    raw = candidate.canonical_json(value)
+    sha = candidate.sha256_bytes(raw)
+    candidate.write_private(releases / f"{sha}.json", raw)
+    return argparse.Namespace(project_root=project, receipt=receipt, release_sha256=sha)
+
+
+def test_release_gate_reuses_approval_without_invoking_scanners(candidate_environment, capsys, monkeypatch):
+    args = _release(candidate_environment, capsys)
+    candidate.publish_release_approval(args)
+    capsys.readouterr()
+    monkeypatch.setattr(candidate.subprocess, "run", lambda *a, **k: pytest.fail("release gate must not invoke scanner/evaluator"))
+    project, deploy_script, _ = candidate_environment
+    for _ in range(2):
+        assert candidate.validate_command(_args(project, deploy_script, args.receipt), gate=True) == 0
+
+
+@pytest.mark.parametrize("updates,message", [
+    ({"image_ids":["sha256:"+"9"*64]}, "does not authorize"),
+    ({"expires_at":"2020-01-01T00:00:00Z"}, "expired"),
+    ({"accepted_risks":""}, "accepted_risks"),
+])
+def test_release_rejects_wrong_image_expiry_and_missing_risk_record(candidate_environment, capsys, updates, message):
+    args = _release(candidate_environment, capsys, **updates)
+    with pytest.raises(candidate.CandidateError, match=message):
+        candidate.publish_release_approval(args)
+
+
+def test_tooling_only_source_change_reuses_image_with_separate_review(candidate_environment, capsys, monkeypatch):
+    args = _release(candidate_environment, capsys)
+    candidate.publish_release_approval(args)
+    capsys.readouterr()
+    project, deploy_script, state = candidate_environment
+    original = candidate.run
+    monkeypatch.setattr(candidate, "run", lambda *cmd, cwd: "docs/changed.md\nscripts/deploy-production.sh" if cmd[:2]==("git","diff") else original(*cmd,cwd=cwd))
+    state["revision"] = "3"*40
+    deploy_script.write_text("#!/bin/bash\n# reviewed tooling fix\n")
+    with pytest.raises(candidate.CandidateError, match="no longer matches"):
+        candidate.validate_candidate(_args(project, deploy_script, args.receipt))
+    candidate.publish_release_approval(args)
+    capsys.readouterr()
+    candidate.validate_command(_args(project, deploy_script, args.receipt), gate=True)
+    assert len(list((candidate.STORE_ROOT/"approvals"/candidate.machine_id_hash()).glob("*.release.json"))) == 2
+    config = _config()
+    config["services"]["weppcloud"]["environment"] = {"CHANGED":"true"}
+    monkeypatch.setattr(candidate,"compose_config",lambda:config)
+    with pytest.raises(candidate.CandidateError,match="no longer matches"):
+        candidate.validate_candidate(_args(project, deploy_script, args.receipt))
+
+
+def test_release_cannot_reuse_old_image_for_application_changes(candidate_environment, capsys, monkeypatch):
+    args = _release(candidate_environment, capsys)
+    _, _, state = candidate_environment
+    original = candidate.run
+    monkeypatch.setattr(candidate,"run",lambda *cmd,cwd: "wepppy/config/redis_settings.py" if cmd[:2]==("git","diff") else original(*cmd,cwd=cwd))
+    state["revision"] = "3"*40
+    with pytest.raises(candidate.CandidateError,match="application/build inputs changed"):
+        candidate.publish_release_approval(args)
+
+
+def test_release_hash_tamper_rejected(candidate_environment, capsys):
+    args = _release(candidate_environment, capsys)
+    candidate.publish_release_approval(args)
+    capsys.readouterr()
+    path = candidate.STORE_ROOT/"approvals"/"releases"/f"{args.release_sha256}.json"
+    path.write_text('{}')
+    project, deploy_script, _ = candidate_environment
+    with pytest.raises(candidate.CandidateError,match="hash mismatch"):
+        candidate.validate_command(_args(project,deploy_script,args.receipt),gate=True)
 
 
 def test_create_accepts_wepp3_fork_archive_common_image(

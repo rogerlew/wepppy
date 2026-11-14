@@ -1,6 +1,6 @@
 # ADR-0140: Bind dependency-security decisions to the candidate image
 
-Status: Accepted; implementation and deployment validation pending  
+Status: Amended by operator; deployment proportionality policy supersedes conflicting requirements
 Date: 2026-11-11
 
 ## Context
@@ -12,6 +12,19 @@ assets. A release decision needs reproducible evidence for the image that will
 actually run, with explicit treatment of scanner omissions and exceptions.
 
 ## Decision
+
+### Operator correction, 2026-11-14 UTC
+
+The [production deployment policy](../infrastructure/production-deployment-policy.md)
+controls where it conflicts with the original decision below. Roger rejected
+per-host repeated scans, tooling-only rebuild/rescan cycles, production full-suite
+reruns and open-ended deployment audits after excessive time/quota consumption.
+Reuse release evidence and explicit risk acceptance; separate application-image
+identity from deployment-tool provenance. The original requirements below remain
+historical rationale and describe parts of the current implementation, not
+authority to repeat that workflow. Executable alignment is required.
+
+### Original decision (subject to the correction above)
 
 Gate the selected common WEPPcloud image and primary frontend lock before
 activation, using one repository-owned policy interface for CI and deployment.

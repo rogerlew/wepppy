@@ -2,6 +2,11 @@
 > Consolidated deployment behavior, tuning levers, and incident signatures for WEPPcloud operators.
 
 ## Usage Model
+
+Follow [production deployment policy](production-deployment-policy.md) for
+required gates, reuse of release evidence and operator risk acceptance. Routine
+deployment must not expand into a fleet-wide dependency audit or full-suite rerun.
+
 1. Confirm the active runtime on the target host (image, command, mounted Caddyfile, git SHA).
 2. Match observed symptoms to the failure-signature table.
 3. Apply the smallest viable tuning change in the appropriate layer.

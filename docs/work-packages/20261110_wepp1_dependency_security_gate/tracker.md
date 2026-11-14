@@ -2,6 +2,15 @@
 
 ## Quick Status
 
+Operator correction (2026-11-14 UTC): finish deployment and implement
+[proportionate deployment governance](../../infrastructure/production-deployment-policy.md).
+The original per-host scan/tooling-only rebuild requirements are superseded.
+wepp1/wepp2 are deployed; wepp3 cutover and Redis rotation are being completed.
+The new protected release-decision path passes 83 focused deployment tests and
+reuses release evidence without rescanning or repeatedly hashing raw bundles.
+Application-input changes, wrong images, configuration drift, unreviewed tooling
+and expired approvals still fail. No full suite is being rerun.
+
 Current execution (2026-11-14 UTC): Roger authorizes deployment and coordinated
 Redis rotation on wepp1/wepp2/wepp3 under the amended release exception. The
 exact f6 candidate passed 13,904 Python tests (437 skipped), focused checks and

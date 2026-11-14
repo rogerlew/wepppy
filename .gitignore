@@ -21,6 +21,8 @@ wepppy/climates/cligen/_scripts/*.db
 wepppy/climates/daymet/test/*
 wepppy/weppcloud/static/js/controllers.js
 wepppy/weppcloud/static/js/controllers-gl.js
+wepppy/weppcloud/static/js/controllers-gl.js.deploy.*
+wepppy/weppcloud/static/js/controllers-gl.js.rollback.*
 wepppy/commit_hash
 wepppy/weppcloud/static/vendor/
 _notes/*
