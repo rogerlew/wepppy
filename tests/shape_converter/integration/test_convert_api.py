@@ -29,6 +29,7 @@ from wepppy.microservices.shape_converter import create_app
 pytestmark = [pytest.mark.integration, pytest.mark.microservice]
 shape_converter_app_module = importlib.import_module("wepppy.microservices.shape_converter.app")
 shape_converter_convert_module = importlib.import_module("wepppy.microservices.shape_converter.convert")
+shape_converter_inspect_module = importlib.import_module("wepppy.microservices.shape_converter.inspect")
 
 
 def test_blocked_conversion_keeps_health_responsive_and_rejects_competing_request(
@@ -67,6 +68,105 @@ def test_blocked_conversion_keeps_health_responsive_and_rejects_competing_reques
     assert ready.status_code == 200
     assert competing.status_code == 503
     assert competing.json()["error"]["code"] == "service_saturated"
+    assert completed.status_code == 200
+
+
+def test_blocked_inspect_keeps_health_responsive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="inspect-blocked"))
+    started = threading.Event()
+    release = threading.Event()
+    original_extract = shape_converter_inspect_module.validate_and_extract_zip_archive
+
+    def _blocked_extract(**kwargs):  # noqa: ANN003, ANN202
+        started.set()
+        assert release.wait(timeout=10)
+        return original_extract(**kwargs)
+
+    monkeypatch.setattr(
+        shape_converter_inspect_module,
+        "validate_and_extract_zip_archive",
+        _blocked_extract,
+    )
+
+    with TestClient(create_app()) as client, concurrent.futures.ThreadPoolExecutor() as executor:
+        inspection = executor.submit(
+            client.post,
+            "/v1/inspect",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+        )
+        assert started.wait(timeout=10)
+        ready = client.get("/health/ready")
+        release.set()
+        completed = inspection.result(timeout=10)
+
+    assert ready.status_code == 200
+    assert completed.status_code == 200
+
+
+def test_blocked_relay_encoding_keeps_health_responsive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="relay-blocked"))
+    started = threading.Event()
+    release = threading.Event()
+    original_encode = shape_converter_app_module._encode_relay_response
+
+    def _blocked_encode(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+        started.set()
+        assert release.wait(timeout=10)
+        return original_encode(*args, **kwargs)
+
+    monkeypatch.setattr(shape_converter_app_module, "_encode_relay_response", _blocked_encode)
+
+    with TestClient(create_app()) as client, concurrent.futures.ThreadPoolExecutor() as executor:
+        conversion = executor.submit(
+            client.post,
+            "/v1/convert",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+                "response_mode": "json_body",
+            },
+        )
+        assert started.wait(timeout=10)
+        ready = client.get("/health/ready")
+        release.set()
+        completed = conversion.result(timeout=10)
+
+    assert ready.status_code == 200
+    assert completed.status_code == 200
+
+
+def test_blocked_request_cleanup_keeps_health_responsive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="cleanup-blocked"))
+    started = threading.Event()
+    release = threading.Event()
+    original_cleanup = shape_converter_app_module.cleanup_request_scratch_dir
+
+    def _blocked_cleanup(**kwargs):  # noqa: ANN003, ANN202
+        started.set()
+        assert release.wait(timeout=10)
+        return original_cleanup(**kwargs)
+
+    monkeypatch.setattr(shape_converter_app_module, "cleanup_request_scratch_dir", _blocked_cleanup)
+
+    with TestClient(create_app()) as client, concurrent.futures.ThreadPoolExecutor() as executor:
+        inspection = executor.submit(
+            client.post,
+            "/v1/inspect",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+        )
+        assert started.wait(timeout=10)
+        ready = client.get("/health/ready")
+        release.set()
+        completed = inspection.result(timeout=10)
+
+    assert ready.status_code == 200
     assert completed.status_code == 200
 
 

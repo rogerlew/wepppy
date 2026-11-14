@@ -59,6 +59,7 @@ def _run_deploy(
     controller_build_failure: bool = False,
     shape_readiness_failure: bool = False,
     shape_stop_failure: bool = False,
+    shape_ps_failure: bool = False,
     shape_build_inputs_clean: bool = True,
     shape_dirty_build_input: str = "wepppy/microservices/shape_converter/convert.py",
     lock_held: bool = False,
@@ -89,6 +90,9 @@ elif [[ "${args}" == *"ps --all --format json"* ]]; then
 elif [[ "${args}" == *" ps "* && "${args}" == *" -q "* ]] \
     || [[ "${args}" == *" ps -q "* ]]; then
     service="${!#}"
+    if [ "${service}" = "shape-converter" ] && [ "${FAKE_SHAPE_PS_FAILURE:-0}" = 1 ]; then
+        exit 82
+    fi
     if [ "${service}" != "shape-converter" ] || [ ! -f "${FAKE_SHAPE_STOPPED_MARKER}" ]; then
         printf 'cid-%s\n' "${service}"
     fi
@@ -413,6 +417,7 @@ exec /bin/cp "$@"
             "FAKE_CONTROLLER_FAILURE": "1" if controller_build_failure else "0",
             "FAKE_SHAPE_READINESS_FAILURE": "1" if shape_readiness_failure else "0",
             "FAKE_SHAPE_STOP_FAILURE": "1" if shape_stop_failure else "0",
+            "FAKE_SHAPE_PS_FAILURE": "1" if shape_ps_failure else "0",
             "FAKE_SHAPE_BUILD_INPUTS_CLEAN": "1" if shape_build_inputs_clean else "0",
             "FAKE_SHAPE_DIRTY_BUILD_INPUT": shape_dirty_build_input,
             "FAKE_SHAPE_STOPPED_MARKER": str(tmp_path / "shape-stopped"),
@@ -598,6 +603,21 @@ def test_shape_readiness_failure_detects_stop_failure(tmp_path: Path) -> None:
     assert "Deployment complete!" not in result.stdout
 
 
+def test_shape_readiness_failure_detects_state_verification_failure(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        shape_readiness_failure=True,
+        shape_ps_failure=True,
+    )
+
+    assert result.returncode == 88
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("ps -q shape-converter" in command for command in commands)
+    assert "unable to verify service state" in result.stderr
+    assert "Deployment complete!" not in result.stdout
+
+
 def test_shape_release_build_rejects_dirty_inputs_even_with_skip_pull(tmp_path: Path) -> None:
     result, commands = _run_deploy(
         tmp_path,
@@ -607,6 +627,8 @@ def test_shape_release_build_rejects_dirty_inputs_even_with_skip_pull(tmp_path: 
 
     assert result.returncode != 0
     assert "inputs differ from HEAD" in result.stderr
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("ps -q shape-converter" in command for command in commands)
     assert not any("build --no-cache" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert "Deployment complete!" not in result.stdout
@@ -624,6 +646,8 @@ def test_shape_release_build_rejects_dirty_production_compose_with_skip_pull(
 
     assert result.returncode != 0
     assert "docker/docker-compose.prod.yml" in result.stderr
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("ps -q shape-converter" in command for command in commands)
     assert not any("build --no-cache" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert "Deployment complete!" not in result.stdout

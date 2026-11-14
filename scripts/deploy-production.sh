@@ -218,6 +218,34 @@ ensure_shape_converter_build_inputs_clean() {
     fi
 }
 
+stop_shape_converter_fail_closed() {
+    local running_container=""
+    echo "✗ Deployment failed; stopping shape-converter instead of restoring an unreviewed parser." >&2
+    if ! wctl docker compose stop --timeout 30 shape-converter >/dev/null 2>&1; then
+        echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to stop the service" >&2
+        return 88
+    fi
+    if ! running_container="$(wctl docker compose ps -q shape-converter)"; then
+        echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to verify service state" >&2
+        return 88
+    fi
+    if [ -n "${running_container}" ]; then
+        echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: service still has a running container" >&2
+        return 88
+    fi
+    echo "✓ shape-converter is down; no GDAL/Fiona or unreviewed parser fallback was activated" >&2
+}
+
+configure_shape_parser_release_provenance() {
+    ensure_shape_converter_build_inputs_clean || return $?
+    SHAPE_PARSER_SOURCE_REVISION="$(git rev-parse HEAD)" || return $?
+    SHAPE_PARSER_RELEASE_LABEL="wepppy-${SHAPE_PARSER_SOURCE_REVISION:0:12}"
+    SHAPE_PARSER_BUILT_UTC="$(git show -s --format=%cI HEAD)" || return $?
+    [[ "${SHAPE_PARSER_SOURCE_REVISION}" =~ ^[a-f0-9]{40}$ ]] || return $?
+    export SHAPE_PARSER_SOURCE_REVISION SHAPE_PARSER_RELEASE_LABEL SHAPE_PARSER_BUILT_UTC
+    echo "    Shape parser release revision: ${SHAPE_PARSER_SOURCE_REVISION}"
+}
+
 safe_git_fast_forward_pull() {
     local original_head=""
     local current_branch=""
@@ -600,13 +628,12 @@ fi
 validate_deploy_topology
 
 if printf "%s\n" "${BUILD_SERVICES[@]}" | grep -qx "shape-converter"; then
-    ensure_shape_converter_build_inputs_clean
-    SHAPE_PARSER_SOURCE_REVISION="$(git rev-parse HEAD)"
-    SHAPE_PARSER_RELEASE_LABEL="wepppy-${SHAPE_PARSER_SOURCE_REVISION:0:12}"
-    SHAPE_PARSER_BUILT_UTC="$(git show -s --format=%cI HEAD)"
-    [[ "${SHAPE_PARSER_SOURCE_REVISION}" =~ ^[a-f0-9]{40}$ ]]
-    export SHAPE_PARSER_SOURCE_REVISION SHAPE_PARSER_RELEASE_LABEL SHAPE_PARSER_BUILT_UTC
-    echo "    Shape parser release revision: ${SHAPE_PARSER_SOURCE_REVISION}"
+    if ! configure_shape_parser_release_provenance; then
+        if ! stop_shape_converter_fail_closed; then
+            exit 88
+        fi
+        exit 1
+    fi
 fi
 
 if [ "${SKIP_BUILD}" = true ] && [ "${#BUILD_SERVICES[@]}" -gt 0 ]; then
@@ -889,17 +916,9 @@ recover_targeted_cap() {
     local shape_shutdown_failed=false
     trap - ERR
     if [ "${SHAPE_CONVERTER_FAIL_CLOSED}" = true ]; then
-        echo "✗ Deployment failed; stopping shape-converter instead of restoring an unreviewed parser." >&2
-        if ! wctl docker compose stop --timeout 30 shape-converter >/dev/null 2>&1; then
-            echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to stop the service" >&2
+        if ! stop_shape_converter_fail_closed; then
             shape_shutdown_failed=true
             recovery_exit=88
-        elif [ -n "$(wctl docker compose ps -q shape-converter)" ]; then
-            echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: service still has a running container" >&2
-            shape_shutdown_failed=true
-            recovery_exit=88
-        else
-            echo "✓ shape-converter is down; no GDAL/Fiona or unreviewed parser fallback was activated" >&2
         fi
     fi
     if [ -n "${STAGED_CONTROLLERS_JS}" ]; then

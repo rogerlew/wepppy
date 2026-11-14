@@ -1,9 +1,11 @@
 """Compare real Rust-parser artifacts with retained Fiona oracle fixtures."""
 from __future__ import annotations
 
+import asyncio
 import io
 import json
 import struct
+from types import SimpleNamespace
 
 import fiona
 import pyarrow.parquet as pq
@@ -11,8 +13,15 @@ import pytest
 from shapely import from_wkb
 from starlette.testclient import TestClient
 
-from tests.shape_converter.helpers.archive_builder import build_minimal_point_dataset, build_zip_bytes
+from tests.shape_converter.helpers.archive_builder import (
+    build_minimal_point_dataset,
+    build_multipatch_dataset,
+    build_multipart_dataset,
+    build_multipoint_dataset,
+    build_zip_bytes,
+)
 from wepppy.microservices.shape_converter.app import create_app
+from wepppy.microservices.shape_converter import convert
 
 pytestmark = [pytest.mark.integration, pytest.mark.microservice]
 
@@ -32,8 +41,56 @@ def _multipatch_entries():
     return entries
 
 
+def _semantic_datasets():
+    datasets = {
+        'multipoint_m': build_multipoint_dataset(prefix='multipoint-m', shape_type=28),
+        'polygon_m': build_multipart_dataset(
+            prefix='polygon-m',
+            shape_type=25,
+            parts=[
+                [(0., 0.), (0., 1.), (1., 1.), (1., 0.), (0., 0.)],
+                [(2., 0.), (2., 1.), (3., 1.), (3., 0.), (2., 0.)],
+            ],
+        ),
+        'multipatch_fan': build_multipatch_dataset(
+            prefix='multipatch-fan',
+            parts=[(1, [(0., 0., 1.), (1., 0., 1.), (1., 1., 1.), (0., 1., 1.)])],
+        ),
+    }
+    canonical_prj = build_minimal_point_dataset(prefix='crs')['crs.prj']
+    for entries in datasets.values():
+        shp_name = next(name for name in entries if name.endswith('.shp'))
+        entries[f'{shp_name[:-4]}.prj'] = canonical_prj
+    return datasets
+
+
+@pytest.mark.parametrize('dataset', ['multipoint_m', 'polygon_m', 'multipatch_fan'])
+def test_rust_parser_geometry_matches_retained_fiona_oracle(tmp_path, dataset):
+    entries = _semantic_datasets()[dataset]
+    source = tmp_path / 'source'
+    source.mkdir()
+    for name, content in entries.items():
+        (source / name).write_bytes(content)
+    shp_path = next(source.glob('*.shp'))
+    with fiona.open(shp_path) as collection:
+        fiona_geometry = next(iter(collection))['geometry'].__geo_interface__
+
+    output_path = source / 'payload.json'
+    asyncio.run(convert._run_parser_worker(
+        shp_path=shp_path,
+        output_path=output_path,
+        scratch=SimpleNamespace(request_dir=source),
+    ))
+    rust_geometry = json.loads(output_path.read_text(encoding='utf-8'))['geometries'][0]
+
+    assert rust_geometry == json.loads(json.dumps(fiona_geometry))
+
+
 @pytest.mark.parametrize('output_format', ['geojson', 'geoparquet'])
-@pytest.mark.parametrize('dataset', ['point_null', 'multipatch'])
+@pytest.mark.parametrize(
+    'dataset',
+    ['point_null', 'multipatch', 'multipoint_m', 'polygon_m', 'multipatch_fan'],
+)
 def test_real_worker_output_semantics_and_cleanup(tmp_path, output_format, dataset):
     if dataset == 'point_null':
         source = tmp_path / 'source'
@@ -46,8 +103,10 @@ def test_real_worker_output_semantics_and_cleanup(tmp_path, output_format, datas
             sink.write({'geometry': None,
                         'properties': {'NAME': None, 'COUNT': None, 'VALUE': None, 'DATE': None}})
         entries = {path.name: path.read_bytes() for path in source.iterdir()}
-    else:
+    elif dataset == 'multipatch':
         entries = _multipatch_entries()
+    else:
+        entries = _semantic_datasets()[dataset]
     scratch = tmp_path / 'scratch'
     with TestClient(create_app()) as client:
         client.app.state.scratch_root = scratch
@@ -82,9 +141,32 @@ def test_real_worker_output_semantics_and_cleanup(tmp_path, output_format, datas
         assert list(geometries[0]['coordinates']) == [10, 20, 3]
         assert geometries[1] is None
         assert metadata['bbox'] == [10, 20, 10, 20]
-    else:
+    elif dataset == 'multipatch':
         assert properties == [{'NAME': 'demo'}]
         assert geometries[0]['type'] == 'GeometryCollection'
         assert len(geometries[0]['geometries']) == 2
         assert all(item['type'] == 'MultiPolygon' for item in geometries[0]['geometries'])
         assert metadata['bbox'] == [0, 0, 3, 1]
+    else:
+        expected_types = {
+            'multipoint_m': 'MultiPoint',
+            'polygon_m': 'MultiPolygon',
+            'multipatch_fan': 'MultiPolygon',
+        }
+        assert properties == [{
+            'NAME': {
+                'multipoint_m': 'multipoint',
+                'polygon_m': 'multipart',
+                'multipatch_fan': 'multipatch',
+            }[dataset]
+        }]
+        assert geometries[0]['type'] == expected_types[dataset]
+        if dataset == 'multipoint_m':
+            assert len(geometries[0]['coordinates']) == 2
+            assert metadata['bbox'] == [10, 20, 12, 21]
+        elif dataset == 'polygon_m':
+            assert len(geometries[0]['coordinates']) == 2
+            assert metadata['bbox'] == [0, 0, 3, 1]
+        else:
+            assert len(geometries[0]['coordinates']) == 2
+            assert metadata['bbox'] == [0, 0, 1, 1]

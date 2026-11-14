@@ -32,6 +32,7 @@ from starlette.routing import Route
 from starlette.staticfiles import StaticFiles
 
 from .abuse_controls import AbuseControlState, load_abuse_control_config
+from .async_runtime import run_blocking_phase
 from .cleanup import (
     ActiveRequestScratchRegistry,
     RequestScratchLayout,
@@ -41,7 +42,6 @@ from .cleanup import (
 )
 from .convert import (
     _parser_cli_path,
-    _run_blocking_phase,
     convert_uploaded_archive,
     probe_parser_runtime,
     validate_conversion_resource_envelope,
@@ -512,8 +512,9 @@ async def inspect_archive(request: Request) -> JSONResponse:
                     request_id=request_id,
                 )
 
+        response_body = await run_blocking_phase(_encode_json_response, payload)
         cleanup_reason = "success"
-        return JSONResponse(payload)
+        return Response(content=response_body, media_type="application/json")
     except TimeoutError:
         cleanup_reason = "timeout"
         return error_response(
@@ -529,12 +530,13 @@ async def inspect_archive(request: Request) -> JSONResponse:
         cleanup_reason = "cancelled"
         raise
     finally:
-        _cleanup_request_scratch(
-            request=request,
+        await run_blocking_phase(
+            _cleanup_request_scratch,
             layout=scratch_layout,
             request_id=request_id,
             request_scope=request_scope,
             cleanup_reason=cleanup_reason,
+            registry=_active_scratch_registry(request.app),
         )
 
 
@@ -633,18 +635,18 @@ def _content_disposition_attachment(filename: str) -> str:
 
 def _cleanup_request_scratch(
     *,
-    request: Request,
     layout: RequestScratchLayout,
     request_id: str,
     request_scope: str,
     cleanup_reason: str,
+    registry: ActiveRequestScratchRegistry,
 ) -> None:
     cleaned = cleanup_request_scratch_dir(
         layout=layout,
         request_id=request_id,
         request_scope=request_scope,
         cleanup_reason=cleanup_reason,
-        registry=_active_scratch_registry(request.app),
+        registry=registry,
         logger=_LOGGER,
     )
     if not cleaned and cleanup_reason == "success":
@@ -824,9 +826,11 @@ async def convert_archive(request: Request) -> Response:
 
         if response_mode == "json_body":
             try:
-                geojson_payload = await _run_blocking_phase(
-                    _decode_geojson_response,
+                response_body = await run_blocking_phase(
+                    _encode_relay_response,
                     converted.content,
+                    request_id=request_id,
+                    metadata=convert_metadata,
                 )
             except (UnicodeDecodeError, ValueError) as exc:
                 cleanup_reason = "json_body_payload_decode_failed"
@@ -841,13 +845,7 @@ async def convert_archive(request: Request) -> Response:
                 )
 
             cleanup_reason = "success"
-            return JSONResponse(
-                {
-                    "request_id": request_id,
-                    "geojson": geojson_payload,
-                    "metadata": convert_metadata,
-                }
-            )
+            return Response(content=response_body, media_type="application/json")
 
         root_path = _request_forwarded_prefix(request)
         metadata_path = _metadata_path_for_request(root_path=root_path, request_id=request_id)
@@ -884,17 +882,40 @@ async def convert_archive(request: Request) -> Response:
         cleanup_reason = "cancelled"
         raise
     finally:
-        _cleanup_request_scratch(
-            request=request,
+        await run_blocking_phase(
+            _cleanup_request_scratch,
             layout=scratch_layout,
             request_id=request_id,
             request_scope=request_scope,
             cleanup_reason=cleanup_reason,
+            registry=_active_scratch_registry(request.app),
         )
 
 
-def _decode_geojson_response(content: bytes) -> object:
-    return json.loads(content.decode("utf-8"))
+def _encode_json_response(payload: object) -> bytes:
+    return json.dumps(
+        payload,
+        ensure_ascii=False,
+        allow_nan=False,
+        indent=None,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def _encode_relay_response(
+    content: bytes,
+    *,
+    request_id: str,
+    metadata: dict[str, object],
+) -> bytes:
+    geojson_payload = json.loads(content.decode("utf-8"))
+    return _encode_json_response(
+        {
+            "request_id": request_id,
+            "geojson": geojson_payload,
+            "metadata": metadata,
+        }
+    )
 
 
 async def convert_metadata(request: Request) -> JSONResponse:

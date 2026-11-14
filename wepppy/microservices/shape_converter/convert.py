@@ -12,7 +12,6 @@ import struct
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ParamSpec, TypeVar
 
 from pyproj import CRS
 from pyproj.exceptions import CRSError
@@ -27,6 +26,7 @@ from .archive_validation import (
     shp_xml_sidecar_warning_message,
     validate_and_extract_zip_archive,
 )
+from .async_runtime import run_blocking_phase as _run_blocking_phase
 from .cleanup import RequestScratchLayout
 from .crs import (
     TARGET_CRS_OPTIONS,
@@ -112,8 +112,6 @@ _REVIEWED_RESOURCE_MAXIMA = {
     "geojson_output_bytes": 32 * 1024 * 1024,
     "geoparquet_output_bytes": 32 * 1024 * 1024,
 }
-_P = ParamSpec("_P")
-_T = TypeVar("_T")
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,24 +145,6 @@ class _PreparedConversion:
     projection_status: str
     projection_warnings: tuple[str, ...]
     sidecar_warning: str | None
-
-
-async def _run_blocking_phase(
-    function: cabc.Callable[_P, _T],
-    /,
-    *args: _P.args,
-    **kwargs: _P.kwargs,
-) -> _T:
-    """Run bounded blocking work without releasing ownership on cancellation."""
-
-    task = asyncio.create_task(asyncio.to_thread(function, *args, **kwargs))
-    try:
-        return await asyncio.shield(task)
-    except asyncio.CancelledError:
-        # A thread cannot be killed safely. Keep the request, scratch, and
-        # single-flight admission owned until it exits, then propagate cancel.
-        await asyncio.shield(asyncio.gather(task, return_exceptions=True))
-        raise
 
 
 def validate_conversion_resource_envelope(

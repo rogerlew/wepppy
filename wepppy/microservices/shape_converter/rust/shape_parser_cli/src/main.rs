@@ -282,7 +282,7 @@ fn validate_record_alignment(config: &Config) -> Result<(), AppError> {
         if next_offset > shp_len {
             return Err(AppError::Parse);
         }
-        validate_record_structure(&mut shp, content_bytes)?;
+        validate_record_structure(&mut shp, content_bytes, config.max_vertices_per_feature)?;
         records.push((shp_offset / 2, u64::from(content_words)));
         shp_offset = next_offset;
     }
@@ -322,12 +322,44 @@ fn validate_record_alignment(config: &Config) -> Result<(), AppError> {
     Ok(())
 }
 
-fn validate_record_structure(source: &mut File, content_bytes: u64) -> Result<(), AppError> {
+fn validate_record_structure(
+    source: &mut File,
+    content_bytes: u64,
+    max_vertices_per_feature: usize,
+) -> Result<(), AppError> {
     let mut shape_type_bytes = [0_u8; 4];
     source
         .read_exact(&mut shape_type_bytes)
         .map_err(|_| AppError::Parse)?;
     let shape_type = u32::from_le_bytes(shape_type_bytes);
+    if matches!(shape_type, 8 | 18 | 28) {
+        if content_bytes < 40 {
+            return Err(AppError::Parse);
+        }
+        let mut structure = [0_u8; 36];
+        source
+            .read_exact(&mut structure)
+            .map_err(|_| AppError::Parse)?;
+        let point_count =
+            u32::from_le_bytes(structure[32..36].try_into().map_err(|_| AppError::Parse)?);
+        if point_count == 0 {
+            return Err(AppError::Parse);
+        }
+        if usize::try_from(point_count).map_err(|_| AppError::VertexLimit)?
+            > max_vertices_per_feature
+        {
+            return Err(AppError::VertexLimit);
+        }
+        let minimum_bytes = u64::from(point_count)
+            .checked_mul(16)
+            .and_then(|value| value.checked_add(40))
+            .ok_or(AppError::Parse)?;
+        return if minimum_bytes <= content_bytes {
+            Ok(())
+        } else {
+            Err(AppError::Parse)
+        };
+    }
     if !matches!(shape_type, 3 | 5 | 13 | 15 | 23 | 25 | 31) {
         return Ok(());
     }
@@ -343,6 +375,9 @@ fn validate_record_structure(source: &mut File, content_bytes: u64) -> Result<()
         u32::from_le_bytes(structure[36..40].try_into().map_err(|_| AppError::Parse)?);
     if part_count == 0 || point_count == 0 || part_count > point_count {
         return Err(AppError::Parse);
+    }
+    if usize::try_from(point_count).map_err(|_| AppError::VertexLimit)? > max_vertices_per_feature {
+        return Err(AppError::VertexLimit);
     }
     let table_bytes = u64::from(part_count)
         .checked_mul(if shape_type == 31 { 8 } else { 4 })
@@ -863,6 +898,7 @@ fn multipatch_geometry(patches: &[Patch]) -> Result<Value, AppError> {
             }
             Patch::TriangleStrip(points) => {
                 flush(&mut active_polygon, &mut members)?;
+                let mut polygons = Vec::new();
                 for index in 2..points.len() {
                     let ring = Value::Array(vec![
                         points[index - 2].values(),
@@ -870,14 +906,13 @@ fn multipatch_geometry(patches: &[Patch]) -> Result<Value, AppError> {
                         points[index].values(),
                         points[index - 2].values(),
                     ]);
-                    members.push(geometry(
-                        "MultiPolygon",
-                        Value::Array(vec![Value::Array(vec![ring])]),
-                    )?);
+                    polygons.push(Value::Array(vec![ring]));
                 }
+                members.push(geometry("MultiPolygon", Value::Array(polygons))?);
             }
             Patch::TriangleFan(points) => {
                 flush(&mut active_polygon, &mut members)?;
+                let mut polygons = Vec::new();
                 for index in 2..points.len() {
                     let ring = Value::Array(vec![
                         points[0].values(),
@@ -885,16 +920,18 @@ fn multipatch_geometry(patches: &[Patch]) -> Result<Value, AppError> {
                         points[index].values(),
                         points[0].values(),
                     ]);
-                    members.push(geometry(
-                        "MultiPolygon",
-                        Value::Array(vec![Value::Array(vec![ring])]),
-                    )?);
+                    polygons.push(Value::Array(vec![ring]));
                 }
+                members.push(geometry("MultiPolygon", Value::Array(polygons))?);
             }
         }
     }
     flush(&mut active_polygon, &mut members)?;
-    Ok(json!({"type": "GeometryCollection", "geometries": members}))
+    if members.len() == 1 {
+        members.pop().ok_or(AppError::Parse)
+    } else {
+        Ok(json!({"type": "GeometryCollection", "geometries": members}))
+    }
 }
 
 fn write_payload_atomically(config: &Config, payload: &ParserPayload) -> Result<(), AppError> {

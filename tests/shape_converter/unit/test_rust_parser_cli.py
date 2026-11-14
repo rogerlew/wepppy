@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import importlib
 import json
+import signal
 import struct
 import subprocess
 import sys
@@ -249,13 +250,22 @@ def test_rust_cli_drops_m_measure_consistently_with_fiona_oracle(tmp_path: Path)
 
 
 @pytest.mark.parametrize(
-    ("name", "parts", "expected_members", "expected_ring_count"),
+    ("name", "parts", "expected_polygon_count", "expected_ring_count"),
     [
         (
             "first-ring",
             [
                 (4, [(0.0, 0.0, 1.0), (0.0, 3.0, 1.0), (3.0, 3.0, 1.0), (0.0, 0.0, 1.0)]),
                 (5, [(0.5, 0.5, 1.0), (1.0, 0.5, 1.0), (0.5, 1.0, 1.0), (0.5, 0.5, 1.0)]),
+            ],
+            1,
+            2,
+        ),
+        (
+            "inner-ring",
+            [
+                (2, [(0.0, 0.0, 1.0), (0.0, 3.0, 1.0), (3.0, 3.0, 1.0), (0.0, 0.0, 1.0)]),
+                (3, [(0.5, 0.5, 1.0), (1.0, 0.5, 1.0), (0.5, 1.0, 1.0), (0.5, 0.5, 1.0)]),
             ],
             1,
             2,
@@ -278,7 +288,7 @@ def test_rust_cli_parses_each_multipatch_family_policy(
     tmp_path: Path,
     name: str,
     parts: list[tuple[int, list[tuple[float, float, float]]]],
-    expected_members: int,
+    expected_polygon_count: int,
     expected_ring_count: int,
 ) -> None:
     payload = _parse_direct(
@@ -286,11 +296,10 @@ def test_rust_cli_parses_each_multipatch_family_policy(
         build_multipatch_dataset(prefix=name, parts=parts),
     )
 
-    collection = payload["geometries"][0]
-    assert collection["type"] == "GeometryCollection"
-    assert len(collection["geometries"]) == expected_members
-    assert all(member["type"] == "MultiPolygon" for member in collection["geometries"])
-    assert len(collection["geometries"][0]["coordinates"][0]) == expected_ring_count
+    geometry = payload["geometries"][0]
+    assert geometry["type"] == "MultiPolygon"
+    assert len(geometry["coordinates"]) == expected_polygon_count
+    assert len(geometry["coordinates"][0]) == expected_ring_count
 
 
 def test_rust_cli_rejects_disguised_non_shapefile(tmp_path: Path) -> None:
@@ -351,6 +360,47 @@ def test_rust_cli_enforces_vertex_limit(
 
 
 @pytest.mark.parametrize(
+    ("entries", "point_count_offset", "deleted"),
+    [
+        (build_multipoint_dataset(prefix="oversize-multipoint"), 144, False),
+        (
+            build_multipart_dataset(
+                prefix="oversize-multipart",
+                shape_type=3,
+                parts=[[(0.0, 0.0), (1.0, 1.0)]],
+            ),
+            148,
+            True,
+        ),
+    ],
+)
+def test_rust_cli_rejects_declared_vertex_limit_before_geometry_allocation(
+    tmp_path: Path,
+    entries: dict[str, bytes],
+    point_count_offset: int,
+    deleted: bool,
+) -> None:
+    shp_name = next(name for name in entries if name.endswith(".shp"))
+    shp = bytearray(entries[shp_name])
+    struct.pack_into("<I", shp, point_count_offset, 101)
+    entries[shp_name] = bytes(shp)
+    if deleted:
+        dbf_name = next(name for name in entries if name.endswith(".dbf"))
+        dbf = bytearray(entries[dbf_name])
+        header_length = struct.unpack_from("<H", dbf, 8)[0]
+        dbf[header_length] = ord("*")
+        entries[dbf_name] = bytes(dbf)
+    shp_path = _write_dataset(tmp_path, entries)
+    output_path = tmp_path / "payload.json"
+
+    result = _run_cli(tmp_path, shp_path, output_path)
+
+    assert result.returncode == 5
+    assert not output_path.exists()
+    assert not list(tmp_path.glob("payload.tmp.*"))
+
+
+@pytest.mark.parametrize(
     ("limits", "expected_exit"),
     [
         ({"max-input-bytes": 1}, 1),
@@ -392,7 +442,7 @@ def test_rust_cli_address_space_limit_fails_closed(tmp_path: Path) -> None:
         },
     )
 
-    assert result.returncode != 0
+    assert result.returncode == -signal.SIGABRT
     assert not output_path.exists()
     assert not list(tmp_path.glob("payload.tmp.*"))
 
@@ -415,7 +465,7 @@ def test_rust_cli_cpu_limit_fails_closed(tmp_path: Path) -> None:
         },
     )
 
-    assert result.returncode != 0
+    assert result.returncode == -signal.SIGKILL
     assert not output_path.exists()
     assert not list(tmp_path.glob("payload.tmp.*"))
 
@@ -548,16 +598,29 @@ def test_rust_cli_parses_dbf_logical_values(
     assert payload["properties"] == [{"ACTIVE": expected}]
 
 
-def test_rust_cli_decodes_supported_dbf_language_driver(tmp_path: Path) -> None:
-    entries = build_minimal_point_dataset(prefix="cp1251")
-    entries["cp1251.dbf"] = _dbf_bytes(
-        [("NAME", "C", 8, 0, "тест".encode("cp1251"))],
-        language_driver=0xC9,
+@pytest.mark.parametrize(
+    ("prefix", "language_driver", "encoded", "expected"),
+    [
+        ("cp1251", 0xC9, "тест".encode("cp1251"), "тест"),
+        ("cp1250", 0xC8, "český".encode("cp1250"), "český"),
+    ],
+)
+def test_rust_cli_decodes_supported_dbf_language_driver(
+    tmp_path: Path,
+    prefix: str,
+    language_driver: int,
+    encoded: bytes,
+    expected: str,
+) -> None:
+    entries = build_minimal_point_dataset(prefix=prefix)
+    entries[f"{prefix}.dbf"] = _dbf_bytes(
+        [("NAME", "C", 8, 0, encoded)],
+        language_driver=language_driver,
     )
 
     payload = _parse_direct(tmp_path, entries)
 
-    assert payload["properties"] == [{"NAME": "тест"}]
+    assert payload["properties"] == [{"NAME": expected}]
 
 
 def test_rust_cli_rejects_paths_outside_request_root(tmp_path: Path) -> None:

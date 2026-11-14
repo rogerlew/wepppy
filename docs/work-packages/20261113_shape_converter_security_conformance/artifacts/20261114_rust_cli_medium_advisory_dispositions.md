@@ -19,7 +19,7 @@ packages, parser linkage, locale, command, or mounts triggers fresh disposition.
 
 | Advisory | Affected artifact(s) | Request-path assessment | Disposition |
 |---|---|---|---|
-| CVE-2025-12781 | CPython 3.12.16 | Vulnerable `base64` decoding APIs are not imported or invoked. | Retain with non-reachability; rescan on base refresh. |
+| CVE-2025-12781 | CPython 3.12.16 | `safe_traceback` calls `b64decode`, but only after a JWT-character prefilter excludes alternate-alphabet characters and padding, and the call uses `validate=True`; the advisory's alternate-alphabet integrity condition is excluded. | Retain with constrained-input non-reachability; rescan on base refresh. |
 | CVE-2025-15366 | CPython 3.12.16 | `imaplib` is not imported; no mail command input exists. | Retain with non-reachability. |
 | CVE-2025-15367 | CPython 3.12.16 | `poplib` is not imported; no mail command input exists. | Retain with non-reachability. |
 | CVE-2025-6141 | ncurses/tinfo packages | The service has no terminal and never parses attacker-supplied termcap data. | Retain with non-reachability. |
@@ -41,7 +41,7 @@ packages, parser linkage, locale, command, or mounts triggers fresh disposition.
 | CVE-2026-18508 | GNU tar | The runtime never invokes tar or its `--one-top-level` extraction mode. | Retain with executable non-reachability. |
 | CVE-2026-19542 | glibc | The service does not call `tdelete`. | Retain with API non-reachability. |
 | CVE-2026-3184 | util-linux/login packages | The container has no login flow and never invokes `login -h`. | Retain with executable/non-root non-reachability. |
-| CVE-2026-3446 | CPython 3.12.16 | Vulnerable `base64` decoding APIs are not imported or invoked. | Retain with non-reachability; rescan on base refresh. |
+| CVE-2026-3446 | CPython 3.12.16 | `safe_traceback` calls `b64decode`, but only after a JWT-character prefilter excludes alternate-alphabet characters and padding, and the call uses `validate=True`; the advisory's alternate-alphabet integrity condition is excluded. | Retain with constrained-input non-reachability; rescan on base refresh. |
 | CVE-2026-42250 | bzip2 library | The affected `bzip2recover` utility is never invoked; ZIP admission does not delegate to it. | Retain with executable non-reachability. |
 | CVE-2026-50812 | SQLite session extension | No request opens SQLite; the session extension is not used. | Retain with extension non-reachability. |
 | CVE-2026-50813 | SQLite session extension | No request opens SQLite; the session extension is not used. | Retain with extension non-reachability. |

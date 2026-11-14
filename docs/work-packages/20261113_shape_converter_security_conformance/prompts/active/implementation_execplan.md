@@ -796,6 +796,7 @@ Run the new cross-boundary WEPPpy tests from `/workdir/wepppy`:
     wctl run-pytest tests/shape_converter/unit/test_rust_parser_cli.py tests/shape_converter/unit/test_parser_ipc.py --maxfail=1
     wctl run-pytest tests/shape_converter/integration/test_parser_ipc_semantics.py --maxfail=1
     wctl run-pytest tests/docker/unit/test_project_config_rollout_contract.py --maxfail=1
+    wctl run-pytest tests/scripts/test_deploy_production_execution.py --maxfail=1
 
 Source and hygiene checks:
 

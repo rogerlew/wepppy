@@ -51,7 +51,9 @@ loader. Fiona and pip were absent from the final runtime.
 The no-mount candidate returned a valid one-feature GeoJSON Point with
 `NAME=demo`, metadata feature count one, and bounds `[10, 20, 10, 20]`; request
 scratch was empty afterwards. The same image also returned a 2,435-byte
-GeoParquet artifact with `PAR1` framing.
+GeoParquet artifact. Independent PyArrow/Shapely readback confirmed one row,
+Point coordinates `[10, 20]`, `NAME=demo`, a present CRS, feature count one,
+and bounds `[10, 20, 10, 20]`; `PAR1` framing was also present.
 
 A retained 235,000-record request exercised the active aggregate envelope. While
 it ran, readiness returned 200 and a competing conversion returned 503
