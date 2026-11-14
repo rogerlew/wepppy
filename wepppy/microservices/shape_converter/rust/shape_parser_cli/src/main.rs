@@ -119,8 +119,8 @@ fn fixed_error_message(error: &AppError) -> &'static str {
 
 fn run() -> Result<(), AppError> {
     let config = parse_args(env::args().skip(1))?;
-    validate_paths_and_sizes(&config)?;
     apply_resource_limits(&config)?;
+    validate_paths_and_sizes(&config)?;
     let payload = parse_dataset(&config)?;
     write_payload_atomically(&config, &payload)
 }
@@ -257,6 +257,9 @@ fn validate_record_alignment(config: &Config) -> Result<(), AppError> {
     let mut shp_offset = 100_u64;
     let mut records = Vec::new();
     while shp_offset < shp_len {
+        if records.len() >= config.max_features {
+            return Err(AppError::FeatureLimit);
+        }
         shp.seek(io::SeekFrom::Start(shp_offset))
             .map_err(|_| AppError::Parse)?;
         let mut header = [0_u8; 8];
@@ -279,15 +282,12 @@ fn validate_record_alignment(config: &Config) -> Result<(), AppError> {
         if next_offset > shp_len {
             return Err(AppError::Parse);
         }
+        validate_record_structure(&mut shp, content_bytes)?;
         records.push((shp_offset / 2, u64::from(content_words)));
         shp_offset = next_offset;
     }
-    if shp_offset != shp_len || records.len() > config.max_features {
-        return Err(if records.len() > config.max_features {
-            AppError::FeatureLimit
-        } else {
-            AppError::Parse
-        });
+    if shp_offset != shp_len {
+        return Err(AppError::Parse);
     }
 
     let mut shx = File::open(config.shp_path.with_extension("shx")).map_err(|_| AppError::Parse)?;
@@ -318,6 +318,64 @@ fn validate_record_alignment(config: &Config) -> Result<(), AppError> {
         u32::from_le_bytes(header[4..8].try_into().map_err(|_| AppError::Parse)?) as u64;
     if records.len() as u64 != record_count {
         return Err(AppError::Parse);
+    }
+    Ok(())
+}
+
+fn validate_record_structure(source: &mut File, content_bytes: u64) -> Result<(), AppError> {
+    let mut shape_type_bytes = [0_u8; 4];
+    source
+        .read_exact(&mut shape_type_bytes)
+        .map_err(|_| AppError::Parse)?;
+    let shape_type = u32::from_le_bytes(shape_type_bytes);
+    if !matches!(shape_type, 3 | 5 | 13 | 15 | 23 | 25 | 31) {
+        return Ok(());
+    }
+    if content_bytes < 44 {
+        return Err(AppError::Parse);
+    }
+    let mut structure = [0_u8; 40];
+    source
+        .read_exact(&mut structure)
+        .map_err(|_| AppError::Parse)?;
+    let part_count = u32::from_le_bytes(structure[32..36].try_into().map_err(|_| AppError::Parse)?);
+    let point_count =
+        u32::from_le_bytes(structure[36..40].try_into().map_err(|_| AppError::Parse)?);
+    if part_count == 0 || point_count == 0 || part_count > point_count {
+        return Err(AppError::Parse);
+    }
+    let table_bytes = u64::from(part_count)
+        .checked_mul(if shape_type == 31 { 8 } else { 4 })
+        .and_then(|value| value.checked_add(44))
+        .ok_or(AppError::Parse)?;
+    if table_bytes > content_bytes {
+        return Err(AppError::Parse);
+    }
+    let mut previous = None;
+    for index in 0..part_count {
+        let mut offset_bytes = [0_u8; 4];
+        source
+            .read_exact(&mut offset_bytes)
+            .map_err(|_| AppError::Parse)?;
+        let offset = u32::from_le_bytes(offset_bytes);
+        if (index == 0 && offset != 0)
+            || offset >= point_count
+            || previous.is_some_and(|value| offset <= value)
+        {
+            return Err(AppError::Parse);
+        }
+        previous = Some(offset);
+    }
+    if shape_type == 31 {
+        for _ in 0..part_count {
+            let mut patch_type_bytes = [0_u8; 4];
+            source
+                .read_exact(&mut patch_type_bytes)
+                .map_err(|_| AppError::Parse)?;
+            if u32::from_le_bytes(patch_type_bytes) > 5 {
+                return Err(AppError::Parse);
+            }
+        }
     }
     Ok(())
 }

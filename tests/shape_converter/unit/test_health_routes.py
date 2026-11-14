@@ -52,6 +52,23 @@ def test_ready_health_returns_503_when_scratch_unwritable(monkeypatch: pytest.Mo
             pass
 
 
+def test_startup_rejects_resource_settings_outside_reviewed_envelope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        shape_converter_app_module,
+        "validate_conversion_resource_envelope",
+        lambda **_kwargs: (
+            False,
+            "shape_converter_resource_envelope_invalid: parser_memory_bytes exceeds reviewed maximum",
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="shape_converter_resource_envelope_invalid"):
+        with TestClient(create_app()):
+            pass
+
+
 def test_ready_health_returns_503_when_parser_provenance_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

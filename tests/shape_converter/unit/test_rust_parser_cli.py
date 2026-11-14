@@ -15,6 +15,11 @@ from tests.shape_converter.helpers.archive_builder import (
     build_minimal_line_dataset,
     build_minimal_point_dataset,
     build_minimal_polygon_dataset,
+    build_multipatch_dataset,
+    build_multipart_dataset,
+    build_multipoint_dataset,
+    build_repeated_point_dataset,
+    build_shape_dataset,
 )
 from wepppy.microservices.shape_converter.errors import ShapeConverterError
 from wepppy.microservices.shape_converter.parser_provenance import (
@@ -120,6 +125,14 @@ def _dbf_bytes(
     return bytes(header + descriptors + b"\r" + record + b"\x1a")
 
 
+def _parse_direct(tmp_path: Path, entries: dict[str, bytes]) -> dict:
+    shp_path = _write_dataset(tmp_path, entries)
+    output_path = tmp_path / "payload.json"
+    result = _run_cli(tmp_path, shp_path, output_path)
+    assert result.returncode == 0, result.stderr
+    return json.loads(output_path.read_text(encoding="utf-8"))
+
+
 @pytest.mark.parametrize(
     ("entries", "expected_type", "expected_name", "expected_bounds"),
     [
@@ -163,6 +176,121 @@ def test_rust_cli_parses_valid_geometry_families(
     assert payload["properties"] == [{"NAME": expected_name}]
     assert payload["geometries"][0]["type"] == expected_type
     assert payload["source_bounds"] == expected_bounds
+
+
+@pytest.mark.parametrize(
+    ("entries", "expected_type", "coordinate_depth"),
+    [
+        (build_multipoint_dataset(), "MultiPoint", 1),
+        (build_multipoint_dataset(prefix="multipoint-m", shape_type=28), "MultiPoint", 1),
+        (
+            build_multipart_dataset(
+                prefix="line-multipart",
+                shape_type=3,
+                parts=[[(0.0, 0.0), (1.0, 1.0)], [(2.0, 0.0), (3.0, 1.0)]],
+            ),
+            "MultiLineString",
+            2,
+        ),
+        (
+            build_multipart_dataset(
+                prefix="line-m",
+                shape_type=23,
+                parts=[[(0.0, 0.0), (1.0, 1.0)]],
+            ),
+            "LineString",
+            1,
+        ),
+        (
+            build_multipart_dataset(
+                prefix="polygon-m",
+                shape_type=25,
+                parts=[[
+                    (0.0, 0.0),
+                    (0.0, 1.0),
+                    (1.0, 1.0),
+                    (1.0, 0.0),
+                    (0.0, 0.0),
+                ]],
+            ),
+            "Polygon",
+            2,
+        ),
+    ],
+)
+def test_rust_cli_parses_multipoint_m_and_multipart_families(
+    tmp_path: Path,
+    entries: dict[str, bytes],
+    expected_type: str,
+    coordinate_depth: int,
+) -> None:
+    payload = _parse_direct(tmp_path, entries)
+
+    geometry = payload["geometries"][0]
+    assert geometry["type"] == expected_type
+    coordinates = geometry["coordinates"]
+    for _ in range(coordinate_depth):
+        coordinates = coordinates[0]
+    assert len(coordinates) == 2
+
+
+def test_rust_cli_drops_m_measure_consistently_with_fiona_oracle(tmp_path: Path) -> None:
+    record = struct.pack("<i3d", 21, 10.0, 20.0, 99.0)
+    entries = build_shape_dataset(
+        prefix="point-m",
+        shape_type=21,
+        record_content=record,
+        bbox=(10.0, 20.0, 10.0, 20.0),
+    )
+
+    payload = _parse_direct(tmp_path, entries)
+
+    assert payload["geometries"] == [{"type": "Point", "coordinates": [10.0, 20.0]}]
+
+
+@pytest.mark.parametrize(
+    ("name", "parts", "expected_members", "expected_ring_count"),
+    [
+        (
+            "first-ring",
+            [
+                (4, [(0.0, 0.0, 1.0), (0.0, 3.0, 1.0), (3.0, 3.0, 1.0), (0.0, 0.0, 1.0)]),
+                (5, [(0.5, 0.5, 1.0), (1.0, 0.5, 1.0), (0.5, 1.0, 1.0), (0.5, 0.5, 1.0)]),
+            ],
+            1,
+            2,
+        ),
+        (
+            "triangle-fan",
+            [(1, [(0.0, 0.0, 1.0), (1.0, 0.0, 1.0), (1.0, 1.0, 1.0), (0.0, 1.0, 1.0)])],
+            2,
+            1,
+        ),
+        (
+            "triangle-strip",
+            [(0, [(0.0, 0.0, 1.0), (1.0, 0.0, 1.0), (0.0, 1.0, 1.0), (1.0, 1.0, 1.0)])],
+            2,
+            1,
+        ),
+    ],
+)
+def test_rust_cli_parses_each_multipatch_family_policy(
+    tmp_path: Path,
+    name: str,
+    parts: list[tuple[int, list[tuple[float, float, float]]]],
+    expected_members: int,
+    expected_ring_count: int,
+) -> None:
+    payload = _parse_direct(
+        tmp_path,
+        build_multipatch_dataset(prefix=name, parts=parts),
+    )
+
+    collection = payload["geometries"][0]
+    assert collection["type"] == "GeometryCollection"
+    assert len(collection["geometries"]) == expected_members
+    assert all(member["type"] == "MultiPolygon" for member in collection["geometries"])
+    assert len(collection["geometries"][0]["coordinates"][0]) == expected_ring_count
 
 
 def test_rust_cli_rejects_disguised_non_shapefile(tmp_path: Path) -> None:
@@ -247,6 +375,51 @@ def test_rust_cli_resource_limits_fail_without_publishing_output(
     assert not list(tmp_path.glob("payload.tmp.*"))
 
 
+def test_rust_cli_address_space_limit_fails_closed(tmp_path: Path) -> None:
+    entries = build_repeated_point_dataset(record_count=50_000, prefix="memory")
+    shp_path = _write_dataset(tmp_path, entries)
+    output_path = tmp_path / "payload.json"
+
+    result = _run_cli(
+        tmp_path,
+        shp_path,
+        output_path,
+        **{
+            "max-input-bytes": 100 * 1024 * 1024,
+            "max-payload-bytes": 100 * 1024 * 1024,
+            "max-features": 100_000,
+            "max-memory-bytes": 1024 * 1024,
+        },
+    )
+
+    assert result.returncode != 0
+    assert not output_path.exists()
+    assert not list(tmp_path.glob("payload.tmp.*"))
+
+
+def test_rust_cli_cpu_limit_fails_closed(tmp_path: Path) -> None:
+    entries = build_repeated_point_dataset(record_count=235_000, prefix="cpu")
+    shp_path = _write_dataset(tmp_path, entries)
+    output_path = tmp_path / "payload.json"
+
+    result = _run_cli(
+        tmp_path,
+        shp_path,
+        output_path,
+        **{
+            "max-input-bytes": 100 * 1024 * 1024,
+            "max-payload-bytes": 100 * 1024 * 1024,
+            "max-features": 300_000,
+            "max-memory-bytes": 384 * 1024 * 1024,
+            "max-cpu-seconds": 1,
+        },
+    )
+
+    assert result.returncode != 0
+    assert not output_path.exists()
+    assert not list(tmp_path.glob("payload.tmp.*"))
+
+
 def test_rust_cli_feature_limit_has_dedicated_exit_and_no_output(tmp_path: Path) -> None:
     shp_path = _write_dataset(tmp_path, _two_point_dataset())
     output_path = tmp_path / "payload.json"
@@ -255,6 +428,23 @@ def test_rust_cli_feature_limit_has_dedicated_exit_and_no_output(tmp_path: Path)
 
     assert result.returncode == 4
     assert not output_path.exists()
+
+
+def test_repeated_point_fixture_reproduces_feature_ceiling(tmp_path: Path) -> None:
+    entries = build_repeated_point_dataset(record_count=101, prefix="ceiling")
+    shp_path = _write_dataset(tmp_path, entries)
+    output_path = tmp_path / "payload.json"
+
+    result = _run_cli(
+        tmp_path,
+        shp_path,
+        output_path,
+        **{"max-features": 100},
+    )
+
+    assert result.returncode == 4
+    assert not output_path.exists()
+    assert not list(tmp_path.glob("payload.tmp.*"))
 
 
 def test_rust_cli_rejects_extra_shp_record_not_indexed_by_shx_or_dbf(tmp_path: Path) -> None:
@@ -344,6 +534,32 @@ def test_rust_cli_rejects_unsupported_dbf_language_driver(tmp_path: Path) -> Non
     assert result.returncode == 1
 
 
+@pytest.mark.parametrize(("raw", "expected"), [(b"T", True), (b"0", False), (b"?", None)])
+def test_rust_cli_parses_dbf_logical_values(
+    tmp_path: Path,
+    raw: bytes,
+    expected: bool | None,
+) -> None:
+    entries = build_minimal_point_dataset(prefix="logical")
+    entries["logical.dbf"] = _dbf_bytes([("ACTIVE", "L", 1, 0, raw)])
+
+    payload = _parse_direct(tmp_path, entries)
+
+    assert payload["properties"] == [{"ACTIVE": expected}]
+
+
+def test_rust_cli_decodes_supported_dbf_language_driver(tmp_path: Path) -> None:
+    entries = build_minimal_point_dataset(prefix="cp1251")
+    entries["cp1251.dbf"] = _dbf_bytes(
+        [("NAME", "C", 8, 0, "тест".encode("cp1251"))],
+        language_driver=0xC9,
+    )
+
+    payload = _parse_direct(tmp_path, entries)
+
+    assert payload["properties"] == [{"NAME": "тест"}]
+
+
 def test_rust_cli_rejects_paths_outside_request_root(tmp_path: Path) -> None:
     request_root = tmp_path / "request"
     request_root.mkdir()
@@ -420,6 +636,25 @@ def test_rust_cli_rejects_bounded_malformed_binary_corpus(tmp_path: Path) -> Non
 
         assert result.returncode != 0, mutation.__name__
         assert not output_path.exists(), mutation.__name__
+
+
+def test_rust_cli_rejects_malformed_multipart_offset(tmp_path: Path) -> None:
+    entries = build_multipart_dataset(
+        prefix="bad-parts",
+        shape_type=3,
+        parts=[[(0.0, 0.0), (1.0, 1.0)], [(2.0, 0.0), (3.0, 1.0)]],
+    )
+    shp = bytearray(entries["bad-parts.shp"])
+    # First part must begin at point zero; offset one makes the record ambiguous.
+    struct.pack_into("<i", shp, 152, 1)
+    entries["bad-parts.shp"] = bytes(shp)
+    shp_path = _write_dataset(tmp_path, entries)
+    output_path = tmp_path / "payload.json"
+
+    result = _run_cli(tmp_path, shp_path, output_path)
+
+    assert result.returncode == 1
+    assert not output_path.exists()
 
 
 def test_rust_cli_command_receives_every_resource_limit(

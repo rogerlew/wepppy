@@ -57,6 +57,9 @@ def _run_deploy(
     controller_backup_failure: bool = False,
     caddy_inspection_failure: bool = False,
     controller_build_failure: bool = False,
+    shape_readiness_failure: bool = False,
+    shape_stop_failure: bool = False,
+    shape_build_inputs_clean: bool = True,
     lock_held: bool = False,
     skip_docker_prune: bool = True,
 ) -> tuple[subprocess.CompletedProcess[str], list[str]]:
@@ -85,7 +88,9 @@ elif [[ "${args}" == *"ps --all --format json"* ]]; then
 elif [[ "${args}" == *" ps "* && "${args}" == *" -q "* ]] \
     || [[ "${args}" == *" ps -q "* ]]; then
     service="${!#}"
-    printf 'cid-%s\n' "${service}"
+    if [ "${service}" != "shape-converter" ] || [ ! -f "${FAKE_SHAPE_STOPPED_MARKER}" ]; then
+        printf 'cid-%s\n' "${service}"
+    fi
 elif [[ "${args}" == *"StartedJobRegistry"* ]]; then
     if [[ "${args}" == *"exec -T rq-worker"* ]]; then
         echo 'rq-probe|exec' >> "${FAKE_COMMAND_LOG}"
@@ -197,6 +202,12 @@ elif [[ "${args}" == *"docker compose run"* ]]; then
 elif [[ "${args}" == *"docker compose exec -T cap"* ]]; then
     :
 elif [[ "${args}" == *"docker compose stop"* ]]; then
+    if [[ "${args}" == *"shape-converter"* ]]; then
+        if [ "${FAKE_SHAPE_STOP_FAILURE:-0}" = 1 ]; then
+            exit 81
+        fi
+        : > "${FAKE_SHAPE_STOPPED_MARKER}"
+    fi
     if [ "${FAKE_RQ_RENEW_HANGS_ONCE:-0}" = 1 ]; then
         /bin/sleep 2
     fi
@@ -263,7 +274,23 @@ fi
     )
     _write_executable(
         bin_dir / "curl",
-        "#!/bin/bash\nset -euo pipefail\nprintf 'curl|%s\\n' \"$*\" >> \"${FAKE_COMMAND_LOG}\"\n",
+        "#!/bin/bash\nset -euo pipefail\nprintf 'curl|%s\\n' \"$*\" >> \"${FAKE_COMMAND_LOG}\"\n"
+        "if [[ \"$*\" == *'/utils/shape-converter/health/ready'* ]] "
+        "&& [ \"${FAKE_SHAPE_READINESS_FAILURE:-0}\" = 1 ]; then exit 22; fi\n",
+    )
+    _write_executable(
+        bin_dir / "git",
+        r'''#!/bin/bash
+set -euo pipefail
+if [ "${1:-}" = "status" ] && [[ "$*" == *"wepppy/microservices/shape_converter"* ]]; then
+    if [ "${FAKE_SHAPE_BUILD_INPUTS_CLEAN:-1}" = 1 ]; then
+        exit 0
+    fi
+    printf ' M wepppy/microservices/shape_converter/convert.py\n'
+    exit 0
+fi
+exec /usr/bin/git "$@"
+''',
     )
     _write_executable(
         bin_dir / "sleep",
@@ -383,6 +410,10 @@ exec /bin/cp "$@"
             "RQ_FENCE_RENEW_RETRIES": "1" if rq_heartbeat_failure else "20",
             "RQ_FENCE_RETRY_DELAY_SECONDS": "0.01",
             "FAKE_CONTROLLER_FAILURE": "1" if controller_build_failure else "0",
+            "FAKE_SHAPE_READINESS_FAILURE": "1" if shape_readiness_failure else "0",
+            "FAKE_SHAPE_STOP_FAILURE": "1" if shape_stop_failure else "0",
+            "FAKE_SHAPE_BUILD_INPUTS_CLEAN": "1" if shape_build_inputs_clean else "0",
+            "FAKE_SHAPE_STOPPED_MARKER": str(tmp_path / "shape-stopped"),
             "CAP_RUNTIME_VALIDATOR": str(cap_validator),
             "CAP_RUNTIME_PREPARER": str(cap_preparer),
             "WEPPCLOUDR_RUNTIME_VALIDATOR": str(weppcloudr_validator),
@@ -457,6 +488,12 @@ def _full_services_with_cap_and_renderer() -> dict[str, object]:
     }
 
 
+def _full_services_with_shape_converter() -> dict[str, object]:
+    services = _full_services_with_cap_and_renderer()
+    services["shape-converter"] = _service("shape-converter:test")
+    return services
+
+
 def test_full_execution_builds_then_stops_workers_and_recreates_without_down(tmp_path: Path) -> None:
     result, commands = _run_deploy(tmp_path, _full_services_with_cap_and_renderer())
 
@@ -522,6 +559,54 @@ def test_full_candidate_failure_recovers_cap_and_never_reports_success_or_prunes
     assert (tmp_path / "controllers-gl.js").read_text(encoding="utf-8") == "known-good controllers"
     assert "Restored the pre-deploy controllers bundle" in result.stderr
     assert not any(command.startswith("docker|system prune") for command in commands)
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_shape_readiness_failure_stops_converter_and_never_reports_success_or_prunes(
+    tmp_path: Path,
+) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        shape_readiness_failure=True,
+        skip_docker_prune=False,
+    )
+
+    assert result.returncode != 0
+    readiness = _position(commands, "/utils/shape-converter/health/ready")
+    stop = _position(commands, "stop --timeout 30 shape-converter")
+    down_check = _position(commands, "ps -q shape-converter")
+    assert readiness < stop < down_check
+    assert "shape-converter is down" in result.stderr
+    assert not any(command.startswith("docker|system prune") for command in commands)
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_shape_readiness_failure_detects_stop_failure(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        shape_readiness_failure=True,
+        shape_stop_failure=True,
+    )
+
+    assert result.returncode == 88
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert "SHAPE_CONVERTER_FAIL_CLOSED_FAILED" in result.stderr
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_shape_release_build_rejects_dirty_inputs_even_with_skip_pull(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        shape_build_inputs_clean=False,
+    )
+
+    assert result.returncode != 0
+    assert "inputs differ from HEAD" in result.stderr
+    assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
     assert "Deployment complete!" not in result.stdout
 
 

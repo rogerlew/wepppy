@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import importlib
 import json
+import threading
+from pathlib import Path
 
 import pytest
 
@@ -26,6 +29,69 @@ from wepppy.microservices.shape_converter import create_app
 pytestmark = [pytest.mark.integration, pytest.mark.microservice]
 shape_converter_app_module = importlib.import_module("wepppy.microservices.shape_converter.app")
 shape_converter_convert_module = importlib.import_module("wepppy.microservices.shape_converter.convert")
+
+
+def test_blocked_conversion_keeps_health_responsive_and_rejects_competing_request(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="blocked"))
+    started = threading.Event()
+    release = threading.Event()
+    original_finish = shape_converter_convert_module._finish_conversion
+
+    def _blocked_finish(**kwargs):  # noqa: ANN003, ANN202
+        started.set()
+        assert release.wait(timeout=10)
+        return original_finish(**kwargs)
+
+    monkeypatch.setattr(shape_converter_convert_module, "_finish_conversion", _blocked_finish)
+
+    with TestClient(create_app()) as client, concurrent.futures.ThreadPoolExecutor() as executor:
+        first = executor.submit(
+            client.post,
+            "/v1/convert",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+        assert started.wait(timeout=10)
+
+        ready = client.get("/health/ready")
+        competing = client.post(
+            "/v1/convert",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+        release.set()
+        completed = first.result(timeout=10)
+
+    assert ready.status_code == 200
+    assert competing.status_code == 503
+    assert competing.json()["error"]["code"] == "service_saturated"
+    assert completed.status_code == 200
+
+
+def test_parser_abort_leaves_api_ready_and_no_partial_artifact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    parser = tmp_path / "aborting-parser"
+    parser.write_text("#!/bin/sh\nulimit -c 0\nkill -ABRT $$\n", encoding="utf-8")
+    parser.chmod(0o755)
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="abort"))
+
+    with TestClient(create_app()) as client:
+        monkeypatch.setenv("SHAPE_CONVERTER_PARSER_CLI", str(parser))
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("abort.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+        ready = client.get("/health/ready")
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "invalid_shapefile"
+    assert ready.status_code == 200
+    assert not list(tmp_path.glob("core*"))
 
 
 @pytest.mark.parametrize(

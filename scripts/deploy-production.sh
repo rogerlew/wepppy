@@ -196,6 +196,26 @@ ensure_git_worktree_clean() {
     return 0
 }
 
+ensure_shape_converter_build_inputs_clean() {
+    local build_input_changes=""
+    build_input_changes="$(
+        git status --porcelain=v1 --untracked-files=all -- \
+            .dockerignore \
+            docker/Dockerfile.shape-converter \
+            docker/requirements-shape-converter.txt \
+            wepppy/__init__.py \
+            wepppy/microservices/__init__.py \
+            wepppy/microservices/shape_converter \
+            wepppy/observability
+    )"
+    if [ -n "${build_input_changes}" ]; then
+        echo "✗ Refusing shape-converter release build: inputs differ from HEAD." >&2
+        print_limited_list "  Dirty shape-converter build inputs:" "${build_input_changes}" 30 >&2
+        echo "  Commit/stash the listed paths; unrelated worktree changes are allowed." >&2
+        return 1
+    fi
+}
+
 safe_git_fast_forward_pull() {
     local original_head=""
     local current_branch=""
@@ -578,6 +598,7 @@ fi
 validate_deploy_topology
 
 if printf "%s\n" "${BUILD_SERVICES[@]}" | grep -qx "shape-converter"; then
+    ensure_shape_converter_build_inputs_clean
     SHAPE_PARSER_SOURCE_REVISION="$(git rev-parse HEAD)"
     SHAPE_PARSER_RELEASE_LABEL="wepppy-${SHAPE_PARSER_SOURCE_REVISION:0:12}"
     SHAPE_PARSER_BUILT_UTC="$(git show -s --format=%cI HEAD)"
@@ -870,9 +891,11 @@ recover_targeted_cap() {
         if ! wctl docker compose stop --timeout 30 shape-converter >/dev/null 2>&1; then
             echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to stop the service" >&2
             shape_shutdown_failed=true
+            recovery_exit=88
         elif [ -n "$(wctl docker compose ps -q shape-converter)" ]; then
             echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: service still has a running container" >&2
             shape_shutdown_failed=true
+            recovery_exit=88
         else
             echo "✓ shape-converter is down; no GDAL/Fiona or unreviewed parser fallback was activated" >&2
         fi

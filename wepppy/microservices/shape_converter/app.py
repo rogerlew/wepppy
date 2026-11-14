@@ -39,7 +39,13 @@ from .cleanup import (
     create_request_scratch_dir,
     sweep_stale_request_dirs,
 )
-from .convert import _parser_cli_path, convert_uploaded_archive, probe_parser_runtime
+from .convert import (
+    _parser_cli_path,
+    _run_blocking_phase,
+    convert_uploaded_archive,
+    probe_parser_runtime,
+    validate_conversion_resource_envelope,
+)
 from .errors import ShapeConverterError, error_response
 from .inspect import inspect_uploaded_archive
 from .parser_provenance import validate_parser_executable
@@ -818,7 +824,10 @@ async def convert_archive(request: Request) -> Response:
 
         if response_mode == "json_body":
             try:
-                geojson_payload = json.loads(converted.content.decode("utf-8"))
+                geojson_payload = await _run_blocking_phase(
+                    _decode_geojson_response,
+                    converted.content,
+                )
             except (UnicodeDecodeError, ValueError) as exc:
                 cleanup_reason = "json_body_payload_decode_failed"
                 return error_response(
@@ -884,6 +893,10 @@ async def convert_archive(request: Request) -> Response:
         )
 
 
+def _decode_geojson_response(content: bytes) -> object:
+    return json.loads(content.decode("utf-8"))
+
+
 async def convert_metadata(request: Request) -> JSONResponse:
     request_id = str(request.path_params.get("request_id") or "").strip()
     metadata_store: OrderedDict[str, tuple[float, dict[str, object]]] = getattr(
@@ -917,6 +930,13 @@ async def app_lifespan(app: Starlette):
     writable, scratch_failure_reason = _is_scratch_root_writable(app.state.scratch_root)
     if not writable:
         raise RuntimeError(scratch_failure_reason or "shape-converter scratch startup check failed")
+    abuse_control_config = load_abuse_control_config()
+    envelope_ready, envelope_failure_reason = validate_conversion_resource_envelope(
+        max_inflight_global=abuse_control_config.max_inflight_global,
+        max_inflight_per_ip=abuse_control_config.max_inflight_per_ip,
+    )
+    if not envelope_ready:
+        raise RuntimeError(envelope_failure_reason or "shape-converter resource envelope invalid")
     toolchain_ready, toolchain_failure_reason = _is_toolchain_available()
     if not toolchain_ready:
         raise RuntimeError(toolchain_failure_reason or "shape-converter parser provenance check failed")
@@ -928,7 +948,7 @@ async def app_lifespan(app: Starlette):
     app.state.relay_cors_allowed_origins = _resolve_relay_cors_allowed_origins()
     app.state.active_request_scratch_registry = ActiveRequestScratchRegistry()
     app.state.convert_metadata = OrderedDict()
-    app.state.abuse_controls = AbuseControlState(load_abuse_control_config())
+    app.state.abuse_controls = AbuseControlState(abuse_control_config)
     app.state.janitor_stop_event = asyncio.Event()
     _run_janitor_sweep(app, trigger="startup")
     app.state.janitor_task = asyncio.create_task(

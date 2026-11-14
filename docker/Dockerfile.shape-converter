@@ -68,6 +68,9 @@ RUN sed -i \
     apt-get -o Acquire::Check-Valid-Until=false update && \
     apt-get install -y --no-install-recommends \
         zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 && \
+    rm -rf /usr/local/bin/pip /usr/local/bin/pip3 /usr/local/bin/pip3.12 \
+        /usr/local/lib/python3.12/site-packages/pip \
+        /usr/local/lib/python3.12/site-packages/pip-*.dist-info && \
     rm -rf /var/lib/apt/lists/*
 
 LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy" \
@@ -92,7 +95,7 @@ COPY --chown=10001:10001 wepppy/microservices/shape_converter/ui /opt/app/wepppy
 COPY --chown=10001:10001 wepppy/observability /opt/app/wepppy/observability
 
 RUN /opt/venv/bin/python -c \
-        "import importlib.util; assert importlib.util.find_spec('fiona') is None" && \
+        "import importlib.util; assert importlib.util.find_spec('fiona') is None; assert importlib.util.find_spec('pip') is None" && \
     /usr/local/bin/shape_parser_cli --version
 
 ENV PATH="/opt/venv/bin:${PATH}" \

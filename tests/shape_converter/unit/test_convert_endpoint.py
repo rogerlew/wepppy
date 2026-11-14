@@ -7,6 +7,7 @@ import json
 import logging
 import signal
 import subprocess
+import threading
 from types import SimpleNamespace
 
 import pytest
@@ -34,6 +35,30 @@ shape_converter_crs_module = importlib.import_module("wepppy.microservices.shape
 shape_converter_serialization_module = importlib.import_module(
     "wepppy.microservices.shape_converter.serialization"
 )
+
+
+def test_blocking_phase_retains_ownership_until_thread_exits_after_cancellation() -> None:
+    started = threading.Event()
+    release = threading.Event()
+
+    def _blocked_phase() -> str:
+        started.set()
+        assert release.wait(timeout=5)
+        return "complete"
+
+    async def _exercise() -> None:
+        task = asyncio.create_task(
+            shape_converter_convert_module._run_blocking_phase(_blocked_phase)
+        )
+        assert await asyncio.to_thread(started.wait, 5)
+        task.cancel()
+        await asyncio.sleep(0)
+        assert task.done() is False
+        release.set()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    asyncio.run(_exercise())
 def test_convert_geojson_wgs84_download_and_metadata_sidecar() -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads"))
 

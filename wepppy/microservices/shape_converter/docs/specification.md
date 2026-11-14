@@ -255,12 +255,34 @@ queue, datastore, daemon, new container, privilege increase, or network protocol
 The launcher must create a process group, enforce hard wall time, terminate the
 whole group on timeout or cancellation, and apply independently tested memory,
 CPU, open-file, input-file, output-file, IPC-payload, feature, and vertex limits.
+Those limits apply before any attacker-controlled file traversal or record scan.
+The parser independently validates exact SHP/SHX/DBF record cardinality and SHX
+offset/length identity, and rejects multipart records unless the first part
+starts at zero and every later part offset is strictly increasing and within the
+declared point count. Feature admission stops at the ceiling rather than first
+building an oversize record list.
 Parser output remains untrusted and must pass the existing UTF-8 JSON byte,
 depth, value-count, duplicate-key, primitive, finite-number, and exact-schema
 validation before use. Panic, abort, malformed output, partial output, limit
 exhaustion, timeout, and cancellation must map to bounded canonical errors and
 leave no request residue. No production fallback to Fiona/GDAL or in-process
 PyO3 is allowed.
+
+For conversion requests, archive extraction, DBF/CRS inspection, payload decoding, geometry
+construction/reprojection, serialization, and result encoding that can consume
+meaningful CPU or block on files runs outside the sole ASGI event-loop thread.
+Client cancellation does not release global admission or remove request scratch
+until any already-started blocking phase has ended. The process therefore keeps
+the one-request resource invariant even while draining a canceled bounded
+thread. Health remains responsive during a held conversion, and a competing
+conversion fails closed as saturated.
+
+Startup validates the complete effective resource envelope, not only defaults.
+Production permits one active request globally and per client and rejects an
+environment override above the reviewed maxima for features, vertices, parser
+payload/input/memory/CPU/open files/time, scratch/precheck, or serialized output.
+Changing those maxima or concurrency requires a revised resource ADR and new
+exact-image near-ceiling evidence.
 
 This CLI process boundary limits failure propagation and permits deterministic
 termination; it is not a claim of containment from arbitrary code execution. The

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import collections.abc as cabc
 import asyncio
+import collections.abc as cabc
 import errno
 import os
 import shutil
@@ -12,6 +12,7 @@ import struct
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from typing import ParamSpec, TypeVar
 
 from pyproj import CRS
 from pyproj.exceptions import CRSError
@@ -38,7 +39,12 @@ from .crs import (
 from .errors import ShapeConverterError
 from .parser_ipc import read_payload
 from .inspect import read_dbf_metadata, read_projection_metadata, select_single_shapefile_dataset
-from .serialization import serialize_geojson, serialize_geoparquet
+from .serialization import (
+    _MAX_GEOJSON_OUTPUT_BYTES,
+    _MAX_GEOPARQUET_OUTPUT_BYTES,
+    serialize_geojson,
+    serialize_geoparquet,
+)
 
 OUTPUT_FORMAT_OPTIONS = frozenset({"geojson", "geoparquet"})
 _MAX_UPLOAD_COMPRESSED_BYTES = ArchiveLimits().max_compressed_bytes
@@ -92,6 +98,22 @@ _SOURCE_PARSER_CLI = (
     / "release"
     / "shape_parser_cli"
 )
+_REVIEWED_RESOURCE_MAXIMA = {
+    "max_features": 1_000_000,
+    "max_vertices_per_feature": 250_000,
+    "parser_payload_bytes": 16 * 1024 * 1024,
+    "request_scratch_bytes": 320 * 1024 * 1024,
+    "scratch_precheck_bytes": 32 * 1024 * 1024,
+    "parser_timeout_seconds": 90,
+    "parser_input_bytes": 128 * 1024 * 1024,
+    "parser_memory_bytes": 384 * 1024 * 1024,
+    "parser_cpu_seconds": 60,
+    "parser_open_files": 32,
+    "geojson_output_bytes": 32 * 1024 * 1024,
+    "geoparquet_output_bytes": 32 * 1024 * 1024,
+}
+_P = ParamSpec("_P")
+_T = TypeVar("_T")
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,6 +135,66 @@ class ConvertedArtifact:
     content_type: str
     content: bytes
     metadata: dict[str, object]
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedConversion:
+    """Validated archive state needed after the Rust parser completes."""
+
+    prefix_path: Path
+    dbf_metadata: dict[str, object]
+    detected_crs: dict[str, object] | None
+    projection_status: str
+    projection_warnings: tuple[str, ...]
+    sidecar_warning: str | None
+
+
+async def _run_blocking_phase(
+    function: cabc.Callable[_P, _T],
+    /,
+    *args: _P.args,
+    **kwargs: _P.kwargs,
+) -> _T:
+    """Run bounded blocking work without releasing ownership on cancellation."""
+
+    task = asyncio.create_task(asyncio.to_thread(function, *args, **kwargs))
+    try:
+        return await asyncio.shield(task)
+    except asyncio.CancelledError:
+        # A thread cannot be killed safely. Keep the request, scratch, and
+        # single-flight admission owned until it exits, then propagate cancel.
+        await asyncio.shield(asyncio.gather(task, return_exceptions=True))
+        raise
+
+
+def validate_conversion_resource_envelope(
+    *,
+    max_inflight_global: int,
+    max_inflight_per_ip: int,
+) -> tuple[bool, str | None]:
+    """Reject effective settings outside the independently reviewed envelope."""
+
+    if max_inflight_global != 1 or max_inflight_per_ip != 1:
+        return False, "shape_converter_resource_envelope_invalid: inflight limits must equal one"
+
+    effective = {
+        "max_features": _MAX_CONVERT_FEATURES,
+        "max_vertices_per_feature": _MAX_VERTICES_PER_FEATURE,
+        "parser_payload_bytes": _MAX_PARSER_PAYLOAD_BYTES,
+        "request_scratch_bytes": _REQUEST_SCRATCH_QUOTA_BYTES,
+        "scratch_precheck_bytes": _SCRATCH_PRECHECK_FREE_BYTES,
+        "parser_timeout_seconds": _PARSER_SUBPROCESS_TIMEOUT_SECONDS,
+        "parser_input_bytes": _MAX_PARSER_INPUT_BYTES,
+        "parser_memory_bytes": _PARSER_MEMORY_LIMIT_BYTES,
+        "parser_cpu_seconds": _PARSER_CPU_LIMIT_SECONDS,
+        "parser_open_files": _PARSER_OPEN_FILE_LIMIT,
+        "geojson_output_bytes": _MAX_GEOJSON_OUTPUT_BYTES,
+        "geoparquet_output_bytes": _MAX_GEOPARQUET_OUTPUT_BYTES,
+    }
+    for name, value in effective.items():
+        if value > _REVIEWED_RESOURCE_MAXIMA[name]:
+            return False, f"shape_converter_resource_envelope_invalid: {name} exceeds reviewed maximum"
+    return True, None
 
 
 async def convert_uploaded_archive(
@@ -158,6 +240,40 @@ async def convert_uploaded_archive(
             details="Uploaded archive contained zero bytes.",
         )
 
+    prepared = await _run_blocking_phase(
+        _prepare_conversion_archive,
+        archive_name=archive_name,
+        archive_bytes=archive_bytes,
+        scratch=scratch,
+        target_crs=target_crs,
+    )
+    del archive_bytes
+
+    loaded = await _load_shapefile(
+        shp_path=prepared.prefix_path.with_suffix(".shp"),
+        scratch=scratch,
+        ignore_source_crs=(
+            target_crs == "same_as_shapefile" and prepared.projection_status == "invalid"
+        ),
+    )
+    return await _run_blocking_phase(
+        _finish_conversion,
+        loaded=loaded,
+        prepared=prepared,
+        scratch=scratch,
+        request_id=request_id,
+        output_format=output_format,
+        target_crs=target_crs,
+    )
+
+
+def _prepare_conversion_archive(
+    *,
+    archive_name: str,
+    archive_bytes: bytes,
+    scratch: RequestScratchLayout,
+    target_crs: str,
+) -> _PreparedConversion:
     _assert_scratch_free_space(
         scratch=scratch,
         required_free_bytes=len(archive_bytes) + _SCRATCH_PRECHECK_FREE_BYTES,
@@ -219,23 +335,35 @@ async def convert_uploaded_archive(
         additional_bytes=_MAX_PARSER_PAYLOAD_BYTES,
         stage="parser_payload_budget",
     )
-    loaded = await _load_shapefile(
-        shp_path=dataset.prefix_path.with_suffix(".shp"),
-        scratch=scratch,
-        ignore_source_crs=(
-            target_crs == "same_as_shapefile" and projection_status == "invalid"
-        ),
+    return _PreparedConversion(
+        prefix_path=dataset.prefix_path,
+        dbf_metadata=dbf_metadata,
+        detected_crs=detected_crs,
+        projection_status=projection_status,
+        projection_warnings=tuple(projection_warnings),
+        sidecar_warning=sidecar_warning,
     )
+
+
+def _finish_conversion(
+    *,
+    loaded: LoadedShapefile,
+    prepared: _PreparedConversion,
+    scratch: RequestScratchLayout,
+    request_id: str,
+    output_format: str,
+    target_crs: str,
+) -> ConvertedArtifact:
     crs_plan = resolve_target_crs(
         target_crs_token=target_crs,
         source_crs=loaded.source_crs,
         source_bounds=loaded.source_bounds,
-        source_projection_status=projection_status,
+        source_projection_status=prepared.projection_status,
     )
     conversion_warnings = list(crs_plan.warnings)
-    conversion_warnings.extend(projection_warnings)
-    if sidecar_warning:
-        conversion_warnings.append(sidecar_warning)
+    conversion_warnings.extend(prepared.projection_warnings)
+    if prepared.sidecar_warning:
+        conversion_warnings.append(prepared.sidecar_warning)
 
     transformed_geometries = reproject_geometries(
         geometries=loaded.geometries,
@@ -266,13 +394,13 @@ async def convert_uploaded_archive(
         crs_plan=crs_plan,
         transformed_geometries=transformed_geometries,
         feature_count=len(loaded.properties),
-        projection_status=projection_status,
-        attribute_schema=dbf_metadata["fields"],
-        detected_crs=detected_crs,
+        projection_status=prepared.projection_status,
+        attribute_schema=prepared.dbf_metadata["fields"],
+        detected_crs=prepared.detected_crs,
         warnings=serialized.warnings,
     )
 
-    prefix_name = dataset.prefix_path.name
+    prefix_name = prepared.prefix_path.name
     filename = f"{prefix_name}_{target_crs}.{serialized.extension}"
     output_path = scratch.output_root / filename
 
@@ -403,7 +531,7 @@ async def _load_shapefile(
         scratch=scratch,
     )
 
-    return await asyncio.to_thread(
+    return await _run_blocking_phase(
         _read_and_load_parser_payload,
         payload_path=parser_output_path,
         worker_stdout=worker_stdout,
