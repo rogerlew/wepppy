@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 (M6 independent re-review failed)
-**Current phase**: M6 second remediation required
+**Last updated**: 2026-11-14 (M6 second remediation qualified)
+**Current phase**: M6 independent second re-review required
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
@@ -67,6 +67,12 @@ pre-cutover oracle
       cancellation/event-loop ownership, effective resource enforcement, early
       Rust limits, executable takedown proof, clean release inputs, semantic/
       resource coverage, and Medium scan dispositions.
+- [x] M6 second remediation: close every retained finding and requalify exact
+      image `sha256:553a8a1c00468cdc28cc78bb98ef47382e6179be33a55b5c026d6605e7ff39a8`
+      from committed revision `be7848eb7`; 264 shape tests and 50 deploy/Compose
+      tests passed (3 environment skips), with no new scan advisory ID.
+- [ ] M6 independent second re-review of `be7848eb7` and its exact-image
+      evidence.
 - [x] Close #655 after its strict data-only IPC acceptance passed; comment on
       #656 with final local evidence and keep it open for independent residual-
       risk acceptance.
@@ -95,6 +101,10 @@ pre-cutover oracle
   image. The common WEPPpy image remains unchanged. Every reachable Medium,
   High, or Critical candidate finding requires remediation or explicit operator
   risk acceptance before rollout.
+- The final runtime does not include pip. The remaining 37 unique Medium scan
+  IDs are governed by the ID-by-ID request-path dispositions in
+  `artifacts/20261114_rust_cli_medium_advisory_dispositions.md`; a changed
+  command, linkage, input, privilege, mount, locale, or role invalidates them.
 - Production rollout is out of scope until separately authorized.
 - If build, activation, provenance, startup, or post-activation readiness cannot
   establish the approved parser state, the canonical deployment stops
@@ -219,16 +229,25 @@ pre-cutover oracle
   valid, but #656 and rollout remain blocked. See the consolidated and dedicated
   security re-review artifacts.
 
+- 2026-11-14: second remediation committed as `be7848eb7` and rebuilt as exact
+  image `sha256:553a8a1c00468cdc28cc78bb98ef47382e6179be33a55b5c026d6605e7ff39a8`.
+  Cancellation ownership, event-loop responsiveness, effective-envelope
+  enforcement, early Rust limits, malformed multipart rejection, deploy
+  takedown execution, clean release inputs, semantic/resource fixtures, and all
+  Medium dispositions are now evidenced. Pinned scanning reports 0 Critical,
+  removes all pip findings, and adds no advisory ID. No publication or
+  production deployment occurred.
+
 ## Handoff
 
-M4 implementation and local validation are complete but independent M6 review
-failed. See the
+M4 implementation and second-remediation local validation are complete. See the
 [dependency evaluation](artifacts/20261114_rust_parser_dependency_evaluation.md)
-and final Rust-CLI evidence/review artifacts. No production deployment occurred;
-do not infer approval for privileges, a parser service, or topology changes.
+and second-remediation qualification/review artifacts. No production deployment
+occurred; do not infer approval for privileges, a parser service, or topology
+changes.
 
-Next checkpoint: remediate the retained re-review findings, rerun exact-image
-qualification where affected, and obtain another independent re-review before
+Next checkpoint: obtain independent code, correctness, QA, operations, and
+security re-review of `be7848eb7` and exact image `sha256:553a8a1c0046...` before
 updating #656 or authorizing rollout.
 Complete Syft/Grype JSON is retained in package artifacts, and the exact image
 proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.

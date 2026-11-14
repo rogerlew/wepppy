@@ -84,10 +84,17 @@ gate; it is not the final parser architecture.
       `21a12c9d0`, validate exact-image provenance, hardening, output semantics,
       single-flight near-ceiling rejection/recovery, cleanup, and persist pinned
       Syft/Grype reports. Independent re-review remains.
-- [ ] (2026-11-14) Independent remediation re-review returned FAIL/HOLD. Code,
+- [x] (2026-11-14) Independent remediation re-review returned FAIL/HOLD. Code,
       correctness, QA, security, and operations retained cancellation/event-loop,
       effective-envelope, early-Rust-limit, deploy-execution, dirty-build,
       semantic/resource-matrix, and Medium-advisory disposition findings.
+- [x] (2026-11-14) Implement and qualify the second remediation at
+      `be7848eb7`: cancellation-safe offload ownership, responsive event loop,
+      startup envelope enforcement, early Rust limits and multipart validation,
+      executable deploy takedown/clean-input gates, expanded semantic/resource
+      fixtures, runtime pip removal, and all 42 prior unique Medium advisory
+      dispositions. Exact image `sha256:553a8a1c00468cdc28cc78bb98ef47382e6179be33a55b5c026d6605e7ff39a8`
+      passed local requalification; independent re-review remains.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
@@ -104,6 +111,14 @@ gate; it is not the final parser architecture.
 - The Rust CLI applies resource limits after its preliminary hostile SHP scan.
   Limits must precede all attacker-controlled traversal, and the scan must stop
   at the feature ceiling rather than allocate before checking.
+- A malformed multipart record whose first part offset was one passed the Rust
+  crate and silently dropped point zero. Independent pre-parser part-table
+  validation now requires offset zero followed by strictly increasing in-range
+  offsets and rejects unknown MultiPatch part codes.
+- The inherited system pip remained in the Python base even after pip was
+  removed from the application virtual environment. Removing both system and
+  venv pip from the final runtime eliminated five Medium and two lower-severity
+  advisory IDs without changing request behavior.
 
 - Independent M6 review reproduced silent feature loss when SHP contains an
   extra valid record not represented by SHX/DBF. Zipping shape and DBF iterators
@@ -206,6 +221,16 @@ gate; it is not the final parser architecture.
   worker. Sandbox claims must not be overstated for that endpoint.
 
 ## Decision Log
+
+- Decision: retain the 37 post-removal unique Medium advisories only under the
+  ID-by-ID request-path dispositions in the second-remediation evidence; remove
+  runtime pip instead of accepting its five Medium findings.
+  Rationale: the retained findings concern APIs, extensions, tools, services, or
+  privileges absent from the fixed converter path. Pip has no runtime purpose,
+  so removal is smaller and stronger than a non-reachability exception. Any
+  command, parser-linkage, input, privilege, mount, locale, or role change
+  invalidates the affected disposition.
+  Date/Author: 2026-11-14, Codex pending independent security acceptance.
 
 - Decision: if the candidate cannot satisfy its security, provenance, startup,
   or post-activation readiness gates, leave `shape-converter` stopped and verify
@@ -383,6 +408,16 @@ requalification. See the
 [receipt](../../artifacts/20261114_rust_cli_remediation_requalification.md).
 This closes the local evidence portion only; independent re-review and rollout
 authorization remain open, so the package is not complete.
+
+The second remediation at `be7848eb7` closes every finding retained by that
+re-review and passes local exact-image requalification. See the
+[second-remediation receipt](../../artifacts/20261114_rust_cli_second_remediation_requalification.md)
+and [Medium dispositions](../../artifacts/20261114_rust_cli_medium_advisory_dispositions.md).
+The work exposed and fixed one additional silent multipart-offset data-loss
+case. The final runtime removes pip, adds no scan advisory ID, and retains
+explicit dispositions for all 37 remaining unique Medium IDs. Independent
+second re-review, #656 disposition, and separately authorized rollout remain
+open; no production action occurred.
 
 Independent re-review of `2bbf8498e` returned FAIL/HOLD. See the
 [consolidated review](../../artifacts/20261114_rust_cli_remediation_independent_re_review.md)
@@ -908,3 +943,10 @@ fail-closed availability decision and implemented asynchronous cancellation,
 record cardinality checks, startup-cached readiness, reproducible provenance,
 aggregate resource limits, and deployment takedown behavior. Exact candidate
 evidence and independent re-review remain required.
+
+Revision note (2026-11-14, M6 second remediation): preserved thread ownership
+through cancellation, moved blocking conversion work off the event loop,
+enforced the effective startup envelope and early Rust limits, rejected malformed
+part tables, execution-tested deploy takedown and clean provenance, completed the
+semantic/resource matrix, removed runtime pip, and retained all Medium advisory
+dispositions plus exact-image evidence.
