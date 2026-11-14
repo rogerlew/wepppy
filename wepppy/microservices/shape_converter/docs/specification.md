@@ -12,9 +12,10 @@ checked-in runtime path and regression evidence enforce it.
 
 Resolution is tracked in
 `docs/work-packages/20261113_shape_converter_security_conformance/` and GitHub
-issues #655 and #656. By operator decision, that package must record current
-GDAL/Fiona linkage and reachable-vulnerability evidence but must not upgrade,
-rebuild, or repin GDAL; dependency replacement belongs to a separate package.
+issues #655 and #656. The original dependency freeze was superseded on
+2026-11-14 for a shape-converter-only image. The common WEPPpy image remains
+unchanged, and release still requires exact linkage and reachable-vulnerability
+evidence for the dedicated image.
 
 The 2026-11-14 independent remediation slice has the following source/local-test
 state; this table does not assert deployed behavior:
@@ -27,7 +28,7 @@ state; this table does not assert deployed behavior:
 | Parser process boundary | Convert runs Fiona/GDAL in a subprocess with a hard timeout and process-group termination. | Data-only JSON IPC is implemented with byte/depth/value/schema validation and fixed exit-code errors. Second-sandbox containment remains nonconformant. |
 | Runtime containment | Compose enforces non-root, read-only root, dropped capabilities, resource limits, hardened tmpfs, and an internal network. | Partial: production defaults active and required sandbox mode to `container`; the required second parser sandbox in the worker lock-up prevention contract is not provisioned. |
 | Semantic and adversarial validation | Feature and per-feature vertex limits are enforced on convert; focused ZIP, cleanup, timeout, and API tests exist. | Partial: the comprehensive malformed-file fuzz, record-count, geometry-validity, coordinate-range, collision, and dependency-sidecar test matrix below is not fully implemented. |
-| Dependency qualification | April 2026 evidence records Fiona linked to GDAL 3.10.3 and a targeted CVE disposition. | Partial: capture exact current runtime/image/linkage and reachable-vulnerability evidence. A GDAL upgrade is explicitly deferred to a separate package. |
+| Dependency qualification | April 2026 evidence records Fiona linked to GDAL 3.10.3 and a targeted CVE disposition. | Partial: build and qualify the operator-approved shape-converter-only GDAL 3.12.4/Fiona 1.10.1 image without changing the common WEPPpy image. Capture exact runtime/image/linkage and reachable-vulnerability evidence before release. |
 
 Until the nonconformant and partial items are closed or explicitly risk-accepted,
 the service must not be represented as fully conformant with this contract.
@@ -211,6 +212,22 @@ run-data migration. Parent and worker must ship together; legacy pickle is rejec
 without fallback. Public output keys/formats remain unchanged. Validate generated
 GeoJSON and GeoParquet through the actual worker and existing endpoint tests, plus
 hostile IPC/driver/archive tests. Broader shapefile semantics remain a later gate.
+
+### Dedicated image amendment (2026-11-14)
+
+The operator authorizes a shape-converter-only image with an upgraded, coherent
+GDAL/Fiona stack. This supersedes the dependency-version freeze only for this
+service image; the common WEPPpy image remains unchanged. The split must preserve
+the public API and Compose service identity while removing inherited application
+secrets, datastore configuration, host data mounts, and unrelated runtime
+packages. It is defense in depth, not the required second parser sandbox, and
+does not close issue #656 or authorize deployment. Pin the base by digest and
+install Python dependencies from a resolved hash-locked input. A Dockerfile-
+specific allowlist must keep repository secrets and unrelated source out of the
+build context. Qualification must inspect the resolved Compose service, final
+image, and running container. Matching `container/container` readiness strings
+remain non-evidence for sandbox containment; production readiness is
+nonconformant until the second boundary exists.
 
 ## Non-Functional Requirements
 - Dedicated container/service (no embedding conversion in existing web app process).

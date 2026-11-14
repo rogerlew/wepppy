@@ -36,8 +36,9 @@ package.
 - Add direct adversarial regressions for disguised formats, malformed payloads,
   worker boundary escape, semantic mismatch, timeout, cleanup, and sandbox
   containment.
-- Record the exact deployed parser dependency versions, linkage, build origin,
-  and reachable-vulnerability disposition without upgrading GDAL.
+- Record the unchanged common-image baseline and exact dedicated-image parser
+  dependency versions, linkage, build origin, and reachable-vulnerability
+  disposition.
 
 ## Scope
 
@@ -246,7 +247,8 @@ Review scaffolds:
 - Direct red/green security and semantic regressions.
 - Approved compression-policy ADR, if a numeric ratio is adopted.
 - Sandbox dependency evaluation and runtime attestation evidence.
-- Exact dependency/linkage/vulnerability record with no GDAL upgrade.
+- Exact common-image baseline plus dedicated-image dependency, linkage, and
+  vulnerability record.
 - Code, QA, correctness, security, scoped local-validation, and
   production-equivalent-validation artifacts.
 - Updated contract, package tracker, root tracker, and GitHub issue reminders or
@@ -254,7 +256,8 @@ Review scaffolds:
 
 ## Follow-up Work
 
-- A GDAL/Fiona/PROJ/GEOS upgrade or rebuild remains a separate work package.
+- Common-image GDAL/Fiona/PROJ/GEOS upgrades remain separate. The operator-
+  approved dedicated shape-converter image is part of this package.
 - Production deployment and post-deployment smoke/monitoring remain separately
   authorized operations.
 - If an in-container second sandbox is infeasible, prepare a separate architecture

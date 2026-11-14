@@ -4,12 +4,12 @@
 
 **Timezone**: UTC
 **Last updated**: 2026-11-14 UTC (independent slice)
-**Current phase**: Independent IPC/driver/archive slice implemented; sandbox/release gates open
+**Current phase**: Dedicated image implementation; sandbox/release gates open
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **GitHub issues**: [#655](https://github.com/rogerlew/wepppy/issues/655),
 [#656](https://github.com/rogerlew/wepppy/issues/656)
-**GDAL decision**: upgrade explicitly deferred; evidence/triage only
+**GDAL decision**: dedicated shape image authorized; common image unchanged
 
 ## Task Board
 
@@ -27,9 +27,12 @@
 - [ ] M1: add focused failing IPC, driver, archive, semantic, and sandbox tests.
 - [x] M2: replace pickle with bounded schema-validated data-only IPC.
 - [x] M3 slice: exact driver, NFC/case-fold collisions, and extra prefixes.
+- [ ] Build and qualify the minimal shape-converter-only GDAL 3.12.4/Fiona
+      1.10.1 image; do not change the common WEPPpy image.
 - [ ] M3 remainder: compression policy and broader semantic validation.
 - [ ] M4: implement and attest the effective second parser sandbox.
-- [ ] M5: capture current dependency/linkage/scan evidence without upgrading GDAL.
+- [ ] M5: capture the unchanged common-image baseline and dedicated candidate
+      dependency/linkage/scan evidence.
 - [ ] M6: run change-scoped shape-converter and production-equivalent gates; no
       full repository or unrelated suite.
 - [ ] M6: close code, QA, correctness, and security reviews.
@@ -50,8 +53,10 @@
   operator decision.
 - Any compression-ratio threshold is a governed parameterization decision. No
   numeric default is authorized by this scaffold.
-- GDAL/Fiona/PROJ/GEOS upgrades, rebuilds, and repins are out of scope. A
-  reachable Critical finding blocks closure and triggers a separate decision.
+- The dependency freeze is superseded only for the dedicated shape-converter
+  image. The common WEPPpy image remains unchanged. Every reachable Medium,
+  High, or Critical candidate finding requires remediation or explicit operator
+  risk acceptance before rollout.
 - Production rollout is out of scope until separately authorized.
 - Validation is change-scoped by operator direction. Do not run or claim the full
   repository suite; list every focused module and boundary probe that ran.
@@ -83,6 +88,11 @@
   addition; four disposable-container semantic cases passed. Independent reviews
   approved the slice; full conformance remains open.
 
+- 2026-11-14: operator selected a minimal dedicated image after reviewing whether
+  the JSON IPC mitigation could replace sandbox conformance. GDAL 3.12.4 with
+  source-built Fiona 1.10.1 is the bounded candidate; this does not waive the
+  second-sandbox or deployment gates.
+
 ## Handoff
 
 Independent slice proceeds under the operator-approved sequencing amendment.
@@ -93,3 +103,6 @@ or dependency upgrade occurred. Continue with a separately selected sandbox
 candidate under unchanged protections; do not infer approval for privileges or
 topology changes. Compression-policy decision, broader semantic matrix, current
 release dependency evidence, and full conformance review remain open.
+
+Next checkpoint: implement and qualify the dedicated image while preserving the
+existing service/API topology. Keep the common image unchanged and do not deploy.

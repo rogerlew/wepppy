@@ -18,8 +18,9 @@ their existing semantics.
 The proof combines change-scoped hostile-boundary tests, valid-output semantic
 readback, and production-equivalent runtime inspection. Do not run the full
 repository suite or unrelated shape-converter/frontend/service suites. This plan
-records current parser dependency evidence but must not upgrade GDAL, Fiona,
-PROJ, or GEOS.
+records current parser dependency evidence. The operator later authorized a
+dedicated shape-converter image with an upgraded coherent GDAL/Fiona stack; the
+common WEPPpy image remains unchanged.
 
 ## Progress
 
@@ -40,9 +41,12 @@ PROJ, or GEOS.
       exact driver, and bounded fixed worker error mapping implemented.
 - [x] (2026-11-14) Independent M3 slice: NFC/case-fold aliases and extra
       incomplete/optional prefixes rejected.
+- [ ] (2026-11-14) Implement and qualify the operator-approved minimal dedicated
+      shape-converter image using GDAL 3.12.4 and Fiona 1.10.1.
 - [ ] M3 remainder: compression decision and broader semantic matrix.
 - [ ] M4: implement effective second sandbox and runtime-derived readiness.
-- [ ] M5: capture current dependency evidence without upgrading GDAL.
+- [ ] M5: capture the unchanged common-image baseline and the dedicated-image
+      dependency/linkage/scan evidence.
 - [ ] M6: validate, review, update GitHub issues, and prepare separate rollout.
 
 ## Surprises & Discoveries
@@ -76,6 +80,17 @@ PROJ, or GEOS.
 
 ## Decision Log
 
+- Decision: build a minimal dedicated shape-converter image and upgrade only its
+  GDAL/Fiona stack.
+  Rationale: the operator selected the bounded image split after reviewing the
+  mitigation-versus-sandbox decision. GDAL 3.12.4 retains Ubuntu 24.04 and Python
+  3.12 compatibility while advancing from the current GDAL 3.10.3 runtime;
+  Fiona 1.10.1 will be source-built against that exact GDAL. The Compose service
+  must stop inheriting common-image secrets, datastore settings, mounts, and
+  dependencies. This is defense in depth and dependency risk reduction, not an
+  effective second parser sandbox or release authorization.
+  Date/Author: 2026-11-14, operator and Codex.
+
 - Decision: proceed with the independent remediation slice before sandbox closure.
   Rationale: operator approved the recommended sequencing on 2026-11-14; the
   demonstrated executable IPC and admission gaps can be removed independently.
@@ -96,6 +111,8 @@ PROJ, or GEOS.
   vulnerability disposition remain required release evidence. A reachable
   Critical blocks closure and triggers a separate decision rather than an
   automatic upgrade.
+  Superseded in part on 2026-11-14 only for the dedicated shape-converter image;
+  the freeze remains in force for the common WEPPpy image.
   Date/Author: 2026-11-13 Pacific, operator; recorded by Codex 2026-11-14 UTC.
 
 - Decision: use JSON as the first parser IPC candidate, with an explicit schema,
@@ -173,6 +190,32 @@ protections or new topology is authorized. Record slice validation separately
 from full package completion. The canonical specification's "Independent
 remediation contract (2026-11-14)" holds the normative schema and rationale.
 
+## Dedicated image amendment (2026-11-14)
+
+The operator authorizes a new Dockerfile and minimal hash-locked requirements
+set for the existing `shape-converter` Compose service. Use the official GDAL
+3.12.4 Ubuntu-small base pinned by digest, retain Python 3.12, and source-build
+Fiona 1.10.1 against the base image's `gdal-config`. Copy only shape-converter
+and required observability source into the runtime image. Use a Dockerfile-
+specific allowlist build context so repository secrets and unrelated source are
+not sent to the builder. The resolved production service must contain no Compose
+secrets, `env_file`, datastore dependency, host data mount, Docker socket, or
+unrelated WEPPpy configuration. Preserve the existing fixed UID, read-only root,
+dropped capabilities, resource limits, tmpfs, internal network, service name,
+port, command, and Caddy route.
+
+Build and inspect the exact image before any rollout. Prove imports and native
+version/linkage, health endpoints, valid GeoJSON and GeoParquet readback, hostile
+IPC rejection, absence of inherited secrets/mounts/configuration in resolved
+Compose, final image files/history/config, and running-container environment,
+mounts, secrets, identity, and networks. Record the exact base digest, resolved
+package inventory, and final image ID. Every reachable Medium, High, or Critical
+vulnerability requires remediation or explicit operator risk acceptance. A
+`200` response produced only by matching `container/container` mode strings is
+not sandbox evidence or release acceptance; production readiness remains
+nonconformant until M4. A clean image split does not satisfy the second-sandbox
+acceptance criterion, close issue #656, or authorize production deployment.
+
 ## Plan of Work
 
 ### Milestone 0: Baseline, decisions, and contract checkpoint
@@ -209,9 +252,10 @@ rejects a ratio as redundant to absolute quotas, amend the contract explicitly
 instead of leaving a false requirement.
 
 Amend the contract with the final IPC schema, sandbox mechanism/attestation,
-archive rule, dependency-evidence rule, and GDAL deferral. Obtain independent
-correctness and security reviews. Commit those decisions as a standalone
-checkpoint ancestor before production code changes.
+archive rule, dependency-evidence rule, and the dedicated-image exception to the
+common-image dependency freeze. Obtain independent correctness and security
+reviews. Commit those decisions as a standalone checkpoint ancestor before
+production code changes.
 
 Milestone acceptance: complete baseline and red matrix, approved sandbox
 evaluation, approved archive threshold decision/ADR or explicit contract change,
@@ -343,9 +387,10 @@ PROJECT_TRACKER, and #655/#656 with exact evidence. Close issues only when their
 acceptance criteria are actually met.
 
 Milestone acceptance: all required local and environment gates/reviews pass,
-documentation matches effective behavior, no GDAL upgrade occurred, and status
-language distinguishes implementation, local validation, environment validation,
-and deployment.
+documentation matches effective behavior, the common image remains unchanged,
+the dedicated dependency upgrade is exactly evidenced, and status language
+distinguishes implementation, local validation, environment validation, and
+deployment.
 
 ## Concrete Steps
 
@@ -366,12 +411,17 @@ If and only if the implementation changes imports or test stubs:
 
     wctl check-test-stubs
 
-Candidate container and dependency evidence, without changing dependency pins:
+Dedicated candidate container and dependency evidence:
 
     docker compose -f docker/docker-compose.dev.yml build shape-converter
     docker compose -f docker/docker-compose.dev.yml up -d shape-converter caddy
     docker exec wepppy-shape-converter ogr2ogr --version
     docker exec wepppy-shape-converter /opt/venv/bin/python -c "import fiona, pyproj; print(fiona.__version__, fiona.__gdal_version__, pyproj.__version__, pyproj.proj_version_str)"
+
+Compose image-split regression and merged-configuration checks:
+
+    wctl run-pytest tests/docker/unit/test_project_config_rollout_contract.py --maxfail=1
+    wctl docker compose config --format json
 
 Scoped documentation checks:
 
