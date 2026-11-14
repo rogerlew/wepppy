@@ -29,15 +29,17 @@ segmented substitute is not accepted.
   is now `docs/infrastructure/production-deployment-policy.md`; earlier conflicting
   milestones below are superseded. Protected release decisions and separate
   tooling bindings pass 83 focused deploy tests without new scans/full-suite runs.
-- [ ] (2026-11-14 UTC) Finish wepp3 activation and coordinated Redis rotation,
-  install the corrected governance tooling without rebuilding application images,
-  and retain final runtime/queue checks. wepp1 and wepp2 are deployed successfully.
+- [x] (2026-11-14 UTC) All three deployments and Redis rotation are complete.
+  Governance tooling `04165dfe7` is installed without rebuilding images. Actual
+  release gates pass in 1.78–3.25 seconds; image/health checks, public endpoints,
+  old-credential rejection after Redis restart and three queue probes pass.
+  See `artifacts/20261114_production_rollout.md`.
 
 - [x] (2026-11-14 UTC) Exact f6 validation passed: 13,904 Python tests,
   437 skipped, 197 focused tests, frontend lint and 1,082 Jest tests. Fresh
   three-host evidence passed with Roger's explicit accepted-risk findings and
   accepted native coverage gaps; no coverage was falsely labeled clean.
-- [ ] (2026-11-14 UTC) Execute Roger-authorized wepp1/wepp2/wepp3 deployment
+- [x] (2026-11-14 UTC) Execute Roger-authorized wepp1/wepp2/wepp3 deployment
   and coordinated Redis rotation. First attempt stopped before service changes
   on unused Compose extension metadata containing a random env-file path.
   Correct the comparison, run focused regressions only, rebuild exact candidates
@@ -685,10 +687,15 @@ not collected by unittest, so both runners are required for upstream evidence.
 
 ## Outcomes & Retrospective
 
-2026-11-14 execution is authorized and underway. The first activation correctly
-left running services untouched on a configuration mismatch, but the mismatch
-was nonruntime metadata. Deployment completion and Redis rotation remain open;
-the prior full-suite result is retained rather than rerun.
+2026-11-14 rollout and Redis rotation are complete on all three hosts. Existing
+application images and release evidence were retained when installing the new
+governance tooling. Its real gates passed in 1.78–3.25 seconds. All selected
+services match their receipts, health checks pass, and all queues executed probes.
+The old Redis credential is rejected after Redis restart. The process expanded
+far beyond proportional deployment work; the controlling production policy and
+small release approvals now prevent per-host scans and tooling-only rebuilds
+from becoming routine requirements. Accepted dependency risks remain follow-up,
+with the original expiry. The prior full-suite result was not rerun.
 
 - (2026-11-13 UTC) `F6-RU-01` is implemented and independently approved at
   `cb839e7d7`. Iterative review found that selected-driver opening alone was

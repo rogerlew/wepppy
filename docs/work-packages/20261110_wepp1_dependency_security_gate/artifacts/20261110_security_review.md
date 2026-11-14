@@ -650,3 +650,19 @@ workflow evidence, authorize production changes, or infer owner risk acceptance.
   implementation, transfer/retention validation and final reviews remain open.
 - **Release recommendation**: hold until all applicable High/Medium package
   findings are closed or explicitly accepted by the owner.
+
+## 2026-11-14 operator decision and bounded tooling review
+
+The historical hold above is superseded for this release by Roger's explicit
+[residual-risk exception](20261113_gdal_residual_risk_exception.md) and controlling
+[deployment policy](../../../infrastructure/production-deployment-policy.md).
+The executing agent reviewed version-2 release bindings at `04165dfe7`: protected
+operator-owned records bind exact image IDs, receipt hash, current tooling and
+expiry; application/build-input changes and configuration drift still reject.
+The change intentionally reuses accepted evidence without invoking scanners or
+rehashing raw bundles. Focused tests cover wrong images, expiry, tampering,
+missing risk fields, changed tooling, changed application inputs and config drift.
+83 deployment tests passed, followed by 26 final receipt tests. Actual gates
+passed on all three production hosts without rebuilds. This is an executing-agent
+review, not an additional independent review or a claim that accepted dependency
+findings were remediated. See the [rollout record](20261114_production_rollout.md).

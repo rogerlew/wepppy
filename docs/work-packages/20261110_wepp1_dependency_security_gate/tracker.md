@@ -5,7 +5,10 @@
 Operator correction (2026-11-14 UTC): finish deployment and implement
 [proportionate deployment governance](../../infrastructure/production-deployment-policy.md).
 The original per-host scan/tooling-only rebuild requirements are superseded.
-wepp1/wepp2 are deployed; wepp3 cutover and Redis rotation are being completed.
+All three hosts are deployed and Redis rotation is complete; queues execute
+probes successfully. Governance tooling `04165dfe7` is installed on all three
+hosts; actual release gates pass in 1.78–3.25 seconds without scans/rebuilds.
+See [completed rollout](artifacts/20261114_production_rollout.md).
 The new protected release-decision path passes 83 focused deployment tests and
 reuses release evidence without rescanning or repeatedly hashing raw bundles.
 Application-input changes, wrong images, configuration drift, unreviewed tooling
@@ -17,8 +20,8 @@ exact f6 candidate passed 13,904 Python tests (437 skipped), focused checks and
 frontend checks; do not rerun the full suite. All three fresh evidence bundles
 passed with explicit accepted findings and native coverage gaps. First wepp1
 activation stopped before service changes on random temporary-path drift in
-unused Compose metadata. Correct that receipt comparison, run focused deploy
-regressions, rebuild source-bound candidates and resume rollout. Earlier
+unused Compose metadata. That correction and the rollout are complete. The later proportional policy
+supersedes tooling-only rebuild/rescan requirements. Earlier
 unauthorized/blocking status below is historical and superseded by this entry.
 
 Current direction (Roger, corrected 2026-11-13): defer the GDAL upgrade and
@@ -41,7 +44,7 @@ Authlib/joserfc are updated and tested in the isolated candidate. Other
 dependency/native repairs remain open.
 
 **Timezone**: UTC  
-**Last updated**: 2026-11-13 UTC
+**Last updated**: 2026-11-14 UTC
 **Current phase**: M0 complete; M1 image dispositions and native coverage in progress  
 **Finding**: F6 / SEC-06 (Medium, exploitability unconfirmed)  
 **Change security impact**: high  

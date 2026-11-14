@@ -59,13 +59,18 @@ Roger explicitly authorized deployment on 2026-11-14 UTC. The first activation
 attempt stopped before service changes because receipt comparison included
 Compose extension metadata containing wctl's random temporary env-file path.
 The bounded correction excludes only top-level `x-` metadata after anchor
-expansion; effective runtime configuration remains fully compared. This requires
-replacement source-bound builds and evidence. The same release acceptance and
-expiry apply to those successors after fresh image-specific evaluation and
-confirmation that this correction changes no application or dependency inputs.
+expansion; effective runtime configuration remains fully compared. The original process required
+replacement builds and evidence; those c1 successors are now deployed and recorded
+in [the completed rollout](20261114_production_rollout.md). The later governing
+[production deployment policy](../../../infrastructure/production-deployment-policy.md)
+supersedes tooling-only rebuild/rescan requirements. The same release acceptance
+and original expiry apply to the explicitly recorded c1 images.
 Retain the original receipts and failed-attempt log; record replacement identities
 in the deployment artifact. No full-suite rerun is requested for this tooling fix;
 run focused retained-candidate and deployment regression checks.
+
+Redis rotation is complete on all three hosts, including rejection of the old
+credential after Redis restart and successful execution on all three queues.
 
 ## Decision
 
