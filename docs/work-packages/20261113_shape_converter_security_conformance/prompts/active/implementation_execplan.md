@@ -84,11 +84,26 @@ gate; it is not the final parser architecture.
       `21a12c9d0`, validate exact-image provenance, hardening, output semantics,
       single-flight near-ceiling rejection/recovery, cleanup, and persist pinned
       Syft/Grype reports. Independent re-review remains.
+- [ ] (2026-11-14) Independent remediation re-review returned FAIL/HOLD. Code,
+      correctness, QA, security, and operations retained cancellation/event-loop,
+      effective-envelope, early-Rust-limit, deploy-execution, dirty-build,
+      semantic/resource-matrix, and Medium-advisory disposition findings.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
 
 ## Surprises & Discoveries
+
+- Cancellation of an `asyncio.to_thread` awaiter does not stop its decode/
+  Shapely thread. The request can release its single-flight slot and remove
+  scratch while that thread still consumes parent memory; single-flight must be
+  retained through bounded thread completion.
+- Setting concurrency/resource defaults is not an invariant while production
+  environment overrides can exceed them. Readiness must validate the complete
+  effective envelope.
+- The Rust CLI applies resource limits after its preliminary hostile SHP scan.
+  Limits must precede all attacker-controlled traversal, and the scan must stop
+  at the feature ceiling rather than allocate before checking.
 
 - Independent M6 review reproduced silent feature loss when SHP contains an
   extra valid record not represented by SHX/DBF. Zipping shape and DBF iterators
@@ -368,6 +383,12 @@ requalification. See the
 [receipt](../../artifacts/20261114_rust_cli_remediation_requalification.md).
 This closes the local evidence portion only; independent re-review and rollout
 authorization remain open, so the package is not complete.
+
+Independent re-review of `2bbf8498e` returned FAIL/HOLD. See the
+[consolidated review](../../artifacts/20261114_rust_cli_remediation_independent_re_review.md)
+and [security review](../../artifacts/20261114_rust_cli_remediation_security_re_review.md).
+The local exact-image receipt remains valid evidence, but it does not override
+the retained findings. #656 and rollout remain blocked.
 
 ## Context and Orientation
 

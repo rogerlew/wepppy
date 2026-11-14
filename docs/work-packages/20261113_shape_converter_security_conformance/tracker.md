@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 (M6 exact-image requalification passed)
-**Current phase**: M6 independent re-review pending
+**Last updated**: 2026-11-14 (M6 independent re-review failed)
+**Current phase**: M6 second remediation required
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
@@ -63,6 +63,10 @@ pre-cutover oracle
 - [x] M6 exact-image requalification at `21a12c9d0`: provenance-identical build,
       output readback, single-flight near-ceiling recovery, cleanup, and pinned
       Syft/Grype evidence passed.
+- [ ] M6 independent remediation re-review: FAIL/HOLD. Retained findings cover
+      cancellation/event-loop ownership, effective resource enforcement, early
+      Rust limits, executable takedown proof, clean release inputs, semantic/
+      resource coverage, and Medium scan dispositions.
 - [x] Close #655 after its strict data-only IPC acceptance passed; comment on
       #656 with final local evidence and keep it open for independent residual-
       risk acceptance.
@@ -210,6 +214,11 @@ pre-cutover oracle
   not OOM-killed. Exact Syft/Grype reports retain the previously reviewed counts
   and dispositions. No production deployment occurred.
 
+- 2026-11-14: independent code, correctness, QA, security, and operations
+  re-review of `2bbf8498e` returned FAIL/HOLD. The exact-image evidence remains
+  valid, but #656 and rollout remain blocked. See the consolidated and dedicated
+  security re-review artifacts.
+
 ## Handoff
 
 M4 implementation and local validation are complete but independent M6 review
@@ -218,7 +227,8 @@ failed. See the
 and final Rust-CLI evidence/review artifacts. No production deployment occurred;
 do not infer approval for privileges, a parser service, or topology changes.
 
-Next checkpoint: obtain independent re-review of the exact remediation candidate
-before updating #656 or authorizing rollout.
+Next checkpoint: remediate the retained re-review findings, rerun exact-image
+qualification where affected, and obtain another independent re-review before
+updating #656 or authorizing rollout.
 Complete Syft/Grype JSON is retained in package artifacts, and the exact image
 proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.

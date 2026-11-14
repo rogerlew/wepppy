@@ -4,7 +4,7 @@ Completed locally: [Safe traceback and exceptional-path secret sanitization](doc
 
 Completed on forest: [Status and preflight WebSocket run authorization](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md) - Ratified run-bound credentials, full regression, five-service cutover and 27 real-browser assertions verified; NFS cleanup recovery retained. Production rollout remains pending separate authorization.
 
-Rust CLI exact-image requalification passed; independent re-review pending: [Shape-converter security conformance closure](docs/work-packages/20261113_shape_converter_security_conformance/package.md) - High parser-boundary remediation for executable worker IPC (#655), GDAL/Fiona replacement and bounded execution (#656), and related archive/driver/semantic gaps. Commit `21a12c9d0` passed provenance-identical build, output readback, single-flight near-ceiling rejection/recovery, cleanup, and pinned scan evidence. Failed security/readiness gates leave the converter stopped with no parser fallback. Independent re-review remains open; no deployment.
+Rust CLI exact-image requalification passed; independent re-review failed: [Shape-converter security conformance closure](docs/work-packages/20261113_shape_converter_security_conformance/package.md) - High parser-boundary remediation for executable worker IPC (#655), GDAL/Fiona replacement and bounded execution (#656), and related archive/driver/semantic gaps. Exact-image evidence remains valid, but reviewers retained cancellation/event-loop, effective-envelope, early-Rust-limit, deploy-execution, clean-build, semantic/resource-matrix, and Medium-advisory disposition findings. #656 and rollout remain blocked; failed gates leave the converter stopped with no parser fallback.
 
 Implemented; runtime acceptance blocked: [Test-support production guardrails and F1-F7 readiness](docs/work-packages/20261111_test_support_production_guardrails/package.md) - F7 defaults the runtime profile to production, excludes support routes from production, and reuses short-lived WEPP_AUTH credentials through automatic wctl/Playwright injection. No smoke markers or new static secret. Closure requires F6 M4, one combined F1-F7 regression receipt, and a reviewed non-executed deployment-validation plan.
 
@@ -883,9 +883,9 @@ The first full M6 independent review failed. Remediation provides asynchronous
 cancellation-safe execution, exact SHP/SHX/DBF cardinality checks, a conservative
 single-flight resource envelope, startup-cached real-parser readiness, stronger
 provenance/reproducibility checks, and canonical deploy-time takedown on candidate
-failure. The exact image from `21a12c9d0` passed requalification; independent
-re-review remains gated. #655 is closed; #656 remains open. No production
-deployment occurred.
+failure. The exact image from `21a12c9d0` passed requalification, but independent
+re-review returned FAIL/HOLD with retained High and Medium findings. #655 is
+closed; #656 and rollout remain blocked. No production deployment occurred.
 
 
 ### Test-Support Production Guardrails and F1-F7 Readiness
