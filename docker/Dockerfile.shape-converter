@@ -6,8 +6,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG SHAPE_PARSER_SOURCE_REVISION=uncommitted-development
 ARG SHAPE_PARSER_RELEASE_LABEL=development
 ARG SHAPE_PARSER_BUILT_UTC=
+ARG SHAPE_PARSER_REQUIRE_RELEASE_PROVENANCE=0
+ARG DEBIAN_SNAPSHOT=20261114T120000Z
 
-RUN apt-get update && \
+RUN sed -i \
+        -e "s|http://deb.debian.org/debian-security|https://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT}|g" \
+        -e "s|http://deb.debian.org/debian|https://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}|g" \
+        /etc/apt/sources.list.d/debian.sources && \
+    apt-get -o Acquire::Check-Valid-Until=false update && \
     apt-get install -y --no-install-recommends file python3 && \
     rm -rf /var/lib/apt/lists/*
 
@@ -17,7 +23,12 @@ COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/Cargo.lock ./Car
 COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/src ./src
 COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/tools ./tools
 
-RUN cargo build --release --locked && \
+RUN if [ "${SHAPE_PARSER_REQUIRE_RELEASE_PROVENANCE}" = "1" ]; then \
+        printf '%s' "${SHAPE_PARSER_SOURCE_REVISION}" | grep -Eq '^[a-f0-9]{40}$'; \
+        [ "${SHAPE_PARSER_RELEASE_LABEL}" != "development" ]; \
+        [ -n "${SHAPE_PARSER_BUILT_UTC}" ]; \
+    fi && \
+    cargo build --release --locked && \
     built_utc_arg="" && \
     if [ -n "${SHAPE_PARSER_BUILT_UTC}" ]; then \
         built_utc_arg="--built-utc=${SHAPE_PARSER_BUILT_UTC}"; \
@@ -48,8 +59,13 @@ RUN python3 -m venv /opt/venv && \
 FROM python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b AS runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_SNAPSHOT=20261114T120000Z
 
-RUN apt-get update && \
+RUN sed -i \
+        -e "s|http://deb.debian.org/debian-security|https://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT}|g" \
+        -e "s|http://deb.debian.org/debian|https://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}|g" \
+        /etc/apt/sources.list.d/debian.sources && \
+    apt-get -o Acquire::Check-Valid-Until=false update && \
     apt-get install -y --no-install-recommends \
         zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 && \
     rm -rf /var/lib/apt/lists/*
@@ -58,7 +74,8 @@ LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy" \
       org.opencontainers.image.title="WEPPpy shape converter" \
       org.opencontainers.image.description="Minimal runtime for untrusted shapefile conversion" \
       org.opencontainers.image.base.name="python:3.12-slim" \
-      org.opencontainers.image.base.digest="sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b"
+      org.opencontainers.image.base.digest="sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b" \
+      org.wepppy.debian.snapshot="${DEBIAN_SNAPSHOT}"
 
 RUN groupadd --gid 10001 shape-converter && \
     useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin shape-converter && \

@@ -78,11 +78,15 @@ def _assert_shape_converter_hardening_contract(
         "SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES",
         "SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS",
         "SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES",
+        "SHAPE_CONVERTER_MAX_PARSER_PAYLOAD_BYTES",
         "SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES",
         "SHAPE_CONVERTER_PARSER_CPU_LIMIT_SECONDS",
         "SHAPE_CONVERTER_PARSER_OPEN_FILE_LIMIT",
+        "SHAPE_CONVERTER_MAX_GEOJSON_OUTPUT_BYTES",
+        "SHAPE_CONVERTER_MAX_GEOPARQUET_OUTPUT_BYTES",
     }
     assert expected_env_keys.issubset(shape_converter["environment"])
+    assert shape_converter["healthcheck"]["test"][0] == "CMD"
 
 
 @pytest.mark.parametrize(

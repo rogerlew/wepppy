@@ -267,6 +267,7 @@ PRINT_PLAN=false
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 RQ_ENGINE_HEALTHCHECK_URL="${RQ_ENGINE_HEALTHCHECK_URL:-}"
 CAP_HEALTHCHECK_URL="${CAP_HEALTHCHECK_URL:-}"
+SHAPE_CONVERTER_HEALTHCHECK_URL="${SHAPE_CONVERTER_HEALTHCHECK_URL:-}"
 CAP_RUNTIME_VALIDATOR="${CAP_RUNTIME_VALIDATOR:-${PROJECT_ROOT}/docker/validate-cap-runtime-contract.sh}"
 CAP_RUNTIME_PREPARER="${CAP_RUNTIME_PREPARER:-${PROJECT_ROOT}/docker/prepare-cap-runtime.sh}"
 WEPPCLOUDR_RUNTIME_VALIDATOR="${WEPPCLOUDR_RUNTIME_VALIDATOR:-${PROJECT_ROOT}/docker/validate-weppcloudr-runtime-contract.sh}"
@@ -576,6 +577,15 @@ fi
 
 validate_deploy_topology
 
+if printf "%s\n" "${BUILD_SERVICES[@]}" | grep -qx "shape-converter"; then
+    SHAPE_PARSER_SOURCE_REVISION="$(git rev-parse HEAD)"
+    SHAPE_PARSER_RELEASE_LABEL="wepppy-${SHAPE_PARSER_SOURCE_REVISION:0:12}"
+    SHAPE_PARSER_BUILT_UTC="$(git show -s --format=%cI HEAD)"
+    [[ "${SHAPE_PARSER_SOURCE_REVISION}" =~ ^[a-f0-9]{40}$ ]]
+    export SHAPE_PARSER_SOURCE_REVISION SHAPE_PARSER_RELEASE_LABEL SHAPE_PARSER_BUILT_UTC
+    echo "    Shape parser release revision: ${SHAPE_PARSER_SOURCE_REVISION}"
+fi
+
 if [ "${SKIP_BUILD}" = true ] && [ "${#BUILD_SERVICES[@]}" -gt 0 ]; then
     echo "✗ --skip-build is unsafe when locally built services will be recreated." >&2
     echo "  Build the candidate images or use --print-plan for a read-only inspection." >&2
@@ -822,6 +832,10 @@ CAP_RESCUE_IMAGE=""
 CAP_RESCUE_CONFIG=""
 CAP_RESCUE_OVERRIDE=""
 CAP_ACTIVATION_STARTED=false
+SHAPE_CONVERTER_FAIL_CLOSED=false
+if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter"; then
+    SHAPE_CONVERTER_FAIL_CLOSED=true
+fi
 STAGED_CONTROLLERS_JS=""
 BACKUP_CONTROLLERS_JS=""
 if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
@@ -849,7 +863,20 @@ fi
 recover_targeted_cap() {
     local original_exit="$?"
     local recovery_exit="${original_exit}"
+    local shape_shutdown_failed=false
     trap - ERR
+    if [ "${SHAPE_CONVERTER_FAIL_CLOSED}" = true ]; then
+        echo "✗ Deployment failed; stopping shape-converter instead of restoring an unreviewed parser." >&2
+        if ! wctl docker compose stop --timeout 30 shape-converter >/dev/null 2>&1; then
+            echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to stop the service" >&2
+            shape_shutdown_failed=true
+        elif [ -n "$(wctl docker compose ps -q shape-converter)" ]; then
+            echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: service still has a running container" >&2
+            shape_shutdown_failed=true
+        else
+            echo "✓ shape-converter is down; no GDAL/Fiona or unreviewed parser fallback was activated" >&2
+        fi
+    fi
     if [ -n "${STAGED_CONTROLLERS_JS}" ]; then
         rm -f -- "${STAGED_CONTROLLERS_JS}"
         STAGED_CONTROLLERS_JS=""
@@ -864,6 +891,7 @@ recover_targeted_cap() {
             echo "✗ RQ_RESUME_FAILED: the 3600-second suspension TTL remains as break-glass protection" >&2
             recovery_exit=87
         fi
+        [ "${shape_shutdown_failed}" = false ] || return 88
         return "${recovery_exit}"
     fi
     echo "✗ Candidate CAP activation failed; restoring ${CAP_RESCUE_IMAGE}" >&2
@@ -932,6 +960,7 @@ recover_targeted_cap() {
         if ! resume_rq_if_owned; then return 87; fi
         return 86
     fi
+    [ "${shape_shutdown_failed}" = false ] || return 88
     return "${recovery_exit}"
 }
 trap recover_targeted_cap ERR
@@ -1260,6 +1289,34 @@ if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_BATCH}" = false ]; then
                 false
             fi
             echo "  Waiting for rq-engine to be ready (attempt ${RQ_ENGINE_ATTEMPT}/${MAX_ATTEMPTS})..."
+            sleep 2
+        done
+    fi
+
+    if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter"; then
+        if [ -z "${SHAPE_CONVERTER_HEALTHCHECK_URL}" ]; then
+            case "${HEALTHCHECK_URL}" in
+                */weppcloud/health)
+                    SHAPE_CONVERTER_HEALTHCHECK_URL="${HEALTHCHECK_URL%/weppcloud/health}/utils/shape-converter/health/ready"
+                    ;;
+                *)
+                    echo "✗ Set SHAPE_CONVERTER_HEALTHCHECK_URL when HEALTHCHECK_URL does not end in /weppcloud/health." >&2
+                    false
+                    ;;
+            esac
+        fi
+        echo "    Shape-converter readiness URL: ${SHAPE_CONVERTER_HEALTHCHECK_URL}"
+        SHAPE_ATTEMPT=0
+        while [ "${SHAPE_ATTEMPT}" -lt "${MAX_ATTEMPTS}" ]; do
+            if curl --connect-timeout 5 --max-time 10 -fsS "${SHAPE_CONVERTER_HEALTHCHECK_URL}" >/dev/null 2>&1; then
+                echo "✓ shape-converter startup parser canary and public readiness passed"
+                break
+            fi
+            SHAPE_ATTEMPT=$((SHAPE_ATTEMPT + 1))
+            if [ "${SHAPE_ATTEMPT}" -eq "${MAX_ATTEMPTS}" ]; then
+                echo "✗ shape-converter readiness failed; fail-closed shutdown required" >&2
+                false
+            fi
             sleep 2
         done
     fi

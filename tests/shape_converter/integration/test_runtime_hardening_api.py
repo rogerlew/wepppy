@@ -24,13 +24,9 @@ def test_ready_endpoint_reports_not_ready_when_provenance_is_invalid(
         lambda: (False, "parser_binary_hash_mismatch"),
     )
 
-    with TestClient(create_app()) as client:
-        response = client.get("/health/ready")
-
-    assert response.status_code == 503
-    payload = response.json()
-    assert payload["status"] == "not_ready"
-    assert payload["reason"] == "parser_binary_hash_mismatch"
+    with pytest.raises(RuntimeError, match="parser_binary_hash_mismatch"):
+        with TestClient(create_app()):
+            pass
 
 
 def test_hardening_readiness_enforcement_does_not_regress_inspect_convert(
@@ -53,7 +49,7 @@ def test_hardening_readiness_enforcement_does_not_regress_inspect_convert(
     assert ready_response.status_code == 200
     ready_payload = ready_response.json()
     assert ready_payload["parser"] == "shape_parser_cli"
-    assert ready_payload["provenance"] == "verified"
+    assert ready_payload["provenance"] == "binary_binding_verified"
 
     assert inspect_response.status_code == 200
     inspect_payload = inspect_response.json()

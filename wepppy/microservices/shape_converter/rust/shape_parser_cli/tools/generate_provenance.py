@@ -83,7 +83,10 @@ def main() -> int:
     source_root = args.source_root.resolve()
     rustc_value = shutil.which(args.rustc) if "/" not in args.rustc else args.rustc
     rustc = Path(rustc_value).absolute() if rustc_value else Path()
-    if not binary.is_file() or not rustc.is_file():
+    rustup = shutil.which("rustup") if args.rustc == "rustc" else None
+    selected_rustc = _run_text([rustup, "which", "rustc"]) if rustup else ""
+    compiler = Path(selected_rustc) if selected_rustc else rustc.resolve()
+    if not binary.is_file() or not rustc.is_file() or not compiler.is_file():
         raise FileNotFoundError("binary or rustc not found")
 
     source_manifest = _manifest(_source_inputs(source_root), source_root)
@@ -113,8 +116,8 @@ def main() -> int:
             "built_utc": built_utc,
             "command": "cargo build --release --locked",
             "rustc_path": str(rustc),
-            "rustc_executable": str(rustc.resolve()),
-            "rustc_sha256": _sha256(rustc.resolve()),
+            "rustc_executable": str(compiler),
+            "rustc_sha256": _sha256(compiler),
             "rustc_version": _run_text([str(rustc), "--version"]),
             "target": _run_text([str(rustc), "-vV"]),
             "cargo_lock_sha256": _sha256(source_root / "Cargo.lock"),

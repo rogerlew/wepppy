@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 import importlib
 import json
 from pathlib import Path
@@ -225,7 +227,7 @@ def test_worker_diagnostics_are_discarded(tmp_path, monkeypatch):
     probe.chmod(0o700)
     monkeypatch.setenv('SHAPE_CONVERTER_PARSER_CLI', str(probe))
     with pytest.raises(ShapeConverterError) as error:
-        convert._run_parser_worker(shp_path=tmp_path / 'a.shp', output_path=tmp_path / 'result.json',
-                                   scratch=SimpleNamespace(request_dir=tmp_path))
+        asyncio.run(convert._run_parser_worker(shp_path=tmp_path / 'a.shp', output_path=tmp_path / 'result.json',
+                                               scratch=SimpleNamespace(request_dir=tmp_path)))
     assert error.value.code == 'invalid_shapefile'
     assert error.value.details == 'Parser worker failed to parse the dataset.'

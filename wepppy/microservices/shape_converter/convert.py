@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import collections.abc as cabc
+import asyncio
 import errno
 import os
 import shutil
 import signal
 import struct
-import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -49,15 +49,15 @@ _MAX_VERTICES_PER_FEATURE = max(
 )
 _MAX_PARSER_PAYLOAD_BYTES = max(
     1,
-    int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_PAYLOAD_BYTES", str(256 * 1024 * 1024))),
+    int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_PAYLOAD_BYTES", str(16 * 1024 * 1024))),
 )
 _REQUEST_SCRATCH_QUOTA_BYTES = max(
     1,
-    int(os.getenv("SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES", str(700 * 1024 * 1024))),
+    int(os.getenv("SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES", str(320 * 1024 * 1024))),
 )
 _SCRATCH_PRECHECK_FREE_BYTES = max(
     1,
-    int(os.getenv("SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES", str(128 * 1024 * 1024))),
+    int(os.getenv("SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES", str(32 * 1024 * 1024))),
 )
 _PARSER_SUBPROCESS_TIMEOUT_SECONDS = max(
     1,
@@ -69,11 +69,11 @@ _PARSER_SUBPROCESS_KILL_GRACE_SECONDS = max(
 )
 _MAX_PARSER_INPUT_BYTES = max(
     1,
-    int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES", str(600 * 1024 * 1024))),
+    int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES", str(128 * 1024 * 1024))),
 )
 _PARSER_MEMORY_LIMIT_BYTES = max(
     64 * 1024 * 1024,
-    int(os.getenv("SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES", str(512 * 1024 * 1024))),
+    int(os.getenv("SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES", str(384 * 1024 * 1024))),
 )
 _PARSER_CPU_LIMIT_SECONDS = max(
     1,
@@ -219,7 +219,7 @@ async def convert_uploaded_archive(
         additional_bytes=_MAX_PARSER_PAYLOAD_BYTES,
         stage="parser_payload_budget",
     )
-    loaded = _load_shapefile(
+    loaded = await _load_shapefile(
         shp_path=dataset.prefix_path.with_suffix(".shp"),
         scratch=scratch,
         ignore_source_crs=(
@@ -390,25 +390,40 @@ def _scratch_tree_size_bytes(path: Path) -> int:
     return total
 
 
-def _load_shapefile(
+async def _load_shapefile(
     *,
     shp_path: Path,
     scratch: RequestScratchLayout,
     ignore_source_crs: bool = False,
 ) -> LoadedShapefile:
     parser_output_path = scratch.request_dir / "parser_worker_payload.json"
-    worker_stdout, worker_stderr = _run_parser_worker(
+    worker_stdout, worker_stderr = await _run_parser_worker(
         shp_path=shp_path,
         output_path=parser_output_path,
         scratch=scratch,
     )
 
-    worker_payload = _read_parser_payload(
+    return await asyncio.to_thread(
+        _read_and_load_parser_payload,
         payload_path=parser_output_path,
         worker_stdout=worker_stdout,
         worker_stderr=worker_stderr,
+        ignore_source_crs=ignore_source_crs,
     )
 
+
+def _read_and_load_parser_payload(
+    *,
+    payload_path: Path,
+    worker_stdout: str,
+    worker_stderr: str,
+    ignore_source_crs: bool,
+) -> LoadedShapefile:
+    worker_payload = _read_parser_payload(
+        payload_path=payload_path,
+        worker_stdout=worker_stdout,
+        worker_stderr=worker_stderr,
+    )
     return _loaded_shapefile_from_payload(
         worker_payload,
         ignore_source_crs=ignore_source_crs,
@@ -424,7 +439,7 @@ def _parser_cli_path() -> Path:
     return _INSTALLED_PARSER_CLI
 
 
-def probe_parser_runtime(scratch_root: Path) -> tuple[bool, str | None]:
+async def probe_parser_runtime(scratch_root: Path) -> tuple[bool, str | None]:
     try:
         scratch_root.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="parser-readiness-", dir=scratch_root) as raw_root:
@@ -438,7 +453,7 @@ def probe_parser_runtime(scratch_root: Path) -> tuple[bool, str | None]:
                 extraction_root=request_root,
                 output_root=request_root,
             )
-            _run_parser_worker(shp_path=shp_path, output_path=output_path, scratch=scratch)
+            await _run_parser_worker(shp_path=shp_path, output_path=output_path, scratch=scratch)
             payload = _read_parser_payload(
                 payload_path=output_path,
                 worker_stdout="",
@@ -504,7 +519,7 @@ def _build_parser_worker_env() -> dict[str, str]:
     }
 
 
-def _run_parser_worker(
+async def _run_parser_worker(
     *,
     shp_path: Path,
     output_path: Path,
@@ -536,10 +551,10 @@ def _run_parser_worker(
     worker_env = _build_parser_worker_env()
 
     try:
-        process = subprocess.Popen(
-            worker_command,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+        process = await asyncio.create_subprocess_exec(
+            *worker_command,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL,
             cwd=scratch.request_dir.as_posix(),
             env=worker_env,
             start_new_session=True,
@@ -554,13 +569,13 @@ def _run_parser_worker(
         ) from exc
 
     try:
-        process.communicate(timeout=_PARSER_SUBPROCESS_TIMEOUT_SECONDS)
-    except subprocess.TimeoutExpired as exc:
-        _terminate_process_group(process)
-        try:
-            process.communicate(timeout=1)
-        except (subprocess.TimeoutExpired, OSError):
-            pass
+        await asyncio.wait_for(
+            process.wait(),
+            timeout=_PARSER_SUBPROCESS_TIMEOUT_SECONDS,
+        )
+    except TimeoutError as exc:
+        await _terminate_process_group(process)
+        _remove_parser_outputs(output_path)
         raise ShapeConverterError(
             code="request_timeout",
             message="Convert parser exceeded timeout and was terminated.",
@@ -570,6 +585,10 @@ def _run_parser_worker(
             ),
             status_code=408,
         ) from exc
+    except asyncio.CancelledError:
+        await _terminate_process_group(process)
+        _remove_parser_outputs(output_path)
+        raise
 
     if process.returncode != 0:
         if process.returncode == 5:
@@ -595,8 +614,8 @@ def _run_parser_worker(
     return "", ""
 
 
-def _terminate_process_group(process: subprocess.Popen[str]) -> None:
-    if process.poll() is not None:
+async def _terminate_process_group(process: asyncio.subprocess.Process) -> None:
+    if process.returncode is not None:
         return
 
     pid = process.pid
@@ -610,9 +629,12 @@ def _terminate_process_group(process: subprocess.Popen[str]) -> None:
         return
 
     try:
-        process.wait(timeout=_PARSER_SUBPROCESS_KILL_GRACE_SECONDS)
+        await asyncio.wait_for(
+            process.wait(),
+            timeout=_PARSER_SUBPROCESS_KILL_GRACE_SECONDS,
+        )
         return
-    except subprocess.TimeoutExpired:
+    except TimeoutError:
         pass
 
     try:
@@ -621,9 +643,21 @@ def _terminate_process_group(process: subprocess.Popen[str]) -> None:
         return
 
     try:
-        process.wait(timeout=1)
-    except subprocess.TimeoutExpired:
+        await asyncio.wait_for(process.wait(), timeout=1)
+    except TimeoutError:
         pass
+
+
+def _remove_parser_outputs(output_path: Path) -> None:
+    try:
+        output_path.unlink(missing_ok=True)
+    except OSError:
+        pass
+    for candidate in output_path.parent.glob(f"{output_path.stem}.tmp.*"):
+        try:
+            candidate.unlink()
+        except OSError:
+            pass
 
 
 def _read_parser_payload(

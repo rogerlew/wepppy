@@ -114,6 +114,7 @@ def test_resolved_shape_converter_uses_isolated_dedicated_image(
     assert shape_service["read_only"] is True
     assert shape_service["cap_drop"] == ["ALL"]
     assert shape_service["security_opt"] == ["no-new-privileges:true"]
+    assert shape_service["mem_limit"] == 1_610_612_736
     assert shape_service["networks"] == {"shape-converter-sandbox": None}
     assert shape_service["command"] == [
         "uvicorn",
@@ -127,6 +128,18 @@ def test_resolved_shape_converter_uses_isolated_dedicated_image(
         "--timeout-keep-alive",
         "5",
     ]
+    assert shape_service["healthcheck"]["test"][:3] == [
+        "CMD",
+        "/opt/venv/bin/python",
+        "-c",
+    ]
+    assert "/health/ready" in shape_service["healthcheck"]["test"][3]
+    assert shape_service["build"]["args"]["SHAPE_PARSER_REQUIRE_RELEASE_PROVENANCE"] == "1"
+    assert services["caddy"]["depends_on"]["shape-converter"]["condition"] == "service_healthy"
+    assert shape_service["environment"]["SHAPE_CONVERTER_MAX_PARSER_PAYLOAD_BYTES"] == "16777216"
+    assert shape_service["environment"]["SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES"] == "134217728"
+    assert shape_service["environment"]["SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES"] == "402653184"
+    assert shape_service["environment"]["SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES"] == "335544320"
     assert shape_service.get("volumes") in (None, [])
     for inherited_key in ("secrets", "env_file", "depends_on"):
         assert not shape_service.get(inherited_key)
@@ -150,3 +163,13 @@ def test_resolved_dev_shape_converter_mounts_only_service_source_read_only() -> 
         "/opt/app/wepppy/observability",
     }
     assert all(mount["type"] == "bind" and mount["read_only"] for mount in mounts)
+
+
+def test_shape_converter_deploy_contract_is_fail_closed() -> None:
+    deploy = (_REPO_ROOT / "scripts" / "deploy-production.sh").read_text(encoding="utf-8")
+
+    assert 'SHAPE_PARSER_SOURCE_REVISION="$(git rev-parse HEAD)"' in deploy
+    assert "SHAPE_CONVERTER_FAIL_CLOSED=true" in deploy
+    assert "stop --timeout 30 shape-converter" in deploy
+    assert "shape-converter is down; no GDAL/Fiona or unreviewed parser fallback" in deploy
+    assert "/utils/shape-converter/health/ready" in deploy

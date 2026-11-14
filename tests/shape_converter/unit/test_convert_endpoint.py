@@ -882,22 +882,28 @@ def test_convert_parser_worker_uses_minimal_environment(
         pid = 1234
         returncode = 0
 
-        def communicate(self, timeout=None):  # noqa: ANN001
-            return "", ""
+        async def wait(self):
+            return self.returncode
 
-    def _fake_popen(*args, **kwargs):  # noqa: ANN002, ANN003
+    async def _fake_exec(*args, **kwargs):  # noqa: ANN002, ANN003
         observed_env.update(dict(kwargs["env"]))
         return _Process()
 
     monkeypatch.setenv("PATH", "/usr/bin")
     monkeypatch.setenv("PYTHONPATH", "/workdir/wepppy")
     monkeypatch.setenv("SHAPE_CONVERTER_TEST_SECRET", "do-not-leak")
-    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", _fake_popen)
+    monkeypatch.setattr(
+        shape_converter_convert_module.asyncio,
+        "create_subprocess_exec",
+        _fake_exec,
+    )
 
-    worker_stdout, worker_stderr = shape_converter_convert_module._run_parser_worker(
-        shp_path=tmp_path / "roads.shp",
-        output_path=tmp_path / "payload.json",
-        scratch=SimpleNamespace(request_dir=tmp_path),
+    worker_stdout, worker_stderr = asyncio.run(
+        shape_converter_convert_module._run_parser_worker(
+            shp_path=tmp_path / "roads.shp",
+            output_path=tmp_path / "payload.json",
+            scratch=SimpleNamespace(request_dir=tmp_path),
+        )
     )
 
     assert worker_stdout == ""
@@ -1076,26 +1082,26 @@ def test_load_shapefile_invokes_worker_subprocess_with_new_session(
         pid = 99123
         returncode = 0
 
-        def communicate(self, timeout=None):  # noqa: ANN001
+        async def wait(self):
             payload_path.write_bytes(json.dumps(expected_payload).encode("utf-8"))
-            return "", ""
-
-        def poll(self):
             return self.returncode
 
-        def wait(self, timeout=None):  # noqa: ANN001
-            return self.returncode
-
-    def _fake_popen(*args, **kwargs):  # noqa: ANN002, ANN003
+    async def _fake_exec(*args, **kwargs):  # noqa: ANN002, ANN003
         captured_popen_kwargs.update(kwargs)
         return _FakeProcess()
 
-    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", _fake_popen)
+    monkeypatch.setattr(
+        shape_converter_convert_module.asyncio,
+        "create_subprocess_exec",
+        _fake_exec,
+    )
     scratch = SimpleNamespace(request_dir=tmp_path)
 
-    loaded = shape_converter_convert_module._load_shapefile(
-        shp_path=tmp_path / "roads.shp",
-        scratch=scratch,
+    loaded = asyncio.run(
+        shape_converter_convert_module._load_shapefile(
+            shp_path=tmp_path / "roads.shp",
+            scratch=scratch,
+        )
     )
 
     assert loaded.source_bounds == (10.0, 20.0, 10.0, 20.0)
@@ -1117,22 +1123,20 @@ def test_load_shapefile_timeout_kills_worker_process_group(
         pid = 55223
         returncode = None
 
-        def __init__(self):
-            self._communicate_calls = 0
+        async def wait(self):
+            await asyncio.sleep(10)
+            return 0
 
-        def communicate(self, timeout=None):  # noqa: ANN001
-            self._communicate_calls += 1
-            if self._communicate_calls == 1:
-                raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
-            return "", ""
+    async def _fake_exec(*_args, **_kwargs):
+        return _TimeoutProcess()
 
-        def poll(self):
-            return None
-
-        def wait(self, timeout=None):  # noqa: ANN001
-            raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
-
-    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", lambda *a, **k: _TimeoutProcess())  # noqa: ANN002, ANN003
+    monkeypatch.setattr(
+        shape_converter_convert_module.asyncio,
+        "create_subprocess_exec",
+        _fake_exec,
+    )
+    monkeypatch.setattr(shape_converter_convert_module, "_PARSER_SUBPROCESS_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr(shape_converter_convert_module, "_PARSER_SUBPROCESS_KILL_GRACE_SECONDS", 0.01)
     monkeypatch.setattr(
         shape_converter_convert_module.os,
         "killpg",
@@ -1141,9 +1145,11 @@ def test_load_shapefile_timeout_kills_worker_process_group(
     scratch = SimpleNamespace(request_dir=tmp_path)
 
     with pytest.raises(shape_converter_convert_module.ShapeConverterError) as exc_info:
-        shape_converter_convert_module._load_shapefile(
-            shp_path=tmp_path / "roads.shp",
-            scratch=scratch,
+        asyncio.run(
+            shape_converter_convert_module._load_shapefile(
+                shp_path=tmp_path / "roads.shp",
+                scratch=scratch,
+            )
         )
 
     exc = exc_info.value

@@ -38,7 +38,7 @@ def test_ready_health_returns_ok_when_scratch_is_writable() -> None:
     assert payload["scope"] == "shape-converter"
     assert payload["check"] == "ready"
     assert payload["parser"] == "shape_parser_cli"
-    assert payload["provenance"] == "verified"
+    assert payload["provenance"] == "binary_binding_verified"
 
 
 def test_ready_health_returns_503_when_scratch_unwritable(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -47,15 +47,9 @@ def test_ready_health_returns_503_when_scratch_unwritable(monkeypatch: pytest.Mo
 
     monkeypatch.setattr(shape_converter_app_module, "_is_scratch_root_writable", _fake_probe)
 
-    with TestClient(create_app()) as client:
-        response = client.get("/health/ready")
-
-    assert response.status_code == 503
-    payload = response.json()
-    assert payload["status"] == "not_ready"
-    assert payload["scope"] == "shape-converter"
-    assert payload["check"] == "ready"
-    assert payload["reason"].startswith("scratch_root_not_writable")
+    with pytest.raises(RuntimeError, match="scratch_root_not_writable"):
+        with TestClient(create_app()):
+            pass
 
 
 def test_ready_health_returns_503_when_parser_provenance_fails(
@@ -67,40 +61,39 @@ def test_ready_health_returns_503_when_parser_provenance_fails(
         lambda: (False, "parser_binary_hash_mismatch"),
     )
 
-    with TestClient(create_app()) as client:
-        response = client.get("/health/ready")
-
-    assert response.status_code == 503
-    payload = response.json()
-    assert payload["status"] == "not_ready"
-    assert payload["reason"] == "parser_binary_hash_mismatch"
+    with pytest.raises(RuntimeError, match="parser_binary_hash_mismatch"):
+        with TestClient(create_app()):
+            pass
 
 
 def test_ready_health_returns_503_when_runtime_probe_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(
-        shape_converter_app_module,
-        "probe_parser_runtime",
-        lambda _scratch: (False, "parser_runtime_probe_failed"),
-    )
+    async def _failed_probe(_scratch: Path) -> tuple[bool, str | None]:
+        return False, "parser_runtime_probe_failed"
 
-    with TestClient(create_app()) as client:
-        response = client.get("/health/ready")
+    monkeypatch.setattr(shape_converter_app_module, "probe_parser_runtime", _failed_probe)
 
-    assert response.status_code == 503
-    payload = response.json()
-    assert payload["status"] == "not_ready"
-    assert payload["reason"] == "parser_runtime_probe_failed"
+    with pytest.raises(RuntimeError, match="parser_runtime_probe_failed"):
+        with TestClient(create_app()):
+            pass
 
 
 def test_ready_health_returns_503_when_toolchain_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(shape_converter_app_module, "_is_toolchain_available", lambda: (False, "parser_binary_or_provenance_missing"))
 
+    with pytest.raises(RuntimeError, match="parser_binary_or_provenance_missing"):
+        with TestClient(create_app()):
+            pass
+
+
+def test_ready_health_uses_cached_startup_canary(monkeypatch: pytest.MonkeyPatch) -> None:
     with TestClient(create_app()) as client:
+        async def _unexpected_probe(_scratch: Path) -> tuple[bool, str | None]:
+            raise AssertionError("public readiness must not launch the parser")
+
+        monkeypatch.setattr(shape_converter_app_module, "probe_parser_runtime", _unexpected_probe)
         response = client.get("/health/ready")
 
-    assert response.status_code == 503
-    payload = response.json()
-    assert payload["status"] == "not_ready"
-    assert payload["reason"] == "parser_binary_or_provenance_missing"
+    assert response.status_code == 200
+    assert response.json()["provenance"] == "binary_binding_verified"

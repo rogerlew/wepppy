@@ -74,6 +74,12 @@ gate; it is not the final parser architecture.
 - [ ] M6: scoped validation and exact-image evidence pass, but independent final
       review of `fe5ac7c1c` returned FAIL/HOLD. Remediation, requalification,
       re-review, GitHub disposition, and separately authorized rollout remain.
+- [x] (2026-11-14) Implement the approved fail-closed remediation: asynchronous
+      cancelable parser execution; exact SHP/SHX/DBF cardinality validation;
+      startup parser canary; provenance/reproducibility checks; a conservative
+      aggregate resource envelope; and deploy-time readiness with service
+      takedown on failure. Focused requalification and independent re-review
+      remain.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
@@ -181,6 +187,17 @@ gate; it is not the final parser architecture.
   worker. Sandbox claims must not be overstated for that endpoint.
 
 ## Decision Log
+
+- Decision: if the candidate cannot satisfy its security, provenance, startup,
+  or post-activation readiness gates, leave `shape-converter` stopped and verify
+  that no instance is running.
+  Rationale: the operator explicitly prefers loss of converter availability over
+  restoring the GDAL/Fiona implementation or operating an unqualified Rust
+  parser. The canonical deploy path therefore treats build/activation/readiness
+  failure as a service takedown, not rollback. This authority applies only to
+  `shape-converter`; it does not authorize production deployment or changes to
+  other services.
+  Date/Author: 2026-11-14, operator and Codex.
 
 - Decision: implement M4 as one lightweight service-local Rust CLI crate, not as
   a `wepppyo3` component, Python extension, or new parser microservice.
@@ -323,6 +340,14 @@ evidence; readiness validates the executable/sidecar pair and executes a real
 fixture; and the exact image cannot load Fiona/GDAL. The package remains open
 only for genuinely independent final review, GitHub disposition, and separately
 authorized rollout. No production deployment occurred.
+
+The first M6 independent review returned FAIL/HOLD. The remediation now makes
+the parser wait asynchronous and cancellation-safe, rejects mismatched physical
+SHP/SHX/DBF streams, validates sidecar source-manifest consistency, pins Debian
+package resolution, reduces overlapping resource ceilings, runs its real parser
+canary once at startup, and makes the canonical deployment stop the converter on
+candidate failure. This is implementation status, not independent acceptance;
+the package and #656 remain open pending exact-image evidence and re-review.
 
 ## Context and Orientation
 
@@ -693,7 +718,7 @@ validate the service-local Rust parser:
 Run the new cross-boundary WEPPpy tests from `/workdir/wepppy`:
 
     wctl run-pytest tests/shape_converter/unit/test_rust_parser_cli.py tests/shape_converter/unit/test_parser_ipc.py --maxfail=1
-    wctl run-pytest tests/shape_converter/integration/test_rust_parser_semantics.py tests/shape_converter/integration/test_parser_ipc_semantics.py --maxfail=1
+    wctl run-pytest tests/shape_converter/integration/test_parser_ipc_semantics.py --maxfail=1
     wctl run-pytest tests/docker/unit/test_project_config_rollout_contract.py --maxfail=1
 
 Source and hygiene checks:
@@ -836,3 +861,9 @@ Revision note (2026-11-14, M4 implementation): implemented the CLI and adjacent
 JSON provenance sidecar, removed the Fiona worker/runtime, proved resource and
 semantic behavior, patched the final image's fixed zlib build, and retained exact
 SBOM/scan evidence. Independent signoff and rollout remain outside local proof.
+
+Revision note (2026-11-14, M6 remediation): recorded the operator's explicit
+fail-closed availability decision and implemented asynchronous cancellation,
+record cardinality checks, startup-cached readiness, reproducible provenance,
+aggregate resource limits, and deployment takedown behavior. Exact candidate
+evidence and independent re-review remain required.

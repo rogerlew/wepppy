@@ -1,10 +1,10 @@
 use serde::Serialize;
 use serde_json::{Number, Value, json};
 use shapefile::{Patch, Point, PointM, PointZ, PolygonRing, Shape};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs::{self, File, OpenOptions};
-use std::io::{self, BufWriter, Read, Write};
+use std::io::{self, BufWriter, Read, Seek, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -226,7 +226,7 @@ fn validate_paths_and_sizes(config: &Config) -> Result<(), AppError> {
 
     validate_main_file_header(&config.shp_path)?;
     validate_main_file_header(&config.shp_path.with_extension("shx"))?;
-    validate_record_counts(config)?;
+    validate_record_alignment(config)?;
     Ok(())
 }
 
@@ -251,25 +251,73 @@ fn validate_main_file_header(path: &Path) -> Result<(), AppError> {
     Ok(())
 }
 
-fn validate_record_counts(config: &Config) -> Result<(), AppError> {
-    let shx_len = fs::metadata(config.shp_path.with_extension("shx"))
-        .map_err(|_| AppError::Parse)?
-        .len();
-    if shx_len < 100 || (shx_len - 100) % 8 != 0 {
+fn validate_record_alignment(config: &Config) -> Result<(), AppError> {
+    let mut shp = File::open(&config.shp_path).map_err(|_| AppError::Parse)?;
+    let shp_len = shp.metadata().map_err(|_| AppError::Parse)?.len();
+    let mut shp_offset = 100_u64;
+    let mut records = Vec::new();
+    while shp_offset < shp_len {
+        shp.seek(io::SeekFrom::Start(shp_offset))
+            .map_err(|_| AppError::Parse)?;
+        let mut header = [0_u8; 8];
+        shp.read_exact(&mut header).map_err(|_| AppError::Parse)?;
+        let record_number =
+            u32::from_be_bytes(header[0..4].try_into().map_err(|_| AppError::Parse)?);
+        let content_words =
+            u32::from_be_bytes(header[4..8].try_into().map_err(|_| AppError::Parse)?);
+        let expected_number = u32::try_from(records.len() + 1).map_err(|_| AppError::Parse)?;
+        let content_bytes = u64::from(content_words)
+            .checked_mul(2)
+            .ok_or(AppError::Parse)?;
+        if record_number != expected_number || content_bytes < 4 {
+            return Err(AppError::Parse);
+        }
+        let next_offset = shp_offset
+            .checked_add(8)
+            .and_then(|value| value.checked_add(content_bytes))
+            .ok_or(AppError::Parse)?;
+        if next_offset > shp_len {
+            return Err(AppError::Parse);
+        }
+        records.push((shp_offset / 2, u64::from(content_words)));
+        shp_offset = next_offset;
+    }
+    if shp_offset != shp_len || records.len() > config.max_features {
+        return Err(if records.len() > config.max_features {
+            AppError::FeatureLimit
+        } else {
+            AppError::Parse
+        });
+    }
+
+    let mut shx = File::open(config.shp_path.with_extension("shx")).map_err(|_| AppError::Parse)?;
+    shx.seek(io::SeekFrom::Start(100))
+        .map_err(|_| AppError::Parse)?;
+    for (expected_offset, expected_content_words) in &records {
+        let mut entry = [0_u8; 8];
+        shx.read_exact(&mut entry).map_err(|_| AppError::Parse)?;
+        let offset = u64::from(u32::from_be_bytes(
+            entry[0..4].try_into().map_err(|_| AppError::Parse)?,
+        ));
+        let content_words = u64::from(u32::from_be_bytes(
+            entry[4..8].try_into().map_err(|_| AppError::Parse)?,
+        ));
+        if offset != *expected_offset || content_words != *expected_content_words {
+            return Err(AppError::Parse);
+        }
+    }
+    let mut trailing = [0_u8; 1];
+    if shx.read(&mut trailing).map_err(|_| AppError::Parse)? != 0 {
         return Err(AppError::Parse);
     }
-    let shape_count = (shx_len - 100) / 8;
 
     let mut dbf = File::open(config.shp_path.with_extension("dbf")).map_err(|_| AppError::Parse)?;
     let mut header = [0_u8; 8];
     dbf.read_exact(&mut header).map_err(|_| AppError::Parse)?;
     let record_count =
         u32::from_le_bytes(header[4..8].try_into().map_err(|_| AppError::Parse)?) as u64;
-    if shape_count != record_count {
+    if records.len() as u64 != record_count {
         return Err(AppError::Parse);
-    }
-    if shape_count > config.max_features as u64 {
-        return Err(AppError::FeatureLimit);
     }
     Ok(())
 }
@@ -321,7 +369,8 @@ fn parse_dataset(config: &Config) -> Result<ParserPayload, AppError> {
 
     let dbf_records = read_dbf_records(config)?;
     let mut shape_count = 0_usize;
-    for (item, record) in reader.iter_shapes().zip(dbf_records) {
+    for (index, item) in reader.iter_shapes().enumerate() {
+        let record = dbf_records.get(index).ok_or(AppError::Parse)?;
         shape_count += 1;
         let shape = item.map_err(|_| AppError::Parse)?;
         if record.deleted {
@@ -334,9 +383,9 @@ fn parse_dataset(config: &Config) -> Result<ParserPayload, AppError> {
             return Err(AppError::VertexLimit);
         }
         geometries.push(shape_to_json(shape)?);
-        properties.push(record.properties);
+        properties.push(record.properties.clone());
     }
-    if shape_count != record_count_from_shx(&config.shp_path)? {
+    if shape_count != dbf_records.len() || shape_count != record_count_from_shx(&config.shp_path)? {
         return Err(AppError::Parse);
     }
 
@@ -409,6 +458,7 @@ fn read_dbf_records(config: &Config) -> Result<Vec<DbfRecord>, AppError> {
         return Err(AppError::Parse);
     }
     let mut fields = Vec::with_capacity(terminator / 32);
+    let mut field_names = BTreeSet::new();
     let mut computed_record_len = 1_usize;
     for descriptor in descriptor_bytes[..terminator].chunks_exact(32) {
         let name_end = descriptor[..11]
@@ -419,6 +469,9 @@ fn read_dbf_records(config: &Config) -> Result<Vec<DbfRecord>, AppError> {
             .map_err(|_| AppError::Parse)?
             .trim();
         if name.is_empty() {
+            return Err(AppError::Parse);
+        }
+        if !field_names.insert(name.to_ascii_lowercase()) {
             return Err(AppError::Parse);
         }
         let length = descriptor[16] as usize;
@@ -439,7 +492,7 @@ fn read_dbf_records(config: &Config) -> Result<Vec<DbfRecord>, AppError> {
         return Err(AppError::Parse);
     }
 
-    let encoding = dbf_encoding(&config.shp_path)?;
+    let encoding = dbf_encoding(&config.shp_path, header[29])?;
     let mut records = Vec::new();
     records
         .try_reserve_exact(record_count.min(4096))
@@ -465,13 +518,31 @@ fn read_dbf_records(config: &Config) -> Result<Vec<DbfRecord>, AppError> {
             properties,
         });
     }
+    let mut trailer = [0_u8; 1];
+    match source.read(&mut trailer).map_err(|_| AppError::Parse)? {
+        0 => {}
+        1 if trailer[0] == 0x1a => {
+            if source.read(&mut trailer).map_err(|_| AppError::Parse)? != 0 {
+                return Err(AppError::Parse);
+            }
+        }
+        _ => return Err(AppError::Parse),
+    }
     Ok(records)
 }
 
-fn dbf_encoding(shp_path: &Path) -> Result<&'static encoding_rs::Encoding, AppError> {
+fn dbf_encoding(
+    shp_path: &Path,
+    language_driver: u8,
+) -> Result<&'static encoding_rs::Encoding, AppError> {
     let cpg_path = shp_path.with_extension("cpg");
     if !cpg_path.exists() {
-        return Ok(encoding_rs::WINDOWS_1252);
+        return match language_driver {
+            0x00 | 0x03 | 0x57 => Ok(encoding_rs::WINDOWS_1252),
+            0xc8 => Ok(encoding_rs::WINDOWS_1250),
+            0xc9 => Ok(encoding_rs::WINDOWS_1251),
+            _ => Err(AppError::Parse),
+        };
     }
     let label = fs::read_to_string(cpg_path).map_err(|_| AppError::Parse)?;
     let normalized = label.trim().trim_start_matches('\u{feff}');
@@ -505,9 +576,11 @@ fn dbf_field_value(
         }
         b'N' if field.decimal_count == 0 => {
             let value = std::str::from_utf8(trimmed).map_err(|_| AppError::Parse)?;
-            Ok(Value::Number(
-                value.parse::<i64>().map_err(|_| AppError::Parse)?.into(),
-            ))
+            if let Ok(integer) = value.parse::<i64>() {
+                Ok(Value::Number(integer.into()))
+            } else {
+                number(value.parse::<f64>().map_err(|_| AppError::Parse)?)
+            }
         }
         b'N' | b'F' => {
             let value = std::str::from_utf8(trimmed).map_err(|_| AppError::Parse)?;

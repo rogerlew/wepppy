@@ -328,7 +328,12 @@ async def health_ready(request: Request) -> JSONResponse:
     bootstrapped = bool(getattr(request.app.state, "bootstrapped", False))
     scratch_root = getattr(request.app.state, "scratch_root", _resolve_scratch_root())
     writable, failure_reason = _is_scratch_root_writable(scratch_root)
-    toolchain_ready, toolchain_failure_reason = _is_toolchain_available()
+    parser_ready = bool(getattr(request.app.state, "startup_parser_ready", False))
+    parser_failure_reason = getattr(
+        request.app.state,
+        "startup_parser_failure_reason",
+        "parser_startup_canary_not_run",
+    )
 
     if not bootstrapped:
         return JSONResponse(
@@ -337,17 +342,6 @@ async def health_ready(request: Request) -> JSONResponse:
                 "scope": SERVICE_SCOPE,
                 "check": "ready",
                 "reason": "service_not_bootstrapped",
-            },
-            status_code=503,
-        )
-
-    if not toolchain_ready:
-        return JSONResponse(
-            {
-                "status": "not_ready",
-                "scope": SERVICE_SCOPE,
-                "check": "ready",
-                "reason": toolchain_failure_reason,
             },
             status_code=503,
         )
@@ -364,7 +358,6 @@ async def health_ready(request: Request) -> JSONResponse:
             status_code=503,
         )
 
-    parser_ready, parser_failure_reason = probe_parser_runtime(scratch_root)
     if not parser_ready:
         return JSONResponse(
             {
@@ -383,7 +376,7 @@ async def health_ready(request: Request) -> JSONResponse:
             "check": "ready",
             "scratch_root": str(scratch_root),
             "parser": "shape_parser_cli",
-            "provenance": "verified",
+            "provenance": "binary_binding_verified",
         }
     )
 
@@ -919,6 +912,19 @@ async def convert_metadata(request: Request) -> JSONResponse:
 @asynccontextmanager
 async def app_lifespan(app: Starlette):
     app.state.scratch_root = _resolve_scratch_root()
+    app.state.startup_parser_ready = False
+    app.state.startup_parser_failure_reason = "parser_startup_canary_not_run"
+    writable, scratch_failure_reason = _is_scratch_root_writable(app.state.scratch_root)
+    if not writable:
+        raise RuntimeError(scratch_failure_reason or "shape-converter scratch startup check failed")
+    toolchain_ready, toolchain_failure_reason = _is_toolchain_available()
+    if not toolchain_ready:
+        raise RuntimeError(toolchain_failure_reason or "shape-converter parser provenance check failed")
+    parser_ready, parser_failure_reason = await probe_parser_runtime(app.state.scratch_root)
+    if not parser_ready:
+        raise RuntimeError(parser_failure_reason or "shape-converter parser startup canary failed")
+    app.state.startup_parser_ready = True
+    app.state.startup_parser_failure_reason = None
     app.state.relay_cors_allowed_origins = _resolve_relay_cors_allowed_origins()
     app.state.active_request_scratch_registry = ActiveRequestScratchRegistry()
     app.state.convert_metadata = OrderedDict()
@@ -946,6 +952,7 @@ async def app_lifespan(app: Starlette):
 
         _run_janitor_sweep(app, trigger="shutdown")
         app.state.convert_metadata = {}
+        app.state.startup_parser_ready = False
         app.state.bootstrapped = False
 
 

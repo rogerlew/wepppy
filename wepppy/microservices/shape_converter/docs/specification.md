@@ -178,7 +178,7 @@ extrema. CRS is null or a nonempty WKT string, parsed only after structural chec
 Property/geometry lengths must match and obey the existing feature limit; each
 geometry obeys the existing vertex limit in both worker and parent.
 
-The existing payload byte cap (default 256 MiB) remains authoritative; read at
+The parser payload byte cap (default 16 MiB) remains authoritative; read at
 most cap + 1 bytes and reject oversize/non-regular/symlink payloads. Before JSON
 object allocation, scan for container nesting beyond 16 and more than 2,000,000
 JSON values. Reject duplicate keys, trailing data, invalid UTF-8, non-finite
@@ -290,7 +290,9 @@ the immutable image digest remains the authenticity boundary.
   - `no-new-privileges`.
   - Drop all Linux capabilities except explicit minimum.
   - Seccomp/AppArmor (or SELinux) enabled.
-  - Disable outbound network by default.
+  - Attach the service only to its dedicated internal Compose network so neither
+    the API nor its Rust child has outbound routing. The child shares the
+    container network namespace; this is not a separate network sandbox.
   - Parse hostile Shapefile bytes only through the standalone Rust CLI with hard
     timeout, process-group termination, and explicit per-process resource limits.
   - Treat parser-worker output as untrusted. Exchange data only through a
@@ -303,7 +305,7 @@ the immutable image digest remains the authenticity boundary.
   - Request timeout: 30s metadata scan, 120s conversion hard timeout.
   - Max ZIP upload size: 100 MB.
   - Edge proxy body cap must include multipart overhead headroom above the ZIP limit so canonical app quota errors remain observable (current WEPP1 policy: 120 MB edge cap for 100 MB ZIP quota).
-  - Max total uncompressed bytes: 600 MB.
+  - Max total uncompressed bytes: 128 MiB.
   - Max member count: 200.
   - Max features: 1,000,000.
   - Max vertices per feature: configurable guardrail (start 250,000).
@@ -377,9 +379,12 @@ handle_path /utils/shape-converter/* {
 
 #### Health and lifecycle
 - `GET /utils/shape-converter/health/live` for liveness.
-- `GET /utils/shape-converter/health/ready` for readiness checks scratch
-  writability, the exact `shape_parser_cli` identity, configured resource limits,
-  a real bounded fixture parse, strict JSON validation, and cleanup.
+- Startup checks scratch writability, the exact `shape_parser_cli` identity,
+  configured resource limits, a real bounded fixture parse, strict JSON
+  validation, and cleanup. Startup fails if any check fails.
+- `GET /utils/shape-converter/health/ready` reports the cached successful startup
+  parser check plus a cheap current scratch check. Public readiness requests do
+  not launch attacker-triggerable parser processes.
 - The transitional `SHAPE_CONVERTER_SANDBOX_MODE` and
   `SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE` equality check is not evidence of
   containment and must not be the final production readiness basis.
@@ -669,10 +674,13 @@ Error response contract:
     each release. Record the exact Cargo lock and binary build provenance.
   - Maintain explicit timeout/kill and resource-limit behavior for parser panic,
     non-termination, allocation, file, and output exhaustion classes.
-  - Treat `/vsizip/` as an implementation detail, not a security boundary; archive and contained parser risks still require full validation/sandbox controls.
+  - Treat archive extraction and parser process separation as implementation
+    details, not security boundaries; archive and parser inputs still require
+    full validation and resource controls.
   - Maintain metadata-privacy policy that forbids exposing raw `.shp.xml` content in API payloads, logs, or warnings (only advisory removal notices are allowed).
   - Retain the dedicated low-privilege identity, restricted filesystem, bounded
-    CPU/memory/files/output, and disabled network for the Rust CLI. GDAL-specific
+    CPU/memory/files/output, and internal network for the container. The Rust CLI
+    inherits those authorities and is not a second sandbox. GDAL-specific
     driver/plugin restrictions apply only to the transitional parity oracle.
 
 ## Test Plan
@@ -737,8 +745,11 @@ Error response contract:
 - When `.qmd` is included, it is sanitized via immediate unlink and never parsed or surfaced in API metadata.
 - No uploaded or generated artifacts persist after each request terminal response (verified by tests).
 - Service runs in its own hardened container and is reachable through Caddy.
-- Production uses the required second parser sandbox; readiness evidence is
-  derived from the effective runtime, not only matching environment strings.
+- Production contains no GDAL/Fiona or PyO3 parser fallback. It uses only the
+  bounded Rust CLI and fails startup when executable provenance or its real
+  parser canary fails. If deployment cannot establish that state, deployment
+  stops shape-converter and verifies that it is not running; it does not restore
+  an older parser implementation.
 - CI/security validation proves container hardening and runtime abuse controls are active.
 
 ## Source Notes

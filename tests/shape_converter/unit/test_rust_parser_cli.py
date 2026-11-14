@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import importlib
 import json
 import struct
@@ -91,6 +92,34 @@ def _two_point_dataset() -> dict[str, bytes]:
     return {"points.shp": bytes(shp), "points.shx": bytes(shx), "points.dbf": bytes(dbf)}
 
 
+def _dbf_bytes(
+    fields: list[tuple[str, str, int, int, bytes]],
+    *,
+    language_driver: int = 0,
+    deleted: bool = False,
+) -> bytes:
+    header_length = 32 + 32 * len(fields) + 1
+    record_length = 1 + sum(field[2] for field in fields)
+    header = bytearray(32)
+    header[0] = 0x03
+    struct.pack_into("<I", header, 4, 1)
+    struct.pack_into("<H", header, 8, header_length)
+    struct.pack_into("<H", header, 10, record_length)
+    header[29] = language_driver
+    descriptors = bytearray()
+    record = bytearray(b"*" if deleted else b" ")
+    for name, kind, length, decimal_count, value in fields:
+        descriptor = bytearray(32)
+        encoded_name = name.encode("ascii")[:10]
+        descriptor[: len(encoded_name)] = encoded_name
+        descriptor[11] = ord(kind)
+        descriptor[16] = length
+        descriptor[17] = decimal_count
+        descriptors.extend(descriptor)
+        record.extend(value[:length].ljust(length, b" "))
+    return bytes(header + descriptors + b"\r" + record + b"\x1a")
+
+
 @pytest.mark.parametrize(
     ("entries", "expected_type", "expected_name", "expected_bounds"),
     [
@@ -122,10 +151,12 @@ def test_rust_cli_parses_valid_geometry_families(
     shp_path = _write_dataset(tmp_path, entries)
     output_path = tmp_path / "payload.json"
 
-    convert._run_parser_worker(
-        shp_path=shp_path,
-        output_path=output_path,
-        scratch=SimpleNamespace(request_dir=tmp_path),
+    asyncio.run(
+        convert._run_parser_worker(
+            shp_path=shp_path,
+            output_path=output_path,
+            scratch=SimpleNamespace(request_dir=tmp_path),
+        )
     )
 
     payload = json.loads(output_path.read_text(encoding="utf-8"))
@@ -142,10 +173,12 @@ def test_rust_cli_rejects_disguised_non_shapefile(tmp_path: Path) -> None:
     (tmp_path / "disguised.dbf").write_bytes(b"not-a-dbf")
 
     with pytest.raises(ShapeConverterError) as error:
-        convert._run_parser_worker(
-            shp_path=tmp_path / "disguised.shp",
-            output_path=tmp_path / "payload.json",
-            scratch=SimpleNamespace(request_dir=tmp_path),
+        asyncio.run(
+            convert._run_parser_worker(
+                shp_path=tmp_path / "disguised.shp",
+                output_path=tmp_path / "payload.json",
+                scratch=SimpleNamespace(request_dir=tmp_path),
+            )
         )
 
     assert error.value.code == "invalid_shapefile"
@@ -177,10 +210,12 @@ def test_rust_cli_enforces_vertex_limit(
     monkeypatch.setattr(convert, "_MAX_VERTICES_PER_FEATURE", 1)
 
     with pytest.raises(ShapeConverterError) as error:
-        convert._run_parser_worker(
-            shp_path=shp_path,
-            output_path=tmp_path / "payload.json",
-            scratch=SimpleNamespace(request_dir=tmp_path),
+        asyncio.run(
+            convert._run_parser_worker(
+                shp_path=shp_path,
+                output_path=tmp_path / "payload.json",
+                scratch=SimpleNamespace(request_dir=tmp_path),
+            )
         )
 
     assert error.value.code == "archive_quota_exceeded"
@@ -220,6 +255,124 @@ def test_rust_cli_feature_limit_has_dedicated_exit_and_no_output(tmp_path: Path)
 
     assert result.returncode == 4
     assert not output_path.exists()
+
+
+def test_rust_cli_rejects_extra_shp_record_not_indexed_by_shx_or_dbf(tmp_path: Path) -> None:
+    entries = build_minimal_point_dataset(prefix="misaligned")
+    shp = bytearray(entries["misaligned.shp"])
+    extra_record = bytearray(shp[100:])
+    struct.pack_into(">I", extra_record, 0, 2)
+    shp.extend(extra_record)
+    struct.pack_into(">I", shp, 24, len(shp) // 2)
+    entries["misaligned.shp"] = bytes(shp)
+    shp_path = _write_dataset(tmp_path, entries)
+
+    result = _run_cli(tmp_path, shp_path, tmp_path / "payload.json")
+
+    assert result.returncode == 1
+    assert not (tmp_path / "payload.json").exists()
+
+
+def test_rust_cli_rejects_shx_offset_mismatch(tmp_path: Path) -> None:
+    entries = build_minimal_point_dataset(prefix="bad-index")
+    shx = bytearray(entries["bad-index.shx"])
+    struct.pack_into(">I", shx, 100, 51)
+    entries["bad-index.shx"] = bytes(shx)
+    shp_path = _write_dataset(tmp_path, entries)
+
+    result = _run_cli(tmp_path, shp_path, tmp_path / "payload.json")
+
+    assert result.returncode == 1
+    assert not (tmp_path / "payload.json").exists()
+
+
+def test_rust_cli_rejects_duplicate_dbf_field_names(tmp_path: Path) -> None:
+    entries = build_minimal_point_dataset(prefix="duplicates")
+    entries["duplicates.dbf"] = _dbf_bytes(
+        [("NAME", "C", 5, 0, b"first"), ("name", "C", 6, 0, b"second")]
+    )
+    shp_path = _write_dataset(tmp_path, entries)
+
+    result = _run_cli(tmp_path, shp_path, tmp_path / "payload.json")
+
+    assert result.returncode == 1
+    assert not (tmp_path / "payload.json").exists()
+
+
+def test_rust_cli_preserves_wide_integral_dbf_as_finite_number(tmp_path: Path) -> None:
+    entries = build_minimal_point_dataset(prefix="wide-number")
+    entries["wide-number.dbf"] = _dbf_bytes(
+        [("VALUE", "N", 20, 0, b"12345678901234567890")]
+    )
+    shp_path = _write_dataset(tmp_path, entries)
+    output_path = tmp_path / "payload.json"
+
+    result = _run_cli(tmp_path, shp_path, output_path)
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(output_path.read_text(encoding="utf-8"))["properties"] == [
+        {"VALUE": 1.2345678901234567e19}
+    ]
+
+
+def test_rust_cli_handles_deleted_dbf_record_without_misalignment(tmp_path: Path) -> None:
+    entries = build_minimal_point_dataset(prefix="deleted")
+    entries["deleted.dbf"] = _dbf_bytes(
+        [("NAME", "C", 10, 0, b"deleted")],
+        deleted=True,
+    )
+    shp_path = _write_dataset(tmp_path, entries)
+    output_path = tmp_path / "payload.json"
+
+    result = _run_cli(tmp_path, shp_path, output_path)
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["properties"] == []
+    assert payload["geometries"] == []
+
+
+def test_rust_cli_rejects_unsupported_dbf_language_driver(tmp_path: Path) -> None:
+    entries = build_minimal_point_dataset(prefix="unsupported-ldid")
+    dbf = bytearray(entries["unsupported-ldid.dbf"])
+    dbf[29] = 0x01
+    entries["unsupported-ldid.dbf"] = bytes(dbf)
+    shp_path = _write_dataset(tmp_path, entries)
+
+    result = _run_cli(tmp_path, shp_path, tmp_path / "payload.json")
+
+    assert result.returncode == 1
+
+
+def test_rust_cli_rejects_paths_outside_request_root(tmp_path: Path) -> None:
+    request_root = tmp_path / "request"
+    request_root.mkdir()
+    dataset_root = tmp_path / "outside"
+    dataset_root.mkdir()
+    shp_path = _write_dataset(dataset_root, build_minimal_point_dataset(prefix="outside"))
+
+    outside_input = _run_cli(request_root, shp_path, request_root / "payload.json")
+    escaping_output = _run_cli(
+        dataset_root,
+        shp_path,
+        tmp_path / "escaping-payload.json",
+    )
+
+    assert outside_input.returncode == 2
+    assert escaping_output.returncode == 2
+
+
+def test_rust_cli_rejects_symlinked_required_sidecar(tmp_path: Path) -> None:
+    entries = build_minimal_point_dataset(prefix="linked")
+    shp_path = _write_dataset(tmp_path, entries)
+    real_dbf = tmp_path / "real.dbf"
+    (tmp_path / "linked.dbf").replace(real_dbf)
+    (tmp_path / "linked.dbf").symlink_to(real_dbf)
+
+    result = _run_cli(tmp_path, shp_path, tmp_path / "payload.json")
+
+    assert result.returncode == 1
+    assert not (tmp_path / "payload.json").exists()
 
 
 def test_rust_cli_rejects_bounded_malformed_binary_corpus(tmp_path: Path) -> None:
@@ -279,18 +432,20 @@ def test_rust_cli_command_receives_every_resource_limit(
         pid = 123
         returncode = 0
 
-        def communicate(self, timeout=None):  # noqa: ANN001
-            return "", ""
+        async def wait(self):
+            return self.returncode
 
-    def fake_popen(command, **_kwargs):  # noqa: ANN001
+    async def fake_exec(*command, **_kwargs):  # noqa: ANN001
         captured_command.extend(command)
         return Process()
 
-    monkeypatch.setattr(convert.subprocess, "Popen", fake_popen)
-    convert._run_parser_worker(
-        shp_path=tmp_path / "sample.shp",
-        output_path=tmp_path / "payload.json",
-        scratch=SimpleNamespace(request_dir=tmp_path),
+    monkeypatch.setattr(convert.asyncio, "create_subprocess_exec", fake_exec)
+    asyncio.run(
+        convert._run_parser_worker(
+            shp_path=tmp_path / "sample.shp",
+            output_path=tmp_path / "payload.json",
+            scratch=SimpleNamespace(request_dir=tmp_path),
+        )
     )
 
     for flag in (
@@ -304,6 +459,54 @@ def test_rust_cli_command_receives_every_resource_limit(
         "--max-open-files",
     ):
         assert flag in captured_command
+
+
+def test_parser_cancellation_terminates_real_process_group(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    parser = tmp_path / "blocking-parser"
+    parser.write_text(
+        "#!/bin/sh\nsleep 60 &\nchild=$!\nprintf '%s %s\\n' $$ \"$child\" > parser-pids\nwait\n",
+        encoding="utf-8",
+    )
+    parser.chmod(0o755)
+    monkeypatch.setenv("SHAPE_CONVERTER_PARSER_CLI", str(parser))
+
+    async def _exercise() -> tuple[int, int]:
+        task = asyncio.create_task(
+            convert._run_parser_worker(
+                shp_path=tmp_path / "sample.shp",
+                output_path=tmp_path / "payload.json",
+                scratch=SimpleNamespace(request_dir=tmp_path),
+            )
+        )
+        pid_file = tmp_path / "parser-pids"
+        for _ in range(100):
+            if pid_file.exists():
+                break
+            await asyncio.sleep(0.01)
+        assert pid_file.exists()
+        parent_pid, child_pid = (int(value) for value in pid_file.read_text().split())
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+        return parent_pid, child_pid
+
+    parent_pid, child_pid = asyncio.run(_exercise())
+
+    def _running(pid: int) -> bool:
+        stat_path = Path(f"/proc/{pid}/stat")
+        try:
+            state = stat_path.read_text(encoding="utf-8").split()[2]
+        except (FileNotFoundError, ProcessLookupError):
+            return False
+        return state != "Z"
+
+    assert not _running(parent_pid)
+    assert not _running(child_pid)
+    assert not (tmp_path / "payload.json").exists()
+    assert not list(tmp_path.glob("payload.tmp.*"))
 
 
 def test_executable_provenance_sidecar_binds_binary_and_rejects_tampering(
@@ -358,6 +561,22 @@ def test_executable_provenance_sidecar_binds_binary_and_rejects_tampering(
     )
     assert valid.returncode == 0, valid.stderr
     assert validate_parser_executable(binary) == (True, None)
+
+    tampered_sidecar = dict(payload)
+    tampered_source = dict(payload["source"])
+    tampered_source["manifest_sha256"] = "0" * 64
+    tampered_sidecar["source"] = tampered_source
+    sidecar.write_text(json.dumps(tampered_sidecar), encoding="utf-8")
+    invalid_manifest = subprocess.run(
+        [sys.executable, str(validator), "--binary", str(binary), "--sidecar", str(sidecar)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert invalid_manifest.returncode != 0
+    assert "manifest digest mismatch" in invalid_manifest.stderr
+    assert validate_parser_executable(binary) == (False, "parser_provenance_contract_invalid")
+    sidecar.write_text(json.dumps(payload), encoding="utf-8")
 
     binary.write_bytes(binary.read_bytes() + b"tampered")
     invalid = subprocess.run(

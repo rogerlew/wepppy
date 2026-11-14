@@ -4,7 +4,7 @@ Completed locally: [Safe traceback and exceptional-path secret sanitization](doc
 
 Completed on forest: [Status and preflight WebSocket run authorization](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md) - Ratified run-bound credentials, full regression, five-service cutover and 27 real-browser assertions verified; NFS cleanup recovery retained. Production rollout remains pending separate authorization.
 
-Rust CLI implementation locally validated; independent review failed: [Shape-converter security conformance closure](docs/work-packages/20261113_shape_converter_security_conformance/package.md) - High parser-boundary remediation for executable worker IPC (#655), GDAL/Fiona replacement and bounded execution (#656), and related archive/driver/semantic gaps. Strict JSON IPC, the service-local Rust CLI, executable provenance sidecar, OS/resource limits, runtime-derived readiness, and a no-GDAL/Fiona image are implemented. Independent review reproduced cancellation, record-alignment, aggregate-memory, deploy-readiness/rollback, provenance, and coverage gaps. Remediation and re-review remain open; no deployment.
+Rust CLI remediation implemented; exact-image requalification pending: [Shape-converter security conformance closure](docs/work-packages/20261113_shape_converter_security_conformance/package.md) - High parser-boundary remediation for executable worker IPC (#655), GDAL/Fiona replacement and bounded execution (#656), and related archive/driver/semantic gaps. The failed independent review findings now have implementation repairs for cancellation, record alignment, aggregate memory, deploy readiness/takedown, provenance, and focused coverage. If the candidate cannot pass its security/readiness gates, deployment leaves the converter stopped with no parser fallback. Requalification and independent re-review remain open; no deployment.
 
 Implemented; runtime acceptance blocked: [Test-support production guardrails and F1-F7 readiness](docs/work-packages/20261111_test_support_production_guardrails/package.md) - F7 defaults the runtime profile to production, excludes support routes from production, and reuses short-lived WEPP_AUTH credentials through automatic wctl/Playwright injection. No smoke markers or new static secret. Closure requires F6 M4, one combined F1-F7 regression receipt, and a reviewed non-executed deployment-validation plan.
 
@@ -865,9 +865,11 @@ When resuming Kubernetes work:
 **Link**: [docs/work-packages/20261113_shape_converter_security_conformance/](docs/work-packages/20261113_shape_converter_security_conformance/)
 
 **Scope**: Replace executable parser-worker pickle with bounded data-only IPC,
-enforce exact Shapefile driver identity, close archive/dataset/semantic gaps, run
-native parsing in an effective second sandbox, and isolate the service in its
-operator-approved dedicated GDAL image. The common WEPPpy image remains unchanged.
+enforce exact Shapefile identity, close archive/dataset/semantic gaps, and replace
+production GDAL/Fiona parsing with a short-lived service-local Rust CLI under direct
+time, memory, CPU, file, output, feature, vertex, and IPC limits. The CLI remains
+in the existing hardened container; it is not represented as arbitrary-code
+containment. The common WEPPpy image remains unchanged.
 
 **Status**: Operator-approved independent slice implements bounded JSON IPC,
 exact-driver enforcement, normalized alias rejection, and extra-prefix rejection.
@@ -877,10 +879,12 @@ dedicated GDAL 3.12.4/Fiona 1.10.1 image
 has qualified build/dependency evidence. Exact two-worker QA exposed process-local
 abuse controls and conversion metadata; the operator-approved one-worker command
 now passes exact-image limiter, metadata, conversion, and cleanup requalification.
-Independent correctness, QA, and security image reviews pass. The effective
-second parser sandbox, durable full-scan provenance, broader semantics,
-compression policy, and deployment remain gated. Issues #655/#656 remain open;
-no production deployment occurred.
+The first full M6 independent review failed. Remediation now provides asynchronous
+cancellation-safe execution, exact SHP/SHX/DBF cardinality checks, a conservative
+aggregate resource envelope, startup-cached real-parser readiness, stronger
+provenance/reproducibility checks, and canonical deploy-time takedown on candidate
+failure. Exact-image requalification and independent re-review remain gated.
+#655 is closed; #656 remains open. No production deployment occurred.
 
 
 ### Test-Support Production Guardrails and F1-F7 Readiness

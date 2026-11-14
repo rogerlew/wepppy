@@ -14,6 +14,43 @@ PROVENANCE_SCHEMA = "shape-parser-binary-provenance-v1"
 _MAX_SIDECAR_BYTES = 1024 * 1024
 
 
+def _manifest_sha256(manifest: list[object]) -> str:
+    canonical = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def _valid_source_manifest(source_data: dict[str, object], build_data: dict[str, object]) -> bool:
+    files = source_data.get("files")
+    if not isinstance(files, list) or not files:
+        return False
+    seen: set[str] = set()
+    cargo_lock_digest: str | None = None
+    for item in files:
+        if not isinstance(item, dict):
+            return False
+        path = item.get("path")
+        digest = item.get("sha256")
+        size = item.get("size_bytes")
+        if (
+            not isinstance(path, str)
+            or not path
+            or path in seen
+            or not isinstance(digest, str)
+            or len(digest) != 64
+            or not isinstance(size, int)
+            or size < 0
+        ):
+            return False
+        seen.add(path)
+        if path == "Cargo.lock":
+            cargo_lock_digest = digest
+    return (
+        source_data.get("manifest_sha256") == _manifest_sha256(files)
+        and cargo_lock_digest is not None
+        and build_data.get("cargo_lock_sha256") == cargo_lock_digest
+    )
+
+
 def validate_parser_executable(binary: Path) -> tuple[bool, str | None]:
     sidecar = Path(f"{binary}.json")
     try:
@@ -51,9 +88,7 @@ def validate_parser_executable(binary: Path) -> tuple[bool, str | None]:
     if (
         binary_data.get("name") != binary.name
         or binary_data.get("size_bytes") != binary_stat.st_size
-        or not isinstance(source_data.get("files"), list)
-        or not source_data["files"]
-        or not isinstance(build_data.get("cargo_lock_sha256"), str)
+        or not _valid_source_manifest(source_data, build_data)
     ):
         return False, "parser_provenance_contract_invalid"
 

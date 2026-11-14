@@ -12,6 +12,11 @@ from pathlib import Path
 SCHEMA = "shape-parser-binary-provenance-v1"
 
 
+def _manifest_sha256(manifest: list[object]) -> str:
+    canonical = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(canonical).hexdigest()
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -38,8 +43,14 @@ def validate(binary: Path, sidecar: Path) -> dict[str, object]:
     files = source_data.get("files")
     if not isinstance(files, list) or not files:
         raise ValueError("source manifest missing")
-    if not isinstance(build_data.get("cargo_lock_sha256"), str):
-        raise ValueError("Cargo lock provenance missing")
+    cargo_lock = next(
+        (item for item in files if isinstance(item, dict) and item.get("path") == "Cargo.lock"),
+        None,
+    )
+    if source_data.get("manifest_sha256") != _manifest_sha256(files):
+        raise ValueError("source manifest digest mismatch")
+    if not isinstance(cargo_lock, dict) or build_data.get("cargo_lock_sha256") != cargo_lock.get("sha256"):
+        raise ValueError("Cargo lock provenance mismatch")
     return payload
 
 

@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 19:28 UTC (independent review failed)
-**Current phase**: M6 independent-review remediation
+**Last updated**: 2026-11-14 (M6 remediation implemented; requalification pending)
+**Current phase**: M6 exact-image requalification
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
@@ -56,6 +56,10 @@ pre-cutover oracle
       reviews of `fe5ac7c1c`.
 - [ ] M6: remediate and independently re-review the retained findings; current
       verdict is FAIL/HOLD.
+- [x] M6 remediation implementation: asynchronous cancellation-safe parser
+      execution, exact SHP/SHX/DBF cardinality, startup canary, strengthened
+      provenance/reproducibility, bounded aggregate resource envelope, and
+      deploy-time fail-closed service takedown.
 - [x] Close #655 after its strict data-only IPC acceptance passed; comment on
       #656 with final local evidence and keep it open for independent residual-
       risk acceptance.
@@ -85,6 +89,12 @@ pre-cutover oracle
   High, or Critical candidate finding requires remediation or explicit operator
   risk acceptance before rollout.
 - Production rollout is out of scope until separately authorized.
+- If build, activation, provenance, startup, or post-activation readiness cannot
+  establish the approved parser state, the canonical deployment stops
+  `shape-converter` and verifies it is not running. It must not restore
+  GDAL/Fiona, PyO3, or another unreviewed parser fallback. This operator decision
+  favors converter unavailability over an insecure service and does not affect
+  other services.
 - Validation is change-scoped by operator direction. Do not run or claim the full
   repository suite; list every focused module and boundary probe that ran.
 
@@ -176,6 +186,15 @@ pre-cutover oracle
   semantic/resource coverage, and a qualified image not provenance-identical to
   the committed source. #656 remains open; no rollout is authorized.
 
+- 2026-11-14: operator directed that an unsecurable converter be taken down.
+  Remediation now uses asynchronous subprocess cancellation and descendant
+  termination, validates complete SHP/SHX/DBF streams, tightens the aggregate
+  resource envelope, validates provenance internals, runs the real parser canary
+  during startup, and makes the canonical deploy path stop and verify the
+  converter is down after candidate failure. Focused tests pass except where
+  noted in current execution evidence; exact-image qualification and independent
+  re-review are still required.
+
 ## Handoff
 
 M4 implementation and local validation are complete but independent M6 review
@@ -184,8 +203,8 @@ failed. See the
 and final Rust-CLI evidence/review artifacts. No production deployment occurred;
 do not infer approval for privileges, a parser service, or topology changes.
 
-Next checkpoint: remediate the independent findings, rebuild from the committed
-tree, repeat exact-image qualification, and obtain independent re-review before
+Next checkpoint: commit the remediation, rebuild from that committed tree,
+repeat exact-image qualification, and obtain independent re-review before
 updating #656.
 Complete Syft/Grype JSON is retained in package artifacts, and the exact image
 proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.

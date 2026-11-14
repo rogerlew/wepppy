@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import importlib
 import json
-import subprocess
 
 import pytest
 
@@ -385,26 +384,23 @@ def test_convert_parser_subprocess_timeout_returns_canonical_timeout_and_cleans_
         pid = 44001
         returncode = None
 
-        def __init__(self):
-            self._communicate_calls = 0
+        async def wait(self):
+            await asyncio.sleep(10)
+            return 0
 
-        def communicate(self, timeout=None):  # noqa: ANN001
-            self._communicate_calls += 1
-            if self._communicate_calls == 1:
-                raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
-            return "", ""
-
-        def poll(self):
-            return None
-
-        def wait(self, timeout=None):  # noqa: ANN001
-            raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
-
-    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", lambda *a, **k: _TimeoutProcess())  # noqa: ANN002, ANN003
-    monkeypatch.setattr(shape_converter_convert_module.os, "killpg", lambda *_args: None)
+    async def _fake_exec(*_args, **_kwargs):
+        return _TimeoutProcess()
 
     with TestClient(create_app()) as client:
         client.app.state.scratch_root = tmp_path
+        monkeypatch.setattr(
+            shape_converter_convert_module.asyncio,
+            "create_subprocess_exec",
+            _fake_exec,
+        )
+        monkeypatch.setattr(shape_converter_convert_module.os, "killpg", lambda *_args: None)
+        monkeypatch.setattr(shape_converter_convert_module, "_PARSER_SUBPROCESS_TIMEOUT_SECONDS", 0.01)
+        monkeypatch.setattr(shape_converter_convert_module, "_PARSER_SUBPROCESS_KILL_GRACE_SECONDS", 0.01)
         response = client.post(
             "/v1/convert",
             files={"archive": ("timeout-subprocess.zip", archive_bytes, "application/zip")},
