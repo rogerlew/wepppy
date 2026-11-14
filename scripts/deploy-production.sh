@@ -202,6 +202,8 @@ ensure_shape_converter_build_inputs_clean() {
         git status --porcelain=v1 --untracked-files=all -- \
             .dockerignore \
             docker/Dockerfile.shape-converter \
+            docker/docker-compose.prod.yml \
+            docker/docker-compose.prod.wepp1.yml \
             docker/requirements-shape-converter.txt \
             wepppy/__init__.py \
             wepppy/microservices/__init__.py \

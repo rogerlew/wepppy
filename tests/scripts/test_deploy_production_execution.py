@@ -60,6 +60,7 @@ def _run_deploy(
     shape_readiness_failure: bool = False,
     shape_stop_failure: bool = False,
     shape_build_inputs_clean: bool = True,
+    shape_dirty_build_input: str = "wepppy/microservices/shape_converter/convert.py",
     lock_held: bool = False,
     skip_docker_prune: bool = True,
 ) -> tuple[subprocess.CompletedProcess[str], list[str]]:
@@ -286,7 +287,7 @@ if [ "${1:-}" = "status" ] && [[ "$*" == *"wepppy/microservices/shape_converter"
     if [ "${FAKE_SHAPE_BUILD_INPUTS_CLEAN:-1}" = 1 ]; then
         exit 0
     fi
-    printf ' M wepppy/microservices/shape_converter/convert.py\n'
+    printf ' M %s\n' "${FAKE_SHAPE_DIRTY_BUILD_INPUT}"
     exit 0
 fi
 exec /usr/bin/git "$@"
@@ -413,6 +414,7 @@ exec /bin/cp "$@"
             "FAKE_SHAPE_READINESS_FAILURE": "1" if shape_readiness_failure else "0",
             "FAKE_SHAPE_STOP_FAILURE": "1" if shape_stop_failure else "0",
             "FAKE_SHAPE_BUILD_INPUTS_CLEAN": "1" if shape_build_inputs_clean else "0",
+            "FAKE_SHAPE_DIRTY_BUILD_INPUT": shape_dirty_build_input,
             "FAKE_SHAPE_STOPPED_MARKER": str(tmp_path / "shape-stopped"),
             "CAP_RUNTIME_VALIDATOR": str(cap_validator),
             "CAP_RUNTIME_PREPARER": str(cap_preparer),
@@ -605,6 +607,23 @@ def test_shape_release_build_rejects_dirty_inputs_even_with_skip_pull(tmp_path: 
 
     assert result.returncode != 0
     assert "inputs differ from HEAD" in result.stderr
+    assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_shape_release_build_rejects_dirty_production_compose_with_skip_pull(
+    tmp_path: Path,
+) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        shape_build_inputs_clean=False,
+        shape_dirty_build_input="docker/docker-compose.prod.yml",
+    )
+
+    assert result.returncode != 0
+    assert "docker/docker-compose.prod.yml" in result.stderr
     assert not any("build --no-cache" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert "Deployment complete!" not in result.stdout
