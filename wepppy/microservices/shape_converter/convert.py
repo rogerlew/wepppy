@@ -5,7 +5,6 @@ from __future__ import annotations
 import collections.abc as cabc
 import errno
 import os
-import pickle
 import shutil
 import signal
 import subprocess
@@ -14,7 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from pyproj import CRS
-from shapely.errors import GEOSException
+from pyproj.exceptions import CRSError
+from shapely.errors import EmptyPartError, GEOSException
 from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
 from starlette.datastructures import UploadFile
@@ -35,6 +35,7 @@ from .crs import (
     resolve_target_crs,
 )
 from .errors import ShapeConverterError
+from .parser_ipc import read_payload
 from .inspect import read_dbf_metadata, read_projection_metadata, select_single_shapefile_dataset
 from .serialization import serialize_geojson, serialize_geoparquet
 
@@ -377,7 +378,7 @@ def _scratch_tree_size_bytes(path: Path) -> int:
 
 
 def _load_shapefile(*, shp_path: Path, scratch: RequestScratchLayout) -> LoadedShapefile:
-    parser_output_path = scratch.request_dir / "parser_worker_payload.pickle"
+    parser_output_path = scratch.request_dir / "parser_worker_payload.json"
     worker_stdout, worker_stderr = _run_parser_worker(
         shp_path=shp_path,
         output_path=parser_output_path,
@@ -402,6 +403,7 @@ def _build_parser_worker_env() -> dict[str, str]:
         env_value = os.environ.get(env_var)
         if env_value:
             worker_env[env_var] = env_value
+    worker_env["GDAL_DRIVER_PATH"] = "disable"
     return worker_env
 
 
@@ -423,15 +425,16 @@ def _run_parser_worker(
         str(_MAX_CONVERT_FEATURES),
         "--max-vertices-per-feature",
         str(_MAX_VERTICES_PER_FEATURE),
+        "--max-payload-bytes",
+        str(_MAX_PARSER_PAYLOAD_BYTES),
     ]
     worker_env = _build_parser_worker_env()
 
     try:
         process = subprocess.Popen(
             worker_command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             cwd=scratch.request_dir.as_posix(),
             env=worker_env,
             start_new_session=True,
@@ -446,13 +449,13 @@ def _run_parser_worker(
         ) from exc
 
     try:
-        worker_stdout, worker_stderr = process.communicate(timeout=_PARSER_SUBPROCESS_TIMEOUT_SECONDS)
+        process.communicate(timeout=_PARSER_SUBPROCESS_TIMEOUT_SECONDS)
     except subprocess.TimeoutExpired as exc:
         _terminate_process_group(process)
         try:
-            worker_stdout, worker_stderr = process.communicate(timeout=1)
+            process.communicate(timeout=1)
         except (subprocess.TimeoutExpired, OSError):
-            worker_stdout, worker_stderr = "", ""
+            pass
         raise ShapeConverterError(
             code="request_timeout",
             message="Convert parser exceeded timeout and was terminated.",
@@ -464,28 +467,27 @@ def _run_parser_worker(
         ) from exc
 
     if process.returncode != 0:
-        details = worker_stderr.strip() or worker_stdout.strip() or f"Parser subprocess exited with code {process.returncode}."
-        if details.startswith("vertex_limit_exceeded:"):
+        if process.returncode == 5:
             raise ShapeConverterError(
                 code="archive_quota_exceeded",
                 message="Feature vertex count exceeds configured limit.",
-                details=details,
+                details="vertex_limit_exceeded: configured vertex limit exceeded.",
                 status_code=413,
             )
-        if details.startswith("Feature count exceeded limit"):
+        if process.returncode == 4:
             raise ShapeConverterError(
                 code="archive_quota_exceeded",
                 message="Feature count exceeds configured limit.",
-                details=details,
+                details="Feature count exceeded limit.",
                 status_code=413,
             )
         raise ShapeConverterError(
             code="invalid_shapefile",
             message="Unable to parse shapefile content for conversion.",
-            details=details,
+            details="Parser worker failed to parse the dataset.",
         )
 
-    return worker_stdout, worker_stderr
+    return "", ""
 
 
 def _terminate_process_group(process: subprocess.Popen[str]) -> None:
@@ -525,55 +527,19 @@ def _read_parser_payload(
     worker_stdout: str,
     worker_stderr: str,
 ) -> dict[str, object]:
-    if not payload_path.is_file():
-        details = (
-            worker_stderr.strip()
-            or worker_stdout.strip()
-            or f"Parser subprocess did not emit payload at '{payload_path}'."
-        )
-        raise ShapeConverterError(
-            code="invalid_shapefile",
-            message="Unable to parse shapefile content for conversion.",
-            details=details,
-        )
-
     try:
-        payload_size = payload_path.stat().st_size
-    except OSError as exc:
-        raise ShapeConverterError(
-            code="invalid_shapefile",
-            message="Unable to parse shapefile content for conversion.",
-            details=f"Parser payload stat failed: {exc}",
-        ) from exc
-
-    if payload_size > _MAX_PARSER_PAYLOAD_BYTES:
-        raise ShapeConverterError(
-            code="invalid_shapefile",
-            message="Unable to parse shapefile content for conversion.",
-            details=(
-                f"Parser payload size {payload_size} bytes exceeds limit "
-                f"{_MAX_PARSER_PAYLOAD_BYTES} bytes."
-            ),
+        return read_payload(
+            payload_path,
+            max_bytes=_MAX_PARSER_PAYLOAD_BYTES,
+            max_features=_MAX_CONVERT_FEATURES,
+            max_vertices=_MAX_VERTICES_PER_FEATURE,
         )
-
-    try:
-        with payload_path.open("rb") as handle:
-            payload = pickle.load(handle)
-    except (OSError, pickle.PickleError, EOFError, ValueError, TypeError, AttributeError) as exc:
+    except (OSError, ValueError, TypeError, RecursionError, OverflowError) as exc:
         raise ShapeConverterError(
             code="invalid_shapefile",
             message="Unable to parse shapefile content for conversion.",
-            details=f"Parser payload decode failed: {exc}",
+            details="Parser payload is invalid or exceeds limit.",
         ) from exc
-
-    if not isinstance(payload, dict):
-        raise ShapeConverterError(
-            code="invalid_shapefile",
-            message="Unable to parse shapefile content for conversion.",
-            details="Parser payload was not a mapping.",
-        )
-
-    return payload
 
 
 def _loaded_shapefile_from_payload(payload: dict[str, object]) -> LoadedShapefile:
@@ -601,11 +567,11 @@ def _loaded_shapefile_from_payload(payload: dict[str, object]) -> LoadedShapefil
     elif isinstance(source_crs_wkt, str):
         try:
             source_crs = CRS.from_wkt(source_crs_wkt)
-        except (ValueError, TypeError) as exc:
+        except (CRSError, ValueError, TypeError) as exc:
             raise ShapeConverterError(
                 code="invalid_shapefile",
                 message="Unable to parse shapefile content for conversion.",
-                details=f"Invalid source CRS in parser payload: {exc}",
+                details="Invalid source CRS in parser payload.",
             ) from exc
     else:
         raise ShapeConverterError(
@@ -649,11 +615,11 @@ def _loaded_shapefile_from_payload(payload: dict[str, object]) -> LoadedShapefil
         elif isinstance(geometry_payload, cabc.Mapping):
             try:
                 geometry = shape(dict(geometry_payload))
-            except (GEOSException, ValueError, TypeError) as exc:
+            except (EmptyPartError, GEOSException, IndexError, ValueError, TypeError) as exc:
                 raise ShapeConverterError(
                     code="invalid_shapefile",
                     message="Unable to parse shapefile content for conversion.",
-                    details=f"Invalid geometry at index {index}: {exc}",
+                    details="Invalid geometry in parser payload.",
                 ) from exc
         else:
             raise ShapeConverterError(

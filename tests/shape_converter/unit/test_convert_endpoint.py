@@ -5,7 +5,6 @@ import errno
 import importlib
 import json
 import logging
-import pickle
 import signal
 import subprocess
 from types import SimpleNamespace
@@ -902,7 +901,7 @@ def test_convert_parser_worker_uses_minimal_environment(
 
     worker_stdout, worker_stderr = shape_converter_convert_module._run_parser_worker(
         shp_path=tmp_path / "roads.shp",
-        output_path=tmp_path / "payload.pickle",
+        output_path=tmp_path / "payload.json",
         scratch=SimpleNamespace(request_dir=tmp_path),
     )
 
@@ -919,7 +918,7 @@ def test_convert_rejects_oversize_parser_worker_payload(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path,
 ) -> None:  # noqa: ANN001
-    payload_path = tmp_path / "parser_worker_payload.pickle"
+    payload_path = tmp_path / "parser_worker_payload.json"
     payload_path.write_bytes(b"0123456789")
     monkeypatch.setattr(shape_converter_convert_module, "_MAX_PARSER_PAYLOAD_BYTES", 4)
 
@@ -1084,6 +1083,7 @@ def test_parser_worker_applies_parser_egress_guards_and_driver_allowlist(
             return False
 
     class _FakeDataset:
+        driver = "ESRI Shapefile"
         bounds = (10.0, 20.0, 10.0, 20.0)
         crs_wkt = None
         crs = {}
@@ -1129,7 +1129,7 @@ def test_load_shapefile_invokes_worker_subprocess_with_new_session(
     tmp_path,
 ) -> None:
     captured_popen_kwargs: dict[str, object] = {}
-    payload_path = tmp_path / "parser_worker_payload.pickle"
+    payload_path = tmp_path / "parser_worker_payload.json"
     expected_payload = {
         "properties": [{"NAME": "roads"}],
         "geometries": [{"type": "Point", "coordinates": [10.0, 20.0]}],
@@ -1142,7 +1142,7 @@ def test_load_shapefile_invokes_worker_subprocess_with_new_session(
         returncode = 0
 
         def communicate(self, timeout=None):  # noqa: ANN001
-            payload_path.write_bytes(pickle.dumps(expected_payload, protocol=pickle.HIGHEST_PROTOCOL))
+            payload_path.write_bytes(json.dumps(expected_payload).encode("utf-8"))
             return "", ""
 
         def poll(self):
@@ -1168,7 +1168,8 @@ def test_load_shapefile_invokes_worker_subprocess_with_new_session(
     assert loaded.source_crs.to_epsg() == 4326
     assert captured_popen_kwargs["start_new_session"] is True
     assert captured_popen_kwargs["cwd"] == tmp_path.as_posix()
-    assert captured_popen_kwargs["text"] is True
+    assert captured_popen_kwargs["stdout"] == subprocess.DEVNULL
+    assert captured_popen_kwargs["stderr"] == subprocess.DEVNULL
 
 
 def test_load_shapefile_timeout_kills_worker_process_group(

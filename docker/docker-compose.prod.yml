@@ -467,7 +467,13 @@ services:
         condition: service_healthy
 
   shape-converter:
-    <<: *wepppy-service
+    image: ${SHAPE_CONVERTER_IMAGE:-wepppy-shape-converter:latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.shape-converter
+    init: true
+    restart: unless-stopped
+    working_dir: /opt/app
     user: "10001:10001"
     read_only: true
     security_opt:
@@ -488,7 +494,7 @@ services:
     networks:
       - shape-converter-sandbox
     environment:
-      <<: *wepppy-env
+      PYTHONUNBUFFERED: "1"
       SHAPE_CONVERTER_RATE_LIMIT_COUNT: ${SHAPE_CONVERTER_RATE_LIMIT_COUNT:-120}
       SHAPE_CONVERTER_RATE_LIMIT_WINDOW_SECONDS: ${SHAPE_CONVERTER_RATE_LIMIT_WINDOW_SECONDS:-60}
       SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL: ${SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL:-32}
@@ -510,7 +516,7 @@ services:
       - uvicorn
       - wepppy.microservices.shape_converter:app
       - --workers
-      - "2"
+      - "1"
       - --host
       - 0.0.0.0
       - --port

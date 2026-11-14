@@ -6,6 +6,7 @@ import errno
 import os
 import shutil
 import struct
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -229,7 +230,7 @@ def select_single_shapefile_dataset(extracted_archive: ExtractedArchive) -> Shap
         if not suffix:
             continue
 
-        normalized_prefix_key = str(extracted_file.with_suffix("").relative_to(extracted_archive.extraction_root)).lower()
+        normalized_prefix_key = unicodedata.normalize("NFC", str(extracted_file.with_suffix("").relative_to(extracted_archive.extraction_root))).casefold()
         sidecar_map.setdefault(normalized_prefix_key, set()).add(suffix)
         prefix_paths.setdefault(normalized_prefix_key, extracted_file.with_suffix(""))
 
@@ -252,11 +253,11 @@ def select_single_shapefile_dataset(extracted_archive: ExtractedArchive) -> Shap
             details="No .shp/.shx/.dbf sidecar set was found.",
         )
 
-    if len(complete_prefixes) > 1:
+    if len(sidecar_map) > 1:
         raise ShapeConverterError(
             code="invalid_shapefile",
             message="Archive contains multiple shapefile datasets.",
-            details=f"Detected shapefile prefixes: {sorted(complete_prefixes)}.",
+            details="All shapefile sidecars must share one dataset prefix.",
         )
 
     selected_prefix = complete_prefixes[0]

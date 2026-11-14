@@ -553,8 +553,13 @@ services:
         condition: service_healthy
 
   shape-converter:
-    <<: *wepppy-service
+    image: ${SHAPE_CONVERTER_IMAGE:-wepppy-shape-converter:dev}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.shape-converter
+    init: true
     container_name: wepppy-shape-converter
+    working_dir: /opt/app
     user: "10001:10001"
     read_only: true
     security_opt:
@@ -569,14 +574,15 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - ../:/workdir/wepppy:ro
+      - ../wepppy/microservices/shape_converter:/opt/app/wepppy/microservices/shape_converter:ro
+      - ../wepppy/observability:/opt/app/wepppy/observability:ro
     tmpfs:
       - /tmp:size=734003200,noexec,nosuid,nodev,mode=1777
       - /run/shape-converter:size=8388608,noexec,nosuid,nodev,mode=755
     networks:
       - shape-converter-sandbox
     environment:
-      <<: *wepppy-env
+      PYTHONUNBUFFERED: "1"
       SHAPE_CONVERTER_RATE_LIMIT_COUNT: ${SHAPE_CONVERTER_RATE_LIMIT_COUNT:-120}
       SHAPE_CONVERTER_RATE_LIMIT_WINDOW_SECONDS: ${SHAPE_CONVERTER_RATE_LIMIT_WINDOW_SECONDS:-60}
       SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL: ${SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL:-32}

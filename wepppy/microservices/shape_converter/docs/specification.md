@@ -1,7 +1,37 @@
-# Mini Work Package: Sandboxed Shapefile Conversion Web App Spec
-Status: Complete (Implemented)
-Last Updated: 2026-04-19
+# Sandboxed Shapefile Conversion Security Contract
+Status: Implemented with open conformance gaps
+Last Updated: 2026-11-14
 Primary Areas: `docker/docker-compose.dev.yml`, `docker/caddy/Caddyfile`, `wepppy/microservices/*`, `wepppy/all_your_base/geo/geo.py`, `wepppy/weppcloud/*`
+
+## Contract Status and Conformance
+
+This document is the normative security and behavior contract for the public
+shape-converter service. Closed work packages record implementation history but
+do not prove continuing conformance. A control is implemented only when the
+checked-in runtime path and regression evidence enforce it.
+
+Resolution is tracked in
+`docs/work-packages/20261113_shape_converter_security_conformance/` and GitHub
+issues #655 and #656. The original dependency freeze was superseded on
+2026-11-14 for a shape-converter-only image. The common WEPPpy image remains
+unchanged, and release still requires exact linkage and reachable-vulnerability
+evidence for the dedicated image.
+
+The 2026-11-14 independent remediation slice has the following source/local-test
+state; this table does not assert deployed behavior:
+
+| Boundary | Current evidence | Status |
+| --- | --- | --- |
+| ZIP admission and extraction | Size/member quotas, path containment, extension policy, case-insensitive duplicate detection, special-file rejection, and request-scoped extraction are implemented in `archive_validation.py`. | Partial: NFC/case-fold collision rejection is implemented; compression-ratio policy remains pending. |
+| Dataset selection | `select_single_shapefile_dataset(...)` requires one complete shared-prefix `.shp/.shx/.dbf` set and rejects additional complete or incomplete prefixes. | Implemented. |
+| Format/driver identity | Convert opens only through Fiona with `enabled_drivers=["ESRI Shapefile"]`; `.shp` and DBF headers also receive limited direct checks. | Locally validated: opened driver identity is asserted before data access; disguised GeoJSON is rejected. |
+| Parser process boundary | Convert runs Fiona/GDAL in a subprocess with a hard timeout and process-group termination. | Data-only JSON IPC is implemented with byte/depth/value/schema validation and fixed exit-code errors. Second-sandbox containment remains nonconformant. |
+| Runtime containment | Compose enforces non-root, read-only root, dropped capabilities, resource limits, hardened tmpfs, and an internal network. | Partial: production defaults active and required sandbox mode to `container`; the required second parser sandbox in the worker lock-up prevention contract is not provisioned. |
+| Semantic and adversarial validation | Feature and per-feature vertex limits are enforced on convert; focused ZIP, cleanup, timeout, and API tests exist. | Partial: the comprehensive malformed-file fuzz, record-count, geometry-validity, coordinate-range, collision, and dependency-sidecar test matrix below is not fully implemented. |
+| Dependency qualification | The dedicated image is locally built from digest-pinned GDAL 3.12.4 with source-built Fiona 1.10.1, hash-locked Python dependencies, exact linkage evidence, real artifact readback, and a final-image scan. The common image is unchanged. | Locally qualified, not deployed: residual findings have request-path non-reachability dispositions pending independent security approval; sandbox and release gates remain open. |
+
+Until the nonconformant and partial items are closed or explicitly risk-accepted,
+the service must not be represented as fully conformant with this contract.
 
 ## Objective
 Provide a sandboxed upload/conversion service where users can upload a ZIP containing a shapefile and convert it to GeoJSON or GeoParquet, with explicit CRS handling options:
@@ -49,12 +79,18 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - Reject password-protected/encrypted ZIP entries.
 - Reject nested archives by policy in v1.
 - Require shapefile core sidecars by shared prefix: `.shp`, `.shx`, `.dbf`.
+- Require exactly one logical dataset: core sidecars must share one normalized
+  directory and prefix; reject extra complete or incomplete shapefile prefixes.
+- Normalize path separators and Unicode before duplicate/case-collision checks.
 - Permit optional sidecars: `.prj`, `.cpg`, `.sbn`, `.sbx`, `.qix`.
 - Allow `.shp.xml` metadata sidecars as non-fatal input but immediately unlink them after extraction.
 - Allow `.qmd` metadata sidecars as non-fatal input but immediately unlink them after extraction.
 - Emit an explicit warning when `.shp.xml` is removed that it is generally not advisable to pack `.shp.xml` in shapefile ZIPs because metadata may leak sensitive details.
 - Reject other non-required XML sidecars (`.xml`, `.gml`) in v1.
 - Reject archives containing multiple shapefile prefixes unless user explicitly selects one (v1 default: reject).
+- Treat extensions and magic bytes as admission hints, not parser authorization.
+  The parser must enable only the ESRI Shapefile driver, verify the opened driver
+  is exactly `ESRI Shapefile`, and reject renamed VRT, HDF, or other formats.
 - `inspect` and `convert` are independent uploads by design; no server-side file staging across requests.
 
 ### Access model (explicit)
@@ -119,6 +155,86 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - Relay mode keeps `.zip` and shapefile sidecars processed/deleted inside shape-converter request scope.
 - Shape-converter does not require WEPPcloud credentials and does not call WEPPcloud directly.
 
+## Independent remediation contract (2026-11-14)
+
+The operator authorized IPC, exact-driver, and archive fixes to proceed before
+sandbox feasibility is resolved. This sequencing removes independently confirmed
+weaknesses; it does not waive the second sandbox, current dependency evidence,
+compression-policy decision, semantic matrix, or deployment gates. Full security
+conformance remains blocked. No container protection or dependency version changes
+are authorized by this amendment.
+
+Parser IPC uses strict UTF-8 JSON with exactly `properties`, `geometries`,
+`source_bounds`, and `source_crs_wkt`. Properties are objects with string keys and
+only string, finite number, boolean, or null values. Geometry is null or a Point,
+MultiPoint, LineString, MultiLineString, Polygon, or MultiPolygon object containing
+exactly `type` and `coordinates`; positions have two or three finite numbers.
+Preserve MultiPatch GeometryCollections recursively as exactly `type` and
+`geometries`, aggregating the vertex cap across their members. During worker
+normalization remove Fiona-only null `geometries` from coordinate geometries
+and null `coordinates` from GeometryCollections.
+Bounds are four finite numbers in min-x/min-y/max-x/max-y order, with ordered
+extrema. CRS is null or a nonempty WKT string, parsed only after structural checks.
+Property/geometry lengths must match and obey the existing feature limit; each
+geometry obeys the existing vertex limit in both worker and parent.
+
+The existing payload byte cap (default 256 MiB) remains authoritative; read at
+most cap + 1 bytes and reject oversize/non-regular/symlink payloads. Before JSON
+object allocation, scan for container nesting beyond 16 and more than 2,000,000
+JSON values. Reject duplicate keys, trailing data, invalid UTF-8, non-finite
+numbers, and extra/missing fields. A duplicate-key detector may return plain
+JSON dictionaries only; no extensible object construction hooks are permitted.
+Worker output is atomically renamed within request scratch. Parser decode/schema
+errors use fixed messages without uploaded values or filesystem paths. The
+parent discards worker stdout/stderr rather than buffering untrusted diagnostics;
+exit codes 4 and 5 select the existing feature/vertex quota errors, and other
+nonzero exits select a fixed parse error. Standalone worker stderr stays generic.
+See [ADR-0142](../../../../docs/adrs/ADR-0142-shape-parser-ipc-bounds.md).
+
+Immediately after Fiona open with the ESRI Shapefile allowlist, assert the opened
+driver equals `ESRI Shapefile` before reading bounds, CRS, or features. Disable
+plugin discovery with `GDAL_DRIVER_PATH=disable` in the worker environment.
+
+For archive paths, normalize separators and Unicode NFC before case-folded
+collision comparison. Preserve the normalized spelling on disk. Dataset selection
+requires one logical NFC/case-folded prefix across all admitted shapefile sidecars,
+including optional and incomplete prefixes; stripped `.shp.xml`/`.qmd` files
+remain excluded. Reject ambiguity with `invalid_shapefile`. Existing quotas remain;
+no new compression-ratio threshold is introduced in this independent slice.
+For users: archives must contain one dataset, and duplicate filename aliases or
+additional sidecar prefixes are rejected. Very large valid conversions can now
+reach the JSON value budget before the older byte/feature caps; errors are
+explicit and no partial output is returned. Operators must ship parent and worker
+together and must not interpret matching readiness mode strings as containment.
+
+Compatibility and regression plan: this is request-internal IPC, with no persisted
+run-data migration. Parent and worker must ship together; legacy pickle is rejected
+without fallback. Public output keys/formats remain unchanged. Validate generated
+GeoJSON and GeoParquet through the actual worker and existing endpoint tests, plus
+hostile IPC/driver/archive tests. Broader shapefile semantics remain a later gate.
+
+### Dedicated image amendment (2026-11-14)
+
+The operator authorizes a shape-converter-only image with an upgraded, coherent
+GDAL/Fiona stack. This supersedes the dependency-version freeze only for this
+service image; the common WEPPpy image remains unchanged. The split must preserve
+the public API and Compose service identity while removing inherited application
+secrets, datastore configuration, host data mounts, and unrelated runtime
+packages. It is defense in depth, not the required second parser sandbox, and
+does not close issue #656 or authorize deployment. Pin the base by digest and
+install Python dependencies from a resolved hash-locked input. A Dockerfile-
+specific allowlist must keep repository secrets and unrelated source out of the
+build context. Qualification must inspect the resolved Compose service, final
+image, and running container. Matching `container/container` readiness strings
+remain non-evidence for sandbox containment; production readiness is
+nonconformant until the second boundary exists.
+
+Starlette 1.3.1 is required in the dedicated image to close the form-limit
+advisory affecting earlier releases. Register HTTP middleware explicitly through
+`add_middleware(BaseHTTPMiddleware, dispatch=...)`; the removed decorator API is
+not a compatibility reason to retain a vulnerable Starlette release. Preserve
+the existing abuse-control and relay-CORS middleware order and public behavior.
+
 ## Non-Functional Requirements
 - Dedicated container/service (no embedding conversion in existing web app process).
 - Sandboxed runtime:
@@ -129,6 +245,12 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
   - Seccomp/AppArmor (or SELinux) enabled.
   - Disable outbound network by default.
   - Treat GDAL/OGR parser execution as hostile-input boundary and run it only in bounded subprocesses with hard timeout + process-group termination.
+  - Treat parser-worker output as untrusted. Exchange data only through a
+    non-executable serialization with an explicit schema, byte limit, nesting
+    limit, and primitive-type allowlist. `pickle`, `marshal`, YAML object tags,
+    and equivalent executable deserialization are forbidden across this boundary.
+  - Disable GDAL driver/plugin autoload from attacker-writable paths and keep an
+    explicit driver allowlist at every native open.
 - Resource limits (initial defaults, tune with data):
   - Request timeout: 30s metadata scan, 120s conversion hard timeout.
   - Max ZIP upload size: 100 MB.
@@ -222,6 +344,10 @@ handle_path /utils/shape-converter/* {
   - Validate parser subprocess sandbox mode (production hard requirement).
 
 #### Performance and concurrency contract
+- Production runs one Uvicorn application worker. Abuse-control counters and
+  conversion metadata are intentionally process-local, so multiple workers would
+  multiply configured limits and make metadata lookup nondeterministic. Scale-up
+  requires a reviewed shared-state contract before increasing the worker count.
 - Bound active requests with middleware abuse controls:
   - `SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL` (default `32`) with immediate `503 service_saturated` when global slots are exhausted.
   - `SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP` (default `8`) with immediate `429 rate_limited` when per-client slots are exhausted.
@@ -382,7 +508,7 @@ Error response contract:
 | Oversize filenames/path depth | FS/path handling failures | Enforce max filename length and max path depth | Very deep path archive rejected |
 | Hidden/system files in archive | Ambiguous behavior | Allowlist required extensions and optional sidecars only; sanitize known metadata sidecars (`.shp.xml`, `.qmd`) by immediate unlink | `.exe`, `.dll`, `.py` members rejected |
 | Null-byte or control-char filenames | Sanitization bypass | Reject non-printable/control chars and null bytes | Crafted control-char names rejected |
-| ZIP metadata trust issues | Spoofed types | Validate extension + signature + entry policy | Mismatched extension/signature rejected |
+| ZIP metadata trust issues | Spoofed types | Validate extension + signature + entry policy; exact-driver restricted open remains authoritative | Renamed VRT/HDF/other format with `.shp` extension is rejected before data use |
 | Archive parser dependency CVEs | Parser compromise risk | Keep libraries patched, run in sandbox, pin versions | Dependency audit gate + CVE regression check |
 
 ## Shapefile Risk Matrix (Comprehensive)
@@ -408,6 +534,7 @@ Error response contract:
 | XML sidecar entity expansion (`.xml`, `.gml`, `.shp.xml`) | CPU/memory DoS via parser | Reject generic XML sidecars; if `.shp.xml` is present, delete it immediately after extraction and enforce parser timeout + memory caps | Generic XML sidecar rejected; `.shp.xml` stripped with warning |
 | Parser-triggered remote fetch (`/vsicurl/`, remote references) | Unwanted network egress/data exfil risk | Keep deny-all egress and disable remote parser sources by policy/config | Fixture attempting remote reference fails without outbound access |
 | Metadata PII leak from metadata sidecars (`.shp.xml`, `.qmd`) | Exposure of usernames, contact details, host paths, org/process history | Never parse or return sidecar metadata; sanitize by immediate unlink; keep warnings/log fields free of raw sidecar content | Fixture containing PII in sidecar yields no PII in API payloads/logs |
+| Executable parser-worker IPC | Native parser compromise crosses back into the parent process | Use schema-validated, data-only serialization; never deserialize pickle or object-capable formats from the worker | Malicious worker payload is rejected without code execution or filesystem side effects |
 
 ## CRS Rules and UTM Determination Details
 - Source of truth for UTM mode should mirror existing WEPPpy logic in `wepppy/all_your_base/geo/geo.py`:
@@ -482,10 +609,15 @@ Error response contract:
   - SBOM generation for release builds.
   - Vulnerability scan gate that blocks unresolved High/Critical issues in reachable runtime components.
 - Parser dependency controls:
-  - Track and triage GDAL/OGR parser vulnerabilities (including memory-corruption and parser-DoS classes) before each release; keep known examples such as `CVE-2021-45943` and `CVE-2025-29480` on the watchlist.
+  - Track and triage GDAL/OGR and reachable third-party parser vulnerabilities
+    before each release. Record the actual linked runtime versions and fix
+    provenance; a static example-CVE list is not release evidence.
   - Maintain explicit timeout/kill behavior for parser non-termination classes (for example malformed WKB infinite-loop conditions).
   - Treat `/vsizip/` as an implementation detail, not a security boundary; archive and contained parser risks still require full validation/sandbox controls.
   - Maintain metadata-privacy policy that forbids exposing raw `.shp.xml` content in API payloads, logs, or warnings (only advisory removal notices are allowed).
+  - Follow GDAL's untrusted-input guidance: use a dedicated low-privilege
+    identity, restrict filesystem access, bound CPU/memory, disable network and
+    unused drivers, and do not inherit plugin paths from untrusted environments.
 
 ## Test Plan
 ### Unit tests
@@ -507,6 +639,10 @@ Error response contract:
 - Encrypted ZIP fixtures.
 - Malformed shapefile fuzz corpus.
 - Parser timeout and cancellation behavior.
+- Disguised VRT/HDF/other non-shapefile content renamed `.shp` is rejected by
+  the exact-driver boundary.
+- Malicious or malformed parser-worker output cannot trigger executable
+  deserialization in the parent.
 - XML sidecar bomb fixtures (`.shp.xml`/`.xml` entity expansion class payloads).
 - Parser non-termination fixtures (malformed WKB parser-loop class).
 - Metadata privacy fixtures: `.shp.xml` and `.qmd` containing usernames/paths/contact fields are not exposed in responses/logging.
@@ -536,12 +672,16 @@ Error response contract:
 - Invalid `.prj` reprojection paths return explicit `invalid_source_crs` while missing CRS remains `unknown_source_crs`.
 - GeoJSON behavior is explicit: RFC 7946 in WGS84 mode and clearly labeled non-RFC projected mode for UTM/same-CRS output.
 - ZIP and shapefile risk tests are implemented and passing.
+- Native parser opens are exact-driver restricted and parser-worker IPC is
+  schema-validated and non-executable.
 - XML sidecar and parser-loop abuse tests are implemented and passing.
 - No sidecar-derived PII (for example `.shp.xml`/`.qmd` usernames, contacts, file paths) is exposed by API metadata or logs.
 - When `.shp.xml` is included, API warnings explicitly report removal and advise that packing `.shp.xml` in shapefile ZIPs is generally not advisable.
 - When `.qmd` is included, it is sanitized via immediate unlink and never parsed or surfaced in API metadata.
 - No uploaded or generated artifacts persist after each request terminal response (verified by tests).
 - Service runs in its own hardened container and is reachable through Caddy.
+- Production uses the required second parser sandbox; readiness evidence is
+  derived from the effective runtime, not only matching environment strings.
 - CI/security validation proves container hardening and runtime abuse controls are active.
 
 ## Source Notes
@@ -554,6 +694,7 @@ Error response contract:
 - NVD CVE-2024-55587 (archive extraction traversal class example): https://nvd.nist.gov/vuln/detail/CVE-2024-55587
 - GDAL security model for untrusted input: https://gdal.org/en/stable/user/security.html
 - GDAL ESRI Shapefile driver docs: https://gdal.org/en/stable/drivers/vector/shapefile.html
+- GDAL releases: https://github.com/OSGeo/gdal/releases
 - GDAL issue #14039 (WKB parser infinite-loop class): https://github.com/OSGeo/gdal/issues/14039
 - ESRI Shapefile Technical Description: https://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
 - ArcGIS shapefile output limitations: https://pro.arcgis.com/en/pro-app/latest/tool-reference/appendices/geoprocessing-considerations-for-shapefile-output.htm

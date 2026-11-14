@@ -24,6 +24,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from starlette.applications import Starlette
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.background import BackgroundTask
 from starlette.datastructures import FormData
 from starlette.datastructures import UploadFile
@@ -1030,7 +1031,6 @@ def create_app() -> Starlette:
     app = Starlette(debug=False, routes=routes, lifespan=app_lifespan)
     app.mount("/assets", StaticFiles(directory=str(_UI_DIR)), name="ui-assets")
 
-    @app.middleware("http")
     async def relay_cors_middleware(request: Request, call_next):
         if request.url.path != "/v1/convert":
             return await call_next(request)
@@ -1052,7 +1052,6 @@ def create_app() -> Starlette:
         _apply_relay_cors_headers(response, origin=origin, allowed_origins=allowed_origins)
         return response
 
-    @app.middleware("http")
     async def abuse_control_middleware(request: Request, call_next):
         abuse_controls = _abuse_control_state(request.app)
         if not abuse_controls.protects(request):
@@ -1138,6 +1137,12 @@ def create_app() -> Starlette:
             limiter_key=identity.limiter_key,
         )
         return response
+
+    # Starlette 1.0 removed the ``@app.middleware`` convenience decorator.
+    # Register the same BaseHTTPMiddleware dispatch functions through the
+    # stable application API so the common and dedicated runtimes agree.
+    app.add_middleware(BaseHTTPMiddleware, dispatch=relay_cors_middleware)
+    app.add_middleware(BaseHTTPMiddleware, dispatch=abuse_control_middleware)
 
     return app
 
