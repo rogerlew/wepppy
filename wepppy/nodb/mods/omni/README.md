@@ -46,6 +46,12 @@ The contrast-build facade/router now keeps responsibilities split by concern:
 
 ## Getting Started (Web Interface)
 
+Omni requires an undisturbed or burned baseline with no applied treatments.
+Define treatment alternatives within Omni. See
+[Before You Begin](ENDUSER.md#before-you-begin) for user guidance and the
+[baseline eligibility contract](../../../../docs/schemas/omni-baseline-contract.md)
+for the supported scope and rationale.
+
 ### Enabling the Omni Module
 
 Omni is an optional module that must be added to your project before use:
