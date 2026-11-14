@@ -7,8 +7,9 @@ import errno
 import os
 import shutil
 import signal
+import struct
 import subprocess
-import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -66,21 +67,30 @@ _PARSER_SUBPROCESS_KILL_GRACE_SECONDS = max(
     1,
     int(os.getenv("SHAPE_CONVERTER_PARSER_KILL_GRACE_SECONDS", "5")),
 )
-_PARSER_WORKER_MODULE = "wepppy.microservices.shape_converter.convert_parser_worker"
-_PARSER_WORKER_ENV_ALLOWLIST = frozenset(
-    {
-        "PATH",
-        "PYTHONPATH",
-        "PYTHONHOME",
-        "PYTHONNOUSERSITE",
-        "PYTHONHASHSEED",
-        "LD_LIBRARY_PATH",
-        "GDAL_DATA",
-        "PROJ_LIB",
-        "SSL_CERT_FILE",
-        "SSL_CERT_DIR",
-        "TZ",
-    }
+_MAX_PARSER_INPUT_BYTES = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES", str(600 * 1024 * 1024))),
+)
+_PARSER_MEMORY_LIMIT_BYTES = max(
+    64 * 1024 * 1024,
+    int(os.getenv("SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES", str(512 * 1024 * 1024))),
+)
+_PARSER_CPU_LIMIT_SECONDS = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_PARSER_CPU_LIMIT_SECONDS", "60")),
+)
+_PARSER_OPEN_FILE_LIMIT = max(
+    8,
+    int(os.getenv("SHAPE_CONVERTER_PARSER_OPEN_FILE_LIMIT", "32")),
+)
+_INSTALLED_PARSER_CLI = Path("/usr/local/bin/shape_parser_cli")
+_SOURCE_PARSER_CLI = (
+    Path(__file__).resolve().parent
+    / "rust"
+    / "shape_parser_cli"
+    / "target"
+    / "release"
+    / "shape_parser_cli"
 )
 
 
@@ -212,6 +222,9 @@ async def convert_uploaded_archive(
     loaded = _load_shapefile(
         shp_path=dataset.prefix_path.with_suffix(".shp"),
         scratch=scratch,
+        ignore_source_crs=(
+            target_crs == "same_as_shapefile" and projection_status == "invalid"
+        ),
     )
     crs_plan = resolve_target_crs(
         target_crs_token=target_crs,
@@ -377,7 +390,12 @@ def _scratch_tree_size_bytes(path: Path) -> int:
     return total
 
 
-def _load_shapefile(*, shp_path: Path, scratch: RequestScratchLayout) -> LoadedShapefile:
+def _load_shapefile(
+    *,
+    shp_path: Path,
+    scratch: RequestScratchLayout,
+    ignore_source_crs: bool = False,
+) -> LoadedShapefile:
     parser_output_path = scratch.request_dir / "parser_worker_payload.json"
     worker_stdout, worker_stderr = _run_parser_worker(
         shp_path=shp_path,
@@ -391,20 +409,99 @@ def _load_shapefile(*, shp_path: Path, scratch: RequestScratchLayout) -> LoadedS
         worker_stderr=worker_stderr,
     )
 
-    return _loaded_shapefile_from_payload(worker_payload)
+    return _loaded_shapefile_from_payload(
+        worker_payload,
+        ignore_source_crs=ignore_source_crs,
+    )
+
+
+def _parser_cli_path() -> Path:
+    configured = os.getenv("SHAPE_CONVERTER_PARSER_CLI")
+    if configured:
+        return Path(configured)
+    if _SOURCE_PARSER_CLI.is_file() and os.access(_SOURCE_PARSER_CLI, os.X_OK):
+        return _SOURCE_PARSER_CLI
+    return _INSTALLED_PARSER_CLI
+
+
+def probe_parser_runtime(scratch_root: Path) -> tuple[bool, str | None]:
+    try:
+        scratch_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="parser-readiness-", dir=scratch_root) as raw_root:
+            request_root = Path(raw_root)
+            shp_path = request_root / "probe.shp"
+            _write_readiness_dataset(shp_path)
+            output_path = request_root / "payload.json"
+            scratch = RequestScratchLayout(
+                request_dir=request_root,
+                upload_archive_path=request_root / "unused.zip",
+                extraction_root=request_root,
+                output_root=request_root,
+            )
+            _run_parser_worker(shp_path=shp_path, output_path=output_path, scratch=scratch)
+            payload = _read_parser_payload(
+                payload_path=output_path,
+                worker_stdout="",
+                worker_stderr="",
+            )
+    except (OSError, ShapeConverterError, ValueError, TypeError, struct.error):
+        return False, "parser_runtime_probe_failed"
+
+    if (
+        payload.get("properties") != [{"READY": "yes"}]
+        or payload.get("geometries")
+        != [{"type": "Point", "coordinates": [1.0, 2.0]}]
+        or payload.get("source_bounds") != [1.0, 2.0, 1.0, 2.0]
+    ):
+        return False, "parser_runtime_probe_semantics_invalid"
+    return True, None
+
+
+def _write_readiness_dataset(shp_path: Path) -> None:
+    record_content = struct.pack("<i2d", 1, 1.0, 2.0)
+    record_header = struct.pack(">2i", 1, len(record_content) // 2)
+    shp_header = _readiness_shape_header(
+        file_length_words=(100 + len(record_header) + len(record_content)) // 2,
+    )
+    shp_path.write_bytes(shp_header + record_header + record_content)
+
+    shx_record = struct.pack(">2i", 50, len(record_content) // 2)
+    shp_path.with_suffix(".shx").write_bytes(
+        _readiness_shape_header(file_length_words=(100 + len(shx_record)) // 2)
+        + shx_record
+    )
+
+    dbf_header = bytearray(32)
+    dbf_header[0] = 0x03
+    dbf_header[1:4] = bytes((126, 11, 14))
+    dbf_header[4:8] = struct.pack("<I", 1)
+    dbf_header[8:10] = struct.pack("<H", 65)
+    dbf_header[10:12] = struct.pack("<H", 9)
+    field = bytearray(32)
+    field[:5] = b"READY"
+    field[11] = ord("C")
+    field[16] = 8
+    record = b" " + b"yes".ljust(8, b" ")
+    shp_path.with_suffix(".dbf").write_bytes(
+        bytes(dbf_header) + bytes(field) + b"\r" + record + b"\x1a"
+    )
+
+
+def _readiness_shape_header(*, file_length_words: int) -> bytes:
+    header = bytearray(100)
+    struct.pack_into(">i", header, 0, 9994)
+    struct.pack_into(">i", header, 24, file_length_words)
+    struct.pack_into("<i", header, 28, 1000)
+    struct.pack_into("<i", header, 32, 1)
+    struct.pack_into("<4d", header, 36, 1.0, 2.0, 1.0, 2.0)
+    return bytes(header)
 
 
 def _build_parser_worker_env() -> dict[str, str]:
-    worker_env: dict[str, str] = {
+    return {
         "LC_ALL": "C",
         "LANG": "C",
     }
-    for env_var in _PARSER_WORKER_ENV_ALLOWLIST:
-        env_value = os.environ.get(env_var)
-        if env_value:
-            worker_env[env_var] = env_value
-    worker_env["GDAL_DRIVER_PATH"] = "disable"
-    return worker_env
 
 
 def _run_parser_worker(
@@ -414,9 +511,9 @@ def _run_parser_worker(
     scratch: RequestScratchLayout,
 ) -> tuple[str, str]:
     worker_command = [
-        sys.executable,
-        "-m",
-        _PARSER_WORKER_MODULE,
+        os.fspath(_parser_cli_path()),
+        "--request-root",
+        scratch.request_dir.as_posix(),
         "--shp-path",
         shp_path.as_posix(),
         "--output-path",
@@ -427,6 +524,14 @@ def _run_parser_worker(
         str(_MAX_VERTICES_PER_FEATURE),
         "--max-payload-bytes",
         str(_MAX_PARSER_PAYLOAD_BYTES),
+        "--max-input-bytes",
+        str(_MAX_PARSER_INPUT_BYTES),
+        "--max-memory-bytes",
+        str(_PARSER_MEMORY_LIMIT_BYTES),
+        "--max-cpu-seconds",
+        str(_PARSER_CPU_LIMIT_SECONDS),
+        "--max-open-files",
+        str(_PARSER_OPEN_FILE_LIMIT),
     ]
     worker_env = _build_parser_worker_env()
 
@@ -542,7 +647,11 @@ def _read_parser_payload(
         ) from exc
 
 
-def _loaded_shapefile_from_payload(payload: dict[str, object]) -> LoadedShapefile:
+def _loaded_shapefile_from_payload(
+    payload: dict[str, object],
+    *,
+    ignore_source_crs: bool = False,
+) -> LoadedShapefile:
     raw_bounds = payload.get("source_bounds")
     if (
         not isinstance(raw_bounds, (list, tuple))
@@ -562,7 +671,7 @@ def _loaded_shapefile_from_payload(payload: dict[str, object]) -> LoadedShapefil
 
     source_crs_wkt = payload.get("source_crs_wkt")
     source_crs: CRS | None
-    if source_crs_wkt is None:
+    if source_crs_wkt is None or ignore_source_crs:
         source_crs = None
     elif isinstance(source_crs_wkt, str):
         try:

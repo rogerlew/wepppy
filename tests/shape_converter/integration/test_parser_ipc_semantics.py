@@ -1,4 +1,4 @@
-"""Read artifacts from the real Fiona worker and JSON IPC boundary."""
+"""Compare real Rust-parser artifacts with retained Fiona oracle fixtures."""
 from __future__ import annotations
 
 import io
@@ -76,6 +76,7 @@ def test_real_worker_output_semantics_and_cleanup(tmp_path, output_format, datas
     if dataset == 'point_null':
         assert len(properties) == 2
         assert properties[0] == {'NAME': 'demo', 'COUNT': 7, 'VALUE': 1.25, 'DATE': '2026-01-02'}
+        assert type(properties[0]['COUNT']) is int
         assert all(value is None for value in properties[1].values())
         assert geometries[0]['type'] == 'Point'
         assert list(geometries[0]['coordinates']) == [10, 20, 3]

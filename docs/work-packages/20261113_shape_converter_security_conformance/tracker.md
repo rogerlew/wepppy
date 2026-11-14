@@ -3,14 +3,16 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 UTC (reproducible dedicated image locally qualified)
-**Current phase**: Dedicated image re-review; sandbox/release gates open
+**Last updated**: 2026-11-14 UTC (Rust CLI implementation locally validated)
+**Current phase**: M6 independent review and issue disposition
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
 **GitHub issues**: [#655](https://github.com/rogerlew/wepppy/issues/655),
 [#656](https://github.com/rogerlew/wepppy/issues/656)
-**GDAL decision**: dedicated shape image authorized; common image unchanged
+**Parser decision**: replace production GDAL/Fiona parsing with a bounded,
+service-local lightweight Rust CLI; retain the dedicated GDAL image only as a
+pre-cutover oracle
 
 ## Task Board
 
@@ -20,28 +22,40 @@
       issues #655 and #656.
 - [x] Record the operator decision to defer GDAL upgrades.
 - [x] M0: run nine scoped baseline modules (136 passed) and direct IPC/alias/prefix probes.
-- [ ] M0: complete remaining red matrix and sandbox feasibility gate.
-- [ ] M0: evaluate the proposed sandbox mechanism and approve any dependency.
-- [ ] M0: author/approve the compression-ratio threshold ADR before code changes.
+- [x] M0: complete the remaining red matrix and Rust parser feasibility gate.
+- [x] M0: evaluate the proposed Rust parser and resource-limit dependencies.
+- [x] M0: reject a ratio threshold and retain existing absolute quotas; no
+      parameter/default change means no ADR is required.
 - [x] Independent slice contract checkpoint committed before code: `6712ba631`.
-- [ ] Full M0 sandbox/compression contract decisions remain open.
-- [ ] M1: add focused failing IPC, driver, archive, semantic, and sandbox tests.
+- [x] Full M0 parser/compression contract decisions recorded.
+- [x] M1: add focused IPC, driver, archive, semantic, provenance, malformed
+      binary, and resource-limit tests.
 - [x] M2: replace pickle with bounded schema-validated data-only IPC.
 - [x] M3 slice: exact driver, NFC/case-fold collisions, and extra prefixes.
 - [x] Build and locally qualify the minimal shape-converter-only GDAL 3.12.4/
       Fiona 1.10.1 image; common WEPPpy image unchanged.
-- [ ] M3 remainder: compression policy and broader semantic validation.
-- [ ] M4: implement and attest the effective second parser sandbox.
+- [x] M3 remainder: compression policy and broader semantic validation.
+- [x] M4A: evaluate the Rust `shapefile` crate, unsafe/transitive surface,
+      semantic coverage, encoding behavior, malformed-input behavior, and CLI
+      resource-limit strategy.
+- [x] M4B: implement and test the service-local `shape_parser_cli` crate and its
+      private parser modules.
+- [x] M4C: implement `shape_parser_cli` plus the Python launcher, strict JSON
+      contract, process-group termination, and memory/CPU/file/output limits.
+- [x] M4D implementation: prove oracle parity and recovery and remove Fiona/GDAL
+      from the production parser image/path. Independent residual-risk acceptance
+      remains an M6 gate.
 - [x] M5 candidate: dedicated image dependency/linkage/scan, resolved Compose,
       and exact-image artifact evidence captured; operator-approved one-worker
       command passes limiter, metadata, conversion, and cleanup qualification.
 - [x] Dedicated-image correctness, QA, and security re-reviews pass after the
       one-worker repair; broader M6 and rollout gates remain open.
-- [ ] M6: run change-scoped shape-converter and production-equivalent gates; no
+- [x] M6: run change-scoped shape-converter and production-equivalent gates; no
       full repository or unrelated suite.
 - [ ] M6: close code, QA, correctness, and security reviews.
-- [x] Comment on #655/#656 with local implementation and bounded evidence;
-      both remain open pending their remaining acceptance/disposition.
+- [x] Close #655 after its strict data-only IPC acceptance passed; comment on
+      #656 with final local evidence and keep it open for independent residual-
+      risk acceptance.
 - [ ] Complete authorized rollout separately; do not imply deployment from local
       or forest1 validation.
 
@@ -52,11 +66,17 @@
 - JSON is the first IPC candidate because it is data-only and already available;
   its decoder still requires explicit byte, nesting, primitive, finite-number,
   and schema validation.
-- Prototype one local per-parser sandbox under the existing hardened container.
-  A new service/topology requires retained failure evidence and a separate
-  operator decision.
-- Any compression-ratio threshold is a governed parameterization decision. No
-  numeric default is authorized by this scaffold.
+- Production parsing will use a short-lived standalone Rust CLI in the existing
+  hardened shape-converter container. Python must not import the parser through
+  PyO3, and no parser service, socket, or new deployment topology is authorized.
+- The CLI boundary provides bounded failure and recovery, not containment from
+  arbitrary code execution: it retains the container UID, mounts, and network
+  authority. Closure therefore requires explicit acceptance of that residual.
+- Absolute compressed/uncompressed/member/scratch/parser-input ceilings are the
+  expansion policy. No compression-ratio threshold or numeric default is added.
+- The installed executable must have adjacent `shape_parser_cli.json`
+  provenance. Build and readiness verify executable hash, size, and version
+  against it; the immutable image digest remains the authenticity boundary.
 - The dependency freeze is superseded only for the dedicated shape-converter
   image. The common WEPPpy image remains unchanged. Every reachable Medium,
   High, or Critical candidate finding requires remediation or explicit operator
@@ -68,8 +88,9 @@
 ## Required Evidence
 
 - Baseline source/runtime matrix and retained red tests for each failure class.
-- Contract checkpoint SHA and compression-policy ADR link.
-- Sandbox dependency evaluation and production-equivalent prototype receipt.
+- Contract checkpoint SHA and recorded no-threshold compression decision.
+- Rust parser dependency/unsafe/transitive evaluation and production-equivalent
+  CLI/resource-limit receipt.
 - Direct worker IPC rejection and no-side-effect evidence.
 - Exact-driver and disguised-format rejection evidence.
 - Unicode collision, ambiguous-prefix, compression, malformed-sidecar, semantic,
@@ -120,23 +141,38 @@
 
 - 2026-11-14: independent correctness, QA, and security re-reviews passed the
   dedicated-image slice. Persisting complete scan evidence outside `/tmp` remains
-  a Low package-closeout provenance item. The second sandbox remains a release
-  blocker.
+  a Low package-closeout provenance item. The then-required second sandbox
+  remained a release blocker.
 
 - 2026-11-14: reviewed dedicated-image implementation committed as `73ed430d4`.
   No image publication or deployment occurred.
 
+- 2026-11-14: operator selected replacement of GDAL/Fiona with one lightweight,
+  service-local Rust CLI. The CLI remains in the existing container and
+  is bounded by wall-time, process-group kill, memory, CPU, open-file, file,
+  output, feature, vertex, and IPC limits. This supersedes the proposed second
+  sandbox only after full cutover and independent residual-risk acceptance; it
+  does not claim arbitrary-code containment. Issue #656 remains open until then.
+
+- 2026-11-14: M4 implementation completed locally. The Rust CLI, strict launcher,
+  OS/resource limits, executable-specific JSON sidecar, readiness fixture, and
+  minimal no-GDAL/Fiona image are implemented. A 50,000-feature oracle benchmark
+  matched normalized semantics; direct memory and CPU probes terminated without
+  output. The malformed corpus found and closed SHP/SHX declared-length and
+  reversed-ring compatibility gaps. Exact Syft/Grype JSON is retained in package
+  artifacts, and the fixed Debian zlib security build replaces the vulnerable
+  base version. Final exact image:
+  `sha256:d3605b92360eaf65f8c1c2d72bac0c0d9c44a0c096776e4cb7edebbbde1fca41`.
+  Independent final review and rollout remain open.
+
 ## Handoff
 
-Independent slice proceeds under the operator-approved sequencing amendment.
-Reviewed contract checkpoint: `6712ba631`. See
-[slice evidence](artifacts/20261114_independent_slice.md) for implementation,
-validation, independent reviews, and remaining risks. No production deployment
-or dependency upgrade occurred. Continue with a separately selected sandbox
-candidate under unchanged protections; do not infer approval for privileges or
-topology changes. Compression-policy decision, broader semantic matrix, current
-release dependency evidence, and full conformance review remain open.
+M4 implementation and local validation are complete. See the
+[dependency evaluation](artifacts/20261114_rust_parser_dependency_evaluation.md)
+and final Rust-CLI evidence/review artifacts. No production deployment occurred;
+do not infer approval for privileges, a parser service, or topology changes.
 
-Next checkpoint: continue the separately selected second-sandbox work. Before
-full package closeout, persist complete scan evidence outside `/tmp`. Keep the
-common image unchanged and do not deploy.
+Next checkpoint: obtain genuinely independent acceptance of the same-container
+residual authority and exact-image finding dispositions, then update #655/#656.
+Complete Syft/Grype JSON is retained in package artifacts, and the exact image
+proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.

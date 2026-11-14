@@ -2,7 +2,6 @@
 
 !docker/
 docker/**
-!docker/requirements-shape-converter-build.txt
 !docker/requirements-shape-converter.txt
 
 !wepppy/
@@ -18,3 +17,4 @@ wepppy/**
 wepppy/microservices/shape_converter/docs/
 **/__pycache__
 **/*.pyc
+**/target/

@@ -37,9 +37,8 @@ def test_ready_health_returns_ok_when_scratch_is_writable() -> None:
     assert payload["status"] == "ok"
     assert payload["scope"] == "shape-converter"
     assert payload["check"] == "ready"
-    assert payload["sandbox_mode"]
-    assert payload["required_sandbox_mode"]
-    assert payload["sandbox_mode"] == payload["required_sandbox_mode"]
+    assert payload["parser"] == "shape_parser_cli"
+    assert payload["provenance"] == "verified"
 
 
 def test_ready_health_returns_503_when_scratch_unwritable(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -59,11 +58,14 @@ def test_ready_health_returns_503_when_scratch_unwritable(monkeypatch: pytest.Mo
     assert payload["reason"].startswith("scratch_root_not_writable")
 
 
-def test_ready_health_returns_503_when_required_sandbox_mode_mismatches_active(
+def test_ready_health_returns_503_when_parser_provenance_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("SHAPE_CONVERTER_SANDBOX_MODE", "container")
-    monkeypatch.setenv("SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE", "gvisor")
+    monkeypatch.setattr(
+        shape_converter_app_module,
+        "_is_toolchain_available",
+        lambda: (False, "parser_binary_hash_mismatch"),
+    )
 
     with TestClient(create_app()) as client:
         response = client.get("/health/ready")
@@ -71,16 +73,17 @@ def test_ready_health_returns_503_when_required_sandbox_mode_mismatches_active(
     assert response.status_code == 503
     payload = response.json()
     assert payload["status"] == "not_ready"
-    assert payload["reason"].startswith("sandbox_mode_mismatch")
-    assert payload["sandbox_mode"] == "container"
-    assert payload["required_sandbox_mode"] == "gvisor"
+    assert payload["reason"] == "parser_binary_hash_mismatch"
 
 
-def test_ready_health_returns_503_when_required_sandbox_mode_is_unset(
+def test_ready_health_returns_503_when_runtime_probe_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("SHAPE_CONVERTER_SANDBOX_MODE", "container")
-    monkeypatch.setenv("SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE", "")
+    monkeypatch.setattr(
+        shape_converter_app_module,
+        "probe_parser_runtime",
+        lambda _scratch: (False, "parser_runtime_probe_failed"),
+    )
 
     with TestClient(create_app()) as client:
         response = client.get("/health/ready")
@@ -88,11 +91,11 @@ def test_ready_health_returns_503_when_required_sandbox_mode_is_unset(
     assert response.status_code == 503
     payload = response.json()
     assert payload["status"] == "not_ready"
-    assert payload["reason"] == "sandbox_required_mode_unset"
+    assert payload["reason"] == "parser_runtime_probe_failed"
 
 
 def test_ready_health_returns_503_when_toolchain_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(shape_converter_app_module, "_is_toolchain_available", lambda: (False, "ogr2ogr_not_found"))
+    monkeypatch.setattr(shape_converter_app_module, "_is_toolchain_available", lambda: (False, "parser_binary_or_provenance_missing"))
 
     with TestClient(create_app()) as client:
         response = client.get("/health/ready")
@@ -100,4 +103,4 @@ def test_ready_health_returns_503_when_toolchain_unavailable(monkeypatch: pytest
     assert response.status_code == 503
     payload = response.json()
     assert payload["status"] == "not_ready"
-    assert payload["reason"] == "ogr2ogr_not_found"
+    assert payload["reason"] == "parser_binary_or_provenance_missing"

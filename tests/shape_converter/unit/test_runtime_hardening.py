@@ -70,8 +70,6 @@ def _assert_shape_converter_hardening_contract(
         assert "nodev" in entry
 
     expected_env_keys = {
-        "SHAPE_CONVERTER_SANDBOX_MODE",
-        "SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE",
         "SHAPE_CONVERTER_SCRATCH_ROOT",
         "SHAPE_CONVERTER_MULTIPART_MAX_PARTS",
         "SHAPE_CONVERTER_MULTIPART_MAX_FIELD_BYTES",
@@ -79,6 +77,10 @@ def _assert_shape_converter_hardening_contract(
         "SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES",
         "SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES",
         "SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS",
+        "SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES",
+        "SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES",
+        "SHAPE_CONVERTER_PARSER_CPU_LIMIT_SECONDS",
+        "SHAPE_CONVERTER_PARSER_OPEN_FILE_LIMIT",
     }
     assert expected_env_keys.issubset(shape_converter["environment"])
 

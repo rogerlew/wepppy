@@ -12,7 +12,6 @@ from wepppy.microservices.shape_converter.errors import ShapeConverterError
 from wepppy.microservices.shape_converter.inspect import select_single_shapefile_dataset
 
 convert = importlib.import_module('wepppy.microservices.shape_converter.convert')
-worker = importlib.import_module('wepppy.microservices.shape_converter.convert_parser_worker')
 pytestmark = [pytest.mark.unit, pytest.mark.microservice]
 
 
@@ -95,26 +94,6 @@ def test_normalized_valid_dataset_and_optional_sidecar(tmp_path):
     selected = select_single_shapefile_dataset(extracted)
     assert selected.prefix_path.name == 'caf\u00e9'
     assert selected.prefix_path.with_suffix('.shp').exists()
-
-
-def test_actual_driver_rejects_disguised_geojson(tmp_path):
-    path = tmp_path / 'disguised.shp'
-    path.write_text('{"type":"FeatureCollection","features":[]}')
-    with pytest.raises(ValueError):
-        worker._load_shapefile_payload(shp_path=path, max_features=10, max_vertices_per_feature=10)
-
-
-def test_exact_driver_checked_before_dataset_access(tmp_path, monkeypatch):
-    class WrongDriver:
-        driver = 'GeoJSON'
-        def __enter__(self): return self
-        def __exit__(self, *args): return False
-        @property
-        def bounds(self):
-            pytest.fail('dataset bounds read before driver rejection')
-    monkeypatch.setattr(worker.fiona, 'open', lambda *a, **k: WrongDriver())
-    with pytest.raises(ValueError, match='driver'):
-        worker._load_shapefile_payload(shp_path=tmp_path / 'input.shp', max_features=10, max_vertices_per_feature=10)
 
 
 def test_json_duplicate_and_overflow_are_rejected_by_decoder():
@@ -221,6 +200,9 @@ def test_invalid_wkt_is_canonical_and_contains_no_payload(tmp_path):
     assert error.value.code == 'invalid_shapefile'
     assert 'private-crs-canary' not in error.value.details
 
+    loaded = convert._loaded_shapefile_from_payload(decoded, ignore_source_crs=True)
+    assert loaded.source_crs is None
+
 
 @pytest.mark.parametrize('geometry', [
     {'type': 'MultiLineString', 'coordinates': [[], [[1, 2], [2, 3]]]},
@@ -238,11 +220,10 @@ def test_malformed_multipart_returns_canonical_error(tmp_path, geometry):
 
 def test_worker_diagnostics_are_discarded(tmp_path, monkeypatch):
     from types import SimpleNamespace
-    (tmp_path / 'diagnostic_probe.py').write_text(
-        'import os\nos.write(1, b"private-value" * 100000)\n'
-        'os.write(2, b"\\xff" * 1000000)\nraise SystemExit(1)\n')
-    monkeypatch.setenv('PYTHONPATH', str(tmp_path))
-    monkeypatch.setattr(convert, '_PARSER_WORKER_MODULE', 'diagnostic_probe')
+    probe = tmp_path / 'diagnostic-probe'
+    probe.write_text('#!/bin/sh\nprintf private-value\nprintf private-value >&2\nexit 1\n')
+    probe.chmod(0o700)
+    monkeypatch.setenv('SHAPE_CONVERTER_PARSER_CLI', str(probe))
     with pytest.raises(ShapeConverterError) as error:
         convert._run_parser_worker(shp_path=tmp_path / 'a.shp', output_path=tmp_path / 'result.json',
                                    scratch=SimpleNamespace(request_dir=tmp_path))

@@ -45,6 +45,7 @@ When a dependency is promoted with performance or capability claims: treat marke
 | 2026-11 | joserfc 1.8.0 with Authlib 1.9.1 | conditional candidate; clean build and final scan/gates required | `docs/work-packages/20261110_wepp1_dependency_security_gate/artifacts/20261112_oauth_implementation.md` |
 | 2026-11 | libpass 1.9.3 | accept isolated compatibility candidate replacing Passlib; final gates pending | `docs/work-packages/20261110_wepp1_dependency_security_gate/artifacts/20261112_python_compatibility.md` |
 | 2026-11 | golang-jwt/jwt/v5 v5.3.1 | accept for stream verification | `docs/work-packages/20261111_status_preflight_websocket_authorization/artifacts/20261111_dependency_evaluation.md` |
+| 2026-11 | shapefile 0.9.0 (`shape_parser_cli`) | accept as bounded GDAL/Fiona replacement | `docs/work-packages/20261113_shape_converter_security_conformance/artifacts/20261114_rust_parser_dependency_evaluation.md` |
 | 2026-03 | raster_tools (USDA RMRS) | defer | `docs/work-packages/20260303_raster_tools_crosswalk_benchmarks/artifacts/adoption_recommendation.md` |
 
 Add new rows as evaluations complete. Link to the work package recommendation artifact, not raw data.

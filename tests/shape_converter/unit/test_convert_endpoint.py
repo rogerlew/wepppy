@@ -34,11 +34,6 @@ shape_converter_crs_module = importlib.import_module("wepppy.microservices.shape
 shape_converter_serialization_module = importlib.import_module(
     "wepppy.microservices.shape_converter.serialization"
 )
-shape_converter_parser_worker_module = importlib.import_module(
-    "wepppy.microservices.shape_converter.convert_parser_worker"
-)
-
-
 def test_convert_geojson_wgs84_download_and_metadata_sidecar() -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads"))
 
@@ -907,10 +902,9 @@ def test_convert_parser_worker_uses_minimal_environment(
 
     assert worker_stdout == ""
     assert worker_stderr == ""
-    assert observed_env["PATH"] == "/usr/bin"
-    assert observed_env["PYTHONPATH"] == "/workdir/wepppy"
     assert observed_env["LC_ALL"] == "C"
     assert observed_env["LANG"] == "C"
+    assert set(observed_env) == {"LC_ALL", "LANG"}
     assert "SHAPE_CONVERTER_TEST_SECRET" not in observed_env
 
 
@@ -1063,65 +1057,6 @@ def test_convert_parser_loop_timeout_cancels_processing_and_cleans_scratch(
     assert payload["error"]["code"] == "request_timeout"
     assert observed_cancel["value"] is True
     assert list(tmp_path.iterdir()) == []
-
-
-def test_parser_worker_applies_parser_egress_guards_and_driver_allowlist(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path,
-) -> None:  # noqa: ANN001
-    captured_options: dict[str, str] = {}
-    captured_open: dict[str, object] = {}
-
-    class _FakeEnv:
-        def __init__(self, **kwargs):  # noqa: ANN003
-            captured_options.update({str(key): str(value) for key, value in kwargs.items()})
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):  # noqa: ANN001
-            return False
-
-    class _FakeDataset:
-        driver = "ESRI Shapefile"
-        bounds = (10.0, 20.0, 10.0, 20.0)
-        crs_wkt = None
-        crs = {}
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):  # noqa: ANN001
-            return False
-
-        def __iter__(self):
-            return iter(())
-
-    monkeypatch.setattr(shape_converter_parser_worker_module.fiona, "Env", _FakeEnv)
-
-    def _fake_open(path: str, *, enabled_drivers: list[str] | None = None):  # noqa: ANN001
-        captured_open["path"] = path
-        captured_open["enabled_drivers"] = enabled_drivers
-        return _FakeDataset()
-
-    monkeypatch.setattr(shape_converter_parser_worker_module.fiona, "open", _fake_open)
-    monkeypatch.setattr(
-        shape_converter_parser_worker_module,
-        "parse_source_crs",
-        lambda **_kwargs: None,
-    )
-
-    payload = shape_converter_parser_worker_module._load_shapefile_payload(
-        shp_path=tmp_path / "roads.shp",
-        max_features=10,
-        max_vertices_per_feature=250000,
-    )
-
-    assert payload["source_bounds"] == (10.0, 20.0, 10.0, 20.0)
-    assert captured_open["enabled_drivers"] == ["ESRI Shapefile"]
-    assert captured_options["CPL_VSIL_CURL_ALLOWED_EXTENSIONS"] == ""
-    assert captured_options["GDAL_DISABLE_READDIR_ON_OPEN"] == "EMPTY_DIR"
-    assert captured_options["GDAL_HTTP_MAX_RETRY"] == "0"
 
 
 def test_load_shapefile_invokes_worker_subprocess_with_new_session(

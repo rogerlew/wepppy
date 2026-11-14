@@ -8,19 +8,21 @@ plan and `tracker.md` at every stopping point.
 ## Purpose / Big Picture
 
 After this work, uploaded shapefiles are admitted through one unambiguous archive
-and driver contract; native parsing occurs in an effective second sandbox; and
-the parent accepts only bounded data-only parser output. A compromised or
-malfunctioning parser cannot use its IPC channel to execute in the parent, read
-parent-only files, write outside request output, use the network, signal the API
-process, or evade timeout cleanup. Valid GeoJSON and GeoParquet conversions retain
-their existing semantics.
+contract and parsed by a narrow memory-safe Rust implementation instead of
+GDAL/Fiona. The parser runs as a short-lived CLI with strict JSON IPC, hard wall-
+time and process-group termination, directly proven CPU/memory/file/output
+limits, and request cleanup. Valid GeoJSON and GeoParquet conversions retain
+their existing semantics. This plan no longer claims containment of arbitrary
+code execution inside the outer container; that residual risk is explicit.
 
 The proof combines change-scoped hostile-boundary tests, valid-output semantic
 readback, and production-equivalent runtime inspection. Do not run the full
-repository suite or unrelated shape-converter/frontend/service suites. This plan
-records current parser dependency evidence. The operator later authorized a
-dedicated shape-converter image with an upgraded coherent GDAL/Fiona stack; the
-common WEPPpy image remains unchanged.
+repository suite or unrelated shape-converter/frontend/service suites. The
+operator narrowed M4 to a service-local lightweight Rust parser CLI
+after deciding that the goal is to remove GDAL/Fiona's hostile binary parsing
+risk rather than contain arbitrary parser code execution. The locally qualified
+GDAL/Fiona image remains a parity reference until the Rust path passes every
+gate; it is not the final parser architecture.
 
 ## Progress
 
@@ -30,21 +32,35 @@ common WEPPpy image remains unchanged.
       the operator's GDAL-upgrade deferral.
 - [x] (2026-11-14 05:13 UTC) Run scoped baseline: 136 passed; reproduce IPC,
       Unicode/case-fold alias, and incomplete-prefix gaps with disposable probes.
-- [ ] M0: finish full red inventory (driver, semantic, ratio, and error cases remain).
-- [ ] M0: approve a sandbox mechanism. Bubblewrap startup prerequisite failed
-      under existing restrictions; independent security review confirms stop gate.
-- [ ] M0: approve a compression-ratio threshold ADR if the control is retained.
+- [x] (2026-11-14) M0: finish the red inventory, including malformed binary
+      headers/counts, semantic drift, resource ceilings, and image dependencies.
+- [x] (2026-11-14) M0 parser replacement selected: a service-local lightweight
+      Rust CLI in the existing hardened container, with no Python extension or
+      in-process native parser path. Dependency/limit evaluation remains before code.
+- [x] (2026-11-14) M0 compression decision: retain absolute quotas and do not
+      introduce a ratio threshold; no parameterization change or ADR is required.
 - [x] (2026-11-14) Independent slice contract reviewed and committed as
       checkpoint ancestor `6712ba631`; full sandbox/compression decisions pending.
-- [ ] M1: retain focused failing tests at each confirmed boundary.
+- [x] (2026-11-14) M1: retain focused tests at each confirmed IPC, archive,
+      semantic, provenance, malformed-binary, and resource boundary.
 - [x] (2026-11-14) Independent M2: data-only JSON IPC, structural budgets,
       exact driver, and bounded fixed worker error mapping implemented.
 - [x] (2026-11-14) Independent M3 slice: NFC/case-fold aliases and extra
       incomplete/optional prefixes rejected.
 - [x] (2026-11-14 06:56 UTC) Implement and locally qualify the operator-approved
       minimal dedicated shape-converter image using GDAL 3.12.4 and Fiona 1.10.1.
-- [ ] M3 remainder: compression decision and broader semantic matrix.
-- [ ] M4: implement effective second sandbox and runtime-derived readiness.
+- [x] (2026-11-14) M3 remainder: absolute-quota compression policy and broader
+      point/line/polygon/Z/null/MultiPatch/DBF/output semantic matrix validated.
+- [x] (2026-11-14) M4A: evaluate and ratify the Rust `shapefile` dependency, single-crate CLI
+      contract, and enforceable resource-limit mechanism.
+- [x] (2026-11-14) M4B: implement Rust semantic parity and hostile-input limits in
+      the service-local parser crate, backed by direct Rust tests and a bounded
+      malformed-binary mutation corpus.
+- [x] (2026-11-14) M4C: integrate `shape_parser_cli`, process-group timeout/kill, per-process
+      resource limits, fail-closed Python launcher, and runtime-derived readiness.
+- [x] (2026-11-14) M4D implementation: remove Fiona/GDAL parsing from the
+      production API image after
+      exact artifact parity, containment, dependency, and rollback gates pass.
 - [x] (2026-11-14) M5 dedicated candidate: image identity,
       dependency/linkage, resolved Compose, artifact, and vulnerability-scan
       evidence captured; operator-approved one-worker command passed exact-image
@@ -55,9 +71,39 @@ common WEPPpy image remains unchanged.
       rollout gates.
 - [x] (2026-11-14) Commit the reviewed dedicated-image implementation as
       `73ed430d4`; no image publication or deployment occurred.
-- [ ] M6: validate, review, update GitHub issues, and prepare separate rollout.
+- [ ] M6: scoped validation and exact-image evidence pass; independent final
+      review, GitHub disposition, and separately authorized rollout remain.
+- [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
+      exact Rust-CLI evidence and retain it open for independent residual-risk
+      acceptance.
 
 ## Surprises & Discoveries
+
+- Fiona has no non-GDAL parser backend; Pyogrio also uses GDAL. The existing
+  strict JSON payload means M4 does not require Fiona API compatibility: a Rust
+  parser can preserve the internal payload contract instead. The Rust
+  `shapefile` crate supports the required shape families, including Z/M and
+  MultiPatch, and its current reader includes explicit malformed-allocation and
+  record-size overflow hardening. This is candidate evidence, not dependency
+  approval; WEPPpy fixture parity and hostile-input evaluation remain mandatory.
+- A Python extension imported by the API would make parser panic, hang,
+  allocation, and unsafe-code failures API-process failures. A small service-local
+  Rust executable avoids that coupling while retaining a short-lived child,
+  strict JSON result, and hard resource limits.
+- The crate accepted a forged SHP file-length header and classified a
+  counterclockwise first polygon ring as an inner ring. WEPPpy now validates
+  SHP/SHX magic, version, and declared length before parsing, and consistently
+  inverts ring classification when the first ring establishes reversed
+  orientation. Both discoveries are retained as direct regressions.
+- A low `RLIMIT_AS` probe terminated through allocation failure without
+  publishing output. The CLI now also sets `RLIMIT_CORE=0` before hostile
+  parsing so a panic/abort/resource kill cannot create a core artifact.
+- The final Python slim digest contained two reachable zlib High findings with
+  a fixed Debian security build. The runtime installs that exact fixed zlib;
+  the remaining High scanner records describe command, privileged-local,
+  SQLite extension, gettext environment, Perl document/archive, or unused C++/
+  glibc function paths outside this service contract and require final security
+  review rather than being hidden.
 
 - Starlette 1.3.1 removed the `@app.middleware` convenience decorator. The
   dedicated image caught this at startup even though the common runtime tests
@@ -121,6 +167,29 @@ common WEPPpy image remains unchanged.
 
 ## Decision Log
 
+- Decision: implement M4 as one lightweight service-local Rust CLI crate, not as
+  a `wepppyo3` component, Python extension, or new parser microservice.
+  Rationale: the operator set the goal to replace GDAL/Fiona with a safer,
+  narrow-format parser. A CLI preserves process isolation, timeout/kill, fixed
+  exit codes, strict JSON IPC, and enforceable CPU/memory/file/output limits
+  without adding a service, protocol, network, shared volume, or deployment
+  topology. The crate preserves the current strict JSON response schema and may
+  use ordinary internal modules without creating a separately published library.
+  The existing dedicated GDAL image remains a parity oracle until the Rust
+  candidate passes all gates.
+  Date/Author: 2026-11-14, operator and Codex.
+
+- Decision: amend the #656 threat model rather than claim a second sandbox.
+  Rationale: replacing the memory-unsafe, broad-driver GDAL/Fiona parser removes
+  the failure class that motivated the second sandbox. The Rust CLI remains in
+  the API container and therefore does not contain arbitrary code execution from
+  that container's UID, mounts, or network. This residual risk is explicit and
+  requires independent security review and operator acceptance before #656 may
+  close as superseded by parser replacement. This authorization does not permit
+  a queue, datastore, Docker socket, privileged launcher, new service, or silent
+  Python/PyO3/GDAL fallback.
+  Date/Author: 2026-11-14, operator and Codex.
+
 - Decision: change the production command from two Uvicorn workers to one.
   Rationale: exact-command QA proved that the current in-memory abuse controls
   and conversion metadata cannot satisfy service-level behavior across two
@@ -181,17 +250,31 @@ common WEPPpy image remains unchanged.
   validation before object construction is mandatory.
   Date/Author: 2026-11-14, Codex; pending M0 contract review.
 
-- Decision: prototype one per-parser sandbox inside the existing hardened service
-  container before considering a parser service.
-  Rationale: it is the smallest topology-preserving path. Escalation requires
-  retained production-equivalent evidence that it cannot satisfy the acceptance
-  tests under the non-root container.
-  Date/Author: 2026-11-14, Codex; pending dependency evaluation/operator review.
+- Decision: the original second-sandbox requirement is superseded for M4 only
+  after the Rust cutover gates pass.
+  Rationale: both user-namespace unshare and Bubblewrap failed under the exact
+  non-root, capability-free, read-only, no-new-privileges constraints. That
+  retained evidence rules out the smallest namespace mechanisms without weakening
+  outer protections. The operator chose parser replacement plus bounded CLI
+  execution instead of topology escalation. Until GDAL/Fiona is absent from the
+  production parsing path, the existing second-sandbox finding remains open.
+  Date/Author: 2026-11-14, operator and Codex.
 
 - Decision: do not choose a compression-ratio threshold in this scaffold.
-  Rationale: a new workflow cutoff requires an ADR with valid-fixture and hostile
-  evidence plus a named decision owner. Existing absolute quotas remain active.
-  Date/Author: 2026-11-14, Codex.
+  Rationale: compressed-upload, total-uncompressed, member, scratch, parser-input,
+  and output limits already bound the resource exposure. A ratio-only cutoff can
+  reject small legitimate highly compressible datasets without lowering those
+  ceilings. Because no numeric default/formula changed, no ADR is required; any
+  future ratio remains a new governed decision.
+  Date/Author: 2026-11-14, Codex under the operator-approved package execution.
+
+- Decision: ship an adjacent executable-specific JSON provenance sidecar.
+  Rationale: the operator requested provenance similar to the jimf-cligen532
+  pattern. `shape_parser_cli.json` binds binary hash/size/version/ELF identity,
+  source manifest and revision, Cargo lock, compiler, command, and build time.
+  Build and readiness validate the pair. The sidecar is not a signature; the
+  immutable image digest remains the authenticity boundary.
+  Date/Author: 2026-11-14, operator and Codex.
 
 - Decision: validation is limited to tests and runtime probes that exercise the
   changed boundaries; no full repository suite is required.
@@ -214,7 +297,17 @@ The dedicated candidate is now locally qualified. See
 The image split removed common secrets, mounts, datastore coupling, and unrelated
 source from the resolved service while preserving the outer container controls.
 Exact-image health, GeoJSON, GeoParquet, cleanup, and hostile-IPC probes passed.
-This outcome does not change the open second-sandbox or deployment gates.
+This outcome did not change the then-open second-sandbox or deployment gates.
+The later Rust CLI amendment replaces the sandbox objective only after the full
+GDAL/Fiona removal and residual-risk acceptance gates pass.
+
+M4 is implemented and locally validated. The service-local Rust parser matches
+the retained Fiona/GDAL oracle for the accepted semantic matrix; CPU, memory,
+file, output, input, feature, vertex, timeout, and cleanup boundaries have direct
+evidence; readiness validates the executable/sidecar pair and executes a real
+fixture; and the exact image cannot load Fiona/GDAL. The package remains open
+only for genuinely independent final review, GitHub disposition, and separately
+authorized rollout. No production deployment occurred.
 
 ## Context and Orientation
 
@@ -227,16 +320,22 @@ switch branches.
 extracts ZIP members into a request root. `inspect.py` selects a shared-prefix
 `.shp/.shx/.dbf` dataset and reads bounded shapefile, DBF, and projection
 metadata. `convert.py` invokes `convert_parser_worker.py` with a hard timeout and
-process-group termination. The worker opens through Fiona/GDAL, accumulates
-properties/geometries, and currently writes pickle; the parent currently
-`pickle.load`s it before validating the mapping. `app.py` readiness currently
-compares declared sandbox-mode strings and toolchain/scratch availability.
+process-group termination. The worker currently opens through Fiona/GDAL and
+writes strict JSON through `parser_ipc.py`; the parent validates byte, depth,
+value, schema, geometry, and quota constraints before object construction.
+`app.py` readiness still compares declared sandbox-mode strings and
+toolchain/scratch availability, which is not effective containment evidence.
 
 The current production Compose definition hardens the whole service container
 and attaches it to an internal network. The parser process still shares that
-container's user, mounts, namespace, and service process context. The required
-second sandbox must be effective at every native parse, expose only the minimum
-request-specific paths, and be observable through a real probe or attestation.
+container's user, mounts, namespace, and service process context. M4 adds one
+service-local Rust binary crate at
+`wepppy/microservices/shape_converter/rust/shape_parser_cli`. The Python API
+launches the binary against the already admitted request-local components, gives
+it a single output path, enforces a hard wall-clock timeout, and validates the
+existing strict JSON payload. The CLI is a reliability and resource boundary,
+not a second security sandbox; arbitrary code execution would retain the outer
+container's UID, mounts, and network authority.
 
 The canonical behavior and risk matrix live in
 `wepppy/microservices/shape_converter/docs/specification.md`. Historical
@@ -282,6 +381,43 @@ not sandbox evidence or release acceptance; production readiness remains
 nonconformant until M4. A clean image split does not satisfy the second-sandbox
 acceptance criterion, close issue #656, or authorize production deployment.
 
+## Rust parser CLI amendment (2026-11-14)
+
+The operator selects a lightweight Rust CLI owned by the shape-converter service
+instead of a `wepppyo3` component, second parser sandbox, or microservice. Add one
+binary crate at `wepppy/microservices/shape_converter/rust/shape_parser_cli`.
+Use private Rust modules or a crate-local library target only when they materially
+improve direct testing; do not create a public Rust API or Python binding. The
+production WEPPpy API must never import or call the parser in-process. No new container,
+network protocol, socket, queue, datastore, daemon, shared volume, Docker socket,
+or privilege is authorized.
+
+The CLI accepts only the selected `.shp` path, its same-prefix admitted
+components, one output path inside the same request scratch directory, and the
+existing feature/vertex/payload limits. It returns no Python object. Success is
+an atomically published strict JSON payload using exactly `properties`,
+`geometries`, `source_bounds`, and `source_crs_wkt`; failure uses fixed exit codes
+and generic bounded stderr. The parent discards diagnostics, validates the output
+again through `parser_ipc.py`, and never falls back to Fiona/GDAL or PyO3.
+
+The CLI applies ratified process limits before reading hostile component data:
+address-space or equivalent memory, CPU seconds, output file size, open files,
+and any other limit proven reliable in the production image. The Python parent
+creates a new process group, enforces the existing wall-clock deadline, kills the
+entire group on timeout/cancellation, rejects partial output, and removes request
+scratch. The outer container retains its non-root UID, read-only root, dropped
+capabilities, no-new-privileges, PID/memory/CPU limits, hardened tmpfs, no secrets
+or host data mounts, and internal/no-egress network policy.
+
+The external Rust `shapefile` crate and its DBF/encoding dependency graph require
+the repository dependency-evaluation gates before adoption. The evaluation must
+inspect unsafe code and transitive dependencies, malformed-input allocation and
+overflow behavior, release/maintenance history, license, encoding behavior, and
+all required geometry families. The retained Fiona/GDAL worker and exact d515
+image are development parity oracles only until cutover. After activation,
+rollback may select the last independently approved Rust-CLI image or disable
+conversion; it must not silently restore GDAL/Fiona parsing.
+
 ## Plan of Work
 
 ### Milestone 0: Baseline, decisions, and contract checkpoint
@@ -301,14 +437,17 @@ available, user, mounts, namespaces, network, seccomp/AppArmor status, `ogr2ogr`
 version, Fiona-linked GDAL, PROJ/GEOS versions, and native linkage. This is
 baseline evidence, not permission to change a dependency.
 
-Evaluate one in-container sandbox candidate under
-`docs/standards/dependency-evaluation-standard.md`. Prefer a mechanism that runs
-as the existing non-root user without a daemon, host socket, writable root,
-privilege/capability increase, or new network service. Prototype it in the exact
-production-equivalent container constraints. Demonstrate minimal read-only input,
-write-only or narrowly writable output, no network, bounded processes/files/CPU/
-memory/wall time, and termination of descendants. If no candidate meets these
-conditions, stop and retain the failure evidence; do not create a parser service.
+Treat the retained unshare and Bubblewrap failures as the completed evidence for
+not pursuing a nested second sandbox. Evaluate the Rust `shapefile` crate and the
+single `shape_parser_cli` crate under
+`docs/standards/dependency-evaluation-standard.md`. Prototype the standalone CLI
+from the WEPPpy service-local crate in the exact hardened API image. Demonstrate process-
+group timeout and descendant termination; enforceable wall-time, CPU, memory,
+open-file, output, and payload limits; cleanup; API survival after parser panic,
+abort, malformed input, and limit exhaustion; and exact shape/DBF/CRS semantics
+against the retained oracle. Stop before production integration if dependency,
+parity, resource, recovery, or residual-risk review fails; do not weaken outer
+container protections to compensate.
 
 Prepare a parameterization ADR before adding a compression-ratio cutoff. Measure
 valid archive ratios from committed or approved fixtures and compare bounded bomb
@@ -346,13 +485,17 @@ Replace helper-only assumptions with direct boundary tests:
 - Add bounded semantic fixtures for DBF/SHP count mismatch, invalid/truncated
   sidecars, geometry validity/type/coordinates, field-name collisions, and
   record/value limits according to the ratified contract.
-- Add sandbox probes for parent-canary read, out-of-root write, socket open,
-  signal/process escape, descendant timeout, partial output, and cleanup.
+- Add Rust CLI probes for allocation and CPU exhaustion, output/file/open-file
+  limits, panic/abort, descendant timeout, partial output, API recovery, and
+  cleanup. Retain the historical sandbox probes as evidence explaining why this
+  plan explicitly accepts same-container authority rather than claiming it is
+  denied.
 
-Tests must invoke the actual changed serializer, Fiona/GDAL open, archive
-extractor, and sandbox where those are the failure boundaries. Mocks may isolate
-unrelated HTTP or slow infrastructure but cannot stand in for the boundary being
-claimed safe.
+Tests must invoke the actual changed serializer, archive extractor, Rust parser,
+CLI launcher, and limit mechanism where those are the failure boundaries. The
+retained oracle tests invoke Fiona/GDAL only for parity before cutover. Mocks may
+isolate unrelated HTTP but cannot stand in for a claimed resource or parser
+boundary.
 
 Milestone acceptance: each test fails for the intended current gap and retains
 bounded, non-secret red evidence.
@@ -399,32 +542,79 @@ to stable canonical errors without exposing raw uploaded content or host paths.
 Milestone acceptance: archive and semantic rows in the conformance table have
 direct tests and no accepted valid-control regression.
 
-### Milestone 4: Effective second sandbox and readiness
+### Milestone 4: Rust parser replacement and bounded CLI execution
 
-Wrap every native parser-worker launch with the approved sandbox. Expose only
-the selected request input and the single output target/containing directory;
-deny the service source, parent-only canary, unrelated scratch roots, credentials,
-network, signals, and additional process creation beyond the ratified minimum.
-Keep the existing outer container controls and process-group timeout escalation.
+M4A establishes the dependency and CLI contracts before integration. Add one
+reviewed binary crate at
+`wepppy/microservices/shape_converter/rust/shape_parser_cli`. Evaluate the Rust
+`shapefile` crate and its full dependency graph under the WEPPpy dependency
+standard. Freeze CLI arguments,
+component and aggregate byte caps, fixed exit/error codes, process limits, and
+the existing strict JSON success schema in cross-repository golden fixtures.
+Record exact behavior for point, multipoint, polyline, polygon, Z/M variants,
+MultiPatch, null shapes, DBF primitive/null/date/logical values, deleted records,
+encodings, `.prj`, `.cpg`, bounds, ring orientation, record alignment, malformed
+indexes, truncation, and unsupported values. A candidate that cannot preserve a
+ratified behavior must fail the gate rather than silently normalize it.
 
-Do not fall back to direct worker execution if the sandbox is absent or fails.
-Make readiness run or consume a freshness-bounded attestation from the same
-sandbox launcher and policy used by real requests. The probe must demonstrate
-effective restrictions, not compare caller-supplied labels. Avoid leaking mount,
-host, image, or policy internals in the public readiness response; retain detailed
-operator evidence in safe logs/receipts.
+M4B implements parsing inside the lightweight CLI crate without Python-extension
+or service concerns. Private modules accept bounded component readers and return
+Rust types that serialize exactly to the current parser JSON schema. Enforce
+feature, per-feature vertex, nesting,
+finite-number, allocation, and diagnostic limits during parsing, before large
+allocation where possible. Add unit, property, and bounded fuzz-corpus tests for
+valid parity and malformed length/count/offset/part/DBF inputs. Keep evidence
+labels precise: Rust memory safety narrows the native attack surface but does not
+prove freedom from denial-of-service, logic, dependency, or unsafe-code defects.
 
-Milestone acceptance: #656 containment probes pass in the built container;
-readiness fails closed for missing/ineffective policy; valid conversion parity,
-timeout, descendant kill, and scratch cleanup pass.
+M4C integrates `shape_parser_cli` as a standalone Rust binary, not a Python
+extension. It accepts the selected `.shp` and output paths plus explicit limits,
+discovers only same-prefix admitted sidecars, applies per-process resource limits
+before parsing, invokes its private parser modules, and atomically writes bounded JSON.
+It never opens URLs, loads format plugins, spawns helpers, accepts arbitrary
+driver names, or emits uploaded values/paths in diagnostics. Unit tests prove
+that every limit is active rather than merely configured.
 
-### Milestone 5: Current dependency evidence without upgrade
+In WEPPpy, replace `convert_parser_worker.py` production invocation with a narrow
+CLI launcher adjacent to `parser_ipc.py`. It creates a new process group, passes
+only request-local paths and numeric limits, discards stdout/stderr, maps fixed
+exit codes to canonical errors, enforces the wall-clock deadline, kills the whole
+group on timeout/cancellation, validates the bounded JSON output, and cleans all
+scratch. Do not retain a direct Fiona/GDAL or in-process PyO3 fallback. The
+current Fiona/GDAL path may coexist only in test/parity tooling that cannot be
+selected by production configuration or make readiness green.
 
-Build the exact candidate with no GDAL/Fiona/PROJ/GEOS version edits. Record
-image identity, package sources, `ogr2ogr --version`, Fiona's linked GDAL,
-PROJ/GEOS versions, `ldd`/equivalent native linkage, and available SBOM/scan
-results. Triage findings for reachability through the admitted Shapefile driver
-and actual build configuration. Do not claim a static CVE list is current.
+M4D replaces sandbox-label comparison with effective parser readiness. The API
+performs a freshness-bounded miniature parse through the exact CLI executable,
+process limits, timeout, JSON validation, and cleanup path used by conversions.
+The public response reports only ready/not-ready; detailed binary identity,
+limit enforcement, timing, and failure evidence stays in safe logs/receipts.
+Hostile probes demonstrate that malformed input, excessive allocation, CPU
+exhaustion, oversize output, panic/abort, timeout, and cancellation do not leave
+partial output or scratch and that the outer service recovers according to the
+documented container restart/health contract.
+
+Milestone acceptance: direct Rust and cross-language golden tests pass; the exact
+image proves active wall-time, CPU, memory, open-file, output, payload, feature,
+and vertex limits; timeout/cancellation kill the parser process group; readiness
+fails closed for an absent, stale, incompatible, or failing CLI; valid GeoJSON
+and GeoParquet artifact readback matches the retained GDAL/Fiona oracle; the
+production image and source contain no Fiona/GDAL hostile parsing or in-process
+PyO3 parser path; and independent correctness, QA, operations, and security
+reviews approve the explicit same-container residual risk. Only then may #656 be
+closed as superseded by removal of the GDAL/Fiona failure class, not as proof of
+a second sandbox.
+
+### Milestone 5: Exact transitional and Rust-CLI dependency evidence
+
+Retain the already qualified GDAL/Fiona image identity, linkage, SBOM/scan, and
+request-path dispositions as the transitional oracle. Build and inventory the
+exact API image containing `shape_parser_cli` but no Fiona/GDAL parser libraries.
+Record source revisions, Cargo lock identity, `shape_parser_cli --version`, crate
+provenance, unsafe-code inventory, native linkage, image digest, SBOM, scan, and
+runtime configuration. Triage findings against the actual parser, encoding,
+JSON, CLI, and output paths. Do not claim that Rust, a clean scan, or absence of
+GDAL proves security.
 
 If a reachable Critical issue is confirmed, mark the package blocked at the
 release gate, retain the evidence, and request a separate remediation decision.
@@ -432,8 +622,9 @@ Do not change dependency versions under this plan. High findings require the
 security review's explicit disposition and operator decision under the package
 closure policy.
 
-Milestone acceptance: reproducible current-runtime receipt with no hidden version
-change and an evidence-backed reachable-risk disposition.
+Milestone acceptance: reproducible transitional and final receipts, no hidden
+dependency or native linkage, complete reachable-risk dispositions, and evidence
+that the production image cannot load Fiona/GDAL or the parser through PyO3.
 
 ### Milestone 6: Validation, review, and handoff
 
@@ -468,21 +659,37 @@ Baseline and change-scoped iteration:
     wctl run-pytest tests/shape_converter/unit/test_health_routes.py tests/shape_converter/unit/test_runtime_hardening.py --maxfail=1
     wctl run-pytest tests/shape_converter/integration/test_inspect_api.py tests/shape_converter/integration/test_convert_api.py tests/shape_converter/integration/test_runtime_hardening_api.py --maxfail=1
 
+From
+`/workdir/wepppy/wepppy/microservices/shape_converter/rust/shape_parser_cli`,
+validate the service-local Rust parser:
+
+    cargo fmt --check
+    cargo test --locked
+    cargo tree --locked
+    cargo build --release --locked
+
+Run the new cross-boundary WEPPpy tests from `/workdir/wepppy`:
+
+    wctl run-pytest tests/shape_converter/unit/test_rust_parser_cli.py tests/shape_converter/unit/test_parser_ipc.py --maxfail=1
+    wctl run-pytest tests/shape_converter/integration/test_rust_parser_semantics.py tests/shape_converter/integration/test_parser_ipc_semantics.py --maxfail=1
+    wctl run-pytest tests/docker/unit/test_project_config_rollout_contract.py --maxfail=1
+
 Source and hygiene checks:
 
-    rg -n "pickle|fiona\.open|enabled_drivers|dataset\.driver|SANDBOX_MODE|subprocess\.Popen" wepppy/microservices/shape_converter tests/shape_converter docker
+    rg -n "pickle|fiona\.open|enabled_drivers|dataset\.driver|SANDBOX_MODE|subprocess\.Popen|shape_parser_cli" wepppy/microservices/shape_converter tests/shape_converter docker
     python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master
 
 If and only if the implementation changes imports or test stubs:
 
     wctl check-test-stubs
 
-Dedicated candidate container and dependency evidence:
+Transitional oracle and Rust-CLI candidate evidence:
 
     docker compose -f docker/docker-compose.dev.yml build shape-converter
     docker compose -f docker/docker-compose.dev.yml up -d shape-converter caddy
-    docker exec wepppy-shape-converter ogr2ogr --version
-    docker exec wepppy-shape-converter /opt/venv/bin/python -c "import fiona, pyproj; print(fiona.__version__, fiona.__gdal_version__, pyproj.__version__, pyproj.proj_version_str)"
+    docker exec wepppy-shape-converter /usr/local/bin/shape_parser_cli --version
+    docker inspect wepppy-shape-converter
+    docker exec wepppy-shape-converter /opt/venv/bin/python -c "import importlib.util; assert importlib.util.find_spec('fiona') is None"
 
 Compose image-split regression and merged-configuration checks:
 
@@ -510,14 +717,19 @@ types with the pre-change baseline.
 The hostile matrix contains object-capable/non-JSON IPC, over-size/depth/item
 payloads, non-finite numbers, schema mismatch, Unicode aliases, extra prefixes,
 compression edges, disguised drivers, malformed/truncated sidecars, semantic
-mismatches, parent-canary read, out-of-root write, socket open, process/signal
-escape, timeout, cancellation, and partial output. Each must fail at the expected
-boundary with a canonical bounded error and empty request scratch after response.
+mismatches, malformed Rust record lengths/counts/offsets/parts/DBF values,
+allocation exhaustion, CPU exhaustion, output growth, panic/abort, timeout,
+cancellation, descendant survival, and partial output. Each must fail at the
+expected boundary with a canonical bounded error and empty request scratch after
+response; the API must remain healthy or recover through the documented outer-
+container restart contract.
 
-An HTTP 200, a process exit code, a matching environment string, or an output
-file's existence is insufficient. Read back the effective sandbox restrictions
-and parse output semantics. Do not state "fixed" or close #655/#656 before the
-exact candidate passes its required evidence boundary.
+An HTTP 200, a process exit code, a matching environment string, a Rust
+implementation, or an output file's existence is insufficient. Exercise every
+CLI and outer-container resource limit, verify that no GDAL/Fiona or in-process
+parser path exists, and parse output semantics. Do not state "fixed" or close
+#656 before the exact Rust-CLI candidate passes its amended evidence boundary and
+the residual-risk review is accepted.
 
 ## Idempotence and Recovery
 
@@ -526,10 +738,11 @@ canaries. Re-running them must not mutate committed fixtures, shared projects, o
 production data. Preserve useful failed-attempt logs/receipts without retaining
 hostile uploaded content or secrets.
 
-Serializer and sandbox changes must fail closed. Rollback cannot restore pickle
-IPC or a direct unsandboxed parser path; if a broader application rollback is
-necessary, retain equivalent guards or disable conversion until a safe candidate
-is active. Archive threshold rollback follows its ADR. No data migration exists.
+Serializer and Rust-CLI changes must fail closed. Rollback cannot silently restore
+pickle IPC, direct Fiona/GDAL parsing, or an in-process PyO3 parser path. If the
+last approved Rust-CLI image cannot be restored, disable conversion until a safe
+candidate is active. Archive threshold rollback follows its ADR. No persisted
+run-data migration exists.
 
 ## Artifacts and Notes
 
@@ -537,10 +750,10 @@ Retain under this package:
 
 - baseline and final source/runtime inventories;
 - contract checkpoint and independent review dispositions;
-- compression-policy ADR link and sandbox dependency evaluation;
+- compression-policy ADR link and Rust parser/resource-limit dependency evaluation;
 - bounded red/green transcripts and fixture manifests/hashes;
 - semantic parity report for GeoJSON/GeoParquet;
-- sandbox policy, probe, denial, timeout, and cleanup receipts;
+- CLI identity, limit, denial, timeout, process-group kill, and cleanup receipts;
 - exact revision, container identity, native versions/linkage, SBOM/scan, and CVE
   dispositions;
 - completed code, QA, correctness, and security reviews; and
@@ -554,13 +767,27 @@ production tokens, or raw metadata sidecar content.
 
 Preserve the existing public endpoints, multipart fields, response/error schema,
 output media types, filenames, request-scoped cleanup, and independent uploads.
-The worker IPC is private and may change to the ratified JSON schema. Use existing
-`ShapeConverterError`, `ArchiveLimits`, `RequestScratchLayout`, process-group
-termination, and safe logging/error utilities.
+Use existing `ShapeConverterError`, `ArchiveLimits`, `RequestScratchLayout`,
+strict `parser_ipc.py` validation, and safe logging/error utilities.
 
-One sandbox dependency may be added only after the M0 evaluation and reviewed
-contract checkpoint. No other runtime dependency is authorized. GDAL, Fiona,
-PROJ, and GEOS versions are frozen for this package.
+Add one binary crate at
+`wepppy/microservices/shape_converter/rust/shape_parser_cli`. It owns
+Shapefile/DBF parsing, bounded semantic normalization, CLI validation, early
+resource-limit application, fixed exit codes, atomic bounded JSON publication,
+version reporting, and self-test behavior. Keep parser modules private to the
+crate unless a crate-local library target is justified for tests. It is not a
+WEPPpy-wide Rust API and is not installed as a Python module.
+
+The API owns process-group creation, wall-clock deadline, cancellation/kill,
+scratch cleanup, and validation of every success response through the existing
+Python decoder. The CLI receives only request-local paths and numeric limits. The
+Rust `shapefile` crate and any new resource-limit dependencies require explicit
+dependency-evaluation evidence and lockfile review before merge.
+
+The current GDAL/Fiona versions remain frozen in the transitional oracle. They
+must not be copied into the final production image. PyProj/Shapely may remain in
+the API for validated CRS/output operations, but raw Shapefile bytes must reach
+only `shape_parser_cli`.
 
 Revision note, 2026-11-14: initial scaffold created from the 2026-11-13 security
 contract review. Added explicit GDAL-upgrade deferral, bounded topology, governed
@@ -572,3 +799,18 @@ failed sandbox prerequisite, and independent review; retained M0 stop gate.
 
 Revision note (2026-11-14, independent slice): operator-approved sequencing is
 implemented; record local evidence separately from remaining sandbox/release gates.
+
+Revision note (2026-11-14, Rust M4): replaced the failed second-sandbox plan with
+an operator-selected service-local lightweight Rust CLI. The revision
+sets parser replacement, not arbitrary-code containment, as the goal; prohibits
+production in-process PyO3/GDAL fallback; defines CLI/resource/readiness gates;
+and retains the qualified GDAL image only as a parity oracle before cutover.
+
+Revision note (2026-11-14, ownership correction): removed `wepppyo3` and a
+separate parser-core crate from M4. The parser is one shape-converter-owned Rust
+binary crate with private modules, minimizing release and repository coupling.
+
+Revision note (2026-11-14, M4 implementation): implemented the CLI and adjacent
+JSON provenance sidecar, removed the Fiona worker/runtime, proved resource and
+semantic behavior, patched the final image's fixed zlib build, and retained exact
+SBOM/scan evidence. Independent signoff and rollout remain outside local proof.
