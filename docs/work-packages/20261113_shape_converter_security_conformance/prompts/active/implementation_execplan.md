@@ -80,6 +80,10 @@ gate; it is not the final parser architecture.
       aggregate resource envelope; and deploy-time readiness with service
       takedown on failure. Focused requalification and independent re-review
       remain.
+- [x] (2026-11-14) Rebuild release-mode candidate from committed revision
+      `21a12c9d0`, validate exact-image provenance, hardening, output semantics,
+      single-flight near-ceiling rejection/recovery, cleanup, and persist pinned
+      Syft/Grype reports. Independent re-review remains.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
@@ -357,7 +361,13 @@ SHP/SHX/DBF streams, validates sidecar source-manifest consistency, pins Debian
 package resolution, reduces overlapping resource ceilings, runs its real parser
 canary once at startup, and makes the canonical deployment stop the converter on
 candidate failure. This is implementation status, not independent acceptance;
-the package and #656 remain open pending exact-image evidence and re-review.
+the package and #656 remain open pending independent re-review.
+
+The remediation candidate at `21a12c9d0` has now passed local exact-image
+requalification. See the
+[receipt](../../artifacts/20261114_rust_cli_remediation_requalification.md).
+This closes the local evidence portion only; independent re-review and rollout
+authorization remain open, so the package is not complete.
 
 ## Context and Orientation
 

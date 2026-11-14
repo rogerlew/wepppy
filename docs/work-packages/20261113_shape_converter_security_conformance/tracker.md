@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 (M6 remediation implemented; requalification pending)
-**Current phase**: M6 exact-image requalification
+**Last updated**: 2026-11-14 (M6 exact-image requalification passed)
+**Current phase**: M6 independent re-review pending
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
@@ -60,6 +60,9 @@ pre-cutover oracle
       execution, exact SHP/SHX/DBF cardinality, startup canary, strengthened
       provenance/reproducibility, bounded aggregate resource envelope, and
       deploy-time fail-closed service takedown.
+- [x] M6 exact-image requalification at `21a12c9d0`: provenance-identical build,
+      output readback, single-flight near-ceiling recovery, cleanup, and pinned
+      Syft/Grype evidence passed.
 - [x] Close #655 after its strict data-only IPC acceptance passed; comment on
       #656 with final local evidence and keep it open for independent residual-
       risk acceptance.
@@ -198,6 +201,15 @@ pre-cutover oracle
   noted in current execution evidence; exact-image qualification and independent
   re-review are still required.
 
+- 2026-11-14: release-mode image
+  `sha256:ec4872021957fd5cb37b3a554537051bf5843be533dbb30276a014e328ab3921`
+  was built from commit `21a12c9d0`. Provenance/source hashes, startup canary,
+  hardening, GeoJSON/GeoParquet readback, empty scratch, and a 235,000-record
+  bounded rejection/recovery probe passed. Peak cgroup memory was 453,931,008
+  bytes; a competing request received 503; the service remained healthy and was
+  not OOM-killed. Exact Syft/Grype reports retain the previously reviewed counts
+  and dispositions. No production deployment occurred.
+
 ## Handoff
 
 M4 implementation and local validation are complete but independent M6 review
@@ -206,8 +218,7 @@ failed. See the
 and final Rust-CLI evidence/review artifacts. No production deployment occurred;
 do not infer approval for privileges, a parser service, or topology changes.
 
-Next checkpoint: commit the remediation, rebuild from that committed tree,
-repeat exact-image qualification, and obtain independent re-review before
-updating #656.
+Next checkpoint: obtain independent re-review of the exact remediation candidate
+before updating #656 or authorizing rollout.
 Complete Syft/Grype JSON is retained in package artifacts, and the exact image
 proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.
