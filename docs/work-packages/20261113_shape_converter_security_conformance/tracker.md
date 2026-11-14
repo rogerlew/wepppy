@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 UTC (Rust CLI implementation locally validated)
-**Current phase**: M6 independent review and issue disposition
+**Last updated**: 2026-11-14 19:28 UTC (independent review failed)
+**Current phase**: M6 independent-review remediation
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
@@ -52,7 +52,10 @@ pre-cutover oracle
       one-worker repair; broader M6 and rollout gates remain open.
 - [x] M6: run change-scoped shape-converter and production-equivalent gates; no
       full repository or unrelated suite.
-- [ ] M6: close code, QA, correctness, and security reviews.
+- [x] M6: complete independent code, QA, correctness, security, and operations
+      reviews of `fe5ac7c1c`.
+- [ ] M6: remediate and independently re-review the retained findings; current
+      verdict is FAIL/HOLD.
 - [x] Close #655 after its strict data-only IPC acceptance passed; comment on
       #656 with final local evidence and keep it open for independent residual-
       risk acceptance.
@@ -165,14 +168,24 @@ pre-cutover oracle
   `sha256:d3605b92360eaf65f8c1c2d72bac0c0d9c44a0c096776e4cb7edebbbde1fca41`.
   Independent final review and rollout remain open.
 
+- 2026-11-14 19:28 UTC: independent code, correctness, QA, security, and
+  operations reviews of `fe5ac7c1c` returned FAIL/HOLD. Confirmed blockers
+  include synchronous parser execution on the sole ASGI worker, silent feature
+  loss for mismatched SHP/SHX/DBF records, an unproven aggregate memory
+  envelope, missing deploy-time readiness and rollback gates, incomplete
+  semantic/resource coverage, and a qualified image not provenance-identical to
+  the committed source. #656 remains open; no rollout is authorized.
+
 ## Handoff
 
-M4 implementation and local validation are complete. See the
+M4 implementation and local validation are complete but independent M6 review
+failed. See the
 [dependency evaluation](artifacts/20261114_rust_parser_dependency_evaluation.md)
 and final Rust-CLI evidence/review artifacts. No production deployment occurred;
 do not infer approval for privileges, a parser service, or topology changes.
 
-Next checkpoint: obtain genuinely independent acceptance of the same-container
-residual authority and exact-image finding dispositions, then update #655/#656.
+Next checkpoint: remediate the independent findings, rebuild from the committed
+tree, repeat exact-image qualification, and obtain independent re-review before
+updating #656.
 Complete Syft/Grype JSON is retained in package artifacts, and the exact image
 proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.

@@ -71,13 +71,28 @@ gate; it is not the final parser architecture.
       rollout gates.
 - [x] (2026-11-14) Commit the reviewed dedicated-image implementation as
       `73ed430d4`; no image publication or deployment occurred.
-- [ ] M6: scoped validation and exact-image evidence pass; independent final
-      review, GitHub disposition, and separately authorized rollout remain.
+- [ ] M6: scoped validation and exact-image evidence pass, but independent final
+      review of `fe5ac7c1c` returned FAIL/HOLD. Remediation, requalification,
+      re-review, GitHub disposition, and separately authorized rollout remain.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
 
 ## Surprises & Discoveries
+
+- Independent M6 review reproduced silent feature loss when SHP contains an
+  extra valid record not represented by SHX/DBF. Zipping shape and DBF iterators
+  hides the extra shape; exact stream cardinality and SHX entry validation are
+  required.
+- The synchronous child wait runs on the sole ASGI event loop. The child timeout
+  bounds duration, but client cancellation, concurrent health, and request-level
+  cleanup cannot execute while `communicate()` blocks.
+- Individually valid scratch, parser, upload, payload, and container limits do
+  not yet establish a safe aggregate memory invariant beneath the 1 GiB cgroup.
+- Exact-image provenance exposed a useful distinction: the candidate passed its
+  own binary binding but was built from worktree content whose `Cargo.toml` does
+  not match commit `fe5ac7c1c`. Requalification must start from the committed
+  tree and inject the released revision through the canonical deploy path.
 
 - Fiona has no non-GDAL parser backend; Pyogrio also uses GDAL. The existing
   strict JSON payload means M4 does not require Fiona API compatibility: a Rust
@@ -648,6 +663,13 @@ documentation matches effective behavior, the common image remains unchanged,
 the dedicated dependency upgrade is exactly evidenced, and status language
 distinguishes implementation, local validation, environment validation, and
 deployment.
+
+Independent review result (2026-11-14): FAIL/HOLD. Retained review artifacts
+identify High blockers in parser cancellation/event-loop availability and
+deploy readiness/rollback, plus Medium correctness, aggregate-memory,
+provenance, semantic-matrix, vulnerability-disposition, and reproducibility
+findings. Do not close #656 or roll out until remediation and independent
+re-review pass.
 
 ## Concrete Steps
 

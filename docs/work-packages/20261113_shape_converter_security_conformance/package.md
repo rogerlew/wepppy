@@ -234,6 +234,14 @@ Rust CLI implementation reviews (self-review; independent M6 signoff pending):
 - [Security review](artifacts/20261114_rust_cli_security_review.md)
 - [Qualification receipt](artifacts/20261114_rust_cli_qualification.md)
 
+Independent M6 reviews of `fe5ac7c1c` (FAIL/HOLD; remediation required):
+
+- [Code review](artifacts/20261114_rust_cli_independent_code_review.md)
+- [Correctness review](artifacts/20261114_rust_cli_independent_correctness_review.md)
+- [QA review](artifacts/20261114_rust_cli_independent_qa_review.md)
+- [Security review](artifacts/20261114_rust_cli_independent_security_review.md)
+- [Operations review](artifacts/20261114_rust_cli_independent_operations_review.md)
+
 ## Hardening and Recurrence
 
 - **Health signals**: data-only schema accepted; actual Rust CLI parse and binary
