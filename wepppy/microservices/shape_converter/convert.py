@@ -723,37 +723,94 @@ async def _run_parser_worker(
 
 
 async def _terminate_process_group(process: asyncio.subprocess.Process) -> None:
-    if process.returncode is not None:
-        return
-
     pid = process.pid
     if pid is None:
-        process.kill()
+        if process.returncode is None:
+            process.kill()
+            await process.wait()
         return
 
     try:
         os.killpg(pid, signal.SIGTERM)
     except ProcessLookupError:
+        if process.returncode is None:
+            await process.wait()
         return
 
-    try:
-        await asyncio.wait_for(
-            process.wait(),
-            timeout=_PARSER_SUBPROCESS_KILL_GRACE_SECONDS,
-        )
+    if await _wait_for_process_group_exit(
+        process,
+        process_group_id=pid,
+        timeout=_PARSER_SUBPROCESS_KILL_GRACE_SECONDS,
+    ):
         return
-    except TimeoutError:
-        pass
 
     try:
         os.killpg(pid, signal.SIGKILL)
     except ProcessLookupError:
-        return
+        pass
+
+    # Do not release the request slot or scratch ownership while any descendant
+    # remains in the parser's session. SIGKILL is not catchable; an uninterruptible
+    # kernel wait may delay this cleanup, which is safer than returning early.
+    await _wait_for_process_group_exit(
+        process,
+        process_group_id=pid,
+        timeout=None,
+    )
+
+
+def _process_group_exists(process_group_id: int) -> bool:
+    proc_root = Path("/proc")
+    try:
+        proc_entries = proc_root.iterdir()
+    except OSError:
+        proc_entries = None
+    if proc_entries is not None:
+        try:
+            for entry in proc_entries:
+                if not entry.name.isdigit():
+                    continue
+                try:
+                    stat_text = (entry / "stat").read_text(encoding="utf-8")
+                    stat_fields = stat_text.rpartition(") ")[2].split()
+                    state = stat_fields[0]
+                    member_process_group = int(stat_fields[2])
+                except (IndexError, OSError, ValueError):
+                    continue
+                if member_process_group == process_group_id and state != "Z":
+                    return True
+            return False
+        except OSError:
+            pass
 
     try:
-        await asyncio.wait_for(process.wait(), timeout=1)
-    except TimeoutError:
-        pass
+        os.killpg(process_group_id, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+async def _wait_for_process_group_exit(
+    process: asyncio.subprocess.Process,
+    *,
+    process_group_id: int,
+    timeout: float | None,
+) -> bool:
+    loop = asyncio.get_running_loop()
+    deadline = None if timeout is None else loop.time() + timeout
+    while _process_group_exists(process_group_id):
+        if deadline is not None:
+            remaining = deadline - loop.time()
+            if remaining <= 0:
+                return False
+            await asyncio.sleep(min(0.01, remaining))
+        else:
+            await asyncio.sleep(0.01)
+    if process.returncode is None:
+        await process.wait()
+    return True
 
 
 def _remove_parser_outputs(output_path: Path) -> None:

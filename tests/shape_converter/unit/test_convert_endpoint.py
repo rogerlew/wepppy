@@ -1200,6 +1200,9 @@ def test_load_shapefile_timeout_kills_worker_process_group(
         returncode = None
 
         async def wait(self):
+            if signal.SIGKILL in signals_sent:
+                self.returncode = -signal.SIGKILL
+                return self.returncode
             await asyncio.sleep(10)
             return 0
 
@@ -1217,6 +1220,11 @@ def test_load_shapefile_timeout_kills_worker_process_group(
         shape_converter_convert_module.os,
         "killpg",
         lambda _pid, sig: signals_sent.append(sig),
+    )
+    monkeypatch.setattr(
+        shape_converter_convert_module,
+        "_process_group_exists",
+        lambda _pid: signal.SIGKILL not in signals_sent,
     )
     scratch = SimpleNamespace(request_dir=tmp_path)
 

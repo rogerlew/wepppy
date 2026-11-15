@@ -59,10 +59,12 @@ def _run_deploy(
     controller_build_failure: bool = False,
     shape_readiness_failure: bool = False,
     shape_stop_failure: bool = False,
+    shape_discovery_failure: bool = False,
     shape_ps_failure: bool = False,
     shape_git_status_failure: bool = False,
     shape_build_inputs_clean: bool = True,
     shape_dirty_build_input: str = "wepppy/microservices/shape_converter/convert.py",
+    compose_files: str | None = None,
     lock_held: bool = False,
     skip_docker_prune: bool = True,
 ) -> tuple[subprocess.CompletedProcess[str], list[str]]:
@@ -80,6 +82,8 @@ printf 'wctl|%s\n' "$*" >> "${FAKE_COMMAND_LOG}"
 args="$*"
 if [[ "${args}" == *"config --services"* ]]; then
     printf '%s\n' "${FAKE_SERVICES}"
+elif [[ "${args}" == *"show-compose-files"* ]]; then
+    printf '%s\n' "${FAKE_COMPOSE_FILES}"
 elif [[ "${args}" == *"config --format json"* ]]; then
     printf '%s\n' "${FAKE_CONFIG}"
 elif [[ "${args}" == *"docker compose config"* ]]; then
@@ -259,6 +263,26 @@ elif [ "${1:-}" = "image" ] && [ "${2:-}" = "inspect" ]; then
             printf 'sha-candidate\n'
         fi
     fi
+elif [ "${1:-}" = "ps" ] && [[ "$*" == *"com.docker.compose.service=shape-converter"* ]]; then
+    shape_ps_calls=0
+    [ ! -f "${FAKE_SHAPE_PS_CALL_COUNT}" ] \
+        || shape_ps_calls="$(cat "${FAKE_SHAPE_PS_CALL_COUNT}")"
+    shape_ps_calls=$((shape_ps_calls + 1))
+    printf '%s\n' "${shape_ps_calls}" > "${FAKE_SHAPE_PS_CALL_COUNT}"
+    if [ "${FAKE_SHAPE_DISCOVERY_FAILURE:-0}" = 1 ] && [ "${shape_ps_calls}" -eq 1 ]; then
+        exit 82
+    fi
+    if [ "${FAKE_SHAPE_PS_FAILURE:-0}" = 1 ] && [ "${shape_ps_calls}" -ge 2 ]; then
+        exit 82
+    fi
+    if [ ! -f "${FAKE_SHAPE_STOPPED_MARKER}" ]; then
+        printf 'cid-shape-converter\n'
+    fi
+elif [ "${1:-}" = "stop" ]; then
+    if [ "${FAKE_SHAPE_STOP_FAILURE:-0}" = 1 ]; then
+        exit 81
+    fi
+    : > "${FAKE_SHAPE_STOPPED_MARKER}"
 elif [ "${1:-}" = "compose" ]; then
     if [[ "$*" == *" up -d --no-deps --force-recreate cap"* ]] \
         && [ "${FAKE_RECOVERY_FAILURE:-0}" = 1 ]; then
@@ -374,6 +398,14 @@ exec /bin/cp "$@"
         if not isinstance(definition, dict)
         or (definition.get("deploy") or {}).get("replicas") != 0
     ]
+    if compose_files is None:
+        if "weppcloud" in services:
+            compose_files = "docker/docker-compose.prod.yml"
+        elif set(services) == {"rq-worker-fork-archive"}:
+            compose_files = "docker/docker-compose.prod.wepp3.yml"
+        else:
+            compose_files = "docker/docker-compose.prod.worker.yml"
+
     environment = os.environ.copy()
     environment.update(
         {
@@ -382,6 +414,7 @@ exec /bin/cp "$@"
             "FAKE_RQ_PROBE_RESULT": rq_probe_result,
             "FAKE_COMMAND_LOG": str(command_log),
             "FAKE_SERVICES": "\n".join(services),
+            "FAKE_COMPOSE_FILES": compose_files,
             "FAKE_CONFIG": json.dumps({"services": services}),
             "FAKE_PS": json.dumps(records),
             "FAKE_CANDIDATE_MISMATCH": "1" if candidate_mismatch else "0",
@@ -421,11 +454,13 @@ exec /bin/cp "$@"
             "FAKE_CONTROLLER_FAILURE": "1" if controller_build_failure else "0",
             "FAKE_SHAPE_READINESS_FAILURE": "1" if shape_readiness_failure else "0",
             "FAKE_SHAPE_STOP_FAILURE": "1" if shape_stop_failure else "0",
+            "FAKE_SHAPE_DISCOVERY_FAILURE": "1" if shape_discovery_failure else "0",
             "FAKE_SHAPE_PS_FAILURE": "1" if shape_ps_failure else "0",
             "FAKE_SHAPE_GIT_STATUS_FAILURE": "1" if shape_git_status_failure else "0",
             "FAKE_SHAPE_BUILD_INPUTS_CLEAN": "1" if shape_build_inputs_clean else "0",
             "FAKE_SHAPE_DIRTY_BUILD_INPUT": shape_dirty_build_input,
             "FAKE_SHAPE_STOPPED_MARKER": str(tmp_path / "shape-stopped"),
+            "FAKE_SHAPE_PS_CALL_COUNT": str(tmp_path / "shape-ps-call-count"),
             "CAP_RUNTIME_VALIDATOR": str(cap_validator),
             "CAP_RUNTIME_PREPARER": str(cap_preparer),
             "WEPPCLOUDR_RUNTIME_VALIDATOR": str(weppcloudr_validator),
@@ -462,7 +497,11 @@ exec /bin/cp "$@"
         )
     finally:
         lock_handle.close()
-    commands = command_log.read_text(encoding="utf-8").splitlines()
+    commands = (
+        command_log.read_text(encoding="utf-8").splitlines()
+        if command_log.exists()
+        else []
+    )
     return result, commands
 
 
@@ -549,7 +588,7 @@ def test_stale_renderer_is_rejected_before_cap_preparation_or_activation(tmp_pat
     assert not any(command.startswith("cap-validator|") for command in commands)
     assert not any(command.startswith("cap-preparer|") for command in commands)
     assert not any("docker compose stop cap" in command for command in commands)
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert not any(_RQ_SUSPEND in command or _RQ_RESUME in command for command in commands)
     assert not any(command.startswith("docker|system prune") for command in commands)
@@ -589,8 +628,8 @@ def test_shape_readiness_failure_stops_converter_and_never_reports_success_or_pr
 
     assert result.returncode != 0
     readiness = _position(commands, "/utils/shape-converter/health/ready")
-    stop = _position(commands, "stop --timeout 30 shape-converter")
-    down_check = _position(commands, "ps -q shape-converter")
+    stop = _position(commands, "docker|stop --time 30 cid-shape-converter")
+    down_check = _position(commands, "docker|ps -q --filter label=com.docker.compose.service=shape-converter")
     assert readiness < stop < down_check
     assert "shape-converter is down" in result.stderr
     assert not any(command.startswith("docker|system prune") for command in commands)
@@ -606,8 +645,23 @@ def test_shape_readiness_failure_detects_stop_failure(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 88
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
     assert "SHAPE_CONVERTER_FAIL_CLOSED_FAILED" in result.stderr
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_shape_readiness_failure_detects_container_discovery_failure(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        shape_readiness_failure=True,
+        shape_discovery_failure=True,
+    )
+
+    assert result.returncode == 88
+    assert any("docker|ps -aq" in command for command in commands)
+    assert not any("docker|stop --time 30" in command for command in commands)
+    assert "unable to discover service containers" in result.stderr
     assert "Deployment complete!" not in result.stdout
 
 
@@ -620,8 +674,8 @@ def test_shape_readiness_failure_detects_state_verification_failure(tmp_path: Pa
     )
 
     assert result.returncode == 88
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
-    assert any("ps -q shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
+    assert any("com.docker.compose.service=shape-converter" in command for command in commands)
     assert "unable to verify service state" in result.stderr
     assert "Deployment complete!" not in result.stdout
 
@@ -635,8 +689,8 @@ def test_shape_release_build_rejects_dirty_inputs_even_with_skip_pull(tmp_path: 
 
     assert result.returncode != 0
     assert "inputs differ from HEAD" in result.stderr
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
-    assert any("ps -q shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
+    assert any("com.docker.compose.service=shape-converter" in command for command in commands)
     assert not any("build --no-cache" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert "Deployment complete!" not in result.stdout
@@ -654,8 +708,8 @@ def test_shape_release_build_rejects_dirty_dockerfile_specific_ignore(
 
     assert result.returncode != 0
     assert "Dockerfile.shape-converter.dockerignore" in result.stderr
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
-    assert any("ps -q shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
+    assert any("com.docker.compose.service=shape-converter" in command for command in commands)
     assert not any("build --no-cache" in command for command in commands)
     assert not any("up -d" in command for command in commands)
 
@@ -672,8 +726,8 @@ def test_shape_release_build_rejects_dirty_production_compose_with_skip_pull(
 
     assert result.returncode != 0
     assert "docker/docker-compose.prod.yml" in result.stderr
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
-    assert any("ps -q shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
+    assert any("com.docker.compose.service=shape-converter" in command for command in commands)
     assert not any("build --no-cache" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert "Deployment complete!" not in result.stdout
@@ -690,8 +744,8 @@ def test_shape_release_build_rejects_git_status_failure_and_stops_service(
 
     assert result.returncode != 0
     assert "unable to inspect build inputs" in result.stderr
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
-    assert any("ps -q shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
+    assert any("com.docker.compose.service=shape-converter" in command for command in commands)
     assert not any("build --no-cache" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert "Deployment complete!" not in result.stdout
@@ -707,8 +761,34 @@ def test_shape_release_rejects_effective_service_without_build_contract(
 
     assert result.returncode != 0
     assert "without the reviewed shape-converter service/build contract" in result.stderr
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
-    assert any("ps -q shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
+    assert any("com.docker.compose.service=shape-converter" in command for command in commands)
+    assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_clean_full_preset_stops_labeled_orphan_when_shape_service_is_missing(
+    tmp_path: Path,
+) -> None:
+    services = _full_services_with_shape_converter()
+    services.pop("shape-converter")
+
+    result, commands = _run_deploy(tmp_path, services)
+
+    assert result.returncode != 0
+    discovery = _position(
+        commands,
+        "docker|ps -aq --filter label=com.docker.compose.service=shape-converter",
+    )
+    stop = _position(commands, "docker|stop --time 30 cid-shape-converter")
+    verification = _position(
+        commands,
+        "docker|ps -q --filter label=com.docker.compose.service=shape-converter",
+    )
+    assert discovery < stop < verification
+    assert "without the reviewed shape-converter service/build contract" in result.stderr
+    assert "shape-converter is down" in result.stderr
     assert not any("build --no-cache" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert "Deployment complete!" not in result.stdout
@@ -734,8 +814,32 @@ def test_shape_release_rejects_dirty_effective_contract_mutation(
 
     assert result.returncode != 0
     assert "docker/docker-compose.prod.yml" in result.stderr
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
-    assert any("ps -q shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
+    assert any("com.docker.compose.service=shape-converter" in command for command in commands)
+    assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_dirty_full_preset_cannot_reclassify_as_worker_to_bypass_shape_gate(
+    tmp_path: Path,
+) -> None:
+    services = _full_services_with_shape_converter()
+    services.pop("weppcloud")
+    services.pop("shape-converter")
+
+    result, commands = _run_deploy(
+        tmp_path,
+        services,
+        shape_build_inputs_clean=False,
+        shape_dirty_build_input="docker/docker-compose.prod.yml",
+        compose_files="docker/docker-compose.prod.yml",
+    )
+
+    assert result.returncode != 0
+    assert "docker/docker-compose.prod.yml" in result.stderr
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
+    assert any("com.docker.compose.service=shape-converter" in command for command in commands)
     assert not any("build --no-cache" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert "Deployment complete!" not in result.stdout
@@ -1209,7 +1313,7 @@ def test_shape_takedown_failure_precedes_cap_recovery_failure(tmp_path: Path) ->
     )
 
     assert result.returncode == 88
-    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
     assert "SHAPE_CONVERTER_FAIL_CLOSED_FAILED" in result.stderr
     assert "CAP_RESCUE_FAILED" in result.stderr
     assert "Deployment complete!" not in result.stdout

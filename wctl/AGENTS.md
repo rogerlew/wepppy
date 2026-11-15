@@ -78,6 +78,9 @@ The legacy man page has been retired; Typer help (`wctl --help`) is now the cano
 - `rq-info` inspects the effective Compose service list: it prefers `rq-worker`
   and falls back to `rq-worker-fork-archive` for the dedicated wepp3 topology;
   an explicit `--service` always wins.
+- `show-compose-files` reports the installed preset's base and override paths,
+  one per line. Deployment safety checks use it as intent independent of the
+  mutable rendered service set.
 - To exercise the prompt flow in non-interactive harnesses, temporarily prepend a mock `markdown-doc` binary (for example under `/tmp/mock-md`) so the command can complete without scanning the full repository.
 
 Keep this guide accurate. It’s the authoritative checklist agents should follow to keep the user experience consistent whenever wctl evolves.

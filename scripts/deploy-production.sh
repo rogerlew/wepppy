@@ -223,13 +223,30 @@ ensure_shape_converter_build_inputs_clean() {
 }
 
 stop_shape_converter_fail_closed() {
+    local -a container_id_list=()
+    local container_ids=""
     local running_container=""
     echo "✗ Deployment failed; stopping shape-converter instead of restoring an unreviewed parser." >&2
-    if ! wctl docker compose stop --timeout 30 shape-converter >/dev/null 2>&1; then
-        echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to stop the service" >&2
+    if ! container_ids="$(
+        docker ps -aq \
+            --filter "label=com.docker.compose.service=shape-converter" \
+            --filter "label=com.docker.compose.project.working_dir=${PROJECT_ROOT}/docker"
+    )"; then
+        echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to discover service containers" >&2
         return 88
     fi
-    if ! running_container="$(wctl docker compose ps -q shape-converter)"; then
+    if [ -n "${container_ids}" ]; then
+        readarray -t container_id_list <<< "${container_ids}"
+        if ! docker stop --time 30 "${container_id_list[@]}" >/dev/null 2>&1; then
+            echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to stop the service" >&2
+            return 88
+        fi
+    fi
+    if ! running_container="$(
+        docker ps -q \
+            --filter "label=com.docker.compose.service=shape-converter" \
+            --filter "label=com.docker.compose.project.working_dir=${PROJECT_ROOT}/docker"
+    )"; then
         echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to verify service state" >&2
         return 88
     fi
@@ -400,6 +417,39 @@ done
 cd "${PROJECT_ROOT}"
 
 configure_deploy_topology() {
+    if ! DEPLOY_PRESET_FILES="$(
+        capture_wctl_with_retry \
+            "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+            "${WCTL_COMPOSE_RETRIES}" \
+            "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+            show-compose-files
+    )"; then
+        echo "✗ Unable to identify the installed wctl deployment preset." >&2
+        if ! stop_shape_converter_fail_closed; then
+            exit 88
+        fi
+        exit 1
+    fi
+    FULL_STACK_DEPLOY_PRESET=false
+    if printf "%s\n" "${DEPLOY_PRESET_FILES}" \
+        | grep -qx "docker/docker-compose.prod.yml"; then
+        FULL_STACK_DEPLOY_PRESET=true
+    fi
+
+    if [ "${FULL_STACK_DEPLOY_PRESET}" = true ] \
+        && [ "${TARGETED_WEB}" = false ] \
+        && [ "${TARGETED_CAP}" = false ] \
+        && [ "${TARGETED_BATCH}" = false ] \
+        && [ "${PRINT_PLAN}" = false ]; then
+        if ! configure_shape_parser_release_provenance; then
+            if ! stop_shape_converter_fail_closed; then
+                exit 88
+            fi
+            exit 1
+        fi
+        SHAPE_RELEASE_PROVENANCE_CONFIGURED=true
+    fi
+
     COMPOSE_SERVICES="$(
         capture_wctl_with_retry \
             "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
@@ -436,6 +486,15 @@ configure_deploy_topology() {
         echo "  Effective services:" >&2
         printf "%s\n" "${COMPOSE_SERVICES}" | sed 's/^/    /' >&2
         echo "  Reinstall the intended wctl preset before deploying." >&2
+        if [ "${FULL_STACK_DEPLOY_PRESET}" = true ] \
+            && [ "${TARGETED_WEB}" = false ] \
+            && [ "${TARGETED_CAP}" = false ] \
+            && [ "${TARGETED_BATCH}" = false ] \
+            && [ "${PRINT_PLAN}" = false ]; then
+            if ! stop_shape_converter_fail_closed; then
+                exit 88
+            fi
+        fi
         exit 1
     fi
 
@@ -506,6 +565,18 @@ configure_deploy_topology() {
             validate-runtime-config "${RUNTIME_SERVICE_ARGS[@]}"
 }
 
+SHAPE_RELEASE_PROVENANCE_CONFIGURED=false
+if [ "${PRINT_PLAN}" = false ]; then
+    DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-${PROJECT_ROOT}/.git/wepppy-production-deploy.lock}"
+    if [ "${DEPLOY_LOCK_HELD_PID:-}" != "$$" ]; then
+        exec 9>"${DEPLOY_LOCK_FILE}"
+        if ! flock -n 9; then
+            echo "✗ Another deployment holds ${DEPLOY_LOCK_FILE}; refusing concurrent activation." >&2
+            exit 1
+        fi
+        export DEPLOY_LOCK_HELD_PID="$$"
+    fi
+fi
 configure_deploy_topology
 
 validate_deploy_topology() {
@@ -632,7 +703,7 @@ fi
 validate_deploy_topology
 
 SHAPE_CONVERTER_RELEASE_REQUIRED=false
-if [ "${DEPLOY_MODE}" = "full" ] \
+if [ "${FULL_STACK_DEPLOY_PRESET}" = true ] \
     && [ "${TARGETED_WEB}" = false ] \
     && [ "${TARGETED_CAP}" = false ] \
     && [ "${TARGETED_BATCH}" = false ]; then
@@ -642,7 +713,12 @@ elif printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter"; then
 fi
 
 if [ "${SHAPE_CONVERTER_RELEASE_REQUIRED}" = true ]; then
-    if ! configure_shape_parser_release_provenance \
+    SHAPE_RELEASE_PROVENANCE_FAILED=false
+    if [ "${SHAPE_RELEASE_PROVENANCE_CONFIGURED}" != true ] \
+        && ! configure_shape_parser_release_provenance; then
+        SHAPE_RELEASE_PROVENANCE_FAILED=true
+    fi
+    if [ "${SHAPE_RELEASE_PROVENANCE_FAILED}" = true ] \
         || ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "shape-converter" \
         || ! printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter" \
         || ! printf "%s\n" "${BUILD_SERVICES[@]}" | grep -qx "shape-converter"; then

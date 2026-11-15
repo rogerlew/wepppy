@@ -172,6 +172,7 @@ def test_shape_converter_deploy_contract_is_fail_closed() -> None:
 
     assert 'SHAPE_PARSER_SOURCE_REVISION="$(git rev-parse HEAD)"' in deploy
     assert "SHAPE_CONVERTER_FAIL_CLOSED=true" in deploy
-    assert "stop --timeout 30 shape-converter" in deploy
+    assert "label=com.docker.compose.service=shape-converter" in deploy
+    assert "docker stop --time 30" in deploy
     assert "shape-converter is down; no GDAL/Fiona or unreviewed parser fallback" in deploy
     assert "/utils/shape-converter/health/ready" in deploy

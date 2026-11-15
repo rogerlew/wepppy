@@ -783,7 +783,11 @@ def test_parser_cancellation_terminates_real_process_group(
 ) -> None:
     parser = tmp_path / "blocking-parser"
     parser.write_text(
-        "#!/bin/sh\nsleep 60 &\nchild=$!\nprintf '%s %s\\n' $$ \"$child\" > parser-pids\nwait\n",
+        "#!/bin/sh\n"
+        "sh -c 'trap \"\" TERM; sleep 60' &\n"
+        "child=$!\n"
+        "printf '%s %s\\n' $$ \"$child\" > parser-pids\n"
+        "wait\n",
         encoding="utf-8",
     )
     parser.chmod(0o755)
