@@ -42,8 +42,19 @@ def _multipatch_entries():
 
 
 def _semantic_datasets():
+    outer_one = (2, [(0., 0., 1.), (0., 3., 1.), (3., 3., 1.), (0., 0., 1.)])
+    outer_two = (2, [(10., 0., 1.), (10., 3., 1.), (13., 3., 1.), (10., 0., 1.)])
+    first_one = (4, outer_one[1])
+    first_two = (4, outer_two[1])
+    inner = (3, [(0.5, 0.5, 1.), (1., 0.5, 1.), (0.5, 1., 1.), (0.5, 0.5, 1.)])
+    fan = (1, [(20., 0., 1.), (21., 0., 1.), (21., 1., 1.), (20., 1., 1.)])
     datasets = {
         'multipoint_m': build_multipoint_dataset(prefix='multipoint-m', shape_type=28),
+        'polyline_m': build_multipart_dataset(
+            prefix='polyline-m',
+            shape_type=23,
+            parts=[[(0., 0.), (1., 1.)], [(2., 0.), (3., 1.)]],
+        ),
         'polygon_m': build_multipart_dataset(
             prefix='polygon-m',
             shape_type=25,
@@ -54,7 +65,27 @@ def _semantic_datasets():
         ),
         'multipatch_fan': build_multipatch_dataset(
             prefix='multipatch-fan',
-            parts=[(1, [(0., 0., 1.), (1., 0., 1.), (1., 1., 1.), (0., 1., 1.)])],
+            parts=[fan],
+        ),
+        'multipatch_strip': build_multipatch_dataset(
+            prefix='multipatch-strip',
+            parts=[(0, [(0., 0., 1.), (1., 0., 1.), (0., 1., 1.), (1., 1., 1.)])],
+        ),
+        'multipatch_inner': build_multipatch_dataset(
+            prefix='multipatch-inner',
+            parts=[outer_one, inner],
+        ),
+        'multipatch_two_outer': build_multipatch_dataset(
+            prefix='multipatch-two-outer',
+            parts=[outer_one, outer_two],
+        ),
+        'multipatch_two_first': build_multipatch_dataset(
+            prefix='multipatch-two-first',
+            parts=[first_one, first_two],
+        ),
+        'multipatch_mixed': build_multipatch_dataset(
+            prefix='multipatch-mixed',
+            parts=[outer_one, fan],
         ),
     }
     canonical_prj = build_minimal_point_dataset(prefix='crs')['crs.prj']
@@ -64,7 +95,29 @@ def _semantic_datasets():
     return datasets
 
 
-@pytest.mark.parametrize('dataset', ['multipoint_m', 'polygon_m', 'multipatch_fan'])
+def _plain_fiona_geometry(geometry):  # noqa: ANN001, ANN202
+    if geometry.type == 'GeometryCollection':
+        return {
+            'type': geometry.type,
+            'geometries': [_plain_fiona_geometry(member) for member in geometry.geometries],
+        }
+    return json.loads(json.dumps(geometry.__geo_interface__))
+
+
+@pytest.mark.parametrize(
+    'dataset',
+    [
+        'multipoint_m',
+        'polyline_m',
+        'polygon_m',
+        'multipatch_fan',
+        'multipatch_strip',
+        'multipatch_inner',
+        'multipatch_two_outer',
+        'multipatch_two_first',
+        'multipatch_mixed',
+    ],
+)
 def test_rust_parser_geometry_matches_retained_fiona_oracle(tmp_path, dataset):
     entries = _semantic_datasets()[dataset]
     source = tmp_path / 'source'
@@ -73,7 +126,7 @@ def test_rust_parser_geometry_matches_retained_fiona_oracle(tmp_path, dataset):
         (source / name).write_bytes(content)
     shp_path = next(source.glob('*.shp'))
     with fiona.open(shp_path) as collection:
-        fiona_geometry = next(iter(collection))['geometry'].__geo_interface__
+        fiona_geometry = _plain_fiona_geometry(next(iter(collection))['geometry'])
 
     output_path = source / 'payload.json'
     asyncio.run(convert._run_parser_worker(
@@ -83,13 +136,21 @@ def test_rust_parser_geometry_matches_retained_fiona_oracle(tmp_path, dataset):
     ))
     rust_geometry = json.loads(output_path.read_text(encoding='utf-8'))['geometries'][0]
 
-    assert rust_geometry == json.loads(json.dumps(fiona_geometry))
+    assert rust_geometry == fiona_geometry
 
 
 @pytest.mark.parametrize('output_format', ['geojson', 'geoparquet'])
 @pytest.mark.parametrize(
     'dataset',
-    ['point_null', 'multipatch', 'multipoint_m', 'polygon_m', 'multipatch_fan'],
+    [
+        'point_null',
+        'multipatch',
+        'multipoint_m',
+        'polyline_m',
+        'polygon_m',
+        'multipatch_fan',
+        'multipatch_two_outer',
+    ],
 )
 def test_real_worker_output_semantics_and_cleanup(tmp_path, output_format, dataset):
     if dataset == 'point_null':
@@ -150,23 +211,30 @@ def test_real_worker_output_semantics_and_cleanup(tmp_path, output_format, datas
     else:
         expected_types = {
             'multipoint_m': 'MultiPoint',
+            'polyline_m': 'MultiLineString',
             'polygon_m': 'MultiPolygon',
             'multipatch_fan': 'MultiPolygon',
+            'multipatch_two_outer': 'MultiPolygon',
         }
         assert properties == [{
             'NAME': {
                 'multipoint_m': 'multipoint',
+                'polyline_m': 'multipart',
                 'polygon_m': 'multipart',
                 'multipatch_fan': 'multipatch',
+                'multipatch_two_outer': 'multipatch',
             }[dataset]
         }]
         assert geometries[0]['type'] == expected_types[dataset]
         if dataset == 'multipoint_m':
             assert len(geometries[0]['coordinates']) == 2
             assert metadata['bbox'] == [10, 20, 12, 21]
-        elif dataset == 'polygon_m':
+        elif dataset in {'polyline_m', 'polygon_m'}:
             assert len(geometries[0]['coordinates']) == 2
             assert metadata['bbox'] == [0, 0, 3, 1]
+        elif dataset == 'multipatch_fan':
+            assert len(geometries[0]['coordinates']) == 2
+            assert metadata['bbox'] == [20, 0, 21, 1]
         else:
             assert len(geometries[0]['coordinates']) == 2
-            assert metadata['bbox'] == [0, 0, 1, 1]
+            assert metadata['bbox'] == [0, 0, 13, 3]

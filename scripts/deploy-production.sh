@@ -198,10 +198,11 @@ ensure_git_worktree_clean() {
 
 ensure_shape_converter_build_inputs_clean() {
     local build_input_changes=""
-    build_input_changes="$(
+    if ! build_input_changes="$(
         git status --porcelain=v1 --untracked-files=all -- \
             .dockerignore \
             docker/Dockerfile.shape-converter \
+            docker/Dockerfile.shape-converter.dockerignore \
             docker/docker-compose.prod.yml \
             docker/docker-compose.prod.wepp1.yml \
             docker/requirements-shape-converter.txt \
@@ -209,7 +210,10 @@ ensure_shape_converter_build_inputs_clean() {
             wepppy/microservices/__init__.py \
             wepppy/microservices/shape_converter \
             wepppy/observability
-    )"
+    )"; then
+        echo "✗ Refusing shape-converter release build: unable to inspect build inputs." >&2
+        return 1
+    fi
     if [ -n "${build_input_changes}" ]; then
         echo "✗ Refusing shape-converter release build: inputs differ from HEAD." >&2
         print_limited_list "  Dirty shape-converter build inputs:" "${build_input_changes}" 30 >&2
@@ -627,8 +631,22 @@ fi
 
 validate_deploy_topology
 
-if printf "%s\n" "${BUILD_SERVICES[@]}" | grep -qx "shape-converter"; then
-    if ! configure_shape_parser_release_provenance; then
+SHAPE_CONVERTER_RELEASE_REQUIRED=false
+if [ "${DEPLOY_MODE}" = "full" ] \
+    && [ "${TARGETED_WEB}" = false ] \
+    && [ "${TARGETED_CAP}" = false ] \
+    && [ "${TARGETED_BATCH}" = false ]; then
+    SHAPE_CONVERTER_RELEASE_REQUIRED=true
+elif printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter"; then
+    SHAPE_CONVERTER_RELEASE_REQUIRED=true
+fi
+
+if [ "${SHAPE_CONVERTER_RELEASE_REQUIRED}" = true ]; then
+    if ! configure_shape_parser_release_provenance \
+        || ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "shape-converter" \
+        || ! printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter" \
+        || ! printf "%s\n" "${BUILD_SERVICES[@]}" | grep -qx "shape-converter"; then
+        echo "✗ Refusing full activation without the reviewed shape-converter service/build contract." >&2
         if ! stop_shape_converter_fail_closed; then
             exit 88
         fi
@@ -957,16 +975,18 @@ recover_targeted_cap() {
         local rescue_caddy
         if ! rescue_caddy="$(docker compose -f "${CAP_RESCUE_CONFIG}" -f "${CAP_RESCUE_OVERRIDE}" ps -q caddy)"; then
             echo "✗ CAP_RESCUE_FAILED: unable to inspect Caddy" >&2
-            if ! resume_rq_if_owned; then return 87; fi
-            return 86
+            if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+            [ "${shape_shutdown_failed}" = false ] || return 88
+            return "${recovery_exit}"
         fi
         if [ -z "${rescue_caddy}" ] \
             || [ "$(docker inspect --format '{{.State.Running}}' "${rescue_caddy}" 2>/dev/null || true)" != "true" ]; then
             if ! docker compose -f "${CAP_RESCUE_CONFIG}" -f "${CAP_RESCUE_OVERRIDE}" \
                 up -d --no-deps caddy >/dev/null; then
                 echo "✗ CAP_RESCUE_FAILED: unable to restore Caddy" >&2
-                if ! resume_rq_if_owned; then return 87; fi
-                return 86
+                if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+                [ "${shape_shutdown_failed}" = false ] || return 88
+                return "${recovery_exit}"
             fi
         fi
         local recovery_cap_url="${CAP_HEALTHCHECK_URL}"
@@ -985,24 +1005,29 @@ recover_targeted_cap() {
                 if curl --connect-timeout 5 --max-time 10 -fsS "${recovery_cap_url}" >/dev/null; then
                     if ! resume_rq_if_owned; then
                         echo "✗ RQ_RESUME_FAILED after CAP recovery" >&2
+                        [ "${shape_shutdown_failed}" = false ] || return 88
                         return 87
                     fi
                     echo "✓ Known-good CAP rescue image restored; internal functional and public health passed" >&2
+                    [ "${shape_shutdown_failed}" = false ] || return 88
                     return "${recovery_exit}"
                 fi
                 sleep 2
             done
             echo "✗ CAP_RESCUE_FAILED: public CAP route did not recover" >&2
-            if ! resume_rq_if_owned; then return 87; fi
-            return 86
+            if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+            [ "${shape_shutdown_failed}" = false ] || return 88
+            return "${recovery_exit}"
         fi
         echo "✗ CAP_RESCUE_FAILED: no public CAP health URL could be resolved" >&2
-        if ! resume_rq_if_owned; then return 87; fi
-        return 86
+        if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+        [ "${shape_shutdown_failed}" = false ] || return 88
+        return "${recovery_exit}"
     else
         echo "✗ CAP_RESCUE_FAILED: rescue image retained as ${CAP_RESCUE_IMAGE}" >&2
-        if ! resume_rq_if_owned; then return 87; fi
-        return 86
+        if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+        [ "${shape_shutdown_failed}" = false ] || return 88
+        return "${recovery_exit}"
     fi
     [ "${shape_shutdown_failed}" = false ] || return 88
     return "${recovery_exit}"

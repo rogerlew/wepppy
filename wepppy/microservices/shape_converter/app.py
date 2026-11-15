@@ -289,7 +289,7 @@ def _run_janitor_sweep(app: Starlette, *, trigger: str) -> None:
 
 async def _run_janitor_loop(app: Starlette, stop_event: asyncio.Event) -> None:
     while not stop_event.is_set():
-        _run_janitor_sweep(app, trigger="periodic")
+        await run_blocking_phase(_run_janitor_sweep, app, trigger="periodic")
         try:
             await asyncio.wait_for(stop_event.wait(), timeout=_JANITOR_INTERVAL_SECONDS)
         except TimeoutError:
@@ -971,7 +971,7 @@ async def app_lifespan(app: Starlette):
     app.state.convert_metadata = OrderedDict()
     app.state.abuse_controls = AbuseControlState(abuse_control_config)
     app.state.janitor_stop_event = asyncio.Event()
-    _run_janitor_sweep(app, trigger="startup")
+    await run_blocking_phase(_run_janitor_sweep, app, trigger="startup")
     app.state.janitor_task = asyncio.create_task(
         _run_janitor_loop(app, app.state.janitor_stop_event),
         name="shape-converter-janitor",
@@ -991,7 +991,7 @@ async def app_lifespan(app: Starlette):
             except asyncio.CancelledError:
                 pass
 
-        _run_janitor_sweep(app, trigger="shutdown")
+        await run_blocking_phase(_run_janitor_sweep, app, trigger="shutdown")
         app.state.convert_metadata = {}
         app.state.startup_parser_ready = False
         app.state.bootstrapped = False

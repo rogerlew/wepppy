@@ -19,17 +19,15 @@ async def run_blocking_phase(
     """Run blocking work and retain ownership through repeated cancellation."""
 
     task = asyncio.create_task(asyncio.to_thread(function, *args, **kwargs))
+    drained = asyncio.gather(task, return_exceptions=True)
     cancelled = False
-    while not task.done():
+    while not drained.done():
         try:
-            await asyncio.shield(task)
+            await asyncio.shield(drained)
         except asyncio.CancelledError:
             # Threads cannot be killed safely. Every cancellation is deferred
             # until the bounded thread ends so admission and scratch stay owned.
             cancelled = True
     if cancelled:
-        # Retrieve any worker exception so cancellation does not leave an
-        # unobserved-task warning; cancellation remains the request contract.
-        task.exception()
         raise asyncio.CancelledError
     return task.result()

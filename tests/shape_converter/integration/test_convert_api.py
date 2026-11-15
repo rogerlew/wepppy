@@ -5,6 +5,7 @@ import concurrent.futures
 import importlib
 import json
 import threading
+import time
 from pathlib import Path
 
 import pytest
@@ -168,6 +169,33 @@ def test_blocked_request_cleanup_keeps_health_responsive(
 
     assert ready.status_code == 200
     assert completed.status_code == 200
+
+
+def test_blocked_periodic_janitor_keeps_health_responsive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    started = threading.Event()
+    release = threading.Event()
+    original_sweep = shape_converter_app_module._run_janitor_sweep
+
+    def _blocked_periodic_sweep(app, *, trigger):  # noqa: ANN001, ANN202
+        if trigger == "periodic":
+            started.set()
+            assert release.wait(timeout=10)
+        return original_sweep(app, trigger=trigger)
+
+    monkeypatch.setattr(
+        shape_converter_app_module,
+        "_run_janitor_sweep",
+        _blocked_periodic_sweep,
+    )
+
+    with TestClient(create_app()) as client:
+        assert started.wait(timeout=10)
+        ready = client.get("/health/ready")
+        release.set()
+
+    assert ready.status_code == 200
 
 
 def test_parser_abort_leaves_api_ready_and_no_partial_artifact(
@@ -537,6 +565,36 @@ def test_convert_parser_loop_timeout_returns_canonical_timeout_and_cleans_scratc
     payload = response.json()
     assert payload["error"]["code"] == "request_timeout"
     assert observed_cancel["value"] is True
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_convert_timeout_wins_over_late_blocking_worker_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:  # noqa: ANN001
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="late-failure"))
+
+    def _late_failure(**_kwargs):  # noqa: ANN003, ANN202
+        time.sleep(0.12)
+        raise RuntimeError("late worker failure")
+
+    monkeypatch.setattr(shape_converter_app_module, "_CONVERT_TIMEOUT_SECONDS", 0.03)
+    monkeypatch.setattr(
+        shape_converter_convert_module,
+        "_prepare_conversion_archive",
+        _late_failure,
+    )
+
+    with TestClient(create_app()) as client:
+        client.app.state.scratch_root = tmp_path
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("late-failure.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 408
+    assert response.json()["error"]["code"] == "request_timeout"
     assert list(tmp_path.iterdir()) == []
 
 

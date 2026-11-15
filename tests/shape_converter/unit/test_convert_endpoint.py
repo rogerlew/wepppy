@@ -86,6 +86,30 @@ def test_blocking_phase_retains_ownership_through_repeated_cancellation() -> Non
     asyncio.run(_exercise())
 
 
+def test_blocking_phase_preserves_cancellation_when_worker_later_fails() -> None:
+    started = threading.Event()
+    release = threading.Event()
+
+    def _failing_worker() -> None:
+        started.set()
+        assert release.wait(timeout=10)
+        raise RuntimeError("late worker failure")
+
+    async def _exercise() -> None:
+        task = asyncio.create_task(
+            shape_converter_convert_module._run_blocking_phase(_failing_worker)
+        )
+        assert await asyncio.to_thread(started.wait, 10)
+        task.cancel()
+        await asyncio.sleep(0)
+        assert not task.done()
+        release.set()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    asyncio.run(_exercise())
+
+
 def test_convert_geojson_wgs84_download_and_metadata_sidecar() -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="roads"))
 

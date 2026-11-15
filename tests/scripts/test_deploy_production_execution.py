@@ -60,6 +60,7 @@ def _run_deploy(
     shape_readiness_failure: bool = False,
     shape_stop_failure: bool = False,
     shape_ps_failure: bool = False,
+    shape_git_status_failure: bool = False,
     shape_build_inputs_clean: bool = True,
     shape_dirty_build_input: str = "wepppy/microservices/shape_converter/convert.py",
     lock_held: bool = False,
@@ -288,6 +289,9 @@ fi
         r'''#!/bin/bash
 set -euo pipefail
 if [ "${1:-}" = "status" ] && [[ "$*" == *"wepppy/microservices/shape_converter"* ]]; then
+    if [ "${FAKE_SHAPE_GIT_STATUS_FAILURE:-0}" = 1 ]; then
+        exit 83
+    fi
     if [ "${FAKE_SHAPE_BUILD_INPUTS_CLEAN:-1}" = 1 ]; then
         exit 0
     fi
@@ -418,6 +422,7 @@ exec /bin/cp "$@"
             "FAKE_SHAPE_READINESS_FAILURE": "1" if shape_readiness_failure else "0",
             "FAKE_SHAPE_STOP_FAILURE": "1" if shape_stop_failure else "0",
             "FAKE_SHAPE_PS_FAILURE": "1" if shape_ps_failure else "0",
+            "FAKE_SHAPE_GIT_STATUS_FAILURE": "1" if shape_git_status_failure else "0",
             "FAKE_SHAPE_BUILD_INPUTS_CLEAN": "1" if shape_build_inputs_clean else "0",
             "FAKE_SHAPE_DIRTY_BUILD_INPUT": shape_dirty_build_input,
             "FAKE_SHAPE_STOPPED_MARKER": str(tmp_path / "shape-stopped"),
@@ -492,20 +497,22 @@ def _full_services_with_cap_and_renderer() -> dict[str, object]:
         "cap": _service("cap:test"),
         "caddy": _service("caddy:test", build=False),
         "redis": _service("redis:test", build=False),
+        "shape-converter": _service("shape-converter:test"),
     }
 
 
 def _full_services_with_shape_converter() -> dict[str, object]:
-    services = _full_services_with_cap_and_renderer()
-    services["shape-converter"] = _service("shape-converter:test")
-    return services
+    return _full_services_with_cap_and_renderer()
 
 
 def test_full_execution_builds_then_stops_workers_and_recreates_without_down(tmp_path: Path) -> None:
     result, commands = _run_deploy(tmp_path, _full_services_with_cap_and_renderer())
 
     assert result.returncode == 0, result.stdout + result.stderr
-    build = _position(commands, "wctl|build --no-cache weppcloud weppcloudr cap")
+    build = _position(
+        commands,
+        "wctl|build --no-cache weppcloud weppcloudr cap shape-converter",
+    )
     renderer_validation = _position(
         commands,
         "weppcloudr-validator|weppcloudr:test wepppy:test",
@@ -541,7 +548,8 @@ def test_stale_renderer_is_rejected_before_cap_preparation_or_activation(tmp_pat
     assert any(command.startswith("weppcloudr-validator|") for command in commands)
     assert not any(command.startswith("cap-validator|") for command in commands)
     assert not any(command.startswith("cap-preparer|") for command in commands)
-    assert not any("docker compose stop" in command for command in commands)
+    assert not any("docker compose stop cap" in command for command in commands)
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
     assert not any("up -d" in command for command in commands)
     assert not any(_RQ_SUSPEND in command or _RQ_RESUME in command for command in commands)
     assert not any(command.startswith("docker|system prune") for command in commands)
@@ -634,12 +642,92 @@ def test_shape_release_build_rejects_dirty_inputs_even_with_skip_pull(tmp_path: 
     assert "Deployment complete!" not in result.stdout
 
 
+def test_shape_release_build_rejects_dirty_dockerfile_specific_ignore(
+    tmp_path: Path,
+) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        shape_build_inputs_clean=False,
+        shape_dirty_build_input="docker/Dockerfile.shape-converter.dockerignore",
+    )
+
+    assert result.returncode != 0
+    assert "Dockerfile.shape-converter.dockerignore" in result.stderr
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("ps -q shape-converter" in command for command in commands)
+    assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
+
+
 def test_shape_release_build_rejects_dirty_production_compose_with_skip_pull(
     tmp_path: Path,
 ) -> None:
     result, commands = _run_deploy(
         tmp_path,
         _full_services_with_shape_converter(),
+        shape_build_inputs_clean=False,
+        shape_dirty_build_input="docker/docker-compose.prod.yml",
+    )
+
+    assert result.returncode != 0
+    assert "docker/docker-compose.prod.yml" in result.stderr
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("ps -q shape-converter" in command for command in commands)
+    assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_shape_release_build_rejects_git_status_failure_and_stops_service(
+    tmp_path: Path,
+) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        shape_git_status_failure=True,
+    )
+
+    assert result.returncode != 0
+    assert "unable to inspect build inputs" in result.stderr
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("ps -q shape-converter" in command for command in commands)
+    assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_shape_release_rejects_effective_service_without_build_contract(
+    tmp_path: Path,
+) -> None:
+    services = _full_services_with_shape_converter()
+    services["shape-converter"] = _service("shape-converter:test", build=False)
+
+    result, commands = _run_deploy(tmp_path, services)
+
+    assert result.returncode != 0
+    assert "without the reviewed shape-converter service/build contract" in result.stderr
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert any("ps -q shape-converter" in command for command in commands)
+    assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
+    assert "Deployment complete!" not in result.stdout
+
+
+@pytest.mark.parametrize("mutation", ["image", "service"])
+def test_shape_release_rejects_dirty_effective_contract_mutation(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    services = _full_services_with_shape_converter()
+    if mutation == "image":
+        services["shape-converter"] = _service("unreviewed-shape:test")
+    else:
+        services.pop("shape-converter")
+
+    result, commands = _run_deploy(
+        tmp_path,
+        services,
         shape_build_inputs_clean=False,
         shape_dirty_build_input="docker/docker-compose.prod.yml",
     )
@@ -684,6 +772,7 @@ def test_concurrent_deploy_lock_fails_before_build_or_activation(tmp_path: Path)
     services = {
         "weppcloud": _service("wepppy:test"),
         "rq-worker": _service("wepppy:test"),
+        "shape-converter": _service("shape-converter:test"),
     }
     result, commands = _run_deploy(tmp_path, services, lock_held=True)
 
@@ -697,6 +786,7 @@ def test_controller_builder_failure_removes_staged_bundle_before_cutover(tmp_pat
     services = {
         "weppcloud": _service("wepppy:test"),
         "rq-worker": _service("wepppy:test"),
+        "shape-converter": _service("shape-converter:test"),
     }
     result, commands = _run_deploy(tmp_path, services, controller_build_failure=True)
 
@@ -1106,6 +1196,22 @@ def test_full_caddy_inspection_failure_returns_distinct_rescue_signal_and_resume
     assert caddy < resume
     assert "CAP_RESCUE_FAILED: unable to inspect Caddy" in result.stderr
     assert not any(command.startswith("docker|system prune") for command in commands)
+    assert "Deployment complete!" not in result.stdout
+
+
+def test_shape_takedown_failure_precedes_cap_recovery_failure(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_cap_and_renderer(),
+        candidate_mismatch=True,
+        recovery_failure=True,
+        shape_ps_failure=True,
+    )
+
+    assert result.returncode == 88
+    assert any("stop --timeout 30 shape-converter" in command for command in commands)
+    assert "SHAPE_CONVERTER_FAIL_CLOSED_FAILED" in result.stderr
+    assert "CAP_RESCUE_FAILED" in result.stderr
     assert "Deployment complete!" not in result.stdout
 
 

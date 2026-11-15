@@ -873,21 +873,18 @@ fn polygon_geometry<P: Coordinate>(rings: &[PolygonRing<P>]) -> Result<Value, Ap
 }
 
 fn multipatch_geometry(patches: &[Patch]) -> Result<Value, AppError> {
-    let mut members = Vec::new();
+    let mut triangle_members = Vec::new();
+    let mut ring_polygons = Vec::new();
     let mut active_polygon: Option<Vec<Value>> = None;
-    fn flush(active: &mut Option<Vec<Value>>, output: &mut Vec<Value>) -> Result<(), AppError> {
+    fn flush(active: &mut Option<Vec<Value>>, polygons: &mut Vec<Value>) {
         if let Some(rings) = active.take() {
-            output.push(geometry(
-                "MultiPolygon",
-                Value::Array(vec![Value::Array(rings)]),
-            )?);
+            polygons.push(Value::Array(rings));
         }
-        Ok(())
     }
     for patch in patches {
         match patch {
             Patch::OuterRing(points) | Patch::FirstRing(points) => {
-                flush(&mut active_polygon, &mut members)?;
+                flush(&mut active_polygon, &mut ring_polygons);
                 active_polygon = Some(vec![points_json(points)]);
             }
             Patch::InnerRing(points) | Patch::Ring(points) => {
@@ -897,7 +894,7 @@ fn multipatch_geometry(patches: &[Patch]) -> Result<Value, AppError> {
                 rings.push(points_json(points));
             }
             Patch::TriangleStrip(points) => {
-                flush(&mut active_polygon, &mut members)?;
+                flush(&mut active_polygon, &mut ring_polygons);
                 let mut polygons = Vec::new();
                 for index in 2..points.len() {
                     let ring = Value::Array(vec![
@@ -908,10 +905,10 @@ fn multipatch_geometry(patches: &[Patch]) -> Result<Value, AppError> {
                     ]);
                     polygons.push(Value::Array(vec![ring]));
                 }
-                members.push(geometry("MultiPolygon", Value::Array(polygons))?);
+                triangle_members.push(geometry("MultiPolygon", Value::Array(polygons))?);
             }
             Patch::TriangleFan(points) => {
-                flush(&mut active_polygon, &mut members)?;
+                flush(&mut active_polygon, &mut ring_polygons);
                 let mut polygons = Vec::new();
                 for index in 2..points.len() {
                     let ring = Value::Array(vec![
@@ -922,11 +919,15 @@ fn multipatch_geometry(patches: &[Patch]) -> Result<Value, AppError> {
                     ]);
                     polygons.push(Value::Array(vec![ring]));
                 }
-                members.push(geometry("MultiPolygon", Value::Array(polygons))?);
+                triangle_members.push(geometry("MultiPolygon", Value::Array(polygons))?);
             }
         }
     }
-    flush(&mut active_polygon, &mut members)?;
+    flush(&mut active_polygon, &mut ring_polygons);
+    if !ring_polygons.is_empty() {
+        triangle_members.push(geometry("MultiPolygon", Value::Array(ring_polygons))?);
+    }
+    let mut members = triangle_members;
     if members.len() == 1 {
         members.pop().ok_or(AppError::Parse)
     } else {
