@@ -131,7 +131,11 @@ gate; it is not the final parser architecture.
 - [x] (2026-11-14) Rebuild and locally qualify exact final-4 image
       `sha256:b9e78b16718911ff16dc213b27d719477d95880ebcdca500cc858cea13c05ae8`.
       Hardened runtime, provenance, Point conversion, cleanup, tests, Syft, and
-      Grype passed. Independent final-4 re-review remains.
+      Grype passed.
+- [x] (2026-11-14) Independent final-4 code, correctness, QA, operations, and
+      security re-review passed with zero findings. #656 is ready to close as
+      superseded by GDAL/Fiona removal, explicitly not as second-sandbox proof.
+      Production rollout remains separately authorized.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
@@ -499,7 +503,13 @@ work. Commit `a6be89141` closes those paths and catalogues operator recovery.
 Exact image
 `sha256:b9e78b16718911ff16dc213b27d719477d95880ebcdca500cc858cea13c05ae8`
 passes local final-4 qualification with unchanged advisory IDs. Independent
-final-4 re-review remains; no production action occurred.
+final-4 re-review was the remaining gate; no production action occurred.
+
+Independent final-4 re-review passed in all five lanes with no findings. The
+accepted residual is a bounded Rust parser process in the API container, not a
+second sandbox. #656 may close as superseded by removal of the GDAL/Fiona
+failure class. No image publication, issue mutation, or production action
+occurred.
 
 Independent re-review of `2bbf8498e` returned FAIL/HOLD. See the
 [consolidated review](../../artifacts/20261114_rust_cli_remediation_independent_re_review.md)

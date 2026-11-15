@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 (M6 final-4 remediation qualified)
-**Current phase**: M6 independent final-4 re-review required
+**Last updated**: 2026-11-14 (M6 final-4 independent review passed)
+**Current phase**: #656 closure ready; production rollout separately authorized
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
@@ -100,8 +100,9 @@ pre-cutover oracle
       preserve read-only/targeted scope, and catalogue recovery; qualify exact
       image `sha256:b9e78b16718911ff16dc213b27d719477d95880ebcdca500cc858cea13c05ae8`
       from `a6be89141`.
-- [ ] M6 independent final-4 re-review of `a6be89141` and its exact-image
-      evidence.
+- [x] M6 independent final-4 code, correctness, QA, operations, and security
+      re-review of `a6be89141` and its exact-image evidence passed with zero
+      findings.
 - [x] Close #655 after its strict data-only IPC acceptance passed; comment on
       #656 with final local evidence and keep it open for independent residual-
       risk acceptance.
@@ -296,17 +297,22 @@ pre-cutover oracle
   image `sha256:b9e78b16718911ff16dc213b27d719477d95880ebcdca500cc858cea13c05ae8`
   passed local qualification with no advisory-ID drift. Independent final-4
   review remains; no production action occurred.
+- 2026-11-14: independent final-4 review passed in all five lanes with zero
+  findings. Review accepts the explicit same-container Rust CLI residual and
+  supports closing #656 as superseded by GDAL/Fiona removal, not as second-
+  sandbox conformance. Rollout remains separate; no issue or production
+  mutation occurred.
 
 ## Handoff
 
-M4 implementation and final-4-remediation local validation are complete. See the
-[dependency evaluation](artifacts/20261114_rust_parser_dependency_evaluation.md)
-and final-remediation qualification artifact. No production deployment
-occurred; do not infer approval for privileges, a parser service, or topology
-changes.
+M4 implementation, final-4 qualification, and independent review are complete.
+See the [dependency evaluation](artifacts/20261114_rust_parser_dependency_evaluation.md),
+[final-4 qualification](artifacts/20261114_rust_cli_final4_remediation_requalification.md),
+and [independent review](artifacts/20261114_rust_cli_final4_independent_re_review.md).
+No production deployment occurred; do not infer approval for privileges, a
+parser service, or topology changes.
 
-Next checkpoint: obtain independent code, correctness, QA, operations, and
-security re-review of `a6be89141` and exact image `sha256:b9e78b167189...` before
-updating #656 or authorizing rollout.
+Next checkpoint: close #656 with the accepted supersession rationale if the
+operator requests the issue mutation. Authorize and execute rollout separately.
 Complete Syft/Grype JSON is retained in package artifacts, and the exact image
 proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.
