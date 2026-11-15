@@ -65,6 +65,8 @@ def _run_deploy(
     shape_build_inputs_clean: bool = True,
     shape_dirty_build_input: str = "wepppy/microservices/shape_converter/convert.py",
     compose_files: str | None = None,
+    preset_query_failure: bool = False,
+    compose_render_failure: bool = False,
     lock_held: bool = False,
     skip_docker_prune: bool = True,
 ) -> tuple[subprocess.CompletedProcess[str], list[str]]:
@@ -83,8 +85,14 @@ args="$*"
 if [[ "${args}" == *"config --services"* ]]; then
     printf '%s\n' "${FAKE_SERVICES}"
 elif [[ "${args}" == *"show-compose-files"* ]]; then
+    if [ "${FAKE_PRESET_QUERY_FAILURE:-0}" = 1 ]; then
+        exit 84
+    fi
     printf '%s\n' "${FAKE_COMPOSE_FILES}"
 elif [[ "${args}" == *"config --format json"* ]]; then
+    if [ "${FAKE_COMPOSE_RENDER_FAILURE:-0}" = 1 ]; then
+        exit 85
+    fi
     printf '%s\n' "${FAKE_CONFIG}"
 elif [[ "${args}" == *"docker compose config"* ]]; then
     printf '%s\n' "${FAKE_CONFIG}"
@@ -224,7 +232,7 @@ elif [[ "${args}" == *"docker compose stop"* ]]; then
 elif [[ "${args}" == *"build --no-cache"* ]] \
     || [[ "${args}" == "up -d --force-recreate" || "${args}" == *" up -d"* ]] \
     || [[ "${args}" == "down" || "${args}" == *" down"* ]] \
-    || [[ "${args}" == *" rq-info "* ]]; then
+    || [[ "${args}" == rq-info* || "${args}" == *" rq-info "* ]]; then
     :
 else
     echo "unexpected wctl call: ${args}" >&2
@@ -415,6 +423,8 @@ exec /bin/cp "$@"
             "FAKE_COMMAND_LOG": str(command_log),
             "FAKE_SERVICES": "\n".join(services),
             "FAKE_COMPOSE_FILES": compose_files,
+            "FAKE_PRESET_QUERY_FAILURE": "1" if preset_query_failure else "0",
+            "FAKE_COMPOSE_RENDER_FAILURE": "1" if compose_render_failure else "0",
             "FAKE_CONFIG": json.dumps({"services": services}),
             "FAKE_PS": json.dumps(records),
             "FAKE_CANDIDATE_MISMATCH": "1" if candidate_mismatch else "0",
@@ -883,6 +893,38 @@ def test_concurrent_deploy_lock_fails_before_build_or_activation(tmp_path: Path)
     assert result.returncode != 0
     assert "Another deployment holds" in result.stderr
     assert not any("build --no-cache" in command for command in commands)
+    assert not any("up -d" in command for command in commands)
+
+
+@pytest.mark.parametrize("argument", ["--print-plan", "--targeted-web"])
+def test_preset_query_failure_in_non_shape_scope_never_stops_converter(
+    tmp_path: Path,
+    argument: str,
+) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        argument,
+        preset_query_failure=True,
+    )
+
+    assert result.returncode != 0
+    assert "Unable to identify the installed wctl deployment preset" in result.stderr
+    assert not any("com.docker.compose.service=shape-converter" in command for command in commands)
+    assert not any("docker|stop" in command for command in commands)
+
+
+def test_full_preset_compose_render_failure_stops_converter(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path,
+        _full_services_with_shape_converter(),
+        compose_render_failure=True,
+    )
+
+    assert result.returncode != 0
+    assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
+    assert any("com.docker.compose.service=shape-converter" in command for command in commands)
+    assert "shape-converter is down" in result.stderr
     assert not any("up -d" in command for command in commands)
 
 

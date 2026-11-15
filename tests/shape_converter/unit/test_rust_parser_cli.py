@@ -809,6 +809,8 @@ def test_parser_cancellation_terminates_real_process_group(
         assert pid_file.exists()
         parent_pid, child_pid = (int(value) for value in pid_file.read_text().split())
         task.cancel()
+        await asyncio.sleep(0.05)
+        task.cancel()
         with pytest.raises(asyncio.CancelledError):
             await task
         return parent_pid, child_pid

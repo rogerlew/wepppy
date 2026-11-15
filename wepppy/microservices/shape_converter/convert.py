@@ -682,8 +682,10 @@ async def _run_parser_worker(
             timeout=_PARSER_SUBPROCESS_TIMEOUT_SECONDS,
         )
     except TimeoutError as exc:
-        await _terminate_process_group(process)
+        cancelled_during_termination = await _drain_process_group_termination(process)
         _remove_parser_outputs(output_path)
+        if cancelled_during_termination:
+            raise asyncio.CancelledError
         raise ShapeConverterError(
             code="request_timeout",
             message="Convert parser exceeded timeout and was terminated.",
@@ -694,7 +696,7 @@ async def _run_parser_worker(
             status_code=408,
         ) from exc
     except asyncio.CancelledError:
-        await _terminate_process_group(process)
+        await _drain_process_group_termination(process)
         _remove_parser_outputs(output_path)
         raise
 
@@ -757,6 +759,23 @@ async def _terminate_process_group(process: asyncio.subprocess.Process) -> None:
         process_group_id=pid,
         timeout=None,
     )
+
+
+async def _drain_process_group_termination(
+    process: asyncio.subprocess.Process,
+) -> bool:
+    termination_task = asyncio.create_task(_terminate_process_group(process))
+    drained = asyncio.gather(termination_task, return_exceptions=True)
+    cancelled = False
+    while not drained.done():
+        try:
+            await asyncio.shield(drained)
+        except asyncio.CancelledError:
+            cancelled = True
+    result = drained.result()[0]
+    if isinstance(result, BaseException):
+        raise result
+    return cancelled
 
 
 def _process_group_exists(process_group_id: int) -> bool:

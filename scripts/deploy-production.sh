@@ -61,9 +61,9 @@ run_wctl_with_retry() {
     while [ "${attempt}" -le "${retries}" ]; do
         if run_with_timeout "${timeout_seconds}" wctl "${cmd[@]}"; then
             return 0
+        else
+            exit_code=$?
         fi
-
-        exit_code=$?
         if [ "${attempt}" -ge "${retries}" ]; then
             echo "✗ Command failed after ${attempt} attempts: wctl ${cmd[*]} (exit ${exit_code})" >&2
             return "${exit_code}"
@@ -95,9 +95,9 @@ capture_wctl_with_retry() {
         if output="$(run_with_timeout "${timeout_seconds}" wctl "${cmd[@]}")"; then
             printf "%s\n" "${output}"
             return 0
+        else
+            exit_code=$?
         fi
-
-        exit_code=$?
         if [ "${attempt}" -ge "${retries}" ]; then
             echo "✗ Command failed after ${attempt} attempts: wctl ${cmd[*]} (exit ${exit_code})" >&2
             return "${exit_code}"
@@ -255,6 +255,19 @@ stop_shape_converter_fail_closed() {
         return 88
     fi
     echo "✓ shape-converter is down; no GDAL/Fiona or unreviewed parser fallback was activated" >&2
+}
+
+fail_shape_release_preflight() {
+    if [ "${FULL_STACK_DEPLOY_PRESET:-false}" = true ] \
+        && [ "${TARGETED_WEB}" = false ] \
+        && [ "${TARGETED_CAP}" = false ] \
+        && [ "${TARGETED_BATCH}" = false ] \
+        && [ "${PRINT_PLAN}" = false ]; then
+        if ! stop_shape_converter_fail_closed; then
+            return 88
+        fi
+    fi
+    return 1
 }
 
 configure_shape_parser_release_provenance() {
@@ -425,8 +438,13 @@ configure_deploy_topology() {
             show-compose-files
     )"; then
         echo "✗ Unable to identify the installed wctl deployment preset." >&2
-        if ! stop_shape_converter_fail_closed; then
-            exit 88
+        if [ "${PRINT_PLAN}" = false ] \
+            && [ "${TARGETED_WEB}" = false ] \
+            && [ "${TARGETED_CAP}" = false ] \
+            && [ "${TARGETED_BATCH}" = false ]; then
+            if ! stop_shape_converter_fail_closed; then
+                exit 88
+            fi
         fi
         exit 1
     fi
@@ -450,13 +468,17 @@ configure_deploy_topology() {
         SHAPE_RELEASE_PROVENANCE_CONFIGURED=true
     fi
 
-    COMPOSE_SERVICES="$(
+    if ! COMPOSE_SERVICES="$(
         capture_wctl_with_retry \
             "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
             "${WCTL_COMPOSE_RETRIES}" \
             "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
             docker compose config --services
-    )"
+    )"; then
+        local failure_status=1
+        fail_shape_release_preflight || failure_status=$?
+        return "${failure_status}"
+    fi
     HAS_WEPPCLOUD=false
     IS_WEPP3_FORK_ARCHIVE=false
     ACTIVE_SERVICE_ARGS=()
@@ -498,17 +520,25 @@ configure_deploy_topology() {
         exit 1
     fi
 
-    BUILD_OUTPUT="$(
+    if ! BUILD_OUTPUT="$(
         wctl docker compose config --format json \
             | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
                 build-services "${ACTIVE_SERVICE_ARGS[@]}"
-    )"
+    )"; then
+        local failure_status=1
+        fail_shape_release_preflight || failure_status=$?
+        return "${failure_status}"
+    fi
     mapfile -t BUILD_SERVICES <<< "${BUILD_OUTPUT}"
-    EXPECTED_OUTPUT="$(
+    if ! EXPECTED_OUTPUT="$(
         wctl docker compose config --format json \
             | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
                 expected-services "${ACTIVE_SERVICE_ARGS[@]}"
-    )"
+    )"; then
+        local failure_status=1
+        fail_shape_release_preflight || failure_status=$?
+        return "${failure_status}"
+    fi
     mapfile -t EXPECTED_RUNNING_SERVICES <<< "${EXPECTED_OUTPUT}"
     if [ "${DEPLOY_MODE}" = "full" ]; then
         FILTERED_EXPECTED_SERVICES=()
@@ -560,9 +590,13 @@ configure_deploy_topology() {
     for service in "${RECREATED_SERVICES[@]}"; do
         RUNTIME_SERVICE_ARGS+=(--active-service "${service}")
     done
-    wctl docker compose config --format json \
+    if ! wctl docker compose config --format json \
         | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
-            validate-runtime-config "${RUNTIME_SERVICE_ARGS[@]}"
+            validate-runtime-config "${RUNTIME_SERVICE_ARGS[@]}"; then
+        local failure_status=1
+        fail_shape_release_preflight || failure_status=$?
+        return "${failure_status}"
+    fi
 }
 
 SHAPE_RELEASE_PROVENANCE_CONFIGURED=false
