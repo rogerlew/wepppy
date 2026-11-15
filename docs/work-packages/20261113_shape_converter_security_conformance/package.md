@@ -1,16 +1,16 @@
 # Shape-converter security conformance closure
 
 **Status**: Rust CLI replacement, exact final-4 image, and all five independent
-review lanes pass locally. #656 closure and production rollout remain separate
-operator actions. See the
+review lanes pass locally. #656 is closed as superseded; production rollout
+remains a separate operator action. See the
 [final review](artifacts/20261114_rust_cli_final4_independent_re_review.md) and
 [Rust dependency evidence](artifacts/20261114_rust_parser_dependency_evaluation.md).
 
 **Started**: 2026-11-13 Pacific / 2026-11-14 UTC
 
-**Issue status**: #655 closed as completed on 2026-11-14; independent review
-accepts closing #656 as superseded by GDAL/Fiona removal, not as second-sandbox
-conformance. #656 remains open pending the separately requested issue mutation.
+**Issue status**: #655 closed as completed on 2026-11-14. #656 closed as not
+planned on 2026-11-14 because GDAL/Fiona removal supersedes its original
+requirement; closure does not claim second-sandbox conformance.
 
 **Timezone**: UTC
 

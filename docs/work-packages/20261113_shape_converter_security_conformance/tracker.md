@@ -4,7 +4,7 @@
 
 **Timezone**: UTC
 **Last updated**: 2026-11-14 (M6 final-4 independent review passed)
-**Current phase**: #656 closure ready; production rollout separately authorized
+**Current phase**: local package closure complete; production rollout separately authorized
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
@@ -103,6 +103,8 @@ pre-cutover oracle
 - [x] M6 independent final-4 code, correctness, QA, operations, and security
       re-review of `a6be89141` and its exact-image evidence passed with zero
       findings.
+- [x] Close #656 as not planned because GDAL/Fiona removal supersedes the
+      original second-sandbox requirement; do not claim sandbox conformance.
 - [x] Close #655 after its strict data-only IPC acceptance passed; comment on
       #656 with final local evidence and keep it open for independent residual-
       risk acceptance.
@@ -302,6 +304,9 @@ pre-cutover oracle
   supports closing #656 as superseded by GDAL/Fiona removal, not as second-
   sandbox conformance. Rollout remains separate; no issue or production
   mutation occurred.
+- 2026-11-14: operator authorized issue disposition. #656 was commented with
+  the accepted residual-risk rationale and closed as not planned/superseded.
+  No image publication or production action occurred.
 
 ## Handoff
 
@@ -312,7 +317,6 @@ and [independent review](artifacts/20261114_rust_cli_final4_independent_re_revie
 No production deployment occurred; do not infer approval for privileges, a
 parser service, or topology changes.
 
-Next checkpoint: close #656 with the accepted supersession rationale if the
-operator requests the issue mutation. Authorize and execute rollout separately.
+Next checkpoint: authorize and execute rollout separately if desired.
 Complete Syft/Grype JSON is retained in package artifacts, and the exact image
 proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.

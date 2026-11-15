@@ -136,6 +136,9 @@ gate; it is not the final parser architecture.
       security re-review passed with zero findings. #656 is ready to close as
       superseded by GDAL/Fiona removal, explicitly not as second-sandbox proof.
       Production rollout remains separately authorized.
+- [x] (2026-11-14) At operator request, comment on and close #656 as not
+      planned/superseded. The closure records the same-container residual and
+      explicitly does not claim second-sandbox conformance.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
@@ -509,6 +512,8 @@ Independent final-4 re-review passed in all five lanes with no findings. The
 accepted residual is a bounded Rust parser process in the API container, not a
 second sandbox. #656 may close as superseded by removal of the GDAL/Fiona
 failure class. No image publication, issue mutation, or production action
+occurred during review. The operator subsequently authorized #656 closure; it
+was commented and closed as not planned/superseded. No production action
 occurred.
 
 Independent re-review of `2bbf8498e` returned FAIL/HOLD. See the

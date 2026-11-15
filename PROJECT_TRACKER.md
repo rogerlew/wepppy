@@ -4,7 +4,7 @@ Completed locally: [Safe traceback and exceptional-path secret sanitization](doc
 
 Completed on forest: [Status and preflight WebSocket run authorization](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md) - Ratified run-bound credentials, full regression, five-service cutover and 27 real-browser assertions verified; NFS cleanup recovery retained. Production rollout remains pending separate authorization.
 
-Independent review passed; #656 closure ready, rollout pending: [Shape-converter security conformance closure](docs/work-packages/20261113_shape_converter_security_conformance/package.md) - All five final-4 review lanes accept exact image `sha256:b9e78b16718911ff16dc213b27d719477d95880ebcdca500cc858cea13c05ae8` with zero findings. GDAL/Fiona are removed; strict Rust CLI IPC, repeated-cancellation drainage, resource bounds, provenance, and fail-closed release/takedown controls pass. #656 may close as superseded, not as second-sandbox proof. No image publication or production rollout occurred.
+Local closure complete; rollout pending: [Shape-converter security conformance closure](docs/work-packages/20261113_shape_converter_security_conformance/package.md) - All five final-4 review lanes accept exact image `sha256:b9e78b16718911ff16dc213b27d719477d95880ebcdca500cc858cea13c05ae8` with zero findings. GDAL/Fiona are removed; strict Rust CLI IPC, repeated-cancellation drainage, resource bounds, provenance, and fail-closed release/takedown controls pass. #655 is completed and #656 is closed as superseded, not as second-sandbox proof. No image publication or production rollout occurred.
 
 Implemented; runtime acceptance blocked: [Test-support production guardrails and F1-F7 readiness](docs/work-packages/20261111_test_support_production_guardrails/package.md) - F7 defaults the runtime profile to production, excludes support routes from production, and reuses short-lived WEPP_AUTH credentials through automatic wctl/Playwright injection. No smoke markers or new static secret. Closure requires F6 M4, one combined F1-F7 regression receipt, and a reviewed non-executed deployment-validation plan.
 
@@ -886,8 +886,9 @@ provenance/reproducibility checks, and canonical deploy-time takedown on candida
 failure. Second remediation `be7848eb7` closes every retained re-review finding;
 its exact image passed no-mount hardening, provenance, semantic, concurrent
 near-ceiling, cleanup, and pinned scan qualification with no new advisory ID.
-#655 is closed; #656 and rollout remain blocked pending independent second
-re-review. No image publication or production deployment occurred.
+#655 is completed and #656 is closed as superseded after final-4 independent
+acceptance. Production rollout remains separately authorized. No image
+publication or production deployment occurred.
 
 
 ### Test-Support Production Guardrails and F1-F7 Readiness
