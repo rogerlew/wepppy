@@ -95,6 +95,24 @@ gate; it is not the final parser architecture.
       fixtures, runtime pip removal, and all 42 prior unique Medium advisory
       dispositions. Exact image `sha256:553a8a1c00468cdc28cc78bb98ef47382e6179be33a55b5c026d6605e7ff39a8`
       passed local requalification; independent re-review remains.
+- [x] (2026-11-14) Resolve the second re-review blockers at `ec1916b23`:
+      repeated cancellation ownership, inspect/relay/cleanup event-loop
+      offloads, fail-closed early provenance failure, pre-allocation vertex
+      limits, Fiona-compatible homogeneous MultiPatch output, and the missing
+      semantic/encoding/resource regressions.
+- [x] (2026-11-14) Rebuild and locally qualify exact image
+      `sha256:196e83b85b1c88e09999de481fdfc3aee03893e58f751ea6146c9776a99bb5bb`.
+      GeoJSON/GeoParquet semantic readback, live aggregate-envelope behavior,
+      hardening, child limits, cleanup, provenance, Syft, and Grype passed.
+      Independent final re-review returned FAIL/HOLD with cancellation-error,
+      periodic-janitor, effective-Compose, recovery-precedence, multi-group
+      MultiPatch, and multipart PolylineM findings.
+- [x] (2026-11-14) Resolve those findings at `f9b92459e`, expand the retained
+      regressions, and requalify exact image
+      `sha256:c1f1e84d6beec7562fc184ab9b5ed48398bb955d938aa139768fcea7da777361`.
+      Parsed Point and multi-group MultiPatch GeoJSON/GeoParquet, live limits,
+      saturation, cleanup, provenance, Syft, and Grype passed. Independent
+      final-2 re-review remains.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
@@ -119,6 +137,12 @@ gate; it is not the final parser architecture.
   removed from the application virtual environment. Removing both system and
   venv pip from the final runtime eliminated five Medium and two lower-severity
   advisory IDs without changing request behavior.
+- Linux truncates a process `comm` name to 15 characters. Exact-image limit
+  observation must match `shape_parser_cl`, or use the executable path, rather
+  than assume the full `shape_parser_cli` name appears in `/proc/*/comm`.
+- The newer Grype database added Unknown CVE-2026-91094 for dpkg source-package
+  unpacking. The image/package set did not add a High or Medium ID; dpkg is not
+  invoked and attacker Debian source packages are not accepted by this service.
 
 - Independent M6 review reproduced silent feature loss when SHP contains an
   extra valid record not represented by SHX/DBF. Zipping shape and DBF iterators
@@ -368,6 +392,13 @@ gate; it is not the final parser architecture.
   surface with direct security and semantic acceptance checks.
   Date/Author: 2026-11-13 Pacific, operator; recorded by Codex 2026-11-14 UTC.
 
+- Decision: retain the final image only if early release-provenance failure uses
+  the same secure-or-stop behavior as post-build qualification failure.
+  Rationale: a dirty or unprovable candidate cannot justify leaving an older
+  converter running. Stop failure and inability to verify stopped state both use
+  distinct exit 88; no GDAL/Fiona fallback is restored.
+  Date/Author: 2026-11-14, operator direction implemented by Codex.
+
 ## Outcomes & Retrospective
 
 The authorized independent slice is implemented after reviewed contract checkpoint
@@ -418,6 +449,21 @@ case. The final runtime removes pip, adds no scan advisory ID, and retains
 explicit dispositions for all 37 remaining unique Medium IDs. Independent
 second re-review, #656 disposition, and separately authorized rollout remain
 open; no production action occurred.
+
+The final remediation at `ec1916b23` closes the blockers retained by the second
+re-review and passes local exact-image qualification as
+`sha256:196e83b85b1c88e09999de481fdfc3aee03893e58f751ea6146c9776a99bb5bb`.
+The exact image preserves the 0 Critical result and unchanged unique High and
+Medium sets. Independent final re-review is in progress; this local outcome does
+not authorize publication, deployment, or #656 closure.
+
+Independent review of `ec1916b23` returned FAIL/HOLD and identified late-worker
+error precedence, blocking periodic janitor cleanup, effective-Compose release
+gate bypass, recovery status precedence, multi-group MultiPatch drift, and a
+multipart PolylineM coverage gap. Final-2 remediation `f9b92459e` closes those
+paths and passes exact-image qualification as
+`sha256:c1f1e84d6beec7562fc184ab9b5ed48398bb955d938aa139768fcea7da777361`.
+Independent final-2 re-review remains; no production action occurred.
 
 Independent re-review of `2bbf8498e` returned FAIL/HOLD. See the
 [consolidated review](../../artifacts/20261114_rust_cli_remediation_independent_re_review.md)

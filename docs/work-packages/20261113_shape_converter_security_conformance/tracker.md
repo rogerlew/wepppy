@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 (M6 second remediation qualified)
-**Current phase**: M6 independent second re-review required
+**Last updated**: 2026-11-14 (M6 final-2 remediation qualified)
+**Current phase**: M6 independent final-2 re-review required
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
@@ -71,7 +71,21 @@ pre-cutover oracle
       image `sha256:553a8a1c00468cdc28cc78bb98ef47382e6179be33a55b5c026d6605e7ff39a8`
       from committed revision `be7848eb7`; 264 shape tests and 50 deploy/Compose
       tests passed (3 environment skips), with no new scan advisory ID.
-- [ ] M6 independent second re-review of `be7848eb7` and its exact-image
+- [x] M6 independent second re-review of `be7848eb7` and its exact-image
+      evidence returned FAIL/HOLD and supplied the final-remediation findings.
+- [x] M6 final remediation: close repeated cancellation, remaining ASGI
+      blocking phases, early fail-closed deployment, pre-allocation vertex
+      enforcement, homogeneous MultiPatch parity, and retained QA gaps; qualify
+      exact image `sha256:196e83b85b1c88e09999de481fdfc3aee03893e58f751ea6146c9776a99bb5bb`
+      from `ec1916b23`.
+- [x] M6 independent final re-review of `ec1916b23` and its exact-image
+      evidence returned FAIL/HOLD and supplied the final-2 findings.
+- [x] M6 final-2 remediation: close cancellation-error precedence, periodic
+      janitor blocking, effective-Compose gate bypass, recovery exit precedence,
+      multi-group MultiPatch parity, and multipart PolylineM coverage; qualify
+      exact image `sha256:c1f1e84d6beec7562fc184ab9b5ed48398bb955d938aa139768fcea7da777361`
+      from `f9b92459e`.
+- [ ] M6 independent final-2 re-review of `f9b92459e` and its exact-image
       evidence.
 - [x] Close #655 after its strict data-only IPC acceptance passed; comment on
       #656 with final local evidence and keep it open for independent residual-
@@ -237,17 +251,33 @@ pre-cutover oracle
   Medium dispositions are now evidenced. Pinned scanning reports 0 Critical,
   removes all pip findings, and adds no advisory ID. No publication or
   production deployment occurred.
+- 2026-11-14: final remediation committed as `ec1916b23` and rebuilt as exact
+  image `sha256:196e83b85b1c88e09999de481fdfc3aee03893e58f751ea6146c9776a99bb5bb`.
+  Repeated cancellation, remaining ASGI blocking work, early deploy fail-closed
+  behavior, pre-allocation vertex enforcement, homogeneous MultiPatch parity,
+  and retained semantic/encoding/resource gaps are closed locally. The exact
+  image passed GeoJSON/GeoParquet readback, live saturation/limits, cleanup,
+  provenance, and pinned scanning. Independent final re-review remains; no
+  publication or production deployment occurred.
+- 2026-11-14: independent review of `ec1916b23` returned FAIL/HOLD. Final-2
+  remediation `f9b92459e` closes cancellation-error precedence, periodic
+  janitor blocking, effective-Compose release bypass, compound recovery status,
+  multi-group MultiPatch drift, and multipart PolylineM coverage. Exact image
+  `sha256:c1f1e84d6beec7562fc184ab9b5ed48398bb955d938aa139768fcea7da777361`
+  passed local semantic, saturation, limit, cleanup, provenance, and pinned-scan
+  qualification. Independent final-2 review remains; no production action
+  occurred.
 
 ## Handoff
 
-M4 implementation and second-remediation local validation are complete. See the
+M4 implementation and final-2-remediation local validation are complete. See the
 [dependency evaluation](artifacts/20261114_rust_parser_dependency_evaluation.md)
-and second-remediation qualification/review artifacts. No production deployment
+and final-remediation qualification artifact. No production deployment
 occurred; do not infer approval for privileges, a parser service, or topology
 changes.
 
 Next checkpoint: obtain independent code, correctness, QA, operations, and
-security re-review of `be7848eb7` and exact image `sha256:553a8a1c0046...` before
+security re-review of `f9b92459e` and exact image `sha256:c1f1e84d6bee...` before
 updating #656 or authorizing rollout.
 Complete Syft/Grype JSON is retained in package artifacts, and the exact image
 proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.
