@@ -121,7 +121,17 @@ gate; it is not the final parser architecture.
 - [x] (2026-11-14) Rebuild and locally qualify exact final-3 image
       `sha256:8c9acdd292a80355c708823f98d3651484667856abfd35b0a28af2b4a3cfc3cf`.
       Hardened runtime, provenance, Point conversion, cleanup, tests, Syft, and
-      Grype passed. Independent final-3 re-review remains.
+      Grype passed. Independent final-3 re-review returned HOLD on repeated
+      cancellation, full-preset render failures, and read-only preset-query
+      mutation.
+- [x] (2026-11-14) Close those findings at `a6be89141`: shield process-group
+      drainage through repeated cancellation, fail closed on every full-preset
+      render/contract failure, preserve read-only and targeted scope, retain
+      real retry exit status, and catalogue exit-88 recovery.
+- [x] (2026-11-14) Rebuild and locally qualify exact final-4 image
+      `sha256:b9e78b16718911ff16dc213b27d719477d95880ebcdca500cc858cea13c05ae8`.
+      Hardened runtime, provenance, Point conversion, cleanup, tests, Syft, and
+      Grype passed. Independent final-4 re-review remains.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
@@ -482,6 +492,14 @@ operator runbook. Exact image
 `sha256:8c9acdd292a80355c708823f98d3651484667856abfd35b0a28af2b4a3cfc3cf`
 passes local final-3 qualification with unchanged advisory IDs. Independent
 final-3 re-review remains; no production action occurred.
+
+Independent final-3 review retained repeated-cancellation drainage, unguarded
+full-preset render failures, and preset-query mutation during read-only/targeted
+work. Commit `a6be89141` closes those paths and catalogues operator recovery.
+Exact image
+`sha256:b9e78b16718911ff16dc213b27d719477d95880ebcdca500cc858cea13c05ae8`
+passes local final-4 qualification with unchanged advisory IDs. Independent
+final-4 re-review remains; no production action occurred.
 
 Independent re-review of `2bbf8498e` returned FAIL/HOLD. See the
 [consolidated review](../../artifacts/20261114_rust_cli_remediation_independent_re_review.md)
