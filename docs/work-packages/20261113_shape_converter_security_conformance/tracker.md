@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Last updated**: 2026-11-14 (M6 final-2 remediation qualified)
-**Current phase**: M6 independent final-2 re-review required
+**Last updated**: 2026-11-14 (M6 final-3 remediation qualified)
+**Current phase**: M6 independent final-3 re-review required
 **Security impact**: high
 **Starting revision**: `ab205eacc5dc09e5920afa38df4c1fda50192f96`
 **Dedicated-image implementation**: `73ed430d4`
@@ -85,7 +85,14 @@ pre-cutover oracle
       multi-group MultiPatch parity, and multipart PolylineM coverage; qualify
       exact image `sha256:c1f1e84d6beec7562fc184ab9b5ed48398bb955d938aa139768fcea7da777361`
       from `f9b92459e`.
-- [ ] M6 independent final-2 re-review of `f9b92459e` and its exact-image
+- [x] M6 independent final-2 re-review of `f9b92459e` returned HOLD with
+      mutable-preset/orphan-takedown and parser-descendant-drain findings.
+- [x] M6 final-3 remediation: bind full deployment intent to installed preset
+      paths, independently stop labeled orphan containers, promote exit-88
+      recovery guidance, and drain SIGTERM-ignoring parser descendants; qualify
+      exact image `sha256:8c9acdd292a80355c708823f98d3651484667856abfd35b0a28af2b4a3cfc3cf`
+      from `4587308ff`.
+- [ ] M6 independent final-3 re-review of `4587308ff` and its exact-image
       evidence.
 - [x] Close #655 after its strict data-only IPC acceptance passed; comment on
       #656 with final local evidence and keep it open for independent residual-
@@ -267,17 +274,25 @@ pre-cutover oracle
   passed local semantic, saturation, limit, cleanup, provenance, and pinned-scan
   qualification. Independent final-2 review remains; no production action
   occurred.
+- 2026-11-14: independent final-2 review returned HOLD on mutable deployment
+  intent/orphan takedown and parser descendant drainage. Final-3 commit
+  `4587308ff` closes those paths and adds durable exit-88 recovery guidance.
+  Exact image
+  `sha256:8c9acdd292a80355c708823f98d3651484667856abfd35b0a28af2b4a3cfc3cf`
+  passed local hardened-runtime, provenance, functional, cleanup, regression,
+  Syft, and Grype qualification with no advisory-ID drift. Independent final-3
+  review remains; no production action occurred.
 
 ## Handoff
 
-M4 implementation and final-2-remediation local validation are complete. See the
+M4 implementation and final-3-remediation local validation are complete. See the
 [dependency evaluation](artifacts/20261114_rust_parser_dependency_evaluation.md)
 and final-remediation qualification artifact. No production deployment
 occurred; do not infer approval for privileges, a parser service, or topology
 changes.
 
 Next checkpoint: obtain independent code, correctness, QA, operations, and
-security re-review of `f9b92459e` and exact image `sha256:c1f1e84d6bee...` before
+security re-review of `4587308ff` and exact image `sha256:8c9acdd292a8...` before
 updating #656 or authorizing rollout.
 Complete Syft/Grype JSON is retained in package artifacts, and the exact image
 proves Fiona/GDAL absence. Keep the common image unchanged and do not deploy.

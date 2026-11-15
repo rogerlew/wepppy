@@ -112,7 +112,16 @@ gate; it is not the final parser architecture.
       `sha256:c1f1e84d6beec7562fc184ab9b5ed48398bb955d938aa139768fcea7da777361`.
       Parsed Point and multi-group MultiPatch GeoJSON/GeoParquet, live limits,
       saturation, cleanup, provenance, Syft, and Grype passed. Independent
-      final-2 re-review remains.
+      final-2 re-review returned HOLD with mutable-preset/orphan-takedown and
+      parser-descendant-drain findings.
+- [x] (2026-11-14) Close those findings at `4587308ff`: bind deployment intent
+      to installed preset paths, stop/verify labeled orphan containers without
+      the mutable service definition, promote exit-88 recovery guidance, and
+      drain SIGTERM-ignoring parser descendants before releasing ownership.
+- [x] (2026-11-14) Rebuild and locally qualify exact final-3 image
+      `sha256:8c9acdd292a80355c708823f98d3651484667856abfd35b0a28af2b4a3cfc3cf`.
+      Hardened runtime, provenance, Point conversion, cleanup, tests, Syft, and
+      Grype passed. Independent final-3 re-review remains.
 - [x] (2026-11-14) Close #655 after strict JSON IPC acceptance; update #656 with
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
@@ -464,6 +473,15 @@ multipart PolylineM coverage gap. Final-2 remediation `f9b92459e` closes those
 paths and passes exact-image qualification as
 `sha256:c1f1e84d6beec7562fc184ab9b5ed48398bb955d938aa139768fcea7da777361`.
 Independent final-2 re-review remains; no production action occurred.
+
+Independent final-2 review found that mutable Compose could still downgrade a
+full preset before the release gate, that the damaged definition could not stop
+an orphaned converter, and that leader exit could hide a SIGTERM-ignoring parser
+descendant. Commit `4587308ff` closes all three paths and promotes the exit-88
+operator runbook. Exact image
+`sha256:8c9acdd292a80355c708823f98d3651484667856abfd35b0a28af2b4a3cfc3cf`
+passes local final-3 qualification with unchanged advisory IDs. Independent
+final-3 re-review remains; no production action occurred.
 
 Independent re-review of `2bbf8498e` returned FAIL/HOLD. See the
 [consolidated review](../../artifacts/20261114_rust_cli_remediation_independent_re_review.md)
