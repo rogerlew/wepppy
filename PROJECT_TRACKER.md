@@ -1,4 +1,4 @@
-Implemented; local validation closeout: [Batch and culvert partial-success results](docs/work-packages/20261115_batch_partial_success/package.md) — immutable attempt results, additive polling and companion client success-only metrics/geometry. Contract checkpoints committed; no deployment or incident recovery.
+Implemented and locally validated: [Batch and culvert partial-success results](docs/work-packages/20261115_batch_partial_success/package.md) — immutable attempt results, additive polling and companion client success-only metrics/geometry. Contract checkpoints committed; no deployment or incident recovery.
 
 Completed: [Redis credential transport hardening](docs/work-packages/20261111_redis_credential_transport/package.md) - Accepted implementation db7ef7cb7 removes generated credential URLs/argv while preserving Redis auth/topology. Scoped Python/Go and isolated Compose acceptance plus all four independent reviews passed; F5 is unblocked. Shared-dev Redis recreation and job-continuity limits are documented; no production rollout.
 

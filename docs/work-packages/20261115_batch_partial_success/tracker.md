@@ -1,6 +1,6 @@
 # Batch partial-success tracker
 
-Updated: 2026-11-16. Server/client implementation complete; local validation closeout.
+Updated: 2026-11-16. Server/client implementation and local validation complete.
 
 ## Progress
 
@@ -9,7 +9,8 @@ Updated: 2026-11-16. Server/client implementation complete; local validation clo
 - [x] Shared attempt publication, additive polling, failure settlement and bounded Omni recovery.
 - [x] Companion client polling/resume and manifest-selected metrics/geometry.
 - [x] Local real Redis/RQ timeout, actual finalizer, HTTP/download, cancellation and archive/restore tests.
-- [ ] Final regression receipts, independent review artifacts and implementation commits.
+- [x] Final focused regression receipts, independent review artifacts and implementation commits.
+- [x] Full suite stopped at operator request: 766 passed / 32 skipped before interruption.
 
 ## Decisions and handoff
 
@@ -39,3 +40,10 @@ science or deployed Celery/production identity and mount parity. Validate that
 existing user workflow under production-equivalent conditions before rollout.
 No deployment, model parameter change, production resource mutation or incident
 repair is claimed. The original incident ID is not a release prerequisite.
+
+## Commits
+
+Server `f13e4ce6f`; external client `c56fa19a7`. Contract ancestors are listed above.
+Final receipts: [validation](artifacts/20261116_validation.md),
+[reviews](artifacts/20261116_implementation_reviews.md), and
+[artifact readback](artifacts/20261116_artifact_readback.json).

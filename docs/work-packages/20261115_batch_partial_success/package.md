@@ -1,6 +1,6 @@
 # Batch and culvert partial-success results
 
-Status: implemented in server and companion client; local acceptance and final review closeout. Created 2026-11-16 06:13 UTC.
+Status: implemented in server and companion client; local acceptance and independent reviews complete. Created 2026-11-16 06:13 UTC.
 
 ## Purpose and scope
 

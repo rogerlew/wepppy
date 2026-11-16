@@ -1,7 +1,7 @@
 # Implement batch outcomes for partial results
 
 
-This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. M1–M3 are implemented; M4 local regression and review closeout is active. The reviewed contract checkpoint precedes runtime implementation.
+This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. M1–M4 implementation and local validation are complete. The reviewed contract checkpoint precedes runtime implementation.
 
 ## Purpose / Big Picture
 
@@ -17,7 +17,7 @@ Deliver successful batch and culvert results when a sibling times out. A 32-succ
 - [x] M1: Operator ratified; checkpoint `390108471` and climate compatibility addendum `0aec93f1c` committed before their respective runtime changes.
 - [x] M2: Finalization and additive polling implementation for both workflows.
 - [x] M3: Client adoption, direct artifact acceptance, migration guide.
-- [ ] M4: Regression gates, independent reviews, evidence-based handoff.
+- [x] M4: Focused gates and independent reviews pass; full run stopped at operator request (766 passed / 32 skipped). Server `f13e4ce6f`, external client `c56fa19a7`.
 
 ## Surprises & Discoveries
 
@@ -107,3 +107,8 @@ execution-state rechecks. Enqueue and parent linkage share the same short lease;
 cancellation refreshes the tree after acquisition. Poll-settled failures also write
 matching member manifests. This implements the ratified cancellation/immutability
 contract rather than changing cancellation semantics.
+
+Final operator direction: “i don't think we need to run the full suite of tests”.
+The broad run was interrupted; final acceptance uses focused regression, real
+Redis/RQ boundary and client readback receipts. No full-suite pass is claimed.
+Implementation delivery is complete. Deployment acceptance remains separate.
