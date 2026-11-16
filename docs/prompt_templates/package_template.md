@@ -165,3 +165,10 @@ Use `docs/prompt_templates/security_review_template.md` for the security artifac
 **Lessons Learned**: [What went well, what could be improved for future packages]
 
 **Archive Status**: [Note what artifacts are retained and where]
+
+Integration evidence must follow `docs/standards/integration-history-governance.md`.
+Record local acceptance, remote integration, validated integration, publication,
+and deployment as separate states. Before claiming integration, retain a fresh
+remote receipt for the accepted source SHA and explicit repository/branch. The
+receipt belongs in a later audit commit or retained artifact; it cannot contain
+the hash of its own commit. Ancestry does not establish current security behavior.

@@ -48,7 +48,7 @@ All commands mirror the legacy behavior, but now live under the Typer dispatcher
 - `wctl build-static-assets` – calls `wepppy/weppcloud/static-src/build-static-assets.sh`, adding `--prod` automatically when the installer targets the production compose file.
 - `wctl restore-docker-data-permissions` – repairs ownership for `.docker-data/*` using the UID/GID from the active env file.
 - `wctl run-npm` – runs host-side npm/Yarn scripts with `--prefix wepppy/weppcloud/static-src` (plain npm commands like `install`, `test`, `lint`, etc.).
-- `wctl run-pytest` – executes pytest inside the running `weppcloud` container (`pytest tests` by default).
+- `wctl run-pytest` – executes pytest inside the running `weppcloud` container (`pytest tests` by default). It first verifies the container sees the caller’s live checkout (or explicit `--project-dir`); a mismatch stops before tests run. Reinstall the shim after updating wctl to enable caller-directory detection.
 - `wctl run-pytest-sharded` – executes module-level pytest shards in parallel subprocesses (no xdist), streams shard logs live, automatically reuses cached module timings for longest-first balancing when available, and prints an aggregate result summary. Start with `--workers 4` unless you have a known reason to tune higher/lower.
 - `wctl run-python` – opens the project virtualenv's Python inside the container, defaulting to an interactive REPL when no script/args are supplied.
 - `wctl issue-auth-token` / `revoke-auth-token` – mint or revoke WEPPcloud JWTs (e.g., `wctl issue-auth-token culvert-app --scope culvert:batch:submit --audience rq-engine --expires-in 7776000`).

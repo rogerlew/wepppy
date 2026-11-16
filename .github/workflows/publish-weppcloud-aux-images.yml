@@ -8,7 +8,28 @@ permissions:
   packages: write
 
 jobs:
+  governance:
+    name: Verify exact-source integration eligibility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Check out the exact publication source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Require successful governance for this master revision
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 tools/check_security_baseline.py publication --repository "${SOURCE_REPOSITORY}" --candidate "${SOURCE_SHA}" --wait-seconds 600
   publish:
+    needs: governance
     name: Build, test, and publish ${{ matrix.service }}
     runs-on: ubuntu-24.04
     strategy:

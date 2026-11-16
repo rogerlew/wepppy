@@ -77,3 +77,27 @@
 ## Next Steps
 - Implement phase 1 skeleton and add initial smoke tests.
 - Share spec with agents and begin staged migration.
+
+## Test checkout identity
+
+`run-pytest` and `run-pytest-sharded` verify that container `/workdir/wepppy`
+sees the requested live host checkout before starting tests. `--project-dir`
+takes precedence; otherwise the shim preserves the caller's directory and finds
+its WEPPpy checkout. Commands invoked outside a checkout retain the installed
+preset's project directory.
+
+The check creates a random temporary `.wctl-checkout-*` nonce in the host
+checkout, reads it inside the container, and removes it when the command returns.
+It contains no source or credentials. A read-only container mount is supported;
+the host checkout must be writable. This proves shared source visibility,
+including dirty and untracked source, without hashing the repository. Separate
+copies, including copies at the same commit, fail with `WCTL_CHECKOUT_MISMATCH`
+before pytest starts. Mount the requested checkout or run from the existing
+mounted checkout. The command does not recreate containers or switch Git refs.
+
+The mount check does not freeze concurrent source edits or qualify ignored build
+outputs, dependencies, or external data. Serialize source mutation and validation
+as required by the integration governance contract. A killed wrapper may leave
+a harmless nonce file; remove only that invocation's `.wctl-checkout-*` file once
+its process is no longer running. Reinstall the shim after updating `install.sh`
+so alternate-worktree caller detection is active.

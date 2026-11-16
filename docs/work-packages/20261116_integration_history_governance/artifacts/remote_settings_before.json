@@ -1,0 +1,20 @@
+{
+  "protection": {
+    "exit_code": 1,
+    "response": {
+      "message": "Branch not protected",
+      "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+      "status": "404"
+    }
+  },
+  "rulesets": {
+    "exit_code": 0,
+    "response": []
+  },
+  "merge_settings": {
+    "allow_merge_commit": true,
+    "allow_rebase_merge": true,
+    "allow_squash_merge": true,
+    "delete_branch_on_merge": false
+  }
+}

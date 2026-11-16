@@ -5,6 +5,7 @@ from typing import List
 
 import typer
 
+from ..checkout_identity import checked_test_command, requested_checkout
 from ..context import CLIContext
 from ..docker import compose_exec
 from ..util import quote_args
@@ -19,6 +20,26 @@ def _context(ctx: typer.Context) -> CLIContext:
 
 def _exit_from_result(result: subprocess.CompletedProcess) -> None:
     raise typer.Exit(result.returncode)
+
+
+def _run_checked_test(ctx: typer.Context, context: CLIContext, command: str) -> None:
+    project_dir = requested_checkout(
+        context.project_dir,
+        context.environment.get("WCTL_CALLER_CWD"),
+        explicit=bool(ctx.find_root().params.get("project_dir")),
+    )
+    try:
+        with checked_test_command(project_dir, command) as checked_command:
+            context.logger.info("Verifying test checkout mount: %s", project_dir)
+            result = compose_exec(context, "weppcloud", checked_command, check=False)
+    except OSError as exc:
+        typer.echo(
+            f"WCTL_CHECKOUT_UNVERIFIED: cannot verify {project_dir}: {exc}. "
+            "Use a writable host checkout mounted at container /workdir/wepppy.",
+            err=True,
+        )
+        raise typer.Exit(2) from None
+    _exit_from_result(result)
 
 
 def register(app: typer.Typer) -> None:
@@ -36,8 +57,7 @@ def register(app: typer.Typer) -> None:
             "MYPY_CACHE_DIR=/tmp/mypy_cache "
             f"/opt/venv/bin/pytest {quoted}"
         )
-        result = compose_exec(context, "weppcloud", command, check=False)
-        _exit_from_result(result)
+        _run_checked_test(ctx, context, command)
 
     @app.command(
         "run-pytest-sharded",
@@ -61,8 +81,7 @@ def register(app: typer.Typer) -> None:
             "MYPY_CACHE_DIR=/tmp/mypy_cache "
             f"/opt/venv/bin/python tools/run_pytest_sharded.py --workers {workers} -- {quoted_args}"
         )
-        result = compose_exec(context, "weppcloud", command, check=False)
-        _exit_from_result(result)
+        _run_checked_test(ctx, context, command)
 
     @app.command(
         "run-python",

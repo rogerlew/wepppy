@@ -20,7 +20,7 @@
 - **Artifacts are the executable truth:** follow [artifact observability](docs/standards/artifact-observability-standard.md) and [generated-artifact validation](docs/standards/generated-artifact-validation-standard.md); persisted state or job success alone cannot prove output correctness.
 - Keep docs terse: Codex loads context in bulk and does not compress verbose guidance.
 - Do not add fallback wrappers that silently mask missing required dependencies; prefer explicit failures over hidden recovery paths.
-- Do not create or switch to a new git branch unless the user explicitly asks for it.
+- For authorized work, use task branches/worktrees and one master integrator; follow [integration/history governance](docs/standards/integration-history-governance.md). Never routinely rebase/reset shared master.
 - Always ignore `wepppy/weppcloud/routes/usersum/generated/docs_index.json` when it is dirty unless explicitly asked to modify it.
 
 ## Agent Feedback Loop

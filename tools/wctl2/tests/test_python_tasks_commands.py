@@ -122,7 +122,8 @@ def test_run_pytest_sharded_defaults_to_tests(monkeypatch: pytest.MonkeyPatch, t
     recorded: List[Tuple[str, str, bool, bool]] = []
 
     def fake_compose_exec(context, service, exec_command, tty=True, check=True):
-        recorded.append((service, exec_command, tty, check))
+        assert "WCTL_CHECKOUT_MISMATCH" in exec_command
+        recorded.append((service, exec_command.split(" && ", 1)[1], tty, check))
         return DummyResult()
 
     monkeypatch.setattr("tools.wctl2.commands.python_tasks.compose_exec", fake_compose_exec)
@@ -155,7 +156,8 @@ def test_run_pytest_sharded_passes_workers_and_args(monkeypatch: pytest.MonkeyPa
     recorded: List[Tuple[str, str, bool, bool]] = []
 
     def fake_compose_exec(context, service, exec_command, tty=True, check=True):
-        recorded.append((service, exec_command, tty, check))
+        assert "WCTL_CHECKOUT_MISMATCH" in exec_command
+        recorded.append((service, exec_command.split(" && ", 1)[1], tty, check))
         return DummyResult()
 
     monkeypatch.setattr("tools.wctl2.commands.python_tasks.compose_exec", fake_compose_exec)

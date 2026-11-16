@@ -59,6 +59,7 @@ def _run_deploy(
     controller_backup_failure: bool = False,
     caddy_inspection_failure: bool = False,
     gate_failure_call: int = 0,
+    governance_failure: bool = False,
     worker_stops_after_stop: bool = False,
     controller_build_failure: bool = False,
     shape_readiness_failure: bool = False,
@@ -407,6 +408,11 @@ fi
         bin_dir / "python3",
         r'''#!/bin/bash
 set -euo pipefail
+if [[ "${1:-}" == *"tools/check_deployment_governance.py" ]]; then
+    printf 'governance|check\n' >> "${FAKE_COMMAND_LOG}"
+    if [ "${FAKE_GOVERNANCE_FAILURE:-0}" = 1 ]; then exit 89; fi
+    exit 0
+fi
 if [[ "${1:-}" == *"tools/security/retained_candidate.py" ]]; then
     /bin/cat >/dev/null
     printf 'retained|%s\n' "${2:-}" >> "${FAKE_COMMAND_LOG}"
@@ -640,6 +646,7 @@ exec /bin/cp "$@"
             "FAKE_IMAGE_OVERRIDE": str(fake_override),
             "FAKE_GATE_COUNT": str(state_dir / "gate-count"),
             "FAKE_GATE_FAILURE_CALL": str(gate_failure_call),
+            "FAKE_GOVERNANCE_FAILURE": "1" if governance_failure else "0",
             "FAKE_STOPPED_WORKER_AFTER_STOP": "1" if worker_stops_after_stop else "0",
             "FAKE_WORKER_STOPPED_MARKER": str(state_dir / "worker-stopped"),
             "FAKE_RECOVERY_STARTED_MARKER": str(state_dir / "recovery-started"),
@@ -1816,3 +1823,14 @@ def test_active_job_probe_never_cleans_registry(monkeypatch, capsys):
     exec(compile(program, str(_DEPLOY), "exec"), {})
     assert calls == ["rq:wip:default", "rq:wip:batch"]
     assert capsys.readouterr().out.strip() == "1"
+
+
+def test_governance_failure_precedes_build_stop_and_activation(tmp_path: Path) -> None:
+    result, commands = _run_deploy(
+        tmp_path, _full_services_with_cap_and_renderer(), governance_failure=True,
+    )
+    assert result.returncode == 89
+    assert "governance|check" in commands
+    assert not any(_RQ_SUSPEND in command for command in commands)
+    assert not any("build " in command or "--force-recreate" in command for command in commands)
+    assert not any(command.startswith("docker|stop ") for command in commands)

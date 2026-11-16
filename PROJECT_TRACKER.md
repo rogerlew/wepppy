@@ -1,3 +1,5 @@
+Implementation authorized: [Integration and history preservation governance](docs/work-packages/20261116_integration_history_governance/package.md) — remote receipts, history preservation, task isolation, trusted checks and publication gating; implementation and enforcement evidence pending.
+
 Complete: [Omni SBS map reload and resubmission](docs/work-packages/20261116_omni_sbs_reload/package.md) - Contract-first shared staging/Omni fix; 118 scoped Python and 26 JS tests pass. Disposable fixture repaired; native watershed/report and queued browser no-upload resubmission pass. No production rollout.
 
 Implemented and locally validated: [Batch and culvert partial-success results](docs/work-packages/20261115_batch_partial_success/package.md) — immutable attempt results, additive polling and companion client success-only metrics/geometry. Contract checkpoints committed; no deployment or incident recovery.

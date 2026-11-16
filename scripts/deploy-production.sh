@@ -790,6 +790,10 @@ else
     echo ""
 fi
 
+# Verify exact integrated source before builds, worker suspension, or activation.
+# Public GitHub read access is sufficient; GH_TOKEN may raise the API rate limit.
+python3 "${PROJECT_ROOT}/tools/check_deployment_governance.py" --root "${PROJECT_ROOT}"
+
 validate_deploy_topology
 
 SHAPE_CONVERTER_RELEASE_REQUIRED=false
