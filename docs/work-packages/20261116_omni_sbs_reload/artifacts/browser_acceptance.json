@@ -1,0 +1,24 @@
+{
+  "url": "https://forest.tail305ec9.ts.net/weppcloud/runs/qa-omni-reload-20261116/config/",
+  "before": {
+    "scenarios": [
+      {
+        "type": "sbs_map",
+        "sbs_file_path": "/wc1/runs/qa/qa-omni-reload-20261116/omni/_limbo/00/qa_omni_reload.tif"
+      }
+    ],
+    "filename": "qa_omni_reload.tif",
+    "selectedFiles": 0
+  },
+  "after": {
+    "scenarios": [
+      {
+        "type": "sbs_map",
+        "sbs_file_path": "/wc1/runs/qa/qa-omni-reload-20261116/omni/_limbo/00/qa_omni_reload.tif"
+      }
+    ],
+    "filename": "qa_omni_reload.tif"
+  },
+  "status": 202,
+  "job_id": "3dd9ac8f-b0ab-483d-aae8-dba1d946b45d"
+}

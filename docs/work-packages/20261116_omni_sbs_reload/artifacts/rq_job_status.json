@@ -1,0 +1,14 @@
+{
+  "jobs:0,scenario:sbs_map_cWFfb21uaV9yZWxvYWQudGlm": {
+    "id": "91191820-5718-4d18-a575-857252b7bb1c",
+    "status": "JobStatus.FAILED"
+  },
+  "jobs:2,func:_compile_hillslope_summaries_rq": {
+    "id": "672607df-7885-43c8-96e2-a5d92937a573",
+    "status": "JobStatus.DEFERRED"
+  },
+  "jobs:3,func:_finalize_omni_scenarios_rq": {
+    "id": "f44b04c7-495a-4b8b-ae96-eccfad4e86dd",
+    "status": "JobStatus.DEFERRED"
+  }
+}

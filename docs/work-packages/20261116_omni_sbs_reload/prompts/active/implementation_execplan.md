@@ -21,10 +21,11 @@ requires both the visible UI and the actual scenario input to agree.
 - [x] (2026-11-16 19:05 UTC) Record contract-first and scoped-test instruction.
 - [ ] Capture browser reproduction and exact canonical contract amendments.
 - [x] (2026-11-16 UTC) Author shared staging and Omni contracts; reconcile freshness/upload rules.
-- [ ] Complete accepted contract checkpoint and standalone ancestor commit.
-- [ ] Add failing targeted tests and implement the contracted fix.
-- [ ] Rebuild assets; verify browser, filesystem, and generated output behavior.
-- [ ] Complete independent reviews and documentation; disposition limitations.
+- [x] (2026-11-16 UTC) Reviewed contract ancestor committed as `67468cf86`.
+- [x] (2026-11-16 UTC) Scoped regressions and implementation; 116 Python/26 JS tests pass.
+- [x] (2026-11-16 UTC) Rebuild assets; browser HTTP 202/reload and native recovery/reset/input/hillslope evidence pass.
+- [ ] Final watershed/report acceptance blocked by fixture climate mismatch (2007 versus 1980).
+- [x] (2026-11-16 UTC) Independent correctness/security reviews pass; documentation and limitations retained.
 
 ## Surprises & Discoveries
 
@@ -56,10 +57,18 @@ freshness decisions about output reuse. No new store or legacy migration.
 ## Outcomes & Retrospective
 
 
-Source-level diagnosis and a restartable implementation plan are complete.
-No browser reproduction, contract acceptance, implementation, or runtime
-validation has occurred. The key discovery is that the temporary-upload lifecycle
-must be tested alongside the visible saved state.
+Contract ancestor `67468cf86` and bounded implementation are complete. Scoped
+checks pass: 116 Python plus 2 real NoDb persistence tests, 26 JS tests, ESLint,
+bundle build and documentation checks. Authenticated browser submission with no
+File returned 202 and reload preserved the filename/reference. Native recovery
+from the corresponding child passed, including real persisted state, reset,
+unchanged raster digest, regenerated inputs and 217 fresh hillslope outputs.
+
+The full watershed/report gate remains open because the copied project's channel
+climate starts in 2007 while its hillslope passes start in 1980. The model explicitly
+stopped; do not call the package closed, deployed, or incident resolved. Retain
+the disposable run and validation artifacts, and use a climate-consistent project
+for the remaining gate. No unrelated scientific correction is authorized.
 
 ## Context and Orientation
 
@@ -195,11 +204,11 @@ and affected-run repair require separate evidence and authorization.
 
 From `/home/workdir/wepppy`, use scoped commands during implementation:
 
-    wctl run-npm test -- omni.test.js --runInBand
+    wctl run-npm exec --call 'NODE_OPTIONS=--experimental-vm-modules node wepppy/weppcloud/static-src/node_modules/jest/bin/jest.js --config wepppy/weppcloud/static-src/jest.config.mjs --runInBand --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/omni.test.js'
     wctl run-pytest tests/microservices/test_rq_engine_omni_routes.py --maxfail=1
     wctl run-pytest tests/weppcloud/routes/test_omni_bp.py tests/weppcloud/routes/test_omni_bp_routes.py --maxfail=1
     wctl run-pytest tests/nodb/mods/test_omni_sbs_freshness.py --maxfail=1
-    python3 wepppy/weppcloud/controllers_js/build_controllers_js.py
+    wctl run-python wepppy/weppcloud/controllers_js/build_controllers_js.py
 
 Run parser, mode-build, orchestration, or RQ test modules only when those paths
 are changed or implicated. Determine the canonical wrapper's targeted ESLint
@@ -266,3 +275,11 @@ resolution rule for old/new projects; removed the open storage/legacy-policy for
 Revision note (2026-11-16 UTC): User approved an independent user-file staging
 contract within this package. Added it to the contract milestone and scoped
 lifecycle acceptance; Omni remains the sole implementation consumer in scope.
+
+Execution note (2026-11-16 UTC): Contract ancestor `67468cf86` precedes all code
+changes. Independent code reviews found and closed copy-before-publication,
+shared saved-reference readers/deletion, and numeric hydration issues. Scoped
+Python/JS/ESLint checks pass. Native and browser acceptance are in progress.
+
+Execution note (2026-11-16 UTC): Browser and input/artifact boundaries validated;
+full watershed/report gate explicitly blocked by fixture dates. See artifacts/validation.md.

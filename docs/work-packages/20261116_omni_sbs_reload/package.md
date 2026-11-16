@@ -1,7 +1,7 @@
 # Omni SBS map reload and resubmission
 
-**Status**: Scaffolded; contract-first implementation pending  
-**Started**: 2026-11-16 19:05 UTC  
+**Status**: Implemented and scoped validation passed; full watershed/report gate blocked
+**Started**: 2026-11-16 19:05 UTC
 **Owner**: WEPPcloud maintainers; implementation agent unassigned
 
 ## Overview
@@ -12,8 +12,8 @@ This package repairs the UI-to-admission round trip and resolves the consumed
 upload lifecycle that can independently prevent resubmission.
 
 The user requested a scaffold and issue/decision walkthrough, then explicitly
-required contract-first implementation with scoped validation tests. This
-scaffold does not authorize deployment or claim implementation is complete.
+required contract-first implementation with scoped validation tests. The operator subsequently authorized execution of the plan. Production deployment
+is outside this authorization.
 
 ## Scope and complexity budget
 
@@ -57,7 +57,8 @@ Source inspection at `65fa0c0bd008b16157a82191a766a0bdb9453173` establishes:
    thinning inputs; it does not demonstrate an SBS reload/resubmit round trip.
 
 Full source paths and the execution sequence are in the [ExecPlan](prompts/active/implementation_execplan.md).
-No affected project or browser session has been inspected yet.
+The original affected project was not identified. A disposable real-project copy
+and authenticated browser were inspected during execution; see the validation artifact.
 
 ## Contract decisions and rationale
 
@@ -203,8 +204,12 @@ and configuration. Use a disposable representative project in the dev Compose
 environment; identify an affected project only if needed to reproduce unresolved
 behavior. Missing environment evidence limits closure claims.
 
-**Current evidence grade:** source-level diagnosis and scaffold only. Browser
-reproduction, implementation, deployment, and incident resolution are unproven.
+**Current evidence grade:** implemented and locally validated (116 scoped Python
+tests plus 2 real NoDb persistence tests, 26 controller tests, scoped ESLint and independent code reviews). Authenticated browser reload/resubmit passed (HTTP 202). Native restoration,
+reset, regenerated inputs, and 217 fresh hillslope outputs passed. Full watershed
+and final report acceptance remain blocked by the fixture climate mismatch
+(channel start 2007 versus pass start 1980). No production deployment or incident
+resolution claim. See [validation evidence](artifacts/validation.md).
 
 ## Related history
 

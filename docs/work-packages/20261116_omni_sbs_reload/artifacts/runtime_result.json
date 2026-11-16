@@ -1,0 +1,12 @@
+{
+  "runid": "qa-omni-reload-20261116",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "stages": [],
+  "status": "watershed_blocked",
+  "source_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+  "fixture_blocker": "channel climate starts 2007; hillslope pass files start 1980"
+}

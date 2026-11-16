@@ -203,6 +203,65 @@ describe("Omni controller", () => {
         expect(groundSelect.value).toBe("93%");
     });
 
+    test.each(["sbs_map", 8])("saved SBS map (%s) survives reload and submission with canonical filename", async (type) => {
+        const saved = { type, sbs_file_path: "/run/omni/_limbo/03/severity.tif" };
+        getJsonMock.mockResolvedValueOnce([saved]);
+        await omni.load_scenarios_from_backend();
+        expect(document.querySelector(".wc-field--display .wc-field__label").textContent).toBe("Current SBS map");
+        expect(document.querySelector(".wc-text-display code").textContent).toBe("severity.tif");
+        expect(document.querySelector("input[type=file]").files).toHaveLength(0);
+        expect(omni.serializeScenarios().scenarios).toEqual([{ ...saved, type: "sbs_map" }]);
+    });
+
+    test("SBS uploads use submitted list index after blank rows", async () => {
+        getJsonMock.mockResolvedValueOnce([{ type: "" }, { type: "sbs_map" }]);
+        await omni.load_scenarios_from_backend();
+        const file = new File(["raster"], "new.tif", { type: "image/tiff" });
+        Object.defineProperty(document.querySelector("input[type=file]"), "files", { value: [file] });
+        const payload = omni.serializeScenarios();
+        expect(payload.formData.get("scenarios[0][sbs_file]").name).toBe("new.tif");
+        expect(payload.formData.has("scenarios[1][sbs_file]")).toBe(false);
+    });
+
+    test("SBS removal, type changes and pending replacement preserve row ownership", async () => {
+        const saved = [
+            { type: "sbs_map", sbs_file_path: "/run/omni/_limbo/00/first.tif" },
+            { type: "sbs_map", sbs_file_path: "/run/omni/_limbo/01/second.tif" }
+        ];
+        getJsonMock.mockResolvedValueOnce(saved);
+        await omni.load_scenarios_from_backend();
+        document.querySelector("[data-omni-action=remove-scenario]").click();
+        expect(omni.serializeScenarios().scenarios).toEqual([saved[1]]);
+        const input = document.querySelector("input[type=file]");
+        Object.defineProperty(input, "files", { configurable: true, value: [new File(["bad"], "bad.zip")] });
+        expect(() => omni.serializeScenarios()).toThrow("SBS maps must");
+        expect(document.querySelector(".wc-text-display code").textContent).toBe("second.tif");
+        Object.defineProperty(input, "files", { value: [new File(["raster"], "replacement.tif")] });
+        expect(omni.serializeScenarios().scenarios).toEqual([{ type: "sbs_map", sbs_file: "replacement.tif" }]);
+        expect(document.querySelector(".wc-text-display code").textContent).toBe("second.tif");
+        const select = document.querySelector("[data-omni-role=scenario-select]");
+        select.value = "uniform_low";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        expect(omni.serializeScenarios().scenarios).toEqual([{ type: "uniform_low" }]);
+        select.value = "sbs_map";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        expect(omni.serializeScenarios().scenarios).toEqual([{ type: "sbs_map" }]);
+        expect(document.querySelector(".wc-text-display").textContent).toBe("No map uploaded.");
+    });
+
+    test("SBS postcommit error reconciles accepted filename without clearing error", async () => {
+        const old = { type: "sbs_map", sbs_file_path: "/run/omni/_limbo/00/old.tif" };
+        getJsonMock.mockResolvedValueOnce([old]);
+        await omni.load_scenarios_from_backend();
+        const accepted = { type: "sbs_map", sbs_file_path: "/run/omni/_limbo/new/new.tif" };
+        getJsonMock.mockResolvedValueOnce([accepted]);
+        requestMock.mockRejectedValueOnce(new Error("Queue unavailable"));
+        omni.run_omni_scenarios();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(document.querySelector(".wc-text-display code").textContent).toBe("new.tif");
+        expect(document.querySelector("#omni_form #status").textContent).toContain("Queue unavailable");
+    });
+
     test("new thinning rows preserve defaults with expanded canopy choices", () => {
         const item = addScenarioAndSelect("thinning");
         const canopy = item.querySelector("[data-omni-field='canopy_cover']");
@@ -305,6 +364,25 @@ describe("Omni controller", () => {
 
         const statusElement = document.getElementById("status");
         expect(statusElement.textContent).toContain("SBS maps must be");
+    });
+
+    test("saved SBS deletion targets accepted map while replacement is pending", async () => {
+        getJsonMock.mockResolvedValueOnce([{ type: "sbs_map", sbs_file_path: "/run/omni/_limbo/00/old.tif" }]);
+        await omni.load_scenarios_from_backend();
+        Object.defineProperty(document.querySelector("input[type=file]"), "files", { value: [new File(["raster"], "new.tif")] });
+        document.querySelector("input[type=file]").dispatchEvent(new Event("change", { bubbles: true }));
+        const acceptedName = "sbs_map_" + btoa("old.tif").replace(/=+$/, "");
+        requestMock.mockResolvedValueOnce({ body: { Content: { removed: [acceptedName], missing: [] } } });
+        const checkbox = document.querySelector("[data-omni-role=scenario-select-toggle]");
+        checkbox.checked = true;
+        checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+        document.querySelector("[data-omni-action=delete-selected]").click();
+        document.querySelector("[data-omni-action=confirm-delete]").click();
+        expect(requestMock).toHaveBeenCalledWith("api/omni/delete_scenarios", expect.objectContaining({
+            json: { scenario_names: ["sbs_map_" + btoa("old.tif").replace(/=+$/, "")] }
+        }));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(document.querySelectorAll("[data-omni-scenario-item=true]")).toHaveLength(0);
     });
 
     test("delete selected scenarios posts delete request and prunes DOM", async () => {

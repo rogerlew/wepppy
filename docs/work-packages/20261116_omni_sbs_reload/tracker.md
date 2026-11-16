@@ -2,7 +2,8 @@
 
 ## Status
 
-Contract-first execution active; contract drafts and reviews prepared.
+Implemented; scoped validation and browser acceptance passed. Full watershed/report
+environment gate remains open due to fixture climate-year mismatch.
 Updated 2026-11-16 19:05 UTC.
 
 ## Task board
@@ -14,10 +15,11 @@ Updated 2026-11-16 19:05 UTC.
 - [x] Record user-directed two-location resolution and simple existing-project policy.
 - [x] Include independent user-file staging contract in package scope.
 - [x] Draft shared staging contract and Omni-specific contract delta.
-- [ ] Complete independent contract reviews and accepted ancestor checkpoint.
-- [ ] Add failing scoped regressions, implement bounded fix, rebuild controller bundle.
-- [ ] Run scoped validation and real artifact/browser acceptance.
-- [ ] Complete correctness/UX and security artifacts; update affected documentation.
+- [x] Complete independent contract reviews and accepted ancestor checkpoint.
+- [x] Add failing scoped regressions, implement bounded fix, rebuild controller bundle.
+- [x] Run scoped tests, authenticated browser submission/reload, and native input/reset validation.
+- [ ] Complete final watershed/report acceptance on a climate-consistent project.
+- [x] Complete correctness/UX and security code reviews; update affected documentation.
 
 ## Decisions
 
@@ -37,7 +39,7 @@ Scaffold validation: package docs (3 files) and root project tracker passed
 `wctl doc-lint` with zero errors/warnings; spelling preview showed no changes;
 `git diff --check` passed. No application tests run for this documentation-only turn.
 Starting implementation revision: `65fa0c0bd008b16157a82191a766a0bdb9453173`.
-Contract ancestor revision: not yet created.
+Contract ancestor revision: `67468cf86` (reviewed contracts only, before code edits).
 
 ## Risks and next handoff
 
@@ -83,3 +85,38 @@ postcommit error semantics; both were clarified before implementation. The two
 review artifacts retain findings and disposition. No implementation file has
 been edited before the checkpoint. Only package/new or specifically amended
 contracts will be committed; unrelated dirty shared contracts remain excluded.
+
+## Implementation — 2026-11-16 UTC
+
+Saved SBS references now hydrate/serialize and feed shared scenario identity
+readers, including accepted-map deletion with a pending replacement. Numeric type
+8 hydrates correctly. Backend matches persisted associations and resolves staged
+or corresponding child maps; new uploads stage separately, restored bytes are
+checked before publication, and accepted inputs are rechecked at commit.
+
+Scoped validation: 116 Python tests, 26 controller tests, targeted ESLint pass.
+Independent correctness and security code gates pass with findings closed.
+Generated bundle rebuilt through `wctl run-python` because host Python lacks
+Jinja2. Native acceptance is running on independent copy
+`qa-omni-reload-20261116`; 4,165 source files copied with identity/readback evidence.
+Browser and native completion evidence remain pending. No production deployment.
+
+## Final implementation handoff — 2026-11-16 UTC
+
+Scoped checks: 116 Python tests plus 2 real NoDb commit/drift tests, 26 controller
+tests, targeted ESLint, bundle build, broad-exception check, and documentation
+lint passed. No full suites run. Contract ancestor is `67468cf86`; implementation
+revision is the subsequent task-scoped commit (see git history).
+
+Authenticated dev browser submitted through the actual Run Omni button with zero
+selected files, received HTTP 202, and retained the filename/reference on reload.
+`artifacts/browser_acceptance.json` and screenshot retain evidence. The dev
+rq-engine API was restarted to load the candidate; workers/production were not
+restarted. Native input restoration passed through actual admission/persistence,
+reset, verified copied raster, regenerated model inputs and 217 fresh hillslope
+outputs. Full watershed and final report acceptance are blocked: channel climate
+starts 2007 while hillslope passes start 1980. See `artifacts/validation.md`.
+
+Both independent code reviews pass with findings closed. Package remains open
+only for the environment gate; no speculative climate fix or production rollout
+was attempted. Disposable run `qa-omni-reload-20261116` is retained for inspection.

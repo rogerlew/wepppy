@@ -1,6 +1,6 @@
 # User-file staging lifecycle
 
-Status: UFS-01 accepted intent (2026-11-16); implementation conformance pending.
+Status: UFS-01 accepted intent (2026-11-16); candidate implemented and scoped validation passed; no production rollout.
 
 ## Scope and adoption
 

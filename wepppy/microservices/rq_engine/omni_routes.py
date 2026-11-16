@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import copy
+from dataclasses import dataclass
 import json
 import logging
 import os
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 from uuid import uuid4
+from types import SimpleNamespace
 
 import redis
 from .payloads import request_form, PayloadRoute
@@ -20,6 +23,7 @@ from wepppy.nodb.single_input_policy import single_input_uploads_enabled
 from wepppy.nodb.core import Ron
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.omni import Omni, OmniScenario
+from wepppy.nodb.mods.omni.omni_sbs_freshness import child_source
 from wepppy.nodb.core import Watershed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
@@ -319,6 +323,75 @@ def _preflight_omni_roots(wd: str) -> None:
     _require_directory_root(wd, "soils")
 
 
+@dataclass
+class _SavedSbsInput:
+    source: Path
+    identity: RasterUploadIdentity
+    staged: Path
+
+
+def _contained_omni_path(path: Path, root: Path, wd: str) -> Path:
+    """Check existing and not-yet-created paths before reading or publishing."""
+    trusted = Path(wd).resolve(strict=True)
+    try:
+        root.resolve().relative_to(trusted)
+        path.resolve().relative_to(root.resolve())
+        relative = path.absolute().relative_to(Path(wd).absolute())
+    except ValueError as exc:
+        raise UploadError("Stored raster is outside the trusted run root.") from exc
+    current = Path(wd)
+    for part in relative.parts:
+        current = current / part
+        if current.is_symlink():
+            raise UploadError("Stored raster path must not contain symlinks.")
+    return path
+
+
+def _saved_sbs_staging_path(wd: str, saved_path: str) -> Path:
+    # Forks can retain an old absolute prefix. Only a server-owned saved
+    # definition reaches this helper; rebase its staging suffix locally.
+    marker = "/omni/_limbo/"
+    prefix, separator, suffix = saved_path.rpartition(marker)
+    parts = suffix.split("/")
+    if not separator or not prefix or len(parts) != 2 or any(
+        part in ("", ".", "..") or "\\" in part for part in parts
+    ):
+        raise UploadError("Saved SBS map has an invalid staging path; upload it again.")
+    root = Path(wd) / "omni" / "_limbo"
+    return _contained_omni_path(root.joinpath(*parts), root, wd)
+
+
+def _restore_saved_sbs(receipt: _SavedSbsInput, wd: str) -> Path:
+    if receipt.source == receipt.staged:
+        return receipt.staged
+    _contained_omni_path(receipt.staged, Path(wd) / "omni/_limbo", wd)
+    assert_validated_raster_identity(receipt.source, receipt.identity)
+    def _validate_copy(candidate: Path) -> None:
+        identity = validate_raster_upload(candidate)
+        if identity.sha256 != receipt.identity.sha256:
+            raise UploadError("Saved SBS map changed while restoring it; retry the submission.")
+        assert_validated_raster_identity(receipt.source, receipt.identity)
+
+    with receipt.source.open("rb") as stream:
+        restored = save_upload_file(
+            UploadFile(stream, filename=receipt.staged.name),
+            allowed_extensions=SBS_ALLOWED_EXTENSIONS,
+            dest_dir=receipt.staged.parent,
+            filename_transform=lambda _name: receipt.staged.name,
+            max_bytes=SBS_MAX_BYTES,
+            overwrite=False,
+            post_save=_validate_copy,
+            isolated_post_save=True,
+        )
+    assert_validated_raster_identity(receipt.source, receipt.identity)
+    restored_identity = validate_raster_upload(restored)
+    if restored_identity.sha256 != receipt.identity.sha256:
+        raise UploadError("Saved SBS map changed while restoring it; retry the submission.")
+    receipt.source = restored
+    receipt.identity = restored_identity
+    return restored
+
+
 def _prepare_omni_scenarios(
     payload: dict[str, Any],
     raw_json: Any,
@@ -327,7 +400,7 @@ def _prepare_omni_scenarios(
     runid: str,
     config: str,
     wd: str,
-    reuse_receipts: Mapping[int, tuple[Path, RasterUploadIdentity]] | None = None,
+    reuse_receipts: dict[int, _SavedSbsInput] | None = None,
 ) -> list[tuple[OmniScenario, dict[str, Any]]]:
     scenarios_payload = _coerce_omni_scenario_list(payload, raw_json)
     if scenarios_payload is None:
@@ -336,7 +409,7 @@ def _prepare_omni_scenarios(
         raise ValueError("Scenarios data must be a list")
 
     limbo_dir = Path(wd) / "omni" / "_limbo"
-    limbo_dir.mkdir(parents=True, exist_ok=True)
+    _contained_omni_path(limbo_dir, limbo_dir, wd)
 
     parsed_inputs: list[tuple[OmniScenario, dict[str, Any]]] = []
     for idx, scenario in enumerate(scenarios_payload):
@@ -404,7 +477,7 @@ def _prepare_omni_scenarios(
                     upload_path = save_upload_file(
                         upload,
                         allowed_extensions=SBS_ALLOWED_EXTENSIONS,
-                        dest_dir=limbo_dir / f"{idx:02d}",
+                        dest_dir=limbo_dir / uuid4().hex,
                         max_bytes=SBS_MAX_BYTES,
                         overwrite=True,
                         post_save=validate_raster_upload,
@@ -416,13 +489,17 @@ def _prepare_omni_scenarios(
                         status_code=exc.status_code,
                     ) from exc
                 scenario_params["sbs_file_path"] = str(upload_path)
+                if reuse_receipts is not None:
+                    reuse_receipts[idx] = _SavedSbsInput(
+                        upload_path, validate_raster_upload(upload_path), upload_path
+                    )
             elif scenario_params.get("sbs_file_path"):
                 receipt = (reuse_receipts or {}).get(idx)
                 if receipt is None:
                     raise ValueError(
                         f"Scenario {idx} requires a new SBS upload; stored raster was not validated."
                     )
-                upload_path, _identity = receipt
+                upload_path = _restore_saved_sbs(receipt, wd)
                 scenario_params["sbs_file_path"] = str(upload_path)
             else:
                 raise ValueError(f"Missing SBS file for scenario {idx}")
@@ -435,14 +512,16 @@ def _prepare_omni_scenarios(
 
 
 def _prevalidate_omni_sbs_inputs(
-    payload: dict[str, Any], raw_json: Any, form: FormData, *, wd: str
-) -> dict[int, tuple[Path, RasterUploadIdentity]]:
-    """Validate every new or persisted SBS input before publishing any upload."""
+    payload: dict[str, Any], raw_json: Any, form: FormData, *, wd: str,
+    saved_scenarios: list[dict[str, Any]] | tuple = (),
+) -> dict[int, _SavedSbsInput]:
+    """Validate every new or associated SBS input before publishing any upload."""
     scenarios = _coerce_omni_scenario_list(payload, raw_json)
     if not isinstance(scenarios, list):
         return {}
-    limbo_dir = Path(wd) / "omni" / "_limbo"
-    receipts: dict[int, tuple[Path, RasterUploadIdentity]] = {}
+    receipts: dict[int, _SavedSbsInput] = {}
+    saved_sbs = [item for item in saved_scenarios
+                 if item.get("type") in ("sbs_map", 8) and item.get("sbs_file_path")]
     for idx, scenario in enumerate(scenarios):
         if not isinstance(scenario, dict) or not scenario.get("type"):
             continue
@@ -452,28 +531,36 @@ def _prevalidate_omni_sbs_inputs(
         upload = _extract_upload(form, key)
         if upload is not None and upload.filename:
             prevalidate_raster_upload_file(
-                upload,
-                allowed_extensions=SBS_ALLOWED_EXTENSIONS,
-                max_bytes=SBS_MAX_BYTES,
+                upload, allowed_extensions=SBS_ALLOWED_EXTENSIONS, max_bytes=SBS_MAX_BYTES,
             )
             continue
         claimed = scenario.get("sbs_file_path")
         if not claimed:
-            raise ValueError(f"Missing SBS file for scenario {idx}")
-        scenario_root = limbo_dir / f"{idx:02d}"
-        candidates = sorted(
-            path
-            for path in scenario_root.glob("*")
-            if path.suffix.lower().lstrip(".") in SBS_ALLOWED_EXTENSIONS
-        ) if scenario_root.is_dir() else []
-        if len(candidates) != 1:
-            raise ValueError(
-                f"Scenario {idx} requires a new SBS upload; stored raster state is missing or ambiguous."
-            )
-        source = resolve_run_owned_raster_path(
-            candidates[0], scenario_root, trusted_run_root=Path(wd)
-        )
-        receipts[idx] = (source, validate_raster_upload(source))
+            raise ValueError(f"Missing SBS file for scenario {idx}; upload a map.")
+        matches = [item for item in saved_sbs if item["sbs_file_path"] == claimed]
+        if len(matches) != 1:
+            raise ValueError(f"Scenario {idx} saved SBS association is missing or ambiguous; reload or upload a map.")
+        saved = matches[0]
+        staged = _saved_sbs_staging_path(wd, saved["sbs_file_path"])
+        source = staged
+        # Only absence permits child recovery. Invalid/present sources fail.
+        if not staged.exists():
+            owner = SimpleNamespace(wd=wd)
+            source = child_source(owner, saved)
+            if any(item["sbs_file_path"] != claimed and child_source(owner, item) == source
+                   for item in saved_sbs):
+                raise ValueError(f"Scenario {idx} saved SBS child is ambiguous; upload a replacement map.")
+            root = source.parent
+            _contained_omni_path(source, root, wd)
+            if not source.exists():
+                raise ValueError(f"Scenario {idx} saved SBS map is missing; upload a replacement map.")
+        else:
+            root = Path(wd) / "omni/_limbo"
+        source = resolve_run_owned_raster_path(source, root, trusted_run_root=Path(wd))
+        identity = validate_raster_upload(source)
+        if identity.size > SBS_MAX_BYTES:
+            raise UploadError("Saved SBS map exceeds 100 MB; upload a smaller map.", status_code=413)
+        receipts[idx] = _SavedSbsInput(source, identity, staged)
     return receipts
 
 
@@ -654,9 +741,11 @@ async def _run_omni(
         return JSONResponse({"message": "Set omni inputs for batch processing"})
 
     try:
+        saved_scenarios = copy.deepcopy(omni.scenarios)
         reuse_receipts = _prevalidate_omni_sbs_inputs(
-            payload, raw_json, form, wd=wd
+            payload, raw_json, form, wd=wd, saved_scenarios=saved_scenarios
         )
+        has_saved_inputs = bool(reuse_receipts)
         parsed_inputs = _prepare_omni_scenarios(
             payload,
             raw_json,
@@ -667,8 +756,12 @@ async def _run_omni(
             reuse_receipts=reuse_receipts,
         )
         def _reassert_reused_rasters() -> None:
-            for path, identity in reuse_receipts.values():
-                assert_validated_raster_identity(path, identity)
+            if has_saved_inputs:
+                durable = Omni.load_detached(wd)
+                if durable is None or durable.scenarios != saved_scenarios:
+                    raise ValueError("Saved Omni scenarios changed; reload before submitting again.")
+            for receipt in reuse_receipts.values():
+                assert_validated_raster_identity(receipt.source, receipt.identity)
 
         omni.parse_scenarios(
             parsed_inputs,

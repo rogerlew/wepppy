@@ -168,19 +168,35 @@ Apply the same soil burn severity (SBS) class to all hillslopes:
 
 Upload your own soil burn severity raster (GeoTIFF or IMG format) to capture spatial variability from BAER field mapping.
 
+Each saved SBS row shows **Current SBS map**. Leave the file chooser empty to
+keep that map; select a file only to replace it. Reloading and resubmitting use
+the associated map in `omni/_limbo`, or restore it from the corresponding scenario
+project before a rerun resets that project. Existing projects use the same rule.
+
+If neither location contains the map, or validation fails, upload a replacement.
+For an ambiguous saved association, use a distinct filename. An enqueue error or
+timeout can occur after settings were saved; reload to check the accepted filename
+before retrying. Operators should inspect the exact saved `sbs_file_path` and
+associated child, never choose another row's file or copy an arbitrary same-name
+map. No bulk staging cleanup or legacy migration is required.
+
 Re-uploading changed bytes under the same filename reruns that SBS scenario.
 The accepted private dependency signature records the uploaded main-file SHA256;
 scenario names and public definitions stay unchanged. After the upload is consumed,
 reuse checks the accepted receipt against the expected child copy. Historical
 consumed uploads without receipts retain their previous skip behavior without
-historical byte proof. Re-upload to establish a new verified receipt.
+historical byte proof. Run admission can validate and restage the associated
+scenario map without requiring an old receipt; normal execution establishes any
+new receipt needed.
 
 Observed upload or child changes during execution fail before success admission.
 Failed child work remains available through normal browse/archive; replacing a
 child is not an atomic rollback of its previous outputs. The receipt covers the
 main file copied by the existing SBS workflow, not inherited child sidecars.
 See [SBS freshness contract](../../../../docs/schemas/omni-sbs-freshness-contract.md)
-for concurrency limits and direct/RQ compatibility.
+for concurrency limits and direct/RQ compatibility, and the
+[Omni SBS control contract](../../../../docs/ui-docs/contracts/omni-sbs-control-contract.md)
+for saved-map resolution under the shared staging lifecycle.
 
 
 ### Treatment Scenarios

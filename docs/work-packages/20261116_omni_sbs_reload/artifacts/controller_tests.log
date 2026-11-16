@@ -1,0 +1,36 @@
+(node:2246085) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS wepppy/weppcloud/controllers_js/__tests__/omni.test.js
+  Omni controller
+    ✓ run_omni_scenarios posts FormData and emits completion event (164 ms)
+    ✓ run_omni_scenarios handles message-only responses without undefined job id (69 ms)
+    ✓ load_scenarios_from_backend hydrates scenario controls (74 ms)
+    ✓ saved SBS map (sbs_map) survives reload and submission with canonical filename (54 ms)
+    ✓ saved SBS map (8) survives reload and submission with canonical filename (49 ms)
+    ✓ SBS uploads use submitted list index after blank rows (50 ms)
+    ✓ SBS removal, type changes and pending replacement preserve row ownership (83 ms)
+    ✓ SBS postcommit error reconciles accepted filename without clearing error (72 ms)
+    ✓ new thinning rows preserve defaults with expanded canopy choices (49 ms)
+    ✓ thinning 30% survives hydration and serialization (48 ms)
+    ✓ thinning 40% survives hydration and serialization (45 ms)
+    ✓ thinning 50% survives hydration and serialization (44 ms)
+    ✓ thinning 60% survives hydration and serialization (47 ms)
+    ✓ thinning 65% survives hydration and serialization (49 ms)
+    ✓ thinning 70% survives hydration and serialization (50 ms)
+    ✓ scenario filters render only for mulch/thinning/prescribed_fire and start collapsed (75 ms)
+    ✓ serializeScenarios normalizes per-scenario filter fields (58 ms)
+    ✓ filtered scenarios produce distinct contrast options (57 ms)
+    ✓ run_omni_scenarios validates SBS uploads before posting (39 ms)
+    ✓ saved SBS deletion targets accepted map while replacement is pending (48 ms)
+    ✓ delete selected scenarios posts delete request and prunes DOM (44 ms)
+    ✓ run_omni_contrasts handles message-only responses without undefined job id (72 ms)
+    ✓ delete contrasts submits job and updates hint/status (30 ms)
+    ✓ completion trigger is idempotent (27 ms)
+    ✓ poll failure pushes stacktrace and emits job error (26 ms)
+    ✓ bootstrap wires poll completion before set_rq_job_id (30 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        2.258 s
+Ran all test suites within paths "/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/omni.test.js".

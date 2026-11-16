@@ -1,7 +1,7 @@
 # Independent OSR-01 / UFS-01 contract correctness review
 
-Reviewer: independent `reviewer` agent `/root/contract_correctness`  
-Date: 2026-11-16 UTC  
+Reviewer: independent `reviewer` agent `/root/contract_correctness`
+Date: 2026-11-16 UTC
 Disposition: accepted after revision; both medium findings below are closed.
 Post-fix read-only confirmation: 2026-11-16 19:14 UTC.
 

@@ -1,0 +1,5 @@
+Enter number of years to simulate -->
+*** WARNING ***
+Channel climate file beginning year 2007 is not equal
+to Hillslope\watershed pass file beginning year 1980
+*** SIMULATION STOPPED ***

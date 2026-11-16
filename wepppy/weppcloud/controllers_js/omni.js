@@ -529,12 +529,24 @@ var Omni = (function () {
             hint.textContent = control.help || "GeoTIFF/IMG, 100 MB maximum.";
             fieldWrap.field.appendChild(hint);
 
-            if (values && values.sbs_file_path) {
-                var existing = document.createElement("p");
-                existing.className = "wc-field__help";
-                existing.textContent = "Current file: " + extractFileName(values.sbs_file_path);
-                fieldWrap.field.appendChild(existing);
+            input.dataset.omniSavedSbs = values && values.sbs_file_path ? values.sbs_file_path : "";
+            var existing = document.createElement("div");
+            existing.className = "wc-field wc-field--display";
+            var existingLabel = document.createElement("span");
+            existingLabel.className = "wc-field__label";
+            existingLabel.textContent = "Current SBS map";
+            var display = document.createElement("div");
+            display.className = "wc-text-display";
+            if (input.dataset.omniSavedSbs) {
+                var filename = document.createElement("code");
+                filename.textContent = extractFileName(input.dataset.omniSavedSbs);
+                display.appendChild(filename);
+            } else {
+                display.textContent = "No map uploaded.";
             }
+            existing.appendChild(existingLabel);
+            existing.appendChild(display);
+            fieldWrap.field.appendChild(existing);
         }
 
         return fieldWrap.field;
@@ -756,7 +768,7 @@ var Omni = (function () {
         return "__filters_" + parts.join("_");
     }
 
-    function readScenarioDefinition(scenarioItem) {
+    function readScenarioDefinition(scenarioItem, accepted) {
         if (!scenarioItem) {
             return null;
         }
@@ -772,8 +784,12 @@ var Omni = (function () {
                 return;
             }
             if (input.type === "file") {
-                if (input.files && input.files.length > 0) {
+                if (accepted && input.dataset.omniSavedSbs) {
+                    definition.sbs_file_path = input.dataset.omniSavedSbs;
+                } else if (input.files && input.files.length > 0) {
                     definition[fieldName] = input.files[0].name;
+                } else if (select.value === "sbs_map" && input.dataset.omniSavedSbs) {
+                    definition.sbs_file_path = input.dataset.omniSavedSbs;
                 }
                 return;
             }
@@ -1115,7 +1131,7 @@ var Omni = (function () {
                 if (!checkbox || checkbox.disabled || !checkbox.checked) {
                     return;
                 }
-                var definition = readScenarioDefinition(item);
+                var definition = readScenarioDefinition(item, true);
                 var scenarioName = scenarioNameFromDefinition(definition);
                 if (scenarioName) {
                     selections.push({
@@ -1165,7 +1181,7 @@ var Omni = (function () {
             }));
             var items = scenarioContainer.querySelectorAll("[data-omni-scenario-item='true']");
             items.forEach(function (item) {
-                var scenarioName = item.dataset.omniScenarioName;
+                var scenarioName = scenarioNameFromDefinition(readScenarioDefinition(item, true));
                 if (scenarioName && removedSet.has(scenarioName)) {
                     item.remove();
                     if (omniEvents && typeof omniEvents.emit === "function") {
@@ -1418,7 +1434,7 @@ var Omni = (function () {
             populateScenarioSelect(select, scenarioContainer);
 
             if (prefill && prefill.type) {
-                select.value = prefill.type;
+                select.value = normalizeScenarioTypeToken(prefill.type);
             }
             updateScenarioControls(scenarioItem, prefill || null);
             syncScenarioSelectionState(scenarioItem, prefill || readScenarioDefinition(scenarioItem));
@@ -1524,7 +1540,8 @@ var Omni = (function () {
                 formData.delete("scenarios");
             }
 
-            items.forEach(function (item, index) {
+            items.forEach(function (item) {
+                var index = scenarios.length;
                 var select = item.querySelector("[data-omni-role='scenario-select']");
                 if (!select || !select.value) {
                     return;
@@ -1548,6 +1565,8 @@ var Omni = (function () {
                             }
                             formData.append("scenarios[" + index + "][" + name + "]", file);
                             scenarioDef[name] = file.name;
+                        } else if (select.value === "sbs_map" && input.dataset.omniSavedSbs) {
+                            scenarioDef.sbs_file_path = input.dataset.omniSavedSbs;
                         }
                         return;
                     }
@@ -2457,12 +2476,14 @@ var Omni = (function () {
                 var body = response && response.body ? response.body : null;
                 if (body && (body.error || body.errors)) {
                     omni.pushResponseStacktrace(omni, body);
+                    omni.load_scenarios_from_backend({ preserveStatus: true });
                     if (omniEvents && typeof omniEvents.emit === "function") {
                         omniEvents.emit("omni:run:error", { response: body });
                     }
                     return;
                 }
                 if (body) {
+                    omni.load_scenarios_from_backend({ preserveStatus: true });
                     var jobId = body.job_id ? String(body.job_id) : "";
                     var statusMessage = "";
                     if (jobId) {
@@ -2499,6 +2520,7 @@ var Omni = (function () {
                 var payload = toResponsePayload(http, error);
                 omni.pushResponseStacktrace(omni, payload);
                 setStatus(resolveErrorMessage(payload, "Omni run failed."));
+                omni.load_scenarios_from_backend({ preserveStatus: true });
                 if (omniEvents && typeof omniEvents.emit === "function") {
                     omniEvents.emit("omni:run:error", { error: error });
                 }
@@ -2738,8 +2760,11 @@ var Omni = (function () {
 
         omni.runOmniScenarios = omni.run_omni_scenarios;
 
-        omni.load_scenarios_from_backend = function () {
-            clearStatus();
+        omni.load_scenarios_from_backend = function (options) {
+            var preserveStatus = options && options.preserveStatus;
+            if (!preserveStatus) {
+                clearStatus();
+            }
             var endpoint = url_for_run("api/omni/get_scenarios");
             return http.getJson(endpoint).then(function (data) {
                 if (!Array.isArray(data)) {
@@ -2753,7 +2778,7 @@ var Omni = (function () {
                     var item = addScenario(scenario, { deferRefresh: true });
                     var select = item.querySelector("[data-omni-role='scenario-select']");
                     if (select && scenario.type) {
-                        select.value = scenario.type;
+                        select.value = normalizeScenarioTypeToken(scenario.type);
                     }
                     updateScenarioControls(item, scenario);
                     syncScenarioSelectionState(item, scenario);
@@ -2768,7 +2793,9 @@ var Omni = (function () {
                 }
             }).catch(function (error) {
                 console.error("Error loading scenarios:", error);
-                setStatus("Unable to load saved scenarios.");
+                if (!preserveStatus) {
+                    setStatus("Unable to load saved scenarios.");
+                }
                 if (omniEvents && typeof omniEvents.emit === "function") {
                     omniEvents.emit("omni:run:error", { error: error });
                 }

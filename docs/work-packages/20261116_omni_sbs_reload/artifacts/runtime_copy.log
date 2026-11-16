@@ -1,0 +1,19 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/python docs/work-packages/20261116_omni_sbs_reload/artifacts/prepare_runtime.py
+COPY 250/4165 files
+COPY 500/4165 files
+COPY 750/4165 files
+COPY 1000/4165 files
+COPY 1250/4165 files
+COPY 1500/4165 files
+COPY 1750/4165 files
+COPY 2000/4165 files
+COPY 2250/4165 files
+COPY 2500/4165 files
+COPY 2750/4165 files
+COPY 3000/4165 files
+COPY 3250/4165 files
+COPY 3500/4165 files
+COPY 3750/4165 files
+COPY 4000/4165 files
+{"status": "prepared", "runid": "qa-omni-reload-20261116", "destination": "/wc1/runs/qa/qa-omni-reload-20261116", "manifest": "/wc1/runs/qa/qa-omni-reload-20261116-copy-manifest.json", "files": 4165, "bytes": 8328199666}
+DISPOSABLE_COPY_READY /wc1/runs/qa/qa-omni-reload-20261116

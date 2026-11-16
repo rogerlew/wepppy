@@ -1,6 +1,6 @@
 # Omni SBS saved-map control
 
-Status: OSR-01 accepted intent (2026-11-16); implementation conformance pending.
+Status: OSR-01 accepted intent (2026-11-16); candidate implemented and scoped validation passed; no production rollout.
 
 ## Scope and authority
 
@@ -83,7 +83,7 @@ receipt schemas. Valid legacy definitions lacking content receipts may supply
 fresh execution input; this does not manufacture historical proof or grant an
 output-cache hit. Programmatic direct execution retains its current freshness
 rules; run admission makes the staged input available before direct/RQ execution.
-Batch template input saves use the same admission behavior without queueing.
+Batch template input saves use the same admission behavior without queuing.
 Archive-backed roots retain their existing restore requirements; restored/forked
 projects use only their own files. Existing scenario/project deletion owns cleanup;
 no orphan sweep is introduced. Unreferenced failed-request staging files cannot

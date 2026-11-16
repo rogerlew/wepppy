@@ -189,6 +189,7 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
 def _stub_omni(monkeypatch: pytest.MonkeyPatch, *, run_group: str = "") -> None:
     class DummyOmni:
         run_group = ""
+        scenarios = []
 
         def parse_scenarios(self, scenarios, *, precommit_validator=None) -> None:
             if precommit_validator is not None:
@@ -304,7 +305,7 @@ def test_prepare_omni_scenarios_reuses_only_server_authoritative_sbs(tmp_path: P
             ]
         }
     receipts = omni_routes._prevalidate_omni_sbs_inputs(
-        payload, None, FormData({}), wd=str(wd)
+        payload, None, FormData({}), wd=str(wd), saved_scenarios=payload["scenarios"]
     )
     parsed = omni_routes._prepare_omni_scenarios(
         payload=payload,
@@ -319,34 +320,19 @@ def test_prepare_omni_scenarios_reuses_only_server_authoritative_sbs(tmp_path: P
     assert parsed[0][1]["sbs_file_path"] == str(source.resolve())
 
 
-def test_omni_reuse_ignores_client_path_and_derives_server_candidate(tmp_path: Path) -> None:
+def test_omni_reuse_rejects_unknown_client_path_even_when_row_has_file(tmp_path: Path) -> None:
     from tests.factories.raster import sbs_raster_bytes
 
     wd = tmp_path / "run"
-    scenario_root = wd / "omni" / "_limbo" / "00"
-    scenario_root.mkdir(parents=True)
-    source = scenario_root / "severity.tif"
+    source = wd / "omni/_limbo/00/severity.tif"
+    source.parent.mkdir(parents=True)
     sbs_raster_bytes(source)
-
-    payload = {
-                "scenarios": [
-                    {"type": "sbs_map", "sbs_file_path": "/etc/passwd"}
-                ]
-            }
-    receipts = omni_routes._prevalidate_omni_sbs_inputs(
-        payload, None, FormData({}), wd=str(wd)
-    )
-    parsed = omni_routes._prepare_omni_scenarios(
-            payload=payload,
-            raw_json=None,
-            form=FormData({}),
-            runid="run-1",
-            config="cfg",
-            wd=str(wd),
-            reuse_receipts=receipts,
+    saved = [{"type": "sbs_map", "sbs_file_path": str(source)}]
+    with pytest.raises(ValueError, match="association is missing or ambiguous"):
+        omni_routes._prevalidate_omni_sbs_inputs(
+            {"scenarios": [{"type": "sbs_map", "sbs_file_path": "/etc/passwd"}]},
+            None, FormData(), wd=str(wd), saved_scenarios=saved,
         )
-
-    assert parsed[0][1]["sbs_file_path"] == str(source.resolve())
 
 
 def test_prevalidate_omni_reuse_rejects_before_any_upload_is_published(
@@ -410,12 +396,12 @@ def test_prevalidate_omni_rejects_symlinked_server_upload_root(
     sbs_raster_bytes(source)
     (wd / "omni" / "_limbo").symlink_to(outside, target_is_directory=True)
     payload = {
-        "scenarios": [{"type": "sbs_map", "sbs_file_path": "reuse"}]
+        "scenarios": [{"type": "sbs_map", "sbs_file_path": str(wd / "omni/_limbo/00/severity.tif")}]
     }
 
     with pytest.raises(omni_routes.UploadError, match="outside the trusted"):
         omni_routes._prevalidate_omni_sbs_inputs(
-            payload, None, FormData({}), wd=str(wd)
+            payload, None, FormData({}), wd=str(wd), saved_scenarios=payload["scenarios"]
         )
 
 
@@ -672,6 +658,7 @@ def test_run_omni_batch_multipart_returns_input_message_without_enqueue(
 ) -> None:
     from tests.factories.raster import sbs_raster_bytes
 
+    (tmp_path / "run").mkdir()
     _stub_auth(monkeypatch)
     _stub_omni(monkeypatch, run_group="batch")
     monkeypatch.setattr(omni_routes, "get_wd", lambda runid: str(tmp_path / "run"))
@@ -1731,3 +1718,187 @@ def test_run_omni_contrasts_dry_run_propagates_nodir_preflight_errors(
 
     assert response.status_code == http_status
     assert response.json()["error"]["code"] == code
+
+
+def test_saved_sbs_reordered_rows_select_association_not_position(tmp_path):
+    from tests.factories.raster import sbs_raster_bytes
+
+    wd = tmp_path / "run"
+    first = wd / "omni/_limbo/00/first.tif"
+    second = wd / "omni/_limbo/01/second.tif"
+    first.parent.mkdir(parents=True)
+    second.parent.mkdir(parents=True)
+    sbs_raster_bytes(first)
+    sbs_raster_bytes(second)
+    saved = [{"type": "sbs_map", "sbs_file_path": str(path)} for path in (first, second)]
+    receipts = omni_routes._prevalidate_omni_sbs_inputs(
+        {"scenarios": [saved[1]]}, None, FormData(), wd=str(wd), saved_scenarios=saved
+    )
+    parsed = omni_routes._prepare_omni_scenarios(
+        {"scenarios": [saved[1]]}, None, FormData(), wd=str(wd),
+        runid="run", config="cfg", reuse_receipts=receipts,
+    )
+    assert parsed[0][1]["sbs_file_path"] == str(second)
+
+
+def test_saved_sbs_consumed_child_restaged_before_reset_without_receipt(tmp_path):
+    from tests.factories.raster import sbs_raster_bytes
+    from wepppy.nodb.mods.omni.omni import _scenario_name_from_scenario_definition
+    from wepppy.nodb.mods.omni.omni_sbs_freshness import SbsExecution
+    import shutil
+
+    wd = tmp_path / "run"
+    staged = wd / "omni/_limbo/03/severity.tif"
+    saved = {"type": "sbs_map", "sbs_file_path": str(staged)}
+    child_root = wd / "_pups/omni/scenarios" / _scenario_name_from_scenario_definition(saved)
+    child = child_root / "disturbed/severity.tif"
+    child.parent.mkdir(parents=True)
+    raw = sbs_raster_bytes(child)
+    receipts = omni_routes._prevalidate_omni_sbs_inputs(
+        {"scenarios": [saved]}, None, FormData(), wd=str(wd), saved_scenarios=[saved]
+    )
+    assert not staged.exists(), "prevalidation must not publish recovery files"
+    parsed = omni_routes._prepare_omni_scenarios(
+        {"scenarios": [saved]}, None, FormData(), wd=str(wd),
+        runid="run", config="cfg", reuse_receipts=receipts,
+    )
+    assert parsed[0][1]["sbs_file_path"] == str(staged)
+    assert staged.read_bytes() == raw
+    execution = SbsExecution.capture(parsed[0][1])
+    shutil.rmtree(child_root)
+    child.parent.mkdir(parents=True)
+    execution.copy_to(child)
+    assert child.read_bytes() == raw
+    assert not staged.exists()
+
+
+@pytest.mark.parametrize("old_prefix", [False, True])
+def test_saved_sbs_child_collision_rejected_and_fork_rebases_locally(tmp_path, old_prefix):
+    from tests.factories.raster import sbs_raster_bytes
+    from wepppy.nodb.mods.omni.omni import _scenario_name_from_scenario_definition
+
+    wd = tmp_path / "run"
+    prefix = "/original/project" if old_prefix else str(wd)
+    saved = [{"type": "sbs_map", "sbs_file_path": f"{prefix}/omni/_limbo/{i:02d}/same.tif"}
+             for i in range(2)]
+    child = wd / "_pups/omni/scenarios" / _scenario_name_from_scenario_definition(saved[0]) / "disturbed/same.tif"
+    child.parent.mkdir(parents=True)
+    sbs_raster_bytes(child)
+    with pytest.raises(ValueError, match="child is ambiguous"):
+        omni_routes._prevalidate_omni_sbs_inputs(
+            {"scenarios": [saved[0]]}, None, FormData(), wd=str(wd), saved_scenarios=saved,
+        )
+    receipts = omni_routes._prevalidate_omni_sbs_inputs(
+        {"scenarios": [saved[0]]}, None, FormData(), wd=str(wd), saved_scenarios=saved[:1],
+    )
+    assert receipts[0].source == child
+    assert receipts[0].staged == wd / "omni/_limbo/00/same.tif"
+
+
+@pytest.mark.parametrize("bad_source", ["invalid", "symlink", "traversal"])
+def test_saved_sbs_present_invalid_source_never_falls_back(tmp_path, bad_source):
+    from tests.factories.raster import sbs_raster_bytes
+    from wepppy.nodb.mods.omni.omni import _scenario_name_from_scenario_definition
+
+    wd = tmp_path / "run"
+    staged = wd / "omni/_limbo/00/map.tif"
+    staged.parent.mkdir(parents=True)
+    saved = {"type": "sbs_map", "sbs_file_path": str(staged)}
+    child = wd / "_pups/omni/scenarios" / _scenario_name_from_scenario_definition(saved) / "disturbed/map.tif"
+    child.parent.mkdir(parents=True)
+    sbs_raster_bytes(child)
+    if bad_source == "invalid":
+        staged.write_text("not a raster")
+    elif bad_source == "symlink":
+        staged.symlink_to(child)
+    else:
+        saved["sbs_file_path"] = str(wd) + "/omni/_limbo/../map.tif"
+    with pytest.raises(omni_routes.UploadError):
+        omni_routes._prevalidate_omni_sbs_inputs(
+            {"scenarios": [saved]}, None, FormData(), wd=str(wd), saved_scenarios=[saved],
+        )
+
+
+def test_new_sbs_replacement_isolated_from_accepted_same_name(tmp_path):
+    from tests.factories.raster import sbs_raster_bytes
+
+    wd = tmp_path / "run"
+    old = wd / "omni/_limbo/00/severity.tif"
+    old.parent.mkdir(parents=True)
+    raw = sbs_raster_bytes(old)
+    form = FormData({"scenarios[0][sbs_file]": UploadFile(io.BytesIO(raw), filename=old.name)})
+    payload = {"scenarios": [{"type": "sbs_map", "sbs_file_path": str(old)}]}
+    receipts = omni_routes._prevalidate_omni_sbs_inputs(payload, None, form, wd=str(wd))
+    parsed = omni_routes._prepare_omni_scenarios(
+        payload, None, form, wd=str(wd), runid="run", config="cfg", reuse_receipts=receipts,
+    )
+    new = Path(parsed[0][1]["sbs_file_path"])
+    assert new != old
+    assert new.name == old.name
+    assert new.read_bytes() == old.read_bytes() == raw
+
+
+def test_saved_sbs_restore_checks_copied_bytes_before_publication(tmp_path, monkeypatch):
+    from tests.factories.raster import sbs_raster_bytes
+    from wepppy.nodb.mods.omni.omni import _scenario_name_from_scenario_definition
+
+    wd = tmp_path / "run"
+    staged = wd / "omni/_limbo/03/severity.tif"
+    saved = {"type": "sbs_map", "sbs_file_path": str(staged)}
+    child = wd / "_pups/omni/scenarios" / _scenario_name_from_scenario_definition(saved) / "disturbed/severity.tif"
+    child.parent.mkdir(parents=True)
+    sbs_raster_bytes(child)
+    receipts = omni_routes._prevalidate_omni_sbs_inputs(
+        {"scenarios": [saved]}, None, FormData(), wd=str(wd), saved_scenarios=[saved],
+    )
+    original = omni_routes.save_upload_file
+
+    def mutate_before_copy(upload, **kwargs):
+        # A different but valid raster arrives after source validation, before
+        # the open stream is copied. Real staged validation must reject it.
+        sbs_raster_bytes(child, nodata_only=True)
+        return original(upload, **kwargs)
+
+    monkeypatch.setattr(omni_routes, "save_upload_file", mutate_before_copy)
+    with pytest.raises(omni_routes.UploadError, match="changed"):
+        omni_routes._prepare_omni_scenarios(
+            {"scenarios": [saved]}, None, FormData(), wd=str(wd),
+            runid="run", config="cfg", reuse_receipts=receipts,
+        )
+    assert not staged.exists()
+    assert child.exists()
+
+
+@pytest.mark.parametrize("drift", [False, True])
+def test_saved_sbs_real_nodb_commit_rechecks_association(tmp_path, monkeypatch, drift):
+    from tests.factories.raster import sbs_raster_bytes
+
+    wd = tmp_path / "real-omni-commit"
+    wd.mkdir()
+    omni = omni_routes.Omni(str(wd), "0.cfg")
+    staged = wd / "omni/_limbo/00/severity.tif"
+    staged.parent.mkdir(parents=True)
+    sbs_raster_bytes(staged)
+    saved = {"type": "sbs_map", "sbs_file_path": str(staged)}
+    omni.parse_scenarios([(omni_routes.OmniScenario.SBSmap, saved)])
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: str(wd))
+    original = omni_routes._prepare_omni_scenarios
+
+    def prepare_with_concurrent_change(*args, **kwargs):
+        result = original(*args, **kwargs)
+        if drift:
+            concurrent = omni_routes.Omni.load_detached(str(wd))
+            concurrent._init_logging()
+            concurrent.scenarios = [{"type": "uniform_low"}]
+        return result
+
+    monkeypatch.setattr(omni_routes, "_prepare_omni_scenarios", prepare_with_concurrent_change)
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/_base/run-omni", json={"scenarios": [saved]})
+    assert response.status_code == (400 if drift else 200), response.text
+    durable = omni_routes.Omni.load_detached(str(wd))
+    assert durable.scenarios == ([{"type": "uniform_low"}] if drift else [saved])
+    assert staged.exists()
+    if drift:
+        assert "changed" in response.json()["error"]["message"]

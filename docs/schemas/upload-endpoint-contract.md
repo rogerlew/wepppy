@@ -125,7 +125,7 @@ recovery. Existing archive limits, upload aliases and semantic validation remain
 mandatory. Do not retain the raw callback in project uploads or archives.
 ## Omni saved-input staging (OSR-01)
 
-Accepted intent 2026-11-16; implementation conformance pending. Omni SBS uploads
+Accepted intent 2026-11-16; candidate implemented with scoped validation. Omni SBS uploads
 adopt the [user-file staging lifecycle](user-file-staging-contract.md).
 The [Omni SBS control contract](../ui-docs/contracts/omni-sbs-control-contract.md)
 defines saved-reference resolution, replacement isolation, and restoration from

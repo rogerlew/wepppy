@@ -32,7 +32,7 @@ accepted receipts can reuse a consumed-source scenario only through its existing
 accepted association and a matching expected child main file. Verify the copied
 file; do not fabricate a receipt from today's child. If execution is needed but
 the required upload is absent, direct execution retains its missing-source failure.
-OSR-01 (accepted intent 2026-11-16; implementation pending) permits run admission
+OSR-01 (accepted intent 2026-11-16; candidate implemented with scoped validation) permits run admission
 to restore the associated scenario map into staging before execution under the
 [Omni SBS control contract](../ui-docs/contracts/omni-sbs-control-contract.md).
 This adopts the [user-file staging lifecycle](user-file-staging-contract.md).
