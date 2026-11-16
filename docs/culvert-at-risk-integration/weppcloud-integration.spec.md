@@ -250,6 +250,15 @@ Notes:
 - `order_reduction_passes` in `model-parameters.json` overrides both the config default and the map-mode calculation when present.
 - `flow_accum_threshold` is preserved for traceability and only used to map order-reduction passes; streams are still pre-computed in the payload.
 
+### Nominal-resolution pruning heuristic
+
+Map mode uses effective resolution `cellsize_m * sqrt(flow_accum_threshold / 100)`,
+with threshold 100 when missing or nonpositive. The candidate ranges are three
+passes at <= 1.5 m, two at > 1.5 through 4 m, and one above 4 m.
+This heuristic remains pending forest calibration under ADR-0143; explicit
+`order_reduction_passes` in the payload overrides the mapping.
+
+
 ### Coordinate system rules
 - **Rasters must be in UTM projection.** Culvert_web_app reprojects all inputs to UTM during its `ws_deln` pipeline (source: `subroutine_nested_watershed_delineation.py::get_utm_crs_from_wgs84()` determines zone from boundary centroid, then `reproject_raster_from_path()` reprojects DEM unconditionally). Output files are named with `_UTM` suffix (e.g., `DEM_UTM.tif`, `D8flow_dir_UTM.tif`).
 - **GeoJSON must use the same UTM CRS as the rasters.** Since DEMs can have 1m resolution, keeping all assets in the same projected CRS avoids reprojection artifacts and ensures pixel-accurate alignment.
@@ -420,3 +429,11 @@ Notes:
 - Long-term auth model (JWT issuance, refresh, key rotation) and webhook payload schema/retry policy.
 - Data retention policy and cleanup schedule in `/wc1/culverts/` (required).
 - `Watershed.find_outlet()` edge cases: mask extension + seeding handle NoOutletFoundError candidates, but WBT junction errors remain (e.g., "Current cell is not recognized as a junction").
+
+## Per-run pruning policy transition
+
+The [per-run stream selection contract](../schemas/culvert-stream-selection-contract.md)
+and ADR-0144 supersede the single batch-level pass selection and immediate
+unpruned fallback described above for new-policy batches. Implementation is
+pending its contract checkpoint. Retained batches without a policy intent marker
+continue using the legacy behavior; do not migrate them implicitly.
