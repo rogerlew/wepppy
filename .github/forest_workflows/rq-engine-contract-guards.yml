@@ -37,7 +37,7 @@ jobs:
       - self-hosted
       - Linux
       - X64
-      - homelab
+      - remote-ci
     timeout-minutes: 20
     steps:
       - name: Ensure docker secrets exist
