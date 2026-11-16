@@ -228,3 +228,43 @@ This targeted evidence does not erase the failed broad-suite attempts or classif
 unrelated baseline failures as passing; the regression-disposition artifact retains
 those outcomes separately. No source, index, or installed-hook edits were made by
 this independent reviewer during this review.
+
+## Native policy reporter repair review
+
+A later real merge refusal exposed a coverage limit in the earlier environmental
+verdict: duplicate PR-target events on one head created multiple workflow suites,
+but the custom Checks API reports attached to the older suite. Independent API
+readback for PR #662 head `edec451e464bdcf2654b5fc696887e568d0c8f21` confirmed
+custom required checks `133658322779` and `133658183168` both in suite
+`119032773520`, while native reporter `133658150965` correctly belonged to newer
+suite `119032828536`. All were app `15368` and successful on that same head;
+therefore a green custom check was insufficient evidence of current-suite coverage.
+
+Reviewed the canonical/generated workflow, test changes, and canonical standard.
+The repaired native job is named exactly `integration-governance-policy`, depends
+on the trusted evaluator, uses `if: always()`, and exits nonzero unless the evaluator
+result is exactly `success`. It performs no checkout or candidate execution, has
+`permissions: {}`, and removes the token, custom Checks API call, and hand-built
+check association. The base-owned evaluation boundary remains unchanged. This is
+a smaller and less privileged implementation than repairing custom suite selection.
+
+The meaningful reporter test executes the actual generated workflow script for
+success, failure, cancellation, skipped, and empty results; only success passes.
+Wiring assertions also retain the base-only checkout, trusted dependency,
+always-run condition, required native name, and absence of check-write/API paths.
+Read `/tmp/governance-native-reporter-tests.log`: **40 passed in 10.16 seconds**.
+Independent generated-workflow `--check` passes, with only the preexisting README
+profile-section warning. No source/index/remote mutation was performed by this
+reviewer.
+
+**Static repair verdict: PASS; duplicate-event environmental proof remains open.**
+Integrate the repair normally using the existing base workflow, without disabling
+protection, then test a disposable protected canary whose base contains the repair.
+Create one harmless draft PR and mark it ready without changing its head, producing
+opened/ready events. Retain both target run IDs, suite IDs, exact head and app IDs;
+require a native required check in each corresponding suite, latest-suite eligibility,
+and accepted integration without settings bypass. Separately retain a candidate
+workflow-weakening rejection with the native policy result failing and merge/direct
+push refused. Cleanup and rule readback must follow. These canaries do not count as
+real operational-observation integrations. The existing deliberate same-app forgery
+residual is unchanged and is not solved by native check association.

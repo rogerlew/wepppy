@@ -177,7 +177,7 @@ def test_workflow_and_publish_consumers_are_wired():
         assert "publication --repository" in json.dumps(gate_job)
 
 
-def test_trusted_policy_never_executes_candidate_code_and_binds_head():
+def test_trusted_policy_never_executes_candidate_code_and_uses_native_reporter():
     from scripts.build_forest_workflows import load_yaml
     root = Path(__file__).resolve().parents[2]
     workflow = load_yaml(root / ".github/forest_workflows/integration-policy.yml")
@@ -190,10 +190,27 @@ def test_trusted_policy_never_executes_candidate_code_and_binds_head():
     assert "cargo" not in commands and "git checkout" not in commands
     assert "python3 tools/check_security_baseline.py policy" in commands
     report = workflow["jobs"]["report-policy"]
-    assert report["permissions"] == {"checks": "write"}
+    assert report["permissions"] == {}
+    assert report["name"] == "integration-governance-policy"
+    assert report["if"] == "always()"
     assert report["needs"] == "trusted-policy"
     assert not any("uses" in step for step in report["steps"])
-    assert '"head_sha": candidate' in report["steps"][0]["run"]
+    assert report["steps"][0]["env"] == {"POLICY_RESULT": "${{ needs.trusted-policy.result }}"}
+    assert "GH_TOKEN" not in json.dumps(report)
+    assert "check-runs" not in json.dumps(report)
+
+
+@pytest.mark.parametrize("result", ["success", "failure", "cancelled", "skipped", ""])
+def test_native_policy_reporter_fails_closed(result):
+    from scripts.build_forest_workflows import load_yaml
+    root = Path(__file__).resolve().parents[2]
+    workflow = load_yaml(root / ".github/workflows/integration-policy.yml")
+    report = workflow["jobs"]["report-policy"]
+    completed = subprocess.run(
+        ["bash", "-e", "-c", report["steps"][0]["run"]],
+        env={"POLICY_RESULT": result}, capture_output=True, text=True,
+    )
+    assert (completed.returncode == 0) == (result == "success")
 
 
 @pytest.mark.parametrize("path", [

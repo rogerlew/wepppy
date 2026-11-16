@@ -140,8 +140,11 @@ python3 tools/check_integration_history.py verify --repo /workdir/wepppy \
 
 The required check names are `integration-governance` (behavior) and
 `integration-governance-policy` (base-owned policy). A separate
-`pull_request_target` workflow reads candidate Git objects as data and writes
-its result on the exact PR head; it never runs candidate code. Public GitHub's
+`pull_request_target` workflow reads candidate Git objects as data; it never runs
+candidate code. Its native `integration-governance-policy` reporter job always
+runs after evaluation and fails unless evaluation succeeds. GitHub associates
+that native check with the PR head and its workflow suite; the reporter has no
+token permissions and does not create custom check runs through the API. Public GitHub's
 shared Actions app identity is not an isolation boundary against a determined
 writer deliberately forging check names. Independent human review or a separately
 controlled check provider is required to claim that stronger threat model.

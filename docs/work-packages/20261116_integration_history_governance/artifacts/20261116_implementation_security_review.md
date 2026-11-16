@@ -243,3 +243,53 @@ A separate synthetic predicate probe rejected all three symlink forms and duplic
 packed entries. These probes used only temporary repositories and did not alter
 the installed guard or source. Root still owns installation, integration, and
 remote enforcement evidence. No full test suite was restarted for this review.
+
+## Native policy reporter repair — implementation author addendum
+
+This addendum records implementation by `ci_security`; independent review of this
+repair belongs to `history_controls`, rather than the author of the change.
+
+PR #662 at `edec451e464bdcf2654b5fc696887e568d0c8f21` remained blocked with
+`Required status check integration-governance-policy is expected` despite two
+successful exact-head custom checks from Actions app 15368. Read-only API evidence:
+
+- Runs `43969385574` and `43969407518` created suites `119032773520` and
+  `119032828536` after synchronize and ready-for-review events.
+- Both custom checks `133658183168` and `133658322779` attached to the older suite
+  `119032773520`. The newer suite had successful evaluator/reporter jobs but no
+  custom required check. Its native reporter `133658150965` already had the correct
+  candidate SHA and PR #662 association.
+- There were no commit statuses with the required name and no merge-ref check
+  runs. Both protection contexts still required app 15368 and strict updates.
+- Previously merged PR #661 had a single policy suite `119010693037`; its custom
+  check `133629567859` belonged to that suite.
+
+The duplicate-suite association is the strongest supported cause of the blocked
+merge; GitHub's internal merge evaluation is not exposed by these API results.
+The [Checks API](https://docs.github.com/en/rest/checks/runs) does not offer a
+check-suite selector when creating a check run. Avoiding custom publication
+removes this ambiguous association path.
+
+The repair names the native reporter job `integration-governance-policy`, keeps
+`needs: trusted-policy` and `if: always()`, and explicitly fails for every evaluator
+result except `success`. The reporter has `permissions: {}`, no checkout, no
+provided token, and no API publication. The base-owned evaluator and all four
+trigger events remain unchanged. Local tests execute the generated reporter for
+success, failure, cancellation, skipped evaluation, and an empty result; wiring
+checks cover the required name, dependency, unconditional scheduling, and absence
+of a publication token. GitHub suite/merge semantics still require live validation.
+
+Rollout: root adds a new reviewed commit to already-ready PR #662, approves its
+exact policy transition, and lets the old base's single synchronize run satisfy
+existing protection without a bypass. After merge, a disposable protected canary
+must exercise the new base workflow with duplicate events on the same SHA and
+confirm native required checks attach to each suite. A deliberately weakened
+candidate must fail policy evaluation and its reporter, blocking merge. No remote
+settings or check results were mutated by this agent.
+
+Local repair validation: **40 passed, 2 warnings in 10.16 seconds** for
+`tests/tools/test_security_baseline.py` and
+`tests/tools/test_deployment_governance.py` through `wctl run-pytest`;
+`/tmp/governance-native-reporter-tests.log`. Generated workflow consistency,
+scoped documentation lint, and Git whitespace checks pass. These results do not
+substitute for the root-owned remote canary described above.

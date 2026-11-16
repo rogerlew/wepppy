@@ -213,3 +213,22 @@ Final focused/coupled results and independent review are recorded in the
 Final repair validation: the coupled governance/workflow/registry/Usersum suite
 passed 559 tests in 41.97s; deployment plan/execution passed 77 in 105.37s. These
 are scoped repair results, not a rerun or green result for the entire repository.
+
+## Native policy reporting correction
+
+PR #662's merge API refused head `edec451e464bdcf2654b5fc696887e568d0c8f21`
+with HTTP405 / required policy check expected, despite successful exact-head checks.
+Two policy runs for synchronize/ready-for-review produced distinct workflow suites,
+but both API-created policy checks attached to the older suite. The newer suite
+contained its native evaluator/reporter jobs but lacked the required custom check.
+No protection rule was disabled or bypassed.
+
+The reporter is now the native job named `integration-governance-policy`, with
+`needs`, `always()`, no token permissions, and explicit failure unless trusted
+base-owned evaluation succeeds. It no longer writes custom checks through the API.
+This retains all event triggers and removes the ambiguous custom-suite association.
+Forty focused policy/deployment-helper tests pass, including failed/cancelled/skipped
+reporting; generated workflows match. A normal additive synchronize commit on the
+already-ready PR permits integration through the existing base workflow. Native
+same-head repeated-event and negative-weakening canaries must then be recorded
+against the new base before environmental acceptance of this reporting repair.
