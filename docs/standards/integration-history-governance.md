@@ -109,7 +109,11 @@ implementation complete separately from this observation period.
 
 Install the local guard using `python3 tools/install_integration_hooks.py`; verify
 it with `--check` before integration. Existing hook managers must integrate the
-reference guard explicitly; the installer refuses to overwrite them. A rejected
+reference guard explicitly; the installer refuses to overwrite them. The installed
+checker lives in the common hooks directory and uses `/usr/bin/python3 -I`
+(Python 3.10 or newer), so removing a task worktree or its virtual environment
+does not remove the guard. Upgrades require reviewing and backing up the owned
+installed files before replacement; `--check` reports drift. A rejected
 hard reset or rebase can already have changed index/worktree contents even though
 the master ref is preserved. Stop after refusal, inspect preserved refs and WIP
 backups, and recover deliberately. Never retry with the guard disabled.

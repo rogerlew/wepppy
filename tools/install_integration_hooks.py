@@ -7,6 +7,7 @@ import hashlib
 import os
 from pathlib import Path
 import shlex
+import subprocess
 import sys
 import tempfile
 
@@ -14,6 +15,24 @@ from check_integration_history import IntegrationError, git
 
 
 INSTALLED_CHECKER = "wepppy-integration-history-v1.py"
+
+
+def stable_interpreter(repo: Path) -> Path:
+    """Use the supported Linux system interpreter, never a task-local venv."""
+    interpreter = Path("/usr/bin/python3")
+    resolved = interpreter.resolve(strict=True)
+    for line in git(repo, "worktree", "list", "--porcelain").splitlines():
+        if line.startswith("worktree "):
+            worktree = Path(line.removeprefix("worktree ")).resolve()
+            if resolved == worktree or worktree in resolved.parents:
+                raise IntegrationError("UNSTABLE_INTERPRETER: system Python resolves inside a worktree")
+    result = subprocess.run(
+        [str(interpreter), "-I", "-c", "import sys; raise SystemExit(sys.version_info < (3, 10))"],
+        capture_output=True, timeout=10,
+    )
+    if result.returncode:
+        raise IntegrationError("UNSUPPORTED_INTERPRETER: /usr/bin/python3 must be Python 3.10 or newer")
+    return interpreter
 
 
 def verify_existing(path: Path, content: bytes, *, executable: bool) -> bool:
@@ -65,9 +84,10 @@ def main() -> int:
         installed_checker = hooks / INSTALLED_CHECKER
         source = Path(__file__).resolve().with_name("check_integration_history.py").read_bytes()
         digest = hashlib.sha256(source).hexdigest()
+        interpreter = stable_interpreter(repo)
         content = ("#!/bin/sh\n# wepppy integration history guard v2\n"
                    + f"# installed checker sha256: {digest}\nexec "
-                   + shlex.quote(sys.executable) + " " + shlex.quote(str(installed_checker))
+                   + shlex.quote(str(interpreter)) + " -I " + shlex.quote(str(installed_checker))
                    + ' reference-transaction "$@"\n').encode()
         # Inspect both destinations before mutating either. Never overwrite LFS,
         # another hook manager, or a previously installed different revision.
@@ -84,7 +104,7 @@ def main() -> int:
         print(f"integration history guard {'verified' if args.check else 'installed'}: "
               f"{hook}; checker sha256={digest}")
         return 0
-    except (IntegrationError, OSError) as exc:
+    except (IntegrationError, OSError, subprocess.TimeoutExpired) as exc:
         print(f"hook setup refused: {exc}", file=sys.stderr)
         return 1
 

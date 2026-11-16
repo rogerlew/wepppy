@@ -13,9 +13,11 @@ collaborators exist; this is not a claim that the owner is the only contributor.
 
 - M1: fresh remote ancestry receipts with no-clobber output, explicit identity,
   immutable observation, shallow/offline refusal, and ambient Git environment
-  sanitization. Protected-ref installer preserves existing LFS hooks. Eighteen
+  sanitization. Protected-ref installer preserves existing LFS hooks. Twenty-two
   real-Git tests pass, including original 20-commit-loss topology and two-repo
-  environment redirection. Installed/check verified locally; no production host
+  environment redirection and survival after copied/symlinked installation venv
+  removal. Stable installed checker and system interpreter are verified locally;
+  existing LFS hooks remain byte-identical. No production host
   hook installation is claimed.
 - M2: live mount nonce precedes pytest/sharded pytest. Sixty-six wctl tests pass;
   a real wrong-checkout invocation exits 2 before tests and the normal fallback

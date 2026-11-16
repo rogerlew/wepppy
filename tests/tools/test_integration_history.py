@@ -278,7 +278,8 @@ def test_installed_guard_works_in_linked_worktree(history, tmp_path):
     assert git(linked, "rev-parse", "master") == accepted
 
 
-def test_installed_checker_survives_removal_of_installer_worktree(history, tmp_path):
+@pytest.mark.parametrize("venv_mode", ["--copies", "--symlinks"])
+def test_installed_checker_survives_removal_of_installer_worktree(history, tmp_path, venv_mode):
     repo, remote, base = history
     source_tree = tmp_path / "installer-worktree"
     git(repo, "worktree", "add", "--detach", str(source_tree), base)
@@ -286,11 +287,14 @@ def test_installed_checker_survives_removal_of_installer_worktree(history, tmp_p
     tools.mkdir()
     (tools / CHECKER.name).write_bytes(CHECKER.read_bytes())
     (tools / INSTALLER.name).write_bytes(INSTALLER.read_bytes())
-    run(sys.executable, tools / INSTALLER.name, "--repo", source_tree)
+    environment = source_tree / ".venv"
+    run(sys.executable, "-m", "venv", "--without-pip", venv_mode, environment)
+    run(environment / "bin/python", tools / INSTALLER.name, "--repo", source_tree)
     installed = repo / ".git/hooks/wepppy-integration-history-v1.py"
     assert installed.read_bytes() == CHECKER.read_bytes()
     hook = (repo / ".git/hooks/reference-transaction").read_text()
     assert str(source_tree) not in hook
+    assert "/usr/bin/python3 -I " in hook
     git(repo, "worktree", "remove", "--force", str(source_tree))
     assert not source_tree.exists()
     accepted = commit(repo, "accepted-after-removal")

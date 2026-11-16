@@ -124,3 +124,50 @@ Independent CI/security-baseline review, deployment script execution regressions
 remote rejection/positive-integration canary, and package-required broad testing
 remain the root integrator's gates. No high/medium risk acceptance is inferred
 from this scoped pass.
+
+## Stable-hook follow-up review — 17d0d1e79
+
+Independent readback of `17d0d1e79e86f6bf57395405f7d995d7a7dcca4a`
+confirms that the checker is now copied into the shared Git hooks directory,
+content drift and symlink destinations fail without overwrite, and installation
+publishes complete files with no-clobber links. The new real-worktree test proves
+checker survival after the installer worktree is removed. Root reports 21 passing
+history tests and verified migration of only its owned wrapper with LFS unchanged;
+this reviewer did not repeat the broader suite.
+
+**SEC-HOOK-02 — Medium, open:** the installed shell wrapper still embeds raw
+`sys.executable`. An installer invoked with a virtual environment interpreter
+inside a disposable task worktree can therefore leave a missing interpreter when
+that worktree is removed, despite preserving the checker itself. The current
+worktree-removal test invokes the normal test interpreter and does not construct
+that state. Select and validate a durable base/system interpreter, and retain a
+real virtual-environment removal regression (including a copied interpreter,
+where resolving a symlink alone is insufficient). No owner acceptance is implied.
+
+Updated scoped gate: **HOLD for the worktree-lifetime claim** until SEC-HOOK-02 is
+closed. The prior receipt, mount, and deployment conclusions remain unchanged.
+
+## SEC-HOOK-02 closure — durable interpreter re-review
+
+**Resolved; scoped security gate restored to PASS.** Independent readback of the
+final installer confirms that it selects `/usr/bin/python3`, verifies Python
+3.10 or newer in isolated mode, and refuses a resolved interpreter inside any
+registered worktree. The wrapper invokes that durable interpreter with `-I` and
+the stable checker copy under the shared Git hooks directory. It no longer
+captures the installer's virtual-environment executable or imports through the
+caller's Python environment.
+
+The retained real-Git regression now installs from a virtual environment inside
+a disposable worktree in both `--copies` and `--symlinks` modes. After removing
+the worktree and its environment, it proves ordinary commit/push and receipt
+creation still work, the rewind guard still rejects master loss, and installer
+readback still matches. Reviewed `/tmp/integration-history-stable-python-tests.log`:
+**22 passed, 2 warnings in 21.30s** through wctl's verified checkout. No additional
+broad suite was run by this reviewer.
+
+The source change and direct failure-class coverage close the only outstanding
+medium finding from the stable-hook follow-up. No open high/medium findings remain
+in this review's M1/M2/root deployment-consumer scope. Bootstrap merge may proceed
+subject to the separate CI review and root integration gates. Remote enforcement,
+production deployment, and operating-system interpreter administration remain
+outside this source-level sign-off.
