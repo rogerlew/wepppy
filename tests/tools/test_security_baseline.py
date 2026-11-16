@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
@@ -231,3 +232,32 @@ def test_ambient_git_variables_cannot_redirect_explicit_root(repository, tmp_pat
     assert head != other_sha
     with pytest.raises(gate.GateError, match="POLICY_APPROVAL_REQUIRED"):
         gate.check_policy(root, base, head, "")
+
+
+def test_workflow_generator_does_not_change_global_yaml_boolean_parsing():
+    # A fresh process exercises the first import even if an earlier wiring test
+    # imported the generator. Global resolver mutation broke downstream feature
+    # registry and Usersum validation in the full suite.
+    code = r"""
+import copy
+import yaml
+before_load = copy.deepcopy(yaml.SafeLoader.yaml_implicit_resolvers)
+before_dump = copy.deepcopy(yaml.SafeDumper.yaml_implicit_resolvers)
+before_text = yaml.safe_dump({'enabled': True})
+import runpy
+builder = runpy.run_path("scripts/build_forest_workflows.py")
+WorkflowLoader, dump_yaml = builder["WorkflowLoader"], builder["dump_yaml"]
+assert yaml.SafeLoader.yaml_implicit_resolvers == before_load
+assert yaml.SafeDumper.yaml_implicit_resolvers == before_dump
+assert yaml.safe_load('enabled: true')['enabled'] is True
+assert yaml.safe_load('enabled: false')['enabled'] is False
+assert yaml.safe_dump({'enabled': True}) == before_text
+workflow = yaml.load('on: {push: null}\nflag: false', Loader=WorkflowLoader)
+assert workflow == {'on': {'push': None}, 'flag': 'false'}
+assert yaml.load(dump_yaml(workflow), Loader=WorkflowLoader) == workflow
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", code], cwd=Path(__file__).resolve().parents[2],
+        capture_output=True, text=True,
+    )
+    assert result.returncode == 0, result.stderr

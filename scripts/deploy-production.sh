@@ -714,7 +714,7 @@ validate_deploy_topology() {
         exit 1
     fi
 
-    if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+    if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] && [ "${PRINT_PLAN}" = false ]; then
         if ! wctl docker compose run --rm --no-deps --entrypoint /bin/sh \
             rq-worker-fork-archive -c \
             'test -r /run/secrets/redis_password && test -r /opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token'; then

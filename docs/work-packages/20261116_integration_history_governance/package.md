@@ -1,6 +1,6 @@
 # Integration and history preservation governance
 
-**Status**: Open — implemented and enforced; final validation and observation pending
+**Status**: Open — implemented and enforced; operational observation pending
 **Started**: 2026-11-16 20:48 UTC
 **Timezone**: UTC
 
@@ -112,7 +112,8 @@ fresh remote object, receipt writer, receipt reader, exact CI candidate, and rel
 consumer. Use real local bare remotes for Git boundaries and read back GitHub
 settings/check results for environmental enforcement. Retain receipt contents and
 identities, not merely successful exit codes. Current claim: implemented and environment validated for integration controls;
-full regression and operational observation remain open.
+required regression attempts and repairs are recorded with four preexisting RQ
+fixture failures; operational observation remains open.
 
 ## Failure-Class Assessment and Hardening
 
@@ -149,5 +150,7 @@ suites. See the [ExecPlan](prompts/active/implementation_execplan.md).
 Bootstrap PR #657 and protected follow-up PR #661 are merged. Remote protection
 and merge settings are read back; local guard and wctl shim are installed in this
 checkout. See the [execution receipt](artifacts/20261116_execution.md). No production
-deployment occurred. Full repository regression and the five-integration
-observation window remain open; this package is not closed.
+deployment occurred. Required broad regression attempts did not pass; the
+[regression disposition](artifacts/20261116_regression_disposition.md) records
+four preexisting RQ fixture failures and the completed focused repairs. The
+five-integration observation window remains open; this package is not closed.

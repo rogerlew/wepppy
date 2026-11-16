@@ -4,10 +4,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-11-16 20:48 UTC
-**Phase**: Implemented and enforced; final validation and observation open
+**Phase**: Implemented and enforced; operational observation open
 **Security impact**: high
 **Remote implementation**: bootstrap PR #657; protected follow-up PR #661
-**Next milestone**: Complete full regression receipt and operational observation
+**Next milestone**: Observe five real protected integrations; retain baseline regression failures
 
 ## Task Board
 
@@ -21,7 +21,7 @@
 - [x] Merge the sparse correction through protected master and retain a fresh integration receipt.
 - [x] Complete independent implementation reviews and close identified medium/high findings.
 - [x] Clean up disposable canary rules, remote refs and clean worktrees, retaining evidence/local refs.
-- [ ] Record completed full repository pytest and final changed-path validation.
+- [x] Record failed full/remainder attempts, baseline attribution and final changed-path validation.
 - [x] Complete disposable recovery drill, including tracked/untracked WIP recovery and fresh receipt.
 - [ ] Observe five real subsequent protected integrations; do not manufacture empty changes.
 - [ ] Complete operational observation and package closure.
@@ -59,7 +59,7 @@ wctl shim; no production-host installation is claimed.
 - [x] Real Rust valid-output, quota and malformed-input checks locally and on GitHub.
 - [x] Real remote rejection/acceptance canaries and master settings readback.
 - [x] Exact-source publication eligibility rejects stale approval before registry writes.
-- [ ] Full application suite and final audit record.
+- [x] Full application attempts and final audit record; four preexisting RQ fixture failures remain.
 
 ## Hardening Signal Log
 
@@ -76,5 +76,7 @@ positive evidence. See the execution receipt for exact identity and recovery.
 ## Handoff
 
 The implementation is wired and remotely enforced. Keep the package open for
-full validation/observation; do not label future operational evidence complete.
+operational observation; do not label future evidence complete or the failed broad
+suites green. Coupled YAML/governance/web validation: 559 passed; deployment
+plan/execution: 77 passed; history boundary: 37 passed.
 Durable policy lives in `docs/standards/integration-history-governance.md`.

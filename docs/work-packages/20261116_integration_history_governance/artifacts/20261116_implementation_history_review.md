@@ -172,3 +172,59 @@ verdict does not claim full application regression success, completed image
 publication, hostile-writer containment, other-host hook rollout, or package
 closure. Full pytest is still running, and five future real integrations remain
 an open operational observation obligation; bootstrap/canaries do not satisfy it.
+
+## Final regression repair review
+
+Independently reviewed the workflow-generator resolver repair and deployment-plan
+fixture/side-effect repair. The generator now deep-copies inherited resolver maps
+for both its loader and dumper before removing workflow-specific boolean rules.
+This preserves the intended workflow parsing while avoiding shared PyYAML mutation.
+
+Independent fresh-process readback reproduced the original source as
+`bool-type=str shared-map-preserved=False` after importing the generator, and the
+fixed source as `bool-type=bool shared-map-preserved=True`. The new regression
+runs the actual generator in a fresh subprocess, outside the old isolating fixture,
+and checks both parent resolver maps, normal true/false loading, default dumping,
+workflow `on`/string-boolean semantics, and roundtrip. It therefore detects the
+shared-state defect rather than only asserting the implementation's copy calls.
+Independent `/usr/bin/python3 scripts/build_forest_workflows.py --check` exits zero
+with generated output unchanged. The existing README profile-section warning is
+not a generated-workflow mismatch.
+
+The plan fixture now supplies the actual installed-preset query and records
+forbidden Git/Docker/network/non-query-wctl/non-contract-Python activity, including
+negative cases whose nonzero exit alone could previously hide the wrong failure.
+The new wepp3 plan case exposed a real production side effect: the old
+`validate_deploy_topology` started a secret-readability container during
+`--print-plan`. Its retained red run failed on that exact invocation. The repair
+adds only `PRINT_PLAN=false` to that preflight condition; real deployment retains
+the secret check. Execution coverage verifies governance precedes the secret
+probe and build, and failed governance prevents the probe for full/wepp3 variants.
+Independent shell syntax and changed-file whitespace checks pass.
+
+Static verdict: no remaining implementation blocker for these narrow repairs.
+The repaired test suites' final results are recorded below once available; this
+review does not convert the earlier failed full-suite attempts into passing runs.
+
+### Final repair validation receipt
+
+Read the completed logs independently:
+
+- `/tmp/governance-yaml-coupled-tests.log`: **559 passed in 41.97 seconds**.
+  The security/workflow tests and all affected feature-registry, pure-controls,
+  and Usersum modules run in the same process in that order. This closes the
+  33 downstream failures attributed to the generator's global resolver mutation.
+- `/tmp/governance-deploy-plan-execution-tests.log`: **77 passed in 105.37 seconds**.
+- `/tmp/governance-deploy-governance-boundary-tests.log`: **2 passed in 9.47 seconds**
+  after adding the explicit assertion that failed governance invokes no secret
+  readability probe for either full or wepp3 topology. These two cases overlap
+  the preceding execution suite and must not be added as unique coverage.
+
+**Final regression-repair verdict: PASS.** The reviewed generator repair preserves
+workflow output and normal YAML semantics; the plan repair aligns the fixture with
+current preset discovery and keeps actual `--print-plan` read-only while retaining
+real-deployment preflight ordering. No remaining blocker was found in these changes.
+This targeted evidence does not erase the failed broad-suite attempts or classify
+unrelated baseline failures as passing; the regression-disposition artifact retains
+those outcomes separately. No source, index, or installed-hook edits were made by
+this independent reviewer during this review.

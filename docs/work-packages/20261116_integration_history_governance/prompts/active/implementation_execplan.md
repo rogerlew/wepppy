@@ -36,8 +36,8 @@ who can deliberately disable every control.
 - [x] (2026-11-16) Complete independent implementation reviews and close findings.
 - [x] (2026-11-16) Complete disposable recovery drill: refused ref rewrite, external WIP recovery, legitimate merge and fresh receipt.
 - [x] (2026-11-16) Repair actual pack-refs false positive; 37 real-Git tests, independent review and shared-checkout ref-preserving maintenance pass.
-- [ ] Record final full-suite result and finish the five-real-integration observation
-  period before package closure.
+- [x] (2026-11-16) Record failed full/remainder results; repair YAML test pollution and plan boundary; coupled 559 and deployment 77 pass. Four preexisting RQ fixture failures remain.
+- [ ] Finish the five-real-integration observation period before package closure.
 
 ## Surprises & Discoveries
 
@@ -80,9 +80,10 @@ fast-forward an eligible PR head and record it as merged; this is not merge-butt
 or API-only enforcement. A separate failed canary setup was isolated and closed,
 and is explicitly excluded from positive evidence.
 
-Full application regression and the five-real-integration observation period
-remain open. Do not close the package or claim those future results from local
-unit tests or from artificial canary updates.
+Full application attempts and regression repairs are recorded; four preexisting
+RQ fixture failures remain, so no clean full-suite pass is claimed. The
+five-real-integration observation period remains open. Do not close the package
+or substitute artificial canary updates for that operational evidence.
 ## Context and Orientation
 
 

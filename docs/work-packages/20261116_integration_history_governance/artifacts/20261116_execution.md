@@ -27,7 +27,9 @@ collaborators exist; this is not a claim that the owner is the only contributor.
   helper suite: 34 passed after final protected-input and environment coverage. These scopes overlap and should not be added as unique tests.
 - Real Rust smoke verifies valid output, feature quota rejection and malformed SHX
   rejection. Generated workflows are in sync using the container Python runtime.
-- Full repository pytest is running; its result is not yet claimed.
+- Required full repository pytest stopped at a confirmed preexisting RQ fixture
+  failure: 8,790 passed, 383 skipped, 1 failed, 3 subtests passed. See the
+  [regression disposition](20261116_regression_disposition.md); continuation is separate.
 - Independent implementation reviews are retained for history/CI, correctness and
   security. All identified medium/high findings were repaired and independently
   re-reviewed; remote enforcement evidence is recorded below.
@@ -148,8 +150,14 @@ sparse-checkout refinements. Those final paths were independently rerun through
 The initial combined 152 and initial wctl 66 scopes overlap these results; counts
 are not additive. The full run validates the shared working tree, including
 preexisting unrelated edits, rather than an immutable clean checkout. No domain
-application code was changed by the governance refinements. Final full-run result
-is pending; no pass is claimed here yet.
+application code was changed by the governance refinements. The full attempt stopped after 52m41s with 8,790 passed, 383 skipped, one failure
+and three passing subtests. Focused enumeration found two unchanged RQ fixture
+failures; immutable pre-governance blobs reproduce the original exception. The
+remaining collection groups completed with those exact two node IDs deselected:
+6,324 passed, 42 failed, 272 skipped and 12 subtests passed in 14m55s. These counts
+overlap the initial attempt and are not additive. Forty failures were repaired and rerun
+(33 YAML parser-pollution consumers and seven stale plan-fixture cases); two more
+RQ fixture mismatches predate governance. No clean full-suite pass is claimed.
 
 ## Recovery drill
 
@@ -181,3 +189,27 @@ and checked. Installed checker SHA256:
 Real shared-checkout `git pack-refs --all --prune` succeeded with byte-identical
 `git show-ref` output; unrelated hooks remained byte-identical. No force update,
 hook bypass, or production mutation was used.
+
+## Regression-driven repairs
+
+The new governance wiring tests imported the workflow generator into pytest. Its
+inherited YAML resolver dictionaries were mutated in place, disabling boolean
+parsing for ordinary `yaml.safe_load` consumers and causing 33 downstream registry
+and Usersum failures. This is an in-scope test-isolation regression despite the
+latent generator defect predating governance. Copying the loader/dumper resolver
+maps isolates workflow semantics; generated output is unchanged. A fresh-process
+regression and a coupled governance/web suite validate the boundary.
+
+Seven plan tests used a fake wctl missing the existing `show-compose-files`
+contract. The fixture now supports read-only preset/config inspection and rejects
+all other commands. This exposed a real `--print-plan` side effect on wepp3: the
+secret-readability container probe ran during planning. It now runs only for real
+deployment; tests retain governance-before-probe/build/stop ordering and refusal
+on full/wepp3 deployments. No live deployment was invoked.
+
+Final focused/coupled results and independent review are recorded in the
+[regression disposition](20261116_regression_disposition.md).
+
+Final repair validation: the coupled governance/workflow/registry/Usersum suite
+passed 559 tests in 41.97s; deployment plan/execution passed 77 in 105.37s. These
+are scoped repair results, not a rerun or green result for the entire repository.

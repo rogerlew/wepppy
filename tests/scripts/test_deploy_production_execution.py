@@ -1600,7 +1600,9 @@ def test_wepp3_retained_execution_drains_and_activates_immutable_image(tmp_path:
     activation = _position(commands, "docker|compose -f")
     registration = _position(commands, "Worker.all")
     resume = _position(commands, _RQ_RESUME)
-    assert build < suspend < stop < down < activation < registration < resume
+    governance = _position(commands, "governance|check")
+    secret_preflight = _position(commands, "test -r /run/secrets/redis_password")
+    assert governance < secret_preflight < build < suspend < stop < down < activation < registration < resume
     assert "fork-archive RQ registries are drained" in result.stdout
     assert "retained|record-activation" in commands
     assert any("wepppy-retained-rollback:" in command for command in commands)
@@ -1825,12 +1827,14 @@ def test_active_job_probe_never_cleans_registry(monkeypatch, capsys):
     assert capsys.readouterr().out.strip() == "1"
 
 
-def test_governance_failure_precedes_build_stop_and_activation(tmp_path: Path) -> None:
-    result, commands = _run_deploy(
-        tmp_path, _full_services_with_cap_and_renderer(), governance_failure=True,
-    )
+@pytest.mark.parametrize("topology", ["full", "wepp3"])
+def test_governance_failure_precedes_build_stop_and_activation(tmp_path: Path, topology: str) -> None:
+    services = (_full_services_with_cap_and_renderer() if topology == "full"
+                else {"rq-worker-fork-archive": _service("wepppy:test")})
+    result, commands = _run_deploy(tmp_path, services, governance_failure=True)
     assert result.returncode == 89
     assert "governance|check" in commands
+    assert not any("test -r /run/secrets/redis_password" in command for command in commands)
     assert not any(_RQ_SUSPEND in command for command in commands)
     assert not any("build " in command or "--force-recreate" in command for command in commands)
     assert not any(command.startswith("docker|stop ") for command in commands)
