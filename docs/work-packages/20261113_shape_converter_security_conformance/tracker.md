@@ -14,6 +14,12 @@
 service-local lightweight Rust CLI; retain the dedicated GDAL image only as a
 pre-cutover oracle
 
+Recovery addendum (2026-11-16): restored the 20 dropped Rust-parser commits by
+merging `4194fd43b` into current master as `a5d9f0fc3`. The original acceptance
+and second-sandbox decision are preserved. See
+[history recovery](artifacts/20261116_history_recovery.md) for validation and
+rollback integration details.
+
 ## Task Board
 
 - [x] Scaffold package, active ExecPlan, failure-class assessment, and four

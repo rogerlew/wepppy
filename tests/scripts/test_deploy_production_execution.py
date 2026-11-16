@@ -855,7 +855,7 @@ def test_gate_failure_after_stop_restores_prior_map_before_fence_release(tmp_pat
     recovery = _position(commands, "docker|compose -f")
     resume = _position(commands, _RQ_RESUME)
     assert stop < recovery < resume
-    assert "Exact pre-cutover workload restored and verified" in result.stderr
+    assert "Retained workloads restored and verified; fail-closed services remain stopped" in result.stderr
     compose_commands = [command for command in commands if command.startswith("docker|compose -f")]
     assert len(compose_commands) == 1
     assert "wepppy-known-good" in compose_commands[0]
@@ -925,6 +925,10 @@ def test_recovery_waits_for_health_and_worker_registration_before_resume(
 
     assert result.returncode != 0
     recovery = _position(commands, "docker|compose -f")
+    recovery_command = commands[recovery]
+    assert "--no-deps" in recovery_command
+    assert "shape-converter" not in recovery_command.split("--no-deps", 1)[1].split()
+    assert "rq-worker" in recovery_command.split("--no-deps", 1)[1].split()
     resume = _position(commands, _RQ_RESUME)
     recovery_ps = [
         index for index, command in enumerate(commands)
@@ -937,7 +941,7 @@ def test_recovery_waits_for_health_and_worker_registration_before_resume(
     assert len(recovery_ps) >= 3
     assert len(recovery_registration) >= 3
     assert max(recovery_registration) < resume
-    assert "Exact pre-cutover workload restored and verified" in result.stderr
+    assert "Retained workloads restored and verified; fail-closed services remain stopped" in result.stderr
 
 
 def test_full_candidate_failure_recovers_cap_and_never_reports_success_or_prunes(tmp_path: Path) -> None:
@@ -954,7 +958,7 @@ def test_full_candidate_failure_recovers_cap_and_never_reports_success_or_prunes
     resume = _position(commands, _RQ_RESUME)
     recovery = activations[1]
     assert suspend < activation < recovery < resume
-    assert "Exact pre-cutover workload restored and verified" in result.stderr
+    assert "Retained workloads restored and verified; fail-closed services remain stopped" in result.stderr
     assert (tmp_path / "controllers-gl.js").read_text(encoding="utf-8") == "known-good controllers"
     assert "Restored the pre-deploy controllers bundle" in result.stderr
     assert not any(command.startswith("docker|system prune") for command in commands)
@@ -992,6 +996,7 @@ def test_shape_readiness_failure_detects_stop_failure(tmp_path: Path) -> None:
     assert result.returncode == 88
     assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
     assert "SHAPE_CONVERTER_FAIL_CLOSED_FAILED" in result.stderr
+    assert not any(_RQ_RESUME in command for command in commands)
     assert "Deployment complete!" not in result.stdout
 
 
@@ -1278,7 +1283,7 @@ def test_controller_backup_failure_preserves_old_bundle_recovers_and_resumes(tmp
     assert _position(commands, _RQ_SUSPEND) < recovery < resume
     assert (tmp_path / "controllers-gl.js").read_text(encoding="utf-8") == "known-good controllers"
     assert not any(command == "wctl|up -d --force-recreate" for command in commands)
-    assert "Exact pre-cutover workload restored and verified" in result.stderr
+    assert "Retained workloads restored and verified; fail-closed services remain stopped" in result.stderr
     assert "Deployment complete!" not in result.stdout
 
 
@@ -1701,7 +1706,7 @@ def test_full_failure_uses_exact_map_recovery_without_legacy_caddy_rescue(tmp_pa
     resume = _position(commands, _RQ_RESUME)
     recovery = _positions(commands, "docker|compose -f")[1]
     assert recovery < resume
-    assert "Exact pre-cutover workload restored and verified" in result.stderr
+    assert "Retained workloads restored and verified; fail-closed services remain stopped" in result.stderr
     assert not any(
         command.startswith("docker|compose -f") and "ps -q caddy" in command
         for command in commands
@@ -1710,19 +1715,20 @@ def test_full_failure_uses_exact_map_recovery_without_legacy_caddy_rescue(tmp_pa
     assert "Deployment complete!" not in result.stdout
 
 
-def test_shape_takedown_failure_precedes_cap_recovery_failure(tmp_path: Path) -> None:
+def test_shape_takedown_and_retained_recovery_failure_keep_fence(tmp_path: Path) -> None:
     result, commands = _run_deploy(
         tmp_path,
         _full_services_with_cap_and_renderer(),
         candidate_mismatch=True,
         recovery_failure=True,
-        shape_ps_failure=True,
+        shape_stop_failure=True,
     )
 
     assert result.returncode == 88
     assert any("docker|stop --time 30 cid-shape-converter" in command for command in commands)
     assert "SHAPE_CONVERTER_FAIL_CLOSED_FAILED" in result.stderr
-    assert "CAP_RESCUE_FAILED" in result.stderr
+    assert "KNOWN_GOOD_RESTORE_FAILED" in result.stderr
+    assert not any(_RQ_RESUME in command for command in commands)
     assert "Deployment complete!" not in result.stdout
 
 

@@ -1281,6 +1281,11 @@ verify_known_good_state_once() {
     local expected_args=()
     while IFS=$'\t' read -r service expected_id expected_count; do
         [ -n "${service}" ] || continue
+        # A failed shape release must remain stopped, even while the other
+        # workloads recover their retained image map.
+        if [ "${SHAPE_CONVERTER_FAIL_CLOSED}" = true ] && [ "${service}" = shape-converter ]; then
+            continue
+        fi
         expected_args+=(--expected-service "${service}")
         mapfile -t restored_containers < <(wctl docker compose ps -q "${service}")
         [ "${#restored_containers[@]}" -eq "${expected_count}" ] || return 1
@@ -1411,16 +1416,35 @@ recover_targeted_cap() {
         echo "✓ Restored the pre-deploy controllers bundle" >&2
     fi
     if [ "${CUTOVER_STARTED}" = true ] && [ -n "${KNOWN_GOOD_CONFIG}" ]; then
-        echo "✗ Cutover failed; restoring the exact pre-cutover image map" >&2
+        local -a recovery_services=()
+        local service expected_id expected_count
+        while IFS=$'\t' read -r service expected_id expected_count; do
+            [ -n "${service}" ] || continue
+            if [ "${SHAPE_CONVERTER_FAIL_CLOSED}" = true ] && [ "${service}" = shape-converter ]; then
+                continue
+            fi
+            recovery_services+=("${service}")
+        done < "${KNOWN_GOOD_ROWS}"
+        echo "✗ Cutover failed; restoring the retained workloads except any fail-closed shape-converter" >&2
+        # Explicit services and --no-deps prevent Compose from reactivating the
+        # stopped parser through the full retained config or dependency closure.
+        if [ "${#recovery_services[@]}" -eq 0 ]; then
+            stop_rq_heartbeat_preserve_fence
+            return 88
+        fi
         if docker compose -f "${KNOWN_GOOD_CONFIG}" -f "${KNOWN_GOOD_OVERRIDE}" \
-            up -d --force-recreate --no-build --pull never \
+            up -d --force-recreate --no-build --pull never --no-deps "${recovery_services[@]}" \
             && verify_known_good_state; then
             CUTOVER_STARTED=false
+            if [ "${shape_shutdown_failed}" = true ]; then
+                stop_rq_heartbeat_preserve_fence
+                return 88
+            fi
             if ! resume_rq_if_owned; then
                 echo "✗ RQ_RESUME_FAILED after known-good restoration" >&2
                 return 87
             fi
-            echo "✓ Exact pre-cutover workload restored and verified" >&2
+            echo "✓ Retained workloads restored and verified; fail-closed services remain stopped" >&2
             return "${recovery_exit}"
         fi
         echo "✗ KNOWN_GOOD_RESTORE_FAILED: RQ fence retained for bounded recovery" >&2

@@ -143,6 +143,10 @@ gate; it is not the final parser architecture.
       exact Rust-CLI evidence and retain it open for independent residual-risk
       acceptance.
 
+- [x] (2026-11-16) Recover the 20 commits dropped by rebase, preserving newer
+      master history and unrelated working changes. Restore the accepted Rust
+      implementation and documented second-sandbox decision.
+
 ## Surprises & Discoveries
 
 - Cancellation of an `asyncio.to_thread` awaiter does not stop its decode/
@@ -269,6 +273,11 @@ gate; it is not the final parser architecture.
   complete dataset while leaving another incomplete shapefile prefix present.
 - Inspect parses bounded headers/DBF/PRJ directly and does not use the Fiona
   worker. Sandbox claims must not be overstated for that endpoint.
+
+Recovery addendum (2026-11-16): the November 15 rebase retained the soils
+commit but dropped the Rust-parser history after `19c0dc107`. The recovered
+fail-closed parser shutdown also conflicts with newer full-stack rollback,
+which otherwise restarts and checks every retained service.
 
 ## Decision Log
 
@@ -425,6 +434,11 @@ gate; it is not the final parser architecture.
   distinct exit 88; no GDAL/Fiona fallback is restored.
   Date/Author: 2026-11-14, operator direction implemented by Codex.
 
+Recovery decision (2026-11-16): merge the original reviewed history instead of
+recreating its changes. During failed cutover, restore the other retained
+services with an explicit service list and `--no-deps`; keep shape-converter
+stopped. Retain the RQ fence if parser shutdown cannot be verified.
+
 ## Outcomes & Retrospective
 
 The authorized independent slice is implemented after reviewed contract checkpoint
@@ -521,6 +535,11 @@ Independent re-review of `2bbf8498e` returned FAIL/HOLD. See the
 and [security review](../../artifacts/20261114_rust_cli_remediation_security_re_review.md).
 The local exact-image receipt remains valid evidence, but it does not override
 the retained findings. #656 and rollout remain blocked.
+
+Recovery addendum (2026-11-16): source history and the accepted architecture are
+restored. The parser, parser tests, and dedicated Dockerfile match the accepted
+tip byte for byte. See `../../artifacts/20261116_history_recovery.md` for the
+recovery receipt. This recovery does not deploy a production image.
 
 ## Context and Orientation
 

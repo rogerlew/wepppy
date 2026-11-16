@@ -34,3 +34,11 @@ start the former GDAL/Fiona implementation or any other parser fallback.
 Retain the exit code, filtered container inventory, stop result, public
 unavailability check, source revision, and final image ID in the deployment
 receipt. A successful container stop by itself is not authorization to deploy.
+
+During a failed full-stack cutover, rollback restores and verifies the retained
+images for the other workloads. It excludes shape-converter from both the
+explicit Compose service list and health verification, and uses `--no-deps` to
+prevent a dependency from restarting the unreviewed parser. RQ resumes only
+after retained workloads pass health and worker-registration checks. If stopping
+the converter cannot be verified, exit `88` retains the RQ fence even if those
+other workloads recover successfully.
