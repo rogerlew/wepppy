@@ -722,3 +722,15 @@ Declarative DEM mutation refusal uses the existing error envelope with code
 `declarative_protected` and HTTP 409 after authorization. Queued refusal uses
 normal RQ failure bookkeeping. The private operator protocol does not add a
 public endpoint or change ordinary responses.
+
+## Proposed batch outcome amendment (BATCH-OUTCOME-01)
+
+The exact proposed additive root polling schema, artifact publication and narrow
+terminal-failure reconciliation behavior are specified in
+[Batch result outcomes](batch-outcome-contract.md). Operator ratification, the
+standalone checkpoint and implementation conformance are pending. Existing RQ
+status, errors, restricted catalog disclosure and leaf tracebacks remain
+unchanged. This proposal does not establish deployed behavior.
+
+BATCH-OUTCOME-01 ratification: operator approved the concrete proposal and
+checkpoint/implementation on 2026-11-16. Implementation conformance remains pending.

@@ -127,3 +127,14 @@ summary even after an upstream crash. A strict dependency alone strands that
 summary; an unconditional failure-tolerant scientific stage would consume
 incomplete outputs. Attempt-bound visible receipts preserve observability and
 prevent old success from authorizing a new failed attempt.
+
+## Proposed result publication amendment
+
+[Batch result outcomes](batch-outcome-contract.md) proposes selected-cohort
+outcomes and validated baseline WEPP result bundles after this contract's
+existing terminal observer and Omni linkage settle. It preserves task selection,
+scientific handoffs, cancellation and diagnostic files. Exact operator
+ratification and implementation are pending.
+
+BATCH-OUTCOME-01 ratification: operator approved the concrete proposal and
+checkpoint/implementation on 2026-11-16. Implementation conformance remains pending.

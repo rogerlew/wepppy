@@ -279,3 +279,15 @@ Validate copied-store, stale-backup and ordinary-restart cases separately.
 Admission disable and rollback must retain instrumented execution until accepted
 producers drain, or explicitly mark affected roots unavailable; never silently
 reclassify incomplete tracking as complete. No shared Redis flush or RQ downgrade.
+
+## Batch outcome compatibility
+
+The proposed [batch result outcome contract](batch-outcome-contract.md) separates
+artifact usability from execution status. It does not add domain data to webhook
+bodies or alter webhook settlement, retry, membership or delivery. After a
+terminal event, clients may poll the enrolled root for the additive outcome once
+implemented. A failed execution event does not prove that every run lacks usable
+results. Proposal ratification and implementation remain pending.
+
+BATCH-OUTCOME-01 ratification: operator approved the concrete proposal and
+checkpoint/implementation on 2026-11-16. Implementation conformance remains pending.

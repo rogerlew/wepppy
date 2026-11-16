@@ -1,0 +1,88 @@
+# Implement batch outcomes for partial results
+
+
+This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Execution is active at M1; runtime implementation follows exact contract ratification and the checkpoint ancestor.
+
+## Purpose / Big Picture
+
+
+Deliver successful batch and culvert results when a sibling times out. A 32-success/one-timeout case must download 32 valid runs, report the omission, and retain the failed leaf's traceback. Polling, project inspection, metrics, and geometry must agree.
+
+## Progress
+
+
+- [x] (2026-11-16 06:13 UTC) Scaffold package and draft decision.
+- [x] (2026-11-16 06:29 UTC) M1 source/consumer inventory and exact proposed canonical schema prepared; see artifacts/20261116_inventory.md and docs/schemas/batch-outcome-contract.md.
+- [x] (2026-11-16) M1: Independent correctness/security contract reviews and finding disposition pass; artifacts record reviewed hash.
+- [ ] M1: Exact operator ratification and standalone checkpoint commit. Runtime edits remain gated.
+- [ ] M2: Finalization and additive polling implementation for both workflows.
+- [ ] M3: Client adoption, direct artifact acceptance, migration guide.
+- [ ] M4: Regression gates, independent reviews, evidence-based handoff.
+
+## Surprises & Discoveries
+
+M1: both finalizer edges already tolerate failure. Ordinary Omni strict downstream edges can still strand the batch finalizer after scenario failure. Successful leaf RQ evidence can expire before a 12-hour sibling timeout unless retention is extended. Culvert resume and standalone finalize are additional consumers. See artifacts/20261116_inventory.md and independent review findings.
+
+
+Culvert finalization already permits partial success, but generic RQ aggregation propagates failed children and the client aborts before download. Caught application exceptions returning `failed` behave differently. All 33 runs in `1f2933b8-12a7-48cc-b508-5f2719baa8a7` failed SSURGO; resolve the separate timeout incident identity in M1.
+
+## Decision Log
+
+2026-11-16: Proposed immutable attempt-specific baseline WEPP ZIPs for both workflows, retaining legacy diagnostic archives and WATAR/Omni project downloads. Prep-only selections are explicit skips; selected-only ordinary retry cohorts exclude historical complete runs. These newly resolved choices require exact operator ratification. See the canonical proposal and inventory.
+
+
+2026-11-16 06:13 UTC: Add finalizer-owned `batch` outcome on jobinfo and jobstatus, preserving RQ status and exception visibility. Artifact availability and execution diagnostics answer different questions. Exact contract ratification remains pending.
+
+## Outcomes & Retrospective
+
+
+M1 inventory and a concrete canonical proposal are prepared. Runtime implementation, external client adoption and environment validation have not begun. Exact operator ratification is pending; no checkpoint commit, deployment or recovery is claimed.
+
+## Context and Orientation
+
+
+Work from `/workdir/wepppy` and read root/nearest AGENTS instructions. A leaf executes one run; a finalizer settles results after the relevant leaves terminate. `wepppy/rq/job_info.py` constructs recursive jobinfo and aggregate jobstatus; `wepppy/microservices/rq_engine/job_routes.py` exposes them. Ordinary batch finalization is in `wepppy/rq/batch_rq.py::_final_batch_complete_rq`. Culvert orchestration and artifacts use `culvert_rq.py::_final_culvert_batch_complete_rq`, `culvert_rq_pipeline.py`, and `culvert_rq_manifest.py` in the same directory. Inspect ordinary batch linked dependencies and artifact surfaces; do not assume culvert topology applies unchanged.
+
+The external client is `Culvert_web_app/culvert_app/tasks/wepp_cloud_integration_task.py`. It currently aborts on aggregate failure, filters metrics through file-read exceptions, and processes geometry independently. Explicit successful-run selection and omission warnings are required for all layers. Record external repository delivery separately from server implementation.
+
+## Plan of Work
+
+
+M1: Read the contract-first, artifact observability/validation, and hardening lifecycle standards. Inventory `docs/schemas/rq-response-contract.md`, webhook contract, nearest subsystem contracts, finalizers, consumers and download routes. Complete `artifacts/20261116_contract_decision.md` with exact schema types, errors, counts, ordinary batch artifact shape, atomic publication, attempt identity, retention and finalizer crash detection. Promote canonical amendments as implementation pending, reconcile conflicts, obtain operator approval and two independent read-only reviews, and disposition findings. Commit the canonical checkpoint as a standalone ancestor before runtime edits and record its revision. Preserve existing dirty contract changes. No checkpoint is claimed by this scaffold.
+
+M2: Implement the ratified summary using existing RQ and persistence. Both polling endpoints must expose the same authoritative current-attempt summary. Finalization waits for relevant work but tolerates failed dependencies; worker death without metadata is reconciled from RQ. Validate successful outputs, publish the artifact atomically, then expose availability. A finalizer failure must settle visibly even if normal publication never executes. Keep sanitized leaf exceptions, generic status aggregation, and restricted catalog disclosure intact. Update the dependency catalog if queue wiring changes.
+
+M3: Wire culvert polling to terminal batch outcome and result availability, including aggregate failed with partial success. Filter metrics, hillslopes, channels and counts by explicit validated successful IDs; failed runs must not appear as zero erosion. Preserve explicit legacy behavior. Update `docs/culvert-at-risk-integration/dev-package/weppcloud-wbt-unnest-basins-migration-guide.md` with the ratified schema, polling examples, timeout/all-failed cases, and rollout guidance. End-to-end closure requires real consumer adoption, not just a server response example.
+
+M4: Obtain independent correctness and security reviews using repository templates; close medium/high findings. Complete focused/broad regressions and artifact evidence, then update tracker/project board. Deployment and incident requeue are separate authorized activities.
+
+## Concrete Steps
+
+
+From `/workdir/wepppy`, inspect `git status --short`. Use `rg` to locate batch/culvert/polling tests under `tests/rq` and `tests/microservices`; run `wctl run-pytest <discovered-test-paths>`. For wiring edits run `wctl check-rq-graph` and update `wepppy/rq/job-dependencies-catalog.md`. For changed interfaces/stubs run applicable `wctl run-stubtest <module>` and `wctl check-test-stubs`. Before implementation closeout run `wctl run-pytest tests --maxfail=1`; run npm lint/tests when frontend code changes. Run `wctl doc-lint --path <changed-file>` for documentation. Record exact commands and results in artifacts; do not claim unrun tests.
+
+## Validation and Acceptance
+
+
+Exercise every state in the draft decision matrix for both workflows. Use a real RQ worker with a short test timeout to reproduce the 12-hour failure class. Verify finalizer scheduling after failure, persist/read actual summaries, call both polling endpoints, download real artifacts, and compare semantic run IDs in metrics and geometry. A failed ID must appear in diagnostics and be absent from successful outputs. Test actual publication failure, missing outputs despite success markers, and retry fencing. Mock-only serializer tests cannot prove these boundaries. Show valid access works and hostile/foreign paths fail without broader disclosure. Include normal project inspection and archive/restore behavior.
+
+## Idempotence and Recovery
+
+
+Repeated finalization cannot mix attempts or advertise an old archive as newly ready. Use isolated test projects and preserve production evidence. Missing additive fields never imply success. Record reader rollback/retention behavior and avoid production mutation during local acceptance.
+
+## Artifacts and Notes
+
+
+Retain checkpoint revision, two contract reviews/disposition, independent correctness/security review artifacts, test receipts, real timeout evidence, polling JSON, and artifact-ID comparisons. Timestamp in UTC and redact credentials. Base revision is `df8b5249c70a3d98fd27f2b3b3b16ac1d96deb52`; existing dirty files are not presumed part of this package.
+
+## Interfaces and Dependencies
+
+
+The additive `batch` fields are proposed in the decision artifact. Promote exact schema and compatibility rules to the canonical RQ response contract before implementing. Reuse existing infrastructure; no new queue/service/datastore or model changes. Resolve ordinary batch artifact representation, finalizer failure settlement, and attempt retention in M1.
+
+Revision note: 2026-11-16 06:13 UTC — initial contract-first scaffold; implementation and wiring remain separate acceptance milestones.
+
+Revision note: 2026-11-16 — executed M1 inventory, prepared exact proposed contract and initiated independent reviews; runtime remains behind ratification and checkpoint.
+
+Operator approval (2026-11-16 06:31 UTC): “i approve. proceed with commit and implementation”. This ratifies the reviewed contract (pre-status-update SHA-256 `42d00a1931ea77e862412349ff91414bfae47d3dc33dd57faf0eb6ac7f8fed92`) and authorizes the standalone checkpoint and implementation commits. Runtime conformance remains pending.
