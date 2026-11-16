@@ -1,8 +1,8 @@
 # Forest Service basemap (FSBASE-01)
 
 Status: intended behavior authorized by the 2026-11-16 request to execute the
-Forest Service basemap package; independent contract reviews passed; checkpoint commit pending. Implementation
-conformance pending; this document does not claim deployment.
+Forest Service basemap package; independent contract reviews passed and checkpoints committed. Implemented
+and locally browser-validated; this document does not claim production deployment.
 
 ## Scope and rationale
 
@@ -55,7 +55,7 @@ and retain “Forest Service - Geospatial Office” credit. Credit must track ac
 visible providers through loading, failure, and switching, without implying
 that a pending selection already rendered. Preserve other providers' credits.
 
-Light and dark Vite landing pages and the Flask fallback identify the optional
+Light and dark Vite landing pages identify the optional
 Forest Service basemap separately from their existing background provider, with
 an accessible limitations disclosure or link. Explain that this map cannot
 establish ownership, legal boundaries, jurisdiction, or access rights. Obtain
@@ -75,7 +75,10 @@ sending run URL/query details in referrers. Use fixed safe credit text/links;
 never inject remote metadata HTML. Inspect resolved style/source/font/sprite
 origins before adoption; service metadata accessibility alone is insufficient.
 Confine resource requests at runtime to the approved HTTPS service resource
-origins/paths recorded by the feasibility evaluation. Resolve official relative
+origins/paths selected by the feasibility evaluation. The approved resource
+subtree is
+`https://tiles.arcgis.com/tiles/gGHDlz6USftL5Pau/arcgis/rest/services/FSBasemap_20240617/VectorTileServer/`.
+No query strings, fragments, or embedded credentials are needed. Resolve official relative
 URLs against their service/style base before validating them. Reject URL
 credentials and unapproved same-origin, internal, or foreign resource targets
 before dispatch; redirects must not escape that boundary. If the renderer
@@ -123,14 +126,28 @@ Compare responsiveness, transfer cost, and memory with Terrain on a representati
 run. Retain focused regression tests plus independent correctness/security
 reviews. Mocks or a successful build alone cannot establish conformance.
 
-## Fallback navigation repair (FSBASE-02)
+## Landing delivery and navigation (FSBASE-02/03)
 
-Operator approved on 2026-11-16: replace the fallback's broken “About WEPPcloud”
-link with “WEPPcloud user guide,” targeting the existing
-`usersum.view_markdown` route for `weppcloud/user-guide.md`. The deleted
-`weppcloud_site.about` endpoint currently prevents fallback rendering before
-credit can be displayed. Apply the same endpoint correction to the legacy
-global header, the only other confirmed template consumer, without changing
-any access rules or other navigation. This repairs a confirmed render failure;
-it creates no new route. Verify URL building with the real Flask application
-and render the fallback disclosure in a browser. Conformance pending.
+FSBASE-02 repairs the legacy global header's deleted About endpoint with
+“WEPPcloud user guide,” targeting the existing `usersum.view_markdown` route
+for `weppcloud/user-guide.md`. No access rule or other navigation changes.
+
+FSBASE-03 supersedes the former requirement to preserve a Flask landing
+fallback. Operator instruction on 2026-11-16: “this is too complicated. remove
+the fallback.” Keep the light and dark Vite pages; `/` and `/landing/` continue
+to select light, and explicit light/dark routes keep their existing theme.
+Delete the obsolete `landing.htm` template and its route fallback. Missing or
+unreadable requested HTML exports return HTTP 503 with a short, plain message
+that the landing page is temporarily unavailable; do not serve the other theme
+or a substitute page. Log the unavailable export for operator diagnosis without
+exposing filesystem paths to visitors. Existing state injection and successful
+response cache behavior remain unchanged. Operators restore availability by
+running the existing landing export build and verifying both theme routes.
+
+Rationale: requiring the frontend build eliminates a third, drifting landing
+implementation and its independent CDN renderer. This removes the confirmed
+legacy attribution sink rather than maintaining another dependency path.
+Existing exports remain compatible; incomplete deployments now fail explicitly.
+Validate both themes and default routes, real missing/unreadable export states,
+no legacy template reference, and unchanged state injection. Implementation
+conformance for FSBASE-03 is pending.
