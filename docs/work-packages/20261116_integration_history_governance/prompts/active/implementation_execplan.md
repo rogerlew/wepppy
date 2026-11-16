@@ -35,6 +35,7 @@ who can deliberately disable every control.
   source; stale approval failed before publish, then qualified publication succeeded.
 - [x] (2026-11-16) Complete independent implementation reviews and close findings.
 - [x] (2026-11-16) Complete disposable recovery drill: refused ref rewrite, external WIP recovery, legitimate merge and fresh receipt.
+- [x] (2026-11-16) Repair actual pack-refs false positive; 37 real-Git tests, independent review and shared-checkout ref-preserving maintenance pass.
 - [ ] Record final full-suite result and finish the five-real-integration observation
   period before package closure.
 

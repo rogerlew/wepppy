@@ -159,3 +159,25 @@ recovery from retained accepted refs plus external WIP backup, and legitimate
 merge integration with exact tracked/untracked work restored. Fresh remote receipt
 and verification succeeded. This fulfills the separate recovery drill; fixture
 commits do not count toward the five-real-integration observation.
+
+## Maintenance correction discovered during audit
+
+Automatic Git maintenance exposed a false positive: files-backend `pack-refs`
+reports pruning the redundant loose master ref as SHA-to-zero, so the original
+hook refused it as logical deletion. The audit commit/push succeeded, but normal
+maintenance failed. This was repaired before handoff, not waived.
+
+The guard now permits only the verified storage transition: matching old SHA in
+both loose and packed entries, a loose-ref lock, and no packed rewrite lock/new
+state. Symlinks, duplicate entries and unknown layouts fail closed. Actual branch
+deletion remains blocked for loose, packed and mixed refs. Independent security
+review checked Git 2.43 source and real bare/linked probes. The final suite passes
+37 real-Git tests, including maintenance and actual deletion/rewind coverage.
+
+The previous owned hook/checker were backed up in
+`/tmp/governance-pre-pack-refs-fix-hooks`, then the reviewed guard was installed
+and checked. Installed checker SHA256:
+`d9240304432c45256733c386fbc56e87071ef95bc13a7ec43a52bfb27d97a438`.
+Real shared-checkout `git pack-refs --all --prune` succeeded with byte-identical
+`git show-ref` output; unrelated hooks remained byte-identical. No force update,
+hook bypass, or production mutation was used.

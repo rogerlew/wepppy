@@ -133,6 +133,40 @@ def read_receipt(path: Path) -> dict[str, object]:
     return receipt
 
 
+def redundant_loose_ref_prune(repo: Path, old: str, ref: str) -> bool:
+    """Recognize files-backend pruning after an identical packed ref was committed.
+
+    Git 2.43 pack-refs reports deletion of the redundant loose representation as
+    SHA -> zero. Actual logical deletion also prepares a packed-ref transaction
+    and holds packed-refs.lock. Unknown layouts/transactions fail closed.
+    """
+    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", old) or set(old) == {"0"}:
+        return False
+    common = Path(git(repo, "rev-parse", "--git-common-dir"))
+    if not common.is_absolute():
+        common = repo / common
+    loose = common / ref
+    packed = common / "packed-refs"
+    loose_lock = Path(str(loose) + ".lock")
+    if loose.is_symlink() or packed.is_symlink() or loose_lock.is_symlink():
+        return False
+    if not loose_lock.is_file():
+        return False
+    for name in ("packed-refs.lock", "packed-refs.new"):
+        candidate = common / name
+        if candidate.exists() or candidate.is_symlink():
+            return False
+    try:
+        if loose.read_text(encoding="ascii").strip() != old:
+            return False
+        entries = [line.partition(" ")[0]
+                   for line in packed.read_text(encoding="ascii").splitlines()
+                   if line.partition(" ")[2] == ref]
+        return entries == [old]
+    except FileNotFoundError:
+        return False
+
+
 def protect_reference_transaction(state: str) -> None:
     if state != "prepared":
         return
@@ -144,6 +178,8 @@ def protect_reference_transaction(state: str) -> None:
         if ref != "refs/heads/master":
             continue
         if set(new) == {"0"}:
+            if redundant_loose_ref_prune(Path.cwd(), old, ref):
+                continue
             raise IntegrationError("PROTECTED_MASTER: deletion is prohibited")
         if set(old) == {"0"}:
             old = git(Path.cwd(), "rev-parse", "--verify", "--quiet", ref, allowed=(0, 1))

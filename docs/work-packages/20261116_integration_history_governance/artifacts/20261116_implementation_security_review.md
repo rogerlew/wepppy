@@ -202,3 +202,44 @@ and remote enforcement evidence remain root integration gates. The separate
 positive-canary setup error (an empty-index deletion commit on a disposable branch)
 is incident/test-setup evidence, not a successful integration or a master change,
 and does not substitute for the positive-canary proof.
+
+## Reference packing follow-up review — Git 2.43 files backend
+
+**Scoped PASS; no new high/medium finding.** The original guard treated Git's
+redundant loose-ref pruning as logical branch deletion. The repair allows only a
+nonzero full old SHA that matches both the loose master contents and exactly one
+committed packed master entry, while the loose master lock exists and neither
+packed rewrite lock nor pending packed replacement exists. Symlinked loose,
+packed, or loose-lock files and duplicate packed master entries are refused.
+Missing or unreadable state does not authorize the exception.
+
+Reviewed the actual transaction traces under
+`/tmp/git-ref-transactions-0n2t4qk7/`: packing commits the packed master before a
+separate old-SHA-to-zero loose prune; genuine mixed-representation deletion holds
+the packed rewrite lock and prepares its replacement. This agrees with the
+[Git 2.43 files-backend implementation](https://github.com/git/git/blob/v2.43.0/refs/files-backend.c):
+`prune_ref` marks representation pruning, while logical deletion prepares a packed
+transaction, and packing releases the packed lock before pruning loose copies.
+The exception depends on that supported backend behavior, not on a caller-supplied
+"maintenance" flag. It does not authorize master removal or rewind.
+
+The normal loose-ref lock prevents another Git writer from concurrently deleting
+that same logical ref while the prune is being prepared. Concurrent packed-ref
+maintenance can conservatively cause refusal if a rewrite lock is observed;
+that is a retryable availability outcome, not authorization to bypass the guard.
+No claim is made against an owner who manually tampers with Git internals or
+against unqualified future storage backends.
+
+Reviewed `/tmp/integration-history-pack-refs-tests.log`: **36 passed, 2 warnings
+in 26.16s**. The suite exercises real packing, pruning, repeated maintenance and
+GC with dirty/index/untracked state preserved; logical deletion across loose,
+packed, stale mixed and identical mixed representations using three deletion
+forms; and packed-ref rewind refusal.
+
+Independent disposable-repository probes additionally demonstrated that both a
+linked worktree and a bare repository can pack/prune master without changing its
+SHA, then reject a genuine `update-ref -d` deletion with the expected old SHA.
+A separate synthetic predicate probe rejected all three symlink forms and duplicate
+packed entries. These probes used only temporary repositories and did not alter
+the installed guard or source. Root still owns installation, integration, and
+remote enforcement evidence. No full test suite was restarted for this review.

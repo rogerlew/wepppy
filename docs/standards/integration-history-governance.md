@@ -174,3 +174,11 @@ GitHub documents this PR-association behavior in
 [available repository rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#require-a-pull-request-before-merging).
 The canary verified the effective classic protection directly; configuration alone
 was not treated as proof of rejected operations.
+
+The local guard recognizes the supported Git files-backend `pack-refs`/prune
+transaction: an identical master commit has already been stored in `packed-refs`,
+and Git is removing only the redundant loose representation. This permits normal
+packing and garbage collection, including from a linked worktree. Logical master
+deletion remains prohibited for loose, packed, and mixed storage. Unknown storage
+layouts, ambiguous entries, or unmatched lock states fail closed; stop and inspect
+the failure instead of disabling the guard or assuming all maintenance is exempt.

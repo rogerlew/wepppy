@@ -13,7 +13,7 @@
 
 - [x] Capture incident evidence, scaffold, and independent design reviews.
 - [x] Adopt D1–D5 defaults and promote the canonical governance standard.
-- [x] Implement fresh remote receipts and a durable protected-ref hook; 22 real-Git cases pass.
+- [x] Implement fresh remote receipts and a durable protected-ref hook; 37 real-Git cases pass.
 - [x] Implement live checkout identity, including sparse trees; 66 initial and 16 final focused wctl cases pass.
 - [x] Implement base-owned policy evaluation, exact-source behavior checks, and release gates.
 - [x] Validate rejection of green-but-weakened policy and no-PR changes on disposable canaries.
