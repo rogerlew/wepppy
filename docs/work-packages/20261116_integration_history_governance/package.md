@@ -147,7 +147,8 @@ suites. See the [ExecPlan](prompts/active/implementation_execplan.md).
 
 ## Execution Status
 
-Bootstrap PR #657 and protected follow-up PR #661 are merged. Remote protection
+Bootstrap PR #657 and protected follow-ups #661 and #662 are merged.
+Native policy reporting passes same-head repeated-event and negative canaries. Remote protection
 and merge settings are read back; local guard and wctl shim are installed in this
 checkout. See the [execution receipt](artifacts/20261116_execution.md). No production
 deployment occurred. Required broad regression attempts did not pass; the

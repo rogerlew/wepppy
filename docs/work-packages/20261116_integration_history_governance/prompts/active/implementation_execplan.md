@@ -37,6 +37,7 @@ who can deliberately disable every control.
 - [x] (2026-11-16) Complete disposable recovery drill: refused ref rewrite, external WIP recovery, legitimate merge and fresh receipt.
 - [x] (2026-11-16) Repair actual pack-refs false positive; 37 real-Git tests, independent review and shared-checkout ref-preserving maintenance pass.
 - [x] (2026-11-16) Record failed full/remainder results; repair YAML test pollution and plan boundary; coupled 559 and deployment 77 pass. Four preexisting RQ fixture failures remain.
+- [x] (2026-11-16) Integrate native policy reporter through protected PR #662; repeated-event positive and green-but-weakened negative canaries pass with unchanged master protection.
 - [ ] Finish the five-real-integration observation period before package closure.
 
 ## Surprises & Discoveries
