@@ -1581,3 +1581,11 @@ area, invalid uploads, or uploads exceeding 16 MiB/100,000 records show an
 explanation while simulation curves remain usable. Reload after replacing an
 upload or restoring its source files. The overlay starts off and retains your
 selection while switching plot sources and axes.
+
+## Forest Service basemap amendment (implementation pending)
+
+[FSBASE-01](contracts/forest-service-basemap-contract.md) adds the optional
+`forestService` choice while retaining Google Terrain as default and existing
+explicit selections. Its lifecycle, credit, limitations, and acceptance matrix
+govern this addition; the raster-only combined viewer retains its OSM behavior.
+Existing basemap descriptions above describe the pre-amendment implementation.

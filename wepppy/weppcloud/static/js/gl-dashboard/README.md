@@ -218,3 +218,10 @@ for Roads/GL Dashboard, and `__tests__/roads.test.js`. Live smoke accepts
 actual generated summary/geometry propagation, numerical aggregation, keyboard
 details and both scope directions. The canonical behavior is
 [Roads GL dashboard contract](../../../../../docs/schemas/roads-gl-dashboard-contract.md).
+
+## Forest Service basemap contract amendment
+
+Implementation pending: [FSBASE-01](../../../../../docs/ui-docs/contracts/forest-service-basemap-contract.md)
+governs the optional vector basemap, default/state preservation, credit, and
+loading/failure lifecycle. Preserve the raster factory used by combined-viewer.js
+without requiring a vector renderer for its OSM-only definitions.

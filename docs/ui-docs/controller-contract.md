@@ -308,3 +308,9 @@ Declarative DEM projects show origin and build/protection outcome with a normal
 browse link to provenance. Editing, unlocking and Bootstrap are unavailable;
 read-only browsing and the existing map elevation consumer remain available.
 Presentation does not replace backend mutation enforcement.
+
+## Optional Forest Service basemap
+
+The [Forest Service basemap contract](contracts/forest-service-basemap-contract.md)
+governs the additive run-map/dashboard choice, retained Google Terrain default,
+provider credit, and failure behavior. Implementation conformance is pending.

@@ -260,3 +260,10 @@
    - Keep design lightweight - this is informational, not promotional
 
 ````
+
+## Optional Forest Service basemap credit (implementation pending)
+
+Follow [FSBASE-01](../docs/ui-docs/contracts/forest-service-basemap-contract.md)
+for dedicated optional-basemap credit and accessible use limitations in both
+Vite variants and the Flask fallback. Preserve the landing background provider
+and its existing credit; the Forest Service choice belongs to run/dashboard maps.
