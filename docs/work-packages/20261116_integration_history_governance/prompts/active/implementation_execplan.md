@@ -26,8 +26,9 @@ who can deliberately disable every control.
   in `artifacts/review_synthesis.md`; no enforcement is claimed.
 - [x] (2026-11-16) Adopt recommended D1–D5 defaults and promote the canonical
   integration-history standard; no independent human approver is yet assigned.
-- [ ] Implement and validate remote integration receipt and local preservation.
-- [ ] Prove task isolation and exact worktree validation without shared-stack drift.
+- [x] (2026-11-16) Implement and validate remote receipt and local protected-ref guard.
+- [x] (2026-11-16) Prove wrong-checkout rejection using live mount identity;
+  adopt task ownership and serialized integration/validation.
 - [ ] Configure, canary, and read back remote integration and baseline enforcement.
 - [ ] Bind publication/release to exact validated candidate and test recovery.
 - [ ] Complete implementation reviews and evidence-based closure.

@@ -4,10 +4,10 @@
 
 **Timezone**: UTC
 **Started / last updated**: 2026-11-16 20:48 UTC
-**Phase**: Scaffold and independent design review
+**Phase**: Implementation and live enforcement validation
 **Security impact**: high
-**Next milestone**: Synthesize review findings and obtain D1–D5 decisions
-**Implementation/enforcement**: not started
+**Next milestone**: Bootstrap PR, remote enforcement canary, and master rule activation
+**Implementation/enforcement**: local controls validated; remote activation pending
 
 ## Task Board
 
@@ -16,9 +16,9 @@
 - [x] Complete independent Git/history, security/CI, and correctness/QA design reviews.
 - [x] Consolidate findings, recommended defaults, and unresolved operator decisions
   in [review synthesis](artifacts/review_synthesis.md).
-- [ ] Ratify integration contract and promote durable policy outside this package.
-- [ ] Implement/test remote receipt and shared-master preservation controls.
-- [ ] Implement/test isolated task workflow after branch-policy decision.
+- [x] Ratify integration contract and promote durable policy outside this package.
+- [x] Implement/test remote receipt and shared-master preservation controls.
+- [x] Implement/test checkout identity and adopt single-integrator task workflow.
 - [ ] Stage, review, enable, and verify remote protections and baseline checks.
 - [ ] Validate publication/deployment consumers and recovery drill.
 - [ ] Re-review implemented controls and close all medium/high findings.
@@ -56,3 +56,10 @@ No prevention health signal can be claimed yet. No temporary mitigation installe
 Continue from `prompts/active/implementation_execplan.md` only after scope and
 workflow decisions are ratified. This scaffold cannot close the implementation
 package. Root tracker must identify this as scaffolded, not enforced.
+
+## Execution update — 2026-11-16 UTC
+
+The operator authorized implementation after scaffolding. Recommended defaults
+are adopted; previous decision holds describe the scaffold state. See
+[execution receipt](artifacts/20261116_execution.md). M1/M2 validation passes;
+remote rule activation and full-suite outcome remain pending.

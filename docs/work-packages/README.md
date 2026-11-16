@@ -196,6 +196,12 @@ matrices, trackers, or decisions to authorize later work. If later work needs a
 rule found only in a closed package, promote that rule to a current canonical
 document first.
 
+Integration evidence must follow `docs/standards/integration-history-governance.md`.
+Record local acceptance, remote integration, validated integration, publication,
+and deployment as separate states. Before claiming integration, retain a fresh
+remote receipt for the accepted source SHA and explicit repository/branch. The
+receipt belongs in a later audit commit or retained artifact; it cannot contain
+the hash of its own commit. Ancestry does not establish current security behavior.
 ## Referencing Work Packages
 
 When linking to a work package from other documentation:

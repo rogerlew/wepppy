@@ -104,3 +104,53 @@ Retain exact rule exports, source/check identities, receipts, readback, and fail
 results. Observation covers the first five subsequent integrations plus a recovery
 drill; do not manufacture five empty changes to claim operational evidence. Mark
 implementation complete separately from this observation period.
+
+## Operator commands
+
+Install the local guard using `python3 tools/install_integration_hooks.py`; verify
+it with `--check` before integration. Existing hook managers must integrate the
+reference guard explicitly; the installer refuses to overwrite them. A rejected
+hard reset or rebase can already have changed index/worktree contents even though
+the master ref is preserved. Stop after refusal, inspect preserved refs and WIP
+backups, and recover deliberately. Never retry with the guard disabled.
+
+Create a receipt after the accepted commit reaches the remote:
+
+```bash
+python3 tools/check_integration_history.py receipt --repo /workdir/wepppy \
+  --remote origin --branch master --accepted FULL_ACCEPTED_SHA --output RECEIPT.json
+python3 tools/check_integration_history.py verify --repo /workdir/wepppy \
+  --remote origin --branch master --receipt RECEIPT.json
+```
+
+The required check names are `integration-governance` (behavior) and
+`integration-governance-policy` (base-owned policy). A separate
+`pull_request_target` workflow reads candidate Git objects as data and writes
+its result on the exact PR head; it never runs candidate code. Public GitHub's
+shared Actions app identity is not an isolation boundary against a determined
+writer deliberately forging check names. Independent human review or a separately
+controlled check provider is required to claim that stronger threat model.
+
+For a deliberate policy change, obtain its digest with the base-owned
+`tools/check_security_baseline.py policy --base FULL_BASE_SHA --candidate
+FULL_CANDIDATE_SHA --digest-only`. After reviewing the exact diff, the operator
+sets Actions variable `INTEGRATION_POLICY_APPROVAL` to `FULL_CANDIDATE_SHA:DIGEST`.
+Approval is external to the candidate and does not transfer to another SHA. After
+merge, authorize the merge SHA's policy transition and rerun its governance check
+if the initial push check arrived before that approval. Publishing remains blocked
+until the exact merge check succeeds. Record both transitions in the work package.
+
+Initial bootstrap is special: the base has no checker or trusted workflow. Verify
+the checker locally, set `INTEGRATION_GOVERNANCE_BOOTSTRAP_SHA256` to its reviewed
+SHA-256, approve the initial exact candidate transition from recovery commit
+`420e31b97e962dd6ea79694efe89f348c27ef83f`, and merge the reviewed bootstrap PR.
+Only after the trusted workflow exists and the canary proves enforcement should
+the two contexts become required. This one-time bootstrap does not authorize
+ongoing direct pushes or a generalized missing-check fallback.
+
+The existing deployment script now requires `tools/check_deployment_governance.py`
+to pass before builds, worker suspension or activation. It rejects dirty/untracked
+protected source and requires a successful exact-source master governance run.
+Public GitHub read access suffices; an existing `GH_TOKEN` can increase API limits.
+Unavailable or rate-limited evidence fails closed before activation. Existing
+retained-image rollback and parser stop behavior remain separate safeguards.
