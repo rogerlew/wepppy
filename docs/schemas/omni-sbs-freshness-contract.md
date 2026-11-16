@@ -31,7 +31,15 @@ Successful SBS mode historically deletes the limbo source after copying. New
 accepted receipts can reuse a consumed-source scenario only through its existing
 accepted association and a matching expected child main file. Verify the copied
 file; do not fabricate a receipt from today's child. If execution is needed but
-the required upload is absent, preserve the existing missing-source failure.
+the required upload is absent, direct execution retains its missing-source failure.
+OSR-01 (accepted intent 2026-11-16; implementation pending) permits run admission
+to restore the associated scenario map into staging before execution under the
+[Omni SBS control contract](../ui-docs/contracts/omni-sbs-control-contract.md).
+This adopts the [user-file staging lifecycle](user-file-staging-contract.md).
+Validate the currently available input, including for legacy projects without
+receipts; restoration does not invent historical proof or bypass signature,
+selection, copy, reset, or output-freshness checks. Existing receipt schemas and
+scenario naming remain unchanged.
 
 Legacy definition-only success with an absent source keeps its existing skip
 eligibility, explicitly without historical byte proof. A present upload requires

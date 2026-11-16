@@ -123,6 +123,16 @@ and, when present, requires the Idempotency-Key header under the
 Validate callback syntax before extraction; bind the computed upload digest for
 recovery. Existing archive limits, upload aliases and semantic validation remain
 mandatory. Do not retain the raw callback in project uploads or archives.
+## Omni saved-input staging (OSR-01)
+
+Accepted intent 2026-11-16; implementation conformance pending. Omni SBS uploads
+adopt the [user-file staging lifecycle](user-file-staging-contract.md).
+The [Omni SBS control contract](../ui-docs/contracts/omni-sbs-control-contract.md)
+defines saved-reference resolution, replacement isolation, and restoration from
+the corresponding scenario project. Existing extension, size, restricted-decoder,
+containment, authentication, and error rules remain mandatory. No other upload
+consumer is enrolled by this amendment.
+
 ## Error Contract Requirements
 - Upload validation failures must return canonical 4xx responses with `error.message`, `error.details`, `error.code`, and top-level `error_id` consistent with `docs/schemas/rq-response-contract.md`.
 - MUST return specific user-visible failure reasons (`error.message`) for validation/business failures.
