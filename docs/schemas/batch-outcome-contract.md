@@ -171,7 +171,12 @@ features and their identities against the selected run; never synthesize zero
 metrics for failed/missing outputs. Ordinary batch success requires current
 completion under its enabled directives and parsed outputs: enabled watershed
 execution requires watershed loss interchange; enabled hillslope execution
-requires `H.loss.parquet`. Optional absent modules remain absent, not errors.
+requires `H.loss.parquet` for continuous climate and `H.pass.parquet` for
+supported single-storm climate (the producer intentionally omits storm loss
+interchange). Read the leaf climate mode; do not infer it from missing files.
+Zero-row optional/event tables and empty optional geometries remain valid when
+structurally parseable; required consumer metrics/subcatchments retain their
+semantic validation. Optional absent modules remain absent, not errors.
 Prep-only/no-model selected members are skipped with reason
 `no_result_outputs` (scientific results were not requested); an all-skipped
 selection produces no usable result ZIP and uses batch reason
@@ -245,3 +250,7 @@ real external client's metrics/geometry filtering. Directive cases separately
 include watershed/hillslope disabled, optional modules absent, already-complete
 retry, full rerun and linked Omni. Mocks alone cannot close publication,
 authorization, process-boundary or artifact acceptance.
+
+Implementation clarification (2026-11-16): climate-appropriate validation preserves
+existing single-storm behavior; the initial blanket hillslope-loss predicate was
+inconsistent with the owned producer. No scientific defaults or formulas change.
