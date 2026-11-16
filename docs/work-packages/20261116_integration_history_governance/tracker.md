@@ -6,7 +6,7 @@
 **Started**: 2026-11-16 20:48 UTC
 **Phase**: Implemented and enforced; operational observation open
 **Security impact**: high
-**Remote implementation**: bootstrap PR #657; protected follow-up PR #661
+**Remote implementation**: bootstrap PR #657; protected follow-ups #661 and #662
 **Next milestone**: Observe five real protected integrations; retain baseline regression failures
 
 ## Task Board
@@ -22,6 +22,7 @@
 - [x] Complete independent implementation reviews and close identified medium/high findings.
 - [x] Clean up disposable canary rules, remote refs and clean worktrees, retaining evidence/local refs.
 - [x] Record failed full/remainder attempts, baseline attribution and final changed-path validation.
+- [x] Replace ambiguous custom check reporting with native jobs; repeated-event and negative canaries pass.
 - [x] Complete disposable recovery drill, including tracked/untracked WIP recovery and fresh receipt.
 - [ ] Observe five real subsequent protected integrations; do not manufacture empty changes.
 - [ ] Complete operational observation and package closure.
@@ -45,6 +46,8 @@ See [execution receipt](artifacts/20261116_execution.md),
 [implementation correctness review](artifacts/20261116_implementation_correctness_review.md),
 [implementation history review](artifacts/20261116_implementation_history_review.md),
 and [implementation security review](artifacts/20261116_implementation_security_review.md).
+Final native reporting evidence: [canary readback](artifacts/native_policy_canary.json)
+and [integration receipt](artifacts/native_policy_integration_receipt.json).
 
 Local hooks prevent accidents; they do not contain an actor who controls hooks.
 GitHub owners can change protections, and same-app deliberate check forgery remains
@@ -66,7 +69,7 @@ wctl shim; no production-host installation is claimed.
 Baseline: 20 accepted local commits omitted while a remote fast-forward remained
 valid. Recovery preceded this package. Current controls reject the reproduced
 false-closure scenario and tested integration violations. First protected master
-integration: PR #661. Bootstrap PR #657 and disposable canaries are not counted
+integrations: PR #661 and PR #662. Bootstrap PR #657 and disposable canaries are not counted
 as five real subsequent integrations.
 
 The canary setup error that produced an empty-tree candidate was isolated and closed

@@ -268,3 +268,55 @@ workflow-weakening rejection with the native policy result failing and merge/dir
 push refused. Cleanup and rule readback must follow. These canaries do not count as
 real operational-observation integrations. The existing deliberate same-app forgery
 residual is unchanged and is not solved by native check association.
+
+## Native reporter environmental acceptance
+
+The repaired base entered master through normal protected
+[PR #662](https://github.com/rogerlew/wepppy/pull/662), merged as
+`f4bc3b77b66f141d7a24f42718079384d0f6cebe` while preserving reviewed head
+`475bdf6cc02c800e4ccd008c7a97f3bcd8ecee09`. Independent API readback confirms
+that integration. The following post-integration canaries exercise the native
+reporter from the repaired trusted base, not candidate-owned reporting code.
+
+For positive [PR #663](https://github.com/rogerlew/wepppy/pull/663), draft-opened
+and ready events produced two target suites for the unchanged head
+`4e39dc1ef501800e8183b54d2b1402a893609cc2`. Independent per-suite and per-head
+API readback confirms:
+
+| Required native check | Suite | App | Result |
+|---|---|---|---|
+| `133664333543` | `119037654311` | `15368` | success |
+| `133664380679` | `119037714715` | `15368` | success |
+
+Both checks are named `integration-governance-policy` and belong to that exact
+head. Behavioral check `133663619754` also succeeded. GitHub subsequently accepted
+the protected integration and records PR #663 merged at
+`07b56b39ea6b354fe88dbf5dfc71a97efd1c2eff`. This directly exercises the duplicate
+same-head event condition that defeated custom API reporting.
+
+For negative [PR #664](https://github.com/rogerlew/wepppy/pull/664), head
+`4b85002e1ab6308d267c5e62ac0bea32e0c0f525` deliberately makes the candidate
+behavior workflow a green no-op. Independent readback confirms behavioral check
+`133663677420` succeeded, while native policy check `133664382642` in suite
+`119037701953` failed; both are app `15368` on the exact negative head.
+`native_policy_canary.json` retains the merge API's explicit HTTP 405 failing-policy
+rejection and direct push's GH006 rejection. The PR is closed and unmerged.
+
+Reviewed the finalized canary artifact, including its complete rule snapshot,
+positive merge, negative rejections, and cleanup. Independent API queries now
+return no native-canary base or candidate remote refs, and `git worktree list`
+contains neither disposable native-policy worktree. The initial cleanup assertion
+correctly stopped on sparse unmaterialized paths; the operator verified an unchanged
+index and only missing tracked content, restored the committed tree, then removed
+clean worktrees. Local recovery refs remain retained. Master readback still requires
+both app-bound checks with strict status, administrator enforcement, and no
+force-push/deletion. No protection bypass was used to make the positive case pass.
+
+**Native reporter environmental verdict: PASS.** The suite-association defect is
+closed by exact-head, per-suite live evidence plus accepted positive and rejected
+negative integration. This supplements the 40-test local repair receipt. It does
+not alter the PR-association semantics, deliberate same-app forgery limitation,
+failed broad-suite disposition, or future operational-observation requirement.
+Neither disposable canary counts toward five real subsequent integrations.
+All review API/Git operations were read-only; this reviewer made no remote,
+source, index, or installed-hook changes.

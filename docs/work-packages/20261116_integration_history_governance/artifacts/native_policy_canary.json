@@ -1,0 +1,214 @@
+{
+  "base_branch": "governance-canary/native-20261116",
+  "base_sha": "f4bc3b77b66f141d7a24f42718079384d0f6cebe",
+  "candidates": {
+    "positive": {
+      "branch": "codex/native-policy-positive-20261116",
+      "worktree": "/tmp/wepppy-native-policy-positive-20261116",
+      "sha": "4e39dc1ef501800e8183b54d2b1402a893609cc2",
+      "checks": [
+        {
+          "id": 133664380679,
+          "name": "integration-governance-policy",
+          "head_sha": "4e39dc1ef501800e8183b54d2b1402a893609cc2",
+          "app_id": 15368,
+          "suite_id": 119037714715,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133664333543,
+          "name": "integration-governance-policy",
+          "head_sha": "4e39dc1ef501800e8183b54d2b1402a893609cc2",
+          "app_id": 15368,
+          "suite_id": 119037654311,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133663619754,
+          "name": "integration-governance",
+          "head_sha": "4e39dc1ef501800e8183b54d2b1402a893609cc2",
+          "app_id": 15368,
+          "suite_id": 119037654046,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "pr": {
+        "number": 663,
+        "url": "https://github.com/rogerlew/wepppy/pull/663",
+        "state": "closed",
+        "merged": true,
+        "merge_commit_sha": "07b56b39ea6b354fe88dbf5dfc71a97efd1c2eff"
+      }
+    },
+    "negative": {
+      "branch": "codex/native-policy-negative-20261116",
+      "worktree": "/tmp/wepppy-native-policy-negative-20261116",
+      "sha": "4b85002e1ab6308d267c5e62ac0bea32e0c0f525",
+      "checks": [
+        {
+          "id": 133664382642,
+          "name": "integration-governance-policy",
+          "head_sha": "4b85002e1ab6308d267c5e62ac0bea32e0c0f525",
+          "app_id": 15368,
+          "suite_id": 119037701953,
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 133663677420,
+          "name": "integration-governance",
+          "head_sha": "4b85002e1ab6308d267c5e62ac0bea32e0c0f525",
+          "app_id": 15368,
+          "suite_id": 119037699095,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "pr": {
+        "number": 664,
+        "url": "https://github.com/rogerlew/wepppy/pull/664",
+        "state": "closed",
+        "merged": false,
+        "merge_commit_sha": "ab7c36d2b858d27a8a51a944c33ddc52a074714c"
+      }
+    }
+  },
+  "negative_merge_rejection": {
+    "status": 405,
+    "message": "Required status check \"integration-governance-policy\" is failing."
+  },
+  "negative_push_rejection": {
+    "returncode": 1,
+    "stderr": "remote: error: GH006: Protected branch update failed for refs/heads/governance-canary/native-20261116.        \nremote: \nremote: - Required status check \"integration-governance-policy\" is failing.        \nTo https://github.com/rogerlew/wepppy\n ! [remote rejected]     4b85002e1ab6308d267c5e62ac0bea32e0c0f525 -> governance-canary/native-20261116 (protected branch hook declined)\nerror: failed to push some refs to 'https://github.com/rogerlew/wepppy'\n"
+  },
+  "canary_protection": {
+    "url": "https://api.github.com/repos/rogerlew/wepppy/branches/governance-canary/native-20261116/protection",
+    "required_status_checks": {
+      "url": "https://api.github.com/repos/rogerlew/wepppy/branches/governance-canary/native-20261116/protection/required_status_checks",
+      "strict": true,
+      "contexts": [
+        "integration-governance",
+        "integration-governance-policy"
+      ],
+      "contexts_url": "https://api.github.com/repos/rogerlew/wepppy/branches/governance-canary/native-20261116/protection/required_status_checks/contexts",
+      "checks": [
+        {
+          "context": "integration-governance",
+          "app_id": 15368
+        },
+        {
+          "context": "integration-governance-policy",
+          "app_id": 15368
+        }
+      ]
+    },
+    "required_pull_request_reviews": {
+      "url": "https://api.github.com/repos/rogerlew/wepppy/branches/governance-canary/native-20261116/protection/required_pull_request_reviews",
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": false,
+      "require_last_push_approval": false,
+      "required_approving_review_count": 0
+    },
+    "required_signatures": {
+      "url": "https://api.github.com/repos/rogerlew/wepppy/branches/governance-canary/native-20261116/protection/required_signatures",
+      "enabled": false
+    },
+    "enforce_admins": {
+      "url": "https://api.github.com/repos/rogerlew/wepppy/branches/governance-canary/native-20261116/protection/enforce_admins",
+      "enabled": true
+    },
+    "required_linear_history": {
+      "enabled": false
+    },
+    "allow_force_pushes": {
+      "enabled": false
+    },
+    "allow_deletions": {
+      "enabled": false
+    },
+    "block_creations": {
+      "enabled": false
+    },
+    "required_conversation_resolution": {
+      "enabled": true
+    },
+    "lock_branch": {
+      "enabled": false
+    },
+    "allow_fork_syncing": {
+      "enabled": false
+    }
+  },
+  "cleanup": {
+    "remote_branches_removed": [
+      "governance-canary/native-20261116",
+      "codex/native-policy-positive-20261116",
+      "codex/native-policy-negative-20261116"
+    ],
+    "canary_rule_removed": true,
+    "clean_worktrees_removed": true,
+    "local_refs_retained": true,
+    "note": "Initial clean-worktree assertion stopped on unmaterialized sparse paths; verified only absent tracked files and clean index, restored from committed tree, then removed clean worktrees."
+  },
+  "master_protection_after": {
+    "url": "https://api.github.com/repos/rogerlew/wepppy/branches/master/protection",
+    "required_status_checks": {
+      "url": "https://api.github.com/repos/rogerlew/wepppy/branches/master/protection/required_status_checks",
+      "strict": true,
+      "contexts": [
+        "integration-governance",
+        "integration-governance-policy"
+      ],
+      "contexts_url": "https://api.github.com/repos/rogerlew/wepppy/branches/master/protection/required_status_checks/contexts",
+      "checks": [
+        {
+          "context": "integration-governance",
+          "app_id": 15368
+        },
+        {
+          "context": "integration-governance-policy",
+          "app_id": 15368
+        }
+      ]
+    },
+    "required_pull_request_reviews": {
+      "url": "https://api.github.com/repos/rogerlew/wepppy/branches/master/protection/required_pull_request_reviews",
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": false,
+      "require_last_push_approval": false,
+      "required_approving_review_count": 0
+    },
+    "required_signatures": {
+      "url": "https://api.github.com/repos/rogerlew/wepppy/branches/master/protection/required_signatures",
+      "enabled": false
+    },
+    "enforce_admins": {
+      "url": "https://api.github.com/repos/rogerlew/wepppy/branches/master/protection/enforce_admins",
+      "enabled": true
+    },
+    "required_linear_history": {
+      "enabled": false
+    },
+    "allow_force_pushes": {
+      "enabled": false
+    },
+    "allow_deletions": {
+      "enabled": false
+    },
+    "block_creations": {
+      "enabled": false
+    },
+    "required_conversation_resolution": {
+      "enabled": true
+    },
+    "lock_branch": {
+      "enabled": false
+    },
+    "allow_fork_syncing": {
+      "enabled": false
+    }
+  }
+}

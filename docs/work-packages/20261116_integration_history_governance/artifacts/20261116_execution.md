@@ -232,3 +232,38 @@ reporting; generated workflows match. A normal additive synchronize commit on th
 already-ready PR permits integration through the existing base workflow. Native
 same-head repeated-event and negative-weakening canaries must then be recorded
 against the new base before environmental acceptance of this reporting repair.
+
+## Native policy environmental acceptance
+
+PR #662 merged normally as `f4bc3b77b66f141d7a24f42718079384d0f6cebe`, preserving
+accepted source `475bdf6cc02c800e4ccd008c7a97f3bcd8ecee09`.
+`native_policy_integration_receipt.json` records fresh remote ancestry readback.
+The old-base single-synchronize workflow accepted the additive repair without
+any change to master protection.
+
+The protected disposable native canary then exercised both opened and
+ready-for-review on positive PR #663's same head
+`4e39dc1ef501800e8183b54d2b1402a893609cc2`. Native policy checks succeeded in both
+respective suites (`119037654311`, `119037714715`), bound to that exact head and
+Actions app15368. GitHub accepted its merge as
+`07b56b39ea6b354fe88dbf5dfc71a97efd1c2eff` after behavioral success.
+
+Negative PR #664 replaced the behavioral workflow with a green no-op. The native
+base-owned policy failed on head `4b85002e1ab6308d267c5e62ac0bea32e0c0f525`;
+GitHub rejected both the merge API (HTTP405, required policy failing) and direct
+push (GH006). The PR was closed unmerged. `native_policy_canary.json` retains
+check/suite identities, API/push refusals, protection readback and cleanup.
+
+All three disposable remote branches, their canary rule and two clean worktrees
+were removed. Cleanup first stopped on unmaterialized sparse files; after verifying
+only absent tracked paths and a clean index, their committed contents were restored
+and the clean worktrees removed. Candidate commits always had the full index tree
+and exactly one intended changed path. Local candidate/recovery refs remain.
+Master protection was read back unchanged; these canaries do not count toward the
+five-real-integration observation. Real protected integrations so far are #661
+and #662; this evidence audit counts only after its own successful integration.
+
+Merge-push governance run43971073841 attempt2 succeeded after exact merge approval.
+Publication run43971073672 attempt2 passed exact-source eligibility and entered
+normal image publication. Its final artifact result is tracked separately; no
+production deployment occurred.
