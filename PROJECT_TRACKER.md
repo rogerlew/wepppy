@@ -134,6 +134,8 @@ Completed (investigation/design): [ASCII PASS century failure](docs/work-package
 **Active Packages**: 48
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
+Completed locally: [Omni MOFE Disturbed soil repair](docs/work-packages/20261115_omni_mofe_disturbed_soil_repair/package.md) - the shared producer now rebuilds treatment/Omni MOFE soils from retained single-OFE sources while preserving ordered per-segment parameterization. Focused generated-artifact validation passed; no full-suite run, deployment, or production recovery.
+
 ## Purpose
 
 Completed (development): [Schema-2 PASS calendar selection](docs/work-packages/20261021_hbp_schema2_calendar_selection/package.md) — exact requested-date routing fixes non-leap padding drift; two 44-year cases and a 28-hillslope, 43-year project pass readback, unchanged hillslope payloads and observation off/on parity. Independent review passes; broad native suite limitations retained. Not released or deployed; ASCII century issue remains separate.

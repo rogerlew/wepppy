@@ -65,8 +65,19 @@ class _FakeLanduse:
 
 
 class _FakeSoils:
-    def __init__(self, *, domsoil_d, soils, soils_dir: str, logger=None) -> None:
+    def __init__(
+        self,
+        *,
+        domsoil_d,
+        soils,
+        soils_dir: str,
+        logger=None,
+        ssurgo_domsoil_d=None,
+    ) -> None:
         self.domsoil_d = domsoil_d
+        self.ssurgo_domsoil_d = (
+            dict(domsoil_d) if ssurgo_domsoil_d is None else ssurgo_domsoil_d
+        )
         self.soils = soils
         self.soils_dir = soils_dir
         self.logger = logger or _NoopLogger()
@@ -187,6 +198,121 @@ def test_modify_mofe_soils_uses_base_lookup_class_for_treatments(
     assert replacements_seen == [{"ki": "1"}, {"ki": "1"}]
     assert soils.domsoil_d["101"] == "hill_101.mofe"
     assert soils.soils["hill_101.mofe"].pct_coverage == pytest.approx(100.0)
+
+
+def test_modify_mofe_soils_reuses_retained_source_after_mofe_publication(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-reentry")
+    disturbed._sol_ver = 9005.0
+    (run_dir / "soils" / "src.sol").write_text("soil", encoding="utf-8")
+    (run_dir / "soils" / "hill_101.mofe.sol").write_text("combined", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "hill_101.mofe"},
+        ssurgo_domsoil_d={"101": "m1"},
+        soils={
+            "m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol"),
+            "hill_101.mofe": _SoilStub(
+                clay=30.0,
+                sand=40.0,
+                fname="hill_101.mofe.sol",
+            ),
+        },
+        soils_dir=str(run_dir / "soils"),
+    )
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1", "2": "dom-2"}},
+        managements={
+            "dom-1": _ManagementSummary("forest high sev fire"),
+            "dom-2": _ManagementSummary("thinning_50_90"),
+        },
+    )
+    watershed = _FakeWatershed({"101": 1.0})
+    source_paths: list[str] = []
+    stack_paths: list[list[str]] = []
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            source_paths.append(source_path)
+
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
+            return _FakeWriter([])
+
+    class _FakeMofeSynth:
+        def __init__(self, stack):
+            stack_paths.append(list(stack))
+
+        def write(self, path: str) -> None:
+            return
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "watershed_instance", property(lambda self: watershed))
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+    monkeypatch.setattr(disturbed_module, "SoilMultipleOfeSynth", _FakeMofeSynth)
+    monkeypatch.setattr(
+        Disturbed,
+        "land_soil_replacements_d",
+        property(
+            lambda self: {
+                ("mock-texture", "forest high sev fire"): {"ki": "1"},
+                ("mock-texture", "thinning"): {"ki": "2"},
+            }
+        ),
+    )
+
+    disturbed.modify_mofe_soils()
+
+    assert source_paths == [
+        str(run_dir / "soils" / "src.sol"),
+        str(run_dir / "soils" / "src.sol"),
+    ]
+    assert stack_paths == [[
+        str(run_dir / "soils" / "m1-mock-texture-forest high sev fire.sol"),
+        str(run_dir / "soils" / "m1-mock-texture-thinning_50_90.sol"),
+    ]]
+
+
+def test_modify_mofe_soils_rejects_published_state_without_retained_source(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-missing-source")
+    disturbed._sol_ver = 9005.0
+    (run_dir / "soils" / "hill_101.mofe.sol").write_text("combined", encoding="utf-8")
+    soils = _FakeSoils(
+        domsoil_d={"101": "hill_101.mofe"},
+        soils={
+            "hill_101.mofe": _SoilStub(
+                clay=30.0,
+                sand=40.0,
+                fname="hill_101.mofe.sol",
+            ),
+        },
+        soils_dir=str(run_dir / "soils"),
+    )
+    soils.ssurgo_domsoil_d = None
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1"}},
+        managements={"dom-1": _ManagementSummary("forest high sev fire")},
+    )
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+
+    with pytest.raises(ValueError, match="Cannot recover the single-OFE source soil"):
+        disturbed.modify_mofe_soils()
 
 
 def test_modify_mofe_soils_9002_lookup_hit_uses_lookup_row_and_class_key(

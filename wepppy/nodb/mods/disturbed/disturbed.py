@@ -625,6 +625,76 @@ def _load_eu_quality_report(soils_instance: Any) -> Optional[Tuple[Path, Dict[st
     return report_path, load_soil_quality_report(report_path)
 
 
+def _resolve_mofe_source_soil_key(soils: Any, topaz_id: str) -> str:
+    """Return the stable single-OFE source key for a MOFE hillslope build.
+
+    ``domsoil_d`` becomes an output mapping after the first MOFE publication and
+    then points at ``hill_*.mofe.sol``. Reusing that generated file as one stack
+    member nests an already-combined soil deck. Soil builders retain the source
+    assignment in ``ssurgo_domsoil_d``; use it only after detecting published
+    MOFE state so clean first builds preserve their current source selection.
+    """
+
+    topaz_key = str(topaz_id)
+    current_assignments = getattr(soils, 'domsoil_d', None)
+    soil_summaries = getattr(soils, 'soils', None)
+    if not isinstance(current_assignments, dict) or not isinstance(soil_summaries, dict):
+        raise ValueError('MOFE disturbed soil generation requires built soil assignments.')
+
+    current_key_raw = current_assignments.get(topaz_key)
+    current_key = str(current_key_raw) if current_key_raw is not None else ''
+    current_summary = soil_summaries.get(current_key)
+    if current_summary is None:
+        raise ValueError(
+            f'Missing assigned soil for topaz_id={topaz_key!r}, soil_key={current_key!r}; '
+            'rebuild soils before generating MOFE disturbed soils.'
+        )
+
+    current_fname = getattr(current_summary, 'fname', None)
+    current_is_generated_mofe = (
+        current_key.startswith('hill_')
+        and current_key.endswith('.mofe')
+    ) or (
+        isinstance(current_fname, str)
+        and current_fname.startswith('hill_')
+        and current_fname.endswith('.mofe.sol')
+    )
+    if not current_is_generated_mofe:
+        return current_key
+
+    source_assignments = getattr(soils, 'ssurgo_domsoil_d', None)
+    source_key_raw = (
+        source_assignments.get(topaz_key)
+        if isinstance(source_assignments, dict)
+        else None
+    )
+    source_key = str(source_key_raw) if source_key_raw is not None else ''
+    source_summary = soil_summaries.get(source_key)
+    if source_summary is None:
+        raise ValueError(
+            f'Cannot recover the single-OFE source soil for topaz_id={topaz_key!r} '
+            f'from published MOFE soil {current_key!r}; rebuild soils before '
+            'generating treatments or Omni scenarios.'
+        )
+
+    source_fname = getattr(source_summary, 'fname', None)
+    if (
+        source_key.startswith('hill_')
+        and source_key.endswith('.mofe')
+    ) or (
+        isinstance(source_fname, str)
+        and source_fname.startswith('hill_')
+        and source_fname.endswith('.mofe.sol')
+    ):
+        raise ValueError(
+            f'Retained source soil for topaz_id={topaz_key!r} is already a MOFE '
+            f'artifact ({source_key!r}); rebuild soils before generating treatments '
+            'or Omni scenarios.'
+        )
+
+    return source_key
+
+
 def _quality_for_topaz(
     quality_report: Tuple[Path, Dict[str, Any]],
     topaz_id: str | int,
@@ -2193,6 +2263,12 @@ class Disturbed(NoDbBase):
         landuse = self.landuse_instance
         soils = self.soils_instance
 
+        source_soil_keys = {
+            topaz_id: _resolve_mofe_source_soil_key(soils, str(topaz_id))
+            for topaz_id in soils.domsoil_d
+            if not str(topaz_id).endswith('4')
+        }
+
         _land_soil_replacements_d = self.land_soil_replacements_d
         recompute_wp_fc_using_rosetta_on_bd_override = bool(
             getattr(soils, 'rosetta_wc_fc_from_disturbed_bd_override', False)
@@ -2210,9 +2286,8 @@ class Disturbed(NoDbBase):
                     if not str(topaz_id).endswith('4')
                 ],
                 expected_soil_keys={
-                    topaz_id: str(soils.domsoil_d[topaz_id])
-                    for topaz_id in soils.domsoil_d
-                    if not str(topaz_id).endswith('4')
+                    topaz_id: str(source_key)
+                    for topaz_id, source_key in source_soil_keys.items()
                 },
             )
 
@@ -2226,10 +2301,7 @@ class Disturbed(NoDbBase):
         with soils.locked():
             planned_soil_keys = set(soils.soils.keys())
 
-            for topaz_id, mukey in soils.domsoil_d.items():
-                if str(topaz_id).endswith('4'):
-                    continue
-
+            for topaz_id, mukey in source_soil_keys.items():
                 processed_hillslopes += 1
                 self.logger.debug('  topaz_id=%s mukey=%s', topaz_id, mukey)
                 soils.logger.debug('  topaz_id=%s mukey=%s', topaz_id, mukey)

@@ -46,7 +46,9 @@ def soil_case(disturbed_factory, monkeypatch):
     soil = WeppSoilUtil(str(source))
     summary = SimpleNamespace(clay=soil.clay, sand=soil.sand, fname=source.name,
                               desc="base", meta_fn=None, area=0.0, pct_coverage=0.0)
-    soils = SimpleNamespace(domsoil_d={"101": "base"}, soils={"base": summary},
+    soils = SimpleNamespace(domsoil_d={"101": "base"},
+                            ssurgo_domsoil_d={"101": "base"},
+                            soils={"base": summary},
                             soils_dir=str(source.parent), locked=nullcontext,
                             logger=logging.getLogger(__name__))
     lookup = read_disturbed_land_soil_lookup(
@@ -121,6 +123,86 @@ def test_thinning_uses_operator_lookup_values(soil_case, monkeypatch, mofe):
     for ofe in WeppSoilUtil(str(prepared)).obj["ofes"]:
         assert float(ofe["kr"]) == pytest.approx(0.00007)
         assert float(ofe["horizons"][0]["ksat"]) == pytest.approx(23)
+
+
+def test_repeated_mofe_parameterization_uses_retained_single_ofe_source(
+    soil_case,
+    monkeypatch,
+):
+    disturbed, root, soils, lookup = soil_case
+    disturbed._sol_ver = 9002.0
+    landuse = SimpleNamespace(
+        domlc_d={"101": "high"},
+        domlc_mofe_d={"101": {"1": "high", "2": "high", "3": "high"}},
+        managements={
+            "high": SimpleNamespace(disturbed_class="forest high sev fire", sol_path=None),
+            "thin": SimpleNamespace(disturbed_class="thinning_30_90", sol_path=None),
+            "prescribed": SimpleNamespace(disturbed_class="forest prescribed fire", sol_path=None),
+        },
+    )
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+
+    disturbed.modify_mofe_soils()
+    assert soils.domsoil_d == {"101": "hill_101.mofe"}
+    landuse.domlc_mofe_d["101"] = {
+        "1": "high",
+        "2": "thin",
+        "3": "prescribed",
+    }
+    disturbed.modify_mofe_soils()
+
+    combined_path = root / "soils/hill_101.mofe.sol"
+    combined = WeppSoilUtil(str(combined_path))
+    assert len(combined.obj["ofes"]) == 3
+    expected_rows = [
+        lookup[("loam", "forest high sev fire")],
+        lookup[("loam", "thinning")],
+        lookup[("loam", "forest prescribed fire")],
+    ]
+    for ofe, expected in zip(combined.obj["ofes"], expected_rows):
+        for key in ("ki", "kr", "shcrit", "ksatadj", "ksatfac", "ksatrec"):
+            assert float(ofe[key]) == pytest.approx(float(expected[key]))
+        for horizon in ofe["horizons"]:
+            if horizon["solthk"] <= 200:
+                assert float(horizon["ksat"]) == pytest.approx(float(expected["avke"]))
+
+    for component_name in (
+        "base-loam-forest high sev fire.sol",
+        "base-loam-thinning_30_90.sol",
+        "base-loam-forest prescribed fire.sol",
+    ):
+        component = WeppSoilUtil(str(root / "soils" / component_name))
+        assert len(component.obj["ofes"]) == 1
+        assert any("base.sol" in line for line in component.obj["header"])
+        assert not any("hill_101.mofe.sol" in line for line in component.obj["header"])
+
+    slope = root / "watershed/slope_files/hillslopes/hill_101.mofe.slp"
+    slope.parent.mkdir(parents=True)
+    slope.write_text("97.5\n3\n180 1\n" + "2 33.333333\n0 0.2 1 0.2\n" * 3)
+    (root / "landuse").mkdir()
+    management = get_management_summary("144", "disturbed").get_management()
+    ManagementMultipleOfeSynth([management, management, management]).write(
+        str(root / "landuse/hill_101.mofe.man")
+    )
+    prepared_path = root / "wepp/runs/p10.sol"
+    prepared_path.parent.mkdir(parents=True, exist_ok=True)
+    prep_multi_ofe_hillslope((
+        "101",
+        10,
+        str(root),
+        str(prepared_path.parent),
+        1,
+        0.0001,
+        0.75,
+        False,
+        None,
+        False,
+        None,
+        False,
+        None,
+    ))
+    prepared = WeppSoilUtil(str(prepared_path))
+    assert prepared.obj["ofes"] == combined.obj["ofes"]
 
 
 @pytest.mark.parametrize("treatment", [None, "", "not-thinning", "Thinning_30_90",

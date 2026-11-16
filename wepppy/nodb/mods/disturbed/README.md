@@ -269,7 +269,7 @@ disturbed.modify_soils()
 - `remap_landuse()` treats nodata-only/off-map hillslopes as unburned (`130`) by contract; this is an intentional safety rule and not configurable to global-mode fallback.
 - If a management entry defines `SoilFile`/`sol_path`, the controller copies that soil directly instead of regenerating from the lookup table.
 - For treatment suffixes (`-mulch_15`, `-thinning`, etc.), `lookup_disturbed_class()` strips the suffix so soils are keyed by burn severity, not treatment type.
-- For MOFE runs, each OFE gets its own disturbed soil file, reassembled into a `.mofe.sol` via `SoilMultipleOfeSynth`.
+- For MOFE runs, each OFE gets its own disturbed soil file, reassembled into a `.mofe.sol` via `SoilMultipleOfeSynth`. The first build uses the current single-OFE assignment. After publication changes `domsoil_d` to `hill_*.mofe`, repeated Disturbed, Treatments, and Omni calls recover the retained pre-disturbance assignment from `ssurgo_domsoil_d`; generated MOFE output is never reused as a stack member. Missing retained source state fails with rebuild guidance instead of nesting soil decks.
 - MOFE disturbed soil regeneration now follows the canonical NoDb process-pool contract: try `createProcessPoolExecutor(..., prefer_spawn=True)`, retry with `prefer_spawn=False` on `BrokenProcessPool`, then fall back to sequential generation only if both pools break.
 - Non-`BrokenProcessPool` MOFE worker failures propagate immediately (no silent fallback), and in-memory `soils.domsoil_d` / `soils.soils` mutations are applied in a separate locked serial phase after file generation completes.
 - For MOFE `sol_ver=9002` lookup misses, the controller creates class-specific fallback `9002` soils (`mukey-texid-disturbed_class`) with explicit neutral metadata replacements (`luse`, `stext`, `ksatfac=0.0`, `ksatrec=0.0`) so MOFE stacks remain same-version; single-OFE lookup misses still return base `mukey`.
@@ -280,8 +280,10 @@ disturbed.modify_soils()
 
 After deploying the thinning soil lookup correction, rebuild affected scenarios
 through the normal scenario/soil build workflow, prepare WEPP inputs, and rerun.
-Deployment or calling the modifier again with existing generated soil keys does
-not repair saved results. Do not edit `wepp/runs/*.sol` by hand.
+Deployment alone does not repair saved results. Use the normal scenario/soil
+build workflow, which regenerates from retained pre-disturbance soil assignments,
+then inspect the prepared inputs and rerun WEPP. Do not edit
+`wepp/runs/*.sol` by hand.
 
 Inspect both `soils/hill_*.mofe.sol` and prepared `wepp/runs/p*.sol` against the
 effective project lookup. For the default loam thinning row, upper-200-mm Ksat
