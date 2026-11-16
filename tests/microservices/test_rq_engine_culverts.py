@@ -1009,7 +1009,7 @@ def _rewrite_payload_zip_with_member(
     return dest
 
 
-@pytest.mark.parametrize('reserved', ['stream_candidates.json', 'stream_selection_policy.json', 'topo/stream_candidates/pass_1/streams.tif', 'runs/1/stream_selection.json'])
+@pytest.mark.parametrize('reserved', ['stream_candidates.json', 'stream_selection_policy.json', 'topo/stream_candidates/pass_1/streams.tif', 'runs/1/stream_selection.json', '_base/stream_selection.json'])
 def test_culvert_ingest_rejects_caller_selection_artifacts(tmp_path, monkeypatch, reserved):
     root=tmp_path/'batches'
     monkeypatch.setenv('CULVERTS_ROOT',str(root))

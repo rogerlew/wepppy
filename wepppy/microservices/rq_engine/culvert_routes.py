@@ -415,7 +415,7 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
             return validation_error_response(format_validation_errors(payload_issues))
 
         reserved = [batch_root / POLICY, batch_root / "stream_candidates.json",
-                    batch_root / "topo/stream_candidates"]
+                    batch_root / "topo/stream_candidates", batch_root / "_base/stream_selection.json"]
         if any(path.exists() for path in reserved) or any((batch_root / "runs").glob("*/stream_selection.json")):
             shutil.rmtree(batch_root, ignore_errors=True)
             return validation_error_response(format_validation_errors([
