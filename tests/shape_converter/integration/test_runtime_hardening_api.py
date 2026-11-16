@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import importlib
+
 import pytest
 
 pytest.importorskip("starlette")
@@ -10,30 +12,26 @@ from tests.shape_converter.helpers.archive_builder import build_minimal_point_da
 from wepppy.microservices.shape_converter import create_app
 
 pytestmark = [pytest.mark.integration, pytest.mark.microservice]
+app_module = importlib.import_module("wepppy.microservices.shape_converter.app")
 
 
-def test_ready_endpoint_reports_not_ready_when_sandbox_mode_mismatch(
+def test_ready_endpoint_reports_not_ready_when_provenance_is_invalid(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("SHAPE_CONVERTER_SANDBOX_MODE", "container")
-    monkeypatch.setenv("SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE", "gvisor")
+    monkeypatch.setattr(
+        app_module,
+        "_is_toolchain_available",
+        lambda: (False, "parser_binary_hash_mismatch"),
+    )
 
-    with TestClient(create_app()) as client:
-        response = client.get("/health/ready")
-
-    assert response.status_code == 503
-    payload = response.json()
-    assert payload["status"] == "not_ready"
-    assert payload["reason"].startswith("sandbox_mode_mismatch")
-    assert payload["sandbox_mode"] == "container"
-    assert payload["required_sandbox_mode"] == "gvisor"
+    with pytest.raises(RuntimeError, match="parser_binary_hash_mismatch"):
+        with TestClient(create_app()):
+            pass
 
 
 def test_hardening_readiness_enforcement_does_not_regress_inspect_convert(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("SHAPE_CONVERTER_SANDBOX_MODE", "gvisor")
-    monkeypatch.setenv("SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE", "gvisor")
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="hardening-regression"))
 
     with TestClient(create_app()) as client:
@@ -50,8 +48,8 @@ def test_hardening_readiness_enforcement_does_not_regress_inspect_convert(
 
     assert ready_response.status_code == 200
     ready_payload = ready_response.json()
-    assert ready_payload["sandbox_mode"] == "gvisor"
-    assert ready_payload["required_sandbox_mode"] == "gvisor"
+    assert ready_payload["parser"] == "shape_parser_cli"
+    assert ready_payload["provenance"] == "binary_binding_verified"
 
     assert inspect_response.status_code == 200
     inspect_payload = inspect_response.json()

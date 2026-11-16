@@ -80,6 +80,13 @@ def _chown_safe(path: Path, spec: str) -> None:
 
 
 def register(app: typer.Typer) -> None:
+    @app.command("show-compose-files")
+    def show_compose_files(ctx: typer.Context) -> None:
+        """Print the installed preset's Compose paths, one per line."""
+        context = _context(ctx)
+        for compose_file in context.compose_files_relative:
+            typer.echo(compose_file)
+
     @app.command(
         "build-static-assets",
         context_settings={"allow_extra_args": True, "ignore_unknown_options": True},

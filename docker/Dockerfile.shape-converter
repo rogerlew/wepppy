@@ -1,17 +1,51 @@
 # syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.12.4@sha256:9acfdf967ece13a9a1d9622a494d726aad6b9759aeaae40bbd4d8cb74c843971 AS python-builder
+FROM rust:1.92.0-slim-trixie@sha256:bf3368a992915f128293ac76917ab6e561e4dda883273c8f5c9f6f8ea37a378e AS rust-builder
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG SHAPE_PARSER_SOURCE_REVISION=uncommitted-development
+ARG SHAPE_PARSER_RELEASE_LABEL=development
+ARG SHAPE_PARSER_BUILT_UTC=
+ARG SHAPE_PARSER_REQUIRE_RELEASE_PROVENANCE=0
+ARG DEBIAN_SNAPSHOT=20261114T120000Z
 
-RUN apt-get update --snapshot 20261114T060000Z && \
-    apt-get install -y --no-install-recommends --snapshot 20261114T060000Z \
-        build-essential \
-        python3-dev \
-        python3-venv && \
+RUN sed -i \
+        -e "s|http://deb.debian.org/debian-security|https://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT}|g" \
+        -e "s|http://deb.debian.org/debian|https://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}|g" \
+        /etc/apt/sources.list.d/debian.sources && \
+    apt-get -o Acquire::Check-Valid-Until=false update && \
+    apt-get install -y --no-install-recommends file python3 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY docker/requirements-shape-converter-build.txt /tmp/requirements-build.txt
+WORKDIR /src/shape_parser_cli
+COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/Cargo.toml ./Cargo.toml
+COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/Cargo.lock ./Cargo.lock
+COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/src ./src
+COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/tools ./tools
+
+RUN if [ "${SHAPE_PARSER_REQUIRE_RELEASE_PROVENANCE}" = "1" ]; then \
+        printf '%s' "${SHAPE_PARSER_SOURCE_REVISION}" | grep -Eq '^[a-f0-9]{40}$'; \
+        [ "${SHAPE_PARSER_RELEASE_LABEL}" != "development" ]; \
+        [ -n "${SHAPE_PARSER_BUILT_UTC}" ]; \
+    fi && \
+    cargo build --release --locked && \
+    built_utc_arg="" && \
+    if [ -n "${SHAPE_PARSER_BUILT_UTC}" ]; then \
+        built_utc_arg="--built-utc=${SHAPE_PARSER_BUILT_UTC}"; \
+    fi && \
+    python3 tools/generate_provenance.py \
+        --binary target/release/shape_parser_cli \
+        --source-root . \
+        --output target/release/shape_parser_cli.json \
+        --source-revision "${SHAPE_PARSER_SOURCE_REVISION}" \
+        --release-label "${SHAPE_PARSER_RELEASE_LABEL}" \
+        ${built_utc_arg} && \
+    python3 tools/validate_provenance.py \
+        --binary target/release/shape_parser_cli \
+        --sidecar target/release/shape_parser_cli.json
+
+FROM python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b AS python-builder
+
 COPY docker/requirements-shape-converter.txt /tmp/requirements-runtime.txt
 
 RUN python3 -m venv /opt/venv && \
@@ -19,48 +53,56 @@ RUN python3 -m venv /opt/venv && \
         --disable-pip-version-check \
         --no-cache-dir \
         --require-hashes \
-        --requirement /tmp/requirements-build.txt && \
-    GDAL_CONFIG=/usr/bin/gdal-config /opt/venv/bin/pip install \
-        --disable-pip-version-check \
-        --no-build-isolation \
-        --no-binary=fiona \
-        --no-cache-dir \
-        --require-hashes \
         --requirement /tmp/requirements-runtime.txt && \
-    /opt/venv/bin/python -c \
-        "import fiona; assert fiona.__gdal_version__ == '3.12.4', fiona.__gdal_version__" && \
-    /opt/venv/bin/pip uninstall --yes cython pip setuptools
+    /opt/venv/bin/pip uninstall --yes pip setuptools
 
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.12.4@sha256:9acfdf967ece13a9a1d9622a494d726aad6b9759aeaae40bbd4d8cb74c843971 AS runtime
+FROM python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b AS runtime
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_SNAPSHOT=20261114T120000Z
+
+RUN sed -i \
+        -e "s|http://deb.debian.org/debian-security|https://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT}|g" \
+        -e "s|http://deb.debian.org/debian|https://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}|g" \
+        /etc/apt/sources.list.d/debian.sources && \
+    apt-get -o Acquire::Check-Valid-Until=false update && \
+    apt-get install -y --no-install-recommends \
+        zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 && \
+    rm -rf /usr/local/bin/pip /usr/local/bin/pip3 /usr/local/bin/pip3.12 \
+        /usr/local/lib/python3.12/site-packages/pip \
+        /usr/local/lib/python3.12/site-packages/pip-*.dist-info && \
+    rm -rf /var/lib/apt/lists/*
 
 LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy" \
       org.opencontainers.image.title="WEPPpy shape converter" \
       org.opencontainers.image.description="Minimal runtime for untrusted shapefile conversion" \
-      org.opencontainers.image.base.name="ghcr.io/osgeo/gdal:ubuntu-small-3.12.4" \
-      org.opencontainers.image.base.digest="sha256:9acfdf967ece13a9a1d9622a494d726aad6b9759aeaae40bbd4d8cb74c843971" \
-      org.opencontainers.image.ubuntu.snapshot="20261114T060000Z"
+      org.opencontainers.image.base.name="python:3.12-slim" \
+      org.opencontainers.image.base.digest="sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b" \
+      org.wepppy.debian.snapshot="${DEBIAN_SNAPSHOT}"
 
-RUN apt-get update --snapshot 20261114T060000Z && \
-    apt-get upgrade -y --no-install-recommends --snapshot 20261114T060000Z && \
-    rm -rf /var/lib/apt/lists/* && \
-    groupadd --gid 10001 shape-converter && \
+RUN groupadd --gid 10001 shape-converter && \
     useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin shape-converter && \
     mkdir -p /opt/app && \
     chown 10001:10001 /opt/app
 
 COPY --from=python-builder /opt/venv /opt/venv
-RUN /opt/venv/bin/python -c \
-        "import fiona; assert fiona.__gdal_version__ == '3.12.4', fiona.__gdal_version__" && \
-    test "$(gdal-config --version)" = "3.12.4"
+COPY --from=rust-builder /src/shape_parser_cli/target/release/shape_parser_cli /usr/local/bin/shape_parser_cli
+COPY --from=rust-builder /src/shape_parser_cli/target/release/shape_parser_cli.json /usr/local/bin/shape_parser_cli.json
 COPY --chown=10001:10001 wepppy/__init__.py /opt/app/wepppy/__init__.py
 COPY --chown=10001:10001 wepppy/microservices/__init__.py /opt/app/wepppy/microservices/__init__.py
-COPY --chown=10001:10001 wepppy/microservices/shape_converter /opt/app/wepppy/microservices/shape_converter
+COPY --chown=10001:10001 wepppy/microservices/shape_converter/*.py /opt/app/wepppy/microservices/shape_converter/
+COPY --chown=10001:10001 wepppy/microservices/shape_converter/ui /opt/app/wepppy/microservices/shape_converter/ui
 COPY --chown=10001:10001 wepppy/observability /opt/app/wepppy/observability
+
+RUN /opt/venv/bin/python -c \
+        "import importlib.util; assert importlib.util.find_spec('fiona') is None; assert importlib.util.find_spec('pip') is None" && \
+    /usr/local/bin/shape_parser_cli --version
 
 ENV PATH="/opt/venv/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/opt/app
+    PYTHONPATH=/opt/app \
+    SHAPE_CONVERTER_PARSER_CLI=/usr/local/bin/shape_parser_cli
 
 WORKDIR /opt/app
 USER 10001:10001

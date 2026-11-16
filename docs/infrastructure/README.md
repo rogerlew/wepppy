@@ -18,6 +18,7 @@
 | [incident-2026-08-26-gridmet-html-netcdf.md](incident-2026-08-26-gridmet-html-netcdf.md) | GridMET 502/503 HTML responses published as final NetCDF artifacts during production climate construction. |
 | [mythos-system-card-summary.md](mythos-system-card-summary.md) | Threat-focused summary of Anthropic's Claude Mythos Preview system card, centered on cyber capability implications for WEPP.cloud infrastructure and development. |
 | [secrets.md](secrets.md) | Canonical secrets handling policy (Compose secrets now; Kubernetes worker pools next). |
+| [shape-converter-fail-closed-recovery.md](shape-converter-fail-closed-recovery.md) | Exit-88 containment, orphan-container takedown, public unavailability verification, and safe retry procedure for shape-converter deployments. |
 | [ui-rcds-nfs-vs-dev-nfs.md](ui-rcds-nfs-vs-dev-nfs.md) | NFS metadata workload benchmark for delete/recreate performance comparisons. |
 | [wmesque-dataset-sync-manifest.md](wmesque-dataset-sync-manifest.md) | Canonical dataset inventory for production-to-test-production WMesque geodata sync. |
 | [wmesque-operations.md](wmesque-operations.md) | Endpoint configuration, managed publication, scheduled pull synchronization, and recovery. |

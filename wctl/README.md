@@ -84,6 +84,9 @@ Each passthrough call is logged (for example, `INFO:wctl2:docker compose ps`) so
 - Any shell environment variables referenced in the active compose file act as the final overrides – for example export `POSTGRES_PASSWORD` before calling `wctl up`.
 - `WCTL_COMPOSE_FILE` is exported by the shim so Typer can reuse the selected compose file without requiring extra flags on every invocation.
 - `WCTL_COMPOSE_FILE_EXTRAS` can hold additional compose files (comma or `:` separated) to apply overrides.
+- `wctl show-compose-files` prints those installed-preset paths, one per line;
+  deployment tooling uses this stable intent signal before inspecting rendered
+  services.
 
 ### **Testing & Tooling Workflow**
 

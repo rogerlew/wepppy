@@ -47,6 +47,53 @@ def build_minimal_point_dataset(
     return entries
 
 
+def build_repeated_point_dataset(
+    *,
+    record_count: int,
+    prefix: str = "repeated_points",
+    include_prj: bool = True,
+) -> dict[str, bytes]:
+    """Build a deterministic large point fixture for ceiling/recovery probes."""
+
+    if record_count < 1:
+        raise ValueError("record_count must be positive")
+    record_content = struct.pack("<i2d", 1, 10.0, 20.0)
+    content_words = len(record_content) // 2
+    shp_body = bytearray()
+    shx_body = bytearray()
+    next_offset_words = 50
+    for record_number in range(1, record_count + 1):
+        shp_body.extend(struct.pack(">2i", record_number, content_words))
+        shp_body.extend(record_content)
+        shx_body.extend(struct.pack(">2i", next_offset_words, content_words))
+        next_offset_words += 4 + content_words
+    bbox = (10.0, 20.0, 10.0, 20.0)
+    shp = _build_shp_header(
+        file_length_words=(100 + len(shp_body)) // 2,
+        shape_type=1,
+        bbox=bbox,
+    ) + bytes(shp_body)
+    shx = _build_shp_header(
+        file_length_words=(100 + len(shx_body)) // 2,
+        shape_type=1,
+        bbox=bbox,
+    ) + bytes(shx_body)
+    base_dbf = _build_dbf_one_text_field(field_name="NAME", value="demo")
+    header_length = struct.unpack_from("<H", base_dbf, 8)[0]
+    record_length = struct.unpack_from("<H", base_dbf, 10)[0]
+    record = base_dbf[header_length : header_length + record_length]
+    dbf_header = bytearray(base_dbf[:header_length])
+    struct.pack_into("<I", dbf_header, 4, record_count)
+    entries = {
+        f"{prefix}.shp": shp,
+        f"{prefix}.shx": shx,
+        f"{prefix}.dbf": bytes(dbf_header) + record * record_count + b"\x1a",
+    }
+    if include_prj:
+        entries[f"{prefix}.prj"] = WGS84_PRJ_TEXT.encode("utf-8")
+    return entries
+
+
 def build_minimal_line_dataset(
     prefix: str = "sample_line",
     *,
@@ -97,6 +144,146 @@ def build_minimal_polygon_dataset(
     if include_prj:
         entries[f"{prefix}.prj"] = (prj_text or WGS84_PRJ_TEXT).encode("utf-8")
     return entries
+
+
+def build_shape_dataset(
+    *,
+    prefix: str,
+    shape_type: int,
+    record_content: bytes,
+    bbox: tuple[float, float, float, float],
+    property_value: str = "demo",
+) -> dict[str, bytes]:
+    """Build a one-record dataset from an explicitly encoded shape record."""
+
+    shp_bytes, shx_bytes = _build_single_record_sidecars(
+        record_content=record_content,
+        shape_type=shape_type,
+        bbox=bbox,
+    )
+    return {
+        f"{prefix}.shp": shp_bytes,
+        f"{prefix}.shx": shx_bytes,
+        f"{prefix}.dbf": _build_dbf_one_text_field(
+            field_name="NAME", value=property_value
+        ),
+    }
+
+
+def build_multipart_dataset(
+    *,
+    prefix: str,
+    shape_type: int,
+    parts: list[list[tuple[float, float]]],
+    measures: list[float] | None = None,
+) -> dict[str, bytes]:
+    """Build a PolyLine/Polygon or corresponding M-variant fixture."""
+
+    points = [point for part in parts for point in part]
+    if not parts or any(not part for part in parts):
+        raise ValueError("Every multipart fixture part must contain points.")
+    x_values = [point[0] for point in points]
+    y_values = [point[1] for point in points]
+    bbox = (min(x_values), min(y_values), max(x_values), max(y_values))
+    part_offsets: list[int] = []
+    offset = 0
+    for part in parts:
+        part_offsets.append(offset)
+        offset += len(part)
+    record_content = (
+        struct.pack("<i4d2i", shape_type, *bbox, len(parts), len(points))
+        + b"".join(struct.pack("<i", value) for value in part_offsets)
+        + b"".join(struct.pack("<2d", *point) for point in points)
+    )
+    if shape_type in {23, 25}:
+        active_measures = measures or [float(index) for index in range(len(points))]
+        if len(active_measures) != len(points):
+            raise ValueError("M fixtures require one measure per point.")
+        record_content += struct.pack(
+            f"<{len(active_measures) + 2}d",
+            min(active_measures),
+            max(active_measures),
+            *active_measures,
+        )
+    return build_shape_dataset(
+        prefix=prefix,
+        shape_type=shape_type,
+        record_content=record_content,
+        bbox=bbox,
+        property_value="multipart",
+    )
+
+
+def build_multipoint_dataset(
+    *,
+    prefix: str = "multipoint",
+    shape_type: int = 8,
+    points: list[tuple[float, float]] | None = None,
+    measures: list[float] | None = None,
+) -> dict[str, bytes]:
+    """Build a MultiPoint or MultiPointM fixture."""
+
+    active_points = points or [(10.0, 20.0), (12.0, 21.0)]
+    x_values = [point[0] for point in active_points]
+    y_values = [point[1] for point in active_points]
+    bbox = (min(x_values), min(y_values), max(x_values), max(y_values))
+    record_content = (
+        struct.pack("<i4di", shape_type, *bbox, len(active_points))
+        + b"".join(struct.pack("<2d", *point) for point in active_points)
+    )
+    if shape_type == 28:
+        active_measures = measures or [float(index) for index in range(len(active_points))]
+        if len(active_measures) != len(active_points):
+            raise ValueError("MultiPointM fixtures require one measure per point.")
+        record_content += struct.pack(
+            f"<{len(active_measures) + 2}d",
+            min(active_measures),
+            max(active_measures),
+            *active_measures,
+        )
+    return build_shape_dataset(
+        prefix=prefix,
+        shape_type=shape_type,
+        record_content=record_content,
+        bbox=bbox,
+        property_value="multipoint",
+    )
+
+
+def build_multipatch_dataset(
+    *,
+    prefix: str,
+    parts: list[tuple[int, list[tuple[float, float, float]]]],
+) -> dict[str, bytes]:
+    """Build a MultiPatch fixture with explicit ESRI patch-family codes."""
+
+    if not parts or any(not points for _, points in parts):
+        raise ValueError("Every MultiPatch part must contain points.")
+    points = [point for _, part_points in parts for point in part_points]
+    x_values = [point[0] for point in points]
+    y_values = [point[1] for point in points]
+    z_values = [point[2] for point in points]
+    bbox = (min(x_values), min(y_values), max(x_values), max(y_values))
+    offsets: list[int] = []
+    offset = 0
+    for _, part_points in parts:
+        offsets.append(offset)
+        offset += len(part_points)
+    record_content = (
+        struct.pack("<i4d2i", 31, *bbox, len(parts), len(points))
+        + b"".join(struct.pack("<i", value) for value in offsets)
+        + b"".join(struct.pack("<i", patch_type) for patch_type, _ in parts)
+        + b"".join(struct.pack("<2d", x_coord, y_coord) for x_coord, y_coord, _ in points)
+        + struct.pack(f"<{len(z_values) + 2}d", min(z_values), max(z_values), *z_values)
+        + struct.pack(f"<{len(points) + 2}d", 0.0, 0.0, *([0.0] * len(points)))
+    )
+    return build_shape_dataset(
+        prefix=prefix,
+        shape_type=31,
+        record_content=record_content,
+        bbox=bbox,
+        property_value="multipatch",
+    )
 
 
 def build_zip_bytes(entries: dict[str, bytes]) -> bytes:
@@ -218,6 +405,28 @@ def _build_polyline_sidecars(points: list[tuple[float, float]], *, shape_type: i
         bbox=bbox,
     )
 
+    return shp_header + body, shx_header + shx_record
+
+
+def _build_single_record_sidecars(
+    *,
+    record_content: bytes,
+    shape_type: int,
+    bbox: tuple[float, float, float, float],
+) -> tuple[bytes, bytes]:
+    record_header = struct.pack(">2i", 1, len(record_content) // 2)
+    body = record_header + record_content
+    shp_header = _build_shp_header(
+        file_length_words=(100 + len(body)) // 2,
+        shape_type=shape_type,
+        bbox=bbox,
+    )
+    shx_record = struct.pack(">2i", 50, len(record_content) // 2)
+    shx_header = _build_shp_header(
+        file_length_words=(100 + len(shx_record)) // 2,
+        shape_type=shape_type,
+        bbox=bbox,
+    )
     return shp_header + body, shx_header + shx_record
 
 

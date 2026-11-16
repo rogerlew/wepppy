@@ -10,33 +10,42 @@ execution mechanism but needs bounded allocation and a strict primitive schema.
 
 ## Decision
 
-Keep the existing configurable 256 MiB default byte cap, feature limit, and vertex
-limit. Add a maximum JSON container depth of 16 and 2,000,000 JSON values, checked
-lexically before decoding. Count each container and scalar value (object keys
-are not values). Reject rather than truncate. Empty arrays/objects count as one.
+Use a configurable 16 MiB parser JSON cap, 128 MiB uncompressed/parser-input
+cap, 320 MiB request-scratch cap, 384 MiB parser address-space limit, and 32 MiB
+serialized-output cap inside a 1.5 GiB container. Admit one inspect or conversion
+request at a time globally and per client; this single-flight limit is part of
+the memory invariant. Retain the feature and vertex limits. Apply a maximum JSON
+container depth of 16 and 2,000,000 JSON values,
+checked lexically before decoding. Count each container and scalar value (object
+keys are not values). Reject rather than truncate. Empty arrays/objects count as
+one.
 
 ## Decision Provenance
 
 Decision Venue: Codex execution conversation, 2026-11-14 UTC.  
 Participants Present: operator, Codex, independent contract reviewers.  
-Decision Owner: Codex for bounded implementation choices under the operator's
-approved independent-remediation scope; independent security and correctness
-contract reviews approved 2026-11-14.  
+Decision Owner: operator for fail-closed service availability and Codex for the
+bounded remediation values under the approved execution scope. Independent
+security review required an aggregate invariant on 2026-11-14.
 Implementer: Codex.
 
 ## Change Summary
 
-Previously only file bytes were capped before unrestricted pickle allocation.
-Now bytes, depth, and value count bound JSON allocation before schema validation.
+The initial Rust candidate allowed 256 MiB parser JSON, 600 MiB uncompressed
+input, 700 MiB scratch, 512 MiB parser address space, and 100 MiB output inside a
+1 GiB container. The amended envelope uses the limits above and fails closed.
 No ZIP compression ratio or scientific parameter is changed.
 
 ## Rationale
 
-Supported shapefile geometry nesting needs fewer than 16 containers. A separate
-value cap constrains tiny-number/null arrays that expand disproportionately in
-Python memory; two million accommodates multiple maximum-vertex 2D features
-without relying solely on the 256 MiB file cap. This is a conservative security
-budget, not a measured maximum-workload throughput guarantee.
+Supported shapefile geometry nesting needs fewer than 16 containers. The
+independent review showed the initial independently configured maxima could
+exceed the cgroup when tmpfs charging, parser RSS, retained archive bytes, JSON
+bytes/text/objects, Shapely objects, and serialized output overlapped. The lower
+limits, larger cgroup, and single-flight admission prevent independently bounded
+requests from multiplying parser address-space and scratch ceilings. They create
+a conservative envelope for exact-image near-ceiling validation, not a
+maximum-workload throughput guarantee.
 
 ## Alternatives Considered
 
@@ -60,8 +69,10 @@ parity. This compatibility limit must be stated in operator documentation.
 ## Risk and Rollback Notes
 
 If valid workloads exceed this budget, retain bounded fixture evidence and review
-a revised budget against container memory before raising it. Do not restore
-pickle or silently bypass validation. This decision provides no sandbox claim.
+a revised budget against container memory before raising it. If the service
+cannot meet the budget, deployment must leave shape-converter stopped. Do not
+restore pickle, GDAL/Fiona, or silently bypass validation. This decision provides
+no sandbox claim.
 
 ## Implementation Notes
 

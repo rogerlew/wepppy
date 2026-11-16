@@ -22,6 +22,7 @@ from .archive_validation import (
     shp_xml_sidecar_warning_message,
     validate_and_extract_zip_archive,
 )
+from .async_runtime import run_blocking_phase
 from .cleanup import RequestScratchLayout
 from .errors import ShapeConverterError
 
@@ -60,7 +61,7 @@ _SCRATCH_PRECHECK_FREE_BYTES = max(
 )
 _REQUEST_SCRATCH_QUOTA_BYTES = max(
     1,
-    int(os.getenv("SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES", str(700 * 1024 * 1024))),
+    int(os.getenv("SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES", str(320 * 1024 * 1024))),
 )
 
 
@@ -87,6 +88,24 @@ async def inspect_uploaded_archive(
             message="Archive payload is empty.",
             details="Uploaded archive contained zero bytes.",
         )
+
+    return await run_blocking_phase(
+        _inspect_archive_bytes,
+        archive_name=archive_name,
+        archive_bytes=archive_bytes,
+        scratch=scratch,
+        request_id=request_id,
+    )
+
+
+def _inspect_archive_bytes(
+    *,
+    archive_name: str,
+    archive_bytes: bytes,
+    scratch: RequestScratchLayout,
+    request_id: str,
+) -> dict[str, object]:
+    """Inspect already-bounded archive bytes outside the ASGI event loop."""
 
     _assert_scratch_free_space(
         scratch=scratch,

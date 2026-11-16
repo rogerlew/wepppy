@@ -1,5 +1,5 @@
 # Sandboxed Shapefile Conversion Security Contract
-Status: Implemented with open conformance gaps
+Status: Rust CLI implementation locally validated; independent review and rollout pending
 Last Updated: 2026-11-14
 Primary Areas: `docker/docker-compose.dev.yml`, `docker/caddy/Caddyfile`, `wepppy/microservices/*`, `wepppy/all_your_base/geo/geo.py`, `wepppy/weppcloud/*`
 
@@ -12,23 +12,23 @@ checked-in runtime path and regression evidence enforce it.
 
 Resolution is tracked in
 `docs/work-packages/20261113_shape_converter_security_conformance/` and GitHub
-issues #655 and #656. The original dependency freeze was superseded on
-2026-11-14 for a shape-converter-only image. The common WEPPpy image remains
-unchanged, and release still requires exact linkage and reachable-vulnerability
-evidence for the dedicated image.
+issues #655 and #656. The operator selected a service-local Rust CLI to replace
+production GDAL/Fiona parsing on 2026-11-14. The previously qualified dedicated
+GDAL image remains a pre-cutover parity oracle only. The common WEPPpy image
+remains unchanged.
 
 The 2026-11-14 independent remediation slice has the following source/local-test
 state; this table does not assert deployed behavior:
 
 | Boundary | Current evidence | Status |
 | --- | --- | --- |
-| ZIP admission and extraction | Size/member quotas, path containment, extension policy, case-insensitive duplicate detection, special-file rejection, and request-scoped extraction are implemented in `archive_validation.py`. | Partial: NFC/case-fold collision rejection is implemented; compression-ratio policy remains pending. |
+| ZIP admission and extraction | Size/member quotas, path containment, extension policy, NFC/case-fold duplicate detection, special-file rejection, and request-scoped extraction are implemented in `archive_validation.py`. | Implemented. Absolute compressed, uncompressed, member, scratch, and parser-input quotas are the expansion policy; no ratio threshold is adopted. |
 | Dataset selection | `select_single_shapefile_dataset(...)` requires one complete shared-prefix `.shp/.shx/.dbf` set and rejects additional complete or incomplete prefixes. | Implemented. |
-| Format/driver identity | Convert opens only through Fiona with `enabled_drivers=["ESRI Shapefile"]`; `.shp` and DBF headers also receive limited direct checks. | Locally validated: opened driver identity is asserted before data access; disguised GeoJSON is rejected. |
-| Parser process boundary | Convert runs Fiona/GDAL in a subprocess with a hard timeout and process-group termination. | Data-only JSON IPC is implemented with byte/depth/value/schema validation and fixed exit-code errors. Second-sandbox containment remains nonconformant. |
-| Runtime containment | Compose enforces non-root, read-only root, dropped capabilities, resource limits, hardened tmpfs, and an internal network. | Partial: production defaults active and required sandbox mode to `container`; the required second parser sandbox in the worker lock-up prevention contract is not provisioned. |
-| Semantic and adversarial validation | Feature and per-feature vertex limits are enforced on convert; focused ZIP, cleanup, timeout, and API tests exist. | Partial: the comprehensive malformed-file fuzz, record-count, geometry-validity, coordinate-range, collision, and dependency-sidecar test matrix below is not fully implemented. |
-| Dependency qualification | The dedicated image is locally built from digest-pinned GDAL 3.12.4 with source-built Fiona 1.10.1, hash-locked Python dependencies, exact linkage evidence, real artifact readback, and a final-image scan. The common image is unchanged. | Locally qualified, not deployed: residual findings have request-path non-reachability dispositions pending independent security approval; sandbox and release gates remain open. |
+| Format/parser identity | Production conversion invokes only the service-local `shape_parser_cli`; the legacy Fiona worker is removed and the final candidate image contains no Fiona/GDAL files. | Locally implemented and exact-image validated. The retained GDAL image is test/oracle evidence only. |
+| Parser process boundary | Convert launches `shape_parser_cli` in a new process group with a minimal environment, fixed exits, strict JSON IPC, timeout/kill, and OS resource limits. | Implemented and locally validated for input, output, feature, vertex, file-descriptor, memory, and CPU exhaustion. |
+| Runtime containment | Compose enforces non-root, read-only root, dropped capabilities, resource limits, hardened tmpfs, and an internal network. | Partial: the selected CLI shares the container UID, mounts, and network authority. It is a bounded failure boundary, not arbitrary-code containment; final acceptance of this residual is pending. |
+| Semantic and adversarial validation | Point, line, polygon, reversed ring, Z/null, MultiPatch, DBF primitive/null/date, malformed input, strict IPC, cleanup, timeout, and both output formats have direct tests/readback. | Locally validated. Broader fuzz/property expansion remains defense-in-depth follow-up, not a production fallback. |
+| Dependency qualification | `shapefile` 0.9.0 and its 30-package locked graph have dependency, license, unsafe, RustSec, benchmark, and parity evidence. | Locally accepted. Exact release image still requires independent security signoff and normal rollout authorization. |
 
 Until the nonconformant and partial items are closed or explicitly risk-accepted,
 the service must not be represented as fully conformant with this contract.
@@ -158,11 +158,11 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 ## Independent remediation contract (2026-11-14)
 
 The operator authorized IPC, exact-driver, and archive fixes to proceed before
-sandbox feasibility is resolved. This sequencing removes independently confirmed
-weaknesses; it does not waive the second sandbox, current dependency evidence,
-compression-policy decision, semantic matrix, or deployment gates. Full security
-conformance remains blocked. No container protection or dependency version changes
-are authorized by this amendment.
+the then-required sandbox feasibility decision. This historical sequencing
+removed independently confirmed weaknesses without waiving the controls then in
+force. The later Rust parser CLI amendment below supersedes that sandbox objective
+only after its cutover gates pass. Compression policy, semantic, and deployment
+gates remain open.
 
 Parser IPC uses strict UTF-8 JSON with exactly `properties`, `geometries`,
 `source_bounds`, and `source_crs_wkt`. Properties are objects with string keys and
@@ -178,7 +178,7 @@ extrema. CRS is null or a nonempty WKT string, parsed only after structural chec
 Property/geometry lengths must match and obey the existing feature limit; each
 geometry obeys the existing vertex limit in both worker and parent.
 
-The existing payload byte cap (default 256 MiB) remains authoritative; read at
+The parser payload byte cap (default 16 MiB) remains authoritative; read at
 most cap + 1 bytes and reject oversize/non-regular/symlink payloads. Before JSON
 object allocation, scan for container nesting beyond 16 and more than 2,000,000
 JSON values. Reject duplicate keys, trailing data, invalid UTF-8, non-finite
@@ -191,16 +191,20 @@ exit codes 4 and 5 select the existing feature/vertex quota errors, and other
 nonzero exits select a fixed parse error. Standalone worker stderr stays generic.
 See [ADR-0142](../../../../docs/adrs/ADR-0142-shape-parser-ipc-bounds.md).
 
-Immediately after Fiona open with the ESRI Shapefile allowlist, assert the opened
-driver equals `ESRI Shapefile` before reading bounds, CRS, or features. Disable
-plugin discovery with `GDAL_DRIVER_PATH=disable` in the worker environment.
+The retained Fiona parity oracle asserts `ESRI Shapefile` immediately after its
+allowlisted open and disables plugin discovery. This transitional rule is not a
+production fallback; raw production Shapefile bytes reach only the Rust CLI.
 
 For archive paths, normalize separators and Unicode NFC before case-folded
 collision comparison. Preserve the normalized spelling on disk. Dataset selection
 requires one logical NFC/case-folded prefix across all admitted shapefile sidecars,
 including optional and incomplete prefixes; stripped `.shp.xml`/`.qmd` files
-remain excluded. Reject ambiguity with `invalid_shapefile`. Existing quotas remain;
-no new compression-ratio threshold is introduced in this independent slice.
+remain excluded. Reject ambiguity with `invalid_shapefile`. The expansion policy
+uses absolute compressed-upload, total-uncompressed, member-count, scratch, and
+parser-input caps plus streamed counters. A ratio-only threshold is intentionally
+not adopted because it rejects small legitimate highly compressible datasets
+without reducing the absolute resource ceilings; therefore no new numeric
+parameter or ADR is introduced.
 For users: archives must contain one dataset, and duplicate filename aliases or
 additional sidecar prefixes are rejected. Very large valid conversions can now
 reach the JSON value budget before the older byte/feature caps; errors are
@@ -220,20 +224,85 @@ GDAL/Fiona stack. This supersedes the dependency-version freeze only for this
 service image; the common WEPPpy image remains unchanged. The split must preserve
 the public API and Compose service identity while removing inherited application
 secrets, datastore configuration, host data mounts, and unrelated runtime
-packages. It is defense in depth, not the required second parser sandbox, and
-does not close issue #656 or authorize deployment. Pin the base by digest and
+packages. It is defense in depth and did not close issue #656 or authorize
+deployment. Pin the base by digest and
 install Python dependencies from a resolved hash-locked input. A Dockerfile-
 specific allowlist must keep repository secrets and unrelated source out of the
 build context. Qualification must inspect the resolved Compose service, final
 image, and running container. Matching `container/container` readiness strings
-remain non-evidence for sandbox containment; production readiness is
-nonconformant until the second boundary exists.
+remain non-evidence for sandbox containment. The later Rust parser CLI amendment
+defines the final production readiness and #656 closure basis.
 
 Starlette 1.3.1 is required in the dedicated image to close the form-limit
 advisory affecting earlier releases. Register HTTP middleware explicitly through
 `add_middleware(BaseHTTPMiddleware, dispatch=...)`; the removed decorator API is
 not a compatibility reason to retain a vulnerable Starlette release. Preserve
 the existing abuse-control and relay-CORS middleware order and public behavior.
+
+### Rust parser CLI amendment (2026-11-14)
+
+The production goal is replacement of GDAL/Fiona hostile Shapefile parsing, not
+construction of a nested GDAL sandbox. The shape-converter owns one lightweight
+Rust binary crate at
+`wepppy/microservices/shape_converter/rust/shape_parser_cli`. Parser code remains
+private to that crate; no separate shared Rust library is required. The
+shape-converter Python process must launch the CLI as a short-lived subprocess;
+it must never import the production parser through PyO3. The existing service,
+container, public API, request scratch layout, and strict JSON payload contract
+remain unchanged. This amendment does not authorize a parser service, socket,
+queue, datastore, daemon, new container, privilege increase, or network protocol.
+
+The launcher must create a process group, enforce hard wall time, terminate the
+whole group on timeout or cancellation, and apply independently tested memory,
+CPU, open-file, input-file, output-file, IPC-payload, feature, and vertex limits.
+Those limits apply before any attacker-controlled file traversal or record scan.
+The parser independently validates exact SHP/SHX/DBF record cardinality and SHX
+offset/length identity, and rejects multipart records unless the first part
+starts at zero and every later part offset is strictly increasing and within the
+declared point count. Feature admission stops at the ceiling rather than first
+building an oversize record list.
+Parser output remains untrusted and must pass the existing UTF-8 JSON byte,
+depth, value-count, duplicate-key, primitive, finite-number, and exact-schema
+validation before use. Panic, abort, malformed output, partial output, limit
+exhaustion, timeout, and cancellation must map to bounded canonical errors and
+leave no request residue. No production fallback to Fiona/GDAL or in-process
+PyO3 is allowed.
+
+For conversion requests, archive extraction, DBF/CRS inspection, payload decoding, geometry
+construction/reprojection, serialization, and result encoding that can consume
+meaningful CPU or block on files runs outside the sole ASGI event-loop thread.
+Client cancellation does not release global admission or remove request scratch
+until any already-started blocking phase has ended. The process therefore keeps
+the one-request resource invariant even while draining a canceled bounded
+thread. Health remains responsive during a held conversion, and a competing
+conversion fails closed as saturated.
+
+Startup validates the complete effective resource envelope, not only defaults.
+Production permits one active request globally and per client and rejects an
+environment override above the reviewed maxima for features, vertices, parser
+payload/input/memory/CPU/open files/time, scratch/precheck, or serialized output.
+Changing those maxima or concurrency requires a revised resource ADR and new
+exact-image near-ceiling evidence.
+
+This CLI process boundary limits failure propagation and permits deterministic
+termination; it is not a claim of containment from arbitrary code execution. The
+CLI inherits the shape-converter container's UID, mounts, and network authority.
+That residual is acceptable only after dependency and unsafe-code review,
+malformed-input testing, oracle parity, exact-image validation, and independent
+security/operator acceptance. Until those gates pass, issue #656 remains open.
+After cutover, #656 may close as superseded by removal of the GDAL/Fiona failure
+class, not as evidence that a second sandbox was implemented.
+
+The qualified GDAL 3.12.4/Fiona 1.10.1 image is a transitional parity oracle.
+The final production image must contain `shape_parser_cli`, must attest the
+binary and a real bounded parse during readiness, and must not contain or expose
+Fiona/GDAL parser libraries or a PyO3 parser entry point. The executable ships
+with adjacent `/usr/local/bin/shape_parser_cli.json` provenance using schema
+`shape-parser-binary-provenance-v1`. The sidecar binds the binary hash, size,
+version, ELF identity, source manifest/revision, Cargo lock, compiler, command,
+and build time. Build validation and readiness fail closed if the pair is
+missing, malformed, or mismatched. This metadata is not a publisher signature;
+the immutable image digest remains the authenticity boundary.
 
 ## Non-Functional Requirements
 - Dedicated container/service (no embedding conversion in existing web app process).
@@ -243,19 +312,22 @@ the existing abuse-control and relay-CORS middleware order and public behavior.
   - `no-new-privileges`.
   - Drop all Linux capabilities except explicit minimum.
   - Seccomp/AppArmor (or SELinux) enabled.
-  - Disable outbound network by default.
-  - Treat GDAL/OGR parser execution as hostile-input boundary and run it only in bounded subprocesses with hard timeout + process-group termination.
+  - Attach the service only to its dedicated internal Compose network so neither
+    the API nor its Rust child has outbound routing. The child shares the
+    container network namespace; this is not a separate network sandbox.
+  - Parse hostile Shapefile bytes only through the standalone Rust CLI with hard
+    timeout, process-group termination, and explicit per-process resource limits.
   - Treat parser-worker output as untrusted. Exchange data only through a
     non-executable serialization with an explicit schema, byte limit, nesting
     limit, and primitive-type allowlist. `pickle`, `marshal`, YAML object tags,
     and equivalent executable deserialization are forbidden across this boundary.
-  - Disable GDAL driver/plugin autoload from attacker-writable paths and keep an
-    explicit driver allowlist at every native open.
+  - During the parity transition only, disable GDAL driver/plugin autoload from
+    attacker-writable paths and keep an explicit driver allowlist at every oracle open.
 - Resource limits (initial defaults, tune with data):
   - Request timeout: 30s metadata scan, 120s conversion hard timeout.
   - Max ZIP upload size: 100 MB.
   - Edge proxy body cap must include multipart overhead headroom above the ZIP limit so canonical app quota errors remain observable (current WEPP1 policy: 120 MB edge cap for 100 MB ZIP quota).
-  - Max total uncompressed bytes: 600 MB.
+  - Max total uncompressed bytes: 128 MiB.
   - Max member count: 200.
   - Max features: 1,000,000.
   - Max vertices per feature: configurable guardrail (start 250,000).
@@ -304,8 +376,8 @@ handle_path /utils/shape-converter/* {
 ### Container specification (detailed)
 #### Image and runtime
 - Multi-stage image build:
-  - Stage 1: build/install app dependencies and pinned geospatial tooling (`gdal`, `proj`, `geos`).
-  - Stage 2: minimal runtime image with only runtime libs and app code.
+  - Stage 1: build the lockfile-pinned `shape_parser_cli` release binary and app dependencies.
+  - Stage 2: minimal runtime image with the CLI and app code, without Fiona/GDAL parser dependencies.
 - Run as non-root fixed UID/GID (for example `10001:10001`).
 - Root filesystem read-only.
 - Writable paths only via `tmpfs` mounts:
@@ -329,19 +401,25 @@ handle_path /utils/shape-converter/* {
 
 #### Health and lifecycle
 - `GET /utils/shape-converter/health/live` for liveness.
-- `GET /utils/shape-converter/health/ready` for readiness (checks temp dir writability, toolchain availability, and required runtime sandbox mode).
-- Sandbox mode signaling contract for readiness:
-  - `SHAPE_CONVERTER_SANDBOX_MODE` declares active runtime sandbox mode (`container|gvisor|kata|nsjail`).
-  - `SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE` declares required runtime sandbox mode (`container|gvisor|kata|nsjail`).
-  - Readiness returns `503 not_ready` when required mode is unset/invalid, active mode is unset/invalid, or active/required modes mismatch.
+- Startup checks scratch writability, the exact `shape_parser_cli` identity,
+  configured resource limits, a real bounded fixture parse, strict JSON
+  validation, and cleanup. Startup fails if any check fails.
+- `GET /utils/shape-converter/health/ready` reports the cached successful startup
+  parser check plus a cheap current scratch check. Public readiness requests do
+  not launch attacker-triggerable parser processes.
+- The transitional `SHAPE_CONVERTER_SANDBOX_MODE` and
+  `SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE` equality check is not evidence of
+  containment and must not be the final production readiness basis.
 - Graceful shutdown:
   - Stop accepting new work.
   - Wait for in-flight conversions up to shutdown timeout.
   - SIGKILL any remaining conversion subprocess group after timeout.
 - Startup self-check:
-  - Validate `ogr2ogr --version`.
+  - Validate the adjacent executable provenance sidecar, binary SHA-256 and
+    size, and `shape_parser_cli --version` agreement.
   - Validate writable scratch root and cleanup permissions.
-  - Validate parser subprocess sandbox mode (production hard requirement).
+  - Run and clean up a bounded parser fixture under the production launcher and
+    reject readiness when any required limit or JSON validation is inactive.
 
 #### Performance and concurrency contract
 - Production runs one Uvicorn application worker. Abuse-control counters and
@@ -349,8 +427,11 @@ handle_path /utils/shape-converter/* {
   multiply configured limits and make metadata lookup nondeterministic. Scale-up
   requires a reviewed shared-state contract before increasing the worker count.
 - Bound active requests with middleware abuse controls:
-  - `SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL` (default `32`) with immediate `503 service_saturated` when global slots are exhausted.
-  - `SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP` (default `8`) with immediate `429 rate_limited` when per-client slots are exhausted.
+  - `SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL` (default `1`) with immediate `503 service_saturated` when the single resource envelope is occupied.
+  - `SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP` (default `1`) with immediate `429 rate_limited` when that client already has an active request.
+  - The single-flight defaults are part of the aggregate memory invariant. Do
+    not raise either value without exact-image concurrent near-ceiling evidence
+    and a revised cgroup/resource ADR.
   - `SHAPE_CONVERTER_RATE_LIMIT_COUNT` / `SHAPE_CONVERTER_RATE_LIMIT_WINDOW_SECONDS` (defaults `120` / `60`) for sliding-window request throttling.
 - Per-request timeout:
   - Metadata inspect timeout: 30 seconds.
@@ -369,16 +450,20 @@ handle_path /utils/shape-converter/* {
 
 #### Worker lock-up prevention contract
 - Never run heavy geospatial conversion on event loop threads.
-- Execute conversion and deep parse steps in isolated subprocesses (`ogr2ogr`/`ogrinfo` or equivalent) with:
+- Execute hostile parsing through `shape_parser_cli` and keep other heavy
+  conversion steps out of the event loop, with:
   - Process-group creation.
   - Hard wall-clock timeout.
   - Kill entire process group on timeout/cancel.
+  - Direct memory, CPU, open-file, input/output-file, payload, feature, and vertex limits.
 - Keep ASGI handlers async and lightweight:
   - Upload validation.
   - Job orchestration.
   - Streaming response.
 - Ensure all cleanup runs in `finally` blocks independent of client disconnect.
-- In production, parser subprocesses MUST run inside a second sandbox boundary (gVisor/Kata/nsjail-equivalent); service must fail readiness if this requirement is not satisfied.
+- In production, Python must invoke the standalone Rust CLI and must not import
+  the parser through PyO3. The CLI is a reliability and resource boundary within
+  the existing hardened container, not a second arbitrary-code containment boundary.
 
 ### Framework/runtime decision
 #### Option comparison
@@ -386,12 +471,12 @@ handle_path /utils/shape-converter/* {
 | --- | --- | --- | --- | --- |
 | Starlette (Python) | Minimal ASGI layer, low overhead, already aligned with WEPPpy `query-engine` patterns, few dependencies | More manual request validation/OpenAPI wiring than FastAPI | Low if conversion is subprocess-bound and concurrency is capped; high if blocking work leaks into event loop | Strong |
 | FastAPI (Python) | Fast development, built-in validation/docs, based on Starlette/Pydantic | Slightly higher framework/validation overhead, extra abstraction for a very small API | Similar to Starlette for lock-up risk (risk is from blocking work, not framework choice) | Good but not necessary |
-| Go (`net/http` or chi/gin) | Very strong concurrency model, low runtime overhead, each request served in goroutines | New language/toolchain in this repo, higher integration and maintenance overhead, geospatial stack still relies on GDAL subprocesses or CGO bindings | Very low runtime lock risk, but operational complexity is higher in this codebase | Viable v2, not v1 |
+| Go (`net/http` or chi/gin) | Very strong concurrency model, low runtime overhead, each request served in goroutines | Additional service/runtime stack while parsing is already owned by the selected Rust CLI | Very low runtime lock risk, but operational complexity is higher in this codebase | Not justified for this control plane |
 
 #### Final decision
 - **Choose Starlette for v1**, with a strict subprocess execution model for geospatial work.
 - Rationale:
-  - Throughput here is dominated by GDAL/IO and archive processing, not JSON framework overhead.
+  - Throughput here is dominated by parser/IO and archive processing, not JSON framework overhead.
   - Starlette keeps the control plane lean and matches existing repo ASGI patterns.
   - Worker lock-ups are prevented by design through bounded subprocess execution and hard timeouts.
   - This avoids introducing a new language/runtime stack prematurely.
@@ -499,7 +584,7 @@ Error response contract:
 | Symlink entries | Indirect traversal/overwrite | Reject symlink members and special file types | ZIP containing symlink entry rejected |
 | Duplicate member names | Overwrite confusion | Reject duplicate normalized extraction paths | ZIP with duplicate filenames rejected deterministically |
 | Case-collision names | Cross-platform overwrite ambiguity | Normalize policy to lowercase compare for collision detection | `Road.shp` + `road.shp` rejected |
-| ZIP bombs / high compression ratio | Disk and memory exhaustion | Cap compressed size, uncompressed size, and ratio; stream with counters | Known zip-bomb fixtures rejected before extraction |
+| ZIP bombs / high compression ratio | Disk and memory exhaustion | Enforce absolute compressed, total-uncompressed, member, scratch, and parser-input caps while streaming with counters; do not rely on a ratio threshold | High-expansion fixtures crossing an absolute ceiling are rejected before parser execution; valid compressed controls remain accepted |
 | Excessive member count | Inode/CPU exhaustion | Max member cap | ZIP with > cap rejected |
 | Nested archives | Recursive bomb/smuggling | Reject nested archives in v1 | ZIP containing `.zip` members rejected |
 | Encrypted/password ZIPs | Uninspectable content, operational failures | Reject encrypted flag entries | Encrypted ZIP rejected with explicit error |
@@ -609,20 +694,25 @@ Error response contract:
   - SBOM generation for release builds.
   - Vulnerability scan gate that blocks unresolved High/Critical issues in reachable runtime components.
 - Parser dependency controls:
-  - Track and triage GDAL/OGR and reachable third-party parser vulnerabilities
-    before each release. Record the actual linked runtime versions and fix
-    provenance; a static example-CVE list is not release evidence.
-  - Maintain explicit timeout/kill behavior for parser non-termination classes (for example malformed WKB infinite-loop conditions).
-  - Treat `/vsizip/` as an implementation detail, not a security boundary; archive and contained parser risks still require full validation/sandbox controls.
+  - Track and triage the Rust parser's direct and transitive dependencies,
+    unsafe-code surface, advisories, licenses, and malformed-input behavior before
+    each release. Record the exact Cargo lock and binary build provenance.
+  - Maintain explicit timeout/kill and resource-limit behavior for parser panic,
+    non-termination, allocation, file, and output exhaustion classes.
+  - Treat archive extraction and parser process separation as implementation
+    details, not security boundaries; archive and parser inputs still require
+    full validation and resource controls.
   - Maintain metadata-privacy policy that forbids exposing raw `.shp.xml` content in API payloads, logs, or warnings (only advisory removal notices are allowed).
-  - Follow GDAL's untrusted-input guidance: use a dedicated low-privilege
-    identity, restrict filesystem access, bound CPU/memory, disable network and
-    unused drivers, and do not inherit plugin paths from untrusted environments.
+  - Retain the dedicated low-privilege identity, restricted filesystem, bounded
+    CPU/memory/files/output, and internal network for the container. The Rust CLI
+    inherits those authorities and is not a second sandbox. GDAL-specific
+    driver/plugin restrictions apply only to the transitional parity oracle.
 
 ## Test Plan
 ### Unit tests
 - ZIP entry path canonicalization and collision handling.
-- Size/count/ratio quota enforcement.
+- Absolute compressed/uncompressed/member/scratch quota enforcement, including
+  high-expansion rejection and valid compressed controls.
 - CRS option validation matrix.
 - UTM zone function parity with WEPPpy upper-left rule.
 
@@ -680,8 +770,11 @@ Error response contract:
 - When `.qmd` is included, it is sanitized via immediate unlink and never parsed or surfaced in API metadata.
 - No uploaded or generated artifacts persist after each request terminal response (verified by tests).
 - Service runs in its own hardened container and is reachable through Caddy.
-- Production uses the required second parser sandbox; readiness evidence is
-  derived from the effective runtime, not only matching environment strings.
+- Production contains no GDAL/Fiona or PyO3 parser fallback. It uses only the
+  bounded Rust CLI and fails startup when executable provenance or its real
+  parser canary fails. If deployment cannot establish that state, deployment
+  stops shape-converter and verifies that it is not running; it does not restore
+  an older parser implementation.
 - CI/security validation proves container hardening and runtime abuse controls are active.
 
 ## Source Notes

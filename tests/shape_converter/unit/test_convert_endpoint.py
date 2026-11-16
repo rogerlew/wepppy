@@ -7,6 +7,7 @@ import json
 import logging
 import signal
 import subprocess
+import threading
 from types import SimpleNamespace
 
 import pytest
@@ -34,9 +35,79 @@ shape_converter_crs_module = importlib.import_module("wepppy.microservices.shape
 shape_converter_serialization_module = importlib.import_module(
     "wepppy.microservices.shape_converter.serialization"
 )
-shape_converter_parser_worker_module = importlib.import_module(
-    "wepppy.microservices.shape_converter.convert_parser_worker"
-)
+
+
+def test_blocking_phase_retains_ownership_until_thread_exits_after_cancellation() -> None:
+    started = threading.Event()
+    release = threading.Event()
+
+    def _blocked_phase() -> str:
+        started.set()
+        assert release.wait(timeout=5)
+        return "complete"
+
+    async def _exercise() -> None:
+        task = asyncio.create_task(
+            shape_converter_convert_module._run_blocking_phase(_blocked_phase)
+        )
+        assert await asyncio.to_thread(started.wait, 5)
+        task.cancel()
+        await asyncio.sleep(0)
+        assert task.done() is False
+        release.set()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    asyncio.run(_exercise())
+
+
+def test_blocking_phase_retains_ownership_through_repeated_cancellation() -> None:
+    started = threading.Event()
+    release = threading.Event()
+
+    def _blocked() -> None:
+        started.set()
+        assert release.wait(timeout=10)
+
+    async def _exercise() -> None:
+        task = asyncio.create_task(
+            shape_converter_convert_module._run_blocking_phase(_blocked)
+        )
+        assert await asyncio.to_thread(started.wait, 10)
+        task.cancel()
+        await asyncio.sleep(0)
+        task.cancel()
+        await asyncio.sleep(0)
+        assert not task.done()
+        release.set()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    asyncio.run(_exercise())
+
+
+def test_blocking_phase_preserves_cancellation_when_worker_later_fails() -> None:
+    started = threading.Event()
+    release = threading.Event()
+
+    def _failing_worker() -> None:
+        started.set()
+        assert release.wait(timeout=10)
+        raise RuntimeError("late worker failure")
+
+    async def _exercise() -> None:
+        task = asyncio.create_task(
+            shape_converter_convert_module._run_blocking_phase(_failing_worker)
+        )
+        assert await asyncio.to_thread(started.wait, 10)
+        task.cancel()
+        await asyncio.sleep(0)
+        assert not task.done()
+        release.set()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    asyncio.run(_exercise())
 
 
 def test_convert_geojson_wgs84_download_and_metadata_sidecar() -> None:
@@ -887,30 +958,35 @@ def test_convert_parser_worker_uses_minimal_environment(
         pid = 1234
         returncode = 0
 
-        def communicate(self, timeout=None):  # noqa: ANN001
-            return "", ""
+        async def wait(self):
+            return self.returncode
 
-    def _fake_popen(*args, **kwargs):  # noqa: ANN002, ANN003
+    async def _fake_exec(*args, **kwargs):  # noqa: ANN002, ANN003
         observed_env.update(dict(kwargs["env"]))
         return _Process()
 
     monkeypatch.setenv("PATH", "/usr/bin")
     monkeypatch.setenv("PYTHONPATH", "/workdir/wepppy")
     monkeypatch.setenv("SHAPE_CONVERTER_TEST_SECRET", "do-not-leak")
-    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", _fake_popen)
+    monkeypatch.setattr(
+        shape_converter_convert_module.asyncio,
+        "create_subprocess_exec",
+        _fake_exec,
+    )
 
-    worker_stdout, worker_stderr = shape_converter_convert_module._run_parser_worker(
-        shp_path=tmp_path / "roads.shp",
-        output_path=tmp_path / "payload.json",
-        scratch=SimpleNamespace(request_dir=tmp_path),
+    worker_stdout, worker_stderr = asyncio.run(
+        shape_converter_convert_module._run_parser_worker(
+            shp_path=tmp_path / "roads.shp",
+            output_path=tmp_path / "payload.json",
+            scratch=SimpleNamespace(request_dir=tmp_path),
+        )
     )
 
     assert worker_stdout == ""
     assert worker_stderr == ""
-    assert observed_env["PATH"] == "/usr/bin"
-    assert observed_env["PYTHONPATH"] == "/workdir/wepppy"
     assert observed_env["LC_ALL"] == "C"
     assert observed_env["LANG"] == "C"
+    assert set(observed_env) == {"LC_ALL", "LANG"}
     assert "SHAPE_CONVERTER_TEST_SECRET" not in observed_env
 
 
@@ -1065,65 +1141,6 @@ def test_convert_parser_loop_timeout_cancels_processing_and_cleans_scratch(
     assert list(tmp_path.iterdir()) == []
 
 
-def test_parser_worker_applies_parser_egress_guards_and_driver_allowlist(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path,
-) -> None:  # noqa: ANN001
-    captured_options: dict[str, str] = {}
-    captured_open: dict[str, object] = {}
-
-    class _FakeEnv:
-        def __init__(self, **kwargs):  # noqa: ANN003
-            captured_options.update({str(key): str(value) for key, value in kwargs.items()})
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):  # noqa: ANN001
-            return False
-
-    class _FakeDataset:
-        driver = "ESRI Shapefile"
-        bounds = (10.0, 20.0, 10.0, 20.0)
-        crs_wkt = None
-        crs = {}
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):  # noqa: ANN001
-            return False
-
-        def __iter__(self):
-            return iter(())
-
-    monkeypatch.setattr(shape_converter_parser_worker_module.fiona, "Env", _FakeEnv)
-
-    def _fake_open(path: str, *, enabled_drivers: list[str] | None = None):  # noqa: ANN001
-        captured_open["path"] = path
-        captured_open["enabled_drivers"] = enabled_drivers
-        return _FakeDataset()
-
-    monkeypatch.setattr(shape_converter_parser_worker_module.fiona, "open", _fake_open)
-    monkeypatch.setattr(
-        shape_converter_parser_worker_module,
-        "parse_source_crs",
-        lambda **_kwargs: None,
-    )
-
-    payload = shape_converter_parser_worker_module._load_shapefile_payload(
-        shp_path=tmp_path / "roads.shp",
-        max_features=10,
-        max_vertices_per_feature=250000,
-    )
-
-    assert payload["source_bounds"] == (10.0, 20.0, 10.0, 20.0)
-    assert captured_open["enabled_drivers"] == ["ESRI Shapefile"]
-    assert captured_options["CPL_VSIL_CURL_ALLOWED_EXTENSIONS"] == ""
-    assert captured_options["GDAL_DISABLE_READDIR_ON_OPEN"] == "EMPTY_DIR"
-    assert captured_options["GDAL_HTTP_MAX_RETRY"] == "0"
-
-
 def test_load_shapefile_invokes_worker_subprocess_with_new_session(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path,
@@ -1141,26 +1158,26 @@ def test_load_shapefile_invokes_worker_subprocess_with_new_session(
         pid = 99123
         returncode = 0
 
-        def communicate(self, timeout=None):  # noqa: ANN001
+        async def wait(self):
             payload_path.write_bytes(json.dumps(expected_payload).encode("utf-8"))
-            return "", ""
-
-        def poll(self):
             return self.returncode
 
-        def wait(self, timeout=None):  # noqa: ANN001
-            return self.returncode
-
-    def _fake_popen(*args, **kwargs):  # noqa: ANN002, ANN003
+    async def _fake_exec(*args, **kwargs):  # noqa: ANN002, ANN003
         captured_popen_kwargs.update(kwargs)
         return _FakeProcess()
 
-    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", _fake_popen)
+    monkeypatch.setattr(
+        shape_converter_convert_module.asyncio,
+        "create_subprocess_exec",
+        _fake_exec,
+    )
     scratch = SimpleNamespace(request_dir=tmp_path)
 
-    loaded = shape_converter_convert_module._load_shapefile(
-        shp_path=tmp_path / "roads.shp",
-        scratch=scratch,
+    loaded = asyncio.run(
+        shape_converter_convert_module._load_shapefile(
+            shp_path=tmp_path / "roads.shp",
+            scratch=scratch,
+        )
     )
 
     assert loaded.source_bounds == (10.0, 20.0, 10.0, 20.0)
@@ -1182,33 +1199,41 @@ def test_load_shapefile_timeout_kills_worker_process_group(
         pid = 55223
         returncode = None
 
-        def __init__(self):
-            self._communicate_calls = 0
+        async def wait(self):
+            if signal.SIGKILL in signals_sent:
+                self.returncode = -signal.SIGKILL
+                return self.returncode
+            await asyncio.sleep(10)
+            return 0
 
-        def communicate(self, timeout=None):  # noqa: ANN001
-            self._communicate_calls += 1
-            if self._communicate_calls == 1:
-                raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
-            return "", ""
+    async def _fake_exec(*_args, **_kwargs):
+        return _TimeoutProcess()
 
-        def poll(self):
-            return None
-
-        def wait(self, timeout=None):  # noqa: ANN001
-            raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
-
-    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", lambda *a, **k: _TimeoutProcess())  # noqa: ANN002, ANN003
+    monkeypatch.setattr(
+        shape_converter_convert_module.asyncio,
+        "create_subprocess_exec",
+        _fake_exec,
+    )
+    monkeypatch.setattr(shape_converter_convert_module, "_PARSER_SUBPROCESS_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr(shape_converter_convert_module, "_PARSER_SUBPROCESS_KILL_GRACE_SECONDS", 0.01)
     monkeypatch.setattr(
         shape_converter_convert_module.os,
         "killpg",
         lambda _pid, sig: signals_sent.append(sig),
     )
+    monkeypatch.setattr(
+        shape_converter_convert_module,
+        "_process_group_exists",
+        lambda _pid: signal.SIGKILL not in signals_sent,
+    )
     scratch = SimpleNamespace(request_dir=tmp_path)
 
     with pytest.raises(shape_converter_convert_module.ShapeConverterError) as exc_info:
-        shape_converter_convert_module._load_shapefile(
-            shp_path=tmp_path / "roads.shp",
-            scratch=scratch,
+        asyncio.run(
+            shape_converter_convert_module._load_shapefile(
+                shp_path=tmp_path / "roads.shp",
+                scratch=scratch,
+            )
         )
 
     exc = exc_info.value

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import importlib
 import json
-import subprocess
+import threading
+import time
+from pathlib import Path
 
 import pytest
 
@@ -27,6 +30,196 @@ from wepppy.microservices.shape_converter import create_app
 pytestmark = [pytest.mark.integration, pytest.mark.microservice]
 shape_converter_app_module = importlib.import_module("wepppy.microservices.shape_converter.app")
 shape_converter_convert_module = importlib.import_module("wepppy.microservices.shape_converter.convert")
+shape_converter_inspect_module = importlib.import_module("wepppy.microservices.shape_converter.inspect")
+
+
+def test_blocked_conversion_keeps_health_responsive_and_rejects_competing_request(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="blocked"))
+    started = threading.Event()
+    release = threading.Event()
+    original_finish = shape_converter_convert_module._finish_conversion
+
+    def _blocked_finish(**kwargs):  # noqa: ANN003, ANN202
+        started.set()
+        assert release.wait(timeout=10)
+        return original_finish(**kwargs)
+
+    monkeypatch.setattr(shape_converter_convert_module, "_finish_conversion", _blocked_finish)
+
+    with TestClient(create_app()) as client, concurrent.futures.ThreadPoolExecutor() as executor:
+        first = executor.submit(
+            client.post,
+            "/v1/convert",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+        assert started.wait(timeout=10)
+
+        ready = client.get("/health/ready")
+        competing = client.post(
+            "/v1/convert",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+        release.set()
+        completed = first.result(timeout=10)
+
+    assert ready.status_code == 200
+    assert competing.status_code == 503
+    assert competing.json()["error"]["code"] == "service_saturated"
+    assert completed.status_code == 200
+
+
+def test_blocked_inspect_keeps_health_responsive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="inspect-blocked"))
+    started = threading.Event()
+    release = threading.Event()
+    original_extract = shape_converter_inspect_module.validate_and_extract_zip_archive
+
+    def _blocked_extract(**kwargs):  # noqa: ANN003, ANN202
+        started.set()
+        assert release.wait(timeout=10)
+        return original_extract(**kwargs)
+
+    monkeypatch.setattr(
+        shape_converter_inspect_module,
+        "validate_and_extract_zip_archive",
+        _blocked_extract,
+    )
+
+    with TestClient(create_app()) as client, concurrent.futures.ThreadPoolExecutor() as executor:
+        inspection = executor.submit(
+            client.post,
+            "/v1/inspect",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+        )
+        assert started.wait(timeout=10)
+        ready = client.get("/health/ready")
+        release.set()
+        completed = inspection.result(timeout=10)
+
+    assert ready.status_code == 200
+    assert completed.status_code == 200
+
+
+def test_blocked_relay_encoding_keeps_health_responsive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="relay-blocked"))
+    started = threading.Event()
+    release = threading.Event()
+    original_encode = shape_converter_app_module._encode_relay_response
+
+    def _blocked_encode(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+        started.set()
+        assert release.wait(timeout=10)
+        return original_encode(*args, **kwargs)
+
+    monkeypatch.setattr(shape_converter_app_module, "_encode_relay_response", _blocked_encode)
+
+    with TestClient(create_app()) as client, concurrent.futures.ThreadPoolExecutor() as executor:
+        conversion = executor.submit(
+            client.post,
+            "/v1/convert",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+                "response_mode": "json_body",
+            },
+        )
+        assert started.wait(timeout=10)
+        ready = client.get("/health/ready")
+        release.set()
+        completed = conversion.result(timeout=10)
+
+    assert ready.status_code == 200
+    assert completed.status_code == 200
+
+
+def test_blocked_request_cleanup_keeps_health_responsive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="cleanup-blocked"))
+    started = threading.Event()
+    release = threading.Event()
+    original_cleanup = shape_converter_app_module.cleanup_request_scratch_dir
+
+    def _blocked_cleanup(**kwargs):  # noqa: ANN003, ANN202
+        started.set()
+        assert release.wait(timeout=10)
+        return original_cleanup(**kwargs)
+
+    monkeypatch.setattr(shape_converter_app_module, "cleanup_request_scratch_dir", _blocked_cleanup)
+
+    with TestClient(create_app()) as client, concurrent.futures.ThreadPoolExecutor() as executor:
+        inspection = executor.submit(
+            client.post,
+            "/v1/inspect",
+            files={"archive": ("blocked.zip", archive_bytes, "application/zip")},
+        )
+        assert started.wait(timeout=10)
+        ready = client.get("/health/ready")
+        release.set()
+        completed = inspection.result(timeout=10)
+
+    assert ready.status_code == 200
+    assert completed.status_code == 200
+
+
+def test_blocked_periodic_janitor_keeps_health_responsive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    started = threading.Event()
+    release = threading.Event()
+    original_sweep = shape_converter_app_module._run_janitor_sweep
+
+    def _blocked_periodic_sweep(app, *, trigger):  # noqa: ANN001, ANN202
+        if trigger == "periodic":
+            started.set()
+            assert release.wait(timeout=10)
+        return original_sweep(app, trigger=trigger)
+
+    monkeypatch.setattr(
+        shape_converter_app_module,
+        "_run_janitor_sweep",
+        _blocked_periodic_sweep,
+    )
+
+    with TestClient(create_app()) as client:
+        assert started.wait(timeout=10)
+        ready = client.get("/health/ready")
+        release.set()
+
+    assert ready.status_code == 200
+
+
+def test_parser_abort_leaves_api_ready_and_no_partial_artifact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    parser = tmp_path / "aborting-parser"
+    parser.write_text("#!/bin/sh\nulimit -c 0\nkill -ABRT $$\n", encoding="utf-8")
+    parser.chmod(0o755)
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="abort"))
+
+    with TestClient(create_app()) as client:
+        monkeypatch.setenv("SHAPE_CONVERTER_PARSER_CLI", str(parser))
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("abort.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+        ready = client.get("/health/ready")
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "invalid_shapefile"
+    assert ready.status_code == 200
+    assert not list(tmp_path.glob("core*"))
 
 
 @pytest.mark.parametrize(
@@ -375,6 +568,36 @@ def test_convert_parser_loop_timeout_returns_canonical_timeout_and_cleans_scratc
     assert list(tmp_path.iterdir()) == []
 
 
+def test_convert_timeout_wins_over_late_blocking_worker_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:  # noqa: ANN001
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="late-failure"))
+
+    def _late_failure(**_kwargs):  # noqa: ANN003, ANN202
+        time.sleep(0.12)
+        raise RuntimeError("late worker failure")
+
+    monkeypatch.setattr(shape_converter_app_module, "_CONVERT_TIMEOUT_SECONDS", 0.03)
+    monkeypatch.setattr(
+        shape_converter_convert_module,
+        "_prepare_conversion_archive",
+        _late_failure,
+    )
+
+    with TestClient(create_app()) as client:
+        client.app.state.scratch_root = tmp_path
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("late-failure.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 408
+    assert response.json()["error"]["code"] == "request_timeout"
+    assert list(tmp_path.iterdir()) == []
+
+
 def test_convert_parser_subprocess_timeout_returns_canonical_timeout_and_cleans_scratch(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path,
@@ -385,26 +608,23 @@ def test_convert_parser_subprocess_timeout_returns_canonical_timeout_and_cleans_
         pid = 44001
         returncode = None
 
-        def __init__(self):
-            self._communicate_calls = 0
+        async def wait(self):
+            await asyncio.sleep(10)
+            return 0
 
-        def communicate(self, timeout=None):  # noqa: ANN001
-            self._communicate_calls += 1
-            if self._communicate_calls == 1:
-                raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
-            return "", ""
-
-        def poll(self):
-            return None
-
-        def wait(self, timeout=None):  # noqa: ANN001
-            raise subprocess.TimeoutExpired(cmd=["parser"], timeout=timeout)
-
-    monkeypatch.setattr(shape_converter_convert_module.subprocess, "Popen", lambda *a, **k: _TimeoutProcess())  # noqa: ANN002, ANN003
-    monkeypatch.setattr(shape_converter_convert_module.os, "killpg", lambda *_args: None)
+    async def _fake_exec(*_args, **_kwargs):
+        return _TimeoutProcess()
 
     with TestClient(create_app()) as client:
         client.app.state.scratch_root = tmp_path
+        monkeypatch.setattr(
+            shape_converter_convert_module.asyncio,
+            "create_subprocess_exec",
+            _fake_exec,
+        )
+        monkeypatch.setattr(shape_converter_convert_module.os, "killpg", lambda *_args: None)
+        monkeypatch.setattr(shape_converter_convert_module, "_PARSER_SUBPROCESS_TIMEOUT_SECONDS", 0.01)
+        monkeypatch.setattr(shape_converter_convert_module, "_PARSER_SUBPROCESS_KILL_GRACE_SECONDS", 0.01)
         response = client.post(
             "/v1/convert",
             files={"archive": ("timeout-subprocess.zip", archive_bytes, "application/zip")},

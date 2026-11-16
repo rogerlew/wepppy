@@ -8,7 +8,7 @@ Completed locally: [Safe traceback and exceptional-path secret sanitization](doc
 
 Completed on forest: [Status and preflight WebSocket run authorization](docs/work-packages/20261111_status_preflight_websocket_authorization/package.md) - Ratified run-bound credentials, full regression, five-service cutover and 27 real-browser assertions verified; NFS cleanup recovery retained. Production rollout remains pending separate authorization.
 
-Independent IPC/driver/archive slice locally validated: [Shape-converter security conformance closure](docs/work-packages/20261113_shape_converter_security_conformance/package.md) - High parser-boundary remediation for executable worker IPC (#655), the ineffective second sandbox (#656), and related archive/driver/semantic gaps. Validation is change-scoped; GDAL upgrade is explicitly deferred; JSON IPC and admission fixes implemented; sandbox prototype remains blocked; no deployment.
+Local closure complete; rollout pending: [Shape-converter security conformance closure](docs/work-packages/20261113_shape_converter_security_conformance/package.md) - All five final-4 review lanes accept exact image `sha256:b9e78b16718911ff16dc213b27d719477d95880ebcdca500cc858cea13c05ae8` with zero findings. GDAL/Fiona are removed; strict Rust CLI IPC, repeated-cancellation drainage, resource bounds, provenance, and fail-closed release/takedown controls pass. #655 is completed and #656 is closed as superseded, not as second-sandbox proof. No image publication or production rollout occurred.
 
 Implemented; runtime acceptance blocked: [Test-support production guardrails and F1-F7 readiness](docs/work-packages/20261111_test_support_production_guardrails/package.md) - F7 defaults the runtime profile to production, excludes support routes from production, and reuses short-lived WEPP_AUTH credentials through automatic wctl/Playwright injection. No smoke markers or new static secret. Closure requires F6 M4, one combined F1-F7 regression receipt, and a reviewed non-executed deployment-validation plan.
 
@@ -873,9 +873,11 @@ When resuming Kubernetes work:
 **Link**: [docs/work-packages/20261113_shape_converter_security_conformance/](docs/work-packages/20261113_shape_converter_security_conformance/)
 
 **Scope**: Replace executable parser-worker pickle with bounded data-only IPC,
-enforce exact Shapefile driver identity, close archive/dataset/semantic gaps, run
-native parsing in an effective second sandbox, and isolate the service in its
-operator-approved dedicated GDAL image. The common WEPPpy image remains unchanged.
+enforce exact Shapefile identity, close archive/dataset/semantic gaps, and replace
+production GDAL/Fiona parsing with a short-lived service-local Rust CLI under direct
+time, memory, CPU, file, output, feature, vertex, and IPC limits. The CLI remains
+in the existing hardened container; it is not represented as arbitrary-code
+containment. The common WEPPpy image remains unchanged.
 
 **Status**: Operator-approved independent slice implements bounded JSON IPC,
 exact-driver enforcement, normalized alias rejection, and extra-prefix rejection.
@@ -885,10 +887,16 @@ dedicated GDAL 3.12.4/Fiona 1.10.1 image
 has qualified build/dependency evidence. Exact two-worker QA exposed process-local
 abuse controls and conversion metadata; the operator-approved one-worker command
 now passes exact-image limiter, metadata, conversion, and cleanup requalification.
-Independent correctness, QA, and security image reviews pass. The effective
-second parser sandbox, durable full-scan provenance, broader semantics,
-compression policy, and deployment remain gated. Issues #655/#656 remain open;
-no production deployment occurred.
+The first full M6 independent review failed. Remediation provides asynchronous
+cancellation-safe execution, exact SHP/SHX/DBF cardinality checks, a conservative
+single-flight resource envelope, startup-cached real-parser readiness, stronger
+provenance/reproducibility checks, and canonical deploy-time takedown on candidate
+failure. Second remediation `be7848eb7` closes every retained re-review finding;
+its exact image passed no-mount hardening, provenance, semantic, concurrent
+near-ceiling, cleanup, and pinned scan qualification with no new advisory ID.
+#655 is completed and #656 is closed as superseded after final-4 independent
+acceptance. Production rollout remains separately authorized. No image
+publication or production deployment occurred.
 
 
 ### Test-Support Production Guardrails and F1-F7 Readiness

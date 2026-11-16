@@ -14,9 +14,9 @@ from shapely.geometry.base import BaseGeometry
 from .crs import crs_identifier
 from .errors import ShapeConverterError
 
-_MAX_GEOJSON_OUTPUT_BYTES = int(os.getenv("SHAPE_CONVERTER_MAX_GEOJSON_OUTPUT_BYTES", str(100 * 1024 * 1024)))
+_MAX_GEOJSON_OUTPUT_BYTES = int(os.getenv("SHAPE_CONVERTER_MAX_GEOJSON_OUTPUT_BYTES", str(32 * 1024 * 1024)))
 _MAX_GEOPARQUET_OUTPUT_BYTES = int(
-    os.getenv("SHAPE_CONVERTER_MAX_GEOPARQUET_OUTPUT_BYTES", str(100 * 1024 * 1024))
+    os.getenv("SHAPE_CONVERTER_MAX_GEOPARQUET_OUTPUT_BYTES", str(32 * 1024 * 1024))
 )
 
 

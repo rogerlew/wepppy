@@ -61,9 +61,9 @@ run_wctl_with_retry() {
     while [ "${attempt}" -le "${retries}" ]; do
         if run_with_timeout "${timeout_seconds}" wctl "${cmd[@]}"; then
             return 0
+        else
+            exit_code=$?
         fi
-
-        exit_code=$?
         if [ "${attempt}" -ge "${retries}" ]; then
             echo "✗ Command failed after ${attempt} attempts: wctl ${cmd[*]} (exit ${exit_code})" >&2
             return "${exit_code}"
@@ -95,9 +95,9 @@ capture_wctl_with_retry() {
         if output="$(run_with_timeout "${timeout_seconds}" wctl "${cmd[@]}")"; then
             printf "%s\n" "${output}"
             return 0
+        else
+            exit_code=$?
         fi
-
-        exit_code=$?
         if [ "${attempt}" -ge "${retries}" ]; then
             echo "✗ Command failed after ${attempt} attempts: wctl ${cmd[*]} (exit ${exit_code})" >&2
             return "${exit_code}"
@@ -196,6 +196,90 @@ ensure_git_worktree_clean() {
     return 0
 }
 
+ensure_shape_converter_build_inputs_clean() {
+    local build_input_changes=""
+    if ! build_input_changes="$(
+        git status --porcelain=v1 --untracked-files=all -- \
+            .dockerignore \
+            docker/Dockerfile.shape-converter \
+            docker/Dockerfile.shape-converter.dockerignore \
+            docker/docker-compose.prod.yml \
+            docker/docker-compose.prod.wepp1.yml \
+            docker/requirements-shape-converter.txt \
+            wepppy/__init__.py \
+            wepppy/microservices/__init__.py \
+            wepppy/microservices/shape_converter \
+            wepppy/observability
+    )"; then
+        echo "✗ Refusing shape-converter release build: unable to inspect build inputs." >&2
+        return 1
+    fi
+    if [ -n "${build_input_changes}" ]; then
+        echo "✗ Refusing shape-converter release build: inputs differ from HEAD." >&2
+        print_limited_list "  Dirty shape-converter build inputs:" "${build_input_changes}" 30 >&2
+        echo "  Commit/stash the listed paths; unrelated worktree changes are allowed." >&2
+        return 1
+    fi
+}
+
+stop_shape_converter_fail_closed() {
+    local -a container_id_list=()
+    local container_ids=""
+    local running_container=""
+    echo "✗ Deployment failed; stopping shape-converter instead of restoring an unreviewed parser." >&2
+    if ! container_ids="$(
+        docker ps -aq \
+            --filter "label=com.docker.compose.service=shape-converter" \
+            --filter "label=com.docker.compose.project.working_dir=${PROJECT_ROOT}/docker"
+    )"; then
+        echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to discover service containers" >&2
+        return 88
+    fi
+    if [ -n "${container_ids}" ]; then
+        readarray -t container_id_list <<< "${container_ids}"
+        if ! docker stop --time 30 "${container_id_list[@]}" >/dev/null 2>&1; then
+            echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to stop the service" >&2
+            return 88
+        fi
+    fi
+    if ! running_container="$(
+        docker ps -q \
+            --filter "label=com.docker.compose.service=shape-converter" \
+            --filter "label=com.docker.compose.project.working_dir=${PROJECT_ROOT}/docker"
+    )"; then
+        echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: unable to verify service state" >&2
+        return 88
+    fi
+    if [ -n "${running_container}" ]; then
+        echo "✗ SHAPE_CONVERTER_FAIL_CLOSED_FAILED: service still has a running container" >&2
+        return 88
+    fi
+    echo "✓ shape-converter is down; no GDAL/Fiona or unreviewed parser fallback was activated" >&2
+}
+
+fail_shape_release_preflight() {
+    if [ "${FULL_STACK_DEPLOY_PRESET:-false}" = true ] \
+        && [ "${TARGETED_WEB}" = false ] \
+        && [ "${TARGETED_CAP}" = false ] \
+        && [ "${TARGETED_BATCH}" = false ] \
+        && [ "${PRINT_PLAN}" = false ]; then
+        if ! stop_shape_converter_fail_closed; then
+            return 88
+        fi
+    fi
+    return 1
+}
+
+configure_shape_parser_release_provenance() {
+    ensure_shape_converter_build_inputs_clean || return $?
+    SHAPE_PARSER_SOURCE_REVISION="$(git rev-parse HEAD)" || return $?
+    SHAPE_PARSER_RELEASE_LABEL="wepppy-${SHAPE_PARSER_SOURCE_REVISION:0:12}"
+    SHAPE_PARSER_BUILT_UTC="$(git show -s --format=%cI HEAD)" || return $?
+    [[ "${SHAPE_PARSER_SOURCE_REVISION}" =~ ^[a-f0-9]{40}$ ]] || return $?
+    export SHAPE_PARSER_SOURCE_REVISION SHAPE_PARSER_RELEASE_LABEL SHAPE_PARSER_BUILT_UTC
+    echo "    Shape parser release revision: ${SHAPE_PARSER_SOURCE_REVISION}"
+}
+
 safe_git_fast_forward_pull() {
     local original_head=""
     local current_branch=""
@@ -269,6 +353,7 @@ RESUME_RETAINED_CANDIDATE=""
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 RQ_ENGINE_HEALTHCHECK_URL="${RQ_ENGINE_HEALTHCHECK_URL:-}"
 CAP_HEALTHCHECK_URL="${CAP_HEALTHCHECK_URL:-}"
+SHAPE_CONVERTER_HEALTHCHECK_URL="${SHAPE_CONVERTER_HEALTHCHECK_URL:-}"
 CAP_RUNTIME_VALIDATOR="${CAP_RUNTIME_VALIDATOR:-${PROJECT_ROOT}/docker/validate-cap-runtime-contract.sh}"
 CAP_RUNTIME_PREPARER="${CAP_RUNTIME_PREPARER:-${PROJECT_ROOT}/docker/prepare-cap-runtime.sh}"
 WEPPCLOUDR_RUNTIME_VALIDATOR="${WEPPCLOUDR_RUNTIME_VALIDATOR:-${PROJECT_ROOT}/docker/validate-weppcloudr-runtime-contract.sh}"
@@ -355,13 +440,55 @@ done
 cd "${PROJECT_ROOT}"
 
 configure_deploy_topology() {
-    COMPOSE_SERVICES="$(
+    if ! DEPLOY_PRESET_FILES="$(
+        capture_wctl_with_retry \
+            "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+            "${WCTL_COMPOSE_RETRIES}" \
+            "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+            show-compose-files
+    )"; then
+        echo "✗ Unable to identify the installed wctl deployment preset." >&2
+        if [ "${PRINT_PLAN}" = false ] \
+            && [ "${TARGETED_WEB}" = false ] \
+            && [ "${TARGETED_CAP}" = false ] \
+            && [ "${TARGETED_BATCH}" = false ]; then
+            if ! stop_shape_converter_fail_closed; then
+                exit 88
+            fi
+        fi
+        exit 1
+    fi
+    FULL_STACK_DEPLOY_PRESET=false
+    if printf "%s\n" "${DEPLOY_PRESET_FILES}" \
+        | grep -qx "docker/docker-compose.prod.yml"; then
+        FULL_STACK_DEPLOY_PRESET=true
+    fi
+
+    if [ "${FULL_STACK_DEPLOY_PRESET}" = true ] \
+        && [ "${TARGETED_WEB}" = false ] \
+        && [ "${TARGETED_CAP}" = false ] \
+        && [ "${TARGETED_BATCH}" = false ] \
+        && [ "${PRINT_PLAN}" = false ]; then
+        if ! configure_shape_parser_release_provenance; then
+            if ! stop_shape_converter_fail_closed; then
+                exit 88
+            fi
+            exit 1
+        fi
+        SHAPE_RELEASE_PROVENANCE_CONFIGURED=true
+    fi
+
+    if ! COMPOSE_SERVICES="$(
         capture_wctl_with_retry \
             "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
             "${WCTL_COMPOSE_RETRIES}" \
             "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
             docker compose config --services
-    )"
+    )"; then
+        local failure_status=1
+        fail_shape_release_preflight || failure_status=$?
+        return "${failure_status}"
+    fi
     HAS_WEPPCLOUD=false
     IS_WEPP3_FORK_ARCHIVE=false
     ACTIVE_SERVICE_ARGS=()
@@ -391,6 +518,15 @@ configure_deploy_topology() {
         echo "  Effective services:" >&2
         printf "%s\n" "${COMPOSE_SERVICES}" | sed 's/^/    /' >&2
         echo "  Reinstall the intended wctl preset before deploying." >&2
+        if [ "${FULL_STACK_DEPLOY_PRESET}" = true ] \
+            && [ "${TARGETED_WEB}" = false ] \
+            && [ "${TARGETED_CAP}" = false ] \
+            && [ "${TARGETED_BATCH}" = false ] \
+            && [ "${PRINT_PLAN}" = false ]; then
+            if ! stop_shape_converter_fail_closed; then
+                exit 88
+            fi
+        fi
         exit 1
     fi
 
@@ -404,17 +540,25 @@ configure_deploy_topology() {
         RQ_DRAIN_REGISTRIES="default,batch"
     fi
 
-    BUILD_OUTPUT="$(
+    if ! BUILD_OUTPUT="$(
         wctl docker compose config --format json \
             | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
                 build-services "${ACTIVE_SERVICE_ARGS[@]}"
-    )"
+    )"; then
+        local failure_status=1
+        fail_shape_release_preflight || failure_status=$?
+        return "${failure_status}"
+    fi
     mapfile -t BUILD_SERVICES <<< "${BUILD_OUTPUT}"
-    EXPECTED_OUTPUT="$(
+    if ! EXPECTED_OUTPUT="$(
         wctl docker compose config --format json \
             | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
                 expected-services "${ACTIVE_SERVICE_ARGS[@]}"
-    )"
+    )"; then
+        local failure_status=1
+        fail_shape_release_preflight || failure_status=$?
+        return "${failure_status}"
+    fi
     mapfile -t EXPECTED_RUNNING_SERVICES <<< "${EXPECTED_OUTPUT}"
     if [ "${DEPLOY_MODE}" = "full" ]; then
         FILTERED_EXPECTED_SERVICES=()
@@ -466,11 +610,27 @@ configure_deploy_topology() {
     for service in "${RECREATED_SERVICES[@]}"; do
         RUNTIME_SERVICE_ARGS+=(--active-service "${service}")
     done
-    wctl docker compose config --format json \
+    if ! wctl docker compose config --format json \
         | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
-            validate-runtime-config "${RUNTIME_SERVICE_ARGS[@]}"
+            validate-runtime-config "${RUNTIME_SERVICE_ARGS[@]}"; then
+        local failure_status=1
+        fail_shape_release_preflight || failure_status=$?
+        return "${failure_status}"
+    fi
 }
 
+SHAPE_RELEASE_PROVENANCE_CONFIGURED=false
+if [ "${PRINT_PLAN}" = false ]; then
+    DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-${PROJECT_ROOT}/.git/wepppy-production-deploy.lock}"
+    if [ "${DEPLOY_LOCK_HELD_PID:-}" != "$$" ]; then
+        exec 9>"${DEPLOY_LOCK_FILE}"
+        if ! flock -n 9; then
+            echo "✗ Another deployment holds ${DEPLOY_LOCK_FILE}; refusing concurrent activation." >&2
+            exit 1
+        fi
+        export DEPLOY_LOCK_HELD_PID="$$"
+    fi
+fi
 configure_deploy_topology
 
 validate_deploy_topology() {
@@ -631,6 +791,34 @@ else
 fi
 
 validate_deploy_topology
+
+SHAPE_CONVERTER_RELEASE_REQUIRED=false
+if [ "${FULL_STACK_DEPLOY_PRESET}" = true ] \
+    && [ "${TARGETED_WEB}" = false ] \
+    && [ "${TARGETED_CAP}" = false ] \
+    && [ "${TARGETED_BATCH}" = false ]; then
+    SHAPE_CONVERTER_RELEASE_REQUIRED=true
+elif printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter"; then
+    SHAPE_CONVERTER_RELEASE_REQUIRED=true
+fi
+
+if [ "${SHAPE_CONVERTER_RELEASE_REQUIRED}" = true ]; then
+    SHAPE_RELEASE_PROVENANCE_FAILED=false
+    if [ "${SHAPE_RELEASE_PROVENANCE_CONFIGURED}" != true ] \
+        && ! configure_shape_parser_release_provenance; then
+        SHAPE_RELEASE_PROVENANCE_FAILED=true
+    fi
+    if [ "${SHAPE_RELEASE_PROVENANCE_FAILED}" = true ] \
+        || ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "shape-converter" \
+        || ! printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter" \
+        || ! printf "%s\n" "${BUILD_SERVICES[@]}" | grep -qx "shape-converter"; then
+        echo "✗ Refusing full activation without the reviewed shape-converter service/build contract." >&2
+        if ! stop_shape_converter_fail_closed; then
+            exit 88
+        fi
+        exit 1
+    fi
+fi
 
 if [ "${SKIP_BUILD}" = true ] && [ "${#BUILD_SERVICES[@]}" -gt 0 ]; then
     echo "✗ --skip-build is unsafe when locally built services will be recreated." >&2
@@ -1003,6 +1191,10 @@ CAP_RESCUE_IMAGE=""
 CAP_RESCUE_CONFIG=""
 CAP_RESCUE_OVERRIDE=""
 CAP_ACTIVATION_STARTED=false
+SHAPE_CONVERTER_FAIL_CLOSED=false
+if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter"; then
+    SHAPE_CONVERTER_FAIL_CLOSED=true
+fi
 STAGED_CONTROLLERS_JS=""
 BACKUP_CONTROLLERS_JS=""
 KNOWN_GOOD_DIR=""
@@ -1201,7 +1393,14 @@ fi
 recover_targeted_cap() {
     local original_exit="$?"
     local recovery_exit="${original_exit}"
+    local shape_shutdown_failed=false
     trap - ERR
+    if [ "${SHAPE_CONVERTER_FAIL_CLOSED}" = true ]; then
+        if ! stop_shape_converter_fail_closed; then
+            shape_shutdown_failed=true
+            recovery_exit=88
+        fi
+    fi
     if [ -n "${STAGED_CONTROLLERS_JS}" ]; then
         rm -f -- "${STAGED_CONTROLLERS_JS}"
         STAGED_CONTROLLERS_JS=""
@@ -1233,6 +1432,7 @@ recover_targeted_cap() {
             echo "✗ RQ_RESUME_FAILED: the 3600-second suspension TTL remains as break-glass protection" >&2
             recovery_exit=87
         fi
+        [ "${shape_shutdown_failed}" = false ] || return 88
         return "${recovery_exit}"
     fi
     echo "✗ Candidate CAP activation failed; restoring ${CAP_RESCUE_IMAGE}" >&2
@@ -1254,16 +1454,18 @@ recover_targeted_cap() {
         local rescue_caddy
         if ! rescue_caddy="$(docker compose -f "${CAP_RESCUE_CONFIG}" -f "${CAP_RESCUE_OVERRIDE}" ps -q caddy)"; then
             echo "✗ CAP_RESCUE_FAILED: unable to inspect Caddy" >&2
-            if ! resume_rq_if_owned; then return 87; fi
-            return 86
+            if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+            [ "${shape_shutdown_failed}" = false ] || return 88
+            return "${recovery_exit}"
         fi
         if [ -z "${rescue_caddy}" ] \
             || [ "$(docker inspect --format '{{.State.Running}}' "${rescue_caddy}" 2>/dev/null || true)" != "true" ]; then
             if ! docker compose -f "${CAP_RESCUE_CONFIG}" -f "${CAP_RESCUE_OVERRIDE}" \
                 up -d --no-deps caddy >/dev/null; then
                 echo "✗ CAP_RESCUE_FAILED: unable to restore Caddy" >&2
-                if ! resume_rq_if_owned; then return 87; fi
-                return 86
+                if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+                [ "${shape_shutdown_failed}" = false ] || return 88
+                return "${recovery_exit}"
             fi
         fi
         local recovery_cap_url="${CAP_HEALTHCHECK_URL}"
@@ -1282,25 +1484,31 @@ recover_targeted_cap() {
                 if curl --connect-timeout 5 --max-time 10 -fsS "${recovery_cap_url}" >/dev/null; then
                     if ! resume_rq_if_owned; then
                         echo "✗ RQ_RESUME_FAILED after CAP recovery" >&2
+                        [ "${shape_shutdown_failed}" = false ] || return 88
                         return 87
                     fi
                     echo "✓ Known-good CAP rescue image restored; internal functional and public health passed" >&2
+                    [ "${shape_shutdown_failed}" = false ] || return 88
                     return "${recovery_exit}"
                 fi
                 sleep 2
             done
             echo "✗ CAP_RESCUE_FAILED: public CAP route did not recover" >&2
-            if ! resume_rq_if_owned; then return 87; fi
-            return 86
+            if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+            [ "${shape_shutdown_failed}" = false ] || return 88
+            return "${recovery_exit}"
         fi
         echo "✗ CAP_RESCUE_FAILED: no public CAP health URL could be resolved" >&2
-        if ! resume_rq_if_owned; then return 87; fi
-        return 86
+        if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+        [ "${shape_shutdown_failed}" = false ] || return 88
+        return "${recovery_exit}"
     else
         echo "✗ CAP_RESCUE_FAILED: rescue image retained as ${CAP_RESCUE_IMAGE}" >&2
-        if ! resume_rq_if_owned; then return 87; fi
-        return 86
+        if ! resume_rq_if_owned; then recovery_exit=87; else recovery_exit=86; fi
+        [ "${shape_shutdown_failed}" = false ] || return 88
+        return "${recovery_exit}"
     fi
+    [ "${shape_shutdown_failed}" = false ] || return 88
     return "${recovery_exit}"
 }
 trap recover_targeted_cap ERR
@@ -1697,6 +1905,34 @@ if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_BATCH}" = false ]; then
                 false
             fi
             echo "  Waiting for rq-engine to be ready (attempt ${RQ_ENGINE_ATTEMPT}/${MAX_ATTEMPTS})..."
+            sleep 2
+        done
+    fi
+
+    if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "shape-converter"; then
+        if [ -z "${SHAPE_CONVERTER_HEALTHCHECK_URL}" ]; then
+            case "${HEALTHCHECK_URL}" in
+                */weppcloud/health)
+                    SHAPE_CONVERTER_HEALTHCHECK_URL="${HEALTHCHECK_URL%/weppcloud/health}/utils/shape-converter/health/ready"
+                    ;;
+                *)
+                    echo "✗ Set SHAPE_CONVERTER_HEALTHCHECK_URL when HEALTHCHECK_URL does not end in /weppcloud/health." >&2
+                    false
+                    ;;
+            esac
+        fi
+        echo "    Shape-converter readiness URL: ${SHAPE_CONVERTER_HEALTHCHECK_URL}"
+        SHAPE_ATTEMPT=0
+        while [ "${SHAPE_ATTEMPT}" -lt "${MAX_ATTEMPTS}" ]; do
+            if curl --connect-timeout 5 --max-time 10 -fsS "${SHAPE_CONVERTER_HEALTHCHECK_URL}" >/dev/null 2>&1; then
+                echo "✓ shape-converter startup parser canary and public readiness passed"
+                break
+            fi
+            SHAPE_ATTEMPT=$((SHAPE_ATTEMPT + 1))
+            if [ "${SHAPE_ATTEMPT}" -eq "${MAX_ATTEMPTS}" ]; then
+                echo "✗ shape-converter readiness failed; fail-closed shutdown required" >&2
+                false
+            fi
             sleep 2
         done
     fi

@@ -17,6 +17,16 @@ def test_run_npm_help(temp_project) -> None:
     assert "run-npm" in result.stdout
 
 
+def test_show_compose_files_reports_installed_preset_paths(temp_project) -> None:
+    result = CliRunner().invoke(
+        app,
+        ["--project-dir", str(temp_project), "show-compose-files"],
+    )
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == "docker/docker-compose.dev.yml"
+
+
 def test_passthrough_delegates_to_docker_compose(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
     runner = CliRunner()
     recorded: List[Tuple[Sequence[str], bool]] = []

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,7 @@ _DEV_COMPOSE_PATH = _REPO_ROOT / "docker" / "docker-compose.dev.yml"
 _PROD_COMPOSE_PATH = _REPO_ROOT / "docker" / "docker-compose.prod.yml"
 _PROD_WEPP1_COMPOSE_PATH = _REPO_ROOT / "docker" / "docker-compose.prod.wepp1.yml"
 _CADDY_WEPP1_PATH = _REPO_ROOT / "docker" / "caddy" / "Caddyfile.wepp1"
+convert_module = importlib.import_module("wepppy.microservices.shape_converter.convert")
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
@@ -36,6 +38,29 @@ def _extract_caddy_block(caddy_text: str, marker: str) -> str:
                 return caddy_text[start : index + 1]
 
     raise AssertionError(f"{marker!r} block closing brace not found in Caddyfile.wepp1")
+
+
+def test_effective_resource_envelope_rejects_unsafe_concurrency_and_ceiling(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ready, reason = convert_module.validate_conversion_resource_envelope(
+        max_inflight_global=2,
+        max_inflight_per_ip=1,
+    )
+    assert ready is False
+    assert reason and "inflight limits" in reason
+
+    monkeypatch.setattr(
+        convert_module,
+        "_PARSER_MEMORY_LIMIT_BYTES",
+        384 * 1024 * 1024 + 1,
+    )
+    ready, reason = convert_module.validate_conversion_resource_envelope(
+        max_inflight_global=1,
+        max_inflight_per_ip=1,
+    )
+    assert ready is False
+    assert reason and "parser_memory_bytes" in reason
 
 
 def _assert_shape_converter_hardening_contract(
@@ -70,8 +95,6 @@ def _assert_shape_converter_hardening_contract(
         assert "nodev" in entry
 
     expected_env_keys = {
-        "SHAPE_CONVERTER_SANDBOX_MODE",
-        "SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE",
         "SHAPE_CONVERTER_SCRATCH_ROOT",
         "SHAPE_CONVERTER_MULTIPART_MAX_PARTS",
         "SHAPE_CONVERTER_MULTIPART_MAX_FIELD_BYTES",
@@ -79,8 +102,16 @@ def _assert_shape_converter_hardening_contract(
         "SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES",
         "SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES",
         "SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS",
+        "SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES",
+        "SHAPE_CONVERTER_MAX_PARSER_PAYLOAD_BYTES",
+        "SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES",
+        "SHAPE_CONVERTER_PARSER_CPU_LIMIT_SECONDS",
+        "SHAPE_CONVERTER_PARSER_OPEN_FILE_LIMIT",
+        "SHAPE_CONVERTER_MAX_GEOJSON_OUTPUT_BYTES",
+        "SHAPE_CONVERTER_MAX_GEOPARQUET_OUTPUT_BYTES",
     }
     assert expected_env_keys.issubset(shape_converter["environment"])
+    assert shape_converter["healthcheck"]["test"][0] == "CMD"
 
 
 @pytest.mark.parametrize(

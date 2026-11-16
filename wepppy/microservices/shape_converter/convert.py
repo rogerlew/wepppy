@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import collections.abc as cabc
 import errno
 import os
 import shutil
 import signal
-import subprocess
-import sys
+import struct
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -25,6 +26,7 @@ from .archive_validation import (
     shp_xml_sidecar_warning_message,
     validate_and_extract_zip_archive,
 )
+from .async_runtime import run_blocking_phase as _run_blocking_phase
 from .cleanup import RequestScratchLayout
 from .crs import (
     TARGET_CRS_OPTIONS,
@@ -37,7 +39,12 @@ from .crs import (
 from .errors import ShapeConverterError
 from .parser_ipc import read_payload
 from .inspect import read_dbf_metadata, read_projection_metadata, select_single_shapefile_dataset
-from .serialization import serialize_geojson, serialize_geoparquet
+from .serialization import (
+    _MAX_GEOJSON_OUTPUT_BYTES,
+    _MAX_GEOPARQUET_OUTPUT_BYTES,
+    serialize_geojson,
+    serialize_geoparquet,
+)
 
 OUTPUT_FORMAT_OPTIONS = frozenset({"geojson", "geoparquet"})
 _MAX_UPLOAD_COMPRESSED_BYTES = ArchiveLimits().max_compressed_bytes
@@ -48,15 +55,15 @@ _MAX_VERTICES_PER_FEATURE = max(
 )
 _MAX_PARSER_PAYLOAD_BYTES = max(
     1,
-    int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_PAYLOAD_BYTES", str(256 * 1024 * 1024))),
+    int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_PAYLOAD_BYTES", str(16 * 1024 * 1024))),
 )
 _REQUEST_SCRATCH_QUOTA_BYTES = max(
     1,
-    int(os.getenv("SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES", str(700 * 1024 * 1024))),
+    int(os.getenv("SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES", str(320 * 1024 * 1024))),
 )
 _SCRATCH_PRECHECK_FREE_BYTES = max(
     1,
-    int(os.getenv("SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES", str(128 * 1024 * 1024))),
+    int(os.getenv("SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES", str(32 * 1024 * 1024))),
 )
 _PARSER_SUBPROCESS_TIMEOUT_SECONDS = max(
     1,
@@ -66,22 +73,45 @@ _PARSER_SUBPROCESS_KILL_GRACE_SECONDS = max(
     1,
     int(os.getenv("SHAPE_CONVERTER_PARSER_KILL_GRACE_SECONDS", "5")),
 )
-_PARSER_WORKER_MODULE = "wepppy.microservices.shape_converter.convert_parser_worker"
-_PARSER_WORKER_ENV_ALLOWLIST = frozenset(
-    {
-        "PATH",
-        "PYTHONPATH",
-        "PYTHONHOME",
-        "PYTHONNOUSERSITE",
-        "PYTHONHASHSEED",
-        "LD_LIBRARY_PATH",
-        "GDAL_DATA",
-        "PROJ_LIB",
-        "SSL_CERT_FILE",
-        "SSL_CERT_DIR",
-        "TZ",
-    }
+_MAX_PARSER_INPUT_BYTES = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES", str(128 * 1024 * 1024))),
 )
+_PARSER_MEMORY_LIMIT_BYTES = max(
+    64 * 1024 * 1024,
+    int(os.getenv("SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES", str(384 * 1024 * 1024))),
+)
+_PARSER_CPU_LIMIT_SECONDS = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_PARSER_CPU_LIMIT_SECONDS", "60")),
+)
+_PARSER_OPEN_FILE_LIMIT = max(
+    8,
+    int(os.getenv("SHAPE_CONVERTER_PARSER_OPEN_FILE_LIMIT", "32")),
+)
+_INSTALLED_PARSER_CLI = Path("/usr/local/bin/shape_parser_cli")
+_SOURCE_PARSER_CLI = (
+    Path(__file__).resolve().parent
+    / "rust"
+    / "shape_parser_cli"
+    / "target"
+    / "release"
+    / "shape_parser_cli"
+)
+_REVIEWED_RESOURCE_MAXIMA = {
+    "max_features": 1_000_000,
+    "max_vertices_per_feature": 250_000,
+    "parser_payload_bytes": 16 * 1024 * 1024,
+    "request_scratch_bytes": 320 * 1024 * 1024,
+    "scratch_precheck_bytes": 32 * 1024 * 1024,
+    "parser_timeout_seconds": 90,
+    "parser_input_bytes": 128 * 1024 * 1024,
+    "parser_memory_bytes": 384 * 1024 * 1024,
+    "parser_cpu_seconds": 60,
+    "parser_open_files": 32,
+    "geojson_output_bytes": 32 * 1024 * 1024,
+    "geoparquet_output_bytes": 32 * 1024 * 1024,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,6 +133,48 @@ class ConvertedArtifact:
     content_type: str
     content: bytes
     metadata: dict[str, object]
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedConversion:
+    """Validated archive state needed after the Rust parser completes."""
+
+    prefix_path: Path
+    dbf_metadata: dict[str, object]
+    detected_crs: dict[str, object] | None
+    projection_status: str
+    projection_warnings: tuple[str, ...]
+    sidecar_warning: str | None
+
+
+def validate_conversion_resource_envelope(
+    *,
+    max_inflight_global: int,
+    max_inflight_per_ip: int,
+) -> tuple[bool, str | None]:
+    """Reject effective settings outside the independently reviewed envelope."""
+
+    if max_inflight_global != 1 or max_inflight_per_ip != 1:
+        return False, "shape_converter_resource_envelope_invalid: inflight limits must equal one"
+
+    effective = {
+        "max_features": _MAX_CONVERT_FEATURES,
+        "max_vertices_per_feature": _MAX_VERTICES_PER_FEATURE,
+        "parser_payload_bytes": _MAX_PARSER_PAYLOAD_BYTES,
+        "request_scratch_bytes": _REQUEST_SCRATCH_QUOTA_BYTES,
+        "scratch_precheck_bytes": _SCRATCH_PRECHECK_FREE_BYTES,
+        "parser_timeout_seconds": _PARSER_SUBPROCESS_TIMEOUT_SECONDS,
+        "parser_input_bytes": _MAX_PARSER_INPUT_BYTES,
+        "parser_memory_bytes": _PARSER_MEMORY_LIMIT_BYTES,
+        "parser_cpu_seconds": _PARSER_CPU_LIMIT_SECONDS,
+        "parser_open_files": _PARSER_OPEN_FILE_LIMIT,
+        "geojson_output_bytes": _MAX_GEOJSON_OUTPUT_BYTES,
+        "geoparquet_output_bytes": _MAX_GEOPARQUET_OUTPUT_BYTES,
+    }
+    for name, value in effective.items():
+        if value > _REVIEWED_RESOURCE_MAXIMA[name]:
+            return False, f"shape_converter_resource_envelope_invalid: {name} exceeds reviewed maximum"
+    return True, None
 
 
 async def convert_uploaded_archive(
@@ -148,6 +220,40 @@ async def convert_uploaded_archive(
             details="Uploaded archive contained zero bytes.",
         )
 
+    prepared = await _run_blocking_phase(
+        _prepare_conversion_archive,
+        archive_name=archive_name,
+        archive_bytes=archive_bytes,
+        scratch=scratch,
+        target_crs=target_crs,
+    )
+    del archive_bytes
+
+    loaded = await _load_shapefile(
+        shp_path=prepared.prefix_path.with_suffix(".shp"),
+        scratch=scratch,
+        ignore_source_crs=(
+            target_crs == "same_as_shapefile" and prepared.projection_status == "invalid"
+        ),
+    )
+    return await _run_blocking_phase(
+        _finish_conversion,
+        loaded=loaded,
+        prepared=prepared,
+        scratch=scratch,
+        request_id=request_id,
+        output_format=output_format,
+        target_crs=target_crs,
+    )
+
+
+def _prepare_conversion_archive(
+    *,
+    archive_name: str,
+    archive_bytes: bytes,
+    scratch: RequestScratchLayout,
+    target_crs: str,
+) -> _PreparedConversion:
     _assert_scratch_free_space(
         scratch=scratch,
         required_free_bytes=len(archive_bytes) + _SCRATCH_PRECHECK_FREE_BYTES,
@@ -209,20 +315,35 @@ async def convert_uploaded_archive(
         additional_bytes=_MAX_PARSER_PAYLOAD_BYTES,
         stage="parser_payload_budget",
     )
-    loaded = _load_shapefile(
-        shp_path=dataset.prefix_path.with_suffix(".shp"),
-        scratch=scratch,
+    return _PreparedConversion(
+        prefix_path=dataset.prefix_path,
+        dbf_metadata=dbf_metadata,
+        detected_crs=detected_crs,
+        projection_status=projection_status,
+        projection_warnings=tuple(projection_warnings),
+        sidecar_warning=sidecar_warning,
     )
+
+
+def _finish_conversion(
+    *,
+    loaded: LoadedShapefile,
+    prepared: _PreparedConversion,
+    scratch: RequestScratchLayout,
+    request_id: str,
+    output_format: str,
+    target_crs: str,
+) -> ConvertedArtifact:
     crs_plan = resolve_target_crs(
         target_crs_token=target_crs,
         source_crs=loaded.source_crs,
         source_bounds=loaded.source_bounds,
-        source_projection_status=projection_status,
+        source_projection_status=prepared.projection_status,
     )
     conversion_warnings = list(crs_plan.warnings)
-    conversion_warnings.extend(projection_warnings)
-    if sidecar_warning:
-        conversion_warnings.append(sidecar_warning)
+    conversion_warnings.extend(prepared.projection_warnings)
+    if prepared.sidecar_warning:
+        conversion_warnings.append(prepared.sidecar_warning)
 
     transformed_geometries = reproject_geometries(
         geometries=loaded.geometries,
@@ -253,13 +374,13 @@ async def convert_uploaded_archive(
         crs_plan=crs_plan,
         transformed_geometries=transformed_geometries,
         feature_count=len(loaded.properties),
-        projection_status=projection_status,
-        attribute_schema=dbf_metadata["fields"],
-        detected_crs=detected_crs,
+        projection_status=prepared.projection_status,
+        attribute_schema=prepared.dbf_metadata["fields"],
+        detected_crs=prepared.detected_crs,
         warnings=serialized.warnings,
     )
 
-    prefix_name = dataset.prefix_path.name
+    prefix_name = prepared.prefix_path.name
     filename = f"{prefix_name}_{target_crs}.{serialized.extension}"
     output_path = scratch.output_root / filename
 
@@ -377,46 +498,145 @@ def _scratch_tree_size_bytes(path: Path) -> int:
     return total
 
 
-def _load_shapefile(*, shp_path: Path, scratch: RequestScratchLayout) -> LoadedShapefile:
+async def _load_shapefile(
+    *,
+    shp_path: Path,
+    scratch: RequestScratchLayout,
+    ignore_source_crs: bool = False,
+) -> LoadedShapefile:
     parser_output_path = scratch.request_dir / "parser_worker_payload.json"
-    worker_stdout, worker_stderr = _run_parser_worker(
+    worker_stdout, worker_stderr = await _run_parser_worker(
         shp_path=shp_path,
         output_path=parser_output_path,
         scratch=scratch,
     )
 
-    worker_payload = _read_parser_payload(
+    return await _run_blocking_phase(
+        _read_and_load_parser_payload,
         payload_path=parser_output_path,
         worker_stdout=worker_stdout,
         worker_stderr=worker_stderr,
+        ignore_source_crs=ignore_source_crs,
     )
 
-    return _loaded_shapefile_from_payload(worker_payload)
+
+def _read_and_load_parser_payload(
+    *,
+    payload_path: Path,
+    worker_stdout: str,
+    worker_stderr: str,
+    ignore_source_crs: bool,
+) -> LoadedShapefile:
+    worker_payload = _read_parser_payload(
+        payload_path=payload_path,
+        worker_stdout=worker_stdout,
+        worker_stderr=worker_stderr,
+    )
+    return _loaded_shapefile_from_payload(
+        worker_payload,
+        ignore_source_crs=ignore_source_crs,
+    )
+
+
+def _parser_cli_path() -> Path:
+    configured = os.getenv("SHAPE_CONVERTER_PARSER_CLI")
+    if configured:
+        return Path(configured)
+    if _SOURCE_PARSER_CLI.is_file() and os.access(_SOURCE_PARSER_CLI, os.X_OK):
+        return _SOURCE_PARSER_CLI
+    return _INSTALLED_PARSER_CLI
+
+
+async def probe_parser_runtime(scratch_root: Path) -> tuple[bool, str | None]:
+    try:
+        scratch_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="parser-readiness-", dir=scratch_root) as raw_root:
+            request_root = Path(raw_root)
+            shp_path = request_root / "probe.shp"
+            _write_readiness_dataset(shp_path)
+            output_path = request_root / "payload.json"
+            scratch = RequestScratchLayout(
+                request_dir=request_root,
+                upload_archive_path=request_root / "unused.zip",
+                extraction_root=request_root,
+                output_root=request_root,
+            )
+            await _run_parser_worker(shp_path=shp_path, output_path=output_path, scratch=scratch)
+            payload = _read_parser_payload(
+                payload_path=output_path,
+                worker_stdout="",
+                worker_stderr="",
+            )
+    except (OSError, ShapeConverterError, ValueError, TypeError, struct.error):
+        return False, "parser_runtime_probe_failed"
+
+    if (
+        payload.get("properties") != [{"READY": "yes"}]
+        or payload.get("geometries")
+        != [{"type": "Point", "coordinates": [1.0, 2.0]}]
+        or payload.get("source_bounds") != [1.0, 2.0, 1.0, 2.0]
+    ):
+        return False, "parser_runtime_probe_semantics_invalid"
+    return True, None
+
+
+def _write_readiness_dataset(shp_path: Path) -> None:
+    record_content = struct.pack("<i2d", 1, 1.0, 2.0)
+    record_header = struct.pack(">2i", 1, len(record_content) // 2)
+    shp_header = _readiness_shape_header(
+        file_length_words=(100 + len(record_header) + len(record_content)) // 2,
+    )
+    shp_path.write_bytes(shp_header + record_header + record_content)
+
+    shx_record = struct.pack(">2i", 50, len(record_content) // 2)
+    shp_path.with_suffix(".shx").write_bytes(
+        _readiness_shape_header(file_length_words=(100 + len(shx_record)) // 2)
+        + shx_record
+    )
+
+    dbf_header = bytearray(32)
+    dbf_header[0] = 0x03
+    dbf_header[1:4] = bytes((126, 11, 14))
+    dbf_header[4:8] = struct.pack("<I", 1)
+    dbf_header[8:10] = struct.pack("<H", 65)
+    dbf_header[10:12] = struct.pack("<H", 9)
+    field = bytearray(32)
+    field[:5] = b"READY"
+    field[11] = ord("C")
+    field[16] = 8
+    record = b" " + b"yes".ljust(8, b" ")
+    shp_path.with_suffix(".dbf").write_bytes(
+        bytes(dbf_header) + bytes(field) + b"\r" + record + b"\x1a"
+    )
+
+
+def _readiness_shape_header(*, file_length_words: int) -> bytes:
+    header = bytearray(100)
+    struct.pack_into(">i", header, 0, 9994)
+    struct.pack_into(">i", header, 24, file_length_words)
+    struct.pack_into("<i", header, 28, 1000)
+    struct.pack_into("<i", header, 32, 1)
+    struct.pack_into("<4d", header, 36, 1.0, 2.0, 1.0, 2.0)
+    return bytes(header)
 
 
 def _build_parser_worker_env() -> dict[str, str]:
-    worker_env: dict[str, str] = {
+    return {
         "LC_ALL": "C",
         "LANG": "C",
     }
-    for env_var in _PARSER_WORKER_ENV_ALLOWLIST:
-        env_value = os.environ.get(env_var)
-        if env_value:
-            worker_env[env_var] = env_value
-    worker_env["GDAL_DRIVER_PATH"] = "disable"
-    return worker_env
 
 
-def _run_parser_worker(
+async def _run_parser_worker(
     *,
     shp_path: Path,
     output_path: Path,
     scratch: RequestScratchLayout,
 ) -> tuple[str, str]:
     worker_command = [
-        sys.executable,
-        "-m",
-        _PARSER_WORKER_MODULE,
+        os.fspath(_parser_cli_path()),
+        "--request-root",
+        scratch.request_dir.as_posix(),
         "--shp-path",
         shp_path.as_posix(),
         "--output-path",
@@ -427,14 +647,22 @@ def _run_parser_worker(
         str(_MAX_VERTICES_PER_FEATURE),
         "--max-payload-bytes",
         str(_MAX_PARSER_PAYLOAD_BYTES),
+        "--max-input-bytes",
+        str(_MAX_PARSER_INPUT_BYTES),
+        "--max-memory-bytes",
+        str(_PARSER_MEMORY_LIMIT_BYTES),
+        "--max-cpu-seconds",
+        str(_PARSER_CPU_LIMIT_SECONDS),
+        "--max-open-files",
+        str(_PARSER_OPEN_FILE_LIMIT),
     ]
     worker_env = _build_parser_worker_env()
 
     try:
-        process = subprocess.Popen(
-            worker_command,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+        process = await asyncio.create_subprocess_exec(
+            *worker_command,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL,
             cwd=scratch.request_dir.as_posix(),
             env=worker_env,
             start_new_session=True,
@@ -449,13 +677,15 @@ def _run_parser_worker(
         ) from exc
 
     try:
-        process.communicate(timeout=_PARSER_SUBPROCESS_TIMEOUT_SECONDS)
-    except subprocess.TimeoutExpired as exc:
-        _terminate_process_group(process)
-        try:
-            process.communicate(timeout=1)
-        except (subprocess.TimeoutExpired, OSError):
-            pass
+        await asyncio.wait_for(
+            process.wait(),
+            timeout=_PARSER_SUBPROCESS_TIMEOUT_SECONDS,
+        )
+    except TimeoutError as exc:
+        cancelled_during_termination = await _drain_process_group_termination(process)
+        _remove_parser_outputs(output_path)
+        if cancelled_during_termination:
+            raise asyncio.CancelledError
         raise ShapeConverterError(
             code="request_timeout",
             message="Convert parser exceeded timeout and was terminated.",
@@ -465,6 +695,10 @@ def _run_parser_worker(
             ),
             status_code=408,
         ) from exc
+    except asyncio.CancelledError:
+        await _drain_process_group_termination(process)
+        _remove_parser_outputs(output_path)
+        raise
 
     if process.returncode != 0:
         if process.returncode == 5:
@@ -490,35 +724,124 @@ def _run_parser_worker(
     return "", ""
 
 
-def _terminate_process_group(process: subprocess.Popen[str]) -> None:
-    if process.poll() is not None:
-        return
-
+async def _terminate_process_group(process: asyncio.subprocess.Process) -> None:
     pid = process.pid
     if pid is None:
-        process.kill()
+        if process.returncode is None:
+            process.kill()
+            await process.wait()
         return
 
     try:
         os.killpg(pid, signal.SIGTERM)
     except ProcessLookupError:
+        if process.returncode is None:
+            await process.wait()
         return
 
-    try:
-        process.wait(timeout=_PARSER_SUBPROCESS_KILL_GRACE_SECONDS)
+    if await _wait_for_process_group_exit(
+        process,
+        process_group_id=pid,
+        timeout=_PARSER_SUBPROCESS_KILL_GRACE_SECONDS,
+    ):
         return
-    except subprocess.TimeoutExpired:
-        pass
 
     try:
         os.killpg(pid, signal.SIGKILL)
     except ProcessLookupError:
-        return
+        pass
+
+    # Do not release the request slot or scratch ownership while any descendant
+    # remains in the parser's session. SIGKILL is not catchable; an uninterruptible
+    # kernel wait may delay this cleanup, which is safer than returning early.
+    await _wait_for_process_group_exit(
+        process,
+        process_group_id=pid,
+        timeout=None,
+    )
+
+
+async def _drain_process_group_termination(
+    process: asyncio.subprocess.Process,
+) -> bool:
+    termination_task = asyncio.create_task(_terminate_process_group(process))
+    drained = asyncio.gather(termination_task, return_exceptions=True)
+    cancelled = False
+    while not drained.done():
+        try:
+            await asyncio.shield(drained)
+        except asyncio.CancelledError:
+            cancelled = True
+    result = drained.result()[0]
+    if isinstance(result, BaseException):
+        raise result
+    return cancelled
+
+
+def _process_group_exists(process_group_id: int) -> bool:
+    proc_root = Path("/proc")
+    try:
+        proc_entries = proc_root.iterdir()
+    except OSError:
+        proc_entries = None
+    if proc_entries is not None:
+        try:
+            for entry in proc_entries:
+                if not entry.name.isdigit():
+                    continue
+                try:
+                    stat_text = (entry / "stat").read_text(encoding="utf-8")
+                    stat_fields = stat_text.rpartition(") ")[2].split()
+                    state = stat_fields[0]
+                    member_process_group = int(stat_fields[2])
+                except (IndexError, OSError, ValueError):
+                    continue
+                if member_process_group == process_group_id and state != "Z":
+                    return True
+            return False
+        except OSError:
+            pass
 
     try:
-        process.wait(timeout=1)
-    except subprocess.TimeoutExpired:
+        os.killpg(process_group_id, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+async def _wait_for_process_group_exit(
+    process: asyncio.subprocess.Process,
+    *,
+    process_group_id: int,
+    timeout: float | None,
+) -> bool:
+    loop = asyncio.get_running_loop()
+    deadline = None if timeout is None else loop.time() + timeout
+    while _process_group_exists(process_group_id):
+        if deadline is not None:
+            remaining = deadline - loop.time()
+            if remaining <= 0:
+                return False
+            await asyncio.sleep(min(0.01, remaining))
+        else:
+            await asyncio.sleep(0.01)
+    if process.returncode is None:
+        await process.wait()
+    return True
+
+
+def _remove_parser_outputs(output_path: Path) -> None:
+    try:
+        output_path.unlink(missing_ok=True)
+    except OSError:
         pass
+    for candidate in output_path.parent.glob(f"{output_path.stem}.tmp.*"):
+        try:
+            candidate.unlink()
+        except OSError:
+            pass
 
 
 def _read_parser_payload(
@@ -542,7 +865,11 @@ def _read_parser_payload(
         ) from exc
 
 
-def _loaded_shapefile_from_payload(payload: dict[str, object]) -> LoadedShapefile:
+def _loaded_shapefile_from_payload(
+    payload: dict[str, object],
+    *,
+    ignore_source_crs: bool = False,
+) -> LoadedShapefile:
     raw_bounds = payload.get("source_bounds")
     if (
         not isinstance(raw_bounds, (list, tuple))
@@ -562,7 +889,7 @@ def _loaded_shapefile_from_payload(payload: dict[str, object]) -> LoadedShapefil
 
     source_crs_wkt = payload.get("source_crs_wkt")
     source_crs: CRS | None
-    if source_crs_wkt is None:
+    if source_crs_wkt is None or ignore_source_crs:
         source_crs = None
     elif isinstance(source_crs_wkt, str):
         try:

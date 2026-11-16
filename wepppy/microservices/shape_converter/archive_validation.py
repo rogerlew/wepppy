@@ -34,7 +34,7 @@ ArchiveMemberPolicy = Callable[[zipfile.ZipInfo, PurePosixPath], None]
 @dataclass(frozen=True, slots=True)
 class ArchiveLimits:
     max_compressed_bytes: int = 100 * 1024 * 1024
-    max_uncompressed_bytes: int = 600 * 1024 * 1024
+    max_uncompressed_bytes: int = 128 * 1024 * 1024
     max_member_count: int = 200
     max_path_depth: int = 16
     max_name_length: int = 255
