@@ -1,6 +1,7 @@
 # Omni SBS map reload and resubmission
 
-**Status**: Implemented and scoped validation passed; full watershed/report gate blocked
+**Status**: Complete — implementation and scoped/native/browser acceptance passed
+**Closed**: 2026-11-16 (local validation; no production deployment)
 **Started**: 2026-11-16 19:05 UTC
 **Owner**: WEPPcloud maintainers; implementation agent unassigned
 
@@ -56,7 +57,7 @@ Source inspection at `65fa0c0bd008b16157a82191a766a0bdb9453173` establishes:
 5. The existing hydration test in `controllers_js/__tests__/omni.test.js` uses
    thinning inputs; it does not demonstrate an SBS reload/resubmit round trip.
 
-Full source paths and the execution sequence are in the [ExecPlan](prompts/active/implementation_execplan.md).
+Full source paths and the execution sequence are in the [ExecPlan](prompts/completed/implementation_execplan.md).
 The original affected project was not identified. A disposable real-project copy
 and authenticated browser were inspected during execution; see the validation artifact.
 
@@ -206,10 +207,11 @@ behavior. Missing environment evidence limits closure claims.
 
 **Current evidence grade:** implemented and locally validated (116 scoped Python
 tests plus 2 real NoDb persistence tests, 26 controller tests, scoped ESLint and independent code reviews). Authenticated browser reload/resubmit passed (HTTP 202). Native restoration,
-reset, regenerated inputs, and 217 fresh hillslope outputs passed. Full watershed
-and final report acceptance remain blocked by the fixture climate mismatch
-(channel start 2007 versus pass start 1980). No production deployment or incident
-resolution claim. See [validation evidence](artifacts/validation.md).
+reset, regenerated inputs, and 217 fresh hillslope outputs passed. The user-authorized
+fixture repair regenerated stale prepared inputs from unchanged 2007–2024 climate.
+Baseline and scenario watershed execution and 22-row report now pass; unchanged
+browser resubmission completed its three-job tree. No production deployment or
+affected-project incident resolution claim. See [validation evidence](artifacts/validation.md).
 
 ## Related history
 

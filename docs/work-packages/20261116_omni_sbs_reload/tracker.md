@@ -2,23 +2,22 @@
 
 ## Status
 
-Implemented; scoped validation and browser acceptance passed. Full watershed/report
-environment gate remains open due to fixture climate-year mismatch.
-Updated 2026-11-16 19:05 UTC.
+Complete: implementation, scoped tests, native watershed/report acceptance, and
+queued browser resubmission passed. Updated 2026-11-16 UTC. No production rollout.
 
 ## Task board
 
 - [x] Trace hydration, serialization, persistence, admission, and canonical display.
 - [x] Record consumed-source mismatch and row-association risks.
 - [x] Capture user requirement for contract-first implementation and scoped tests.
-- [ ] Reproduce browser failure and capture actual saved scenario response.
+- [x] Retain source/regression reproduction and real saved-response/browser evidence; no pre-fix browser recording was captured.
 - [x] Record user-directed two-location resolution and simple existing-project policy.
 - [x] Include independent user-file staging contract in package scope.
 - [x] Draft shared staging contract and Omni-specific contract delta.
 - [x] Complete independent contract reviews and accepted ancestor checkpoint.
 - [x] Add failing scoped regressions, implement bounded fix, rebuild controller bundle.
 - [x] Run scoped tests, authenticated browser submission/reload, and native input/reset validation.
-- [ ] Complete final watershed/report acceptance on a climate-consistent project.
+- [x] Repair disposable baseline and complete final watershed/report acceptance.
 - [x] Complete correctness/UX and security code reviews; update affected documentation.
 
 ## Decisions
@@ -120,3 +119,33 @@ starts 2007 while hillslope passes start 1980. See `artifacts/validation.md`.
 Both independent code reviews pass with findings closed. Package remains open
 only for the environment gate; no speculative climate fix or production rollout
 was attempted. Disposable run `qa-omni-reload-20261116` is retained for inspection.
+
+## Fixture repair authorization and plan — 2026-11-16 UTC
+
+User requested fixing the fixture. Diagnosis: copied Climate state and current
+`climate/*.cli` use 2007–2024, but prepared parent `wepp/runs/p*.cli` still use
+1980. Omni deliberately inherits those prepared hillslope inputs while preparing
+channel climate from current Climate state. Repair only the disposable project:
+retain failed-input hashes/backups, rematerialize prepared climate via the existing
+Wepp preparation method, regenerate baseline outputs, and rerun consumed-map
+admission plus scenario execution/report. Preserve climate data/configuration,
+model parameters, public schemas, and the original source project. No ADR needed:
+this regenerates stale derived artifacts without a parameterization decision.
+
+Regression plan: compare every prepared hillslope climate to its selected source,
+validate actual daily-year sets against 2007–2024, verify baseline and scenario
+pass/output year sets and final report, and repeat the authenticated no-upload
+submission through completion. Update the reusable fixture preparation path so
+future copies cannot silently reuse stale prepared climates.
+
+## Fixture repair outcome — 2026-11-16 UTC
+
+Canonical baseline preparation replaced stale 1980/45-year derived inputs with
+current 2007–2024 climate inputs. All 217 prepared climate digests match their
+selected source; previous prepared inputs remain in `fixture_repair_before/`.
+Source project NoDb and climate/prepared-climate hashes stayed unchanged.
+Baseline and restored-child watershed execution succeeded, output year sets agree,
+and 22-row reports are retained. Browser submission with zero selected Files
+returned 202, reload retained the filename/reference, and all three reuse/compile/
+finalization jobs finished. See `artifacts/validation.md` for final receipts.
+No production code or model parameter changes were needed for this fixture repair.

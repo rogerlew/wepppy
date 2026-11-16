@@ -101,3 +101,47 @@ behavior; old positional admission will again lack the corrected saved-map reuse
 Do not remove referenced staging files during rollback or claim model-output
 rollback. No source project or production cleanup was performed. Retain the
 isolated acceptance run until its evidence and outstanding fixture gate are resolved.
+
+## Fixture repair and final acceptance — 2026-11-16 UTC
+
+The preceding limitation is resolved for the disposable acceptance project. The
+user authorized fixture repair; no production code or scientific settings changed.
+The current Climate sources cover 2007–2024, while inherited prepared hillslope
+climates/runfiles retained 1980 and 45 years. `repair_fixture.py` backed up 654
+prepared climate/run/error files inside `fixture_repair_before/`, then ran normal
+Wepp hillslope preparation/execution, interchange, watershed preparation/execution,
+and cleanup. `fixture_repair.json` retains all 217 selected-source/prepared climate
+digest comparisons and actual daily year sets, native baseline completion, and
+unchanged source-project NoDb/climate/prepared-climate hash comparison. Earlier
+failed receipts remain unchanged. Fixture-copy instructions now explicitly require
+baseline regeneration before native acceptance.
+
+Executed scoped acceptance commands:
+
+    wctl run-python docs/work-packages/20261116_omni_sbs_reload/artifacts/repair_fixture.py
+    wctl run-python docs/work-packages/20261116_omni_sbs_reload/artifacts/runtime_repaired.py
+    node docs/work-packages/20261116_omni_sbs_reload/artifacts/browser_repaired.cjs
+    wctl run-python docs/work-packages/20261116_omni_sbs_reload/artifacts/check_repaired_jobs.py
+    OMNI_REPORT_READBACK_ONLY=1 node docs/work-packages/20261116_omni_sbs_reload/artifacts/browser_repaired.cjs
+
+Results:
+
+- `runtime_repaired.json`: actual consumed-child recovery, real persisted reload,
+  forced reset/native execution, same raster SHA256 and GDAL checksum, 218 each
+  management/soil/run inputs, 217 fresh hillslope outputs, and completed watershed.
+- Baseline and scenario output year sets both equal 2007–2024. The 22-row native
+  report is retained in `runtime_repaired.csv`.
+- `browser_repaired.json` and `browser_repaired.png`: empty file chooser, current
+  filename, saved reference, HTTP 202, and matching reload state.
+- `browser_repaired_jobs.json`: root, compilation, and finalization jobs all
+  finished; the unchanged scenario reused completed output rather than creating
+  another scenario execution job. Report readback retained 22 rows.
+- `browser_final_report.json` and `.html`: authenticated normal report endpoint
+  returned HTTP 200 after job-tree completion, with the expected scenario and
+  rendered outlet metrics; body digest retained.
+
+Local implementation/validation is complete. These receipts do not establish
+production rollout or repair of the original user's project. The source project
+was not hydrated or changed; the disposable copy and prior failure evidence remain
+available. Existing scoped code-test results remain applicable because this repair
+changed only fixture/evidence scripts and documentation.

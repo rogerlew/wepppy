@@ -3,8 +3,8 @@
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 Maintain Progress, Surprises & Discoveries, Decision Log, and Outcomes &
-Retrospective along with the package tracker at each handoff. Contract-first execution was authorized on 2026-11-16; the milestones below
-are now active.
+Retrospective along with the package tracker at each handoff. Contract-first execution was authorized on 2026-11-16; all milestones are complete. Closed on 2026-11-16 after repaired-fixture native
+watershed/report and queued browser acceptance; no production rollout.
 
 ## Purpose / Big Picture
 
@@ -19,12 +19,12 @@ requires both the visible UI and the actual scenario input to agree.
 
 - [x] (2026-11-16 19:05 UTC) Inspect source and scaffold bounded package.
 - [x] (2026-11-16 19:05 UTC) Record contract-first and scoped-test instruction.
-- [ ] Capture browser reproduction and exact canonical contract amendments.
+- [x] Capture source/regression reproduction, saved-response/browser evidence, and canonical amendments; no pre-fix browser recording retained.
 - [x] (2026-11-16 UTC) Author shared staging and Omni contracts; reconcile freshness/upload rules.
 - [x] (2026-11-16 UTC) Reviewed contract ancestor committed as `67468cf86`.
 - [x] (2026-11-16 UTC) Scoped regressions and implementation; 116 Python/26 JS tests pass.
 - [x] (2026-11-16 UTC) Rebuild assets; browser HTTP 202/reload and native recovery/reset/input/hillslope evidence pass.
-- [ ] Final watershed/report acceptance blocked by fixture climate mismatch (2007 versus 1980).
+- [x] (2026-11-16 UTC) User-authorized fixture regeneration resolved date mismatch; native watershed/report and queued browser repeat submission passed.
 - [x] (2026-11-16 UTC) Independent correctness/security reviews pass; documentation and limitations retained.
 
 ## Surprises & Discoveries
@@ -64,11 +64,14 @@ File returned 202 and reload preserved the filename/reference. Native recovery
 from the corresponding child passed, including real persisted state, reset,
 unchanged raster digest, regenerated inputs and 217 fresh hillslope outputs.
 
-The full watershed/report gate remains open because the copied project's channel
-climate starts in 2007 while its hillslope passes start in 1980. The model explicitly
-stopped; do not call the package closed, deployed, or incident resolved. Retain
-the disposable run and validation artifacts, and use a climate-consistent project
-for the remaining gate. No unrelated scientific correction is authorized.
+The initial watershed gate failed because copied prepared hillslope climate used
+1980 while current source/channel climate used 2007. The user then authorized
+fixture repair. Canonical preparation and baseline execution regenerated derived
+inputs/outputs without changing climate configuration or model parameters. All
+217 climates match selected source bytes; native baseline/scenario watershed
+outputs cover 2007–2024 and the report has 22 rows. Browser resubmission with no
+File completed its three-job reuse tree. The local acceptance gate is closed;
+production deployment and affected-project repair remain outside this evidence.
 
 ## Context and Orientation
 
@@ -283,3 +286,14 @@ Python/JS/ESLint checks pass. Native and browser acceptance are in progress.
 
 Execution note (2026-11-16 UTC): Browser and input/artifact boundaries validated;
 full watershed/report gate explicitly blocked by fixture dates. See artifacts/validation.md.
+
+### Fixture repair continuation — 2026-11-16
+
+The user authorized repairing the disposable fixture. Current climate inputs cover
+2007–2024; inherited prepared hillslope climate/run files use the old 1980 start
+and 45-year duration. Preserve those inputs in the disposable run, then regenerate
+baseline preparation and outputs through canonical Wepp methods. Preserve climate
+configuration, scientific inputs, source project, and earlier failed evidence.
+Verify all 217 prepared climates against selected source bytes and actual years;
+then repeat native consumed-map execution, report readback, and browser submission.
+This repairs derived fixture state without changing a scientific parameter.

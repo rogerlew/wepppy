@@ -156,3 +156,55 @@ real persistence, native input recovery/reset, and browser reload/submission are
 validated at their stated boundaries. Full environment/artifact completion is
 blocked by the unrelated watershed fixture mismatch. No deployment, affected-user
 run repair, or incident-resolved claim is supported.
+
+## Authorized fixture repair and final evidence review — 2026-11-16 19:49 UTC
+
+This addendum supersedes the earlier fixture-blocked environment disposition.
+The operator authorized repairing the disposable acceptance fixture; this
+reviewer inspected the repair/evidence scripts and results without running or
+mutating the fixture. No production-code scope was added. All three entries in
+`candidate_hashes.json` still match the reviewed route, controller, and built
+bundle.
+
+`repair_fixture.py` confines regeneration to `qa-omni-reload-20261116`, backs up
+654 prepared climate/run/error files, and prepares inputs from that fixture's
+existing climate. `fixture_repair.json` records all 217 prepared climate files
+matching their source digests and exactly the years 2007–2024. Normal hillslope
+and watershed execution completed, with 217 fresh hillslope outputs. The source
+project's inspected NoDb and climate input hashes remained unchanged. This is a
+fixture repair, not a climate-policy or model-parameterization change.
+
+`runtime_repaired.py` and `runtime_repaired.json` demonstrate complete native
+execution after admission recovered the consumed scenario map to staging. The
+saved definition survived durable reload; forced scenario execution reset the
+child, consumed the staging copy, and retained the expected SBS digest and raster
+metadata. It regenerated 218 management/soil/run inputs and 217 fresh hillslope
+outputs. Both baseline and scenario output year sets are 2007–2024; native
+watershed execution completed and the normal scenario report has 22 rows.
+
+The reviewer parsed `runtime_repaired.csv` and `browser_repaired_report.csv`:
+they are identical, contain 11 finite-valued metrics for each of the baseline
+and intended SBS scenario, and include matching contributing area, precipitation,
+water discharge, and sediment metrics. This confirms semantic report contents,
+not merely report existence or job success.
+
+`browser_repaired.json` records authenticated actual-button resubmission with no
+selected File, HTTP 202, and preserved saved reference/filename after reload.
+`browser_repaired_jobs.json` records all three jobs finished for root
+`a858ffa4-ad26-4e5d-b0c9-53b00eb6539d`. The tree contains compilation/finalization
+and no scenario execution child, consistent with unchanged-input reuse after the
+separately proven forced native run. It does not claim a second fresh execution.
+
+The final authenticated report request was repeated after the queued tree
+completed. `browser_final_report.json` records HTTP 200 and that ordering;
+`browser_final_report.html` contains the intended SBS scenario. The reviewer
+recomputed the HTML digest and matched the retained receipt. Thus the visible
+report is checked after queue settlement, not inferred from a pre-completion
+page or a successful sibling request.
+
+**Final verdict:** no unresolved medium/high correctness finding remains. The
+former watershed/report blocker is closed by the authorized fixture repair and
+retained native, queued-reuse, semantic report, and browser evidence. The scoped
+repair is environment validated on the disposable forest/dev project at the
+recorded candidate hashes. This does not claim production deployment, repair of
+the originally affected user's project, or broader upload-consumer conformance.

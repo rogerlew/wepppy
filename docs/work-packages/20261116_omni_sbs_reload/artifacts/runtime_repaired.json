@@ -1,0 +1,85 @@
+{
+  "admission_status": 200,
+  "restored_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+  "real_nodb_reload": true,
+  "uid": 1000,
+  "gid": 993,
+  "fixture_baseline": "regenerated from current 2007\u20132024 climate",
+  "status": "passed",
+  "raster": {
+    "width": 836,
+    "height": 714,
+    "bands": 1,
+    "checksum": 28186
+  },
+  "consumed_after_reset": true,
+  "artifacts": {
+    "*.man": {
+      "count": 218,
+      "sample": "p1.man",
+      "sha256": "09f1f694599da16de0260b863655266b5a39925776880d5f3c2d1bfba6c9923d",
+      "first_line": "98.4"
+    },
+    "*.sol": {
+      "count": 218,
+      "sample": "p1.sol",
+      "sha256": "24c462c533ec811611b97aea0ff391cf2cc0228f6c59bd9522f08f7b3e5aa02b",
+      "first_line": "7778"
+    },
+    "*.run": {
+      "count": 218,
+      "sample": "p1.run",
+      "sha256": "910f0603df5d64f34a0487cf03614e2c79fb28936e6340e03ab76a58a62398bc",
+      "first_line": "m"
+    }
+  },
+  "fresh_hillslope_outputs": 217,
+  "seconds": 184.92815518379211,
+  "report_rows": 22,
+  "report_columns": [
+    "key",
+    "value",
+    "units",
+    "scenario"
+  ],
+  "baseline_years": [
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "scenario_years": [
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ]
+}

@@ -1,4 +1,4 @@
-Implemented; final environment gate open: [Omni SBS map reload and resubmission](docs/work-packages/20261116_omni_sbs_reload/package.md) - Contract-first shared staging/Omni fix; 118 scoped Python and 26 JS tests pass, authenticated browser resubmits without upload. Native recovery/reset/hillslope evidence passes; final watershed/report blocked by fixture climate-year mismatch. No production rollout.
+Complete: [Omni SBS map reload and resubmission](docs/work-packages/20261116_omni_sbs_reload/package.md) - Contract-first shared staging/Omni fix; 118 scoped Python and 26 JS tests pass. Disposable fixture repaired; native watershed/report and queued browser no-upload resubmission pass. No production rollout.
 
 Implemented and locally validated: [Batch and culvert partial-success results](docs/work-packages/20261115_batch_partial_success/package.md) — immutable attempt results, additive polling and companion client success-only metrics/geometry. Contract checkpoints committed; no deployment or incident recovery.
 
