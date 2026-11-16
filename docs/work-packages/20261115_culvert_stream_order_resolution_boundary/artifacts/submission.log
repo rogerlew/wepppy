@@ -1,0 +1,13 @@
+2026-11-15 17:13:54 [INFO] ============================================================
+2026-11-15 17:13:54 [INFO] Culvert Batch Payload Submission
+2026-11-15 17:13:54 [INFO] ============================================================
+2026-11-15 17:13:54 [INFO] Host: forest.tail305ec9.ts.net
+2026-11-15 17:13:54 [INFO] Base URL: https://forest.tail305ec9.ts.net
+2026-11-15 17:13:54 [INFO] Auth token: provided
+2026-11-15 17:13:54 [INFO] Upload target: https://forest.tail305ec9.ts.net/rq-engine/api/culverts-wepp-batch/
+2026-11-15 17:13:54 [INFO] Payload file: /wc1/culvert-resolution-replay/point1040.zip
+2026-11-15 17:13:54 [INFO] Payload size: 117,135,121 bytes
+2026-11-15 17:13:54 [INFO] Computing SHA256 hash...
+2026-11-15 17:13:55 [INFO] Payload SHA256: 72e69c535c50a6e01fa0bdd4d6d2abb178c477430bd503aa9058e48215cbeb9e
+2026-11-15 17:13:55 [INFO] Uploading payload to https://forest.tail305ec9.ts.net/rq-engine/api/culverts-wepp-batch/...
+2026-11-15 17:13:56 [ERROR] Network error: HTTPSConnectionPool(host='forest.tail305ec9.ts.net', port=443): Max retries exceeded with url: /rq-engine/api/culverts-wepp-batch/ (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:2417)')))

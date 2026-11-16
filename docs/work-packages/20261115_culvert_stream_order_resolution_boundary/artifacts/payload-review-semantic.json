@@ -1,0 +1,64 @@
+{
+  "reviewer": "independent correctness reviewer",
+  "point_id": 1040,
+  "source_features": {
+    "culverts/culvert_points.geojson": 39,
+    "culverts/watersheds.geojson": 39
+  },
+  "replay_features": {
+    "culverts/culvert_points.geojson": 1,
+    "culverts/watersheds.geojson": 1
+  },
+  "features_preserved": {
+    "culverts/culvert_points.geojson": true,
+    "culverts/watersheds.geojson": true
+  },
+  "rasters_byte_identical": {
+    "topo/breached_filled_DEM_UTM.tif": true,
+    "topo/streams.tif": true
+  },
+  "metadata": {
+    "schema_version": "culvert-metadata-v1",
+    "source": {
+      "system": "Culvert_web_app",
+      "project_id": "Santee_1m",
+      "user_id": "1"
+    },
+    "created_at": "2026-11-14T06:26:29.810538+00:00",
+    "culvert_count": 1,
+    "crs": {
+      "proj4": "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs"
+    },
+    "dem": {
+      "path": "topo/breached_filled_DEM_UTM.tif",
+      "width": 7764,
+      "height": 7344,
+      "resolution_m": 1.0000000000089009,
+      "nodata": 0.0
+    },
+    "streams": {
+      "path": "topo/streams.tif",
+      "nodata": -32768.0,
+      "value_semantics": "binary"
+    },
+    "culvert_points": {
+      "path": "culverts/culvert_points.geojson",
+      "feature_count": 1,
+      "point_id_field": "Point_ID"
+    },
+    "watersheds": {
+      "path": "culverts/watersheds.geojson",
+      "feature_count": 1,
+      "point_id_field": "Point_ID",
+      "simplified": true,
+      "simplification_tolerance_m": 1.0,
+      "note": "Simplified polygons from Culvert_web_app (1.0m tolerance)"
+    },
+    "hydro_enforcement_select": "hydroenf_required"
+  },
+  "model_parameters": {
+    "schema_version": "culvert-model-params-v1",
+    "flow_accum_threshold": 100
+  },
+  "zip_crc_valid": true
+}

@@ -1,0 +1,66 @@
+[
+  {
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 0,
+    "point_id": 1040,
+    "outlet_on_stream": true,
+    "status": "delineated",
+    "channels": 1489,
+    "hillslopes": 3718,
+    "area_m2": 21692731.000386167
+  },
+  {
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 1,
+    "point_id": 1040,
+    "outlet_on_stream": true,
+    "status": "delineated",
+    "channels": 357,
+    "hillslopes": 892,
+    "area_m2": 21692731.000386167
+  },
+  {
+    "grid": "coarse2",
+    "mode": "cells100",
+    "passes": 2,
+    "point_id": 1040,
+    "outlet_on_stream": true,
+    "status": "delineated",
+    "channels": 1544,
+    "hillslopes": 3834,
+    "area_m2": 21682536.0
+  },
+  {
+    "grid": "coarse4",
+    "mode": "cells100",
+    "passes": 1,
+    "point_id": 1040,
+    "outlet_on_stream": true,
+    "status": "tool_failed",
+    "error": "Error: Custom { kind: InvalidInput, error: \"Invalid TOPAZ ID 0 for link 1515\" }"
+  },
+  {
+    "grid": "coarse8",
+    "mode": "cells100",
+    "passes": 1,
+    "point_id": 1040,
+    "outlet_on_stream": true,
+    "status": "delineated",
+    "channels": 394,
+    "hillslopes": 971,
+    "area_m2": 21862464.0
+  },
+  {
+    "grid": "coarse10",
+    "mode": "cells100",
+    "passes": 1,
+    "point_id": 1040,
+    "outlet_on_stream": true,
+    "status": "delineated",
+    "channels": 254,
+    "hillslopes": 617,
+    "area_m2": 21629800.0
+  }
+]

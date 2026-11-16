@@ -1,0 +1,76 @@
+[
+  {
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 0,
+    "status": "delineated",
+    "channels": 1489,
+    "hillslopes": 3718,
+    "one_outlet": true,
+    "all_channels_connected": true,
+    "raster_channel_ids_match_network": true,
+    "area_m2": 21692731.000386167,
+    "fixed_outlet_in_basin": true
+  },
+  {
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 1,
+    "status": "delineated",
+    "channels": 357,
+    "hillslopes": 892,
+    "one_outlet": true,
+    "all_channels_connected": true,
+    "raster_channel_ids_match_network": true,
+    "area_m2": 21692731.000386167,
+    "fixed_outlet_in_basin": true
+  },
+  {
+    "grid": "coarse2",
+    "mode": "cells100",
+    "passes": 2,
+    "status": "delineated",
+    "channels": 1544,
+    "hillslopes": 3834,
+    "one_outlet": true,
+    "all_channels_connected": true,
+    "raster_channel_ids_match_network": true,
+    "area_m2": 21682536.0,
+    "fixed_outlet_in_basin": true
+  },
+  {
+    "grid": "coarse4",
+    "mode": "cells100",
+    "passes": 1,
+    "status": "tool_failed",
+    "netw_exists": false,
+    "subwta_exists": false,
+    "recorded_error": "Error: Custom { kind: InvalidInput, error: \"Invalid TOPAZ ID 0 for link 1515\" }"
+  },
+  {
+    "grid": "coarse8",
+    "mode": "cells100",
+    "passes": 1,
+    "status": "delineated",
+    "channels": 394,
+    "hillslopes": 971,
+    "one_outlet": true,
+    "all_channels_connected": true,
+    "raster_channel_ids_match_network": true,
+    "area_m2": 21862464.0,
+    "fixed_outlet_in_basin": true
+  },
+  {
+    "grid": "coarse10",
+    "mode": "cells100",
+    "passes": 1,
+    "status": "delineated",
+    "channels": 254,
+    "hillslopes": 617,
+    "one_outlet": true,
+    "all_channels_connected": true,
+    "raster_channel_ids_match_network": true,
+    "area_m2": 21629800.0,
+    "fixed_outlet_in_basin": true
+  }
+]

@@ -14,12 +14,12 @@ the supplied DEM/streams and all existing batch artifacts.
 - [x] Operator approved per-run descending candidate selection and performance bias.
 - [x] Draft canonical contract, parameterization ADR and compatibility checkpoint.
 - [x] Complete two independent contract reviews; all medium findings resolved.
-- [ ] Obtain commit authority and create standalone contract ancestor.
-- [ ] Implement candidate generation, per-run selection and additive receipts.
-- [ ] Validate real-raster regressions and focused NoDb/RQ tests.
-- [ ] Submit forest RQ replay covering1040 and a small fallback watershed.
-- [ ] Parse selected/consumed artifacts, counts, outlets and final job trees.
-- [ ] Independent final review and tracker/ADR handoff.
+- [x] Standalone reviewed contract ancestor committed as `61645e8a1`.
+- [x] Implement candidate generation, per-run selection and additive receipts.
+- [x] Validate real-raster regressions and focused NoDb/RQ tests: 103 passed, 1 skipped; runner/helper stubtest and test-stub checks passed.
+- [x] Submit forest RQ replay covering 1040 and 2913: batch `e4eb3edf-0bba-457f-adf0-17eeb61d85b8`, parent `687e8222-37ff-4ca0-bb3c-83246c8ed960`.
+- [x] Parse selected/consumed artifacts, counts, outlets and final job trees: both children and finalizer succeeded.
+- [x] Independent final implementation/security review and tracker/ADR handoff; no open findings.
 
 ## Surprises & Discoveries
 
@@ -86,4 +86,30 @@ absence of a manifest. Roll back new admissions without rewriting saved topology
 
 ## Outcomes & Retrospective
 
-Checkpoint preparation in progress; new per-run implementation not started.
+Completed 2026-11-16 UTC. Contract checkpoint `61645e8a1`, implementation
+`4266e740a`, and security-review fix `d0732a4d2` implement the approved contract.
+Forest batch `e4eb3edf-0bba-457f-adf0-17eeb61d85b8` selected 4 for 1040
+(783 hillslopes/313 channels) and 3 for 2913 (3/1). Both supplied points and
+resolved outlets remain on the consumed candidate rasters. Both children and the
+finalizer succeeded; the archive retains all selection dependencies and receipts.
+Authenticated artifact readbacks and independent reviews are retained in
+`artifacts/per-run-validation.md` and adjacent JSON evidence.
+
+Broad sanity passed: 13,991 passed, 440 skipped. The full sweep started before the
+small base-receipt admission fix; 30 route tests and a real HTTP 400 rejection
+validated that fix separately. Focused real-WBT tests prove the four candidate
+masks match repeated pruning, and stubs/docs/broad-exception checks pass.
+
+Security review caught caller-supplied `_base/stream_selection.json` entering
+new runs through base cloning. Rejecting that path closes the server-only receipt
+trust boundary without changing legitimate payloads. Both correctness and
+security reviews have no open findings. The original three-pass experiment is
+superseded, with retained artifacts and no production changes.
+
+The native 1 m replay supports the performance-first per-run choice. Other nominal
+resolution policies remain provisional heuristics; held-out calibration and the
+previous 4 m TOPAZ failure remain separate follow-ups. No production rollout is
+part of this completion.
+
+Revision 2026-11-16: recorded complete forest artifact acceptance, independent
+reviews and all validation gates; retained provisional scientific limits.

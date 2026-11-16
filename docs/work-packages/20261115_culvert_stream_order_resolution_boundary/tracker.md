@@ -348,3 +348,46 @@ Per-run checkpoint: both independent reviews approve the amended contract; all
 medium findings resolved. Documentation lint and ADR date checks pass. Remaining
 pre-implementation gate is operator authority for the standalone contract commit.
 No new per-run source implementation edits have begun.
+
+Contract ancestor committed: `61645e8a1`; operator granted checkpoint and
+implementation authority. New per-run implementation now in progress.
+
+Implementation validation:103 focused tests passed,1 live test skipped; real WBT
+four-to-three selection and all four candidate masks match repeated pruning.
+Runner/helper stubtest, test-stub check, broad exception gate and14 package docs
+passed. Forest replay submitted after idle workers and uncached SDA pre/post
+restart probes: batch `e4eb3edf-0bba-457f-adf0-17eeb61d85b8`, parent
+`687e8222-37ff-4ca0-bb3c-83246c8ed960`. Artifact acceptance and broad suite pending.
+
+Source implementation committed as `4266e740a`. Both replay selections and
+consumed VRT windows independently verified; resolved outlets remain on channels.
+1040 raster cardinality is783/313 (hillslopes/channels), below the twofold726/298
+baseline criterion;2913 completed with3/1 after4->3 fallback. See
+`artifacts/per-run-review-artifact-readback.json`.
+
+Observe-only code quality: the new selection module is green (212 SLOC); existing
+large route/runner/orchestration functions grow by9/5/13 lines. The small increases
+wire admission integrity and immutable candidate reuse while keeping legacy paths
+intact; broader facade refactoring remains outside this behavior change.
+
+Dedicated security review completed: `artifacts/per-run-security-review.md`.
+Medium base-receipt injection finding fixed in `d0732a4d2`;30 route tests pass
+and live forest admission rejects the crafted archive with HTTP400. Authorized
+manifest and receipt downloads return HTTP200 with exact persisted-byte hashes.
+No open security findings; final archive readback remains pending.
+
+Broad regression:13,991 passed,440 skipped (4,338.64s). This sweep started before
+the small base-receipt admission fix;30 route tests and live rejection cover the
+final fix separately. Both replay children are finished/successful; finalizer is
+writing the archive.
+
+## Per-run implementation complete — 2026-11-16 UTC
+
+Both children and finalizer finished:2 succeeded,0 failed,0 skipped outlets.
+Independent archive readback verifies all20required dependency/provenance/receipt
+members, with matching hashes. Authenticated downloads verify visible artifacts.
+Broad suite:13,991 passed,440 skipped;30 route tests passed after the final
+admission fix. Implementation/security reviews have no open findings.
+See `artifacts/per-run-validation.md`, `artifacts/per-run-security-review.md`,
+and ADR-0144. Contract/source commits: `61645e8a1`, `4266e740a`, `d0732a4d2`.
+Production rollout and broader resolution/site calibration remain separate.

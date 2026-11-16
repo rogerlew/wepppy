@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T rq-worker-batch python /workdir/wepppy/docs/work-packages/20261115_culvert_stream_order_resolution_boundary/scripts/probe_sda.py --mukey 131939
+{"timestamp": "2026-11-16T01:14:24.139059+00:00", "mukey": 131939, "tables": {"component": 2, "chorizon": 4, "corestrictions": 0, "chfrags": 2, "chtexturegrp": 4, "bad_component_mukey": 0, "bad_chorizon_cokey": 0, "bad_corestrictions_cokey": 0, "bad_chfrags_chkey": 2, "bad_chtexturegrp_chkey": 0}, "soil_valid": true, "cache": "new temporary SQLite", "endpoint": "NRCS SDA Tabular API"}

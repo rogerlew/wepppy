@@ -1,0 +1,22 @@
+2026-11-15 17:16:59 [INFO] ============================================================
+2026-11-15 17:16:59 [INFO] Culvert Batch Payload Submission
+2026-11-15 17:16:59 [INFO] ============================================================
+2026-11-15 17:16:59 [INFO] Host: forest.tail305ec9.ts.net
+2026-11-15 17:16:59 [INFO] Base URL: https://forest.tail305ec9.ts.net
+2026-11-15 17:16:59 [INFO] Auth token: provided
+2026-11-15 17:16:59 [INFO] Upload target: https://forest.tail305ec9.ts.net/rq-engine/api/culverts-wepp-batch/
+2026-11-15 17:16:59 [INFO] Payload file: /wc1/culvert-resolution-replay/point1040.zip
+2026-11-15 17:16:59 [INFO] Payload size: 117,135,121 bytes
+2026-11-15 17:16:59 [INFO] Computing SHA256 hash...
+2026-11-15 17:17:00 [INFO] Payload SHA256: 72e69c535c50a6e01fa0bdd4d6d2abb178c477430bd503aa9058e48215cbeb9e
+2026-11-15 17:17:00 [INFO] Uploading payload to https://forest.tail305ec9.ts.net/rq-engine/api/culverts-wepp-batch/...
+2026-11-15 17:17:10 [INFO] Upload completed in 10.3s, status: 200
+2026-11-15 17:17:10 [INFO] Response: job_id=3cd947ee-01fd-4b07-b07e-284e020e9e1c
+2026-11-15 17:17:10 [INFO] Response: culvert_batch_uuid=402e8594-d597-4c25-a724-008bb72a83e7
+2026-11-15 17:17:10 [INFO] Response: status_url=/rq-engine/api/jobstatus/3cd947ee-01fd-4b07-b07e-284e020e9e1c
+2026-11-15 17:17:10 [INFO] ------------------------------------------------------------
+2026-11-15 17:17:10 [INFO] Job Dashboard: https://forest.tail305ec9.ts.net/weppcloud/rq/job-dashboard/3cd947ee-01fd-4b07-b07e-284e020e9e1c
+2026-11-15 17:17:10 [INFO] ------------------------------------------------------------
+2026-11-15 17:17:10 [INFO] Polling status: https://forest.tail305ec9.ts.net/rq-engine/api/jobstatus/3cd947ee-01fd-4b07-b07e-284e020e9e1c
+2026-11-15 17:17:10 [INFO] Poll interval: 30s, timeout: 57600s
+2026-11-15 17:17:10 [INFO] Poll 1 (0s): status=queued

@@ -1,0 +1,2 @@
+{"name": "baseline", "hillslope_area_sum": 21008353, "channel_area_sum": 36145.98522592351, "channel_length_sum": 85171.35014250931, "channel_orders": {"6": 6, "1": 150, "2": 66, "5": 16, "4": 19, "3": 41}}
+{"name": "candidate", "hillslope_area_sum": 21495207, "channel_area_sum": 78957.49550427505, "channel_length_sum": 239579.35594208806, "channel_orders": {"6": 25, "1": 670, "2": 331, "4": 90, "3": 180, "5": 43}}

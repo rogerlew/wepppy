@@ -1,0 +1,2810 @@
+[
+  {
+    "point_id": "2871",
+    "kind": "payload_snapped",
+    "xy": [
+      615664.426327567,
+      3666011.2261530873
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "791",
+    "kind": "payload_snapped",
+    "xy": [
+      613440.5618343175,
+      3666506.765783519
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2897",
+    "kind": "payload_snapped",
+    "xy": [
+      614906.1637651912,
+      3666874.163852662
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "574",
+    "kind": "payload_snapped",
+    "xy": [
+      612778.2049681557,
+      3667594.0047937157
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "573",
+    "kind": "payload_snapped",
+    "xy": [
+      612778.2049681557,
+      3667594.0047937157
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "792",
+    "kind": "payload_snapped",
+    "xy": [
+      613780.6299095268,
+      3667657.5637217006
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "253",
+    "kind": "payload_snapped",
+    "xy": [
+      612813.5071386399,
+      3667965.820479204
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1040",
+    "kind": "payload_snapped",
+    "xy": [
+      611067.7614048679,
+      3666460.5612304336
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "256",
+    "kind": "payload_snapped",
+    "xy": [
+      611674.5717998085,
+      3666566.755818013
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1751",
+    "kind": "payload_snapped",
+    "xy": [
+      611782.1131344987,
+      3666704.563721692
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "255",
+    "kind": "payload_snapped",
+    "xy": [
+      611926.006021277,
+      3666944.5637216945
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "254",
+    "kind": "payload_snapped",
+    "xy": [
+      612016.7294871472,
+      3667117.563721696
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2917",
+    "kind": "payload_snapped",
+    "xy": [
+      610910.4273177192,
+      3667901.563721703
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "588",
+    "kind": "payload_snapped",
+    "xy": [
+      611161.3307023664,
+      3668147.9969154643
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "910",
+    "kind": "payload_snapped",
+    "xy": [
+      609730.8453328044,
+      3666786.482285002
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "911",
+    "kind": "payload_snapped",
+    "xy": [
+      609730.8453328044,
+      3666786.482285002
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "912",
+    "kind": "payload_snapped",
+    "xy": [
+      609730.8453328044,
+      3666786.482285002
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2913",
+    "kind": "payload_snapped",
+    "xy": [
+      610840.0940115228,
+      3667734.2336063017
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2915",
+    "kind": "payload_snapped",
+    "xy": [
+      610875.7282428014,
+      3667820.599375024
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2909",
+    "kind": "payload_snapped",
+    "xy": [
+      610573.001068987,
+      3668110.326548838
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "586",
+    "kind": "payload_snapped",
+    "xy": [
+      610511.5918389728,
+      3668727.5637217104
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "577",
+    "kind": "payload_snapped",
+    "xy": [
+      611098.763896125,
+      3668922.560197013
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "590",
+    "kind": "payload_snapped",
+    "xy": [
+      611183.4220360001,
+      3670568.9055818524
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2902",
+    "kind": "payload_snapped",
+    "xy": [
+      610888.1588076632,
+      3670569.5637217266
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "579",
+    "kind": "payload_snapped",
+    "xy": [
+      610823.7638961226,
+      3668976.8282108125
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2908",
+    "kind": "payload_snapped",
+    "xy": [
+      610561.569277051,
+      3669021.563721713
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2907",
+    "kind": "payload_snapped",
+    "xy": [
+      610563.435893049,
+      3669029.563721713
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "580",
+    "kind": "payload_snapped",
+    "xy": [
+      610128.9409302558,
+      3669129.7407558532
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "584",
+    "kind": "payload_snapped",
+    "xy": [
+      610631.828822338,
+      3669346.498795499
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "581",
+    "kind": "payload_snapped",
+    "xy": [
+      609877.5047806267,
+      3669447.3046062295
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "582",
+    "kind": "payload_snapped",
+    "xy": [
+      609822.2750452147,
+      3669519.0748708183
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "583",
+    "kind": "payload_snapped",
+    "xy": [
+      610640.2677852765,
+      3669716.067610875
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2905",
+    "kind": "payload_snapped",
+    "xy": [
+      610745.252487268,
+      3670197.075130577
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2904",
+    "kind": "payload_snapped",
+    "xy": [
+      610866.1717683625,
+      3670498.563721726
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "252",
+    "kind": "payload_snapped",
+    "xy": [
+      613506.5423645433,
+      3668588.7852533124
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2939",
+    "kind": "payload_snapped",
+    "xy": [
+      613156.4381916507,
+      3669472.2380172242
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2931",
+    "kind": "payload_snapped",
+    "xy": [
+      612557.5559139502,
+      3671662.5637217364
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2929",
+    "kind": "payload_snapped",
+    "xy": [
+      612597.912652012,
+      3671876.4149658647
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2901",
+    "kind": "payload_snapped",
+    "xy": [
+      610856.9921732459,
+      3671139.563721732
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1040",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611067.7638963497,
+      3666460.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1751",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611781.7638963725,
+      3666704.56367341
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "252",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613506.7638964325,
+      3668588.5636733947
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "253",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612813.763896408,
+      3667965.5636734017
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "254",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612016.7638963808,
+      3667117.5636734064
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "255",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611925.7638963773,
+      3666944.5636734082
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "256",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611674.7638963698,
+      3666566.5636734106
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2871",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      615664.7638965113,
+      3666011.563673414
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2897",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      614905.7638964825,
+      3666874.563673407
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2901",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610856.7638963445,
+      3671139.563673378
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2902",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610887.763896345,
+      3670569.563673383
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2904",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610865.7638963449,
+      3670498.563673383
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2905",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610744.7638963402,
+      3670197.563673385
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2907",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610563.7638963338,
+      3669029.5636733933
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2908",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610561.763896335,
+      3669021.5636733943
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2909",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610572.7638963345,
+      3668110.5636734013
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2913",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610839.7638963433,
+      3667734.563673404
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2915",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610875.7638963445,
+      3667820.5636734036
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2917",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610910.7638963453,
+      3667901.563673403
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2929",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612597.7638964009,
+      3671876.5636733714
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2931",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612557.7638964001,
+      3671662.563673373
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2939",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613156.7638964205,
+      3669472.563673388
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "573",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612777.7638964066,
+      3667593.5636734036
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "574",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612777.7638964066,
+      3667593.5636734036
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "577",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611098.763896352,
+      3668922.5636733943
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "579",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610823.7638963426,
+      3668976.5636733947
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "580",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610128.7638963205,
+      3669129.563673394
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "581",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609877.7638963137,
+      3669447.563673391
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "582",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609822.76389631,
+      3669519.563673391
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "583",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610640.7638963372,
+      3669716.5636733877
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "584",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610631.7638963371,
+      3669346.5636733915
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "586",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610511.763896333,
+      3668727.5636733966
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "588",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611161.763896353,
+      3668147.5636734003
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "590",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611183.7638963546,
+      3670568.563673382
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "791",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613440.763896429,
+      3666506.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "792",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613780.7638964417,
+      3667657.5636734017
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "910",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609730.7638963085,
+      3666786.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "911",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609730.7638963085,
+      3666786.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "912",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609730.7638963085,
+      3666786.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2871",
+    "kind": "payload_snapped",
+    "xy": [
+      615664.426327567,
+      3666011.2261530873
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "791",
+    "kind": "payload_snapped",
+    "xy": [
+      613440.5618343175,
+      3666506.765783519
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2897",
+    "kind": "payload_snapped",
+    "xy": [
+      614906.1637651912,
+      3666874.163852662
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "574",
+    "kind": "payload_snapped",
+    "xy": [
+      612778.2049681557,
+      3667594.0047937157
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "573",
+    "kind": "payload_snapped",
+    "xy": [
+      612778.2049681557,
+      3667594.0047937157
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "792",
+    "kind": "payload_snapped",
+    "xy": [
+      613780.6299095268,
+      3667657.5637217006
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "253",
+    "kind": "payload_snapped",
+    "xy": [
+      612813.5071386399,
+      3667965.820479204
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1040",
+    "kind": "payload_snapped",
+    "xy": [
+      611067.7614048679,
+      3666460.5612304336
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "256",
+    "kind": "payload_snapped",
+    "xy": [
+      611674.5717998085,
+      3666566.755818013
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1751",
+    "kind": "payload_snapped",
+    "xy": [
+      611782.1131344987,
+      3666704.563721692
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "255",
+    "kind": "payload_snapped",
+    "xy": [
+      611926.006021277,
+      3666944.5637216945
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "254",
+    "kind": "payload_snapped",
+    "xy": [
+      612016.7294871472,
+      3667117.563721696
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2917",
+    "kind": "payload_snapped",
+    "xy": [
+      610910.4273177192,
+      3667901.563721703
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "588",
+    "kind": "payload_snapped",
+    "xy": [
+      611161.3307023664,
+      3668147.9969154643
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "910",
+    "kind": "payload_snapped",
+    "xy": [
+      609730.8453328044,
+      3666786.482285002
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "911",
+    "kind": "payload_snapped",
+    "xy": [
+      609730.8453328044,
+      3666786.482285002
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "912",
+    "kind": "payload_snapped",
+    "xy": [
+      609730.8453328044,
+      3666786.482285002
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2913",
+    "kind": "payload_snapped",
+    "xy": [
+      610840.0940115228,
+      3667734.2336063017
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2915",
+    "kind": "payload_snapped",
+    "xy": [
+      610875.7282428014,
+      3667820.599375024
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2909",
+    "kind": "payload_snapped",
+    "xy": [
+      610573.001068987,
+      3668110.326548838
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "586",
+    "kind": "payload_snapped",
+    "xy": [
+      610511.5918389728,
+      3668727.5637217104
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "577",
+    "kind": "payload_snapped",
+    "xy": [
+      611098.763896125,
+      3668922.560197013
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "590",
+    "kind": "payload_snapped",
+    "xy": [
+      611183.4220360001,
+      3670568.9055818524
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2902",
+    "kind": "payload_snapped",
+    "xy": [
+      610888.1588076632,
+      3670569.5637217266
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "579",
+    "kind": "payload_snapped",
+    "xy": [
+      610823.7638961226,
+      3668976.8282108125
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2908",
+    "kind": "payload_snapped",
+    "xy": [
+      610561.569277051,
+      3669021.563721713
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2907",
+    "kind": "payload_snapped",
+    "xy": [
+      610563.435893049,
+      3669029.563721713
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "580",
+    "kind": "payload_snapped",
+    "xy": [
+      610128.9409302558,
+      3669129.7407558532
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "584",
+    "kind": "payload_snapped",
+    "xy": [
+      610631.828822338,
+      3669346.498795499
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "581",
+    "kind": "payload_snapped",
+    "xy": [
+      609877.5047806267,
+      3669447.3046062295
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "582",
+    "kind": "payload_snapped",
+    "xy": [
+      609822.2750452147,
+      3669519.0748708183
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "583",
+    "kind": "payload_snapped",
+    "xy": [
+      610640.2677852765,
+      3669716.067610875
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2905",
+    "kind": "payload_snapped",
+    "xy": [
+      610745.252487268,
+      3670197.075130577
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2904",
+    "kind": "payload_snapped",
+    "xy": [
+      610866.1717683625,
+      3670498.563721726
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "252",
+    "kind": "payload_snapped",
+    "xy": [
+      613506.5423645433,
+      3668588.7852533124
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2939",
+    "kind": "payload_snapped",
+    "xy": [
+      613156.4381916507,
+      3669472.2380172242
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2931",
+    "kind": "payload_snapped",
+    "xy": [
+      612557.5559139502,
+      3671662.5637217364
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2929",
+    "kind": "payload_snapped",
+    "xy": [
+      612597.912652012,
+      3671876.4149658647
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2901",
+    "kind": "payload_snapped",
+    "xy": [
+      610856.9921732459,
+      3671139.563721732
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1040",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611067.7638963497,
+      3666460.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1751",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611781.7638963725,
+      3666704.56367341
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "252",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613506.7638964325,
+      3668588.5636733947
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "253",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612813.763896408,
+      3667965.5636734017
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "254",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612016.7638963808,
+      3667117.5636734064
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "255",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611925.7638963773,
+      3666944.5636734082
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "256",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611674.7638963698,
+      3666566.5636734106
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2871",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      615664.7638965113,
+      3666011.563673414
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2897",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      614905.7638964825,
+      3666874.563673407
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2901",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610856.7638963445,
+      3671139.563673378
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2902",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610887.763896345,
+      3670569.563673383
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2904",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610865.7638963449,
+      3670498.563673383
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2905",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610744.7638963402,
+      3670197.563673385
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2907",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610563.7638963338,
+      3669029.5636733933
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2908",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610561.763896335,
+      3669021.5636733943
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2909",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610572.7638963345,
+      3668110.5636734013
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2913",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610839.7638963433,
+      3667734.563673404
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2915",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610875.7638963445,
+      3667820.5636734036
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2917",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610910.7638963453,
+      3667901.563673403
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2929",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612597.7638964009,
+      3671876.5636733714
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2931",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612557.7638964001,
+      3671662.563673373
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2939",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613156.7638964205,
+      3669472.563673388
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "573",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612777.7638964066,
+      3667593.5636734036
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "574",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612777.7638964066,
+      3667593.5636734036
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "577",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611098.763896352,
+      3668922.5636733943
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "579",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610823.7638963426,
+      3668976.5636733947
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "580",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610128.7638963205,
+      3669129.563673394
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "581",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609877.7638963137,
+      3669447.563673391
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "582",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609822.76389631,
+      3669519.563673391
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "583",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610640.7638963372,
+      3669716.5636733877
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "584",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610631.7638963371,
+      3669346.5636733915
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "586",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610511.763896333,
+      3668727.5636733966
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "588",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611161.763896353,
+      3668147.5636734003
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "590",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611183.7638963546,
+      3670568.563673382
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "791",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613440.763896429,
+      3666506.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "792",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613780.7638964417,
+      3667657.5636734017
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "910",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609730.7638963085,
+      3666786.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "911",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609730.7638963085,
+      3666786.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "912",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609730.7638963085,
+      3666786.563673412
+    ],
+    "grid": "native1",
+    "mode": "cells100",
+    "passes": 5,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2871",
+    "kind": "payload_snapped",
+    "xy": [
+      615664.426327567,
+      3666011.2261530873
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "791",
+    "kind": "payload_snapped",
+    "xy": [
+      613440.5618343175,
+      3666506.765783519
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2897",
+    "kind": "payload_snapped",
+    "xy": [
+      614906.1637651912,
+      3666874.163852662
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "574",
+    "kind": "payload_snapped",
+    "xy": [
+      612778.2049681557,
+      3667594.0047937157
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "573",
+    "kind": "payload_snapped",
+    "xy": [
+      612778.2049681557,
+      3667594.0047937157
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "792",
+    "kind": "payload_snapped",
+    "xy": [
+      613780.6299095268,
+      3667657.5637217006
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "253",
+    "kind": "payload_snapped",
+    "xy": [
+      612813.5071386399,
+      3667965.820479204
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1040",
+    "kind": "payload_snapped",
+    "xy": [
+      611067.7614048679,
+      3666460.5612304336
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "256",
+    "kind": "payload_snapped",
+    "xy": [
+      611674.5717998085,
+      3666566.755818013
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1751",
+    "kind": "payload_snapped",
+    "xy": [
+      611782.1131344987,
+      3666704.563721692
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "255",
+    "kind": "payload_snapped",
+    "xy": [
+      611926.006021277,
+      3666944.5637216945
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "254",
+    "kind": "payload_snapped",
+    "xy": [
+      612016.7294871472,
+      3667117.563721696
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2917",
+    "kind": "payload_snapped",
+    "xy": [
+      610910.4273177192,
+      3667901.563721703
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "588",
+    "kind": "payload_snapped",
+    "xy": [
+      611161.3307023664,
+      3668147.9969154643
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "910",
+    "kind": "payload_snapped",
+    "xy": [
+      609730.8453328044,
+      3666786.482285002
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "911",
+    "kind": "payload_snapped",
+    "xy": [
+      609730.8453328044,
+      3666786.482285002
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "912",
+    "kind": "payload_snapped",
+    "xy": [
+      609730.8453328044,
+      3666786.482285002
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2913",
+    "kind": "payload_snapped",
+    "xy": [
+      610840.0940115228,
+      3667734.2336063017
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2915",
+    "kind": "payload_snapped",
+    "xy": [
+      610875.7282428014,
+      3667820.599375024
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2909",
+    "kind": "payload_snapped",
+    "xy": [
+      610573.001068987,
+      3668110.326548838
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "586",
+    "kind": "payload_snapped",
+    "xy": [
+      610511.5918389728,
+      3668727.5637217104
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "577",
+    "kind": "payload_snapped",
+    "xy": [
+      611098.763896125,
+      3668922.560197013
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "590",
+    "kind": "payload_snapped",
+    "xy": [
+      611183.4220360001,
+      3670568.9055818524
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2902",
+    "kind": "payload_snapped",
+    "xy": [
+      610888.1588076632,
+      3670569.5637217266
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "579",
+    "kind": "payload_snapped",
+    "xy": [
+      610823.7638961226,
+      3668976.8282108125
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2908",
+    "kind": "payload_snapped",
+    "xy": [
+      610561.569277051,
+      3669021.563721713
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2907",
+    "kind": "payload_snapped",
+    "xy": [
+      610563.435893049,
+      3669029.563721713
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "580",
+    "kind": "payload_snapped",
+    "xy": [
+      610128.9409302558,
+      3669129.7407558532
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "584",
+    "kind": "payload_snapped",
+    "xy": [
+      610631.828822338,
+      3669346.498795499
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "581",
+    "kind": "payload_snapped",
+    "xy": [
+      609877.5047806267,
+      3669447.3046062295
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "582",
+    "kind": "payload_snapped",
+    "xy": [
+      609822.2750452147,
+      3669519.0748708183
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "583",
+    "kind": "payload_snapped",
+    "xy": [
+      610640.2677852765,
+      3669716.067610875
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2905",
+    "kind": "payload_snapped",
+    "xy": [
+      610745.252487268,
+      3670197.075130577
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2904",
+    "kind": "payload_snapped",
+    "xy": [
+      610866.1717683625,
+      3670498.563721726
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "252",
+    "kind": "payload_snapped",
+    "xy": [
+      613506.5423645433,
+      3668588.7852533124
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2939",
+    "kind": "payload_snapped",
+    "xy": [
+      613156.4381916507,
+      3669472.2380172242
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2931",
+    "kind": "payload_snapped",
+    "xy": [
+      612557.5559139502,
+      3671662.5637217364
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2929",
+    "kind": "payload_snapped",
+    "xy": [
+      612597.912652012,
+      3671876.4149658647
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2901",
+    "kind": "payload_snapped",
+    "xy": [
+      610856.9921732459,
+      3671139.563721732
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1040",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611067.7638963497,
+      3666460.563673412
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "1751",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611781.7638963725,
+      3666704.56367341
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "252",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613506.7638964325,
+      3668588.5636733947
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "253",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612813.763896408,
+      3667965.5636734017
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "254",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612016.7638963808,
+      3667117.5636734064
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "255",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611925.7638963773,
+      3666944.5636734082
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "256",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611674.7638963698,
+      3666566.5636734106
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2871",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      615664.7638965113,
+      3666011.563673414
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2897",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      614905.7638964825,
+      3666874.563673407
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2901",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610856.7638963445,
+      3671139.563673378
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2902",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610887.763896345,
+      3670569.563673383
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2904",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610865.7638963449,
+      3670498.563673383
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2905",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610744.7638963402,
+      3670197.563673385
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2907",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610563.7638963338,
+      3669029.5636733933
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2908",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610561.763896335,
+      3669021.5636733943
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2909",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610572.7638963345,
+      3668110.5636734013
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2913",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610839.7638963433,
+      3667734.563673404
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2915",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610875.7638963445,
+      3667820.5636734036
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2917",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610910.7638963453,
+      3667901.563673403
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2929",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612597.7638964009,
+      3671876.5636733714
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2931",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612557.7638964001,
+      3671662.563673373
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "2939",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613156.7638964205,
+      3669472.563673388
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "573",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612777.7638964066,
+      3667593.5636734036
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "574",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      612777.7638964066,
+      3667593.5636734036
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "577",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611098.763896352,
+      3668922.5636733943
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "579",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610823.7638963426,
+      3668976.5636733947
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "580",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610128.7638963205,
+      3669129.563673394
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "581",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609877.7638963137,
+      3669447.563673391
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "582",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609822.76389631,
+      3669519.563673391
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "583",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610640.7638963372,
+      3669716.5636733877
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "584",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610631.7638963371,
+      3669346.5636733915
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "586",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      610511.763896333,
+      3668727.5636733966
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "588",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611161.763896353,
+      3668147.5636734003
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "590",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      611183.7638963546,
+      3670568.563673382
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "791",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613440.763896429,
+      3666506.563673412
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "792",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      613780.7638964417,
+      3667657.5636734017
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "910",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609730.7638963085,
+      3666786.563673412
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "911",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609730.7638963085,
+      3666786.563673412
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  },
+  {
+    "point_id": "912",
+    "kind": "retained_wepp_outlet",
+    "xy": [
+      609730.7638963085,
+      3666786.563673412
+    ],
+    "grid": "native1",
+    "mode": "area8697",
+    "passes": 4,
+    "d8_downstream_distance_m": null
+  }
+]

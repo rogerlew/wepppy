@@ -1,0 +1,44 @@
+[
+  {
+    "grid": "native1",
+    "within_20_percent_native_area": 39,
+    "valid_references": 39,
+    "total_references": 39,
+    "point1040_area_m2": 21692732.000386167
+  },
+  {
+    "grid": "baseline",
+    "within_20_percent_native_area": 22,
+    "valid_references": 39,
+    "total_references": 39,
+    "point1040_area_m2": 260.9100106551825
+  },
+  {
+    "grid": "coarse2",
+    "within_20_percent_native_area": 19,
+    "valid_references": 39,
+    "total_references": 39,
+    "point1040_area_m2": 21682536.0
+  },
+  {
+    "grid": "coarse4",
+    "within_20_percent_native_area": 23,
+    "valid_references": 39,
+    "total_references": 39,
+    "point1040_area_m2": 21739776.0
+  },
+  {
+    "grid": "coarse8",
+    "within_20_percent_native_area": 18,
+    "valid_references": 39,
+    "total_references": 39,
+    "point1040_area_m2": 21862464.0
+  },
+  {
+    "grid": "coarse10",
+    "within_20_percent_native_area": 16,
+    "valid_references": 39,
+    "total_references": 39,
+    "point1040_area_m2": 21629800.0
+  }
+]

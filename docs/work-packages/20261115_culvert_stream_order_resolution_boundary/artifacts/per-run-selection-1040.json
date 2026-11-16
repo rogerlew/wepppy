@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "point_id": "1040",
+  "starting_passes": 4,
+  "point": [
+    611067.7614048679,
+    3666460.5612304336
+  ],
+  "point_crs": "EPSG:32617",
+  "cell": [
+    6612,
+    2591
+  ],
+  "attempted": [
+    {
+      "passes": 4,
+      "reason": "selected"
+    }
+  ],
+  "state": "selected",
+  "selected_passes": 4,
+  "candidate": {
+    "passes": 4,
+    "streams": {
+      "path": "topo/stream_candidates/pass_4/streams.tif",
+      "sha256": "dcdb434dca4fc4197a066105619dfd858603da69086e6ee9962a09a4154aec74"
+    },
+    "junctions": {
+      "path": "topo/stream_candidates/pass_4/junctions.tif",
+      "sha256": "3048ed8434bce15059ffe590d4660c7de72f978a62e147e2bf9ac85227c6b230"
+    }
+  }
+}

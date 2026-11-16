@@ -1,0 +1,1 @@
+{"uid": 1000, "gid": 993, "groups": [993], "helper": "/workdir/wepppy/wepppy/rq/culvert_rq_helpers.py", "sha256": "77b317868a91217a4b34cee110aa33be4524852c16d49637d8aee2702c7e968a", "passes": 3, "batch_workers": []}
