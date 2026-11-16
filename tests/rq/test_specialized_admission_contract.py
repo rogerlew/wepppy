@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
+from copy import deepcopy
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any, Callable
@@ -255,6 +257,21 @@ class _CulvertRunner:
     def __init__(self, *, fail_save: bool = False) -> None:
         self.rq_job_ids = {"run_culvert_batch_rq": "old-culvert"}
         self.fail_save = fail_save
+        self._runs = {"point-1": {"job_id": "old-culvert"}}
+        self.persisted_runs = deepcopy(self._runs)
+        self.lock_entries = 0
+        self.lock_active = False
+
+    @contextmanager
+    def locked(self):
+        self.lock_entries += 1
+        self.lock_active = True
+        try:
+            yield
+            # Model the successful NoDb lock exit's persistence boundary.
+            self.persisted_runs = deepcopy(self._runs)
+        finally:
+            self.lock_active = False
 
     def set_rq_job_id(self, key: str, job_id: str) -> None:
         if self.fail_save:
@@ -343,6 +360,10 @@ def _invoke_culvert(
             pass
 
         def enqueue_call(self, **kwargs):
+            if job_key == "run_culvert_run_rq":
+                assert runner.lock_entries == 1
+                assert runner.lock_active is False
+                assert runner.persisted_runs[args[2]]["job_id"] == kwargs["job_id"]
             enqueued.append(kwargs)
             if failure == "enqueue":
                 raise RedisError("culvert enqueue failed")
@@ -388,6 +409,9 @@ def test_culvert_actual_producer_replaces_deferred_exactly(
     assert result == "replacement-culvert"
     assert runner.rq_job_ids[operation[0]] == "replacement-culvert"
     assert enqueued[0]["job_id"] == "replacement-culvert"
+    if operation[0] != "run_culvert_run_rq":
+        assert runner.lock_entries == 0
+        assert runner.persisted_runs["point-1"]["job_id"] == "old-culvert"
 
 
 @pytest.mark.parametrize("failure", ("cleanup", "hint-save", "enqueue"))
@@ -410,6 +434,8 @@ def test_culvert_actual_producer_partial_failures(
     if failure in {"cleanup", "hint-save"}:
         assert runner.rq_job_ids[job_key] == "old-culvert"
         assert enqueued == []
+        assert runner.lock_entries == 0
+        assert runner.persisted_runs["point-1"]["job_id"] == "old-culvert"
     else:
         assert runner.rq_job_ids[job_key] == "replacement-culvert"
         assert enqueued[0]["job_id"] == "replacement-culvert"

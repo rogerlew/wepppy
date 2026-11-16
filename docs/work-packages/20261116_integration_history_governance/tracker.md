@@ -7,7 +7,7 @@
 **Phase**: Implemented and enforced; operational observation open
 **Security impact**: high
 **Remote implementation**: bootstrap PR #657; protected follow-ups #661 and #662
-**Next milestone**: Observe five real protected integrations; retain baseline regression failures
+**Next milestone**: Observe five real protected integrations; retain scoped validation limits
 
 ## Task Board
 
@@ -62,14 +62,14 @@ wctl shim; no production-host installation is claimed.
 - [x] Real Rust valid-output, quota and malformed-input checks locally and on GitHub.
 - [x] Real remote rejection/acceptance canaries and master settings readback.
 - [x] Exact-source publication eligibility rejects stale approval before registry writes.
-- [x] Full application attempts and final audit record; four preexisting RQ fixture failures remain.
+- [x] Full application attempts and final audit record; four RQ fixture failures subsequently repaired (81 affected tests pass).
 
 ## Hardening Signal Log
 
 Baseline: 20 accepted local commits omitted while a remote fast-forward remained
 valid. Recovery preceded this package. Current controls reject the reproduced
 false-closure scenario and tested integration violations. First protected master
-integrations: PR #661 and PR #662. Bootstrap PR #657 and disposable canaries are not counted
+integrations: PR #661, PR #662 and evidence audit PR #665. Bootstrap PR #657 and disposable canaries are not counted
 as five real subsequent integrations.
 
 The canary setup error that produced an empty-tree candidate was isolated and closed
@@ -83,3 +83,7 @@ operational observation; do not label future evidence complete or the failed bro
 suites green. Coupled YAML/governance/web validation: 559 passed; deployment
 plan/execution: 77 passed; history boundary: 37 passed.
 Durable policy lives in `docs/standards/integration-history-governance.md`.
+
+RQ follow-up: [fixture-contract repair](artifacts/20261116_rq_fixture_resolution.md)
+resolves all four retained failures without production changes. No operator
+decision was required; skipped Redis integration cases and full-suite limits remain explicit.

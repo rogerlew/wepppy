@@ -112,8 +112,8 @@ fresh remote object, receipt writer, receipt reader, exact CI candidate, and rel
 consumer. Use real local bare remotes for Git boundaries and read back GitHub
 settings/check results for environmental enforcement. Retain receipt contents and
 identities, not merely successful exit codes. Current claim: implemented and environment validated for integration controls;
-required regression attempts and repairs are recorded with four preexisting RQ
-fixture failures; operational observation remains open.
+required regression attempts and repairs are recorded; the four RQ fixture
+failures have a [scoped repair](artifacts/20261116_rq_fixture_resolution.md); operational observation remains open.
 
 ## Failure-Class Assessment and Hardening
 
@@ -153,5 +153,6 @@ and merge settings are read back; local guard and wctl shim are installed in thi
 checkout. See the [execution receipt](artifacts/20261116_execution.md). No production
 deployment occurred. Required broad regression attempts did not pass; the
 [regression disposition](artifacts/20261116_regression_disposition.md) records
-four preexisting RQ fixture failures and the completed focused repairs. The
+historical failures and the completed focused repairs. The four RQ fixture
+failures are now resolved by the [follow-up](artifacts/20261116_rq_fixture_resolution.md). The
 five-integration observation window remains open; this package is not closed.

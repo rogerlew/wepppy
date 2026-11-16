@@ -19,6 +19,8 @@ class _DummyJob:
     kwargs: dict[str, Any] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
     saved: bool = False
+    # Real RQ jobs expose a callable identity even when no batch is enrolled.
+    func_name: str = "wepppy.rq.project_rq.build_soils_rq"
 
     @property
     def id(self) -> str:
@@ -106,7 +108,6 @@ def test_handle_job_failure_preserves_rq_exception_string(
 
 def test_fork_failure_status_refresh_error_does_not_interrupt_failure_handling(monkeypatch, caplog):
     import redis
-    from types import SimpleNamespace
 
     worker = object.__new__(WepppyRqWorker)
     captured = []
@@ -119,7 +120,8 @@ def test_fork_failure_status_refresh_error_does_not_interrupt_failure_handling(m
 
     monkeypatch.setattr(rq.Worker, 'handle_job_failure', superclass)
     monkeypatch.setattr('wepppy.rq.rq_worker.StatusMessenger.publish', lambda *_args: captured.append('published'))
-    job = SimpleNamespace(id='fork-child', meta={'fork_failure': {}}, get_status=unavailable)
+    job = _DummyJob('fork-child', meta={'fork_failure': {}})
+    job.get_status = unavailable
     worker.handle_job_failure(job, object(), object(), exc_string='original task failure')
     assert captured == ['original task failure', 'published']
     assert 'Could not inspect failed fork prerequisite job_id=fork-child' in caplog.text
