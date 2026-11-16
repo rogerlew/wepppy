@@ -10,6 +10,7 @@ describe("Map GL controller", () => {
 
     beforeEach(async () => {
         jest.resetModules();
+        window.WCForestBasemap = { create: jest.fn(() => ({ select: jest.fn(), syncView: jest.fn() })) };
 
         global.runid = "test-run";
         global.config = "cfg";
@@ -134,6 +135,7 @@ describe("Map GL controller", () => {
                 }
                 return [lng, lat];
             });
+            this.getViewports = jest.fn(() => [this.props.viewState || this.props.initialViewState]);
             deckInstance = this;
         }
         function MapView() {}
@@ -204,6 +206,26 @@ describe("Map GL controller", () => {
         delete global.WCMapGlScaleControl;
         delete global.WCMapGlFeatureUi;
         emittedEvents = [];
+    });
+
+    test("Forest Service switches background only and retains Terrain default and aliases", () => {
+        const map = global.MapController.getInstance();
+        const adapter = window.WCForestBasemap.create.mock.results[0].value;
+        expect(adapter.select).toHaveBeenLastCalledWith("googleTerrain");
+        map.setBaseLayer("googleTerrain");
+        const view = deckInstance.props.viewState;
+        const overlays = deckInstance.props.layers.slice(1);
+        map.setBaseLayer("forestService");
+        expect(adapter.select).toHaveBeenLastCalledWith("forestService");
+        expect(deckInstance.props.layers).toEqual(overlays);
+        expect(deckInstance.props.viewState).toBe(view);
+        map.setBaseLayer("Satellite");
+        expect(adapter.select).toHaveBeenLastCalledWith("googleSatellite");
+        expect(deckInstance.props.layers[0].props.id).toBe("map-gl-base-googleSatellite");
+        for (const key of ["unknown", "constructor", "toString", "__proto__"]) {
+            map.setBaseLayer(key);
+            expect(adapter.select).toHaveBeenLastCalledWith("googleTerrain");
+        }
     });
 
     test("getInstance returns singleton and emits map:ready", () => {

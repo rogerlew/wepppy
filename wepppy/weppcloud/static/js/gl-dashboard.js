@@ -212,7 +212,7 @@
   initState({
     dashboardMode,
     batchModeEnabled: !!ctx.batchModeEnabled,
-    currentBasemapKey: BASEMAP_DEFS[ctx.basemap] ? ctx.basemap : 'googleTerrain',
+    currentBasemapKey: Object.prototype.hasOwnProperty.call(BASEMAP_DEFS, ctx.basemap) ? ctx.basemap : 'googleTerrain',
     currentViewState: initialViewState,
     subcatchmentsVisible: true,
     subcatchmentLabelsVisible: false,
@@ -460,7 +460,9 @@
     throw new Error('gl-dashboard: basemap controller module failed to load');
   }
 
+  const vectorBasemap = window.WCForestBasemap.create({ target });
   const basemapController = createBasemapController({
+    vectorBasemap,
     deck,
     basemapDefs: BASEMAP_DEFS,
     getState,
@@ -686,6 +688,9 @@
     },
   });
 
+  vectorBasemap.select(Object.prototype.hasOwnProperty.call(BASEMAP_DEFS, getState().currentBasemapKey) ? getState().currentBasemapKey : 'googleTerrain');
+  vectorBasemap.syncView(initialViewState);
+
   let userInteractedWithMap = false;
   let didAutoFitBatch = false;
 
@@ -693,6 +698,7 @@
     deck,
     target,
     controllerOptions: DEFAULT_CONTROLLER_OPTIONS,
+    onAfterRender: () => { if (mapController) vectorBasemap.syncView(mapController.deckgl.getViewports()[0]); },
     initialViewState,
     layers: [basemapController ? basemapController.getBaseLayer() : undefined].filter(Boolean),
     onViewStateChange: ({ viewState, interactionState }) => {

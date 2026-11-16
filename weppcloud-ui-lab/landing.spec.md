@@ -261,9 +261,19 @@
 
 ````
 
-## Optional Forest Service basemap credit (implementation pending)
+## Optional Forest Service basemap credit
 
 Follow [FSBASE-01](../docs/ui-docs/contracts/forest-service-basemap-contract.md)
 for dedicated optional-basemap credit and accessible use limitations in both
-Vite variants and the Flask fallback. Preserve the landing background provider
+Vite variants. Preserve the landing background provider
 and its existing credit; the Forest Service choice belongs to run/dashboard maps.
+
+
+## Required landing exports
+
+The Flask routes require the light/dark Vite HTML exports. There is no legacy
+template fallback. Missing or unreadable requested HTML returns HTTP 503 with
+“Landing page temporarily unavailable.” Restore the exports with the existing
+`npm --prefix weppcloud-ui-lab run export:landing` command, then verify `/weppcloud/landing/light/` and
+`/weppcloud/landing/dark/`. Both themes remain supported; the default is light.
+See FSBASE-03 in the canonical contract for the removal decision and rationale.

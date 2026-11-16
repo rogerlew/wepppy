@@ -14,6 +14,7 @@ export function createMapController({
   getTooltip,
   onError,
   onViewStateChange,
+  onAfterRender,
   layers = [],
 }) {
   const deckgl = new deck.Deck({
@@ -26,6 +27,7 @@ export function createMapController({
     getTooltip,
     onError,
     onViewStateChange,
+    onAfterRender,
   });
 
   function applyLayers(nextLayers) {

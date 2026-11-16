@@ -924,7 +924,8 @@ def _build_landing_state() -> Dict[str, Any]:
 def _render_ui_lab_index_with_state(index_path: Path) -> Optional['flask.Response']:
     try:
         html = index_path.read_text(encoding='utf-8')
-    except OSError:
+    except (OSError, UnicodeDecodeError):
+        current_app.logger.exception('Landing HTML export unavailable: %s', index_path)
         return None
 
     state_json = json.dumps(_build_landing_state())
@@ -957,12 +958,14 @@ def _render_landing_page(variant: str = 'light') -> 'flask.Response':
 
     index_file = 'index-light.html' if variant == 'light' else 'index.html'
     vite_index = _resolve_landing_static_asset(index_file)
-    if vite_index.exists():
-        rendered = _render_ui_lab_index_with_state(vite_index)
-        if rendered is not None:
-            return rendered
+    rendered = _render_ui_lab_index_with_state(vite_index)
+    if rendered is not None:
+        return rendered
 
-    return render_template('landing.htm', user=current_user)
+    response = make_response('Landing page temporarily unavailable.', 503)
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    response.headers['Cache-Control'] = 'no-store, max-age=0'
+    return response
 
 
 @weppcloud_site_bp.route('/')

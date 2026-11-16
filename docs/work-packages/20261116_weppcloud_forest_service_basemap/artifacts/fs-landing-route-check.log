@@ -1,0 +1,296 @@
+INFO:wctl2:docker compose exec weppcloud python -
+[2026-11-16 18:53:48,070] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+[2026-11-16 18:53:48,076] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+[2026-11-16 18:53:48,081] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+[2026-11-16 18:53:48,086] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+[2026-11-16 18:53:48,091] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+[2026-11-16 18:53:48,096] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+[2026-11-16 18:53:48,101] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+[2026-11-16 18:53:48,106] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpi3eeoyc2/unavailable.html'
+
+[2026-11-16 18:53:48,111] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+[2026-11-16 18:53:48,115] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+[2026-11-16 18:53:48,120] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+[2026-11-16 18:53:48,124] ERROR in weppcloud_site: Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+ERROR:wepppy.weppcloud.app:Landing HTML export unavailable: /tmp/tmpi3eeoyc2/unavailable.html
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/weppcloud_site.py", line 926, in _render_ui_lab_index_with_state
+    html = index_path.read_text(encoding='utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte

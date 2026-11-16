@@ -1,3 +1,4 @@
+import { ForestServiceCredit } from './components/ForestServiceCredit'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import DeckGL from '@deck.gl/react'
@@ -1163,6 +1164,7 @@ const mapSubtitle =
               </a>{' '}
               contributors.
             </p>
+            <ForestServiceCredit />
           </div>
 
           <div className="space-y-4">

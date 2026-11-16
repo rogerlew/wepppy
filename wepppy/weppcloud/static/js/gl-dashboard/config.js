@@ -341,6 +341,7 @@ export function createBasemapDefs() {
   }
 
   const basemapDefs = {
+    forestService: { label: 'Forest Service Basemap', type: 'vector' },
     osm: {
       label: 'OpenStreetMap',
       template: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',

@@ -221,7 +221,20 @@ details and both scope directions. The canonical behavior is
 
 ## Forest Service basemap contract amendment
 
-Implementation pending: [FSBASE-01](../../../../../docs/ui-docs/contracts/forest-service-basemap-contract.md)
+[FSBASE-01](../../../../../docs/ui-docs/contracts/forest-service-basemap-contract.md)
 governs the optional vector basemap, default/state preservation, credit, and
 loading/failure lifecycle. Preserve the raster factory used by combined-viewer.js
 without requiring a vector renderer for its OSM-only definitions.
+
+The implementation injects the shared `WCForestBasemap` adapter into the dashboard
+basemap controller. `createBaseLayer('forestService')` returns no raster layer;
+Deck's onAfterRender keeps the passive underlay synchronized. The optional adapter
+argument leaves the OSM-only combined viewer's raster factory unchanged. Unknown
+interactive keys are no-ops; initial unknown keys resolve to Terrain.
+
+Operator checks: style/tile/font/sprite failures show “Forest Service basemap
+unavailable. Choose another basemap.” Inspect browser requests to the official
+service and same-origin `static/ui-lab/maplibre/` assets. Retry by switching away
+and back. Rebuild controller and landing exports together; use the normal
+frontend rollout/reload workflow. Rollback restores package-owned source and
+regenerates those assets; no project migration, proxy, or CSP change is involved.

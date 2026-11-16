@@ -1,3 +1,4 @@
+import { ForestServiceCredit } from './components/ForestServiceCredit'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import DeckGL from '@deck.gl/react'
@@ -1200,6 +1201,7 @@ export function AppLight() {
               </a>
               .
             </p>
+            <ForestServiceCredit />
             <p className="text-sm text-slate-600 mt-2">
               Hydrography flowlines:{' '}
               <a

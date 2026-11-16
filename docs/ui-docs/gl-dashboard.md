@@ -43,7 +43,7 @@ comparison differences. This does not change OpenET products.
 6. Multi-scenario comparison with differential colormaps
 
 **Key Features:**
-- **Basemap Selection:** Google Terrain, Google Satellite, OpenStreetMap
+- **Basemap Selection:** Google Terrain (default), Google Satellite, OpenStreetMap, Forest Service Basemap
 - **Layer Detection:** Automatic discovery of available datasets (landuse/nlcd.tif, soils/ssurgo.tif, WEPP outputs, RAP parquet files, OpenET parquet)
 - **Channels Support:** Pass 2 channel order overlay (color by order) with optional labels, plus WEPP channel discharge/soil loss overlays (all-years + yearly)
 - **Stacked Layout:** Map viewport above a collapsible graph panel; graph focus hides the map to give the canvas full height
@@ -405,8 +405,8 @@ gl-dashboard.js (main)
 
 #### Basemap Selector
 **Element:** `#gl-basemap-select` (custom dropdown)  
-**Options:** googleTerrain, googleSatellite, osm  
-**Handler:** `setBasemap(key)` → rebuilds basemap tile layer and calls `applyLayers()`
+**Options:** googleTerrain, googleSatellite, osm, forestService
+**Handler:** `setBasemap(key)` updates the raster layer or passive vector background, then calls `applyLayers()`
 
 #### Scenario Selector
 **Element:** `#gl-scenario-select` (select dropdown)  
@@ -1582,10 +1582,17 @@ explanation while simulation curves remain usable. Reload after replacing an
 upload or restoring its source files. The overlay starts off and retains your
 selection while switching plot sources and axes.
 
-## Forest Service basemap amendment (implementation pending)
+## Forest Service basemap
 
 [FSBASE-01](contracts/forest-service-basemap-contract.md) adds the optional
 `forestService` choice while retaining Google Terrain as default and existing
 explicit selections. Its lifecycle, credit, limitations, and acceptance matrix
 govern this addition; the raster-only combined viewer retains its OSM behavior.
-Existing basemap descriptions above describe the pre-amendment implementation.
+Raster choices retain the existing tile-layer path; the vector choice uses the
+shared passive renderer.
+
+The implemented Forest Service choice uses a lazy local MapLibre underlay while
+Deck retains the view and all analysis layers. Terrain/Satellite/OSM remain
+raster choices. Credits identify the selected background; unavailable resources
+show a status with instructions to choose another basemap. Existing state hooks
+are unchanged; no basemap persistence was added. See FSBASE-01 for use limitations.

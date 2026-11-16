@@ -1,0 +1,20 @@
+[
+  {
+    "variant": "light",
+    "url": "https://forest.tail305ec9.ts.net/weppcloud/landing/light/",
+    "credit": "Optional Forest Service Basemap for project maps: USDA, U.S. Forest Service — Forest Service - Geospatial Office. Google Terrain remains the default.\n\nForest Service map use limitations\n\nThis map cannot establish ownership, legal boundaries, jurisdiction, or access rights. Obtain permission before entering private land and check public-land restrictions. For motor-vehicle access, consult official Motor Vehicle Use Maps or the Forest Service. Hazards may be absent. This map is unsuitable for navigation.",
+    "keyboard": true,
+    "buildScripts": [
+      "https://forest.tail305ec9.ts.net/weppcloud/landing/light/assets/light-m15F6tWk.js"
+    ]
+  },
+  {
+    "variant": "dark",
+    "url": "https://forest.tail305ec9.ts.net/weppcloud/landing/dark/",
+    "credit": "Optional Forest Service Basemap for project maps: USDA, U.S. Forest Service — Forest Service - Geospatial Office. Google Terrain remains the default.\n\nForest Service map use limitations\n\nThis map cannot establish ownership, legal boundaries, jurisdiction, or access rights. Obtain permission before entering private land and check public-land restrictions. For motor-vehicle access, consult official Motor Vehicle Use Maps or the Forest Service. Hazards may be absent. This map is unsuitable for navigation.",
+    "keyboard": true,
+    "buildScripts": [
+      "https://forest.tail305ec9.ts.net/weppcloud/landing/dark/assets/main-BOYiP_nY.js"
+    ]
+  }
+]

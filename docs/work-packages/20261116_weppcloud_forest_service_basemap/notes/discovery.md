@@ -14,7 +14,7 @@ The user specified WEPPpy after the initial CULVERT interpretation and explicitl
 | Run-map controls | `controllers_js/map_gl_layer_control.js` renders basemap radios; `templates/controls/map_pure_gl.htm` provides the map template | Reuse controls and accessible presentation; no separate map application. |
 | GL dashboard | `static/js/gl-dashboard/config.js` defines providers; `map/basemap-controller.js` fetches image blobs and uses TileLayer/BitmapLayer; `templates/gl_dashboard.htm` owns selector | Integrate renderer, selector, state hydration, and actual-provider credit together. |
 | Vite landing | `weppcloud-ui-lab/src/AppLight.tsx`, `src/App.tsx` | Add credit/disclosure to both variants while retaining existing map/provider credit. |
-| Fallback landing | `wepppy/weppcloud/templates/landing.htm` | Add equivalent credit/disclosure. |
+| Legacy fallback (removed) | Former `wepppy/weppcloud/templates/landing.htm` | Operator removed this third implementation under FSBASE-03; both Vite themes remain. |
 | Landing route/build | `routes/weppcloud_site.py::_render_landing_page` prefers exported index-light.html/index.html then falls back; `weppcloud-ui-lab/scripts/export-landing.mjs` builds/copies to `static/ui-lab` | Test served exported assets and fallback, not source alone. |
 | Attribution docs | `wepppy/weppcloud/routes/usersum/weppcloud/data-attribution.md` | Extend user-facing basemap sources/limitations; read nearest usersum instructions first. |
 | Tests | `controllers_js/__tests__/map_gl.test.js`, `tests/weppcloud/routes/test_landing_template.py`, `static-src/tests/smoke/landing-keyboard.spec.js`, GL dashboard smoke tests | Extend meaningful behavior/real browser coverage. |

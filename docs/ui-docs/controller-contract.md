@@ -313,4 +313,5 @@ Presentation does not replace backend mutation enforcement.
 
 The [Forest Service basemap contract](contracts/forest-service-basemap-contract.md)
 governs the additive run-map/dashboard choice, retained Google Terrain default,
-provider credit, and failure behavior. Implementation conformance is pending.
+provider credit, and failure behavior. Implementation is locally validated;
+production deployment is not claimed.

@@ -1,0 +1,32 @@
+[
+  {
+    "initial": null,
+    "resolved": "googleTerrain",
+    "unknownInteractiveNoOp": true
+  },
+  {
+    "initial": "",
+    "resolved": "googleTerrain",
+    "unknownInteractiveNoOp": true
+  },
+  {
+    "initial": "constructor",
+    "resolved": "googleTerrain",
+    "unknownInteractiveNoOp": true
+  },
+  {
+    "initial": "googleSatellite",
+    "resolved": "googleSatellite",
+    "unknownInteractiveNoOp": true
+  },
+  {
+    "initial": "osm",
+    "resolved": "osm",
+    "unknownInteractiveNoOp": true
+  },
+  {
+    "initial": "forestService",
+    "resolved": "forestService",
+    "unknownInteractiveNoOp": true
+  }
+]

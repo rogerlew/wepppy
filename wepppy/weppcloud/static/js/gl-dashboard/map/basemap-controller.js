@@ -2,7 +2,7 @@
  * Basemap + subcatchment toggle wiring for gl-dashboard orchestrator.
  */
 
-export function createBasemapController({ deck, basemapDefs, getState, setValue }) {
+export function createBasemapController({ deck, basemapDefs, getState, setValue, vectorBasemap = null }) {
   let baseLayer = null;
   let applyLayers = () => {};
 
@@ -11,7 +11,8 @@ export function createBasemapController({ deck, basemapDefs, getState, setValue 
   }
 
   function createBaseLayer(basemapKey) {
-    const basemapDef = basemapDefs[basemapKey] || basemapDefs.googleTerrain;
+    const basemapDef = Object.prototype.hasOwnProperty.call(basemapDefs, basemapKey) ? basemapDefs[basemapKey] : basemapDefs.googleTerrain;
+    if (basemapDef.type === 'vector') { return null; }
     return new deck.TileLayer({
       id: 'gl-dashboard-base-tiles',
       data: basemapDef.template,
@@ -71,12 +72,13 @@ export function createBasemapController({ deck, basemapDefs, getState, setValue 
   }
 
   function setBasemap(basemapKey) {
-    if (!basemapDefs[basemapKey]) {
+    if (!Object.prototype.hasOwnProperty.call(basemapDefs, basemapKey)) {
       // eslint-disable-next-line no-console
       console.warn('gl-dashboard: unknown basemap key', basemapKey);
       return;
     }
     setValue('currentBasemapKey', basemapKey);
+    if (vectorBasemap) { vectorBasemap.select(basemapKey); vectorBasemap.syncView(getState().currentViewState); }
     baseLayer = createBaseLayer(basemapKey);
     applyLayers();
     const selector = document.getElementById('gl-basemap-select');
@@ -124,7 +126,7 @@ export function createBasemapController({ deck, basemapDefs, getState, setValue 
   function bindBasemapControls() {
     const basemapSelect = document.getElementById('gl-basemap-select');
     if (basemapSelect) {
-      const initialBasemap = basemapDefs[getState().currentBasemapKey] ? getState().currentBasemapKey : 'googleTerrain';
+      const initialBasemap = Object.prototype.hasOwnProperty.call(basemapDefs, getState().currentBasemapKey) ? getState().currentBasemapKey : 'googleTerrain';
       basemapSelect.value = initialBasemap;
       basemapSelect.addEventListener('change', (e) => setBasemap(e.target.value));
     }

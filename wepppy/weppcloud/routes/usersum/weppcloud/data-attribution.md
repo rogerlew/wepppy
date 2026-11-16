@@ -73,3 +73,22 @@ Legacy U.S. metadata references for SSURGO:
 
 - WEPPcloud integrates these datasets with internal preprocessing, lookup tables, and model-parameter transformations. Public attribution does not imply one-to-one raw input usage for every run step.
 - Dataset availability, product names, and provider URLs can change over time. This page should be reviewed periodically against both implementation configs and provider documentation.
+
+## Forest Service Basemap
+
+Choose **Forest Service Basemap** in a project map or GL Dashboard to view
+Forest Service cartography. Google Terrain remains the default. This changes
+only the background map, not model inputs or analysis results.
+
+Credit: [USDA, U.S. Forest Service](https://www.arcgis.com/home/item.html?id=2e1593463c30495e9c802098527e3d1b)
+— Forest Service - Geospatial Office.
+
+This map cannot establish ownership, legal boundaries, jurisdiction, or access
+rights. Obtain permission before entering private land and check public-land
+restrictions. For motor-vehicle access, consult official Motor Vehicle Use Maps
+or the Forest Service. Hazards may be absent. The map is unsuitable for navigation.
+
+Coverage and detail vary by location and zoom. If the basemap is unavailable,
+choose Terrain or Satellite; analysis overlays remain available. To retry,
+choose another basemap and then select Forest Service again. Display in your
+browser does not grant permission for bulk download, hosting, or redistribution.

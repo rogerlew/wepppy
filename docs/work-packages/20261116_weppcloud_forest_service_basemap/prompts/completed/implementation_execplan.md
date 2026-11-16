@@ -1,7 +1,7 @@
 # Add an optional Forest Service basemap to WEPPcloud
 
 
-This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries, Decision Log, Outcomes & Retrospective, and tracker.md current. Execution was requested on 2026-11-16. Contract checkpoint preparation is active; production implementation awaits the required accepted ancestor commit.
+This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep Progress, Surprises & Discoveries, Decision Log, Outcomes & Retrospective, and tracker.md current. Execution completed locally on 2026-11-16 after accepted ancestors 277d55fba, abd9f6156, and 630e155e1. Scoped tests, browser evidence, and independent reviews pass; production deployment is excluded.
 
 
 ## Purpose / Big Picture
@@ -12,42 +12,80 @@ Users can choose Forest Service cartography in the WEPPcloud run map and GL dash
 
 ## Progress
 
-
-- [x] (2026-11-16 18:00 UTC) Corrected scope to WEPPpy, inventoried map/landing source, and recorded the user's explicit Google Terrain default requirement.
-- [x] Retrieved public item, service, and style metadata.
-- [x] (2026-11-16) Draft FSBASE-01 canonical contract, linked amendments, consumer inventory, and contract-decision artifact.
-- [x] (2026-11-16) Two independent contract reviews pass after COR-01/SEC-01 corrections.
-- [ ] Obtain explicit checkpoint commit authority.
-- [ ] Commit accepted checkpoint, then complete renderer feasibility evaluation.
-- [ ] Implement optional basemap plus map and landing attribution.
-- [ ] Rebuild assets, test, and retain real-browser evidence.
-- [ ] Complete independent correctness/security reviews and documentation.
-
+- [x] (2026-11-16) Ratified FSBASE-01 with two independent reviews; checkpoint `277d55fba` precedes implementation.
+- [x] Prototyped official style/labels/symbols on a real populated run; evaluated and pinned existing MapLibre dependency to patched 5.24.1.
+- [x] Wired run/dashboard optional selection, current-provider credit, visible failures, stale-load disposal, and all landing disclosures; Terrain remains default.
+- [x] Ratified operator-approved fallback link repair at `abd9f6156`; both confirmed stale consumers now render with the real Flask routes.
+- [x] Rebuilt and read back served assets; frontend lint, 126 Jest suites / 1,083 tests and 9 Node tests pass; landing pytest 2 pass.
+- [x] Real browser rendering, hostile-resource/redirect/attribution, header privacy, initial-state, mobile, loaded zoom edges, and authenticated selection-box/click checks pass.
+- [x] Isolated four existing dashboard smoke failures against pre-change assets; all four reproduce unchanged.
+- [x] Independent security review passes with zero unresolved findings; correctness source findings closed.
+- [x] (2026-11-16) Operator requested scoped tests; broad run stopped at 3,171 pass / 126 skip. Final scoped Python 327, controller 43, adapter 6 pass. Both independent final reviews and documentation checks pass; closed locally.
+- [x] FSBASE-03: operator removed legacy fallback; checkpoint `630e155e1` precedes removal. Both Vite themes, real export failures, 327 scoped Python tests, and final independent reviews pass.
 
 ## Surprises & Discoveries
 
-The combined watershed viewer calls the shared dashboard raster factory directly with OSM-only definitions. Preserve that interface without a vector dependency. The contract-first standard requires explicit checkpoint commit authority; the execution request does not explicitly grant commits.
+The raster paths cannot consume the service's PBF as images; a passive local
+MapLibre underlay rendered official styling without replacing deck overlays.
+The shared factory also serves the OSM-only combined viewer, so its adapter
+argument remains optional. Actual development access is forest.tail305ec9.ts.net;
+the old hostname returned 503 and unmatched localhost Host returned an empty 200.
 
+The existing MapLibre 5.12.0 dependency was affected by an attribution sanitizer
+advisory. Upstream backported the fix to 5.24.1; the aggregate npm advisory still
+uses an overbroad range. The exact patched distribution, safe fixed credit and
+hostile metadata were validated. Remote resources require runtime confinement,
+not only initial origin inspection.
 
-WEPPpy run/dashboard basemaps are raster deck.gl layers, unlike the initially inspected companion application. The vector endpoint cannot be substituted into image loading. MapLibre already exists in the separate landing build, but run/dashboard compatibility remains unproven. Landing has light and dark Vite variants plus a Flask fallback, so editing one template is insufficient. The date embedded in the service name does not pin its content.
+Real Flask rendering exposed a deleted About endpoint hidden by the template
+test's mocked url_for. The operator approved the existing user-guide destination;
+FSBASE-02 covers both confirmed consumers. Browser request.headers() excludes
+security headers; corrected allHeaders captures substantiate privacy evidence.
 
+Four existing dashboard smoke failures reproduced unchanged with baseline assets
+on the selected run. The full Python suite includes long soil-artifact matrices;
+frontend and browser acceptance finished while that gate continued.
+The legacy fallback also retained an obsolete CDN renderer with a reachable
+attribution sink (SEC-03). The operator directed removing the fallback entirely.
 
 ## Decision Log
 
-2026-11-16 execution: draft `forestService` selection and visible loading/unavailable behavior in FSBASE-01. Existing choices provide recovery; stale loads cannot change the current choice. Prepare independent reviews before requesting the required standalone commit authority. No production edits precede that ancestor.
+2026-11-16: Preserve Google Terrain default and existing explicit selections;
+add only forestService background cartography. The user authorized execution,
+then explicitly authorized the checkpoint commit. Two independent contract reviews
+passed before ancestor 277d55fba. No deployment is authorized.
 
+Reuse existing MapLibre at patched 5.24.1, lazily exported from the landing build,
+with deck retaining camera and interactions. This avoids another top-level
+dependency, server, proxy, or map-stack replacement. The measured optional
+renderer cost is documented; no speedup or model-compute benefit is claimed.
 
-On 2026-11-16 the user corrected the implementation target to WEPPpy and explicitly instructed that Google Terrain remain default. The plan therefore adds an optional choice without replacing current defaults or landing-page map providers. CULVERT files are excluded. Renderer selection remains subject to evidence and dependency evaluation, not a predetermined library adoption. No runtime or production action is authorized by scaffolding alone.
+Use a validated custom protocol with fixed approved service resources, omitted
+credentials/referrers and rejected redirects. Fixed DOM credits avoid remote
+HTML. Asset/style failures are visible and alternate providers remain usable;
+stale loads cannot replace a later selection.
 
+After actual fallback rendering failed, the operator selected “Replace with user
+guide.” Two independent FSBASE-02 reviews passed before ancestor abd9f6156 and
+before either broken link was edited. No new route or access rule was introduced.
+2026-11-16: Operator explicitly removed the legacy fallback, preserving both Vite
+themes. Independent FSBASE-03 reviews passed before checkpoint 630e155e1.
+Required missing/unreadable HTML now returns a logged, path-free 503.
 
 ## Outcomes & Retrospective
 
-Execution has produced a reviewable canonical contract and consumer inventory. Renderer feasibility, production edits, builds, browser evidence, and final reviews remain pending. Checkpoint approval must not be mistaken for implementation acceptance.
+Optional run/dashboard selection and all landing disclosures are implemented and
+validated on served development assets. The legacy fallback is removed at operator request (FSBASE-03); both Vite themes remain and missing/unreadable exports return HTTP 503. The corrected legacy header renders through the real Flask URL map. Independent correctness/security reviews
+pass with zero unresolved findings. Tests and screenshots are retained under
+artifacts; generated bytes are traced through asset_manifest.json.
 
-
-The corrected scaffold identifies actual WEPPpy integration seams and the rendering feasibility question. No code, build, browser validation, or deployment has occurred. Later milestones in this package deliver the wired feature; documentation alone cannot close implementation.
-
-
+Operator-requested scoped checks pass: Python 327, map-controller 43, adapter 6.
+The broad run was stopped after 3,171 passes / 126 skips with no failures; full
+suite completion is not claimed. Four broader smoke failures reproduce against
+pre-change assets and are not attributed to this feature. Production deployment
+and cross-browser certification are excluded. Exact state, resource, attribution,
+and navigation rules live in the canonical FSBASE-01/02/03 contract rather than
+only this execution record.
 ## Context and Orientation
 
 
@@ -55,7 +93,7 @@ Work in `/home/workdir/wepppy`. Read root and nearest AGENTS instructions for co
 
 The run map is `wepppy/weppcloud/controllers_js/map_gl.js`, with basemap radio UI in `map_gl_layer_control.js`. The GL dashboard defines providers in `wepppy/weppcloud/static/js/gl-dashboard/config.js`, renders them in `map/basemap-controller.js`, and exposes a selector in `wepppy/weppcloud/templates/gl_dashboard.htm`. Both currently use deck.gl to load image tiles and draw bitmap layers. A vector tile instead contains geometry requiring style evaluation, label placement, fonts, and symbols.
 
-Landing sources are `weppcloud-ui-lab/src/AppLight.tsx` and `src/App.tsx`. Their export command writes `wepppy/weppcloud/static/ui-lab/`; Flask's `routes/weppcloud_site.py::_render_landing_page` serves those exports or `templates/landing.htm` as fallback. The landing build already declares MapLibre, a styled-vector renderer; its availability there does not establish run-map support.
+Landing sources are `weppcloud-ui-lab/src/AppLight.tsx` and `src/App.tsx`. Their export command writes `wepppy/weppcloud/static/ui-lab/`; Flask's `routes/weppcloud_site.py::_render_landing_page` requires those exports and returns a clear 503 when unavailable. The landing build already declares MapLibre, a styled-vector renderer; its availability there does not establish run-map support.
 
 Use the service:
 
@@ -90,7 +128,7 @@ Implement the proven adapter at the run-map and dashboard seams. Preserve Google
 
 Show “USDA, U.S. Forest Service” linked to the item when Forest Service is displayed; retain service credit “Forest Service - Geospatial Office” as applicable. Keep other providers' credit accurate. Implement the ratified visible unavailable state without silent substitution.
 
-Add dedicated map-data credit and accessible limitations disclosure to both React landing variants and the fallback template. Reuse their existing sources/attribution presentation. Preserve current landing background provider credit. Extend `wepppy/weppcloud/routes/usersum/weppcloud/data-attribution.md` after reading its nearest instructions.
+Add dedicated map-data credit and accessible limitations disclosure to both React landing variants. Reuse their existing sources/attribution presentation. Preserve current landing background provider credit. Extend `wepppy/weppcloud/routes/usersum/weppcloud/data-attribution.md` after reading its nearest instructions.
 
 Disclose all published limitations: no ownership, legal boundary, jurisdiction, or access-right determination; obtain private-land permission and check public restrictions; use official Motor Vehicle Use Maps or Forest Service advice for driving access; hazards may be absent; unsuitable for navigation. Do not inject remote metadata HTML or imply institutional endorsement. Update `weppcloud-ui-lab/landing.spec.md`, relevant controller/dashboard developer docs, and operator notes on external resource failure and rollback.
 
@@ -118,10 +156,10 @@ Begin in the repository root:
 
 After contract and implementation work, run:
 
-    python3 wepppy/weppcloud/controllers_js/build_controllers_js.py
+    wctl exec weppcloud python wepppy/weppcloud/controllers_js/build_controllers_js.py
     wctl run-npm lint
     wctl run-npm test
-    wctl run-pytest tests/weppcloud/routes/test_landing_template.py
+    wctl run-pytest tests/weppcloud/routes/test_landing_routes.py
     wctl run-pytest tests --maxfail=1
 
 From `weppcloud-ui-lab/`, follow its own AGENTS and run:
@@ -170,3 +208,8 @@ Preserve the run controller event/API contract and dashboard `createBasemapContr
 inventory, preliminary capability audit, and two passing independent contract
 reviews. Production implementation remains gated on explicit standalone
 checkpoint commit authority; no runtime or deployment acceptance is claimed.
+
+2026-11-16 closeout: operator replaced the broad Python gate with scoped tests.
+All scoped checks and independent reviews pass; exact receipts and the four
+reproduced baseline smoke failures are retained. This plan is complete for local
+implementation/validation, not production deployment.

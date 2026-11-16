@@ -47,6 +47,8 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
+Completed locally: [WEPPcloud Forest Service basemap and attribution](docs/work-packages/20261116_weppcloud_forest_service_basemap/package.md) — Optional run/dashboard basemap retains Google Terrain default; both landing themes retain credits/limitations; obsolete Flask fallback removed with explicit 503 for unavailable exports; legacy header user-guide link repaired. Served-browser and independent reviews pass; scoped Python 327, controller 43, adapter 6 pass. Broad run stopped at operator request without failures; no production deployment.
+
 Completed locally: [MOFE input producer audit](docs/work-packages/20261102_mofe_input_producer_audit/package.md) — reference-preserving 9005/RAP compatibility delivered in matched revision 7. Native 1,750 tests, 31 watchlist, complete 72-hill/235-OFE/35-year artifacts, segmented broad Python validation and reviewed HTTPS PDF/manifest pass; native `547b9e7eb` pushed. Reference scientific quirks and inherited graphics-age overflow remain documented. No deployment/default switch or installed Rust promotion.
 
 Active repair: [Failed NoDb mutation state](docs/work-packages/20261030_nodb_failed_mutation_state/package.md) — checkpoint `2b998e08d` committed; implementation and independent reviews complete; split validation 12533 passed/371 skipped. Implementation commit and push authorized; no deployment.

@@ -17,3 +17,12 @@ mkdirSync(targetDir, { recursive: true })
 cpSync(distDir, targetDir, { recursive: true })
 
 console.log(`Exported landing bundle to ${targetDir}`)
+
+// Reuse the locked landing renderer for optional run/dashboard vector basemaps.
+const maplibreDir = resolve(projectRoot, 'node_modules/maplibre-gl')
+const rendererTarget = resolve(targetDir, 'maplibre')
+mkdirSync(rendererTarget, { recursive: true })
+for (const name of ['maplibre-gl.js', 'maplibre-gl.css']) {
+  cpSync(resolve(maplibreDir, 'dist', name), resolve(rendererTarget, name))
+}
+cpSync(resolve(maplibreDir, 'LICENSE.txt'), resolve(rendererTarget, 'LICENSE.txt'))

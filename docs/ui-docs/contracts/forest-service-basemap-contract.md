@@ -150,4 +150,4 @@ legacy attribution sink rather than maintaining another dependency path.
 Existing exports remain compatible; incomplete deployments now fail explicitly.
 Validate both themes and default routes, real missing/unreadable export states,
 no legacy template reference, and unchanged state injection. Implementation
-conformance for FSBASE-03 is pending.
+conformance for FSBASE-03 is locally validated; production deployment is not claimed.

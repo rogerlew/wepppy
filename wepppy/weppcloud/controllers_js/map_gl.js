@@ -149,6 +149,7 @@ var MapController = (function () {
             : emitterBase;
 
         var basemapDefs = {
+            forestService: { key: "forestService", label: "Forest Service Basemap" },
             googleTerrain: {
                 key: "googleTerrain",
                 label: "Terrain",
@@ -201,6 +202,7 @@ var MapController = (function () {
         var scaleControl = null;
         var isApplyingViewState = false;
         var baseLayer = null;
+        var vectorBasemap = null;
         var baseLayerKey = basemapDefs.googleTerrain.key;
         var layerControl = null;
         var sbsLayerController = null;
@@ -982,7 +984,7 @@ var MapController = (function () {
             if (!key) {
                 return basemapDefs.googleTerrain;
             }
-            if (basemapDefs[key]) {
+            if (Object.prototype.hasOwnProperty.call(basemapDefs, key)) {
                 return basemapDefs[key];
             }
             var lower = String(key).toLowerCase();
@@ -1010,6 +1012,7 @@ var MapController = (function () {
 
         function createBaseLayer(definition) {
             var def = definition || basemapDefs.googleTerrain;
+            if (def.key === "forestService") { return null; }
             if (!deckApi || typeof deckApi.TileLayer !== "function" || typeof deckApi.BitmapLayer !== "function") {
                 warnNotImplemented("TileLayer/BitmapLayer unavailable");
                 return null;
@@ -2315,7 +2318,8 @@ var MapController = (function () {
 
         map.baseMaps = {
             Terrain: basemapDefs.googleTerrain,
-            Satellite: basemapDefs.googleSatellite
+            Satellite: basemapDefs.googleSatellite,
+            "Forest Service Basemap": basemapDefs.forestService
         };
         map.overlayMaps = {};
 
@@ -2453,6 +2457,8 @@ var MapController = (function () {
             var def = resolveBasemap(key);
             baseLayerKey = def.key;
             baseLayer = createBaseLayer(def);
+            vectorBasemap.select(def.key);
+            vectorBasemap.syncView(deckgl.getViewports()[0]);
             applyLayers();
             syncBaseLayerControlSelection();
             emit("map:layer:toggled", {
@@ -2580,6 +2586,9 @@ var MapController = (function () {
             height: size.height || undefined,
             layers: baseLayer ? [baseLayer] : [],
             widgets: widgets,
+            onAfterRender: function () {
+                if (vectorBasemap) { vectorBasemap.syncView(deckgl.getViewports()[0]); }
+            },
             onHover: function (info) {
                 handleDeckHover(info);
             },
@@ -2611,6 +2620,8 @@ var MapController = (function () {
             }
         });
         map._deck = deckgl;
+        vectorBasemap = window.WCForestBasemap.create({ target: mapCanvasElement });
+        vectorBasemap.select(baseLayerKey);
 
         if (typeof ResizeObserver !== "undefined" && mapCanvasElement) {
             var resizeObserver = new ResizeObserver(function () {

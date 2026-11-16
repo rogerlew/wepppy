@@ -1,0 +1,106 @@
+{
+  "checkpoint": "630e155e1",
+  "implementation": "package source tree; source and served artifact hashes below",
+  "artifacts": [
+    {
+      "path": "wepppy/weppcloud/static/js/controllers-gl.js",
+      "bytes": 2237362,
+      "sha256": "563f70a3461dfb0f7f6fdfe90bf1d31fc3236c4eaee87d837597f4f3a3cdd6a8",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/js/controllers-gl.js",
+      "status": 200,
+      "served_sha256": "563f70a3461dfb0f7f6fdfe90bf1d31fc3236c4eaee87d837597f4f3a3cdd6a8"
+    },
+    {
+      "path": "wepppy/weppcloud/static/js/forest-service-basemap.js",
+      "bytes": 10360,
+      "sha256": "7041ff6a34d42d22d71db115ce5f9dd2374ffd5c19200898aea6e57bd71b4ee1",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/js/forest-service-basemap.js",
+      "status": 200,
+      "served_sha256": "7041ff6a34d42d22d71db115ce5f9dd2374ffd5c19200898aea6e57bd71b4ee1"
+    },
+    {
+      "path": "wepppy/weppcloud/static/js/gl-dashboard.js",
+      "bytes": 50220,
+      "sha256": "b9020555c70481ef8b337d06611cf337ca895ec1432b7e29b8464933b617fb46",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/js/gl-dashboard.js",
+      "status": 200,
+      "served_sha256": "b9020555c70481ef8b337d06611cf337ca895ec1432b7e29b8464933b617fb46"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/vite.svg",
+      "bytes": 1497,
+      "sha256": "4a748afd443918bb16591c834c401dae33e87861ab5dbad0811c3a3b4a9214fb"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/index.html",
+      "bytes": 515,
+      "sha256": "55011417d5689587e28181584a57df1b89c943c065499f0e903afafeeaffcea1"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/index-light.html",
+      "bytes": 517,
+      "sha256": "fe03ade5b91da0f6c01a34a8bbba015c2d7f1630adb621c9f5ef4f7733c77e9a"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/maplibre/maplibre-gl.js",
+      "bytes": 1058059,
+      "sha256": "a9c9e2aa36d4d5b63b131f27c1272f1a28883eeecc0eddd1e0dbfae4033bc7c9",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/ui-lab/maplibre/maplibre-gl.js",
+      "status": 200,
+      "served_sha256": "a9c9e2aa36d4d5b63b131f27c1272f1a28883eeecc0eddd1e0dbfae4033bc7c9"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/maplibre/LICENSE.txt",
+      "bytes": 5984,
+      "sha256": "ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/maplibre/maplibre-gl.css",
+      "bytes": 70024,
+      "sha256": "ab1e70d59ec40465bae7e7030da2f3ccf28133fd502e62bd598eefbadfd7a732",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/ui-lab/maplibre/maplibre-gl.css",
+      "status": 200,
+      "served_sha256": "ab1e70d59ec40465bae7e7030da2f3ccf28133fd502e62bd598eefbadfd7a732"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/assets/light-m15F6tWk.js",
+      "bytes": 36256,
+      "sha256": "b019f00969a49b36bb1f81996ea8b57f1aab07a697631c45cff43fc51660f30e",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/ui-lab/assets/light-m15F6tWk.js",
+      "status": 200,
+      "served_sha256": "b019f00969a49b36bb1f81996ea8b57f1aab07a697631c45cff43fc51660f30e"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/assets/main-BOYiP_nY.js",
+      "bytes": 36612,
+      "sha256": "80abbd968155832077bad4ab8360a5827ca7d2d2840a5dbddf95bafa84d2f08c",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/ui-lab/assets/main-BOYiP_nY.js",
+      "status": 200,
+      "served_sha256": "80abbd968155832077bad4ab8360a5827ca7d2d2840a5dbddf95bafa84d2f08c"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/assets/main-N3_1v9T2.css",
+      "bytes": 102661,
+      "sha256": "b874cb49b464b53bea02ad0c78cdc71e769785865fff8dac01c3554d89ed06f0",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/ui-lab/assets/main-N3_1v9T2.css",
+      "status": 200,
+      "served_sha256": "b874cb49b464b53bea02ad0c78cdc71e769785865fff8dac01c3554d89ed06f0"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/assets/light-BC_sccd8.css",
+      "bytes": 103039,
+      "sha256": "a20926b6c07da782e9cb7d23933530ed1751cd8fb74fea2b007b76f5bb3f4c78",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/ui-lab/assets/light-BC_sccd8.css",
+      "status": 200,
+      "served_sha256": "a20926b6c07da782e9cb7d23933530ed1751cd8fb74fea2b007b76f5bb3f4c78"
+    },
+    {
+      "path": "wepppy/weppcloud/static/ui-lab/assets/utils-ByKqh8Km.js",
+      "bytes": 2090036,
+      "sha256": "1daa08b1232ff98f001407800e1ee87d9c742b59def7e9bea1fcafd0f713c400",
+      "url": "https://forest.tail305ec9.ts.net/weppcloud/static/ui-lab/assets/utils-ByKqh8Km.js",
+      "status": 200,
+      "served_sha256": "1daa08b1232ff98f001407800e1ee87d9c742b59def7e9bea1fcafd0f713c400"
+    }
+  ]
+}

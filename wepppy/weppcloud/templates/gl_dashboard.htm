@@ -908,10 +908,11 @@
     </label>
     <div>
       <h3>Basemap</h3>
-      <select id="gl-basemap-select" class="gl-custom-select__trigger" style="margin-top:0.5rem;">
-        <option value="googleTerrain">Google Terrain</option>
+      <select aria-label="Basemap" id="gl-basemap-select" class="gl-custom-select__trigger" style="margin-top:0.5rem;">
+        <option value="googleTerrain" selected>Google Terrain</option>
         <option value="googleSatellite">Google Satellite</option>
         <option value="osm">OpenStreetMap</option>
+        <option value="forestService">Forest Service Basemap</option>
       </select>
     </div>
     {% if (omni_scenarios or omni_contrasts) and not is_omni_child %}
@@ -1080,6 +1081,7 @@
   <script src="https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js"></script>
   <script src="{{ static_url('js/colormap.js') }}"></script>
   <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+  <script src="{{ static_url('js/forest-service-basemap.js') }}"></script>
   <script src="{{ static_url('js/gl-dashboard.js') }}"></script>
   <script>
     (function () {
