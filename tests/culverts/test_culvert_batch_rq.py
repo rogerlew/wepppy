@@ -16,6 +16,14 @@ from wepppy.rq.culvert_rq import run_culvert_batch_rq
 pytestmark = [pytest.mark.integration, pytest.mark.nodb]
 
 
+@pytest.fixture(autouse=True)
+def isolate_outcome_persistence(monkeypatch):
+    # Topology orchestration uses dummy jobs; direct real RQ/publication coverage
+    # is in tests/rq/test_batch_outcome.py.
+    monkeypatch.setattr(culvert_rq_module.batch_outcome, 'enroll', lambda *a, **k: None)
+    monkeypatch.setattr(culvert_rq_module.batch_outcome, 'register', lambda *a, **k: None)
+
+
 class _DummyRedis:
     def __init__(self, *args, **kwargs) -> None:
         pass
@@ -34,6 +42,12 @@ class _DummyJob:
     def __init__(self, job_id: str) -> None:
         self.id = job_id
         self.meta: dict[str, object] = {}
+
+    def refresh(self) -> None:
+        pass
+
+    def save_meta(self) -> None:
+        pass
 
     def save(self) -> None:
         return None

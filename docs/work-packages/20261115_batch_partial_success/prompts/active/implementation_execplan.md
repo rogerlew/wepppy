@@ -1,7 +1,7 @@
 # Implement batch outcomes for partial results
 
 
-This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Execution is active at M1; runtime implementation follows exact contract ratification and the checkpoint ancestor.
+This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. M1–M3 are implemented; M4 local regression and review closeout is active. The reviewed contract checkpoint precedes runtime implementation.
 
 ## Purpose / Big Picture
 
@@ -14,9 +14,9 @@ Deliver successful batch and culvert results when a sibling times out. A 32-succ
 - [x] (2026-11-16 06:13 UTC) Scaffold package and draft decision.
 - [x] (2026-11-16 06:29 UTC) M1 source/consumer inventory and exact proposed canonical schema prepared; see artifacts/20261116_inventory.md and docs/schemas/batch-outcome-contract.md.
 - [x] (2026-11-16) M1: Independent correctness/security contract reviews and finding disposition pass; artifacts record reviewed hash.
-- [ ] M1: Exact operator ratification and standalone checkpoint commit. Runtime edits remain gated.
-- [ ] M2: Finalization and additive polling implementation for both workflows.
-- [ ] M3: Client adoption, direct artifact acceptance, migration guide.
+- [x] M1: Operator ratified; checkpoint `390108471` and climate compatibility addendum `0aec93f1c` committed before their respective runtime changes.
+- [x] M2: Finalization and additive polling implementation for both workflows.
+- [x] M3: Client adoption, direct artifact acceptance, migration guide.
 - [ ] M4: Regression gates, independent reviews, evidence-based handoff.
 
 ## Surprises & Discoveries
@@ -24,19 +24,31 @@ Deliver successful batch and culvert results when a sibling times out. A 32-succ
 M1: both finalizer edges already tolerate failure. Ordinary Omni strict downstream edges can still strand the batch finalizer after scenario failure. Successful leaf RQ evidence can expire before a 12-hour sibling timeout unless retention is extended. Culvert resume and standalone finalize are additional consumers. See artifacts/20261116_inventory.md and independent review findings.
 
 
-Culvert finalization already permits partial success, but generic RQ aggregation propagates failed children and the client aborts before download. Caught application exceptions returning `failed` behave differently. All 33 runs in `1f2933b8-12a7-48cc-b508-5f2719baa8a7` failed SSURGO; resolve the separate timeout incident identity in M1.
+Culvert finalization already permits partial success, but generic RQ aggregation propagates failed children and the client aborts before download. Caught application exceptions returning `failed` behave differently. All 33 runs in `1f2933b8-12a7-48cc-b508-5f2719baa8a7` failed SSURGO; the operator removed incident-ID recovery from scope because stream-order reduction was revised to avoid the original timeout.
 
 ## Decision Log
 
-2026-11-16: Proposed immutable attempt-specific baseline WEPP ZIPs for both workflows, retaining legacy diagnostic archives and WATAR/Omni project downloads. Prep-only selections are explicit skips; selected-only ordinary retry cohorts exclude historical complete runs. These newly resolved choices require exact operator ratification. See the canonical proposal and inventory.
+2026-11-16: Proposed immutable attempt-specific baseline WEPP ZIPs for both workflows, retaining legacy diagnostic archives and WATAR/Omni project downloads. Prep-only selections are explicit skips; selected-only ordinary retry cohorts exclude historical complete runs. The operator ratified these choices before checkpoint `390108471`. See the canonical proposal and inventory.
 
 
-2026-11-16 06:13 UTC: Add finalizer-owned `batch` outcome on jobinfo and jobstatus, preserving RQ status and exception visibility. Artifact availability and execution diagnostics answer different questions. Exact contract ratification remains pending.
+2026-11-16 06:13 UTC: Add finalizer-owned `batch` outcome on jobinfo and jobstatus, preserving RQ status and exception visibility. Artifact availability and execution diagnostics answer different questions. Ratified by the operator at 06:31 UTC.
 
 ## Outcomes & Retrospective
 
 
-M1 inventory and a concrete canonical proposal are prepared. Runtime implementation, external client adoption and environment validation have not begun. Exact operator ratification is pending; no checkpoint commit, deployment or recovery is claimed.
+Server finalizers and polling are wired to immutable per-attempt artifacts. The
+companion client uses manifest-selected successes for metrics and both geometry
+layers, preserving legacy behavior when `batch` is absent. Local evidence includes
+real Redis/RQ timeout and dependency transitions, actual authorized HTTP download,
+production Culvert finalizer execution, canonical archive/restore, and client
+Parquet/GeoJSON readback. Test producers use synthetic scientific files; feature
+grants and selected NoDb adapters have fixture boundaries. Full scientific execution,
+deployed Celery integration and production-equivalent identities/mounts remain
+release acceptance gates; no deployment is claimed. See the validation artifact.
+
+Review found cancellation races in long publication locks, out-of-lock manifest
+writes and stale metadata. Short shared dispatch/commit leases, refreshed cancellation
+trees and consistent terminal manifests close these without a new service.
 
 ## Context and Orientation
 
@@ -48,7 +60,7 @@ The external client is `Culvert_web_app/culvert_app/tasks/wepp_cloud_integration
 ## Plan of Work
 
 
-M1: Read the contract-first, artifact observability/validation, and hardening lifecycle standards. Inventory `docs/schemas/rq-response-contract.md`, webhook contract, nearest subsystem contracts, finalizers, consumers and download routes. Complete `artifacts/20261116_contract_decision.md` with exact schema types, errors, counts, ordinary batch artifact shape, atomic publication, attempt identity, retention and finalizer crash detection. Promote canonical amendments as implementation pending, reconcile conflicts, obtain operator approval and two independent read-only reviews, and disposition findings. Commit the canonical checkpoint as a standalone ancestor before runtime edits and record its revision. Preserve existing dirty contract changes. No checkpoint is claimed by this scaffold.
+M1: Read the contract-first, artifact observability/validation, and hardening lifecycle standards. Inventory `docs/schemas/rq-response-contract.md`, webhook contract, nearest subsystem contracts, finalizers, consumers and download routes. Complete `artifacts/20261116_contract_decision.md` with exact schema types, errors, counts, ordinary batch artifact shape, atomic publication, attempt identity, retention and finalizer crash detection. Promote canonical amendments as implementation pending, reconcile conflicts, obtain operator approval and two independent read-only reviews, and disposition findings. Commit the canonical checkpoint as a standalone ancestor before runtime edits and record its revision. Preserve existing dirty contract changes. Checkpoint `390108471` records completed M1.
 
 M2: Implement the ratified summary using existing RQ and persistence. Both polling endpoints must expose the same authoritative current-attempt summary. Finalization waits for relevant work but tolerates failed dependencies; worker death without metadata is reconciled from RQ. Validate successful outputs, publish the artifact atomically, then expose availability. A finalizer failure must settle visibly even if normal publication never executes. Keep sanitized leaf exceptions, generic status aggregation, and restricted catalog disclosure intact. Update the dependency catalog if queue wiring changes.
 
@@ -79,10 +91,19 @@ Retain checkpoint revision, two contract reviews/disposition, independent correc
 ## Interfaces and Dependencies
 
 
-The additive `batch` fields are proposed in the decision artifact. Promote exact schema and compatibility rules to the canonical RQ response contract before implementing. Reuse existing infrastructure; no new queue/service/datastore or model changes. Resolve ordinary batch artifact representation, finalizer failure settlement, and attempt retention in M1.
+The additive `batch` fields are ratified in the canonical contract. Promote exact schema and compatibility rules to the canonical RQ response contract before implementing. Reuse existing infrastructure; no new queue/service/datastore or model changes. Resolve ordinary batch artifact representation, finalizer failure settlement, and attempt retention in M1.
 
 Revision note: 2026-11-16 06:13 UTC — initial contract-first scaffold; implementation and wiring remain separate acceptance milestones.
 
 Revision note: 2026-11-16 — executed M1 inventory, prepared exact proposed contract and initiated independent reviews; runtime remains behind ratification and checkpoint.
 
-Operator approval (2026-11-16 06:31 UTC): “i approve. proceed with commit and implementation”. This ratifies the reviewed contract (pre-status-update SHA-256 `42d00a1931ea77e862412349ff91414bfae47d3dc33dd57faf0eb6ac7f8fed92`) and authorizes the standalone checkpoint and implementation commits. Runtime conformance remains pending.
+Operator approval (2026-11-16 06:31 UTC): “i approve. proceed with commit and implementation”. This ratifies the reviewed contract (pre-status-update SHA-256 `42d00a1931ea77e862412349ff91414bfae47d3dc33dd57faf0eb6ac7f8fed92`) and authorizes the standalone checkpoint and implementation commits. Runtime implementation and local conformance evidence follow in the validation artifact.
+
+Progress update: M2/M3 implementation is in the working trees; focused/local boundary validation and independent implementation reviews are active. Incident identity/recovery is excluded per operator clarification.
+
+Decision update (2026-11-16): Preserve cancellability by building ZIPs outside the
+resource lease and committing manifest/ZIP/summary only after cancellation and
+execution-state rechecks. Enqueue and parent linkage share the same short lease;
+cancellation refreshes the tree after acquisition. Poll-settled failures also write
+matching member manifests. This implements the ratified cancellation/immutability
+contract rather than changing cancellation semantics.

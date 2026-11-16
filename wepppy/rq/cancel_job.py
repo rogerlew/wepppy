@@ -125,6 +125,8 @@ def _cancel_job_recursive(job: Job, redis_conn: redis.Redis) -> None:
         return
 
     with redis_conn.lock(str(dispatch_lock_key), timeout=30, blocking_timeout=30):
+        # Dispatch may have linked new children while cancellation waited.
+        job.refresh()
         job.meta["cancel_requested"] = True
         job.save_meta()
         _cancel_job_recursive_unlocked(job, redis_conn)

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from wepppy.rq import batch_outcome
+
 from wepppy.observability.safe_traceback import safe_text
 from wepppy.observability.safe_logging import current_profile
 from wepppy.observability.secret_profiles import WORKER
@@ -153,6 +155,7 @@ def recursive_get_job_details(
     now: datetime,
     *,
     queue_candidates: list[Tuple[str, str, str | None]] | None = None,
+    include_batch: bool = True,
 ) -> Dict[str, Any]:
     """Recursively fetch job details including any children jobs."""
     if is_query_catalog_job(job.id):
@@ -194,6 +197,9 @@ def recursive_get_job_details(
         ),
         "children": {}
     }
+    outcome = batch_outcome.poll(job) if include_batch else None
+    if outcome is not None:
+        job_info["batch"] = outcome
     controlled_error = job.meta.get("error") if isinstance(job.meta, dict) else None
     if isinstance(controlled_error, dict):
         job_info["error"] = controlled_error
@@ -227,6 +233,7 @@ def recursive_get_job_details(
                         redis_conn,
                         now,
                         queue_candidates=queue_candidates,
+                        include_batch=include_batch,
                     )
                     if child_job
                     else None
@@ -261,7 +268,7 @@ def recursive_get_job_details(
 
     return job_info
 
-def get_wepppy_rq_job_info(job_id: str) -> Dict[str, Any]:
+def get_wepppy_rq_job_info(job_id: str, *, include_batch: bool = True) -> Dict[str, Any]:
     """Return the recursive job tree for a single job id."""
     if is_query_catalog_job(job_id):
         try:
@@ -291,11 +298,12 @@ def get_wepppy_rq_job_info(job_id: str) -> Dict[str, Any]:
         if not job:
             return {"job_id": job_id, "status": "not_found"}
 
-        details = recursive_get_job_details(job, redis_conn, now)
+        details = recursive_get_job_details(job, redis_conn, now, include_batch=include_batch)
         _strip_private_conditioning_metadata(details)
-        _overlay_conditioning_diagnostics_failure(
-            details, get_wepppy_rq_job_status(job_id)
-        )
+        if include_batch:
+            _overlay_conditioning_diagnostics_failure(
+                details, get_wepppy_rq_job_status(job_id)
+            )
         return details
 
 
@@ -333,6 +341,8 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
             except NoSuchJobError:
                 results[job_id] = {"job_id": job_id, "status": "not_found"}
                 continue
+            except batch_outcome.BatchReconciliationUnavailable:
+                raise
             except Exception as exc:  # pragma: no cover - defensive guard
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/job_info.py:106", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -356,6 +366,8 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
                     details, get_wepppy_rq_job_status(job_id)
                 )
                 results[job_id] = details
+            except batch_outcome.BatchReconciliationUnavailable:
+                raise
             except Exception as exc:  # pragma: no cover - defensive guard
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/job_info.py:120", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -526,6 +538,8 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
                 "updated_at": progress_updated_at,
             },
         }
+        if "batch" in all_jobs_tree:
+            response["batch"] = all_jobs_tree["batch"]
         queue_snapshot = _build_queue_snapshot(redis_conn, queue_candidates)
         if queue_snapshot is not None:
             response["queue"] = queue_snapshot

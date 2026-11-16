@@ -1,14 +1,20 @@
 # Batch and culvert partial-success results
 
-Status: M1 inventory and concrete contract proposal prepared; ratification pending. Created 2026-11-16 06:13 UTC.
+Status: implemented in server and companion client; local acceptance and final review closeout. Created 2026-11-16 06:13 UTC.
 
 ## Purpose and scope
 
 A batch with 32 successful runs and one 12-hour timeout must deliver the 32 valid results and report the omitted run. Cover ordinary batch and culvert finalizers, persistence, jobinfo/jobstatus serialization, artifact publication, and consumer guidance. Preserve genuine RQ leaf failures and sanitized tracebacks. The finalizer should finish normally when it publishes partial results; generic RQ tree status remains unchanged.
 
-Execution is at the preimplementation contract checkpoint. Follow the [ExecPlan](prompts/active/implementation_execplan.md), [tracker](tracker.md), and [draft contract decision](artifacts/20261116_contract_decision.md). Runtime changes, deployment, and production requeues have not been performed. The user requested a contract-first package and migration-guide update; exact contract ratification and implementation remain future milestones.
+The operator approved the reviewed contract and implementation commits. Contract
+checkpoint `390108471` and climate compatibility addendum `0aec93f1c` precede
+runtime edits. Follow the [ExecPlan](prompts/active/implementation_execplan.md) and
+[tracker](tracker.md) for implementation, test and review evidence. Deployment and
+production requeues have not been performed.
 
-The investigated batch `1f2933b8-12a7-48cc-b508-5f2719baa8a7` had 33 SSURGO failures and is an all-failed control. Resolve the separate mixed-success timeout incident identity during implementation; do not conflate the two.
+The original mixed-success incident identity is immaterial: the operator revised
+stream-order reduction to avoid its timeout trigger. Generic real-timeout
+regression remains in scope; incident identification and recovery are excluded.
 
 ## Deliverables and authority
 
@@ -24,4 +30,4 @@ Use existing RQ, batch persistence, and artifact infrastructure only. No new ser
 
 ## Acceptance
 
-Both workflows pass the decision artifact's state matrix. A real short-timeout RQ test proves the 12-hour failure class: finalization runs, jobstatus/jobinfo expose partial success, an HTTP download succeeds, and semantic readback contains only successful run IDs across metrics and geometry. Finalizer failure and zero-success cases cannot advertise usable results. Normal project inspection agrees with polling and downloads. Complete independent reviews and regression gates; distinguish implemented, wired, environment validated, deployed, and incident repaired. This scaffold cannot close implementation scope.
+Both workflows pass the decision artifact's state matrix. A real short-timeout RQ test proves the 12-hour failure class: finalization runs, jobstatus/jobinfo expose partial success, an HTTP download succeeds, and semantic readback contains only successful run IDs across metrics and geometry. Finalizer failure and zero-success cases cannot advertise usable results. Normal project inspection agrees with polling and downloads. Complete independent reviews and regression gates; distinguish implemented, wired, environment validated, deployed, and incident repaired. Local fixtures do not establish production-equivalent full-model deployment acceptance.

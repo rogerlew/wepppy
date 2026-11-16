@@ -35,8 +35,10 @@ class _DummyQueue:
         kwargs=None,
         timeout=None,
         depends_on=None,
+        **options,
     ) -> _DummyJob:
         job = _DummyJob(f"job-{len(self.calls) + 1}")
+        job.meta.update(options.get("meta") or {})
         self.calls.append(
             {
                 "func": func,
@@ -51,11 +53,12 @@ class _DummyQueue:
 
 
 def _make_parent_job() -> SimpleNamespace:
-    parent_job = SimpleNamespace(meta={}, saves=0)
+    parent_job = SimpleNamespace(id="parent", meta={}, saves=0, refresh=lambda: None)
 
     def _save() -> None:
         parent_job.saves += 1
 
+    parent_job.save_meta = _save
     parent_job.save = _save  # type: ignore[attr-defined]
     return parent_job
 
@@ -93,12 +96,12 @@ def test_enqueue_culvert_batch_jobs_tracks_stage_meta_dependencies_and_child_met
     assert first_call["func"] is tasks.run_culvert_run_rq
     assert first_call["args"] == ("culvert;;batch-1;;1", "batch-1", "1")
     assert second_call["args"] == ("culvert;;batch-1;;2", "batch-1", "2")
-    assert first_call["depends_on"] is None
-    assert second_call["depends_on"] is None
+    assert first_call["depends_on"] == "parent"
+    assert second_call["depends_on"] == "parent"
 
     final_depends_on = final_call["depends_on"]
     assert isinstance(final_depends_on, Dependency)
-    assert final_depends_on.dependencies == ["job-1", "job-2"]
+    assert final_depends_on.dependencies == ["job-1", "job-2", "parent"]
     assert final_depends_on.allow_failure is True
 
     first_child = first_call["job"]
@@ -134,5 +137,5 @@ def test_enqueue_culvert_batch_jobs_handles_empty_run_ids() -> None:
     assert final_job.id == "job-1"
     assert len(q.calls) == 1
     assert q.calls[0]["func"] is tasks._final_culvert_batch_complete_rq
-    assert q.calls[0]["depends_on"] is None
+    assert q.calls[0]["depends_on"].dependencies == ["parent"]
     assert sleeps == []

@@ -36,6 +36,7 @@ from wepppy.config.redis_settings import (
     redis_host,
 )
 from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq import batch_outcome
 from wepppy.rq.submission_recovery import rq_submission_lock
 
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -542,7 +543,7 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
             # Downstream identity validation must survive unbounded queue delay.
             job.result_ttl = -1
             job.meta['runid'] = batch_name
-            job.save()
+            job.save_meta()
 
         StatusMessenger.publish(status_channel, f'rq:{job_id} STARTED {func_name}({batch_name})')
 
@@ -559,6 +560,8 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
                 batch_runner.set_rq_job_id_fresh("run_batch_rq", job.id)
             except (NoDbAlreadyLockedError, NoDbStaleWriteError, OSError, redis.exceptions.RedisError) as exc:
                 logger.warning("batch_rq: failed to persist run_batch_rq job id - %s", exc)
+        if job is not None:
+            batch_outcome.enroll(job, [])
         watershed_collection = batch_runner.get_watershed_collection()
         if not watershed_collection.runid_template:
             raise ValueError('Batch run requires a validated run ID template.')
@@ -604,8 +607,9 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
             "skipped": len(watershed_features) - len(selected_features),
         }
         if job is not None:
-            job.meta["batch_run_selection"] = selection_summary
-            job.save()
+            with batch_outcome.dispatch(job):
+                job.meta["batch_run_selection"] = selection_summary
+                job.save_meta()
         StatusMessenger.publish(
             status_channel,
             (
@@ -618,13 +622,23 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
         cleared_runtime_locks = batch_runner.clear_retry_runtime_locks(selected_features)
         if cleared_runtime_locks:
             if job is not None:
-                job.meta["batch_runtime_locks_cleared"] = len(cleared_runtime_locks)
-                job.save()
+                with batch_outcome.dispatch(job):
+                    job.meta["batch_runtime_locks_cleared"] = len(cleared_runtime_locks)
+                    job.save_meta()
             StatusMessenger.publish(
                 status_channel,
                 f"rq:{job_id} INFO cleared stale runtime locks count={len(cleared_runtime_locks)}",
             )
 
+        if job is not None:
+            batch_outcome.enroll(
+                job, [str(wf.runid) for wf in selected_features],
+                model=(batch_runner.is_task_enabled(TaskEnum.run_wepp_hillslopes)
+                       or batch_runner.is_task_enabled(TaskEnum.run_wepp_watershed)),
+                watershed=batch_runner.is_task_enabled(TaskEnum.run_wepp_watershed),
+                watar=batch_runner.is_task_enabled(TaskEnum.run_watar),
+                hillslopes=batch_runner.is_task_enabled(TaskEnum.run_wepp_hillslopes),
+            )
         watershed_jobs: List[Job] = []
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
@@ -636,33 +650,39 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
                 child_job_id = new_rq_job_id()
                 hillslope_job_id = new_rq_job_id()
                 if job is not None:
-                    job.meta[f'jobs:0,runid:{runid}'] = child_job_id
-                    job.meta[f'jobs:0,hillslopes,runid:{runid}'] = hillslope_job_id
-                    job.save()
-                with rq_submission_lock(
-                    redis_conn,
-                    f"{child_runid}:batch-child",
-                    lifecycle_key=child_runid,
-                ) as lease:
-                    lease.checkpoint()
-                    q.enqueue_call(
-                        func=run_batch_hillslopes_rq,
-                        args=[batch_name, wf, child_job_id],
-                        timeout=TIMEOUT,
-                        job_id=hillslope_job_id,
-                        result_ttl=-1,
-                        depends_on=job_id,
-                        meta={'runid': child_runid, 'batch_root_job_id': job_id,
-                              'jobs:0,func:run_batch_watershed_rq': child_job_id},
-                    )
-                    child_job = q.enqueue_call(
-                        func=run_batch_watershed_rq,
-                        args=[batch_name, wf, hillslope_job_id],
-                        timeout=TIMEOUT,
-                        job_id=child_job_id,
-                        meta={'runid': child_runid, 'batch_root_job_id': job_id},
-                        depends_on=Dependency(jobs=[hillslope_job_id], allow_failure=True),
-                    )
+                    batch_outcome.register(job, member=runid, jobs=[hillslope_job_id, child_job_id])
+                with batch_outcome.dispatch(job):
+                    if job is not None:
+                        job.meta[f'jobs:0,runid:{runid}'] = child_job_id
+                        job.meta[f'jobs:0,hillslopes,runid:{runid}'] = hillslope_job_id
+                        job.save_meta()
+                    with rq_submission_lock(
+                        redis_conn,
+                        f"{child_runid}:batch-child",
+                        lifecycle_key=child_runid,
+                    ) as lease:
+                        lease.checkpoint()
+                        q.enqueue_call(
+                            func=run_batch_hillslopes_rq,
+                            args=[batch_name, wf, child_job_id],
+                            timeout=TIMEOUT,
+                            job_id=hillslope_job_id,
+                            result_ttl=-1, failure_ttl=-1,
+                            depends_on=job_id,
+                            meta={'runid': child_runid, 'batch_root_job_id': job_id,
+                                  'child_dispatch_lock_key': f'rq:submission:batch:{batch_name}',
+                                  'jobs:0,func:run_batch_watershed_rq': child_job_id},
+                        )
+                        child_job = q.enqueue_call(
+                            func=run_batch_watershed_rq,
+                            args=[batch_name, wf, hillslope_job_id],
+                            timeout=TIMEOUT,
+                            job_id=child_job_id,
+                            result_ttl=-1, failure_ttl=-1,
+                            meta={'runid': child_runid, 'batch_root_job_id': job_id,
+                                  'child_dispatch_lock_key': f'rq:submission:batch:{batch_name}'},
+                            depends_on=Dependency(jobs=[hillslope_job_id], allow_failure=True),
+                        )
                 watershed_jobs.append(child_job)
 
             # RQ otherwise leaves dependents deferred when any dependency fails.
@@ -674,18 +694,22 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
                 if watershed_jobs
                 else None
             )
-            final_job = q.enqueue_call(
-                func=_final_batch_complete_rq,
-                args=[batch_name],
-                timeout=TIMEOUT,
-                depends_on=final_depends_on,
-            )
-            final_job.meta['runid'] = batch_name
-            final_job.meta['batch_root_job_id'] = job_id
-            final_job.save()
+            final_id = new_rq_job_id()
             if job is not None:
-                job.meta['jobs:1,func:_final_batch_complete_rq'] = final_job.id
-                job.save()
+                batch_outcome.register(job, finalizer=final_id)
+            with batch_outcome.dispatch(job):
+                final_job = q.enqueue_call(
+                    job_id=final_id, result_ttl=-1, failure_ttl=-1,
+                    meta={'runid': batch_name, 'batch_root_job_id': job_id,
+                          'child_dispatch_lock_key': f'rq:submission:batch:{batch_name}'},
+                    func=_final_batch_complete_rq,
+                    args=[batch_name],
+                    timeout=TIMEOUT,
+                    depends_on=final_depends_on,
+                )
+                if job is not None:
+                    job.meta['jobs:1,func:_final_batch_complete_rq'] = final_job.id
+                    job.save_meta()
             _release_deferred_finalizer_if_ready(q, final_job)
             try:
                 batch_runner.set_rq_job_id_fresh("final_batch_complete_rq", final_job.id)
@@ -874,7 +898,7 @@ def run_batch_watershed_rq(
             final_job_id = root_job.meta["jobs:1,func:_final_batch_complete_rq"]
             # Publish intent before dispatch, under a short metadata-only lock.
             # Omni can execute synchronously; never hold this lock during science.
-            with job.connection.lock(
+            with batch_outcome.dispatch(job), job.connection.lock(
                 f"batch-finalizer-link:{final_job_id}", timeout=30, blocking_timeout=30,
             ):
                 root_job.refresh()
@@ -884,12 +908,12 @@ def run_batch_watershed_rq(
                 root_job.save_meta()
             _reset_omni_nodb_from_base(Path(batch_runner.base_wd), runid_wd, runid)
             omni_final_job = run_omni_scenarios_rq(runid)
-            if omni_final_job is not None:
-                job.meta['omni_final_job_id'] = omni_final_job.id
-                job.save_meta()
-            with job.connection.lock(
+            with batch_outcome.dispatch(job), job.connection.lock(
                 f"batch-finalizer-link:{final_job_id}", timeout=30, blocking_timeout=30,
             ):
+                if omni_final_job is not None:
+                    job.meta['omni_final_job_id'] = omni_final_job.id
+                    job.save_meta()
                 if omni_final_job is not None:
                     final_job = Job.fetch(final_job_id, connection=job.connection)
                     dependency_ids = list(final_job._dependency_ids or [])
@@ -978,6 +1002,7 @@ def _final_batch_complete_rq(batch_name: str) -> None:
             if root_job.meta.get("batch_pending_omni_links"):
                 raise RuntimeError("Batch Omni dependency linkage is incomplete; retry after job inspection")
 
+        batch_outcome.publish(job)
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
         run_states = batch_runner.classify_batch_run_states()
         runstate_summary = batch_runner.summarize_batch_run_states(run_states)
@@ -1001,7 +1026,7 @@ def _final_batch_complete_rq(batch_name: str) -> None:
         if send_discord_message is not None:
             try:
                 send_discord_message(f':herb: Batch {batch_name} completed on {_hostname}')
-            except Exception:
+            except Exception:  # broad-except: optional notification boundary logs failure without undoing completed scientific work.
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/batch_rq.py:504", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 pass

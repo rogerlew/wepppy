@@ -18,6 +18,15 @@ import wepppy.rq.job_dependencies as job_dependencies
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def isolate_outcome_persistence(monkeypatch):
+    # These tests exercise selection/metadata with dummy RQ objects. Real attempt
+    # persistence, publication and timeout boundaries live in test_batch_outcome.
+    monkeypatch.setattr(batch_rq.batch_outcome, 'enroll', lambda *args, **kwargs: None)
+    monkeypatch.setattr(batch_rq.batch_outcome, 'register', lambda *args, **kwargs: None)
+    monkeypatch.setattr(batch_rq.batch_outcome, 'publish', lambda *args, **kwargs: None)
+
+
 class _FakeRedisPrep:
     timestamps_by_wd: dict[str, dict[str, int]] = {}
 
@@ -1093,6 +1102,9 @@ class _DummyJob:
         self.connection = None
         self.args = ["demo", None, "hills"]
 
+    def refresh(self) -> None:
+        pass
+
     def save(self) -> None:
         self.saves += 1
 
@@ -1209,7 +1221,7 @@ def test_run_batch_rq_enqueues_only_retry_eligible_features(
             assert name == "batch"
 
         def enqueue_call(
-            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None, result_ttl=None
+            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None, result_ttl=None, failure_ttl=None
         ):
             job = _DummyJob(job_id or f"job-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
@@ -1319,7 +1331,7 @@ def test_run_batch_rq_full_rerun_enqueues_all_features(
             assert name == "batch"
 
         def enqueue_call(
-            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None, result_ttl=None
+            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None, result_ttl=None, failure_ttl=None
         ):
             job = _DummyJob(job_id or f"job-{len(enqueue_calls) + 1}")
             enqueue_calls.append(

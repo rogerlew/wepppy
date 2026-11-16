@@ -4,6 +4,45 @@
 
 ## Purpose
 
+### Partial batch results
+
+The approved [batch outcome contract](../../schemas/batch-outcome-contract.md)
+adds `batch` to enrolled-root jobinfo and jobstatus responses. Generic RQ status
+and leaf tracebacks remain unchanged: a timeout can leave aggregate status
+`failed` while `batch.state` is `completed`, `batch.outcome` is `partial_success`,
+and `batch.results_available` is true.
+
+The companion Culvert client uses this decision sequence for both resume and polling:
+
+1. If `batch` is absent, retain the legacy aggregate-status behavior.
+2. Reject an unsupported `schema_version`; never infer success.
+3. Continue polling `running` or `finalizing`, including aggregate failure.
+4. Download only `completed` with `results_available: true` using its attempt URL.
+5. Report terminal no-results states visibly; do not manufacture zero erosion.
+
+For 32 valid runs and one timeout, the attempt ZIP contains 32 run directories
+and `runs.json` records all 33 outcomes. The client selects manifest success IDs
+once for metrics, hillslopes and channels, checks counts and membership, and
+reports omitted IDs. All-failed batches have no downloadable result ZIP. The
+server validates scientific files and exact execution receipts before publication.
+URLs must match the configured WEPP origin and expected batch/attempt path;
+version-1 downloads reject redirects and never forward credentials to another origin.
+
+Server and external `Culvert_web_app` implementation are separate deliveries.
+Roll out server support first, then the client. Legacy clients continue using
+the diagnostic skeleton ZIP and cannot benefit from aggregate-failed partial
+success. Existing retained jobs without enrollment keep legacy behavior.
+Inspect `batch_results/current.json` and the attempt's `summary.json`, `runs.json`
+and `results.zip` through normal authorized browse/download. Retain job identity
+records with the project; a standalone retry invalidates the current pointer and
+requires explicit finalization to publish a new attempt. Do not edit committed
+summaries or reuse old archives as evidence of a new attempt.
+
+Local acceptance evidence and deployment limits are recorded in the
+[work-package tracker](../../work-packages/20261115_batch_partial_success/tracker.md).
+The original incident ID and requeue are excluded: the operator revised stream
+order reduction to avoid that timeout trigger.
+
 This guide documents how to replace the current Python nested delineation/hierarchy workflow in `Culvert_web_app` with the revised Rust `UnnestBasins` implementation in `weppcloud-wbt`.
 
 Target Python code paths:

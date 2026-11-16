@@ -376,7 +376,7 @@ def test_catalog_cancellation_requires_operator_and_redacts(monkeypatch, roles, 
     token = _issue_rq_token(monkeypatch, extra_claims={"token_class": "service", "runs": ["unrelated"], "roles": roles})
     observed = []
 
-    def fetch(job_id):
+    def fetch(job_id, **_options):
         observed.append(job_id)
         if failure:
             raise RuntimeError("private-catalog-path-password")
@@ -410,7 +410,7 @@ def test_canceljob_rejects_missing_scope(monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id, **_options: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
 
     with TestClient(rq_engine.app) as client:
@@ -437,7 +437,7 @@ def test_canceljob_accepts_valid_token(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id, **_options: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
     monkeypatch.setattr(job_routes, "cancel_jobs", fake_cancel)
 
@@ -464,7 +464,7 @@ def test_canceljob_reports_kubernetes_cleanup_state_as_conflict(
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"job_id": job_id, "status": "started", "runid": "run-1"},
+        lambda job_id, **_options: {"job_id": job_id, "status": "started", "runid": "run-1"},
     )
     monkeypatch.setattr(
         job_routes,
@@ -499,7 +499,7 @@ def test_canceljob_passes_fork_archive_started_authority(
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"job_id": job_id, "status": "started", "runid": "run-1"},
+        lambda job_id, **_options: {"job_id": job_id, "status": "started", "runid": "run-1"},
     )
     observed: list[bool] = []
 
@@ -532,7 +532,7 @@ def test_canceljob_accepts_culvert_submit_scope(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {
+        lambda job_id, **_options: {
             "job_id": job_id,
             "status": "finished",
             "runid": "culvert;;batch-1;;point-1",
@@ -564,7 +564,7 @@ def test_canceljob_accepts_dual_scope_culvert_token_without_run_claims(
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {
+        lambda job_id, **_options: {
             "job_id": job_id,
             "status": "started",
             "runid": "culvert;;batch-1;;point-1",
@@ -595,7 +595,7 @@ def test_canceljob_culvert_scope_cannot_cancel_non_culvert_job(
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {
+        lambda job_id, **_options: {
             "job_id": job_id,
             "status": "started",
             "runid": "sacral-self-discipline",
@@ -605,7 +605,7 @@ def test_canceljob_culvert_scope_cannot_cancel_non_culvert_job(
     monkeypatch.setattr(
         job_routes,
         "cancel_jobs",
-        lambda job_id: pytest.fail(f"unexpected cancellation: {job_id}"),
+        lambda job_id, **_options: pytest.fail(f"unexpected cancellation: {job_id}"),
     )
 
     with TestClient(rq_engine.app) as client:
@@ -631,7 +631,7 @@ def test_canceljob_rejects_machine_token_with_wrong_run_scope(
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"job_id": job_id, "status": "started", "runid": "run-1"},
+        lambda job_id, **_options: {"job_id": job_id, "status": "started", "runid": "run-1"},
     )
     canceled = []
     monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id, **kwargs: canceled.append(job_id))
@@ -656,7 +656,7 @@ def test_canceljob_enforces_user_run_ownership(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"job_id": job_id, "status": "started", "runid": "run-1"},
+        lambda job_id, **_options: {"job_id": job_id, "status": "started", "runid": "run-1"},
     )
     seen = []
 
@@ -668,7 +668,7 @@ def test_canceljob_enforces_user_run_ownership(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setattr(
         job_routes,
         "cancel_jobs",
-        lambda job_id: pytest.fail(f"unexpected cancellation: {job_id}"),
+        lambda job_id, **_options: pytest.fail(f"unexpected cancellation: {job_id}"),
     )
 
     with TestClient(rq_engine.app) as client:
@@ -692,7 +692,7 @@ def test_canceljob_rejects_revoked_token(monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id, **_options: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
 
     with TestClient(rq_engine.app) as client:
@@ -725,7 +725,7 @@ def test_canceljob_rejects_session_without_marker(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id, **_options: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
     monkeypatch.setattr(
         rq_auth,
@@ -764,7 +764,7 @@ def test_canceljob_accepts_session_with_marker(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id, **_options: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
     monkeypatch.setattr(rq_auth, "_check_session_marker", lambda session_id, runid: None)
     monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id, **kwargs: {"status": "ok"})
@@ -802,7 +802,7 @@ def test_public_job_results_keep_retained_feature_data_and_missing_children(monk
     payload = {"job_id": "sharing-test", "status": "finished", "result": {"contrasts": [123]},
                "children": {"0": [None, {"job_id": "path-child", "description": "run_path_cost_effective_rq(run)",
                                          "result": {"total_cost": 9000}, "exc_info": "retained diagnostic"}]}}
-    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id: payload)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id, **_options: payload)
     monkeypatch.setattr(job_routes, "get_wepppy_rq_jobs_info", lambda job_ids: {"sharing-test": payload})
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/jobinfo", json={"job_ids": ["sharing-test"]}) if batch else client.get("/api/jobinfo/sharing-test")
@@ -819,7 +819,7 @@ def test_cancellation_denies_restricted_descendants_before_any_stop(monkeypatch,
     payload = {"job_id": "root", "runid": "run", "status": "finished", "children": {"0": [None, restricted]}} if nested else restricted
     monkeypatch.setattr(job_routes, "_authorize_cancel_request", lambda request: ({}, {"rq:status"}))
     monkeypatch.setattr(job_routes, "authorize_run_access", lambda *args, **kwargs: None)
-    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id: payload)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id, **_options: payload)
 
     def deny(*args, **kwargs):
         raise rq_auth.AuthError("Feature membership required", status_code=403, code="feature_membership_required")
@@ -861,7 +861,7 @@ def test_workflow_cancellation_does_not_treat_batch_identifier_as_run(monkeypatc
     node = {"job_id": "job", "runid": identifier, "description": f"{task}({identifier})", "status": "started"}
     if feature == "culvert_runner":
         node["culvert_batch_uuid"] = identifier
-    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id: node)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id, **_options: node)
     monkeypatch.setattr(job_routes, "cancel_jobs", lambda *args, **kwargs: {"status": "ok"})
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/canceljob/job")

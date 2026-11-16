@@ -1316,6 +1316,15 @@ async def _handle_browse_request(
     return ensure_response(result)
 
 
+
+async def _observe_batch_results(batch_root):
+    from starlette.concurrency import run_in_threadpool
+    from wepppy.rq.batch_outcome import observe_project, BatchReconciliationUnavailable
+    try:
+        await run_in_threadpool(observe_project, batch_root)
+    except (BatchReconciliationUnavailable, OSError, ValueError) as exc:
+        raise HTTPException(status_code=503, detail='Batch reconciliation unavailable') from exc
+
 async def browse_culvert_root(request: StarletteRequest):
     batch_uuid = request.path_params['uuid']
     try:
@@ -1328,6 +1337,7 @@ async def browse_culvert_root(request: StarletteRequest):
     except BrowseAuthError as exc:
         raise exc.to_http_exception() from exc
     batch_root = _resolve_culvert_batch_root(batch_uuid)
+    await _observe_batch_results(batch_root)
     return await _handle_browse_request(
         request,
         runid=batch_uuid,
@@ -1351,6 +1361,7 @@ async def browse_culvert_subpath(request: StarletteRequest):
     except BrowseAuthError as exc:
         raise exc.to_http_exception() from exc
     batch_root = _resolve_culvert_batch_root(batch_uuid)
+    await _observe_batch_results(batch_root)
     return await _handle_browse_request(
         request,
         runid=batch_uuid,
@@ -1382,6 +1393,7 @@ async def browse_batch_root(request: StarletteRequest):
             redirect_on_401=True,
         )
     batch_root = _resolve_batch_root(batch_name)
+    await _observe_batch_results(batch_root)
     return await _handle_browse_request(
         request,
         runid=batch_name,
@@ -1414,6 +1426,7 @@ async def browse_batch_subpath(request: StarletteRequest):
             redirect_on_401=True,
         )
     batch_root = _resolve_batch_root(batch_name)
+    await _observe_batch_results(batch_root)
     return await _handle_browse_request(
         request,
         runid=batch_name,

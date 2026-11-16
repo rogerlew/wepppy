@@ -1,0 +1,198 @@
+{
+  "producer": "real Redis/RQ short timeout; synthetic scientific outputs",
+  "batch": {
+    "attempt_id": "54da314e-0686-4a3a-9d76-14018644c31e",
+    "download_url": "/weppcloud/culverts/project/download/batch_results/54da314e-0686-4a3a-9d76-14018644c31e/results.zip",
+    "failed": 1,
+    "outcome": "partial_success",
+    "reason": null,
+    "results_available": true,
+    "schema_version": 1,
+    "skipped": 0,
+    "state": "completed",
+    "succeeded": 32,
+    "total": 33
+  },
+  "manifest": {
+    "attempt_id": "54da314e-0686-4a3a-9d76-14018644c31e",
+    "runs": [
+      {
+        "reason": "execution_failed",
+        "run_id": "bad",
+        "status": "failed"
+      },
+      {
+        "reason": null,
+        "run_id": "good",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-1",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-10",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-11",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-12",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-13",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-14",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-15",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-16",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-17",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-18",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-19",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-2",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-20",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-21",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-22",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-23",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-24",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-25",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-26",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-27",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-28",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-29",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-3",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-30",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-31",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-4",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-5",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-6",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-7",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-8",
+        "status": "success"
+      },
+      {
+        "reason": null,
+        "run_id": "good-9",
+        "status": "success"
+      }
+    ],
+    "schema_version": 1,
+    "workflow": "culvert"
+  },
+  "zip_sha256": "39814066184487639a309b30b96621742a9af6c36e20af4c0873d2d2e63689be",
+  "client_readback": {
+    "metrics": 32,
+    "hillslopes": 32,
+    "channels": 32,
+    "omitted": [
+      "bad"
+    ]
+  },
+  "limits": "No WEPP model invocation or deployed Celery run. Feature grants and cancellation identity are fixture-backed."
+}

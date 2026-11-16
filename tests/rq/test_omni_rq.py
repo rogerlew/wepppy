@@ -78,7 +78,7 @@ def test_omni_timeout_options_preserves_single_storm_timeout(
 def omni_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     published = []
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
-    monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-19"))
+    monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-19", meta={}))
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
 
     redis_prep_cls = singleton_factory(
@@ -216,6 +216,7 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
     def _save() -> None:
         parent_job.saves += 1
 
+    parent_job.save_meta = _save
     parent_job.save = _save  # type: ignore[attr-defined]
 
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
@@ -364,6 +365,7 @@ def test_run_omni_scenarios_rejects_timeout_workload_before_rq_mutation(
     record_nodb_cache_clear(omni_rq)
     parent_job = SimpleNamespace(id="job-invalid-scenario", meta={}, saves=0)
     parent_job.save = lambda: setattr(parent_job, "saves", parent_job.saves + 1)
+    parent_job.save_meta = parent_job.save
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda *args: None)
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
@@ -421,6 +423,7 @@ def test_run_omni_scenarios_fully_skipped_does_not_read_timeout_workload(
 ) -> None:
     parent_job = SimpleNamespace(id="job-skipped-scenario", meta={}, saves=0)
     parent_job.save = lambda: setattr(parent_job, "saves", parent_job.saves + 1)
+    parent_job.save_meta = parent_job.save
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda *args: None)
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
@@ -920,6 +923,7 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
     def _save() -> None:
         parent_job.saves += 1
 
+    parent_job.save_meta = _save
     parent_job.save = _save  # type: ignore[attr-defined]
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
@@ -1123,6 +1127,7 @@ def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
     def _save() -> None:
         parent_job.saves += 1
 
+    parent_job.save_meta = _save
     parent_job.save = _save  # type: ignore[attr-defined]
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
@@ -1247,6 +1252,7 @@ def test_run_omni_contrasts_rejects_timeout_workload_before_rerun_or_rq_mutation
     record_nodb_cache_clear(omni_rq)
     parent_job = SimpleNamespace(id="job-invalid-contrast", meta={}, saves=0)
     parent_job.save = lambda: setattr(parent_job, "saves", parent_job.saves + 1)
+    parent_job.save_meta = parent_job.save
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda *args: None)
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: parent_job)
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))

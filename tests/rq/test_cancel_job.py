@@ -25,6 +25,9 @@ class _FakeJob:
         if self._status == "finished":
             raise InvalidJobOperation
 
+    def refresh(self) -> None:
+        pass
+
     def save_meta(self) -> None:
         pass
 

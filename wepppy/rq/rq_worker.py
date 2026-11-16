@@ -319,6 +319,12 @@ class WepppyRqWorker(Worker):
                 started_job_registry,
                 exc_string=exc_string,
             )
+        from wepppy.rq.batch_outcome import observe_failure, BatchReconciliationUnavailable
+        try:
+            observe_failure(job)
+        except (BatchReconciliationUnavailable, ValueError, LookupError, OSError, redis.RedisError):
+            # Worker notification is best-effort; polling repeats the same guarded reconciliation.
+            LOGGER.exception("Batch failure observation deferred job_id=%s", job.id)
         if job_was_stopped:
             # RQ 2.12 blocks every stopped-parent edge. Preserve the approved
             # terminal observers without releasing strict scientific work.

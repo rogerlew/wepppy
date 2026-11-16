@@ -6,6 +6,8 @@ import math
 import os
 import threading
 import time
+from wepppy.rq.batch_outcome import BatchReconciliationUnavailable
+
 from collections import deque
 from collections.abc import Mapping
 from typing import Any
@@ -306,6 +308,9 @@ def jobstatus(job_id: str, request: Request):
             reason="ok",
         )
         return payload
+    except BatchReconciliationUnavailable:
+        return error_response("Batch reconciliation unavailable", status_code=503,
+                              code="batch_reconciliation_unavailable")
     except Exception:
         logger.exception("rq-engine jobstatus failed")
         _audit_polling_request(
@@ -377,6 +382,9 @@ def jobinfo(job_id: str, request: Request):
             reason="ok",
         )
         return payload
+    except BatchReconciliationUnavailable:
+        return error_response("Batch reconciliation unavailable", status_code=503,
+                              code="batch_reconciliation_unavailable")
     except Exception:
         logger.exception("rq-engine jobinfo failed")
         _audit_polling_request(
@@ -447,6 +455,9 @@ async def jobinfo_batch(request: Request):
             reason="ok",
         )
         return {"jobs": job_info_map, "job_ids": ordered_ids}
+    except BatchReconciliationUnavailable:
+        return error_response("Batch reconciliation unavailable", status_code=503,
+                              code="batch_reconciliation_unavailable")
     except Exception:
         logger.exception("rq-engine batch jobinfo failed")
         _audit_polling_request(
@@ -503,7 +514,7 @@ def canceljob(job_id: str, request: Request):
     try:
         if catalog_job and not _is_admin_or_root(claims):
             raise AuthError("Catalog maintenance cancellation requires Admin or Root", status_code=403, code="forbidden")
-        job_info = get_wepppy_rq_job_info(job_id)
+        job_info = get_wepppy_rq_job_info(job_id, include_batch=False)
         if job_info.get("status") == "not_found":
             return error_response(
                 "Job not found",

@@ -30,6 +30,14 @@ def isolated_rq(tmp_path, monkeypatch):
     monkeypatch.setattr(redis, "Redis", redis.StrictRedis)
     external_socket = os.environ.get("BATCH_BOUNDARY_TEST_REDIS_SOCKET")
     if external_socket:
+        class SocketRedis(redis.StrictRedis):
+            def __init__(self, *args, **kwargs):
+                # Route all test infrastructure, including NoDb archive/cache
+                # collaborators, to this explicitly disposable server.
+                super().__init__(unix_socket_path=external_socket,
+                                 db=kwargs.get('db', 0),
+                                 decode_responses=kwargs.get('decode_responses', False))
+        monkeypatch.setattr(redis, "Redis", SocketRedis)
         connection = redis.Redis(unix_socket_path=external_socket)
         assert connection.get("batch-boundary-test-server") == b"disposable"
         before = set(connection.scan_iter("rq:job:*"))
@@ -79,10 +87,13 @@ def workflow(isolated_rq, tmp_path, monkeypatch):
     published = []
     events = []
     features = [SimpleNamespace(runid="leaf")]
-    run_dir = tmp_path / "runs" / "leaf"
+    batch_dir = tmp_path / "demo"
+    batch_dir.mkdir()
+    monkeypatch.setenv("BATCH_RUNNER_ROOT", str(tmp_path))
+    run_dir = batch_dir / "runs" / "leaf"
     class Runner:
-        batch_runs_dir = str(tmp_path / "runs")
-        base_wd = str(tmp_path / "_base")
+        batch_runs_dir = str(batch_dir / "runs")
+        base_wd = str(batch_dir / "_base")
         rq_job_ids = {}
         hillslope_error = False
         watershed_error = False

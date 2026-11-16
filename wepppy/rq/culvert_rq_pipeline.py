@@ -5,6 +5,8 @@ from typing import Any, Callable, Iterable, Optional
 
 from rq import Queue
 from rq.job import Job
+from wepppy.rq import batch_outcome
+from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.job_dependencies import (
     failure_tolerant_depends_on,
     release_deferred_job_if_ready,
@@ -18,8 +20,9 @@ def _record_parent_meta(
 ) -> Job:
     if parent_job is None:
         return child_job
+    parent_job.refresh()
     parent_job.meta[key] = child_job.id
-    parent_job.save()
+    parent_job.save_meta()
     return child_job
 
 
@@ -38,23 +41,31 @@ def _enqueue(
     allow_dependency_failure: bool = False,
 ) -> Job:
     del queue_name
-    child_job = q.enqueue_call(
-        func=func,
-        args=args,
-        kwargs=kwargs,
-        timeout=timeout,
-        depends_on=(
-            failure_tolerant_depends_on(depends_on)
-            if allow_dependency_failure
-            else depends_on
-        ),
-    )
-    if allow_dependency_failure:
-        release_deferred_job_if_ready(q, child_job)
-    if child_meta:
-        child_job.meta.update(child_meta)
-        child_job.save()
-    return _record_parent_meta(parent_job, key, child_job)
+    job_id = new_rq_job_id()
+    if parent_job is not None and parent_job.meta.get('batch_outcome_enrolled'):
+        if child_meta and 'run_id' in child_meta:
+            batch_outcome.register(parent_job, member=child_meta['run_id'], jobs=[job_id])
+        else:
+            batch_outcome.register(parent_job, finalizer=job_id)
+        child_meta = dict(child_meta or {}, batch_outcome_root_id=parent_job.id,
+                          child_dispatch_lock_key=parent_job.meta['child_dispatch_lock_key'])
+    with batch_outcome.dispatch(parent_job):
+        child_job = q.enqueue_call(
+            job_id=job_id, result_ttl=-1, failure_ttl=-1, meta=child_meta,
+            func=func,
+            args=args,
+            kwargs=kwargs,
+            timeout=timeout,
+            depends_on=(
+                failure_tolerant_depends_on(depends_on)
+                if allow_dependency_failure
+                else depends_on
+            ),
+        )
+        if allow_dependency_failure:
+            release_deferred_job_if_ready(q, child_job)
+        return _record_parent_meta(parent_job, key, child_job)
+
 
 
 def enqueue_culvert_batch_jobs(
@@ -80,6 +91,7 @@ def enqueue_culvert_batch_jobs(
             func=tasks.run_culvert_run_rq,
             args=(runid, culvert_batch_uuid, run_id),
             timeout=timeout,
+            depends_on=parent_job.id if parent_job is not None else None,
             queue_name="batch",
             child_meta={
                 "runid": runid,
@@ -99,7 +111,7 @@ def enqueue_culvert_batch_jobs(
         args=(culvert_batch_uuid,),
         timeout=timeout,
         queue_name="batch",
-        depends_on=child_jobs if child_jobs else None,
+        depends_on=([*child_jobs, parent_job] if parent_job is not None else child_jobs) or None,
         allow_dependency_failure=True,
         child_meta={"culvert_batch_uuid": culvert_batch_uuid},
     )

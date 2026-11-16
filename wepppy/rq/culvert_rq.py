@@ -186,6 +186,8 @@ def _attach_batch_logger(runner: CulvertsRunner) -> None:
     _manifest.logger = batch_logger
 
 
+from wepppy.rq import batch_outcome
+
 def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     """Orchestrate culvert batch processing and enqueue per-run jobs."""
     job = get_current_job()
@@ -200,6 +202,8 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
             f"Culvert batch root does not exist: {batch_root}"
         )
 
+    if job is not None:
+        batch_outcome.enroll(job, [])
     payload_metadata = _load_payload_json(batch_root / "metadata.json")
     model_parameters = _load_payload_json(batch_root / "model-parameters.json")
 
@@ -391,6 +395,8 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
 
     logger.info(f"culvert_batch {culvert_batch_uuid}: enqueued {len(run_ids)} runs")
 
+    if job is not None:
+        batch_outcome.enroll(job, run_ids)
     queued_jobs: Dict[str, str]
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:
@@ -628,6 +634,14 @@ def run_culvert_run_rq(
 
 def run_culvert_batch_finalize_rq(culvert_batch_uuid: str) -> dict[str, Any]:
     """Rebuild culvert batch summary artifacts after retries or manual repairs."""
+    job = get_current_job()
+    if job is not None:
+        runner = CulvertsRunner.getInstance(str(_resolve_batch_root(culvert_batch_uuid)))
+        batch_outcome.enroll(job, list(runner.runs))
+        for run_id, record in runner.runs.items():
+            source_id = record.get('job_id')
+            batch_outcome.register(job, member=run_id, jobs=[source_id] if source_id else [])
+        batch_outcome.register(job, finalizer=job.id)
     return _final_culvert_batch_complete_rq(culvert_batch_uuid)
 
 
@@ -646,8 +660,14 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
 
     _attach_batch_logger(runner)
     runs = runner.runs
+    current_job = get_current_job()
+    outcome_root = batch_outcome.root_for_finalizer(current_job) if current_job is not None else None
+    enrolled = outcome_root is not None and outcome_root.meta.get('batch_outcome_enrolled')
+    if enrolled:
+        cohort = batch_outcome.enrollment_for(batch_root.resolve(), outcome_root)['members']
+        runs = {rid: dict(runs.get(rid, {}), wd=str(batch_root / 'runs' / rid)) for rid in cohort}
     runs_dir = batch_root / "runs"
-    if runs_dir.is_dir():
+    if not enrolled and runs_dir.is_dir():
         for entry in runs_dir.iterdir():
             if not entry.is_dir():
                 continue
@@ -702,7 +722,11 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
         if metadata_path.is_file():
             try:
                 metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, OSError):
+                logger.exception("culvert_batch %s: unreadable receipt for %s", culvert_batch_uuid, run_id)
+                metadata = {}
+            if not isinstance(metadata, dict):
+                logger.warning("culvert_batch %s: invalid receipt object for %s", culvert_batch_uuid, run_id)
                 metadata = {}
             status = metadata.get("status")
             if status == "success":
@@ -734,6 +758,21 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
         "failed": failed,
         "skipped_no_outlet": skipped_no_outlet,
     }
+
+    current_job = get_current_job()
+    published = batch_outcome.publish(current_job) if current_job is not None else None
+    if published is not None:
+        summary.update(total=published['total'], succeeded=published['succeeded'],
+                       failed=published['failed'], skipped_no_outlet=published['skipped'],
+                       batch=published)
+        succeeded, failed, skipped_no_outlet = (published['succeeded'], published['failed'], published['skipped'])
+        root_job = batch_outcome.root_for_finalizer(current_job)
+        _, _, artifact_root = batch_outcome.identity(root_job)
+        rows = batch_outcome.read_json(batch_outcome.attempt_path(artifact_root, root_job) / 'runs.json')['runs']
+        for row in rows:
+            runs[row['run_id']]['batch_result_reason'] = row['reason']
+            runs[row['run_id']]['batch_result_status'] = row['status']
+            runs[row['run_id']]['status'] = 'skipped_no_outlet' if row['status'] == 'skipped' else row['status']
 
     with runner.locked():
         for run_id, record in runs.items():
@@ -1587,6 +1626,9 @@ def _process_culvert_run(
         if error_payload is not None:
             run_metadata["error"] = error_payload
 
+        current_job = get_current_job()
+        if current_job is not None:
+            run_metadata["rq_job_id"] = current_job.id
         _write_run_metadata(run_wd / "run_metadata.json", run_metadata)
         try:
             dev_mode = os.getenv("DEV_MODE", "false").strip().lower() in ("1", "true", "yes")
@@ -1636,6 +1678,9 @@ def _record_validation_failure(
     }
     if wepppy_version is not None:
         run_metadata["wepppy_version"] = wepppy_version
+    current_job = get_current_job()
+    if current_job is not None:
+        run_metadata['rq_job_id'] = current_job.id
     _write_run_metadata(run_wd / "run_metadata.json", run_metadata)
 
     logger.warning(

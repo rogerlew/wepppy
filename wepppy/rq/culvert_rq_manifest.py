@@ -71,11 +71,18 @@ def _load_outlet_coords(outlet_path: Path) -> Optional[Tuple[float, float]]:
         payload = json.loads(outlet_path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         return None
+    if not isinstance(payload, dict):
+        logger.warning("Invalid outlet object: %s", outlet_path)
+        return None
     features = payload.get("features") or []
-    if not features:
+    if not isinstance(features, list) or not features:
         return None
     feature = features[0] or {}
+    if not isinstance(feature, dict):
+        return None
     geometry = feature.get("geometry") or {}
+    if not isinstance(geometry, dict):
+        return None
     if geometry.get("type") != "Point":
         return None
     coords = geometry.get("coordinates") or []
@@ -196,8 +203,13 @@ def _load_run_metadata(path: Path) -> dict[str, Any]:
     if not path.is_file():
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            logger.warning("Invalid run metadata object: %s", path)
+            return {}
+        return payload
     except (json.JSONDecodeError, OSError):
+        logger.exception("Unreadable run metadata: %s", path)
         return {}
 
 
@@ -296,9 +308,9 @@ def _write_runs_manifest(
             run_metadata = _load_run_metadata(run_wd / "run_metadata.json")
             runid_slug = run_metadata.get("runid") or f"culvert;;{culvert_batch_uuid};;{run_id}"
             point_id = run_metadata.get("point_id") or run_id
-            status_value = run_metadata.get("status") or record.get("status")
+            status_value = record.get("batch_result_status") or run_metadata.get("status") or record.get("status")
             error_value = _format_manifest_error(
-                run_metadata.get("error") or record.get("error")
+                record.get("batch_result_reason") or run_metadata.get("error") or record.get("error")
             )
 
             watershed_label = _helpers._select_watershed_label(

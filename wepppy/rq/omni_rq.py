@@ -502,6 +502,10 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
     """Coordinate Omni scenario execution, optionally leveraging worker concurrency."""
     try:
         job = get_current_job()
+        batch_options = ({'result_ttl': -1, 'failure_ttl': -1,
+                          'meta': {'batch_root_job_id': job.meta['batch_root_job_id'],
+                                   'child_dispatch_lock_key': job.meta.get('child_dispatch_lock_key')}}
+                         if job.meta.get('batch_root_job_id') else {})
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:omni'
@@ -718,14 +722,16 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
         stage2_jobs: List[Job] = []
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-        with redis.Redis(**conn_kwargs) as redis_conn:
+        from wepppy.rq import batch_outcome
+        with redis.Redis(**conn_kwargs) as redis_conn, batch_outcome.dispatch(job):
             q = Queue("batch", connection=redis_conn)
 
             for task in stage1_tasks:
                 child_job_id = new_rq_job_id()
                 job.meta[f"jobs:0,scenario:{task['scenario_name']}"] = child_job_id
-                job.save()
+                job.save_meta()
                 child_job = q.enqueue_call(
+                    **batch_options,
                     func=run_omni_scenario_rq,
                     args=[runid, task['scenario_def']],
                     kwargs={
@@ -742,8 +748,9 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
             for task in stage2_tasks:
                 child_job_id = new_rq_job_id()
                 job.meta[f"jobs:1,scenario:{task['scenario_name']}"] = child_job_id
-                job.save()
+                job.save_meta()
                 child_job = q.enqueue_call(
+                    **batch_options,
                     func=run_omni_scenario_rq,
                     args=[runid, task['scenario_def']],
                     kwargs={
@@ -760,8 +767,9 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
             compile_depends: List[Job] = stage2_jobs or stage1_jobs
             compile_job_id = new_rq_job_id()
             job.meta['jobs:2,func:_compile_hillslope_summaries_rq'] = compile_job_id
-            job.save()
+            job.save_meta()
             compile_job = q.enqueue_call(
+                    **batch_options,
                 func=_compile_hillslope_summaries_rq,
                 args=[runid],
                 timeout=TIMEOUT,
@@ -771,8 +779,9 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
 
             final_job_id = new_rq_job_id()
             job.meta['jobs:3,func:_finalize_omni_scenarios_rq'] = final_job_id
-            job.save()
+            job.save_meta()
             final_job = q.enqueue_call(
+                    **batch_options,
                 func=_finalize_omni_scenarios_rq,
                 args=[runid],
                 timeout=TIMEOUT,

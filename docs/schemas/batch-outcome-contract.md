@@ -1,6 +1,6 @@
 # Batch result outcomes
 
-Status: BATCH-OUTCOME-01 approved by the operator on 2026-11-16; implementation pending.
+Status: BATCH-OUTCOME-01 approved by the operator on 2026-11-16; implemented; deployment requires environment acceptance.
 This specializes [RQ polling](rq-response-contract.md) for ordinary batch and
 culvert root jobs. It does not change generic RQ status, webhook settlement,
 scientific execution, retry selection, cancellation, or access policy.

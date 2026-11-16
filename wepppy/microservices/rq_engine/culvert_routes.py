@@ -198,12 +198,18 @@ def _enqueue_culvert_job(
                 if result.state in {"active", "mismatch"}:
                     raise RqSubmissionConflict("A culvert batch job is already active.")
                 lease.checkpoint()
+            from wepppy.rq.batch_outcome import invalidate_culvert
+            if job_key == "run_culvert_run_rq":
+                invalidate_culvert(batch_uuid)
             if before_enqueue is not None:
                 lease.checkpoint()
                 before_enqueue()
                 lease.checkpoint()
             job_id = callback.job_id if callback else new_rq_job_id()
             runner.set_rq_job_id(job_key, job_id)
+            if job_key == "run_culvert_run_rq":
+                with runner.locked():
+                    runner._runs[args[2]]["job_id"] = job_id
             lease.checkpoint()
             queue = Queue("batch", connection=redis_conn)
             if callback:
@@ -217,6 +223,7 @@ def _enqueue_culvert_job(
                 args=args,
                 timeout=CULVERT_BATCH_TIMEOUT,
                 job_id=job_id,
+                result_ttl=-1, failure_ttl=-1,
                 meta=meta,
             )
             return str(job.id)
@@ -618,7 +625,7 @@ async def culverts_finalize_batch(batch_uuid: str, request: Request) -> JSONResp
         principal = require_feature_access(submitter_claims, "culvert_runner")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: authentication boundary logs unexpected provider errors and denies access.
         logger.exception("rq-engine culvert finalize auth failed")
         return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
