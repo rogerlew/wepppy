@@ -67,3 +67,15 @@ Server implementation: `f13e4ce6f` in WEPPpy. Companion client implementation:
 No branch switch, push, deployment or production requeue. Unrelated dirty files
 remain untouched. Temporary boundary projects and disposable Redis were cleaned
 up after retaining the artifact/readback receipt.
+
+## Push integration — 2026-11-16
+
+WEPPpy implementation and closeout were pushed to `origin/master`. The client
+remote advanced before push, so `c56fa19a7` was applied to current
+`origin/Production` in an isolated detached checkout and pushed as `189af34e1`.
+The conflict was integrated into the newer renewable-token polling helper,
+preserving terminal 401/403 handling and returning the final payload for download.
+Focused integration checks: 7 passed, 1 optional artifact-dependent test skipped;
+syntax compilation and diff checks passed. Earlier 32-run artifact readback remains
+recorded above. The original client checkout and unrelated local edits were left
+unchanged; its local branch was not reset to the rewritten remote history.

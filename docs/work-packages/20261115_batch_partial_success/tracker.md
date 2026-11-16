@@ -47,3 +47,8 @@ Server `f13e4ce6f`; external client `c56fa19a7`. Contract ancestors are listed a
 Final receipts: [validation](artifacts/20261116_validation.md),
 [reviews](artifacts/20261116_implementation_reviews.md), and
 [artifact readback](artifacts/20261116_artifact_readback.json).
+
+Pushed: server implementation/closeout to `origin/master`; client `189af34e1` to
+`origin/Production` after integrating upstream polling/auth changes. The original
+client checkout remains unchanged. See the validation artifact push-integration
+section for focused test results and commit mapping.
