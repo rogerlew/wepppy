@@ -38,6 +38,7 @@ who can deliberately disable every control.
 - [x] (2026-11-16) Repair actual pack-refs false positive; 37 real-Git tests, independent review and shared-checkout ref-preserving maintenance pass.
 - [x] (2026-11-16) Record failed full/remainder results; repair YAML test pollution and plan boundary; coupled 559 and deployment 77 pass. Four preexisting RQ fixture failures remain.
 - [x] (2026-11-16) Integrate native policy reporter through protected PR #662; repeated-event positive and green-but-weakened negative canaries pass with unchanged master protection.
+- [x] (2026-11-16) Resolve four RQ fixture mismatches on operator request; affected 81 tests pass, adjacent 19 pass/36 skip; no production behavior changes.
 - [ ] Finish the five-real-integration observation period before package closure.
 
 ## Surprises & Discoveries
@@ -81,8 +82,9 @@ fast-forward an eligible PR head and record it as merged; this is not merge-butt
 or API-only enforcement. A separate failed canary setup was isolated and closed,
 and is explicitly excluded from positive evidence.
 
-Full application attempts and regression repairs are recorded; four preexisting
-RQ fixture failures remain, so no clean full-suite pass is claimed. The
+Full application attempts and regression repairs are recorded; the four RQ fixture
+failures were subsequently repaired and passed scoped validation. No clean
+full-suite pass is claimed. The
 five-real-integration observation period remains open. Do not close the package
 or substitute artificial canary updates for that operational evidence.
 ## Context and Orientation
