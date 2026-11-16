@@ -52,6 +52,17 @@ controller assets and creates the disposable account schema before pytest.
 Update the image pins when dependencies change and validate both stubtest and
 isolation; cleanup removes the job-local built image.
 
+RQ-Engine Contract Guards also uses this standalone runtime on `remote-ci`.
+Keep every guard command on `docker/docker-compose.test.yml`, with readiness
+waiting and unconditional job-local cleanup. The former Forest development
+bootstrap failed on runner-02 in job `133100538789`: the WEPPpyo3 startup
+preflight exited at 05:10:26 UTC on 2026-11-16, killing concurrent pytest with
+exit 137. Relabeling a Forest job alone does not supply its host dependencies.
+The replacement runtime was validated directly on runner-02: both guard
+scripts and all 15 targeted tests passed on 2026-11-16.
+Other Forest jobs still target `homelab`; migrate their runtime before moving
+them to `remote-ci` rather than applying a blanket runner-label replacement.
+
 ### Why keep the builder under `scripts/`?
 
 `scripts/build_forest_workflows.py` is used repo-wide (not just by GitHub Actions), so it intentionally lives in `scripts/` alongside other tooling. Keeping it there avoids special-casing `.github/` during linting or packaging.
