@@ -29,7 +29,8 @@ who can deliberately disable every control.
 - [x] (2026-11-16) Implement and validate remote receipt and local protected-ref guard.
 - [x] (2026-11-16) Prove wrong-checkout rejection using live mount identity;
   adopt task ownership and serialized integration/validation.
-- [ ] Configure, canary, and read back remote integration and baseline enforcement.
+- [x] (2026-11-16) Canary rejected workflow weakening and no-PR updates,
+  accepted eligible PR-associated integration, and master protection was read back.
 - [ ] Bind publication/release to exact validated candidate and test recovery.
 - [ ] Complete implementation reviews and evidence-based closure.
 
@@ -222,3 +223,8 @@ Execution amendment (2026-11-16): implement the authorized defaults; PR-only wit
 zero required human approvals initially, admin enforcement and no routine bypass.
 Owner policy approval is exact candidate/digest configuration, not an external
 message. Operational observation remains open until five real integrations occur.
+
+Enforcement readback (2026-11-16): GitHub accepts an eligible open PR head via
+fast-forward push and records it as merged. The tested contract is PR association
+and required checks, not merge-button-only transport. No-PR pushes were separately
+rejected with status checks removed on the disposable canary to isolate that rule.

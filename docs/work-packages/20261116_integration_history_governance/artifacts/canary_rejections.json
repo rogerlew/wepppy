@@ -1,0 +1,12 @@
+{
+  "merge_rejected": {
+    "exit_code": 1,
+    "stdout": "{\"message\":\"Required status check \\\"integration-governance-policy\\\" is failing.\",\"documentation_url\":\"https://docs.github.com/articles/about-protected-branches\",\"status\":\"405\"}",
+    "stderr": "gh: Required status check \"integration-governance-policy\" is failing. (HTTP 405)\n"
+  },
+  "direct_push_rejected": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "remote: error: GH006: Protected branch update failed for refs/heads/governance-canary/20261116.        \nremote: \nremote: - Required status check \"integration-governance-policy\" is failing.        \nTo https://github.com/rogerlew/wepppy\n ! [remote rejected]     98d5aa60e11a62cb78cb741372bdde3265cf9376 -> governance-canary/20261116 (protected branch hook declined)\nerror: failed to push some refs to 'https://github.com/rogerlew/wepppy'\n"
+  }
+}

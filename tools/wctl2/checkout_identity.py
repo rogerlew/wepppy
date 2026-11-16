@@ -8,8 +8,10 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from pathlib import Path
+import os
 import secrets
 import shlex
+import subprocess
 import tempfile
 from typing import Iterator
 
@@ -28,14 +30,53 @@ if not matches:
 """
 
 
+_CHECKOUT_MARKERS = {"tools/wctl2/__main__.py", "docker/defaults.env"}
+
+
+def _tracked_checkout_markers(candidate: Path) -> bool:
+    # Caller selection is local/read-only. Ambient Git settings from a different
+    # checkout must not redirect this lookup, and no optional index write is needed.
+    env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    env.update(GIT_OPTIONAL_LOCKS="0", GIT_NO_REPLACE_OBJECTS="1")
+
+    def inspect(*args: str, allowed: tuple[int, ...] = (0,)) -> str:
+        try:
+            result = subprocess.run(
+                ["git", "-C", str(candidate), *args], env=env,
+                capture_output=True, text=True, timeout=10,
+            )
+        except subprocess.TimeoutExpired:
+            raise OSError(f"Caller checkout inspection timed out at {candidate}") from None
+        if result.returncode not in allowed:
+            raise OSError(f"Cannot inspect caller Git checkout at {candidate}; verify its Git metadata")
+        return result.stdout
+
+    paths = sorted(_CHECKOUT_MARKERS)
+    indexed = set(inspect("ls-files", "--cached", "-z", "--", *paths).split("\0"))
+    if _CHECKOUT_MARKERS <= indexed:
+        return True
+    # A staged deletion must not disguise the caller as an unrelated repository.
+    # An unborn unrelated repository has no HEAD and remains a valid fallback.
+    head = inspect("rev-parse", "--verify", "--quiet", "HEAD", allowed=(0, 1)).strip()
+    if not head:
+        return False
+    committed = set(inspect("ls-tree", "-r", "--name-only", "-z", head, "--", *paths).split("\0"))
+    return _CHECKOUT_MARKERS <= committed
+
+
 def requested_checkout(project_dir: Path, caller_cwd: str | None, *, explicit: bool) -> Path:
     """Use explicit project selection, then caller's WEPPpy tree, then preset."""
     if explicit:
         return project_dir.resolve()
     caller = Path(caller_cwd).resolve() if caller_cwd else Path.cwd().resolve()
     for candidate in (caller, *caller.parents):
-        if (candidate / "tools/wctl2/__main__.py").is_file() and (candidate / "docker/defaults.env").is_file():
+        if all((candidate / marker).is_file() for marker in _CHECKOUT_MARKERS):
             return candidate
+        if (candidate / ".git").exists():
+            if _tracked_checkout_markers(candidate):
+                return candidate
+            # Do not walk through a different repository into an enclosing tree.
+            break
     return project_dir.resolve()
 
 
