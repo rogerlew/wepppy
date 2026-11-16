@@ -42,6 +42,9 @@ def test_malformed_body_cannot_reach_controller_or_queue(name,path,monkeypatch,t
         (tmp_path/dirname).mkdir()
     if hasattr(module, '_batch_runner_feature_enabled'):
         monkeypatch.setattr(module, '_batch_runner_feature_enabled', lambda: True)
+    if name == 'project_config_update':
+        # Reach payload validation regardless of the deployment's feature flag.
+        monkeypatch.setattr(module, 'project_config_update_enabled', lambda: True)
     effects=[]
     def forbidden(*a,**k):
         effects.append('business boundary')
