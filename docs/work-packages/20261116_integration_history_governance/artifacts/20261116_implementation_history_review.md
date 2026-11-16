@@ -114,3 +114,14 @@ Revised verdict: **No remaining static code blocker within the stated scope;
 environmental acceptance remains pending the live workflow-removal rejection,
 required-check association, bootstrap, publication, and recovery evidence.**
 M1 remains excluded from independent approval by this reviewer.
+
+## CI repository-selector repair readback
+
+Re-read the CI checker's `git_environment()` and bounded Git helper after the
+root reviewer reproduced ambient Git environment redirection. Explicit `--root`
+is now authoritative: inherited repository, worktree, index, object-store,
+alternate, namespace, shallow-history, and config override selectors are removed;
+replacement objects are disabled and Git operations have a 60-second timeout.
+The implementer reports a real two-repository regression and 34 checker/deploy
+tests passing. This resolves the static repository-selection concern for the
+reviewed CI helper. No broader enforcement claim follows from that local result.

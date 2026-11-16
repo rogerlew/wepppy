@@ -276,3 +276,56 @@ def test_installed_guard_works_in_linked_worktree(history, tmp_path):
     assert result.returncode != 0
     assert "PROTECTED_MASTER" in result.stderr
     assert git(linked, "rev-parse", "master") == accepted
+
+
+def test_installed_checker_survives_removal_of_installer_worktree(history, tmp_path):
+    repo, remote, base = history
+    source_tree = tmp_path / "installer-worktree"
+    git(repo, "worktree", "add", "--detach", str(source_tree), base)
+    tools = source_tree / "tools"
+    tools.mkdir()
+    (tools / CHECKER.name).write_bytes(CHECKER.read_bytes())
+    (tools / INSTALLER.name).write_bytes(INSTALLER.read_bytes())
+    run(sys.executable, tools / INSTALLER.name, "--repo", source_tree)
+    installed = repo / ".git/hooks/wepppy-integration-history-v1.py"
+    assert installed.read_bytes() == CHECKER.read_bytes()
+    hook = (repo / ".git/hooks/reference-transaction").read_text()
+    assert str(source_tree) not in hook
+    git(repo, "worktree", "remove", "--force", str(source_tree))
+    assert not source_tree.exists()
+    accepted = commit(repo, "accepted-after-removal")
+    git(repo, "push", "origin", "master")
+    path = tmp_path / "stable-receipt"
+    receipt(repo, accepted, path)
+    assert json.loads(path.read_text())["accepted_sha"] == accepted
+    result = run("git", "-C", repo, "reset", "--soft", base, ok=False)
+    assert result.returncode != 0
+    assert "PROTECTED_MASTER" in result.stderr
+    assert git(repo, "rev-parse", "master") == accepted
+    install(repo, "--check")
+
+
+def test_installed_checker_drift_is_reported_without_replacement(history):
+    repo, remote, base = history
+    install(repo)
+    checker = repo / ".git/hooks/wepppy-integration-history-v1.py"
+    original_hook = (repo / ".git/hooks/reference-transaction").read_bytes()
+    checker.write_text("# drift\n")
+    for options in [("--check",), ()]:
+        result = install(repo, *options, ok=False)
+        assert result.returncode != 0
+        assert "HOOK_CONFLICT" in result.stderr
+        assert checker.read_text() == "# drift\n"
+        assert (repo / ".git/hooks/reference-transaction").read_bytes() == original_hook
+
+
+def test_checker_symlink_conflict_prevents_partial_hook_install(history, tmp_path):
+    repo, remote, base = history
+    unrelated = tmp_path / "unrelated"
+    unrelated.write_text("keep")
+    (repo / ".git/hooks/wepppy-integration-history-v1.py").symlink_to(unrelated)
+    result = install(repo, ok=False)
+    assert result.returncode != 0
+    assert "HOOK_CONFLICT" in result.stderr
+    assert not (repo / ".git/hooks/reference-transaction").exists()
+    assert unrelated.read_text() == "keep"
