@@ -60,3 +60,56 @@ up before execution and excluded from task commits.
 The full deployment entry point now refuses unvalidated protected source or missing
 exact-source CI evidence before builds/stops. Public API access suffices; API failure
 blocks deployment. No production service was changed or deployed during this work.
+
+## Live bootstrap and canary progress
+
+PR #657 merged as `98017d78981ec8c43ad14bd8faf9846cdb2d4928`, preserving accepted
+source `2edde3e35c6f4aed62f596f6c3feb9a4cc56eebd`. The first push check correctly
+rejected the PR-head-only approval; publication run 43958588430 failed eligibility
+and skipped its publish job. After exact merge approval, governance run43958588392
+attempt2 succeeded and live publication eligibility was read back.
+
+Negative PR #658 replaces the behavioral workflow with a green no-op. That check
+passed, but base-owned `integration-governance-policy` failed. With the proposed
+rule installed on `governance-canary/20261116`, GitHub rejected both merge API
+(HTTP405, failing required policy check) and direct push (GH006). See retained
+`canary_protection.json` and `canary_rejections.json`.
+
+Positive test setup initially failed: `--no-checkout` left an uninitialized index,
+and non-fail-fast shell continuation created empty-tree commit `14a44dbf9` on a
+disposable branch. PR #659 was closed without merging. Remote master and canary
+base both remained98017d789; no production/default source was changed. The replacement
+positive PR #660 was built from a fully initialized index, with exact index/HEAD
+and one-file staged-diff assertions. This setup error is not counted as positive
+enforcement evidence. Dependent mutation commands now fail fast.
+
+The setup also exposed a real sparse-checkout identity gap: missing physical
+wctl markers could fall back to the installed checkout. A follow-up correction
+uses sanitized Git index/HEAD inspection; 16 focused cases pass and independent
+security review accepts it. It will enter master through the newly enforced PR
+boundary, not a bypass.
+
+## Environmental enforcement
+
+The positive PR #660 passed both checks. A fast-forward push of its exact green
+head was accepted, and GitHub recorded the PR as merged at
+`aefdbecefa8fba2ec2b3cf67f4e461151f12e996`. This is GitHub's PR-association semantics,
+not a guarantee of merge-button/API-only transport. A separate harmless commit
+with no PR association was rejected with GH006/"Changes must be made through a
+pull request" while canary status checks were temporarily disabled; the complete
+rule was restored in a finally block. See `canary_no_pr_rejection.json` and
+`canary_protection_restored.json`. PR #659's accidental empty-tree candidate also
+received a failing trusted policy result and remained closed/unmerged.
+
+On 2026-11-16, the tested protection was applied to master and read back:
+`master_protection_readback.json`. It requires PR association and both checks
+bound to Actions app15368, strict up-to-date status, administrator enforcement,
+and no force push/deletion. Squash/rebase UI/API merges are disabled; merge commits
+remain enabled (`merge_settings_readback.json`). Human required approvals remain
+zero as explicitly adopted; no routine bypass actor was added.
+
+Bootstrap publication run43958588430 attempt2 passed eligibility and proceeded
+through the existing publishing workflow. This is normal artifact publication,
+not production deployment. Exact completion and image evidence remain to be read.
+The follow-up sparse-checkout correction must now demonstrate legitimate integration
+through protected master. Full repository pytest continues; no pass is claimed yet.

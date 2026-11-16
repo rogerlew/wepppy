@@ -18,7 +18,10 @@ commit. Record the complete SHAs, repository/branch, UTC observation time, and
 validation evidence. Missing objects, offline access, shallow ambiguity, stale refs,
 or unsupported integration modes must fail explicitly.
 
-Use merge commits to preserve reviewed source SHAs. Squash and rebase merges are
+Use commit-preserving integration, preferring merge commits. GitHub also accepts
+a fast-forward of an already eligible PR head and records that PR as merged;
+that preserves reviewed SHAs but does not require the merge-button/API transport.
+Squash and rebase merges are
 not supported by the initial receipt contract. Commit ancestry proves historical
 inclusion, not current behavior: a later revert must still pass security-baseline
 validation. Receipts describe an immutable observation, not a guarantee that the
@@ -37,6 +40,10 @@ rebase, reset, deletion and ref replacement are prohibited. Fast-forward updates
 and merges must retain all previously accepted ancestors. Divergence is a merge
 and review obligation, not permission to discard local history.
 
+Initialize a new worktree index before staging. Run dependent shell operations
+with fail-fast behavior and inspect the exact staged file list before committing;
+`--no-checkout` alone leaves an index that can represent unintended deletions.
+
 Use the installed local protected-ref guard as accident prevention. Check its
 installation before integration and preserve existing Git LFS hooks. A hook can
 be disabled by someone controlling the checkout, so remote checks and truthful
@@ -54,14 +61,18 @@ and index changes during this execution.
 
 Run tests against the checkout actually consumed by the container, not just the
 host shell's current directory. wctl must reject a mismatched requested checkout
-before starting pytest. Serialize edits and validation on the existing shared stack;
+before starting pytest. Identify sparse checkouts through Git index/HEAD markers,
+not only files present on disk; broken Git metadata must fail explicitly.
+Serialize edits and validation on the existing shared stack;
 worktree creation does not authorize recreating or remounting another task's stack.
 Validation receipts identify the candidate and any dirty source state. Ignored build
 outputs and external dependencies require their own artifact evidence.
 
 ## Remote integration boundary
 
-Require pull requests and an always-reported integration-governance check on master.
+Require PR-associated changes and always-reported integration governance checks
+on master. Live canaries must distinguish an unassociated push from a green PR
+head: GitHub rejects the former but can accept the latter as the PR merge.
 Disallow force pushes, branch deletion, squash and rebase integration. Enforce the
 rule for administrators too. Initial required human approval count is zero: write
 collaborators exist, but no second human has been assigned to this workflow. The
@@ -158,3 +169,8 @@ protected source and requires a successful exact-source master governance run.
 Public GitHub read access suffices; an existing `GH_TOKEN` can increase API limits.
 Unavailable or rate-limited evidence fails closed before activation. Existing
 retained-image rollback and parser stop behavior remain separate safeguards.
+
+GitHub documents this PR-association behavior in
+[available repository rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#require-a-pull-request-before-merging).
+The canary verified the effective classic protection directly; configuration alone
+was not treated as proof of rejected operations.

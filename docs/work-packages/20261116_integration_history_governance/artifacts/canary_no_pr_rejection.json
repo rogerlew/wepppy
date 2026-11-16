@@ -1,0 +1,9 @@
+{
+  "candidate": "55e5851e3fd471fe04b07ec728ada08404e099c2",
+  "parent": "aefdbecefa8fba2ec2b3cf67f4e461151f12e996",
+  "empty_tree_delta": true,
+  "status_checks_temporarily_disabled_on_canary_only": true,
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "remote: error: GH006: Protected branch update failed for refs/heads/governance-canary/20261116.        \nremote: \nremote: - Changes must be made through a pull request.        \nTo https://github.com/rogerlew/wepppy\n ! [remote rejected]     55e5851e3fd471fe04b07ec728ada08404e099c2 -> governance-canary/20261116 (protected branch hook declined)\nerror: failed to push some refs to 'https://github.com/rogerlew/wepppy'\n"
+}

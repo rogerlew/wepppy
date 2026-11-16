@@ -23,12 +23,13 @@ def _exit_from_result(result: subprocess.CompletedProcess) -> None:
 
 
 def _run_checked_test(ctx: typer.Context, context: CLIContext, command: str) -> None:
-    project_dir = requested_checkout(
-        context.project_dir,
-        context.environment.get("WCTL_CALLER_CWD"),
-        explicit=bool(ctx.find_root().params.get("project_dir")),
-    )
+    project_dir = context.project_dir
     try:
+        project_dir = requested_checkout(
+            context.project_dir,
+            context.environment.get("WCTL_CALLER_CWD"),
+            explicit=bool(ctx.find_root().params.get("project_dir")),
+        )
         with checked_test_command(project_dir, command) as checked_command:
             context.logger.info("Verifying test checkout mount: %s", project_dir)
             result = compose_exec(context, "weppcloud", checked_command, check=False)

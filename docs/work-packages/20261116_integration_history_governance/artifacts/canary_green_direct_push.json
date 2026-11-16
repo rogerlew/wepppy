@@ -1,0 +1,6 @@
+{
+  "candidate": "aefdbecefa8fba2ec2b3cf67f4e461151f12e996",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "remote: \nremote: GitHub found 292 vulnerabilities on rogerlew/wepppy's default branch (18 critical, 142 high, 113 moderate, 19 low). To find out more, visit:        \nremote:      https://github.com/rogerlew/wepppy/security/dependabot        \nremote: \nTo https://github.com/rogerlew/wepppy\n   98017d789..aefdbecef  aefdbecefa8fba2ec2b3cf67f4e461151f12e996 -> governance-canary/20261116\n"
+}

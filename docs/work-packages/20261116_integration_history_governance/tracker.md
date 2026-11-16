@@ -19,7 +19,7 @@
 - [x] Ratify integration contract and promote durable policy outside this package.
 - [x] Implement/test remote receipt and shared-master preservation controls.
 - [x] Implement/test checkout identity and adopt single-integrator task workflow.
-- [ ] Stage, review, enable, and verify remote protections and baseline checks.
+- [x] Stage, review, enable, and verify remote protections and baseline checks.
 - [ ] Validate publication/deployment consumers and recovery drill.
 - [ ] Re-review implemented controls and close all medium/high findings.
 

@@ -171,3 +171,34 @@ in this review's M1/M2/root deployment-consumer scope. Bootstrap merge may proce
 subject to the separate CI review and root integration gates. Remote enforcement,
 production deployment, and operating-system interpreter administration remain
 outside this source-level sign-off.
+
+## M2 sparse-checkout follow-up review
+
+**Scoped PASS.** Independent readback confirms the follow-up repairs the observed
+sparse-worktree selection failure: absence of the two physical WEPPpy marker files
+no longer automatically selects the installed checkout. At a discovered `.git`
+boundary, the helper checks tracked index paths, then committed HEAD paths so a
+staged deletion does not disguise a WEPPpy checkout. Unrelated and unborn Git
+repositories retain the documented installed-preset fallback, while failed Git
+inspection raises an explicit error before the container test command.
+
+The new subprocess is local and read-only, removes ambient `GIT_*` selectors and
+configuration, disables replacement objects and optional locks, uses argument
+lists rather than shell interpolation, and has a ten-second timeout. Checkout
+selection now occurs within the command wrapper's existing error-handling boundary.
+The nonce probe still verifies the selected live tree before pytest starts.
+
+Reviewed the real sparse linked-worktree regression, staged-marker deletion,
+unrelated/unborn fallback, ambient selection, and broken Git-metadata cases in
+`tools/wctl2/tests/test_checkout_identity.py`, and read
+`/tmp/wctl-sparse-checkout-tests.log`: **16 passed in 1.22s** across checkout identity
+and Python command tests. The sparse case explicitly proves that the canonical
+mounted checkout is rejected when the caller requested the sparse worktree.
+No additional broad suite or production operation was performed for this review.
+
+No new high/medium finding was identified in this M2 correction. Its acceptance is
+source-level and scoped; follow-up PR policy checks, exact-source integration,
+and remote enforcement evidence remain root integration gates. The separate
+positive-canary setup error (an empty-index deletion commit on a disposable branch)
+is incident/test-setup evidence, not a successful integration or a master change,
+and does not substitute for the positive-canary proof.
