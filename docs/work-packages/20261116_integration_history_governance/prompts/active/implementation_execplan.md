@@ -31,8 +31,12 @@ who can deliberately disable every control.
   adopt task ownership and serialized integration/validation.
 - [x] (2026-11-16) Canary rejected workflow weakening and no-PR updates,
   accepted eligible PR-associated integration, and master protection was read back.
-- [ ] Bind publication/release to exact validated candidate and test recovery.
-- [ ] Complete implementation reviews and evidence-based closure.
+- [x] (2026-11-16) Bind publication/deployment eligibility to exact validated
+  source; stale approval failed before publish, then qualified publication succeeded.
+- [x] (2026-11-16) Complete independent implementation reviews and close findings.
+- [x] (2026-11-16) Complete disposable recovery drill: refused ref rewrite, external WIP recovery, legitimate merge and fresh receipt.
+- [ ] Record final full-suite result and finish the five-real-integration observation
+  period before package closure.
 
 ## Surprises & Discoveries
 
@@ -54,20 +58,30 @@ without waiting for an exact-candidate acceptance gate.
 small verifiers atop existing Git/CI tools after decisions. Local hooks are
 accident guards and must not be described as a malicious-agent boundary.
 
-D1–D5 in `package.md` are proposed defaults pending operator choice. Prefer
+D1–D5 in `package.md` were adopted by the execution request. Use
 merge-preserving integration for initial exact-SHA receipts, one designated
 integrator, and serialized validation on the existing stack. A worktree does not
-create an independent ref namespace or container environment. A branch-policy
-change must be explicit; current root instructions remain in force.
+create an independent ref namespace or container environment. The canonical standard and root branch-policy pointer now authorize scoped task
+branches and define one integrator.
 
 ## Outcomes & Retrospective
 
+The implementation is wired and remotely enforced. Bootstrap PR #657 preserved
+accepted source through merge98017d789; protected PR #661 integrated the sparse
+checkout correction as d3b0effbc. Fresh remote ancestry receipts and settings
+readback are retained in this package. Independent implementation reviews closed
+all identified medium/high findings. No production deployment occurred.
 
-The history incident was repaired separately at `420e31b97`. This package currently
-provides a scaffold and design review, not implemented safeguards. The durable
-lesson is to distinguish accepted source, observed remote integration, and current
-behavior. Commit ancestry proves inclusion, not that a later revert preserved it.
+Local guards now survive task worktree/venv removal, and checkout verification
+recognizes sparse trees. Actual GitHub canaries rejected a green-but-weakened
+workflow and a no-PR commit, and accepted a valid PR-associated update. GitHub may
+fast-forward an eligible PR head and record it as merged; this is not merge-button
+or API-only enforcement. A separate failed canary setup was isolated and closed,
+and is explicitly excluded from positive evidence.
 
+Full application regression and the five-real-integration observation period
+remain open. Do not close the package or claim those future results from local
+unit tests or from artificial canary updates.
 ## Context and Orientation
 
 

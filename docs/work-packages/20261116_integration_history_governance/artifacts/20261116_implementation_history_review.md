@@ -125,3 +125,50 @@ replacement objects are disabled and Git operations have a 60-second timeout.
 The implementer reports a real two-repository regression and 34 checker/deploy
 tests passing. This resolves the static repository-selection concern for the
 reviewed CI helper. No broader enforcement claim follows from that local result.
+
+## Final environmental review
+
+Independent read-only review on 2026-11-16 confirms the live master protection
+and retained canary evidence. GitHub API readback requires both
+`integration-governance` and `integration-governance-policy`, each bound to Actions
+app `15368`, with strict up-to-date checks and administrator enforcement.
+Force-push and deletion are disabled. PR association is required with zero human
+approvals, as adopted; this is not independent human review. Repository readback
+permits merge commits and disables squash/rebase merges. The repository is public.
+
+Direct API readback of [PR #661](https://github.com/rogerlew/wepppy/pull/661)
+confirms its merge at `d3b0effbc26f0ca04f5f11e8c14982bfbf1b3c54`, preserving
+reviewed head `dff9eba283a2767c9c776cd4d12d81f9b18b91dd`. Both required checks
+succeeded on that exact head under app `15368`. Remote master readback matches the
+merge, and local `git merge-base --is-ancestor` confirms preservation. The retained
+`enforced_integration_receipt.json` agrees with these independent observations.
+
+For [negative PR #658](https://github.com/rogerlew/wepppy/pull/658), independent
+check-run readback confirms the candidate's no-op `integration-governance` succeeded
+while the base-owned policy failed on the same head `98d5aa60e11a62cb78cb741372bdde3265cf9376`.
+The PR remains closed and unmerged. `canary_rejections.json` retains rejection by
+both the merge API and direct push under the tested canary protection. This closes
+H1's environmental gate for the stated accidental/unreviewed weakening scenario.
+
+[Positive PR #660](https://github.com/rogerlew/wepppy/pull/660) is recorded as
+merged at its exact green head `aefdbecefa8fba2ec2b3cf67f4e461151f12e996` after a
+fast-forward push. The demonstrated guarantee is **PR-associated, check-gated
+integration**, not merge-button/API-only transport. A separate commit without PR
+association was rejected while status checks were disabled on the disposable canary
+only, isolating the PR requirement; `canary_no_pr_rejection.json` and
+`canary_protection_restored.json` retain the rejection and restored complete rule.
+
+[PR #659](https://github.com/rogerlew/wepppy/pull/659), created by the empty-index
+canary setup mistake, is independently confirmed closed and unmerged. It is a
+retained setup failure, not positive acceptance evidence. `canary_cleanup.json`
+records removal of temporary protection, remote branches, and clean disposable
+worktrees. No remote writes were performed by this reviewer.
+
+**Environmental verdict: PASS for the tested master integration controls and
+history-preservation boundary.** Local/remote evidence now supports implemented,
+wired, and environmentally enforced status for those controls. The receipt is an
+ancestry snapshot, not a behavior or production deployment attestation. This
+verdict does not claim full application regression success, completed image
+publication, hostile-writer containment, other-host hook rollout, or package
+closure. Full pytest is still running, and five future real integrations remain
+an open operational observation obligation; bootstrap/canaries do not satisfy it.

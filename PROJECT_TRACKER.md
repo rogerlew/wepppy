@@ -1,4 +1,4 @@
-Implementation authorized: [Integration and history preservation governance](docs/work-packages/20261116_integration_history_governance/package.md) — remote receipts, history preservation, task isolation, trusted checks and publication gating; implementation and enforcement evidence pending.
+Implemented and enforced: [Integration and history preservation governance](docs/work-packages/20261116_integration_history_governance/package.md) — remote receipts, preserved history, checkout identity, trusted required checks and exact-source publication gates are active. Independent reviews, GitHub canaries, image readback and recovery drill pass; full regression and five-integration observation remain open.
 
 Complete: [Omni SBS map reload and resubmission](docs/work-packages/20261116_omni_sbs_reload/package.md) - Contract-first shared staging/Omni fix; 118 scoped Python and 26 JS tests pass. Disposable fixture repaired; native watershed/report and queued browser no-upload resubmission pass. No production rollout.
 

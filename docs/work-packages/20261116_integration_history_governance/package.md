@@ -1,6 +1,6 @@
 # Integration and history preservation governance
 
-**Status**: Open — implementation authorized; enforcement validation pending
+**Status**: Open — implemented and enforced; final validation and observation pending
 **Started**: 2026-11-16 20:48 UTC
 **Timezone**: UTC
 
@@ -49,7 +49,7 @@ database, queue, bot credential, dependency, or service is budgeted. Before
 escalation retain a real failing acceptance test and the smallest required change.
 Hooks are defense in depth; they are not a server-enforced security boundary.
 
-## Proposed Deliverables
+## Implemented Deliverables
 
 1. `docs/standards/integration-history-governance.md`: durable state definitions,
    Git mutation rules, receipt requirements, exception and recovery procedures.
@@ -57,17 +57,17 @@ Hooks are defense in depth; they are not a server-enforced security boundary.
    remote observation, accepted revision, integration result, and explicit failures.
 3. Work-package closure template and root agent guidance referencing the standard.
 4. An exact GitHub protection/rules proposal, baseline export, capability check,
-   canary evidence, and applied-settings readback when separately authorized.
+   canary evidence, and applied-settings readback under the execution authorization.
 5. An always-reported security-baseline check in canonical workflow sources,
    generated workflow validation, and release/publication consumer coverage.
 
-## Decisions Required Before Implementation
+## Adopted Control Decisions
 
 | ID | Decision | Proposed default | Tradeoff to resolve |
 |---|---|---|---|
 | D1 | Integration and merge method | Preserve accepted commits through merge commits; no routine shared-master rebase/reset | Squash/rebase requires a separately reviewed mapping from accepted source to integrated tree; ancestry alone cannot validate it |
-| D2 | Concurrent task isolation | Separate worktrees/task branches, one integrator, serialized validation on the existing stack | Current root instructions forbid creating/switching branches without user request; this scaffold does not change that rule |
-| D3 | Remote protection and approval | Required checks; prevent force-push/deletion; defined exceptional bypass | Decide direct push versus PR-only and feasible reviewer requirements for a solo-maintainer workflow; confirm account capabilities |
+| D2 | Concurrent task isolation | Separate worktrees/task branches, one integrator, serialized validation on the existing stack | Root instructions now authorize scoped task branches for authorized work; shared refs and stack validation still require one integrator |
+| D3 | Remote protection and approval | Required checks; prevent force-push/deletion; defined exceptional bypass | PR association and both exact-head checks enforced for administrators; zero human approvals until an independent reviewer is assigned |
 | D4 | Security baseline trust | Required baseline validation on every candidate, owned policy changes explicitly reviewed | Candidate-controlled checks can weaken themselves; determine trusted policy source and minimum workable ownership protection |
 | D5 | Closure and publication | Local acceptance, remote integration, and deployment are distinct states; durable remote receipt before integrated closure | Store receipts after their subject commit; avoid self-referential hashes; define retention/issue authority and publication eligibility |
 
@@ -77,22 +77,22 @@ recommendations belong in `artifacts/review_synthesis.md`.
 
 ## Success Criteria
 
-- [ ] Reproduce the dropped-local-history/valid-remote-fast-forward incident in
+- [x] Reproduce the dropped-local-history/valid-remote-fast-forward incident in
   disposable Git repositories and show the selected controls prevent false closure.
-- [ ] A locally accepted but unpushed revision cannot yield an integration receipt.
-- [ ] Routine updates preserve preexisting accepted commits and working changes;
+- [x] A locally accepted but unpushed revision cannot yield an integration receipt.
+- [x] Routine updates preserve preexisting accepted commits and working changes;
   divergent/shared branches fail with actionable recovery instructions.
-- [ ] Verify the exact host/container checkout actually tested; a worktree shell
+- [x] Verify the exact host/container checkout actually tested; a worktree shell
   location alone cannot establish validation identity.
-- [ ] Supported merge modes, stale refs, shallow history, offline operation,
+- [x] Supported merge modes, stale refs, shallow history, offline operation,
   concurrent remote movement, missing checks, and bypass are tested explicitly.
-- [ ] A later revert that retains ancestry but removes the Rust parser fails the
+- [x] A later revert that retains ancestry but removes the Rust parser fails the
   behavioral security baseline unless retirement is explicitly approved.
-- [ ] Exact remote rules and required checks are verified in the intended account;
+- [x] Exact remote rules and required checks are verified in the intended account;
   ordinary authorized contribution and emergency recovery remain possible.
-- [ ] Publication/deployment consumers use exact candidate evidence, and a
+- [x] Publication/deployment consumers use exact candidate evidence, and a
   documentation-only local success cannot authorize release.
-- [ ] Independent correctness, QA, and security reviews close all medium/high
+- [x] Independent correctness, QA, and security reviews close all medium/high
   findings before package closure; retained evidence supports each status claim.
 
 ## Security Impact and Review Gate
@@ -111,7 +111,8 @@ attestations are consumed artifacts. Trace approved source revision through the
 fresh remote object, receipt writer, receipt reader, exact CI candidate, and release
 consumer. Use real local bare remotes for Git boundaries and read back GitHub
 settings/check results for environmental enforcement. Retain receipt contents and
-identities, not merely successful exit codes. Current claim: diagnosed/scaffolded.
+identities, not merely successful exit codes. Current claim: implemented and environment validated for integration controls;
+full regression and operational observation remain open.
 
 ## Failure-Class Assessment and Hardening
 
@@ -125,9 +126,10 @@ Health signals: accepted work remains reachable, false integration claims fail,
 checks always report, and routine contributions complete without bypass.
 Danger signals: mandatory bypass for normal work, stale receipts, mutable policy
 self-approval, orphaned worktrees, and publication before checks finish.
-Proposed observation window: first five integrations plus one recovery drill;
-operator ratification remains pending. No temporary mitigation is installed by
-this scaffold. Future temporary hooks/rules require an owner and retirement test.
+Adopted observation window: first five real protected integrations plus one recovery
+drill. PR #661 is the first real protected integration; bootstrap and disposable
+canaries do not count. No temporary bypass is installed. Future temporary
+mitigations require an owner and retirement test.
 
 ## Dependencies and Validation
 
@@ -141,3 +143,11 @@ must use real Git boundary tests through wctl, generated-workflow checks, applic
 regression gates, and remote enforcement readback. Follow repository-required
 pre-handoff tests when code changes; a docs-only scaffold does not run application
 suites. See the [ExecPlan](prompts/active/implementation_execplan.md).
+
+## Execution Status
+
+Bootstrap PR #657 and protected follow-up PR #661 are merged. Remote protection
+and merge settings are read back; local guard and wctl shim are installed in this
+checkout. See the [execution receipt](artifacts/20261116_execution.md). No production
+deployment occurred. Full repository regression and the five-integration
+observation window remain open; this package is not closed.
