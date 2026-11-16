@@ -250,13 +250,25 @@ Notes:
 - `order_reduction_passes` in `model-parameters.json` overrides both the config default and the map-mode calculation when present.
 - `flow_accum_threshold` is preserved for traceability and only used to map order-reduction passes; streams are still pre-computed in the payload.
 
-### Nominal-resolution pruning heuristic
+### Per-run pruning candidates
 
-Map mode uses effective resolution `cellsize_m * sqrt(flow_accum_threshold / 100)`,
-with threshold 100 when missing or nonpositive. The candidate ranges are three
-passes at <= 1.5 m, two at > 1.5 through 4 m, and one above 4 m.
-This heuristic remains pending forest calibration under ADR-0143; explicit
-`order_reduction_passes` in the payload overrides the mapping.
+New batches start with four passes through effective resolution 1.5 m, three
+through 3 m, two through 6 m, and one above 6 m. Effective resolution is
+`cellsize_m * sqrt(flow_accum_threshold / 100)` (threshold defaults to100).
+Each culvert tries successively finer candidates until its supplied point
+intersects a channel and its watershed contains stream coverage. Zero uses the
+original supplied streams. If none qualifies, that run fails explicitly.
+
+Explicit `order_reduction_passes` sets the starting maximum; it does not disable
+connection-preserving fallback. An explicit zero selects original streams.
+`stream_selection.json` in each run records selected passes and rejected candidates.
+Batch `stream_selection_policy.json` and `stream_candidates.json` distinguish
+new-policy preparation from retained legacy batches. Inspect these artifacts to
+diagnose incomplete preparation, selection failures, or unexpectedly fine runs.
+Ready candidates are immutable; missing or changed files are errors, not fallback.
+The run skeleton ZIP retains policy/candidate artifacts and receipts, but remains
+a skeleton export rather than a claim of a fully standalone executable project.
+See [the canonical selection contract](../schemas/culvert-stream-selection-contract.md).
 
 
 ### Coordinate system rules

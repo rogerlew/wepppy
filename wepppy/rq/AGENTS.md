@@ -21,3 +21,6 @@
   `python tools/check_rq_dependency_graph.py --write`.
 - Validate changed wiring against a live job tree with
   `wepppy/rq/job_info.py` or the job dashboard.
+
+Culvert per-run candidate/receipt lifecycle and legacy compatibility follow
+`docs/schemas/culvert-stream-selection-contract.md`.

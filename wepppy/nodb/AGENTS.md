@@ -207,3 +207,6 @@ RedisPrep is not a NoDbBase singleton. Follow
 publication, conditional restore, lifecycle fencing and split-store failures.
 Use `update_metadata` for multi-field changes; do not rebuild the shared hash
 field by field or delete unrelated live ownership.
+
+Culvert per-run candidate/receipt lifecycle and legacy compatibility follow
+`docs/schemas/culvert-stream-selection-contract.md`.

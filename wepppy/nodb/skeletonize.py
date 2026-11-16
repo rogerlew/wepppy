@@ -25,6 +25,7 @@ RUN_SKELETON_ALLOWLIST: tuple[str, ...] = (
     "redisprep.dump",
     "ron.nodb",
     "run_metadata.json",
+    "stream_selection.json",
     "unitizer.nodb",
     "watershed.nodb",
     "wepp.nodb",

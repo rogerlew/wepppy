@@ -1007,3 +1007,17 @@ def _rewrite_payload_zip_with_member(
             dst.writestr(info, data)
         dst.writestr(member_name, payload)
     return dest
+
+
+@pytest.mark.parametrize('reserved', ['stream_candidates.json', 'stream_selection_policy.json', 'topo/stream_candidates/pass_1/streams.tif', 'runs/1/stream_selection.json'])
+def test_culvert_ingest_rejects_caller_selection_artifacts(tmp_path, monkeypatch, reserved):
+    root=tmp_path/'batches'
+    monkeypatch.setenv('CULVERTS_ROOT',str(root))
+    headers=_auth_headers(monkeypatch)
+    payload=_build_minimal_payload_zip(tmp_path/'payload.zip')
+    with zipfile.ZipFile(payload,'a') as archive: archive.writestr(reserved,'{}')
+    with payload.open('rb') as handle, TestClient(rq_engine.app) as client:
+        response=client.post('/api/culverts-wepp-batch/',files={'payload.zip':('payload.zip',handle,'application/zip')},headers=headers)
+    assert response.status_code==400
+    assert_validation_error(response.json(),'reserved_artifact')
+    assert not list(root.iterdir())

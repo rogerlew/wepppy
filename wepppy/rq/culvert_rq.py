@@ -6,6 +6,7 @@ from wepppy.observability.secret_profiles import WORKER
 
 import json
 import logging
+import math
 import os
 import shutil
 import sys
@@ -36,6 +37,7 @@ from wepppy.nodb.base import (
     clear_nodb_file_cache,
 )
 from wepppy.nodb.culverts_runner import CulvertsRunner
+from wepppy.nodb import culvert_stream_selection as stream_selection
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
 from wepppy.nodb.core.watershed import NoOutletFoundError
 from wepppy.nodb.skeletonize import RUN_SKELETON_ALLOWLIST, skeletonize_run
@@ -236,85 +238,98 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
         if not Path(path).exists():
             raise FileNotFoundError(f"{path_label} file does not exist: {path}")
 
-    _generate_batch_topo(
-        Path(dem_src),
-        Path(streams_src),
-        Path(flovec_src),
-        Path(netful_src),
-    )
-
-    # Get cellsize from DEM for minimal stream pruning (2 * cellsize)
-    ds = gdal.Open(str(dem_src))
-    if ds is None:
-        raise FileNotFoundError(f"Cannot open DEM: {dem_src}")
-    gt = ds.GetGeoTransform()
-    cellsize = abs(gt[1])  # pixel width
-    ds = None  # close dataset
-
-    min_length = 2.0 * cellsize
-    logger.info(
-        "culvert_batch %s: pruning short streams (min_length=%.1f, cellsize=%.1f)",
-        culvert_batch_uuid,
-        min_length,
-        cellsize,
-    )
-    _prune_short_streams(Path(flovec_src), Path(netful_src), min_length)
-
-    # Check model_parameters for order_reduction_passes override
-    order_reduction_passes = runner.order_reduction_passes
-    flow_accum_threshold = _get_model_param_int(
-        model_parameters, "flow_accum_threshold"
-    )
-    flow_accum_label = (
-        str(flow_accum_threshold)
-        if flow_accum_threshold is not None
-        else "100(default)"
-    )
-    if runner.order_reduction_mode == "map":
-        mapped_passes = _map_order_reduction_passes(
-            cellsize_m=cellsize,
-            flow_accum_threshold=flow_accum_threshold,
-        )
-        if mapped_passes is not None:
-            order_reduction_passes = mapped_passes
-            logger.info(
-                "culvert_batch %s: order_reduction_passes=%d (map mode, cellsize=%.2f, flow_accum_threshold=%s)",
-                culvert_batch_uuid,
-                order_reduction_passes,
-                cellsize,
-                flow_accum_label,
+    new_stream_policy = stream_selection.has_policy(batch_root)
+    with stream_selection.topology_lock(batch_root):
+        reuse_topology = new_stream_policy and stream_selection.reuse_ready(batch_root)
+        if not reuse_topology:
+            _generate_batch_topo(
+                Path(dem_src),
+                Path(streams_src),
+                Path(flovec_src),
+                Path(netful_src),
             )
-    if model_parameters and "order_reduction_passes" in model_parameters:
-        try:
-            mp_value = int(model_parameters["order_reduction_passes"])
-            if mp_value >= 0:
-                order_reduction_passes = mp_value
+
+        # Get cellsize from DEM for minimal stream pruning (2 * cellsize)
+        ds = gdal.Open(str(dem_src))
+        if ds is None:
+            raise FileNotFoundError(f"Cannot open DEM: {dem_src}")
+        gt = ds.GetGeoTransform()
+        cellsize = abs(gt[1])  # pixel width
+        ds = None  # close dataset
+
+        min_length = 2.0 * cellsize
+        logger.info(
+            "culvert_batch %s: pruning short streams (min_length=%.1f, cellsize=%.1f)",
+            culvert_batch_uuid,
+            min_length,
+            cellsize,
+        )
+        if not reuse_topology:
+            _prune_short_streams(Path(flovec_src), Path(netful_src), min_length)
+
+        # Check model_parameters for order_reduction_passes override
+        order_reduction_passes = runner.order_reduction_passes
+        flow_accum_threshold = _get_model_param_int(
+            model_parameters, "flow_accum_threshold"
+        )
+        flow_accum_label = (
+            str(flow_accum_threshold)
+            if flow_accum_threshold is not None
+            else "100(default)"
+        )
+        if runner.order_reduction_mode == "map":
+            mapped_passes = _map_order_reduction_passes(
+                cellsize_m=cellsize,
+                flow_accum_threshold=flow_accum_threshold,
+            )
+            if not new_stream_policy and cellsize > 0:
+                threshold = flow_accum_threshold if flow_accum_threshold and flow_accum_threshold > 0 else 100
+                effective = cellsize * math.sqrt(threshold / 100.0)
+                mapped_passes = 3 if effective <= 1.0 else 2 if effective <= 4.0 else 1
+            if mapped_passes is not None:
+                order_reduction_passes = mapped_passes
                 logger.info(
-                    "culvert_batch %s: order_reduction_passes=%d (from model_parameters)",
+                    "culvert_batch %s: order_reduction_passes=%d (map mode, cellsize=%r, flow_accum_threshold=%s)",
                     culvert_batch_uuid,
                     order_reduction_passes,
+                    cellsize,
+                    flow_accum_label,
                 )
-        except (TypeError, ValueError):
-            pass
-    if order_reduction_passes > 0:
-        logger.info(
-            "culvert_batch %s: pruning netful stream order (%s passes)",
-            culvert_batch_uuid,
-            order_reduction_passes,
-        )
-        _prune_stream_order(
-            Path(flovec_src),
-            Path(netful_src),
-            order_reduction_passes,
-        )
+        if model_parameters and "order_reduction_passes" in model_parameters:
+            try:
+                mp_value = int(model_parameters["order_reduction_passes"])
+                if mp_value >= 0:
+                    order_reduction_passes = mp_value
+                    logger.info(
+                        "culvert_batch %s: order_reduction_passes=%d (from model_parameters)",
+                        culvert_batch_uuid,
+                        order_reduction_passes,
+                    )
+            except (TypeError, ValueError):
+                pass
+        if new_stream_policy:
+            stream_selection.prepare(batch_root, Path(flovec_src), Path(netful_src),
+                                     Path(streams_src), order_reduction_passes, dem=Path(dem_src))
+        if order_reduction_passes > 0 and not new_stream_policy:
+            logger.info(
+                "culvert_batch %s: pruning netful stream order (%s passes)",
+                culvert_batch_uuid,
+                order_reduction_passes,
+            )
+            _prune_stream_order(
+                Path(flovec_src),
+                Path(netful_src),
+                order_reduction_passes,
+            )
 
-    _generate_stream_junctions(Path(flovec_src), Path(netful_src), Path(chnjnt_src))
-    streams_chnjnt_src = batch_root / runner.DEFAULT_STREAMS_CHNJNT_REL_PATH
-    _generate_stream_junctions(
-        Path(flovec_src),
-        Path(streams_src),
-        streams_chnjnt_src,
-    )
+        if not new_stream_policy:
+            _generate_stream_junctions(Path(flovec_src), Path(netful_src), Path(chnjnt_src))
+            streams_chnjnt_src = batch_root / runner.DEFAULT_STREAMS_CHNJNT_REL_PATH
+            _generate_stream_junctions(
+                Path(flovec_src),
+                Path(streams_src),
+                streams_chnjnt_src,
+            )
 
     run_ids = runner._load_run_ids(watersheds_src)
     run_config = runner._resolve_run_config(model_parameters)

@@ -31,13 +31,16 @@ def test_load_payload_json_validates_missing_invalid_and_non_object(tmp_path: Pa
     assert helpers._load_payload_json(valid_payload_path) == {"schema": "v1"}
 
 
-def test_map_order_reduction_passes_applies_cellsize_and_threshold_mapping() -> None:
-    assert helpers._map_order_reduction_passes(cellsize_m=None, flow_accum_threshold=None) is None
-    assert helpers._map_order_reduction_passes(cellsize_m=0.5, flow_accum_threshold=100) == 3
-    assert helpers._map_order_reduction_passes(cellsize_m=2.0, flow_accum_threshold=100) == 2
-    assert helpers._map_order_reduction_passes(cellsize_m=5.0, flow_accum_threshold=100) == 1
-    # threshold increases effective cell size: 2m with threshold 900 -> 6m => 1 pass
-    assert helpers._map_order_reduction_passes(cellsize_m=2.0, flow_accum_threshold=900) == 1
+@pytest.mark.parametrize("cellsize,threshold,expected", [
+    (None, None, None), (0, 100, None), (0.5, 100, 4),
+    (1.0000000000089009, 100, 4), (1.5, 100, 4), (1.51, 100, 3),
+    (2.0, 100, 3), (3.0, 100, 3), (3.01, 100, 2),
+    (4.0, 100, 2), (6.0, 100, 2), (6.01, 100, 1),
+    (8.0, 100, 1), (10.0, 100, 1), (2.0, 900, 2),
+    (3.0, 25, 4), (1.5, None, 4), (1.5, 0, 4),
+])
+def test_map_order_reduction_passes_applies_cellsize_and_threshold_mapping(cellsize, threshold, expected):
+    assert helpers._map_order_reduction_passes(cellsize_m=cellsize, flow_accum_threshold=threshold) == expected
 
 
 def test_minimum_watershed_area_error_respects_threshold_and_type_name() -> None:

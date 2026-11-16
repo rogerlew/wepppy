@@ -10,6 +10,8 @@ import os
 from os.path import exists as _exists
 from os.path import join as _join
 import shutil
+import tempfile
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import rasterio
@@ -18,6 +20,7 @@ from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.vrt import calculate_src_window
 from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, clear_locks, nodb_setter
 from wepppy.nodb.core import Map, Ron, Watershed
+from wepppy.nodb import culvert_stream_selection as stream_selection
 from wepppy.query_engine.catalog_refresh import invalidate_catalog_incarnation
 from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.topo.watershed_collection.watershed_collection import _extract_geojson_crs
@@ -283,6 +286,29 @@ class CulvertsRunner(NoDbBase):
         if watershed_feature is None:
             raise ValueError(f"Watershed feature not found for Point_ID {run_id}")
 
+        if stream_selection.has_policy(Path(abs_batch_root)):
+            points_path = self._resolve_payload_path(
+                payload_metadata, "culvert_points", self.DEFAULT_CULVERT_POINTS_REL_PATH,
+                abs_batch_root,
+            )
+            points, point_crs = self.load_culvert_points(points_path)
+            if not point_crs:
+                raise ValueError("Culvert points CRS required for stream selection")
+            with tempfile.TemporaryDirectory(dir=watershed.wd, prefix=".stream-selection-") as temporary:
+                selection_mask = Path(temporary) / "mask.tif"
+                watershed_feature.build_raster_mask(
+                    template_filepath=dem_src, dst_filepath=str(selection_mask)
+                )
+                selected = stream_selection.select(
+                    Path(abs_batch_root), Path(watershed.wd), run_id, points[run_id],
+                    point_crs, selection_mask,
+                )
+            receipt = stream_selection.read_json(Path(watershed.wd) / stream_selection.RECEIPT)
+            self.logger.info("culvert %s stream selection: starting=%s selected=%s attempts=%s path=%s",
+                             run_id, receipt['starting_passes'], receipt['selected_passes'],
+                             receipt['attempted'], selected[0])
+            return selected
+
         target_path = watershed.target_watershed_path
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
         if not _exists(target_path):
@@ -364,6 +390,11 @@ class CulvertsRunner(NoDbBase):
         flovec_src = _join(abs_batch_root, self.DEFAULT_FLOVEC_REL_PATH)
         netful_src = _join(abs_batch_root, self.DEFAULT_NETFUL_REL_PATH)
         chnjnt_src = _join(abs_batch_root, self.DEFAULT_CHNJNT_REL_PATH)
+        if stream_selection.has_policy(Path(abs_batch_root)):
+            manifest = stream_selection.ready_manifest(Path(abs_batch_root))
+            first = manifest['candidates'][0]
+            netful_src = str(stream_selection.resolve(Path(abs_batch_root), first['streams']))
+            chnjnt_src = str(stream_selection.resolve(Path(abs_batch_root), first['junctions']))
 
         for path_label, path in (
             ("DEM", dem_src),

@@ -14,6 +14,7 @@ from rq.job import Job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.culverts_runner import CulvertsRunner
+from wepppy.nodb import culvert_stream_selection as stream_selection
 from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 from wepppy.topo.watershed_collection import WatershedFeature
 
@@ -398,6 +399,16 @@ def _write_run_skeletons_zip(batch_root: Path) -> Path:
         ):
             if extra.is_file():
                 archive.write(extra, extra.relative_to(batch_root).as_posix())
+        if stream_selection.has_policy(batch_root):
+            manifest = stream_selection.ready_manifest(batch_root)
+            paths = {batch_root / stream_selection.POLICY, batch_root / stream_selection.MANIFEST}
+            for entry in manifest.get('inputs', {}).values():
+                paths.add(stream_selection.resolve(batch_root, entry, verify=True))
+            for candidate in manifest['candidates']:
+                for key in ('streams', 'junctions'):
+                    paths.add(stream_selection.resolve(batch_root, candidate[key], verify=True))
+            for path in sorted(paths):
+                archive.write(path, path.relative_to(batch_root).as_posix())
         for root, _dirnames, filenames in os.walk(
             runs_dir, topdown=True, followlinks=False
         ):

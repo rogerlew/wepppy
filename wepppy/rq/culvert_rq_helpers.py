@@ -77,6 +77,10 @@ def _get_model_param_int(
     return parsed
 
 
+# Provisional arithmetic midpoint bins; see ADR-0144.
+_NOMINAL_ONE_METER_MAX_M = 1.5
+
+
 def _map_order_reduction_passes(
     *,
     cellsize_m: Optional[float],
@@ -87,9 +91,11 @@ def _map_order_reduction_passes(
     if flow_accum_threshold is None or flow_accum_threshold <= 0:
         flow_accum_threshold = 100
     effective_cellsize = cellsize_m * math.sqrt(flow_accum_threshold / 100.0)
-    if effective_cellsize <= 1.0:
+    if effective_cellsize <= _NOMINAL_ONE_METER_MAX_M:
+        return 4
+    if effective_cellsize <= 3.0:
         return 3
-    if effective_cellsize <= 4.0:
+    if effective_cellsize <= 6.0:
         return 2
     return 1
 

@@ -279,12 +279,34 @@ complexity while preserving the main drainage structure. Each pruning pass:
 The number of pruning passes is determined by DEM resolution:
 | DEM Resolution | Pruning passes | Effect |
 |----------------|----------------|--------|
-| 1m | 3 passes | Removes order 1, 2, and 3 streams |
-| 4m | 2 passes | Removes order 1 and 2 streams |
-| 10m+ | 1 pass | Removes order 1 streams only |
+| Effective resolution <= 1.5 m | Starts at 4 passes | Per-run finer fallback |
+| Effective resolution > 1.5 through 3 m | Starts at 3 passes | Per-run finer fallback |
+| Effective resolution > 3 through 6 m | Starts at 2 passes | Per-run finer fallback |
+| Effective resolution > 6 m | Starts at 1 pass | Per-run finer fallback |
 
 This keeps hillslope counts and runtimes manageable without requiring changes in Culvert_web_app.
 You can override this by setting `order_reduction_passes` in `model-parameters.json` if needed.
+
+### Per-run pruning candidates
+
+New batches start with four passes through effective resolution 1.5 m, three
+through 3 m, two through 6 m, and one above 6 m. Effective resolution is
+`cellsize_m * sqrt(flow_accum_threshold / 100)` (threshold defaults to100).
+Each culvert tries successively finer candidates until its supplied point
+intersects a channel and its watershed contains stream coverage. Zero uses the
+original supplied streams. If none qualifies, that run fails explicitly.
+
+Explicit `order_reduction_passes` sets the starting maximum; it does not disable
+connection-preserving fallback. An explicit zero selects original streams.
+`stream_selection.json` in each run records selected passes and rejected candidates.
+Batch `stream_selection_policy.json` and `stream_candidates.json` distinguish
+new-policy preparation from retained legacy batches. Inspect these artifacts to
+diagnose incomplete preparation, selection failures, or unexpectedly fine runs.
+Ready candidates are immutable; missing or changed files are errors, not fallback.
+The run skeleton ZIP retains policy/candidate artifacts and receipts, but remains
+a skeleton export rather than a claim of a fully standalone executable project.
+See [the canonical selection contract](../../schemas/culvert-stream-selection-contract.md).
+
 
 ## WEPPcloud Model Parameters
 
