@@ -333,3 +333,74 @@ def test_checker_symlink_conflict_prevents_partial_hook_install(history, tmp_pat
     assert "HOOK_CONFLICT" in result.stderr
     assert not (repo / ".git/hooks/reference-transaction").exists()
     assert unrelated.read_text() == "keep"
+
+
+@pytest.mark.parametrize("linked", [False, True])
+def test_pack_refs_pruning_and_gc_preserve_master_and_dirty_work(history, tmp_path, linked):
+    repo, remote, base = history
+    accepted = commit(repo, "accepted")
+    common = repo / ".git"
+    if linked:
+        git(repo, "switch", "--detach")
+        target = tmp_path / "maintenance-worktree"
+        git(repo, "worktree", "add", str(target), "master")
+        repo = target
+    index_path = Path(git(repo, "rev-parse", "--git-path", "index"))
+    if not index_path.is_absolute():
+        index_path = repo / index_path
+    install(repo)
+    (repo / "base").write_text("unrelated tracked WIP")
+    (repo / "notes").write_text("untracked WIP")
+    status = git(repo, "status", "--porcelain")
+    index = index_path.read_bytes()
+    git(repo, "pack-refs", "--all", "--prune")
+    assert not (common / "refs/heads/master").exists()
+    assert f"{accepted} refs/heads/master" in (common / "packed-refs").read_text()
+    git(repo, "pack-refs", "--all", "--prune")
+    git(repo, "gc", "--prune=now")
+    assert git(repo, "rev-parse", "master") == accepted
+    assert git(repo, "status", "--porcelain") == status
+    assert index_path.read_bytes() == index
+    assert (repo / "base").read_text() == "unrelated tracked WIP"
+    assert (repo / "notes").read_text() == "untracked WIP"
+
+
+@pytest.mark.parametrize("storage", ["loose", "packed", "mixed-stale", "mixed-identical"])
+@pytest.mark.parametrize("delete_mode", ["without-old", "with-old", "branch"])
+def test_real_master_deletion_still_rejected_for_each_storage(history, storage, delete_mode):
+    repo, remote, base = history
+    accepted = commit(repo, "accepted")
+    if storage == "packed":
+        git(repo, "pack-refs", "--all", "--prune")
+    elif storage == "mixed-stale":
+        git(repo, "pack-refs", "--all", "--prune")
+        accepted = commit(repo, "newer-loose")
+    elif storage == "mixed-identical":
+        git(repo, "pack-refs", "--all", "--no-prune")
+    # Branch deletion must be tested detached so Git reaches the ref guard,
+    # rather than refusing only because master is currently checked out.
+    git(repo, "switch", "--detach")
+    install(repo)
+    if delete_mode == "branch":
+        args = ["branch", "-D", "master"]
+    else:
+        args = ["update-ref", "-d", "refs/heads/master"]
+        if delete_mode == "with-old":
+            args.append(accepted)
+    result = run("git", "-C", repo, *args, ok=False)
+    assert result.returncode != 0
+    assert "PROTECTED_MASTER" in result.stderr
+    assert git(repo, "rev-parse", "master") == accepted
+    assert not (repo / ".git/packed-refs.lock").exists()
+    assert not (repo / ".git/refs/heads/master.lock").exists()
+
+
+def test_packed_master_rewind_remains_rejected(history):
+    repo, remote, base = history
+    accepted = commit(repo, "accepted")
+    git(repo, "pack-refs", "--all", "--prune")
+    install(repo)
+    result = run("git", "-C", repo, "update-ref", "refs/heads/master", base, ok=False)
+    assert result.returncode != 0
+    assert "PROTECTED_MASTER" in result.stderr
+    assert git(repo, "rev-parse", "master") == accepted

@@ -37,3 +37,25 @@ historical GitHub audit log. Exact rebase argv and actor remain unproven.
 
 Unverified exposure is an implementation investigation obligation, not a confirmed
 finding. No blanket claim of other missing work or production rollback is made.
+
+## Implementation dispositions — 2026-11-16
+
+The table above records the initial investigation, not unresolved implementation
+status. The executed dispositions are:
+
+| Consumer | Implemented boundary and evidence | Remaining scope |
+|---|---|---|
+| Shared master and false closure | Stable local ref guard; fresh exact-SHA receipt; 22 real-Git tests reproduce the 20-commit omission and reject false integration | Hook adoption on other checkouts; hooks cannot contain their owner or undo prior index/worktree mutation |
+| Work-package and issue closure | Canonical state definitions, closure template and remote receipt | Issue messaging/closure is separately authorized; no automatic issue changes |
+| Remote fast-forward | Protected PR association plus required checks; original accepted source retained in PR #661 merge | GitHub permits eligible PR-head fast-forward transport; no claim of merge-button-only enforcement |
+| Path-filtered baseline and later revert | Always-reported behavior and trusted base-owned policy checks; real Rust smoke and policy/revert fixtures | Initial security baseline is shape-converter, not every subsystem |
+| Concurrent worktrees | One integrator, isolated task branches, sanitized live-container nonce and sparse-tree detection | Shared ref namespace and stack remain; no independent stack per task |
+| Common/auxiliary publication | Exact SHA and latest successful master-push governance run required before registry-write job, including dispatch | Common-image live publication observed; auxiliary path validated by workflow/eligibility tests, no auxiliary publication invoked |
+| Deployment | Canonical entry point rejects dirty protected inputs and missing exact-source eligibility before build/activation | No production deployment; retained existing runtime/parity gates still apply |
+| Shallow/offline/stale refs | Isolated fresh fetch, immutable observation, explicit errors and no-clobber receipts | Receipt is a historical snapshot, not a permanent assertion about a moving branch |
+| Admin/check policy changes | Both checks bound to Actions app15368; external exact candidate/digest approval; negative live canary rejected | Owner settings changes and deliberate same-app check forgery are outside the accidental-loss threat model |
+
+See [execution evidence](20261116_execution.md) and the three independent
+implementation reviews for validation identities. The separate disposable
+recovery drill passed; five real integrations remain the operational observation
+requirement.

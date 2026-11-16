@@ -1,0 +1,41 @@
+[
+  {
+    "action": "remove disposable canary protection",
+    "exit_code": 0
+  },
+  {
+    "action": "delete disposable remote branch",
+    "branch": "governance-canary/20261116",
+    "exit_code": 0
+  },
+  {
+    "action": "delete disposable remote branch",
+    "branch": "codex/governance-canary-reject-20261116",
+    "exit_code": 0
+  },
+  {
+    "action": "delete disposable remote branch",
+    "branch": "codex/governance-canary-accept-20261116",
+    "exit_code": 0
+  },
+  {
+    "action": "delete disposable remote branch",
+    "branch": "codex/governance-canary-positive2-20261116",
+    "exit_code": 0
+  },
+  {
+    "action": "remove clean disposable worktree",
+    "path": "/tmp/wepppy-governance-negative-20261116",
+    "exit_code": 0
+  },
+  {
+    "action": "remove clean disposable worktree",
+    "path": "/tmp/wepppy-governance-positive-20261116",
+    "exit_code": 0
+  },
+  {
+    "action": "remove clean disposable worktree",
+    "path": "/tmp/wepppy-governance-positive2-20261116",
+    "exit_code": 0
+  }
+]

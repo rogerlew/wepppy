@@ -38,42 +38,19 @@ jobs:
         test "$(git rev-parse HEAD)" = "${BASE_SHA}"
         python3 tools/check_security_baseline.py policy --base "${BASE_SHA}" --candidate "${CANDIDATE_SHA}"
   report-policy:
-    name: Report trusted policy on exact PR head
+    name: integration-governance-policy
     needs: trusted-policy
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-    permissions:
-      checks: write
+    permissions: {}
     steps:
-    - name: Publish the exact-head policy result
+    - name: Require successful trusted policy evaluation
       env:
-        GH_TOKEN: ${{ github.token }}
-        CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
         POLICY_RESULT: ${{ needs.trusted-policy.result }}
-      shell: python
+      shell: bash
       run: |
-        import json
-        import os
-        import re
-        import urllib.request
-        candidate = os.environ["CANDIDATE_SHA"]
-        if not re.fullmatch(r"[0-9a-f]{40}", candidate):
-            raise SystemExit("Invalid candidate SHA")
-        conclusion = "success" if os.environ["POLICY_RESULT"] == "success" else "failure"
-        repository = os.environ["GITHUB_REPOSITORY"]
-        details = f"https://github.com/{repository}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
-        data = json.dumps({"name": "integration-governance-policy", "head_sha": candidate,
-                           "status": "completed", "conclusion": conclusion,
-                           "details_url": details,
-                           "output": {"title": "Trusted integration policy",
-                                      "summary": f"Base-owned policy result: {conclusion}. Candidate code was not executed."}}).encode()
-        request = urllib.request.Request(f"https://api.github.com/repos/{repository}/check-runs",
-            data=data, method="POST", headers={"Authorization": f"Bearer {os.environ['GH_TOKEN']}",
-            "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"})
-        with urllib.request.urlopen(request, timeout=30) as response:
-            result = json.load(response)
-        if result.get("head_sha") != candidate or result.get("conclusion") != conclusion:
-            raise SystemExit("Check result readback mismatch")
-        if conclusion != "success":
-            raise SystemExit("Trusted policy rejected the candidate")
+        if [[ "${POLICY_RESULT}" != "success" ]]; then
+          echo "Trusted policy did not succeed: ${POLICY_RESULT}" >&2
+          exit 1
+        fi

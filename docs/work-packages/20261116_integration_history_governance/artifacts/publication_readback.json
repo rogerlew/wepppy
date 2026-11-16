@@ -1,0 +1,33 @@
+{
+  "bootstrap": {
+    "run": {
+      "attempt": 2,
+      "conclusion": "success",
+      "headSha": "98017d78981ec8c43ad14bd8faf9846cdb2d4928",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/43958588430",
+      "workflowName": "Publish WEPPcloud common runtime image"
+    },
+    "registry_inspect": "Name:      ghcr.io/rogerlew/wepppy:sha-98017d78981ec8c43ad14bd8faf9846cdb2d4928\nMediaType: application/vnd.oci.image.index.v1+json\nDigest:    sha256:94964fa14981277487f02a684fee7115f4cc724699054163f43fab81f852b707\n           \nManifests: \n  Name:        ghcr.io/rogerlew/wepppy:sha-98017d78981ec8c43ad14bd8faf9846cdb2d4928@sha256:5d8c35aa318cd04f0dc3ee7000d4e483523a0d8b8cd95af8c13279e8cfa0a73b\n  MediaType:   application/vnd.oci.image.manifest.v1+json\n  Platform:    linux/amd64\n               \n  Name:        ghcr.io/rogerlew/wepppy:sha-98017d78981ec8c43ad14bd8faf9846cdb2d4928@sha256:2e4673bf45b877a00b15b7cc414daabe442decc0248c8fcfefbaea75bf113e3b\n  MediaType:   application/vnd.oci.image.manifest.v1+json\n  Platform:    unknown/unknown\n  Annotations: \n    vnd.docker.reference.digest: sha256:5d8c35aa318cd04f0dc3ee7000d4e483523a0d8b8cd95af8c13279e8cfa0a73b\n    vnd.docker.reference.type:   attestation-manifest\n",
+    "image_labels": {
+      "org.opencontainers.image.revision": "98017d78981ec8c43ad14bd8faf9846cdb2d4928",
+      "org.opencontainers.image.source": "https://github.com/rogerlew/wepppy"
+    }
+  },
+  "production_deployment": false,
+  "protected_followup": {
+    "run": {
+      "attempt": 2,
+      "conclusion": "success",
+      "headSha": "d3b0effbc26f0ca04f5f11e8c14982bfbf1b3c54",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/43961539621",
+      "workflowName": "Publish WEPPcloud common runtime image"
+    },
+    "registry_inspect": "Name:      ghcr.io/rogerlew/wepppy:sha-d3b0effbc26f0ca04f5f11e8c14982bfbf1b3c54\nMediaType: application/vnd.oci.image.index.v1+json\nDigest:    sha256:3cd337199548c54ee61a0a7c8c7dd002e262e9c74531da63e5cb4dcd81200706\n           \nManifests: \n  Name:        ghcr.io/rogerlew/wepppy:sha-d3b0effbc26f0ca04f5f11e8c14982bfbf1b3c54@sha256:1401cf66597f92e1f9226fa6171122f40f0ed9e7c9826dba359dc2cc80f454c2\n  MediaType:   application/vnd.oci.image.manifest.v1+json\n  Platform:    linux/amd64\n               \n  Name:        ghcr.io/rogerlew/wepppy:sha-d3b0effbc26f0ca04f5f11e8c14982bfbf1b3c54@sha256:e4338d416ac184015708c1f60b8f407604b3d341176d7d6f7e8cb0e967d2c135\n  MediaType:   application/vnd.oci.image.manifest.v1+json\n  Platform:    unknown/unknown\n  Annotations: \n    vnd.docker.reference.digest: sha256:1401cf66597f92e1f9226fa6171122f40f0ed9e7c9826dba359dc2cc80f454c2\n    vnd.docker.reference.type:   attestation-manifest\n",
+    "image_labels": {
+      "org.opencontainers.image.revision": "d3b0effbc26f0ca04f5f11e8c14982bfbf1b3c54",
+      "org.opencontainers.image.source": "https://github.com/rogerlew/wepppy"
+    }
+  }
+}

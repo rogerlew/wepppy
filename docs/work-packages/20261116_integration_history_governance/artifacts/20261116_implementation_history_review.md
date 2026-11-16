@@ -125,3 +125,146 @@ replacement objects are disabled and Git operations have a 60-second timeout.
 The implementer reports a real two-repository regression and 34 checker/deploy
 tests passing. This resolves the static repository-selection concern for the
 reviewed CI helper. No broader enforcement claim follows from that local result.
+
+## Final environmental review
+
+Independent read-only review on 2026-11-16 confirms the live master protection
+and retained canary evidence. GitHub API readback requires both
+`integration-governance` and `integration-governance-policy`, each bound to Actions
+app `15368`, with strict up-to-date checks and administrator enforcement.
+Force-push and deletion are disabled. PR association is required with zero human
+approvals, as adopted; this is not independent human review. Repository readback
+permits merge commits and disables squash/rebase merges. The repository is public.
+
+Direct API readback of [PR #661](https://github.com/rogerlew/wepppy/pull/661)
+confirms its merge at `d3b0effbc26f0ca04f5f11e8c14982bfbf1b3c54`, preserving
+reviewed head `dff9eba283a2767c9c776cd4d12d81f9b18b91dd`. Both required checks
+succeeded on that exact head under app `15368`. Remote master readback matches the
+merge, and local `git merge-base --is-ancestor` confirms preservation. The retained
+`enforced_integration_receipt.json` agrees with these independent observations.
+
+For [negative PR #658](https://github.com/rogerlew/wepppy/pull/658), independent
+check-run readback confirms the candidate's no-op `integration-governance` succeeded
+while the base-owned policy failed on the same head `98d5aa60e11a62cb78cb741372bdde3265cf9376`.
+The PR remains closed and unmerged. `canary_rejections.json` retains rejection by
+both the merge API and direct push under the tested canary protection. This closes
+H1's environmental gate for the stated accidental/unreviewed weakening scenario.
+
+[Positive PR #660](https://github.com/rogerlew/wepppy/pull/660) is recorded as
+merged at its exact green head `aefdbecefa8fba2ec2b3cf67f4e461151f12e996` after a
+fast-forward push. The demonstrated guarantee is **PR-associated, check-gated
+integration**, not merge-button/API-only transport. A separate commit without PR
+association was rejected while status checks were disabled on the disposable canary
+only, isolating the PR requirement; `canary_no_pr_rejection.json` and
+`canary_protection_restored.json` retain the rejection and restored complete rule.
+
+[PR #659](https://github.com/rogerlew/wepppy/pull/659), created by the empty-index
+canary setup mistake, is independently confirmed closed and unmerged. It is a
+retained setup failure, not positive acceptance evidence. `canary_cleanup.json`
+records removal of temporary protection, remote branches, and clean disposable
+worktrees. No remote writes were performed by this reviewer.
+
+**Environmental verdict: PASS for the tested master integration controls and
+history-preservation boundary.** Local/remote evidence now supports implemented,
+wired, and environmentally enforced status for those controls. The receipt is an
+ancestry snapshot, not a behavior or production deployment attestation. This
+verdict does not claim full application regression success, completed image
+publication, hostile-writer containment, other-host hook rollout, or package
+closure. Full pytest is still running, and five future real integrations remain
+an open operational observation obligation; bootstrap/canaries do not satisfy it.
+
+## Final regression repair review
+
+Independently reviewed the workflow-generator resolver repair and deployment-plan
+fixture/side-effect repair. The generator now deep-copies inherited resolver maps
+for both its loader and dumper before removing workflow-specific boolean rules.
+This preserves the intended workflow parsing while avoiding shared PyYAML mutation.
+
+Independent fresh-process readback reproduced the original source as
+`bool-type=str shared-map-preserved=False` after importing the generator, and the
+fixed source as `bool-type=bool shared-map-preserved=True`. The new regression
+runs the actual generator in a fresh subprocess, outside the old isolating fixture,
+and checks both parent resolver maps, normal true/false loading, default dumping,
+workflow `on`/string-boolean semantics, and roundtrip. It therefore detects the
+shared-state defect rather than only asserting the implementation's copy calls.
+Independent `/usr/bin/python3 scripts/build_forest_workflows.py --check` exits zero
+with generated output unchanged. The existing README profile-section warning is
+not a generated-workflow mismatch.
+
+The plan fixture now supplies the actual installed-preset query and records
+forbidden Git/Docker/network/non-query-wctl/non-contract-Python activity, including
+negative cases whose nonzero exit alone could previously hide the wrong failure.
+The new wepp3 plan case exposed a real production side effect: the old
+`validate_deploy_topology` started a secret-readability container during
+`--print-plan`. Its retained red run failed on that exact invocation. The repair
+adds only `PRINT_PLAN=false` to that preflight condition; real deployment retains
+the secret check. Execution coverage verifies governance precedes the secret
+probe and build, and failed governance prevents the probe for full/wepp3 variants.
+Independent shell syntax and changed-file whitespace checks pass.
+
+Static verdict: no remaining implementation blocker for these narrow repairs.
+The repaired test suites' final results are recorded below once available; this
+review does not convert the earlier failed full-suite attempts into passing runs.
+
+### Final repair validation receipt
+
+Read the completed logs independently:
+
+- `/tmp/governance-yaml-coupled-tests.log`: **559 passed in 41.97 seconds**.
+  The security/workflow tests and all affected feature-registry, pure-controls,
+  and Usersum modules run in the same process in that order. This closes the
+  33 downstream failures attributed to the generator's global resolver mutation.
+- `/tmp/governance-deploy-plan-execution-tests.log`: **77 passed in 105.37 seconds**.
+- `/tmp/governance-deploy-governance-boundary-tests.log`: **2 passed in 9.47 seconds**
+  after adding the explicit assertion that failed governance invokes no secret
+  readability probe for either full or wepp3 topology. These two cases overlap
+  the preceding execution suite and must not be added as unique coverage.
+
+**Final regression-repair verdict: PASS.** The reviewed generator repair preserves
+workflow output and normal YAML semantics; the plan repair aligns the fixture with
+current preset discovery and keeps actual `--print-plan` read-only while retaining
+real-deployment preflight ordering. No remaining blocker was found in these changes.
+This targeted evidence does not erase the failed broad-suite attempts or classify
+unrelated baseline failures as passing; the regression-disposition artifact retains
+those outcomes separately. No source, index, or installed-hook edits were made by
+this independent reviewer during this review.
+
+## Native policy reporter repair review
+
+A later real merge refusal exposed a coverage limit in the earlier environmental
+verdict: duplicate PR-target events on one head created multiple workflow suites,
+but the custom Checks API reports attached to the older suite. Independent API
+readback for PR #662 head `edec451e464bdcf2654b5fc696887e568d0c8f21` confirmed
+custom required checks `133658322779` and `133658183168` both in suite
+`119032773520`, while native reporter `133658150965` correctly belonged to newer
+suite `119032828536`. All were app `15368` and successful on that same head;
+therefore a green custom check was insufficient evidence of current-suite coverage.
+
+Reviewed the canonical/generated workflow, test changes, and canonical standard.
+The repaired native job is named exactly `integration-governance-policy`, depends
+on the trusted evaluator, uses `if: always()`, and exits nonzero unless the evaluator
+result is exactly `success`. It performs no checkout or candidate execution, has
+`permissions: {}`, and removes the token, custom Checks API call, and hand-built
+check association. The base-owned evaluation boundary remains unchanged. This is
+a smaller and less privileged implementation than repairing custom suite selection.
+
+The meaningful reporter test executes the actual generated workflow script for
+success, failure, cancellation, skipped, and empty results; only success passes.
+Wiring assertions also retain the base-only checkout, trusted dependency,
+always-run condition, required native name, and absence of check-write/API paths.
+Read `/tmp/governance-native-reporter-tests.log`: **40 passed in 10.16 seconds**.
+Independent generated-workflow `--check` passes, with only the preexisting README
+profile-section warning. No source/index/remote mutation was performed by this
+reviewer.
+
+**Static repair verdict: PASS; duplicate-event environmental proof remains open.**
+Integrate the repair normally using the existing base workflow, without disabling
+protection, then test a disposable protected canary whose base contains the repair.
+Create one harmless draft PR and mark it ready without changing its head, producing
+opened/ready events. Retain both target run IDs, suite IDs, exact head and app IDs;
+require a native required check in each corresponding suite, latest-suite eligibility,
+and accepted integration without settings bypass. Separately retain a candidate
+workflow-weakening rejection with the native policy result failing and merge/direct
+push refused. Cleanup and rule readback must follow. These canaries do not count as
+real operational-observation integrations. The existing deliberate same-app forgery
+residual is unchanged and is not solved by native check association.
