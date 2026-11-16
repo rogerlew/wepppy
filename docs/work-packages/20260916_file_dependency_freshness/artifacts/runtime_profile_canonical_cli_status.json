@@ -1,4 +1,0 @@
-{
-  "exit_code": 0,
-  "acceptance": "Inspect per-request HTTP statuses; CLI exit alone is insufficient."
-}

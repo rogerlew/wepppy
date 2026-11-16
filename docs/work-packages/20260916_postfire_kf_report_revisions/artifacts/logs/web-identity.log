@@ -1,2 +1,0 @@
-INFO:wctl2:docker compose exec -T weppcloud id
-uid=1000 gid=993 groups=993

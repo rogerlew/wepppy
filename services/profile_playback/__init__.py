@@ -1,2 +1,0 @@
-"""Profile playback FastAPI service."""
-

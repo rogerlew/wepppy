@@ -1,1 +1,0 @@
-WEPPcloud private-canary static compatibility OK

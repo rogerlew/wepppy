@@ -1,3 +1,0 @@
-from __future__ import annotations
-
-def register_handlers() -> None: ...

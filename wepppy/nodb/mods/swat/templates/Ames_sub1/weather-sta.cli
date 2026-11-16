@@ -1,3 +1,0 @@
-weather-sta.cli: 
-name                           wgn               pcp                tmp                slr              hmd             wnd         wnd_dir          atmo_dep  
-wgn_sta1                   wgn_001            ames.pcp           ames.tem              sim              sim             sim            null              null  

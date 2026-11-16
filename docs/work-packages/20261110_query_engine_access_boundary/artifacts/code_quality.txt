@@ -1,3 +1,0 @@
-Wrote JSON report to code-quality-report.json
-Wrote Markdown summary to code-quality-summary.md
-Observe-only mode: no threshold-based failure.

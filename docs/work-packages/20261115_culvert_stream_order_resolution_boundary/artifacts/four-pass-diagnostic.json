@@ -1,8 +1,0 @@
-{
-  "channels": 313,
-  "hillslopes": 783,
-  "outlet_count": 1,
-  "all_channels_reachable_upstream_from_outlet": true,
-  "total_channel_length_m": 111763.761,
-  "scope": "isolated terrain diagnostic, not full RQ replay"
-}

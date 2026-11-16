@@ -1,9 +1,0 @@
-{
-  "timestamp": "2026-11-16T04:16:16.988005+00:00",
-  "batch": "e4eb3edf-0bba-457f-adf0-17eeb61d85b8",
-  "authenticated_download": true,
-  "http_status": 200,
-  "bytes": 845228899,
-  "sha256": "717fbd022453682b13e073dc5b68b6467bcd03739e120bd4503c907055410e5d",
-  "matches_finalized_archive": true
-}

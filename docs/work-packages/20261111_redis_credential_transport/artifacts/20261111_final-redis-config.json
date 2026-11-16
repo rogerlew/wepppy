@@ -1,7 +1,0 @@
-{
-  "appendonly": "yes",
-  "appendfsync": "everysec",
-  "save": "900 1 300 10 60 10000",
-  "aof-use-rdb-preamble": "yes",
-  "notify-keyspace-events": "hK"
-}

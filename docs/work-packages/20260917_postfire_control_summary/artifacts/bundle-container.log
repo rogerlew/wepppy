@@ -1,1 +1,0 @@
-INFO:wctl2:docker compose exec weppcloud python wepppy/weppcloud/controllers_js/build_controllers_js.py

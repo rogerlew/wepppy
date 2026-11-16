@@ -1,9 +1,0 @@
-{
-  "wire_count": 1,
-  "results": [
-    [
-      "historical-no-entry",
-      "/rq-engine/api/runs/profile;;tmp;;independent/disturbed/tasks/upload-sbs/: HTTP 200 (1ms)"
-    ]
-  ]
-}

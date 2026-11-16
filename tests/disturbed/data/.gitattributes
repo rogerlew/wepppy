@@ -1,2 +1,0 @@
-# Preserve generated climate bytes and their provenance hash, including padding.
-mckenzie_2000_2099.cli -text -whitespace

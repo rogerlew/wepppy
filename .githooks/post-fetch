@@ -1,5 +1,0 @@
-#!/bin/sh
-
-ROOT_DIR=$(git rev-parse --show-toplevel)
-COMMIT_HASH=$(git rev-parse HEAD)
-echo "$COMMIT_HASH" > "$ROOT_DIR/wepppy/commit_hash"

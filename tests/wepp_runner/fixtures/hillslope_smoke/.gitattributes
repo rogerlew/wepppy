@@ -1,2 +1,0 @@
-# Preserve the committed WEPP input bytes, including fixed-field padding.
-runs/* -text -whitespace
