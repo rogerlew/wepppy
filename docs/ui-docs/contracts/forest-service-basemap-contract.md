@@ -122,3 +122,15 @@ landing assets, with real style/tile/font/sprite network evidence and screenshot
 Compare responsiveness, transfer cost, and memory with Terrain on a representative
 run. Retain focused regression tests plus independent correctness/security
 reviews. Mocks or a successful build alone cannot establish conformance.
+
+## Fallback navigation repair (FSBASE-02)
+
+Operator approved on 2026-11-16: replace the fallback's broken “About WEPPcloud”
+link with “WEPPcloud user guide,” targeting the existing
+`usersum.view_markdown` route for `weppcloud/user-guide.md`. The deleted
+`weppcloud_site.about` endpoint currently prevents fallback rendering before
+credit can be displayed. Apply the same endpoint correction to the legacy
+global header, the only other confirmed template consumer, without changing
+any access rules or other navigation. This repairs a confirmed render failure;
+it creates no new route. Verify URL building with the real Flask application
+and render the fallback disclosure in a browser. Conformance pending.
