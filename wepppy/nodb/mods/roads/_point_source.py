@@ -16,6 +16,11 @@ from wepppy.observability.secret_profiles import WORKER
 
 from dataclasses import dataclass
 
+__all__ = [
+    'TraceState',
+    'execute_point_sources',
+]
+
 
 @dataclass
 class TraceState:

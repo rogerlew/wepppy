@@ -13,6 +13,11 @@ from wepppy.observability.secret_profiles import WORKER
 from . import _unrutted
 from ._constants import OUTSLOPE_UNRUTTED_AREA_EPSILON_M2, OUTSLOPE_UNRUTTED_LANDUSE_MIN_LENGTH_M
 
+__all__ = [
+    'plan_candidate',
+    'reconcile_hillslope',
+]
+
 
 def _record_missing_inputs(
     roads,

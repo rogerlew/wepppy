@@ -19,6 +19,15 @@ from . import _point_source, _unrutted_execution
 
 from dataclasses import dataclass, field
 
+__all__ = [
+    'ExecutionResults',
+    'SegmentTerrain',
+    'write_execution_manifest',
+    'execute_segments',
+    'build_run_summary',
+    'build_failed_segment_summary',
+]
+
 
 @dataclass
 class ExecutionResults:

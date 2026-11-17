@@ -15,6 +15,10 @@ from wepppy.observability.safe_logging import current_profile
 from wepppy.observability.secret_profiles import WORKER
 from . import _unrutted_planning, _unrutted_native
 
+__all__ = [
+    'execute_unrutted',
+]
+
 
 _LOGGER = logging.getLogger(__name__)
 

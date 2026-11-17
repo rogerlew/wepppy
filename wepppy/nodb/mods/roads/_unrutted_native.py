@@ -13,6 +13,11 @@ from wepppy.observability.safe_logging import current_profile
 from wepppy.observability.secret_profiles import WORKER
 from . import _unrutted
 
+__all__ = [
+    'execute_strip',
+    'execute_remainder',
+]
+
 
 def _materialize_strip(
     roads,
