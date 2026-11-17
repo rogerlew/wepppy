@@ -588,3 +588,14 @@ continued the six frozen QA findings; no shared checkout or deployment changes.
 confirmed Omni cleanup defect, and recorded the independently reproduced copy
 privacy/accounting blocker. Continue from the operator clone-policy decision;
 do not restart M0 or interpret prior PASS artifacts as package acceptance.
+
+
+## Operator sharing decision - 2026-11-17
+
+The operator rejected the proposed fork privacy restriction: public sharing or
+team access permits ordinary authorized copies to inherit the complete project.
+Canonical authority is the normalization contract section “Sharing, copies, and
+existing workspace resets”; rationale/checkpoint is
+`artifacts/20261117_sharing_contract_decision.md`. Do not ask this question again
+or exclude originals from forks. The privacy finding is resolved by this policy;
+physical copy/reset accounting and final validation remain to be completed.

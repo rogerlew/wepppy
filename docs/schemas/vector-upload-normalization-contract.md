@@ -322,6 +322,54 @@ ZIP/Parquet before converter work and browser file pickers advertise only
 GeoJSON. Disabling this flag is the immediate binary rollback and leaves direct
 GeoJSON receiving, provenance, and validation intact.
 
+## Sharing, copies, and existing workspace resets
+
+Operator decision (2026-11-17): making a project public or granting team access
+permits users admitted by the existing fork/copy workflow to inherit its upload
+originals, rejected/failed attempts, receipts, and private archives. The source
+owner is responsible for that sharing choice. Preserve ordinary public/team
+forking and destination ownership; do not remove these records from copies or
+add a separate source-owner approval. This is an explicit copy-boundary exception
+to the direct sensitive-download restrictions below, which remain unchanged.
+The rejected alternative was source-only evidence with restricted copies; it
+would contradict the operator's intended project-sharing semantics.
+
+Copies preserve original bytes, source SHA-256, upload actor and attempt identity.
+A copied normalization receipt remains provenance of the source upload, not a new
+receiving/conversion event. Preserve source project identity in that receipt;
+existing fork/Batch metadata identifies the derived project. Copies count their
+physical retained bytes against the configured run-filesystem ledger and the
+verified copying principal's bucket (the existing unattributed bucket for an
+automated/legacy caller without a verified principal). Original upload `actor`
+remains immutable provenance; additive `retention_actor` identifies who incurs
+the new storage charge. A bounded copy-source receipt/hash records inheritance
+without presenting it as a new upload. No synthetic upload event or new identity
+store is required. Before a managed copy, measure complete terminal source
+receipts under source/destination scopes and enforce the existing byte/free-space
+ceilings including active reservations. Admit new physical bytes before copying;
+verify exact ledger totals after the copy. Nonterminal/corrupt source evidence
+requires reconciliation rather than silently omitting it. A reconciled terminal
+`incomplete` attempt remains a valid retained record and can be copied.
+
+Existing explicit whole-workspace replacement/reset operations retain their
+established semantics, including selected Batch reruns and generated-child
+removal. They use the same global-before-project fence and durable repair
+obligation as deletion, then reconcile actual retained bytes, including renamed
+stale workspaces left by deferred cleanup. Interrupted copy/reset blocks new
+admission until its exact identity is repaired. Normal generated cleanup must
+still preserve the owning project's retained-attempt roots.
+
+The ledger governs only its exact configured run-filesystem root. Operator-owned
+profile data-repository promotion and offline exports outside that root remain
+ordinary byte-preserving exports governed by their storage owner; they are not
+charged as bytes on the run filesystem. Copying those records back into a managed
+run/sandbox is a managed admission and must pass the same accounting boundary.
+This distinction does not change mounts, roots, service identities, or profile
+execution configuration. The known offline-export call sites explicitly identify
+their export boundary; missing retention configuration must never silently
+classify a managed destination as an export. Legacy projects with no retained
+evidence remain valid.
+
 ## Hostile-file quarantine and abuse review
 
 Every rejected complete original is classified `quarantined` in its receipt.
@@ -367,8 +415,8 @@ the archive SHA-256 and `contains_vector_upload_attempts=true`. The shared
 sensitive classifier denies that archive/sidecar to anonymous public-run access
 even if live attempts are later removed or the archive is restored. Archive
 creation uses the retention lock, aggregate archive/total-evidence quotas and
-free-space preflight. A public export, if separately implemented, must omit every
-sensitive root and cannot serve as restore evidence.
+free-space preflight. Direct public archive downloads remain restricted. Authorized forks and copies
+follow the explicit sharing exception above and retain the same project records.
 
 Receipts support abuse investigation by correlating stable error/correlation IDs,
 source SHA-256 and verified actor identity without opening the hostile file. For

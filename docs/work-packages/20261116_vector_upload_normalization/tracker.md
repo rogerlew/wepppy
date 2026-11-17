@@ -331,3 +331,14 @@ copy/privacy/accounting/provenance and reset behavior; then freeze one final
 candidate and rerun affected/full gates and all five independent reviews. M5 is
 not complete. Remote integration, publication and production deployment have
 not occurred. The shared master and its unrelated changes remain untouched.
+
+
+## Operator sharing decision - 2026-11-17
+
+The operator rejected the proposed fork privacy restriction: public sharing or
+team access permits ordinary authorized copies to inherit the complete project.
+Canonical authority is the normalization contract section “Sharing, copies, and
+existing workspace resets”; rationale/checkpoint is
+`artifacts/20261117_sharing_contract_decision.md`. Do not ask this question again
+or exclude originals from forks. The privacy finding is resolved by this policy;
+physical copy/reset accounting and final validation remain to be completed.
