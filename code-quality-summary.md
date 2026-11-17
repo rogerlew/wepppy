@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-11-17T09:37:06Z`
+- Generated (UTC): `2026-11-17T10:37:49Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -35,7 +35,7 @@
 
 ## Changed Files
 
-- Files analyzed: `82`; highest severity red: `30`, yellow: `22`; worsened metric entries: `84` (exceptions: `0`, actionable: `84`)
+- Files analyzed: `82`; highest severity red: `30`, yellow: `23`; worsened metric entries: `84` (exceptions: `0`, actionable: `84`)
 
 | File | Lang | Highest | Key Metric Deltas |
 | --- | --- | --- | --- |
@@ -47,7 +47,7 @@
 | `tests/microservices/test_rq_engine_omni_routes.py` | `python` | `red` | python_file_sloc 1520->1861 (worsened, red)<br>python_function_len 64->103 (worsened, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/microservices/test_rq_engine_upload_batch_runner_routes.py` | `python` | `yellow` | python_file_sloc 341->681 (worsened, yellow)<br>python_function_len 55->68 (worsened, green)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/microservices/test_sensitive_vector_artifacts.py` | `python` | `green` | python_file_sloc n/a->146 (new, green)<br>python_function_len n/a->28 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
-| `tests/microservices/test_vector_retention_lifecycle.py` | `python` | `green` | python_file_sloc n/a->284 (new, green)<br>python_function_len n/a->35 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/microservices/test_vector_retention_lifecycle.py` | `python` | `green` | python_file_sloc n/a->322 (new, green)<br>python_function_len n/a->35 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/microservices/test_vector_upload_exact_converter.py` | `python` | `green` | python_file_sloc n/a->133 (new, green)<br>python_function_len n/a->52 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/microservices/test_vector_upload_exact_downstream.py` | `python` | `yellow` | python_file_sloc n/a->374 (new, green)<br>python_function_len n/a->91 (new, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/microservices/test_vector_upload_normalization.py` | `python` | `yellow` | python_file_sloc n/a->911 (new, yellow)<br>python_function_len n/a->123 (new, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
@@ -59,11 +59,11 @@
 | `tests/nodb/mods/test_roads_controller.py` | `python` | `red` | python_file_sloc 3429->3478 (worsened, red)<br>python_function_len 256->256 (unchanged, red)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/nodb/test_vector_retention_copy_consumers.py` | `python` | `green` | python_file_sloc n/a->357 (new, green)<br>python_function_len n/a->55 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/profile_recorder/test_retained_profile_lifecycle.py` | `python` | `green` | python_file_sloc n/a->293 (new, green)<br>python_function_len n/a->36 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
-| `tests/rq/test_project_rq_archive.py` | `python` | `yellow` | python_file_sloc 829->1058 (worsened, yellow)<br>python_function_len 47->94 (worsened, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/rq/test_project_rq_archive.py` | `python` | `yellow` | python_file_sloc 829->1106 (worsened, yellow)<br>python_function_len 47->94 (worsened, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/rq/test_project_rq_delete_run.py` | `python` | `yellow` | python_file_sloc 494->581 (worsened, green)<br>python_function_len 119->119 (unchanged, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
-| `tests/rq/test_vector_archive_recovery.py` | `python` | `green` | python_file_sloc n/a->339 (new, green)<br>python_function_len n/a->61 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/rq/test_vector_archive_recovery.py` | `python` | `yellow` | python_file_sloc n/a->527 (new, green)<br>python_function_len n/a->118 (new, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/rq/test_vector_fork_retention.py` | `python` | `green` | python_file_sloc n/a->343 (new, green)<br>python_function_len n/a->41 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
-| `tests/rq/test_vector_retention_deletion.py` | `python` | `green` | python_file_sloc n/a->323 (new, green)<br>python_function_len n/a->66 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/rq/test_vector_retention_deletion.py` | `python` | `green` | python_file_sloc n/a->324 (new, green)<br>python_function_len n/a->66 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/shape_converter/unit/test_geoparquet_input.py` | `python` | `green` | python_file_sloc n/a->285 (new, green)<br>python_function_len n/a->41 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/tools/test_check_vector_upload_readiness.py` | `python` | `green` | python_file_sloc n/a->126 (new, green)<br>python_function_len n/a->14 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
 | `tests/topo/test_watershed_collection_upload_geometry.py` | `python` | `green` | python_file_sloc n/a->34 (new, green)<br>python_function_len n/a->5 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
@@ -91,7 +91,7 @@
 | `wepppy/microservices/shape_converter/convert.py` | `python` | `red` | python_file_sloc 913->1497 (worsened, red)<br>python_function_len 99->128 (worsened, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/microservices/shape_converter/crs.py` | `python` | `yellow` | python_file_sloc 237->244 (worsened, green)<br>python_function_len 80->80 (unchanged, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/microservices/shape_converter/parser_provenance.py` | `python` | `green` | python_file_sloc 107->129 (worsened, green)<br>python_function_len 62->62 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
-| `wepppy/microservices/vector_retention_lifecycle.py` | `python` | `yellow` | python_file_sloc n/a->368 (new, green)<br>python_function_len n/a->89 (new, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/microservices/vector_retention_lifecycle.py` | `python` | `yellow` | python_file_sloc n/a->387 (new, green)<br>python_function_len n/a->90 (new, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/microservices/vector_upload_normalization.py` | `python` | `red` | python_file_sloc n/a->1848 (new, red)<br>python_function_len n/a->384 (new, red)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/nodb/batch_runner.py` | `python` | `red` | python_file_sloc 1468->1590 (worsened, red)<br>python_function_len 210->228 (worsened, red)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/nodb/mods/ag_fields/ag_fields.py` | `python` | `red` | python_file_sloc 1759->1839 (worsened, red)<br>python_function_len 165->165 (unchanged, red)<br>python_cc n/a->n/a (n/a, unknown) |
@@ -104,7 +104,7 @@
 | `wepppy/profile_recorder/playback.py` | `python` | `yellow` | python_file_sloc 1063->1072 (worsened, yellow)<br>python_function_len 104->104 (unchanged, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/rq/batch_rq.py` | `python` | `red` | python_file_sloc 914->991 (worsened, yellow)<br>python_function_len 208->208 (unchanged, red)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/rq/project_rq.py` | `python` | `red` | python_file_sloc 2848->2875 (worsened, red)<br>python_function_len 207->214 (worsened, red)<br>python_cc n/a->n/a (n/a, unknown) |
-| `wepppy/rq/project_rq_archive.py` | `python` | `red` | python_file_sloc 467->747 (worsened, yellow)<br>python_function_len 196->300 (worsened, red)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/rq/project_rq_archive.py` | `python` | `red` | python_file_sloc 467->823 (worsened, yellow)<br>python_function_len 196->300 (worsened, red)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/rq/project_rq_delete.py` | `python` | `red` | python_file_sloc 461->554 (worsened, green)<br>python_function_len 148->210 (worsened, red)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/rq/project_rq_fork.py` | `python` | `red` | python_file_sloc 1475->1488 (worsened, red)<br>python_function_len 303->303 (unchanged, red)<br>python_cc n/a->n/a (n/a, unknown) |
 | `wepppy/topo/watershed_collection/__init__.py` | `python` | `green` | python_file_sloc 1->10 (worsened, green)<br>python_function_len n/a->n/a (n/a, unknown)<br>python_cc n/a->n/a (n/a, unknown) |

@@ -4,7 +4,7 @@
 
 **Timezone**: UTC  
 **Last updated**: 2026-11-17
-**Current phase**: M5 — copy/reset remediation and final validation
+**Current phase**: Closed 2026-11-17 — M0-M5 accepted locally
 **Security impact**: high  
 **Starting revision**: `05e3450fa7d3b24572e65161100670ae542a6ea8`  
 **M0 contract ancestor**: `1aebebfe0`  
@@ -31,7 +31,7 @@
       SBOM/scan evidence.
 - [x] M3-M4: integrate all four browser/workflow upload paths without bypassing
       receiving validation; preserve originals, provenance and failed replacement.
-- [ ] M5: final correctness/code/QA/security/operations successor re-reviews.
+- [x] M5: final correctness/code/QA/security/operations successor re-reviews.
 - [x] M5: prepare local validation and rollout/recovery evidence without
       publishing or deploying.
 
@@ -91,6 +91,20 @@
 - Exact-image resource, cancellation, cleanup, readiness, and recovery receipts.
 - Per-workflow normalized payload and downstream artifact semantic readback.
 - Completed correctness, code, QA, security, and operations review artifacts.
+
+Final source: `4da014fee8a3c80643fc542165d6c529a85532ad` (executable `f96483108`).
+All five independent review lanes accept the final scope with no unresolved
+High/Medium findings. Broad predecessor: 7,966 passed/205 skipped before the
+reviewed Roads source-hash gate. First continuation: 1,719 passed/259 skipped;
+native-binary continuation: 2,422 passed/15 skipped; final continuation after
+building the generated controller bundle passed 1,533/1 skipped; final browser
+continuation after supplying locked dependencies and static assets: 854 passed and 1 skipped.
+Affected/source-qualified successor suites pass 721, 142, 98 and 130 cases with
+no skips; counts overlap. Exact commands, revisions, source/image hashes,
+individual results and skips are in
+`artifacts/20261117_final_validation.json`. See `artifacts/20261117_final_acceptance.md`.
+No remote integration, image publication or production deployment occurred.
+Earlier sections below are historical checkpoints superseded by this closure.
 
 ## Notes - 2026-11-16 23:22 UTC
 

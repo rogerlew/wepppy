@@ -42,3 +42,8 @@ filesystem operation. Re-read files, receipts and ledger totals after repair.
 
 The authoritative limits, state machine, authorization and compatibility rules
 are in the [normalization contract](../schemas/vector-upload-normalization-contract.md).
+
+A copy refused because source accounting is pending requires source reconciliation
+before retry. A terminal receipt alone is insufficient: its accounting status
+and any matching Redis reservation must be committed. This refusal occurs before
+the destination is changed.

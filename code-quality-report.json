@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-17T09:37:06Z",
+  "generated_at_utc": "2026-11-17T10:37:49Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -663,7 +663,7 @@
         {
           "name": "python_file_sloc",
           "base": null,
-          "current": 284.0,
+          "current": 322.0,
           "trend": "new",
           "severity": "green"
         },
@@ -1023,7 +1023,7 @@
         {
           "name": "python_file_sloc",
           "base": 829.0,
-          "current": 1058.0,
+          "current": 1106.0,
           "trend": "worsened",
           "severity": "yellow"
         },
@@ -1083,16 +1083,16 @@
         {
           "name": "python_file_sloc",
           "base": null,
-          "current": 339.0,
+          "current": 527.0,
           "trend": "new",
           "severity": "green"
         },
         {
           "name": "python_function_len",
           "base": null,
-          "current": 61.0,
+          "current": 118.0,
           "trend": "new",
-          "severity": "green"
+          "severity": "yellow"
         },
         {
           "name": "python_cc",
@@ -1102,7 +1102,7 @@
           "severity": "unknown"
         }
       ],
-      "highest_severity": "green"
+      "highest_severity": "yellow"
     },
     {
       "path": "tests/rq/test_vector_fork_retention.py",
@@ -1143,7 +1143,7 @@
         {
           "name": "python_file_sloc",
           "base": null,
-          "current": 323.0,
+          "current": 324.0,
           "trend": "new",
           "severity": "green"
         },
@@ -1983,14 +1983,14 @@
         {
           "name": "python_file_sloc",
           "base": null,
-          "current": 368.0,
+          "current": 387.0,
           "trend": "new",
           "severity": "green"
         },
         {
           "name": "python_function_len",
           "base": null,
-          "current": 89.0,
+          "current": 90.0,
           "trend": "new",
           "severity": "yellow"
         },
@@ -2373,7 +2373,7 @@
         {
           "name": "python_file_sloc",
           "base": 467.0,
-          "current": 747.0,
+          "current": 823.0,
           "trend": "worsened",
           "severity": "yellow"
         },

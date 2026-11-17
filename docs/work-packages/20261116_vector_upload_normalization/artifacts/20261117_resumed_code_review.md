@@ -1,5 +1,9 @@
 # Resumed final code review
 
+Current bounded code-review verdict: **PASS** at
+`f964831084159eb4cf68cb533dc48235cb580989`; see the final independent successor
+review below. Earlier dated dispositions are retained as historical evidence.
+
 - Reviewer: independent `reviewer` agent, `code_review`.
 - Date: 2026-11-17 UTC.
 - Reviewed source: `ee26389f099e9e950b5920d53790f8661548a5e3`.
@@ -107,57 +111,140 @@ consumers remain subject to the inventory's explicit closure gate.
 ## Independent sharing/copy/reset successor review
 
 Reviewer: `archive_review`, acting as the independent bounded correctness
-reviewer for the copy/reset successor. Reviewed source:
-`54ee356fd16845e7abf6da59d7df616f8b5fa6ce`. Contract checkpoint:
+reviewer. Final reviewed source:
+`f964831084159eb4cf68cb533dc48235cb580989`; bounded successor comparison:
+`54ee356fd16845e7abf6da59d7df616f8b5fa6ce`. Sharing contract checkpoint:
 `bbb216c0bc48674f8b24f5e69f20ec58e57b795a`.
 
-**HOLD at this source: one Medium fork-recovery defect remains; no High finding
-was identified in this scope.** The separately recorded operations durability
-finding also requires successor closure. This verdict supersedes the earlier
-copy-policy HOLD: the operator's public/team inheritance policy is settled.
+**PASS for this source review. No unresolved High or Medium finding remains in
+the reviewed scope.** This supersedes the prior source-54 recovery HOLD and the
+earlier copy-policy HOLD. It does not claim completion of the integrator's
+full-suite validation or authorize publication/deployment.
 
-### VUN-CODE-RESUME-02 - Medium - ordinary fork retry cannot repair a failed worker copy
+### VUN-CODE-RESUME-02 - Medium - fork retry identity mismatch: closed
 
-An interrupted `project_rq_fork.prepare_fork_run()` leaves the deterministic
-`fork_copy` obligation for its destination. The authorized API retry first calls
-`fork_archive_routes._delete_fork_replacement_tree()`, which requests
-`fork_target_replace`. The common obligation helper correctly rejects that
-different identity, so the retry returns 507 before a new copy job can repair the
-destination. This is a reachable workflow recovery failure, not a request to
-weaken the general pending-operation barrier.
+At source `54ee356fd`, an interrupted worker `fork_copy` left an obligation that
+the authorized API's `fork_target_replace` could not consume. An independent
+real-Redis reproduction returned 507 while retaining both target and marker.
+The common pending-operation barrier was correct; the caller's recovery identity
+was incompatible with the ordinary retry workflow.
 
-An independent reproduction executed the actual frozen helper, replacement
-function and Redis client in `weppcloud:/tmp/vun-final-acceptance`, with a private
-temporary tree and unique Redis prefix. It copied retained evidence, injected an
-`OSError` within `fork_copy`, then invoked the replacement helper:
+At `224184ecd`, `_delete_fork_replacement_tree()` recognizes only an exact
+`fork_copy` obligation for the same destination and completes deletion/rebuild
+under that identity. Other operation/target obligations still block. The actual
+rsync regression injects a worker interruption, calls the authorized replacement
+helper, verifies source preservation and repaired accounting, then recopies and
+checks the recipient's charge.
 
-    marker_before_api_recovery: ['fork_copy']
-    api_recovery_result: 507 vector_retention_quota_exceeded
-    target_still_exists: true
-    pending_marker_retained: 1
+The independent reproduction repeated against
+`weppcloud:/tmp/vun-224184ecd` passed:
 
-Required closure: the already-authorized replacement path may recognize only an
-exact `fork_copy` obligation for the same destination, complete its deletion and
-accounting repair under that identity, and then permit the new copy. Unrelated
-operation/target identities must still block. The integrator's proposed narrow
-fix and actual-rsync failure/retry regression are consistent with this remedy;
-their immutable successor and passing result remain to be recorded.
+    exact_fork_copy_cleanup: PASS
+    both_repair_mirrors_cleared: PASS
+    source_bytes_and_accounting_preserved: PASS
+    subsequent_copy: PASS
 
-### Other review results and independence
+### Other successor findings: closed in this bounded cross-review
 
-The review covered the shared lifecycle helper and normalizer attribution,
-managed copy admission, receipt inventory, path/link checks, source provenance,
-borrowed scope ownership, Batch leaf/base/Omni reset, Omni cleanup, developer test
-clone, fork actor forwarding and authorized replacement ordering. It found no
-additional High or Medium defect in those reviewed paths. Ancestor/stale-tree
-durability is tracked once as `OPS-COPY-01` in the independent operations review;
-outstanding-reservation free-space admission and descendant-scope fencing are
-included in the successor cross-review rather than duplicated here.
+- **VUN-CORRECTNESS-RESUME-03, High:** global maintenance now precedes bounded
+  discovery of relevant active reservation scopes. Composite identities cover
+  children before attempt binding; resolved attempt paths cover physical
+  descendants. The helper and direct run/Batch deletion and archive restore
+  acquire those scopes before mutation. Nested retained records also require
+  configuration before deletion. Real prepared/pre-bind cases preserve original
+  bytes, totals and child ownership, create no destructive marker, and allow
+  retry after the upload completes.
+- **VUN-CORRECTNESS-RESUME-04, Medium:** copy free-space admission includes all
+  outstanding reserved bytes in addition to incoming allowance and the protected
+  reserve. Its regression rejects before destination mutation.
+- **OPS-COPY-01, Medium:** evidence synchronization includes linking ancestors
+  through the configured root and retained recovery trees. Batch
+  and Omni register newly created stale siblings after deferred cleanup. Tests
+  exercise real directory fsync, ancestor order, retained stale bytes and exact
+  accounting. Failure still exits before marker clearance.
+- **Archive privacy follow-up:** sensitivity discovery includes nested private
+  archives. A public archive checks every directory/file member before writing,
+  so a late child upload aborts before retained content enters the public ZIP.
+  The race regression verifies cleanup, unchanged original/receipt bytes and a
+  successful private retry; the nested-private regression verifies ZIP readback.
+- **SEC-ARCHIVE-GROWTH-01, Medium:** final `111dd982c` caps private ZIP output
+  before every write using the current offset plus incoming byte count. The cap
+  covers header rewrites, seeks and central-directory writes without double
+  counting rewritten headers. It uses the existing admitted ZIP allowance;
+  the separate receipt allowance, quotas and public archive behavior remain
+  unchanged. `ExitStack` closes the ZIP before the bounded stream. Successful
+  durable cleanup removes the temporary ZIP and releases its reservation.
+  Four regressions cover exact-size success, central-directory overflow,
+  seek/extent limits and real-ledger late child growth. Originals and exact
+  source charges are preserved; successful cleanup leaves no ZIP/reservation.
+- **Private archive cleanup fault follow-up:** final `467e9db1b` releases that
+  reservation only after temporary removal and directory fsync succeed. Unlink
+  or fsync failure keeps the reservation and records an incomplete receipt with
+  the verified actor. Receipt-persistence failure is logged and also retains the
+  reservation. Fault cases preserve originals and prove actual surviving bytes
+  stay covered; existing reconciliation restores exact global/principal charges
+  after unlink/fsync faults. Failed receipt persistence remains pending for the
+  existing corrupt-receipt recovery path rather than freeing uncharged bytes.
+- **Unreconciled source accounting:** final `f96483108` rejects explicit
+  noncommitted receipt accounting during inventory and rejects a matching
+  noncommitted Redis reservation before admission, repair-marker creation or
+  copying. Existing maintenance/project ownership covers those checks. Legacy
+  receipts without accounting fields and absent/pruned reservation records remain
+  supported. Tests cover receipts marked pending and committed while their
+  reservation remains noncommitted. Both reject, then copy successfully after
+  actual reconciliation with exact source and copier principal charges.
 
-This reviewer did not independently approve its own earlier profile adapters,
-profile tests or archive remediation. Those changes remain covered by the
-separate QA, security and operations lanes. No production or test source was
-changed during this review. The direct Redis reproduction is not a broad test
-suite result; final frozen-suite and artifact-readback evidence belongs in the
-integrator's final validation receipt. Deployment and publication remain outside
-this review.
+The `cfd5329d4` ancestor extension initially compared a relative target parent
+against the absolute configured root, skipping parent synchronization. This
+review independently reproduced that residual. Revision `13feaac92` resolves the
+parent before walking upward, and the regression covers both absolute and
+relative destinations with two newly created parents. A direct final-source
+real-fsync trace passed both ancestor coverage through the configured root and
+child-before-parent ordering. This closes the last demonstrated path variant.
+
+The unchanged reviewed controls include source provenance and copier attribution,
+no speculative deletion credit, complete terminal-receipt inventory, source byte
+verification, overlap/link refusal, borrowed-scope ownership, preserved owning
+attempt roots, and existing fork access/ownership ordering. The canonical
+contract's “Sharing, copies, and existing workspace resets” section records the
+successor's descendant fencing, exact fork recovery and durability requirements.
+
+### Evidence and independence
+
+The reviewer read the production/test corrections through `f96483108`,
+confirmed the isolated checkouts' Git HEADs, and passed the scoped
+`git diff --check`. A frozen-source selection of the nine new regression test
+functions exercised 15 parameterized cases: ancestor syncing, outstanding disk
+reservations, actual Omni child upload, pre-bind child ownership, deferred
+Batch/Omni stale paths, interrupted fork recovery, direct run/Batch deletion,
+nested missing-identity refusal and parent archive restoration.
+
+Result at `224184ecd`: **15 passed, 8 warnings, no skips, 119.14 seconds**.
+
+The independent run used `wctl exec -w /tmp/vun-224184ecd`,
+`PYTHONPATH=/tmp/vun-224184ecd`, `/opt/venv/bin/python -m pytest`,
+`--basetemp=/tmp/vun-224-code-review-data -q --maxfail=1`. The integrator's
+pre-freeze logs were also inspected: 50 helper/fork/OpenAPI tests passed in
+`/tmp/vun-patch-check2.log`; 142 direct deletion/archive tests passed in
+`/tmp/vun-active-descendant-validation.log`. Those preparatory totals are distinct
+from this review's immutable-source run. The archive race suite's preparatory
+log `/tmp/vun-archive-race-validation.log` records 91 passing tests. The
+integrator reports 95 passing archive tests after the bounded-writer addition;
+the security review independently matched those tested source hashes. The
+integrator reports 98 archive tests passing after the cleanup-fault extension.
+This review inspected the added bounded-writer and cleanup-fault cases without
+rerunning broader tests. The copy-source reconciliation suite log
+`/tmp/vun-copy-pending-green2.log` records **19 passed, 4 warnings, no skips**.
+Final helper/copy/exact validation in `/tmp/vun-f964-delta.log` and earlier
+receipts in `/tmp/vun-467-delta.log`, `/tmp/vun-111-delta.log`, and
+`/tmp/vun-13f-focused.log` remain the integrator's runtime gates. The integrator
+reports that the `224184ecd` broad baseline stopped after 7,966 passes and 205
+skips at the Roads publication stale-hash gate; QA investigation remains separate
+from this bounded source verdict. No full-suite PASS is inferred.
+
+This reviewer excluded its own profile adapters/tests and earlier archive
+remediation from independent approval; separate QA/security/operations reviews
+cover them. The new successor archive descendant-scope and privacy amendments
+were reviewed here. No production or test source was changed in this review.
+Exact converter qualification, broader semantic artifact checks and production
+parity retain their existing separate requirements.

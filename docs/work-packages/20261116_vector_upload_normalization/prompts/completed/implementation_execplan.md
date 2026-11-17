@@ -5,6 +5,10 @@ This ExecPlan is a living document governed by
 Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current. Update this
 plan and `tracker.md` at every stopping point.
 
+Completed locally 2026-11-17. Outcome and exact-source evidence:
+[final acceptance](../../artifacts/20261117_final_acceptance.md). Production
+activation and remote integration were not performed.
+
 ## Purpose / Big Picture
 
 After this work, a user can upload GeoJSON, a Shapefile ZIP, or a single
@@ -68,9 +72,8 @@ GeoParquet.
       SHA-256 receipts, receiving validation, reversible replacement and reload.
 - [x] (2026-11-17) M4: integrate Omni run/dry-run and Batch Runner with the same
       boundary, polygon-only Batch admission and rollback safety.
-- [ ] M5: original six frozen QA findings and Omni evidence cleanup are
-      remediated and sharing disposition ratified; copy/reset remediation,
-      final combined validation and all-lane acceptance remain.
+- [x] (2026-11-17) M5: all confirmed findings, copy/reset remediation, final
+      source-qualified validation and independent acceptance are complete.
 - [x] (2026-11-17, resumed) Commit recovery/artifact/provenance fixes through
       `1bb088da5`; retain machine-readable per-case validation and the confirmed
       copy/reset failure-class inventory.
@@ -83,9 +86,20 @@ GeoParquet.
 - [x] (2026-11-17) Ratify public/team evidence inheritance and separate copying
       principal accounting at standalone contract ancestor `bbb216c0b`; both
       independent contract checkpoints pass. No operator decision remains open.
-- [ ] Complete copy/reset integration and final frozen validation. Real Redis
-      tests now cover fork, profile, Batch and Omni consumers; final combined
-      gates and independent acceptance remain pending.
+- [x] (2026-11-17) Complete copy/reset integration, real Redis coverage for
+      fork/profile/Batch/Omni, and final independent acceptance.
+
+- [x] (2026-11-17) Commit copy/reset accounting, descendant-upload fencing,
+      archive member/write bounds and durable cleanup through `467e9db1b`.
+      Public/team inheritance remains the ratified operator policy.
+- [x] (2026-11-17) Complete affected selection: `13feaac92`, 721 passed/no skips;
+      bounded archive successor `111dd982c`, 142 passed/no skips. Final archive successor
+      passed 98 tests; the broad continuation chain is complete below.
+
+- [x] (2026-11-17) Require reconciled receipt and Redis reservation accounting before copies at `f96483108`; real-ledger red/green regression passes 19 tests.
+- [x] (2026-11-17) Review the Roads historical-evidence hash gate and complete
+      the ordered suffix: 854 passed and 1 skipped. The predecessor has 7,966
+      passed and 205 skipped; exact source/selection evidence is retained.
 ## Surprises & Discoveries
 
 - Real fork rsync copies private evidence under ordinary public-run access;
@@ -166,6 +180,9 @@ GeoParquet.
 - Full sanity at `54ee356fd` reached 2,105 passes before the OpenAPI document
   exceeded its existing size budget by 120 bytes. Concise route descriptions
   preserve the response contract and size ceiling; successor rerun is required.
+
+- Terminal incomplete receipts can still reference reserved accounting; copying them caused the committed-only rebuild to omit the copy. Preflight now requires reconciled source accounting under the existing locks. Regression proves refusal before mutation and exact source/copier charges after reconciliation.
+- Broad validation reached a historical Roads evidence gate: upload rollback changed two hashed sources. Historical simulation outputs remain stale; review the source deltas without changing or claiming refreshed report results.
 ## Decision Log
 
 - **2026-11-17, clone-policy checkpoint** - Do not infer permission to exclude
@@ -237,64 +254,31 @@ GeoParquet.
 
 ## Outcomes & Retrospective
 
-Current disposition: sharing is ratified at `bbb216c0b`; copy/reset integration
-is committed through `54ee356fd`. Final review corrections and frozen
-verification are in progress. No operator decision remains open.
+M0-M4 and all confirmed lifecycle/copy/archive corrections are implemented on
+`codex/vector-upload-normalization`. Runtime source is `f96483108`; successor
+`4da014fee` changes only the reviewed Roads historical-evidence descriptor.
+M5 source and runtime reviews pass. The completed ordered broad suffix and
+final machine-readable receipt qualify the retained predecessor evidence. No operator contract decision remains open.
 
-Historical pre-sharing checkpoint: implementation through `1bb088da5` was committed locally.
-The original QA findings and Omni cleanup defect are repaired. Exact source/image
-and per-test evidence is in `artifacts/20261117_resumed_validation.json` (452/4
-focused predecessor; overlapping 206/0 successor; frontend gates pass). Full
-sanity was interrupted at the newly required operator contract decision and is
-not accepted. One High fork privacy and one Medium copy/reset accounting class
-remained at that checkpoint. The later sharing decision supersedes the privacy
-hold; accounting and final gates are tracked above.
-No remote integration, publication or deployment occurred.
+Roads, AgFields, Omni contrasts and Batch Runner accept Shapefile ZIP and
+single-file GeoParquet through the bounded sibling Rust parser and existing
+converter. Canonical WGS84 GeoJSON still crosses each receiving validator.
+Complete originals, receipt hashes and provenance survive replacement failures,
+copies, resets and private archive workflows. Public/team sharing includes this
+evidence per operator decision; copying principals incur separate storage charges.
 
-Current resumption: M0-M4 implementation is retained in the task worktree. M5
-remains open while six frozen QA findings are remediated and independently
-reviewed. Initial real-Redis deletion/recovery and Batch concurrency validation
-passes 50 tests. Earlier milestone statements below are historical checkpoints.
+Historical checkpoints and their source-qualified tests remain in milestone
+and resumption artifacts. Final local acceptance is summarized in
+`artifacts/20261117_final_acceptance.md`. The final converter identity is
+`sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98fa`.
+No remote integration, image publication or deployment occurred. Production
+identity/mount/umask and per-workflow activation canaries remain rollout gates.
 
-M0 dependency security review resumed under Daybreak and conditionally accepted
-the exact graph behind the owned same-descriptor preflight. The canonical
-re-review and focused retention correctness/security reviews pass with no
-unresolved High/Medium finding. Standalone ancestor `1aebebfe0` completes M0.
-No runtime implementation, production
-dependency, candidate image, workflow acceptance, remote integration, publication
-or deployment is complete.
-
-M1 is complete at `eb6b0d3fb`: the separately locked parser enforces the owned
-same-descriptor structural preflight, bounded WKB/JSON output, atomic no-replace
-publication, stable errors and no-follow file handling. Thirty direct tests,
-strict clippy/formatting, a 53-file deterministic corpus, and independent
-correctness/security reviews pass. M2 implementation is committed at
-`0e58feced`; its exact local image passes preliminary API/provenance/containment
-qualification recorded in `artifacts/20261116_m2_validation.md`. M2 independent
-review passed. M3/M4 are implemented at `9ac7cb8f6` plus the current closure
-candidate. Exact final5 passes the common helper plus actual Roads, AgFields,
-Omni run/dry-run and Batch HTTP boundaries across four supported suffixes. Final
-M5 re-review remains open. No image was published and no production deployment
-or remote-host acceptance was performed.
-
-The freeze-preparation successor passes 384 focused tests (four skipped) and 16
-exact-final5 downstream artifact/readback cases. These results include renewable
-lease fault injection, global-before-project destructive lock order,
-transactional concurrency rollback, real signed browser-session provenance, and
-minimized hostile-upload events. Final five-lane review must bind the next
-committed successor before M5 can be marked complete.
-
-Resumed M0 review is active in independent correctness, security/dependency, QA
-and operations lanes. Proposed resource ADR and threat matrix now exist; neither
-is accepted evidence of a working parser. Shared converter source matches the
-starting worktree (apart from caches/build outputs). Shared unrelated work is
-preserved. The running converter is not the predecessor final-4 qualified image.
-
-The planning scaffold is complete. No production code, dependencies, images,
-contracts, or deployment state changed. Update this section after each milestone
-with the supported completion claim, retained evidence, and remaining rollout or
-recovery work.
-
+The key integration lesson is that retained evidence participates in existing
+copy/reset/archive workflows. Terminal receipts alone cannot prove committed
+accounting; source reservation state, durable files and exact copied-byte
+readback must agree. Durable rules live in the canonical normalization contract
+and operator guide, outside this historical work package.
 ## Context and Orientation
 
 The shape-converter service is under

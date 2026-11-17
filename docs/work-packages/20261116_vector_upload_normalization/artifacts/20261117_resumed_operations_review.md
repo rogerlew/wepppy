@@ -2,14 +2,15 @@
 
 Date: 2026-11-17
 Reviewer: independent `ops_security_control_agent` (`destructive_review`)
-Reviewed source: `54ee356fd16845e7abf6da59d7df616f8b5fa6ce`
-Reviewed tree: `fccb328c62078e22e8283ffebac84c32b59009f4`
+Reviewed source: `f964831084159eb4cf68cb533dc48235cb580989`
+Reviewed tree: `afc0509041e57af28d954903f92d497753b6dd7b`
 Comparison source: `0e861887e132b41b00a108292d7833d21750b146`
 Exact local converter image:
 `sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98fa`
 
-Verdict: **HOLD: one Medium crash-durability finding remains in the copy/reset
-successor; no High finding is open in this scope.** This is an independent source and
+Verdict: **PASS for the reviewed local operations changes. No unresolved High
+or Medium finding remains in this scope.** OPS-ARCHIVE-02 is closed in the
+final successor. This is an independent source and
 test-design review, not a substitute for the integrator's revision-bound runtime
 receipt. M5 also requires the other review lanes and the final validation gates.
 Publication, deployment, and remote-host parity are not authorized by this review.
@@ -18,7 +19,10 @@ Publication, deployment, and remote-host parity are not authorized by this revie
 
 The sharing/copy authority checkpoint is `bbb216c0b`; this review does not
 reopen the operator's public/team inheritance decision. The final copy/reset
-source reviewed here is `54ee356fd16845e7abf6da59d7df616f8b5fa6ce`.
+source initially reviewed was `54ee356fd16845e7abf6da59d7df616f8b5fa6ce`;
+its remediation successor is `224184ecd778dd58844036084f272897b79f7cd7`.
+The final accepted source above also incorporates the bounded durability and
+archive-visibility amendments described below.
 
 The following findings from implementation review are closed in that source:
 
@@ -38,25 +42,116 @@ The following findings from implementation review are closed in that source:
   Tests assert failed removal prevents recopy, preserves the pending marker,
   and eventually restores exact original/copier principal totals.
 
-### OPS-COPY-01 - Medium - copy durability omits linking ancestor directories and retained stale paths
+### OPS-COPY-01 - Medium - closed at 224184ecd
 
-`vector_retention_lifecycle._sync_evidence()` fsyncs files and directories inside
-each discovered retained root, then only `target.parent`. A newly copied
-`target/roads/vector_upload_attempts/...` therefore does not fsync `target/roads`
-or `target`, whose entries link the retained subtree. The marker can be cleared
-after ledger readback while those directory entries remain unproven durable.
+At `54ee356fd`, `vector_retention_lifecycle._sync_evidence()` fsynced files and
+directories inside each discovered retained root, then only `target.parent`.
+A newly copied `target/roads/vector_upload_attempts/...` therefore did not fsync
+`target/roads` or `target`, whose entries link the retained subtree. The marker
+could clear after ledger readback while those entries remained unproven durable.
 
-The same class affects deferred stale cleanup. The helper does not synchronize
-`recovery_paths`, and Batch's newly renamed `.stale.*` path is absent from the
-pre-operation snapshot. Partial cleanup can remove entries in that retained
-tree and then defer; a ledger computed from the remaining bytes must not be
-declared durable without synchronizing those directory mutations too.
+The same class affected deferred stale cleanup. The helper did not synchronize
+`recovery_paths`, and Batch's newly renamed `.stale.*` path was absent from the
+pre-operation snapshot. Partial cleanup could remove entries in that retained
+tree and then defer, leaving its ledger readback without corresponding durable
+directory mutations.
 
-Required closure: fsync intervening directories through the target and parent
-in child-before-parent order, register and synchronize retained recovery/stale
-trees after mutation, and retain a real-copy descriptor-path trace that proves
-the ancestor and deferred-stale boundaries were synchronized before marker
-clearance. Failed synchronization must leave the deterministic obligation.
+Closure: `_sync_evidence()` now fsyncs linking ancestors through the target in
+child-before-parent order and then its parent. `TreeOperation.sync_paths`
+carries retained recovery trees, and Batch/Omni register newly renamed stale
+workspaces after reset. All are synchronized before reconciliation and marker
+clearance. Real-copy tests trace the ancestor synchronization, and both consumer
+tests prove retained stale paths enter the real synchronizer while exact ledger
+totals include their remaining bytes. Synchronization exceptions propagate
+before marker clearance.
+
+### Final containment and recovery amendments
+
+The same successor includes already-reserved bytes in copy free-space admission;
+logical quota admission and physical free-space admission therefore account for
+unwritten obligations. It also discovers active descendant reservations while
+holding global maintenance, then fences those scopes before parent copy/reset,
+run deletion, Batch deletion, or archive restoration. Discovery uses both bound
+attempt paths and qualified child project identities, covering the interval
+before an attempt directory exists. Its inventory remains bounded, and unsafe
+reservation paths fail explicitly.
+
+Actual `prepare_vector_upload()` regressions retain a live child upload through
+attempted parent mutation and verify original bytes, prepared receipt, unchanged
+counters, and absence of a new destructive marker. Separate prebind reservation
+cases cover children with no filesystem directory yet. Mutation succeeds after
+the child releases its authority. Required scopes remain passed into the exact
+rebuild, rather than being released before accounting.
+
+Authorized fork replacement can finish the exact interrupted `fork_copy`
+destination obligation before removing its partial tree and retrying the copy.
+It does not clear a different pending operation. A real rsync fault test proves
+the worker-copy failure, authorized same-identity cleanup, unchanged source
+bytes, and successful recopy charged to the verified copier.
+
+### Final durability and archive-visibility re-review
+
+The final successor synchronizes every existing ancestor through the configured
+root, including newly created shard/profile parents above `target.parent`.
+It resolves the parent before walking this boundary, preserving the same
+behavior for relative and alias target paths. The real-copy regression uses
+`root/new-shard/projects/copy`, tests absolute and relative targets, and checks
+child-before-parent synchronization through both new parent directories.
+
+Archive creation now checks each directory and file member immediately before
+writing it. A child upload that appears after public classification aborts the
+archive before a sensitive member enters the temporary public ZIP. The existing
+failure path removes the incomplete archive and preserves the original upload.
+The regression starts a real retained upload after classification, observes the
+actual ZIP write calls, verifies no sensitive writes, verifies unchanged source
+bytes and receipt, and then reads the original bytes from a successful private
+retry. Nested private archives also participate in sensitivity classification;
+the corresponding test reads their exact bytes from the private parent archive.
+These changes preserve the authorized sharing contract and introduce no new
+operational authority. No High or Medium finding remains in this narrow delta.
+
+### OPS-ARCHIVE-02 - Medium - closed at 467e9db1b
+
+The bounded private ZIP writer correctly limits writes by final offset, allowing
+header rewrites while checking the central directory and close writes. It uses
+the existing admitted ZIP allowance and preserves the additional receipt margin.
+At `111dd982c`, its failure path reached `archive_rq()` cleanup at lines 595-602:
+`os.remove(archive_path_tmp)` failures are swallowed, then the reservation is
+released whenever the final archive is absent. A rejected write followed by
+failed temporary-file removal therefore leaves private retained bytes on disk
+with neither their reservation nor a receipt. Successful unlink also needs
+durable parent synchronization before the charge can be released.
+
+Closure: failed unlink or containing-directory fsync now logs its failure and
+retains the bound reservation. Successful cleanup releases accounting only
+after synchronization. A bounded incomplete receipt preserves the verified
+actor, project, reservation, and pending status for existing reconciliation.
+Failure to persist that receipt is logged and also leaves the reservation held.
+
+The regression now covers successful cleanup, failed unlink, failed directory
+fsync, and failed receipt persistence after failed unlink. It reads actual file
+extents, original source bytes, surviving temporary bytes, receipt content,
+and global/principal accounting. Unlink and fsync cases then use the existing
+reconciler and prove exact retained-byte charges to the archive actor while
+preserving the source actor's charge. Successful reconciliation also exercises
+released project authority. The receipt-persistence failure case demonstrates
+fail-closed reservation retention; it does not claim a completed repair.
+
+### Pending source accounting copy guard
+
+At `f96483108`, an explicit noncommitted receipt accounting status prevents
+copy admission. A terminal receipt that claims committed accounting is also
+checked against its matching Redis reservation; a present noncommitted state
+blocks copying. The checks execute under global maintenance and the discovered
+project scopes, before admission, marker creation, and the caller's mutation.
+Legacy receipts without accounting fields retain their existing compatibility.
+
+The real-Redis regression covers both pending and committed receipt labels over
+an unfinished source reservation. Each rejection leaves the target absent,
+the copying principal uncharged, and no new rebuild marker. Existing source
+reconciliation then permits the same copy and produces exact separate charges
+for the source actor and copier. The bounded delta creates no new High or Medium
+operations finding.
 
 ## Scope and independence
 
@@ -134,11 +229,62 @@ For the successor, the reviewer also resolved `ee26389f0` and its tree, inspecte
 the complete three-file `de15403aa..ee26389f0` diff and the canonical contract,
 and ran `git diff --check de15403aa ee26389f0` successfully.
 
-The integrator reported earlier focused selections of 50 and 25 passing tests.
-Those aggregate reports are not independently counted here as frozen-source
-runtime evidence. The final immutable-source execution receipt must identify
-this source revision, exact commands/environment, individual results, and skips
-before local package acceptance. Review PASS does not waive that gate.
+For the final copy/reset successor, the reviewer resolved the full `224184ecd`
+commit and tree, inspected committed helper/caller/test changes against
+`54ee356fd`, re-read the canonical contract and operator guidance, and ran
+`git diff --check 54ee356fd 224184ecd` successfully. Direct Docker readback still
+matched the exact final5 image ID.
+
+The integrator reports direct selections of 142 passing tests, 50 root/fork/
+OpenAPI checks, and 25 exact-image cases. Those aggregate reports are not
+independently counted here as final frozen-source runtime evidence. The reviewer
+read the launched wrapper commands in `/tmp/vun-224-focused.log` and
+`/tmp/vun-224-full.log`; they select the isolated Git checkout
+`/tmp/vun-224184ecd`, its retained fixtures, and final5 HTTP converter. Both
+executions were still running at this review checkpoint. The final immutable-
+source receipt must retain their completed results, commands/environment,
+individual cases, and skips before local package acceptance. Review PASS does
+not waive that gate.
+
+For successor `13feaac9276bd95f2341102d2683aca5a43cd3a5`, the reviewer resolved
+the commit/tree, inspected the complete `224184ecd..13feaac92` runtime,
+test, and contract delta, and ran `git diff --check 224184ecd 13feaac92`
+successfully. The integrator reports 91 passing archive checks. The reviewer
+read the launched final command and progress in `/tmp/vun-13f-focused.log`:
+the command selects `/tmp/vun-13feaac92`, its retained fixtures, and final5.
+That execution was still running at this review checkpoint. The full
+`224184ecd` suite remains ancestor evidence; completed results bound to the
+final source are still required for local package acceptance.
+
+For successor `111dd982cadb499333bc6b5eba2c07f9d4923d7c`, the reviewer resolved
+the commit/tree and inspected the complete four-file `13feaac92..111dd982c`
+delta plus its existing reservation and exception-cleanup callees.
+`git diff --check 13feaac92 111dd982c` passed. The integrator reports 95 archive
+tests. The reviewer read `/tmp/vun-111-delta.log`, which selects the isolated
+`/tmp/vun-111dd982c` checkout and final5 and completed with 142 passed. This
+runtime evidence does not close the untested cleanup fault in OPS-ARCHIVE-02.
+
+For successor `467e9db1b752ebd8448b569b58eede661f6e64a5`, the reviewer resolved
+the commit/tree, inspected the complete three-file `111dd982c..467e9db1b`
+delta and its reconciliation contract, and ran
+`git diff --check 111dd982c 467e9db1b` successfully. The reviewer read
+`/tmp/vun-cleanup-reservation-validation.log`: 98 passed. Subsequent readback of
+`/tmp/vun-467-delta.log` confirms the isolated `/tmp/vun-467e9db1b` archive
+selection also completed with 98 passed.
+No broad test selection was repeated by this reviewer.
+
+For final source `f964831084159eb4cf68cb533dc48235cb580989`, the reviewer resolved
+the commit/tree above, inspected the full three-file `467e9db1b..f96483108`
+delta and the surrounding lease/marker order, and ran the corresponding
+`git diff --check` successfully. `/tmp/vun-copy-pending-green2.log` reports
+19 passed. The isolated helper/copy/exact selection in `/tmp/vun-f964-delta.log`
+uses `/tmp/vun-f96483108` and final5 and was still running at this checkpoint.
+
+The ancestor broad selection in `/tmp/vun-224-full.log` stopped with 1 failed,
+7966 passed, and 205 skipped. Its failure is the Roads publication gate
+`test_published_results_and_sources_are_current_or_explicitly_stale`, reporting
+unreviewed source drift. QA is investigating; this source review neither
+attributes that failure nor waives the outstanding validation gate.
 
 ## Low residual observations
 

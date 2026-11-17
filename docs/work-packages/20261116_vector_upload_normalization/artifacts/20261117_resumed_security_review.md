@@ -1,7 +1,7 @@
 # Resumed independent security review
 
 Date: 2026-11-17. Independent reviewer: `security_reviewer` (`frozen_security`).
-Final reviewed source: `54ee356fd16845e7abf6da59d7df616f8b5fa6ce`.
+Final reviewed source: `f964831084159eb4cf68cb533dc48235cb580989`.
 Comparison source: `0e861887e132b41b00a108292d7833d21750b146`.
 Sharing decision: `bbb216c0bc48674f8b24f5e69f20ec58e57b795a`.
 Exact local converter image:
@@ -10,11 +10,111 @@ Exact local converter image:
 ## Findings and disposition
 
 **PASS for the frozen source security review. No unresolved High or Medium
-source security finding remains in the reviewed package scope.** This supersedes
-this artifact's earlier HOLD at `ee26389f0`. The reviewer changed no production
+security finding remains in the reviewed scope.** `f96483108` closes
+SEC-COPY-PENDING-01 with a tested preflight; the bounded private writer and
+cleanup-fault accounting findings remain closed. This source verdict does not
+waive the separate full-suite failure under QA investigation.
+The reviewer changed no production
 code or tests. Final runtime acceptance remains subject to the integrator's
-immutable-source validation receipt; this source-qualified verdict does not
-assert that the still-running combined/full suites passed.
+immutable-source validation receipt. No combined/full-suite success is inferred.
+
+### SEC-COPY-PENDING-01: Medium - closed in `f96483108`
+
+At `467e9db1b`, a terminal `incomplete` source receipt can still have pending
+accounting and a live reserved Redis record. A copy inherits its `reservation_id`.
+Committed-only rebuild skips both receipts because that reservation is not yet
+committed, so the helper can clear its operation marker while the copier's bucket
+remains zero. The contract permits reconciled terminal incomplete records only.
+
+The final preflight rejects an explicit noncommitted `accounting_status` and
+checks each bounded source reservation identity under global maintenance/source
+scopes. A present Redis reservation must itself be committed: receipt status
+alone is insufficient because reconciliation writes it before Lua commit.
+Legacy terminal receipts without the newer field/reservation remain compatible.
+The checks precede admission, obligation creation and destination mutation.
+
+`test_copy_requires_source_reservation_reconciliation` covers a pending receipt
+and a misleading committed receipt with an unreconciled Redis reservation; it
+requires no destination/marker, then reconciles and checks exact source/copier/
+global bytes. The retained red run demonstrates admission without the fix.
+The first green run rejected correctly but failed its case-sensitive message
+regex; the corrected suite passed **19 tests** in
+`/tmp/vun-copy-pending-green2.log`. Both receipt variants reject before copying
+and succeed with exact accounting after reconciliation. The reviewed helper and
+test hashes match the immutable final checkout. This finding is closed; no
+policy, threshold or ledger API changed.
+
+### SEC-ARCHIVE-GROWTH-01: Medium - closed in `111dd982c`
+
+At `13feaac92`, `archive_rq()` measured payload before classification/reservation. An existing
+sensitive project can gain a child upload after that measurement; its private
+ZIP accepts the additional members. The reservation still uses the earlier
+`required_bytes + 1 MiB`, while `_COMMIT_LUA` records actual bytes without checking
+them against that allowance. Thus this race can complete above global admission
+and consume space already reserved for other work.
+
+An independent actual-ledger probe on `13feaac92` added 3 MiB of real opaque
+terminal child source after the payload measurement. Only test archive headroom
+and quota were scaled down. The archive reserved **1,051,767 bytes** but committed
+**3,150,169 bytes**; global committed storage reached **6,296,118 bytes** against
+an admitted limit of **5,243,101 bytes**. ZIP output, source files, renewable parent
+scope, Lua reservation/commit, reconciliation and final counters were real.
+The late child terminal receipt was a fixture charged by real reconciliation,
+rather than an HTTP upload. No user files or production source were modified.
+
+Retained probe: `/tmp/vun-security-private-growth.py`; measured result, exact
+command and limitations: `/tmp/vun-security-private-growth-result.json`.
+It runs against `weppcloud:/tmp/vun-13feaac92`. The final bounded writer checks
+the current file offset plus `memoryview(data).nbytes` before each underlying
+write against the existing `required_bytes` budget. This covers compressed data,
+header rewrites after seeks and central-directory output. `ExitStack` closes the
+ZIP before its stream. Cleanup releases its uncommitted reservation only after
+temporary-file removal is durable, as verified below. Public handling and the extra
+receipt allowance are unchanged; no Lua API, quota threshold or authorization
+policy changed.
+
+The actual-ledger regression now rejects the same late 3 MiB growth, observes
+that every flushed temporary-file extent stays within the allowance, preserves
+both source originals, leaves no ZIP/temp/reservation, and reads exact prior
+source committed bytes with zero reserved/inflight counters. Three additional
+tests verify exact-size successful ZIP output with header rewrites, rejection
+of central-directory overflow before growth, and extent bounds after seeks.
+The bounded-writer checkpoint matched its retained 95-pass run by SHA-256;
+the final cleanup successor matches its 98-pass archive run. No unresolved
+finding remains from this bounded review.
+
+### OPS-ARCHIVE-02: Medium - independently confirmed closed in `467e9db1b`
+
+The narrow `111dd982c..467e9db1b` review covers the archive cleanup combination
+identified by operations. Failed temporary-file unlink now logs and keeps its
+bound reservation. Successful unlink must also sync the containing directory
+before reservation release. Either failure attempts a private incomplete receipt
+carrying the verified archive actor, project identity, reservation identity and
+pending accounting state; the existing reservation includes its bounded metadata.
+Receipt persistence failure is logged and also keeps the charge. These paths do
+not reinterpret source bytes or introduce a new accounting or recovery API.
+
+The actual-ledger fault test covers normal cleanup, unlink failure, directory
+sync failure and receipt persistence failure after failed unlink. It checks
+physical extents, intact sources, no published ZIP, retained reservation bytes
+covering the surviving bundle, minimized actor metadata and error visibility.
+For valid incomplete receipts, later reconciliation replaces reserved/inflight
+charges with exact surviving bytes under the archive actor while preserving
+the source actor's charge. Failed receipt persistence remains explicitly charged
+for existing corrupt-receipt recovery; it is not claimed as completed repair.
+No High or Medium finding remains in this narrow successor delta.
+
+### Archive confidentiality successor
+
+**VUN-CORRECTNESS-RESUME-05: closed in `13feaac92`.** Every directory/file member
+is checked before `zf.write`; a public-classified archive aborts with 507 before
+newly discovered sensitive bytes enter even its temporary ZIP. Cleanup removes
+that output; the real-ledger regression verifies unchanged source receipt/bytes
+and live child lease, then a private retry containing the original. Nested
+`archives/private` records use the same sensitivity classification. The relative
+target ancestor-sync variant is also closed by resolving the parent before its
+walk to the configured root. The separate archive-growth finding is closed by
+the bounded writer above.
 
 **SEC-RESUME-01, public/team fork inheritance: resolved by explicit operator
 policy.** The initial review demonstrated that ordinary public-run forking copies
@@ -64,6 +164,48 @@ legitimate older snapshot records. The confirmed partial-stale defect is closed
 at its actual Batch consumer; this review requires no new merge policy, receipt
 state machine or workflow permission.
 
+## Successor review: child scopes, recovery and durability
+
+The complete production/test delta `54ee356fd..224184ecd..cfd5329d4` was reviewed.
+The High/Medium findings identified after the first checkpoint are closed:
+
+- **VUN-CORRECTNESS-RESUME-03, active child upload deletion: closed.**
+  `discover_retention_scopes()` scans at most 10,000 reservations under global
+  maintenance and identifies descendants by composite scope and bound attempt
+  path. This includes reservations created before their attempt directory.
+  Lifecycle callers, direct run/Batch deletion and archive restoration acquire
+  the discovered scopes before any destructive mutation. New reservations are
+  blocked by global maintenance; malformed escaping reservation paths fail
+  closed. Tests cover reserved and prepared children, intact originals/receipts,
+  unchanged counters, absence of premature markers and success after release.
+- **VUN-CORRECTNESS-RESUME-04, outstanding free-space demand: closed.** Copy
+  admission now includes total live reservations alongside incoming allowance
+  and protected free space. The regression rejects space sufficient for the
+  copy alone but insufficient for all previously admitted writes.
+- **SEC-COPY-DURABILITY-01, missing linking-ancestor sync: closed in
+  `cfd5329d4`.** The initial successor synced target and its immediate parent,
+  omitting directories linking newly created profile/shard ancestors. The final
+  helper syncs all linking ancestors through the validated configured root.
+  Batch/Omni add retained stale paths to the same sync boundary before rebuild
+  and marker clearance. The regression uses two previously absent parent
+  directories and asserts bottom-up ordering. An independent disposable
+  real-filesystem probe confirmed evidence, target, both parents and configured
+  root were synced; no user data or service state was touched.
+
+Authorized fork replacement now completes an interrupted worker's exact
+destination `fork_copy` cleanup/rebuild obligation before enqueueing replacement.
+The existing destination/principal/failed-job checks remain upstream; this does
+not grant a new delete permission. Global/project fences and the union of repair
+authorities still reject unrelated identities. The real-rsync failure/recovery
+test verifies source preservation, partial-target removal, marker clearance,
+exact totals and fresh recipient charging.
+
+Exact downstream tests now use real Redis admission, renewable leases and ledger
+commit/rebuild instead of fake ledger/lease objects. Fixture teardown reads
+receipts and exact physical/principal/global bytes and requires zero remaining
+reserved/inflight charges and repair markers. Test-only connection injection
+does not bypass the production accounting boundary.
+
 ## Security controls rechecked
 
 - Global maintenance precedes project scopes. Borrowing an already-owned Omni
@@ -104,22 +246,42 @@ private archive/auth, sensitive-artifact, normalizer and readiness tests.
 
 Direct Docker image readback returned the exact final5 ID above. These SHA-256
 values independently matched the frozen worktree and immutable
-`weppcloud:/tmp/vun-final-acceptance` validation snapshot:
+`weppcloud:/tmp/vun-f96483108` validation checkout. Its actual Git HEAD also matched
+the reviewed source:
 
 | File | SHA-256 |
 | --- | --- |
-| `vector_retention_lifecycle.py` | `73fcd237c3cb571066735561d079c7b6200fe504710eac621e03635c49b15100` |
+| `project_rq_archive.py` | `48d8f26bb2fd786f91eefa2454aa688e5a83494deb552ba6473d1c2074773be3` |
+| `vector_retention_lifecycle.py` | `083acbf6a8c16eeaf98dea7c8dd9dc9c4a34c405f942308fe3b8c42503c93903` |
 | `vector_upload_normalization.py` | `9bc5a34bdf61ae8a1ebbc1f318995907277d0d5ab9db161ffaf1297511c09719` |
-| Canonical vector-upload contract | `9d1be8cd69cdae60727d74de80fd027d6c1f4b9c436ba62731ff5b6d07805ad5` |
+| Canonical vector-upload contract | `2495f4b472db881bbde27f57951889f6239ea3dfc73391920ab20cfc14113922` |
 
-`git diff --check 0e861887e..54ee356fd -- wepppy tests services` passed. The wider
-documentation diff contains three Markdown hard-break trailing spaces in an
-earlier correctness checkpoint; the integrator was notified. This reviewer did
-not initiate runtime tests. At review cutoff, `/tmp/vun-final-focused.log` showed
-the immutable-source combined selection running; `/tmp/vun-final-full.log` had
-no completion result. Final results, exclusions and semantic artifact readback
-belong in the retained final validation receipt. Earlier mutable-tree totals are
-not promoted to frozen acceptance here.
+The reviewed successor diffs pass `git diff --check`. The reviewer directly read
+completed logs: `/tmp/vun-13f-focused.log` (**721 passed**),
+`/tmp/vun-111-delta.log` (**142 passed**), and
+`/tmp/vun-cleanup-reservation-validation.log` (**98 passed**). The last run's
+archive module and both test suites have SHA-256 values identical to the final
+commit, recorded in `/tmp/vun-cleanup-reservation-sha256.txt`; it includes the
+bounded writer and cleanup faults. The prior 95-pass cap run and earlier
+candidate logs (50 lifecycle/fork, 142 direct
+deletion/restore and 25 exact downstream passes) remain historical corroboration.
+
+The reviewer ran the disposable actual-ledger reproduction and direct filesystem
+sync probe, but did not initiate pytest. The immutable `467e9db1b` archive
+selection completed: `/tmp/vun-467-delta.log` reports **98 passed, 94 warnings,
+75.83 seconds**, with no failures or skips. The final copy-preflight candidate
+suite reports **19 passed, 4 warnings, 23.87 seconds**; the final helper/test
+hashes are `083acbf6…93903` and `548bdc33…a3c`. At review cutoff the immutable
+`f96483108` copy/helper/exact-integration selection was still running in
+`/tmp/vun-f964-delta.log`.
+
+The full `224184ecd` suite stopped with **1 failed, 7,966 passed, 205 skipped**
+at `test_published_results_and_sources_are_current_or_explicitly_stale` (Roads
+published source-hash drift). Its disposition is under separate QA/integrator
+review; this bounded security closure does not dismiss or waive that failure.
+Final selections, exclusions and semantic artifact readback remain in the
+integrator's retained validation receipt. No incomplete or failed suite is
+represented as passed.
 
 ## Residual limitations
 

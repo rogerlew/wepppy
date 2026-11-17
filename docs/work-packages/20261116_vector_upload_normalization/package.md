@@ -1,6 +1,6 @@
 # Vector upload normalization
 
-**Status**: Implemented locally; M5 final recovery validation and independent acceptance
+**Status**: Closed 2026-11-17
 
 **Started**: 2026-11-16 23:22 UTC
 
@@ -8,9 +8,9 @@
 
 ## Overview
 
-Add Shapefile ZIP and GeoParquet upload support to the four first-party
+Added Shapefile ZIP and GeoParquet upload support to the four first-party
 WEPPcloud workflows that currently accept user-facing GeoJSON. Both binary
-formats will be normalized to canonical GeoJSON through the existing
+formats are normalized to canonical GeoJSON through the existing
 shape-converter service boundary before the workflow's current validation and
 persistence logic runs.
 
@@ -167,23 +167,40 @@ code, QA, and operations reviews against the same revision and exact image.
 
 ## Success Criteria
 
-- [ ] Canonical contracts and the parameterization ADR are ratified before code.
-- [ ] Dependency evaluation accepts the exact locked Rust crate graph.
-- [ ] All four workflows accept valid GeoJSON, Shapefile ZIP, and GeoParquet
+- [x] Canonical contracts and the parameterization ADR are ratified before code.
+- [x] Dependency evaluation accepts the exact locked Rust crate graph.
+- [x] All four workflows accept valid GeoJSON, Shapefile ZIP, and GeoParquet
       while preserving existing auth, CSRF, size, geometry, attribute, and
       persistence behavior.
-- [ ] Invalid and hostile files fail with bounded actionable errors and leave no
+- [x] Invalid and hostile files fail with bounded actionable errors and leave no
       partial workflow state or request scratch residue.
-- [ ] The exact image proves parser provenance, enforced resource limits,
+- [x] The exact image proves parser provenance, enforced resource limits,
       cancellation/process-group drainage, cleanup, recovery, and no network
       dependency.
-- [ ] Direct semantic readback proves equivalence across all three input formats
+- [x] Direct semantic readback proves equivalence across all three input formats
       for each workflow, including downstream artifacts.
-- [ ] Scoped Python/frontend/Rust/Compose checks and independent review gates
+- [x] Scoped Python/frontend/Rust/Compose checks and independent review gates
       pass with no unresolved High or Medium findings.
-- [ ] Documentation distinguishes local validation, environment validation,
+- [x] Documentation distinguishes local validation, environment validation,
       rollout, and production resolution; rollout remains separately authorized.
 
+## Local completion
+
+M0-M5 are complete on `codex/vector-upload-normalization`. Final source is
+`4da014fee8a3c80643fc542165d6c529a85532ad`; executable source is `f96483108`.
+The [final acceptance](artifacts/20261117_final_acceptance.md) and
+[machine-readable receipt](artifacts/20261117_final_validation.json) retain
+source-qualified broad and affected tests, exact image/artifact readback,
+independent reviews and rollout boundaries. Ordered continuations cover the full
+suite after a reviewed Roads provenance correction and isolated-checkout build
+prerequisites. The last continuation passed 854 cases; every earlier failed node
+passes at the final source. Historical Roads results remain explicitly stale.
+
+Public/team sharing includes retained evidence, as recorded in the canonical
+[sharing contract](../../schemas/vector-upload-normalization-contract.md#sharing-copies-and-existing-workspace-resets).
+No remote integration, publication or production deployment occurred. Production
+activation remains a separately authorized operator task using the retained
+readiness/canary/recovery procedure.
 ## References
 
 - [Shape-converter specification](../../../wepppy/microservices/shape_converter/docs/specification.md)
@@ -192,4 +209,3 @@ code, QA, and operations reviews against the same revision and exact image.
 - [Contract-first change standard](../../standards/contract-first-change-standard.md)
 - [Dependency evaluation standard](../../standards/dependency-evaluation-standard.md)
 - [Generated artifact validation standard](../../standards/generated-artifact-validation-standard.md)
-
