@@ -91,6 +91,8 @@ def _prepare(
         "omni_dry_run": "_pups/omni/contrasts/vector_upload_attempts",
     }[workflow]
     attempts = project / relative
+    # Receiving routes create the workflow directory before retention admission.
+    attempts.parent.mkdir(parents=True, exist_ok=True)
     source = _source(fixture_root, geometry, suffix)
     with source.open("rb") as stream:
         return prepare_vector_upload(
