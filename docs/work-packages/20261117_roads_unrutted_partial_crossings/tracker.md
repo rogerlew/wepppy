@@ -116,3 +116,8 @@ failures), `/wc1/runs/ru/rupc2-misty-shortfill` (5 m fill, completed watershed),
 `/wc1/runs/ru/rupc2-native-shapes-accepted` (native exact/short shapes). No source
 project mutation, production deployment, or claim that the 5 m fill is correct
 for Marta's roads. Top placement explicitly assumes no runoff from land above.
+
+End-user documentation audit: corrected the design-table layout, the short-downhill
+exception for top placement, and stale positive-upslope troubleshooting guidance.
+Verified the top-placement limitation, road/fill fit error and rerun instructions;
+scoped Markdown lint passes. Documentation only; no runtime changes.
