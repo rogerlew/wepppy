@@ -52,7 +52,7 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
-Implemented and locally validated: [Unrutted Roads partial-crossing strips](docs/work-packages/20261117_roads_unrutted_partial_crossings/package.md) — RUPC-01 strips and RUPC-02 top placement complete; 199 scoped tests, native two/three-OFE probes, independent reviews and synthetic 5 m-fill full-upload watershed run pass. Original 30 m-fill case resolves three prior failures, retains five explicit road/fill fit failures. Source unchanged; no deployment or site calibration.
+Implemented and locally validated: [Unrutted Roads partial-crossing strips](docs/work-packages/20261117_roads_unrutted_partial_crossings/package.md) — RUPC-01 strips and RUPC-02 top placement complete; 199 scoped tests, native two/three-OFE probes, independent reviews and synthetic 5 m-fill full-upload watershed run pass. Original 30 m-fill case resolves three prior failures, retains five explicit road/fill fit failures. Forest test deployment and requested RQ run now verified with provisional inputs; original upload retained and baseline unchanged. No wepp1 rollout or site calibration.
 
 Completed locally: [WEPPcloud Forest Service basemap and attribution](docs/work-packages/20261116_weppcloud_forest_service_basemap/package.md) — Optional run/dashboard basemap retains Google Terrain default; both landing themes retain credits/limitations; obsolete Flask fallback removed with explicit 503 for unavailable exports; legacy header user-guide link repaired. Served-browser and independent reviews pass; scoped Python 327, controller 43, adapter 6 pass. Broad run stopped at operator request without failures; no production deployment.
 

@@ -38,6 +38,8 @@ does not establish correct physical allocation of contributing area.
 - [x] RUPC-02 independent contract reviews pass; checkpoint `f46d59422` committed.
 - [x] (2026-11-17 UTC) RUPC-02 implemented; 199 scoped tests, fresh native full-upload/shape evidence and both reviews pass.
 
+- [x] (2026-11-17 19:00 UTC) M6 forest test deployment, input completion and requested RQ run; native/report readback passes.
+
 ## Surprises & Discoveries
 
 
@@ -317,3 +319,28 @@ calibration is claimed. This completes M5 implementation and local conformance.
 
 Revision note: 2026-11-17 operator approved implementation after checkpoint;
 progress, discoveries, outcomes and evidence now distinguish both native experiments.
+
+## M6 — Forest test deployment and RQ execution
+
+
+Operator authorized this follow-up and clarified forest's bind-mounted test-server
+role. Local master fast-forwarded to the reviewed source while retaining unrelated
+WIP; targeted services restarted with idle queues under the existing deployment
+fence, then workers resumed. This is forest activation, not production rollout or
+remote Git integration. Input mutation was additive: preserve 55 geometries and
+prior fields, back up input/NoDb and baseline inventory, materialize existing
+width/soil/rock defaults, and use disclosed provisional 5 m fill / 30 m buffer at
+10% for this test. No site-calibration claim.
+
+Both preparation and Roads run were submitted by authenticated, run-scoped RQ
+HTTP API and reached finished. Preparation produces 7 segments without elevation
+splitting; native execution produces 15 road and 9 remainder profiles, watershed
+and 5,844 daily report rows. Verify baseline hashes, native profiles, area closure,
+PASS receipts, actual watershed consumers and current inspection rather than job
+success alone. The retained rollout receipt records exact job IDs, timestamps,
+source/runtime identities, backup path and detailed verification hash. All checks
+passed. Roads schema metadata returned 404 despite OpenAPI/pipeline availability;
+used the declared empty-body endpoints and retained this bounded tooling gap.
+
+Revision note: 2026-11-17 forest deployment and requested RQ execution completed;
+this supersedes earlier no-deployment statements only for the forest test server.

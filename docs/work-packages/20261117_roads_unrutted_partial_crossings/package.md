@@ -1,6 +1,6 @@
 # Unrutted Roads partial-crossing strips
 
-**Status:** RUPC-01 and RUPC-02 implemented and validated locally; deployment and site calibration not claimed.
+**Status:** RUPC-01/RUPC-02 deployed on forest test server; requested RQ run verified. No wepp1 rollout or site calibration.
 Operator authorized plan execution and forest run mutation/forking on 2026-11-17.
 **Created:** 2026-11-17 17:45 UTC
 **Owner:** Roger Lew; implementer: Codex. Scaffold author: Codex.
@@ -133,3 +133,11 @@ independent implementation reviews pass. Native exact-fit and short-downstream
 profiles pass; original synthetic 30 m fill resolves three old failures and leaves
 five honest road/fill fit errors. Separate 5 m-fill experiment completes the full
 watershed chain. Evidence and caveats are in the tracker; no deployment occurred.
+
+## Forest activation
+
+At operator request, forest's mounted checkout was fast-forwarded to the reviewed
+branch and affected services restarted. `misty-eyed-divorcee` now has explicit
+provisional test inputs and completed prepare/run RQ jobs. Native/report readback
+passes; original upload is backed up and baseline WEPP files are unchanged.
+See tracker and `artifacts/20261117_forest_rq_rollout.json` for exact receipts.

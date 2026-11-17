@@ -1,7 +1,7 @@
 # Unrutted partial-crossing tracker
 
 **Updated:** 2026-11-17 UTC
-**Status:** RUPC-01/RUPC-02 locally implemented and validated. No deployment or site calibration.
+**Status:** RUPC-01/RUPC-02 deployed to forest test server; requested RQ run verified. No wepp1 rollout or site calibration.
 **Branch:** `work/roads-unrutted-strip-contract`
 **Worktree:** `/tmp/wepppy-roads-unrutted-strip-contract`
 **Contract ancestor:** `8e87b236301364c4b743fd7bec87b7640b35cd46`
@@ -121,3 +121,36 @@ End-user documentation audit: corrected the design-table layout, the short-downh
 exception for top placement, and stale positive-upslope troubleshooting guidance.
 Verified the top-placement limitation, road/fill fit error and rerun instructions;
 scoped Markdown lint passes. Documentation only; no runtime changes.
+
+## Forest test-server rollout and requested run — 2026-11-17
+
+Operator requested deployment to forest and an RQ run of `misty-eyed-divorcee`,
+with the GeoJSON completed. Forest bind-mounts `/workdir/wepppy`. Fast-forwarded
+the shared checkout from `e4eafdd3e` to reviewed `9757f38db`, preserving unrelated
+tracked/untracked work (targeted PROJECT_TRACKER stash restored successfully).
+Reused 199 passing scoped tests; no image rebuild or full suite. Affected queues
+were empty; acquired/resumed the existing owned RQ deployment fence around targeted
+Compose restarts. Web, RQ engine/workers, browse, query-engine and download came up;
+source hashes match the reviewed checkout. No production deployment script used.
+
+The operator clarified this is the test server. Selected the successful provisional
+fixture values, disclosed before mutation: 5 m fill and 30 m buffer at 10% grades.
+Materialized existing 4 m width, loam and 20% rock defaults. These are test assumptions,
+not measured site values or newly changed runtime defaults. All 55 feature geometries
+and prior properties were preserved. Backed up original GeoJSON/NoDb and baseline
+hashes under `roads/forest_rollout_20261117/`, then used the guarded Roads upload setter.
+
+Preparation job `e04ed015-51dc-4206-a6be-cc4fc29a3d2a` finished at 18:57:23 UTC:
+55 input features, 7 prepared segments, zero elevation splits/mapping warnings.
+Run job `829ce9de-885d-44bc-8f38-0262cfed7657` finished at 18:59:23 UTC:
+15 road + 9 remainder profiles and completed watershed/report generation.
+Readback at 19:00:14 UTC verifies exact native input hashes, 1e-6 m² area closure,
+replacement PASS closure/no baseline double count, canonical watershed consumers,
+5,844 daily report rows, current-result admission, inspection disclosure and unchanged
+baseline WEPP files. Source GeoJSON changed intentionally; baseline files did not.
+
+Receipt: `artifacts/20261117_forest_rq_rollout.json`; detailed immutable attempt
+readback and original input backup remain under the run's rollout folder. No remote
+Git integration/publication or wepp1 rollout is claimed. Operator metadata friction:
+Roads schema/default catalogs return 404 despite live OpenAPI/pipeline registration;
+register those existing operations in the metadata catalog as a separate small fix.
