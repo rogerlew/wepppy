@@ -4,7 +4,7 @@
 
 **Timezone**: UTC  
 **Last updated**: 2026-11-16  
-**Current phase**: M1 bounded GeoParquet CLI implementation  
+**Current phase**: M2 exact-image review and M3 workflow integration
 **Security impact**: high  
 **Starting revision**: `05e3450fa7d3b24572e65161100670ae542a6ea8`  
 **M0 contract ancestor**: `1aebebfe0`  
@@ -23,8 +23,10 @@
 - [x] M0: author and approve the resource-limit ADR.
 - [x] M0: conditionally accept the exact Rust dependency graph behind owned preflight.
 - [x] M0: retain red tests and hostile fixtures for every accepted/rejected state.
-- [ ] M1: implement and directly test `geoparquet_parser_cli`.
+- [x] M1: implement and directly test `geoparquet_parser_cli` at `eb6b0d3fb`.
 - [ ] M2: integrate the CLI into shape-converter and qualify the exact image.
+      Commit `0e58feced` and image `sha256:d131f3df…` pass preliminary local
+      qualification; independent review is active.
 - [ ] M3-M4: integrate the four browser/workflow upload paths without bypassing
       receiving endpoint validation.
 - [ ] M5: run semantic artifact readback, scoped regression, accessibility, and
@@ -204,3 +206,15 @@ unattributed use and concurrent reservations while preserving 10 GiB free space.
 Oversize partial files are deleted and cannot claim a complete hash. No automatic
 ban or new datastore is authorized. The final security re-review passed before
 the standalone M0 commit.
+
+## M1 and M2 execution update
+
+M1 is complete at `eb6b0d3fb`: 30 locked/offline Rust tests, strict clippy and
+format checks, the final 53-file hostile/control corpus, and independent
+correctness/security review pass. M2 implementation is committed at
+`0e58feced`. Exact local image
+`sha256:d131f3df03a12083c138c0ebc65a4576390d90c3ad80352f62a041405b102df4`
+passed readiness/provenance, valid/projected conversion, inspect, unavailable-
+grid rejection, hostile-limit rejection, containment and scratch readback.
+See `artifacts/20261116_m2_validation.md`. Publication and deployment did not
+occur. Independent M2 review remains open while M3 source integration begins.

@@ -58,8 +58,12 @@ GeoParquet.
 - [x] (2026-11-16) Commit the ratified contracts, ADR, exact dependency decision,
       source/threat/state matrices, and reproducible 46-file red corpus as the
       standalone implementation ancestor `1aebebfe0`.
-- [ ] M1: implement and directly test the bounded `geoparquet_parser_cli`.
+- [x] (2026-11-17) M1: implement and directly test the bounded
+      `geoparquet_parser_cli`; commit `eb6b0d3fb`, 30 locked/offline tests and
+      final independent correctness/security review pass.
 - [ ] M2: integrate the CLI with shape-converter and qualify the exact image.
+      Implementation commit `0e58feced`; exact local image `sha256:d131f3df…`
+      passes preliminary qualification, with independent review pending.
 - [ ] M3: integrate Roads and AgFields browser-to-persistence paths.
 - [ ] M4: integrate Omni and Batch Runner browser-to-persistence paths.
 - [ ] M5: complete artifact readback, scoped validation, independent reviews,
@@ -95,6 +99,9 @@ GeoParquet.
 - Project-local quotas cannot protect the shared `/wc1` filesystem across many
   projects. The canonical design now uses existing Redis for atomic filesystem,
   principal and in-flight reservations and fails closed on ambiguous accounting.
+- The installed Docker CLI has no SBOM plugin and Syft/Grype/Trivy are absent.
+  M2 retained exact Debian, Python and Rust package inventories plus a fresh
+  RustSec audit; publication-pipeline image scanning remains a rollout gate.
 
 ## Decision Log
 
@@ -136,6 +143,15 @@ unresolved High/Medium finding. Standalone ancestor `1aebebfe0` completes M0.
 No runtime implementation, production
 dependency, candidate image, workflow acceptance, remote integration, publication
 or deployment is complete.
+
+M1 is complete at `eb6b0d3fb`: the separately locked parser enforces the owned
+same-descriptor structural preflight, bounded WKB/JSON output, atomic no-replace
+publication, stable errors and no-follow file handling. Thirty direct tests,
+strict clippy/formatting, a 53-file deterministic corpus, and independent
+correctness/security reviews pass. M2 implementation is committed at
+`0e58feced`; its exact local image passes preliminary API/provenance/containment
+qualification recorded in `artifacts/20261116_m2_validation.md`. M2 independent
+review and M3-M5 remain open.
 
 Resumed M0 review is active in independent correctness, security/dependency, QA
 and operations lanes. Proposed resource ADR and threat matrix now exist; neither

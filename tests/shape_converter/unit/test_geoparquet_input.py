@@ -217,3 +217,95 @@ def test_geoparquet_worker_timeout_drains_process_group_and_removes_partial(
     assert captured.value.code == "request_timeout"
     assert signal.SIGTERM in signals and signal.SIGKILL in signals
     assert not output.exists()
+
+
+def _parser_payload(*, coordinates: list[float], bounds: list[float]) -> dict[str, object]:
+    return {
+        "schema": "geoparquet-parser-v1",
+        "properties": [{"name": "control"}],
+        "geometries": [{"type": "Point", "coordinates": coordinates}],
+        "feature_count": 1,
+        "geometry_types": ["Point Z" if len(coordinates) == 3 else "Point"],
+        "source_bounds": bounds,
+        "source_crs": "OGC:CRS84",
+        "geoparquet_version": "1.1.0",
+    }
+
+
+def test_geoparquet_ipc_reconciles_observed_bounds_and_accepts_3d() -> None:
+    loaded = convert_module._loaded_geoparquet_from_payload(
+        _parser_payload(coordinates=[1.0, 2.0, 3.0], bounds=[1.0, 2.0, 1.0, 2.0])
+    )
+    assert loaded.source_bounds == (1.0, 2.0, 1.0, 2.0)
+    with pytest.raises(ShapeConverterError) as captured:
+        convert_module._loaded_geoparquet_from_payload(
+            _parser_payload(coordinates=[1.0, 2.0], bounds=[0.0, 0.0, 0.0, 0.0])
+        )
+    assert captured.value.code == "vector_converter_unavailable"
+
+
+def test_geoparquet_ipc_rejects_exponent_overflow(tmp_path: Path) -> None:
+    payload = _parser_payload(coordinates=[1.0, 2.0], bounds=[1.0, 2.0, 1.0, 2.0])
+    raw = json.dumps(payload).replace("1.0, 2.0", "1e400, 2.0", 1)
+    path = tmp_path / "payload.json"
+    path.write_text(raw)
+    with pytest.raises(ShapeConverterError) as captured:
+        convert_module._read_geoparquet_payload(payload_path=path)
+    assert captured.value.code == "vector_converter_unavailable"
+
+
+@pytest.mark.parametrize("coordinate", [10**400, True])
+def test_geoparquet_ipc_rejects_nonfinite_or_nonnumeric_coordinate(coordinate: object) -> None:
+    payload = _parser_payload(coordinates=[1.0, 2.0], bounds=[1.0, 2.0, 1.0, 2.0])
+    payload["geometries"][0]["coordinates"][0] = coordinate  # type: ignore[index]
+    with pytest.raises(ShapeConverterError) as captured:
+        convert_module._loaded_geoparquet_from_payload(payload)
+    assert captured.value.code == "vector_converter_unavailable"
+    assert captured.value.status_code == 503
+
+
+@pytest.mark.parametrize(
+    ("returncode", "code", "status_code"),
+    [
+        (1, "invalid_vector", 400),
+        (2, "vector_converter_unavailable", 503),
+        (3, "vector_converter_unavailable", 503),
+        (4, "vector_limit_exceeded", 413),
+        (-signal.SIGXCPU, "request_timeout", 408),
+        (-signal.SIGXFSZ, "vector_limit_exceeded", 413),
+        (-signal.SIGKILL, "vector_converter_unavailable", 503),
+    ],
+)
+def test_geoparquet_worker_maps_exit_statuses(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    returncode: int,
+    code: str,
+    status_code: int,
+) -> None:
+    class Process:
+        pid = 11003
+
+        def __init__(self) -> None:
+            self.returncode = returncode
+
+        async def wait(self) -> int:
+            return self.returncode
+
+    async def execute(*_args, **_kwargs):
+        return Process()
+
+    output = tmp_path / "output.json"
+    output.write_text("partial")
+    monkeypatch.setattr(convert_module.asyncio, "create_subprocess_exec", execute)
+    with pytest.raises(ShapeConverterError) as captured:
+        asyncio.run(
+            convert_module._run_geoparquet_parser_worker(
+                input_path=tmp_path / "input.parquet",
+                output_path=output,
+                scratch=SimpleNamespace(request_dir=tmp_path),
+            )
+        )
+    assert captured.value.code == code
+    assert captured.value.status_code == status_code
+    assert not output.exists()
