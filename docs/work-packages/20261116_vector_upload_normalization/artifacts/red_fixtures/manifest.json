@@ -296,15 +296,15 @@
     },
     {
       "file": "page-declared-expansion.parquet",
-      "sha256": "118412433c049cd0e92031cc29a0a47e2f42b3bb67e7ae3bede1c967e50bce67",
-      "bytes": 322,
+      "sha256": "64cff6414d50fe7b11b9d9e930a7bd36bce484b9e297fce131a2a713a41a4081",
+      "bytes": 325,
       "category": "page-budget",
       "expected": "reject"
     },
     {
       "file": "page-actual-expansion.parquet",
-      "sha256": "3bd2152310f0e74dd023deb5e2909f597112dd4db18c034d73e8182ce5ebd068",
-      "bytes": 1799,
+      "sha256": "9ed1d079a833e809a63a8e867ea530c374bc25f572b52292c6212d63386d7a75",
+      "bytes": 1798,
       "category": "decompression",
       "expected": "reject"
     },
@@ -317,8 +317,8 @@
     },
     {
       "file": "dictionary-value-count.parquet",
-      "sha256": "c311b7d3cc6c45951e711e81372f0ac74848cd982da5864545134c059d997fd7",
-      "bytes": 359,
+      "sha256": "87f58d4dd245ec8dfe9e7e666de9bd74633c1f079b47afde245e0f26754e77e0",
+      "bytes": 358,
       "category": "dictionary-budget",
       "expected": "reject"
     },
@@ -344,6 +344,64 @@
       "category": "valid",
       "expected": "convert",
       "expected_rows": 2
+    },
+    {
+      "file": "data-page-v2-control.parquet",
+      "sha256": "52d6655b9f8e06b01f093670063f37bc3122e4dbaabc804c9f16bb0f9a6a0c69",
+      "bytes": 361,
+      "category": "valid-v2",
+      "expected": "convert",
+      "expected_rows": 1
+    },
+    {
+      "file": "data-page-v2-row-mismatch.parquet",
+      "sha256": "4843273d1a7ff1eb2f9bfa91404a941a4fa22a4e0e6f7cda3f3197d881fbedc1",
+      "bytes": 361,
+      "category": "v2-row-count",
+      "expected": "reject"
+    },
+    {
+      "file": "data-page-v2-snappy-control.parquet",
+      "sha256": "5f9cea0daa77f4a6c4f80bf085f0ab4d71e551d6b88c184a9dc0fa81b9101776",
+      "bytes": 324,
+      "category": "valid-v2-snappy",
+      "expected": "convert",
+      "expected_rows": 1
+    },
+    {
+      "file": "data-page-v2-snappy-flag-mismatch.parquet",
+      "sha256": "375dfa13cb5a137670f747b8ddd4ad48fe337bdcdf4256e42ef001513f05274e",
+      "bytes": 324,
+      "category": "v2-compression-flag",
+      "expected": "reject"
+    },
+    {
+      "file": "multiple-row-groups-control.parquet",
+      "sha256": "a5301725d25f42938c20c80b3a89ca6d28919276137b89915cf95067de2b64ba",
+      "bytes": 1118,
+      "category": "row-group-control",
+      "expected": "convert",
+      "expected_rows": 2,
+      "expected_row_groups": 2
+    },
+    {
+      "file": "projected-crs-control.parquet",
+      "sha256": "cf7779e998d9ada529fbf09b0daf65c6c072bc1cfa048f859ffcb416face3e3f",
+      "bytes": 3201,
+      "category": "projected-crs-control",
+      "expected": "convert",
+      "expected_wgs84": [
+        -116.0,
+        44.0
+      ]
+    },
+    {
+      "file": "missing-grid-crs.parquet",
+      "sha256": "64c387b6083be14ad96660df1b12bf80451ad4ccc6a79a9de740d56e8044fd34",
+      "bytes": 1348,
+      "category": "workflow-rejection",
+      "expected": "workflow-rejection",
+      "note": "Rust parser accepts data; shape-converter rejects unavailable best offline grid."
     },
     {
       "file": "null-geometry.parquet",

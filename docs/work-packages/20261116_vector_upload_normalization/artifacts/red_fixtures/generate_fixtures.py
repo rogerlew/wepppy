@@ -13,6 +13,7 @@ import struct
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+from pyproj import CRS, Transformer
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon, mapping
 from shapely.wkb import dumps
 
@@ -62,6 +63,8 @@ def geo_metadata(version: str = "1.1.0", **column: object) -> dict:
 
 def manual_file(wkb: bytes, *, codec: int = 0, declared_size: int | None = None,
                 body: bytes | None = None, encoding: int = 0, count: int = 1,
+                v2_rows: int | None = None,
+                v2_is_compressed: bool | None = None,
                 external: bool = False, encrypted_column: bool = False,
                 encrypted_footer: bool = False, dictionary: bool = False,
                 header_extra: bytes = b"", footer_override: bytes | None = None) -> bytes:
@@ -74,27 +77,38 @@ def manual_file(wkb: bytes, *, codec: int = 0, declared_size: int | None = None,
     page_body = decoded if body is None else body
     if codec == 1:
         page_body = bytes(pa.Codec("snappy").compress(page_body))
-    details = [(1, I32, integer(count)), (2, I32, integer(encoding))]
-    if not dictionary:
-        details += [(3, I32, integer(3)), (4, I32, integer(3))]
+    if v2_rows is not None:
+        details = [(1, I32, integer(count)), (2, I32, integer(0)),
+                   (3, I32, integer(v2_rows)), (4, I32, integer(encoding)),
+                   (5, I32, integer(0)), (6, I32, integer(0)),
+                   (7, 1 if (codec != 0 if v2_is_compressed is None else v2_is_compressed) else 2, b"")]
+        page_type = 3
+        detail_field = 8
+    else:
+        details = [(1, I32, integer(count)), (2, I32, integer(encoding))]
+        if not dictionary:
+            details += [(3, I32, integer(3)), (4, I32, integer(3))]
+        page_type = 2 if dictionary else 0
+        detail_field = 7 if dictionary else 5
     header = record([
-        (1, I32, integer(2 if dictionary else 0)),
+        (1, I32, integer(page_type)),
         (2, I32, integer(len(decoded) if declared_size is None else declared_size)),
         (3, I32, integer(len(page_body))),
-        (7 if dictionary else 5, STRUCT, record(details)),
+        (detail_field, STRUCT, record(details)),
     ])
     if header_extra:
         # Field 15 (unknown optional binary) inserted before the struct STOP.
         header = header[:-1] + bytes([BINARY]) + integer(15) + header_extra + b"\0"
     total = len(header) + len(page_body)
+    uncompressed_total = len(header) + (len(decoded) if declared_size is None else declared_size)
     column_meta = record([
         (1, I32, integer(6)),
         (2, LIST, sequence(I32, [integer(encoding), integer(3)])),
         (3, LIST, sequence(BINARY, [binary("geometry")])),
         (4, I32, integer(codec)), (5, I64, integer(1)),
-        (6, I64, integer(total)), (7, I64, integer(total)),
+        (6, I64, integer(uncompressed_total)), (7, I64, integer(total)),
         (11 if dictionary else 9, I64, integer(4)),
-        *([(9, I64, integer(4 + total))] if dictionary else []),
+        *([(9, I64, integer(4))] if dictionary else []),
     ])
     column_fields = [(2, I64, integer(4)), (3, STRUCT, column_meta)]
     if external:
@@ -125,7 +139,7 @@ def manual_file(wkb: bytes, *, codec: int = 0, declared_size: int | None = None,
 def arrow_file(wkbs: list[bytes | None], *, metadata: dict | None = None,
                properties: dict | None = None, codec: str = "snappy",
                dictionary: bool = False, extra_metadata: dict | None = None,
-               page_encoding: str | None = None) -> bytes:
+               page_encoding: str | None = None, row_group_size: int | None = None) -> bytes:
     props = {"field_id": list(range(1, len(wkbs) + 1)), "label": ["fixture"] * len(wkbs)} if properties is None else properties
     table = pa.table({"geometry": pa.array(wkbs, type=pa.binary()), **props})
     meta = {} if metadata is None else {b"geo": json.dumps(metadata, separators=(",", ":")).encode()}
@@ -134,7 +148,8 @@ def arrow_file(wkbs: list[bytes | None], *, metadata: dict | None = None,
     sink = pa.BufferOutputStream()
     pq.write_table(table, sink, compression=codec, use_dictionary=dictionary,
                    write_statistics=False, store_schema=True, version="1.0",
-                   data_page_version="1.0", column_encoding=page_encoding)
+                   data_page_version="1.0", column_encoding=page_encoding,
+                   row_group_size=row_group_size)
     data = sink.getvalue().to_pybytes()
     # In PyArrow 16, store_schema=False drops *all* key/value metadata, including
     # geo. Remove only the known serialized Arrow schema from this trusted writer
@@ -228,6 +243,44 @@ def main() -> None:
     dictionary = arrow_file([wkb, wkb], metadata=geo_metadata(), dictionary=True)
     assert pq.read_table(pa.BufferReader(dictionary)).num_rows == 2
     save("dictionary-control.parquet", dictionary, "valid", "convert", expected_rows=2)
+    v2 = manual_file(wkb, v2_rows=1)
+    assert pq.read_table(pa.BufferReader(v2)).to_pydict()["geometry"] == [wkb]
+    save("data-page-v2-control.parquet", v2, "valid-v2", "convert", expected_rows=1)
+    save("data-page-v2-row-mismatch.parquet", manual_file(wkb, v2_rows=2),
+         "v2-row-count", "reject")
+    compressed_v2 = manual_file(wkb, codec=1, v2_rows=1)
+    assert pq.read_table(pa.BufferReader(compressed_v2)).to_pydict()["geometry"] == [wkb]
+    save("data-page-v2-snappy-control.parquet", compressed_v2,
+         "valid-v2-snappy", "convert", expected_rows=1)
+    save("data-page-v2-snappy-flag-mismatch.parquet",
+         manual_file(wkb, codec=1, v2_rows=1, v2_is_compressed=False),
+         "v2-compression-flag", "reject")
+    multiple_row_groups = arrow_file([wkb, wkb], metadata=geo_metadata(), row_group_size=1)
+    assert pq.read_metadata(pa.BufferReader(multiple_row_groups)).num_row_groups == 2
+    save("multiple-row-groups-control.parquet", multiple_row_groups,
+         "row-group-control", "convert", expected_rows=2, expected_row_groups=2)
+    projected_xy = Transformer.from_crs(4326, 32611, always_xy=True).transform(-116, 44)
+    projected_point = dumps(Point(*projected_xy))
+    projected_metadata = geo_metadata(
+        geometry_types=["Point"], crs=CRS.from_epsg(32611).to_json_dict()
+    )
+    save(
+        "projected-crs-control.parquet",
+        arrow_file([projected_point], metadata=projected_metadata),
+        "projected-crs-control",
+        "convert",
+        expected_wgs84=[-116.0, 44.0],
+    )
+    missing_grid_metadata = geo_metadata(
+        geometry_types=["Point"], crs=CRS.from_epsg(4746).to_json_dict()
+    )
+    save(
+        "missing-grid-crs.parquet",
+        arrow_file([dumps(Point(-149.5, -17.5))], metadata=missing_grid_metadata),
+        "workflow-rejection",
+        "workflow-rejection",
+        note="Rust parser accepts data; shape-converter rejects unavailable best offline grid.",
+    )
     save("null-geometry.parquet", arrow_file([None], metadata=geo_metadata(geometry_types=[])),
          "all-null-geometry", "reject", note="Parser rejects all-null input: finite observed bounds are required")
     save("mixed-polygon-point.parquet", arrow_file([wkb, dumps(Point(-116, 44))],
