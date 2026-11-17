@@ -1,3 +1,5 @@
+Planning ready: [Roads controller code quality refactor](docs/work-packages/20261117_roads_code_quality_refactor/package.md) - Measured 5,907 SLOC; staged facade/collaborator extraction with native artifact parity, persistence compatibility, and independent review gates. Implementation pending.
+
 Implementation: [CILogon accounts and local email verification](docs/work-packages/20261117_cilogon_oidc/package.md) — separate institutional identities, shared local/verified Google/GitHub accounts, email-first password setup and responsive profile. Independent source reviews closed; local validation retained. CILogon registration approval is pending; production migration/activation and environment acceptance remain deferred.
 
 Completed locally: [Vector upload normalization](docs/work-packages/20261116_vector_upload_normalization/package.md) — Roads, AgFields, Omni contrasts and Batch Runner support Shapefile ZIP and GeoParquet. Public/team copies preserve retained records with copying-principal accounting. Exact-image/downstream checks, source-qualified broad validation and five independent reviews pass. No publication/deployment.

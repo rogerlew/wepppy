@@ -34,13 +34,17 @@ wctl exec weppcloud python -m tests.roads.roads_project \
   /wc1/runs/cl/clogging-starch /wc1/runs/ro/roads-validation-UNIQUE DESIGN
 ```
 
-The full upload assigned to unrutted design is an expected negative geometry
-control at this site (two non-positive upstream OFEs). Verify that retained
-failure with `--verify-negative`. The separately reviewed positive control uses
-`--exclude-infeasible-unrutted`, excluding exactly source OSUNUM6 with a pinned
-feature hash. Its 54-feature input is not a full-upload design comparison.
+Full-upload unrutted acceptance follows the current RUPC-02 top-placement
+contract. Non-positive ordinary upstream length alone is no longer a negative
+control; road plus fill exceeding hillslope length remains an explicit failure.
+The opt-in `test_roads_project.py` suite and the existing `--verify-negative` and
+`--exclude-infeasible-unrutted` helpers encode
+historical two-failure/OSUNUM6 expectations and require reconciliation before
+current-policy acceptance. Do not use those historical expectations as the oracle
+for a fresh refactor comparison. Preserve earlier reports as historical evidence.
+See the [current validation contract](../../docs/schemas/roads-validation-suite-contract.md#full-upload-unrutted-acceptance-after-rupc-02).
 `--verify-existing` rechecks a completed run's artifacts and recorded source
-hashes without repeating the model execution.
+hashes without repeating the model execution, subject to the recorded policy.
 
 Never point the destination at the original site or an existing project. The
 runner refuses existing destinations and verifies source and copied baseline
