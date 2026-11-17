@@ -32,6 +32,24 @@ def make_dataset(root, name="test/map", value=7):
     return path
 
 
+def test_bundled_legacy_inventory_is_visible_in_both_catalogs(monkeypatch):
+    # The former relative IDs were silently discarded by both service readers.
+    from wepppy.webservices import wmesque
+
+    inventory = Path(wmesque2.__file__).with_name("catalog")
+    entries = inventory.read_text().splitlines()
+    assert entries
+    assert len(entries) == len(set(entries))
+    for entry in entries:
+        path = Path(entry)
+        assert path.is_absolute() and path.name == ".vrt"
+        catalog.dataset_id(path.parent.relative_to("/geodata").as_posix())
+    monkeypatch.setattr(wmesque2, "_catalog", str(inventory))
+    monkeypatch.setattr(wmesque, "_catalog", str(inventory))
+    assert wmesque2.load_maps("/geodata") == entries
+    assert wmesque.find_maps("/geodata") == entries
+
+
 def test_retrieve_schema_choices_and_health():
     with TestClient(wmesque2.app) as client:
         assert client.get("/health").json() == {"status": "OK"}
