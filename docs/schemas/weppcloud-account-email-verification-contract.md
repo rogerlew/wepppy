@@ -106,3 +106,11 @@ On a disposable populated database, prove upgrade preserves existing user IDs/ha
 Independent CILogon identities remove dependence on upstream email ownership for account matching while retaining institutional sign-in. Verified Google/GitHub emails preserve the familiar shared-account experience. New-local verification prevents attacker-created credentials gaining access; preserving existing access is an explicit compatibility choice with recorded residual risk.
 
 See [sessions](weppcloud-session-contract.md), [CSRF](weppcloud-csrf-contract.md), and [safe diagnostics](safe-traceback-contract.md). Research and prior rejected alternatives are retained in the work package as provenance, not current policy.
+
+## Nullable identity consumer compatibility
+
+Role-eligible personal/run token issuance requires the stable user ID and existing roles, not a login email. Omit the optional `email` claim for accounts without a shared login email; never substitute contact email. Run authorization must tolerate NULL owner emails and continue ID-based checks.
+
+Bootstrap enrollment and new Git tokens use the database user ID for account resolution. New signed Git tokens carry a positive `user_id`; retain the existing shared-email subject where present, otherwise `user:<id>`. A present invalid ID fails closed and cannot fall back to email. Legacy email-only Git tokens remain accepted for shared accounts. Every Git request checks the resolved active user and current run access. The audit header uses the shared login email or stable `user:<id>`; contact email is never authoritative.
+
+Rationale: inspection found these existing consumers rejected a valid CILogon account with no login email. ID-based resolution preserves its project access without treating contact information as ownership proof.

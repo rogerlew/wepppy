@@ -34,3 +34,7 @@ See [round-2 findings and closure](20261117_contract_review_round2.md). Both rev
 
 
 Approval update: operator explicitly approved email-first signup with password selection after the verification link and requested proceeding. OPEN-P1 is resolved. Implementation and its required standalone checkpoint commit are authorized; production deployment/migration remain deferred. Historical pending-choice statements above describe the preceding review state.
+
+## Consumer compatibility checkpoint
+
+Inspection confirmed profile/run token minting and Bootstrap required nonempty shared email and rq-engine dereferenced NULL owner email. The approved separate-account requirement entails preserving ID-authorized workflows without substituting contact email. The canonical account contract, token specification, and Bootstrap specification now describe optional email claims and signed positive user-ID Bootstrap resolution with legacy email-token compatibility. Independent correctness and security reviewers accepted this bounded amendment with no findings on 2026-11-17. Required tests: invalid IDs fail closed, active account/current access enforced, legacy email tokens retained, NULL owner email handled. This checkpoint authorizes consumer implementation only, not deployment.
