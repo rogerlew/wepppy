@@ -81,7 +81,7 @@ supersedes the earlier requirement to reject every non-positive upstream profile
 it does not erase the retained eight-failure evidence.
 
 - [x] Draft canonical placement, role ordering, area and lifecycle amendments; update ADR.
-- [x] Complete two independent contract reviews; standalone checkpoint prepared.
+- [x] Complete two independent contract reviews; standalone checkpoint committed.
 - [ ] Implement adjusted layouts, provenance and execution-policy admission.
 - [ ] Run scoped regressions and native full-upload retry with per-crossing disposition.
 - [ ] Complete fresh correctness/security reviews and user/operator documentation.
@@ -89,3 +89,6 @@ it does not erase the retained eight-failure evidence.
 The current requested delivery is the contract amendment. No RUPC-02 runtime
 changes or new model tests have been performed. Native acceptance must retain
 unresolved crossings honestly; synthetic fill/buffer values are not site calibration.
+
+RUPC-02 standalone contract checkpoint: `f46d59422009d5adb8641b1d2b7494cd5f9b788a`.
+Both reviews pass; no RUPC-02 implementation edits precede this ancestor.

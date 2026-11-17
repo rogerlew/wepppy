@@ -35,7 +35,7 @@ does not establish correct physical allocation of contributing area.
 - [x] (2026-11-17 UTC) M4: 191 scoped tests; fresh native forest slices/control; correctness/security reviews pass.
 
 - [x] (2026-11-17 UTC) RUPC-02 top-placement amendment drafted at operator direction.
-- [x] RUPC-02 independent contract reviews pass; standalone checkpoint prepared.
+- [x] RUPC-02 independent contract reviews pass; checkpoint `f46d59422` committed.
 - [ ] RUPC-02 implementation, scoped native evidence and final reviews.
 
 ## Surprises & Discoveries
