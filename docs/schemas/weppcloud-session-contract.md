@@ -316,3 +316,9 @@ The ratified [WebSocket contract](weppcloud-websocket-auth-contract.md) reuses
 canonical cookie selection and session revocation. Stream minting must not
 shorten an existing four-day run marker. A rejected supplied session must not
 be silently replaced through public fallback. Other session profiles remain unchanged.
+
+## Account identity and new local verification
+
+Implementation pending: the [account identity contract](weppcloud-account-email-verification-contract.md) governs independent CILogon accounts and shared local/Google/GitHub identity. CILogon contact email MUST NOT authorize access to a shared account or password recovery. Existing local login remains available. New-local pending credentials MUST NOT receive sessions, remember cookies, JSON auth tokens, or protected access through registration, confirmation, recovery, or password-change bypasses. Valid OAuth sessions do not activate pending local credentials. Ordinary mailbox verification does not revoke grandfathered sessions; an explicit password reset/setup retains the existing security-identity rotation semantics.
+
+Rationale: preserve familiar shared login and legacy access while preventing unverified local credentials or CILogon contact matching from crossing account boundaries.
