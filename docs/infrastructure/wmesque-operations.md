@@ -34,6 +34,76 @@ per-variable `serving_endpoints` and `dataset_revisions`, preserving the existin
 configured `endpoint` field. An unpinned replica may lag; a dataset name alone
 cannot establish reproducible rebuilds.
 
+## Maintain the legacy discovery inventory
+
+Both WMesque versions read `wepppy/webservices/catalog` on each catalog request.
+V2 can select another file with `CATALOG_PATH`. Each line must be an absolute
+logical VRT path, for example `/geodata/nlcd/2019/.vrt`. Bare dataset IDs are
+silently excluded by both existing readers. The separate `/geodata/catalog`
+file is not read by default. V2 also adds the managed revision catalog entries.
+
+When installing legacy data, update this inventory using the actual serving
+container's `/geodata` layout. Limit discovery to public dataset directories;
+do not scan project/run trees, backups, or `.wmesque/releases`. Include only
+logical `.vrt` entrypoints with valid dataset IDs whose resolved files remain
+under `/geodata`. Sort and deduplicate the result. Inventory membership does not
+prove that every VRT dependency is available; validate representative downloads
+and read their raster values, CRS, and dimensions before declaring success.
+
+Retain the old file and checksum before replacement, verify the candidate under
+the service identity, and replace the file atomically. Since both readers reopen
+it per request, a data-only inventory correction needs no process restart.
+Retain the corrected inventory in source control so a later image rebuild does
+not restore the broken list. Rollback restores the retained inventory file.
+
+The November 17, 2026 repair corrects the shared v1/v2 assumption: the shipped
+file contained `ned1/2024` and `nlcd/2022`, which neither reader accepted. The
+public v2 catalog consequently exposed only the managed Tenerife dataset even
+though `nlcd/2019` retrieval worked. The repair uses the established absolute-path
+format instead of changing retrieval or introducing request-time tree scans.
+The regression `test_bundled_legacy_inventory_is_visible_in_both_catalogs`
+checks that both readers accept every shipped entry. Managed revision discovery
+is unchanged; alternate `CATALOG_PATH` inventories remain operator-maintained.
+
+### November 17 inventory validation
+
+The refreshed inventory contains 328 entries opened successfully with GDAL under
+wepp1's running WMesque2 identity (UID 1002, GID 130). Candidate discovery used
+configured dataset IDs and bounded public dataset directory inspection; it does
+not claim to enumerate every `.vrt` on the host. Broad filesystem discovery was
+stopped when it exceeded the bounded inspection window. Project/run directories,
+backups, and managed release internals are outside discovery scope.
+
+Five historical config references were absent and are excluded from the list:
+`ca/canadalandcover2020`, `eu/corine_landcover/2000`,
+`eu/corine_landcover/2018`, `hawaii/nlcd/wepp_31131a7`, and `ned13/2016`.
+Their config consumers require separate review; this inventory repair does not
+rename datasets or change those configurations. Correctly cased CORINE resources
+and the current NED resources are included where verified.
+
+The inventory SHA-256 is
+`7c2c0af4f56cbae4d99ae5525a2d8b2722a400d24e7ae5b3c14fdd72a11ecb3c`.
+Opening a VRT confirms its metadata can be read, not that every source tile has
+been downloaded or that every geographic request will succeed.
+
+Applied on wepp1 at 2026-11-17 22:05 UTC as an atomic inventory-only replacement
+in `docker-wmesque2-1` and `docker-wmesque-1`. Both public `/catalog` endpoints
+returned exactly the 328 validated entries. Container start times and image IDs
+were unchanged. Each container retains its original file beside the replacement:
+`catalog.bak.20261117T220503Z` (v2) and `catalog.bak.20261117T220504Z` (v1).
+The original SHA-256 is
+`1054f64744171ea96b7643ed055b01382dce3a624c42c349d5bda33be4a2b80d`.
+Other deployments have not been modified; they receive the inventory through
+normal source/image updates and must validate their own installed data.
+
+Focused validation: 56 WMesque catalog/retrieval/priority tests passed, with one
+opt-in network test skipped, in a disposable development Compose container
+mounting the actual task worktree. The new regression failed against the old
+inventory before the correction. Public post-repair downloads were opened with
+GDAL: `nlcd/2019` and `ned1/2024` each produced 25 × 37 pixels at 30 m;
+`prism/ppt` produced 1 × 1 pixels at 800 m with 12 bands; Tenerife produced
+77 × 90 pixels at 25 m. All sampled bands contained 100% valid cells.
+
 ## Publish a Managed Dataset
 
 Run the publication CLI in the existing WEPPpy runtime with access to the geodata

@@ -24,7 +24,10 @@ Remove the `/geodata/` prefix and `/.vrt` suffix to get the dataset ID:
 download URL. The `.vrt` entry describes the source raster; you do not need to
 download it.
 
-The catalog lists identifiers, not a coverage map. Check the source dataset's
+The catalog combines a maintained legacy inventory with managed datasets. It is
+not a live filesystem scan, so a newly installed dataset may be retrievable
+before it is listed. If an expected dataset is missing, ask the service operator
+to refresh the inventory. The catalog lists identifiers, not a coverage map. Check the source dataset's
 coverage, date, units, and usage terms before using it. A listed dataset does not
 guarantee that your chosen area contains data. The repository's
 [dataset inventory](../infrastructure/wmesque-dataset-sync-manifest.md) provides
