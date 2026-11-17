@@ -215,3 +215,19 @@ def test_historical_metadata_tamper_rejected_by_published_snapshot_hash(tmp_path
     result = comparisons.query_comparisons(tmp_path)
     assert result["status"] == "unavailable"
     assert "matching completed publication" in result["diagnostics"][0]["reason"]
+
+
+def test_zero_contributor_snapshot_is_unavailable_without_failing_run(tmp_path):
+    state, signature = _inputs(tmp_path)
+    table = pq.read_table(tmp_path / comparisons.SUMMARY)
+    pq.write_table(table.slice(0, 0), tmp_path / comparisons.SUMMARY)
+    (tmp_path / comparisons.MANIFEST).write_text("[]")
+    result = comparisons.write_comparison_snapshot(tmp_path, parameterization=state,
+        configuration_hash=signature, completed_at=1)
+    assert result["profile_count"] == 0
+    assert result["metrics"]["annual_runoff_m3"] == 0
+    assert "baseline-equivalent" in result["reason"]
+    (tmp_path / comparisons.MANIFEST).write_text('[{"status":"failed"}]')
+    with pytest.raises(ValueError, match="does not match"):
+        comparisons.write_comparison_snapshot(tmp_path, parameterization=state,
+            configuration_hash=signature, completed_at=1)

@@ -1,6 +1,6 @@
 # Unrutted Roads partial-crossing strips
 
-**Status:** Contract design in progress; exact formula ratification pending.
+**Status:** Implemented and validated locally on forest; deployment and full-site repair not claimed.
 Operator authorized plan execution and forest run mutation/forking on 2026-11-17.
 **Created:** 2026-11-17 17:45 UTC
 **Owner:** Roger Lew; implementer: unassigned. Scaffold author: Codex.
@@ -79,25 +79,25 @@ Independent correctness review uses
 
 ## Success criteria
 
-- [ ] Approved current contract and ADR specify geometry, area targets, tolerances,
+- [x] Approved current contract and ADR specify geometry, area targets, tolerances,
       infeasible-area policy, ambiguity policy, and compatibility.
-- [ ] Two independent contract reviews dispositioned; checkpoint ancestor recorded.
-- [ ] Partial crossing executes without the 60% gate or longitudinal reversal split.
-- [ ] Hillslope area closes; road area is preserved when feasible and discrepancies
+- [x] Two independent contract reviews dispositioned; checkpoint ancestor recorded.
+- [x] Partial crossing executes without the 60% gate or longitudinal reversal split.
+- [x] Hillslope area closes; road area is preserved when feasible and discrepancies
       remain visible when not feasible.
-- [ ] Real strip PASS aggregation and watershed consumption verified without adding
+- [x] Real strip PASS aggregation and watershed consumption verified without adding
       the original baseline hillslope response a second time.
-- [ ] Scoped regressions pass; unrelated road regimes remain unchanged.
-- [ ] Switchback/connectivity limitations appear in help and retained provenance.
-- [ ] Independent correctness/security findings of medium/high severity closed.
+- [x] Scoped regressions pass; unrelated road regimes remain unchanged.
+- [x] Switchback/connectivity limitations appear in help and retained provenance.
+- [x] Independent correctness/security findings of medium/high severity closed.
 
 ## Evidence and completion boundaries
 
 See [incident evidence](artifacts/20261117_incident_evidence.md) and
 [acceptance matrix](artifacts/acceptance_matrix.md). A successful job or saved state
 is not artifact correctness. Record local validation, environment validation,
-integration, deployment, and affected-run repair separately. Current claim is only
-**documentation scaffold**; this package cannot close as implemented at this stage.
+integration, deployment, and affected-run repair separately. Current claim is **implemented and scoped forest validation complete**. Full-upload
+placement failures and synthetic fixture inputs remain explicit in the tracker.
 
 ## References
 
@@ -107,3 +107,10 @@ integration, deployment, and affected-run repair separately. Current claim is on
 - [Artifact validation](../../standards/generated-artifact-validation-standard.md)
 - [Artifact observability](../../standards/artifact-observability-standard.md)
 - [Roads specification](../../../wepppy/nodb/mods/roads/specification.md)
+
+## Local outcome
+
+Checkpoint `8e87b2363` precedes all code changes. 191 scoped tests pass; both
+independent reviews pass. Valid 141/42 slices complete native watershed/report
+execution; full copied upload retains eight explicit infeasible-profile failures.
+See tracker and native evidence for exact limits. No wepp1 deployment.

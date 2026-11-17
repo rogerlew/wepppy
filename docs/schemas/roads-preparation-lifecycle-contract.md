@@ -247,6 +247,6 @@ replacement, and does not permit restoring old readiness after partial mutation.
 ## RUPC-01 partial-crossing amendment
 
 The accepted [unrutted strip contract](roads-unrutted-strip-contract.md) defines the bounded
-geometry, accounting and lifecycle delta. Implementation conformance is pending. RUPC-01 supersedes conflicting unrutted
+geometry, accounting and lifecycle delta. Scoped forest conformance was validated on 2026-11-17; production rollout remains pending. RUPC-01 supersedes conflicting unrutted
 geometry, eligibility and preparation provisions above. Unrelated road
 designs, parameterization ownership and lifecycle safeguards remain unchanged.

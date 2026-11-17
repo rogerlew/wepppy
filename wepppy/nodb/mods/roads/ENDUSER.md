@@ -60,8 +60,8 @@ adding a point discharge. Inclusion is assessed separately for each crossed
 hillslope:
 
 - Road overlap must be at least **10 m** long.
-- Overlap length divided by the **modeled hillslope width** must be at least
-  **0.60**. This is not a percentage of hillslope map area.
+- Partial crossings are supported; there is no 60% hillslope-width requirement.
+  Connected pieces with the same model inputs are grouped before checking length.
 - At most **three qualifying crossings per hillslope** are retained, choosing
   the longest overlaps first. Additional crossings are reported as excluded.
 - A downstream landuse section shorter than **10 m** is omitted from the profile.
@@ -70,6 +70,24 @@ hillslope:
 
 Inspect the included, excluded and capped counts. A visible road line is not
 proof that it contributed to the simulation.
+
+Unrutted preparation does not split roads just because elevation rises or falls
+along the road. The model represents downslope flow across it, using road width
+as the road section length and a 4% cross slope. Separate affected strips and an
+unaffected remainder preserve total hillslope area. If combined strips are wider
+than the hillslope, their widths shrink proportionally; the run records target
+road area, modeled road area and the difference.
+
+These strips are intentionally simplified. They do not resolve switchbacks or
+whether multiple road portions intercept the same upstream area. Shared crossing
+profiles are shown on each contributing road feature; do not sum their totals
+across those features. Canonical profile summaries count each profile once.
+
+After upgrading, **Prepare Segment Candidates** again before running unrutted
+roads. If a road, fill and downstream section leave no positive upslope length,
+execution fails explicitly. Check the supplied dimensions and recorded placement;
+do not assume a longer road or a smaller eligibility threshold resolves that case.
+
 
 ## Prepare a GeoJSON road file
 
@@ -388,7 +406,7 @@ panel and its warnings before interpreting it as current output.
 | Few or no eligible segments | Check the Design field and its actual values; unsupported values have no design fallback |
 | Unexpected splitting or misplaced roads | Check CRS, coordinate order, line geometry and terrain coverage in your GIS |
 | Low points are unmapped, or traces do not reach a channel | Inspect preparation/run decisions and compare the linework with watershed drainage; a skipped contributor is not a measured zero |
-| Unrutted roads are excluded | Check 10 m overlap, the 0.60 width ratio, three-crossing cap and required fill/buffer attributes |
+| Unrutted roads are excluded | Check 10 m overlap, three-crossing cap, required fill/buffer attributes and positive upslope profile length |
 | Run asks for fresh preparation | Inputs changed or an older project needs baseline binding; prepare again before running |
 | Save rejects an override | Use a positive, finite number in the displayed units; review the error before changing other inputs |
 | Operation busy | Wait for the current project operation to finish, then reload status; report a persistent conflict to support |

@@ -87,6 +87,7 @@ def _seed_prepared_state(controller: Roads, *, upload_sha: str = "seed-upload-sh
             "uploaded_geojson_sha256": upload_sha,
             "roads_params_signature": controller._params_signature(params),
             "parameterization_hash": roads_module.roads_parameterization.configuration_hash(controller._parameterization),
+            "unrutted_geometry_policy": "unrutted_strips_v1",
         }
         controller._status = "prepared"
 
@@ -2778,7 +2779,7 @@ def test_query_segment_detail_uses_unique_fallback_segment_ids_for_missing_ids(t
     assert detail["surface"] == "gravel"
 
 
-def test_select_outslope_unrutted_hillslope_segments_applies_minimum_ratio_and_cap(
+def test_select_outslope_unrutted_hillslope_segments_applies_minimum_and_cap_without_ratio(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -2819,12 +2820,14 @@ def test_select_outslope_unrutted_hillslope_segments_applies_minimum_ratio_and_c
     )
     monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
 
+    offsets = {name: i * 0.00005 for i, name in enumerate(["seg-a", "seg-b", "seg-c", "seg-d", "seg-short"])}
+
     def _pending(segment_id: str, x_end: float) -> dict[str, object]:
         feature = {
             "type": "Feature",
             "geometry": {
                 "type": "LineString",
-                "coordinates": [[0.0, 0.0], [x_end, 0.0]],
+                "coordinates": [[0.0, offsets[segment_id]], [x_end, offsets[segment_id]]],
             },
             "properties": {
                 "segment_id": segment_id,
@@ -2877,9 +2880,11 @@ def test_select_outslope_unrutted_hillslope_segments_applies_minimum_ratio_and_c
 
 
 @pytest.mark.usefixtures("modeled_accounting_stub")
+@pytest.mark.parametrize("legacy_prepare", [False, True])
 def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    legacy_prepare: bool,
 ) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
 
@@ -2971,6 +2976,7 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
         candidate = {
             "segment_hillslope_id": segment_hillslope_id,
             "source_segment_id": pending["segment_id"],
+            "source_segment_ids": [pending["segment_id"]],
             "topaz_id_hill": 21,
             "hillslope_wepp_id": 1,
             "overlap_length_m": 111.0,
@@ -3091,7 +3097,27 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     controller.set_enabled(True)
     _seed_prepared_state(controller)
 
+    if legacy_prepare:
+        with controller.locked():
+            controller._last_prepare_summary.pop("unrutted_geometry_policy")
+        monkeypatch.setattr(roads_module.roads_lifecycle, "retain",
+            lambda *_a, **_k: pytest.fail("stale admission must not retain/reset workspace"))
+        monkeypatch.setattr(Roads, "_run_segment_hillslope",
+            lambda *_a, **_k: pytest.fail("stale admission must not execute model"))
+        with pytest.raises(ValueError, match="Prepare and run Roads again"):
+            controller.run_roads_wepp()
+        return
     summary = controller.run_roads_wepp()
+    record = summary["segment_execution_records"][0]
+    assert record["sim_length_m"] == 4.0
+    assert record["road_target_area_m2"] == pytest.approx(444.0)
+    assert record["road_modeled_area_m2"] == pytest.approx(400.0)
+    assert record["road_area_deficit_m2"] == pytest.approx(44.0)
+    assert record["strip_width_factor"] == pytest.approx(100.0 / 111.0)
+    hill = summary["outslope_unrutted_hillslope_records"][0]
+    assert hill["reference_area_m2"] == pytest.approx(30000.0)
+    assert abs(hill["emitted_area_residual_m2"]) <= 1e-6
+
 
     assert summary["executed_outslope_unrutted_segment_count"] == 1
     assert summary["segment_design_counts"]["outslope_unrutted"] == 1
@@ -3204,6 +3230,7 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
         candidate_a = {
             "segment_hillslope_id": seg_a,
             "source_segment_id": pending["segment_id"],
+            "source_segment_ids": [pending["segment_id"]],
             "topaz_id_hill": 21,
             "hillslope_wepp_id": 1,
             "overlap_length_m": 90.0,
@@ -3216,6 +3243,7 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
         candidate_b = {
             "segment_hillslope_id": seg_b,
             "source_segment_id": pending["segment_id"],
+            "source_segment_ids": [pending["segment_id"]],
             "topaz_id_hill": 21,
             "hillslope_wepp_id": 1,
             "overlap_length_m": 80.0,
@@ -3476,6 +3504,7 @@ def test_run_roads_wepp_outslope_unrutted_missing_discha_with_no_selected_candid
             segment_hillslope_id: {
                 "segment_hillslope_id": segment_hillslope_id,
                 "source_segment_id": pending["segment_id"],
+            "source_segment_ids": [pending["segment_id"]],
                 "topaz_id_hill": 21,
                 "hillslope_wepp_id": 1,
                 "overlap_length_m": 5.0,

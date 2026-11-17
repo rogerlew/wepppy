@@ -27,7 +27,7 @@ import rasterio
 from rasterio.errors import RasterioIOError
 from pyproj import CRS, Geod, Transformer
 from shapely.geometry import GeometryCollection, LineString, MultiLineString, shape
-from shapely.ops import transform as shapely_transform
+from shapely.ops import transform as shapely_transform, unary_union
 from wepp_runner.wepp_runner import (make_hillslope_run,
     make_watershed_omni_contrasts_run,
     run_hillslope,
@@ -39,7 +39,7 @@ from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.geojson_crs_inference import GeoBounds, infer_geojson_crs
 from wepppy.nodb.mods.roads.monotonic_segments import convert_geojson_file_to_monotonic_segments
 from wepppy.nodb.mods.roads import parameterization as roads_parameterization
-from wepppy.nodb.mods.roads import _parameterization_comparisons
+from wepppy.nodb.mods.roads import _parameterization_comparisons, _unrutted
 
 __all__ = ["Roads"]
 
@@ -59,7 +59,7 @@ ELIGIBLE_POINT_SOURCE_DESIGNS: frozenset[str] = frozenset(
     {"inslope_bd", "inslope_rd", "outslope_rutted"}
 )
 
-OUTSLOPE_UNRUTTED_AREA_EPSILON_M2 = 0.001
+OUTSLOPE_UNRUTTED_AREA_EPSILON_M2 = _unrutted.AREA_EPSILON_M2
 OUTSLOPE_UNRUTTED_LANDUSE_MIN_LENGTH_M = 10.0
 OUTSLOPE_UNRUTTED_REQUIRED_FIELD_KEYS: Dict[str, Tuple[str, ...]] = {
     "fill_length_m": ("FILL_LENGTH_M", "fill_length_m", "FILL_LEN_M", "fill_len_m"),
@@ -752,6 +752,15 @@ class Roads(NoDbBase):
         if status == "idle":
             raise ValueError("Roads segments are stale or missing. Run prepare_segments before run_roads_wepp.")
 
+        if prepare_summary.get("unrutted_geometry_policy") != _unrutted.POLICY:
+            field_map = current_params.get("attribute_field_map", {})
+            for feature in self._load_prepared_segments_geojson()["features"]:
+                design, _ = self._resolve_design_for_feature(
+                    properties=feature.get("properties", {}), attribute_field_map=field_map,
+                )
+                if design == "outslope_unrutted":
+                    raise ValueError("Unrutted geometry policy changed. Prepare and run Roads again.")
+
     def _resolve_prepare_raster_paths(self) -> Dict[str, str]:
         watershed = self.watershed_instance
         relief_path = self._normalize_existing_path(getattr(watershed, "relief", None))
@@ -1331,7 +1340,12 @@ class Roads(NoDbBase):
             segment_id = str(row.get("segment_id") or "").strip()
             if not segment_id:
                 continue
-            records[segment_id] = dict(row)
+            members = row.get("source_segment_ids", [segment_id])
+            if not isinstance(members, list) or not members or any(not isinstance(key, str) or not key for key in members):
+                raise ValueError("Roads profile source membership is malformed.")
+            for member in members:
+                records[member] = dict(row)
+
         return records
 
     def _build_segment_profile_for_query(
@@ -1736,6 +1750,7 @@ class Roads(NoDbBase):
             non_channel_routable_count = int(routing_eligibility_counts.get("non_channel_routable", 0))
             non_routable_count = int(routing_eligibility_counts.get("non_routable", 0))
             prepare_summary = {
+                "unrutted_geometry_policy": _unrutted.POLICY,
                 "input_feature_count": int(summary.input_feature_count),
                 "output_feature_count": int(summary.output_feature_count),
                 "split_feature_count": int(summary.split_feature_count),
@@ -2331,7 +2346,11 @@ class Roads(NoDbBase):
         if not hillslopes:
             raise ValueError("No hillslope geometries were resolved from watershed subcatchments.")
 
-        return hillslopes
+        grouped = defaultdict(list)
+        for row in hillslopes:
+            grouped[row["topaz_id_hill"]].append(row["geometry_wgs84"])
+        return [{"topaz_id_hill": key, "geometry_wgs84": unary_union(parts)}
+                for key, parts in sorted(grouped.items())]
 
     def _select_outslope_unrutted_hillslope_segments(
         self,
@@ -2341,140 +2360,101 @@ class Roads(NoDbBase):
         geod: Geod,
         top2wepp: Mapping[int, Any],
     ) -> Tuple[Dict[int, List[Dict[str, Any]]], Dict[str, Any], Dict[str, Dict[str, Any]]]:
-        inclusion_ratio_threshold = 0.60
-        overlap_length_min_m = 10.0
-        max_crossings_per_hillslope = 3
-
         input_to_wgs84 = Transformer.from_crs(input_crs, CRS.from_epsg(4326), always_xy=True)
-        hillslope_geometries = self._load_hillslope_geometries_wgs84()
-
-        hillslope_records: Dict[int, Dict[str, Any]] = {}
-        candidate_status_by_id: Dict[str, Dict[str, Any]] = {}
-        included_pre_cap_by_hillslope: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
-
+        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
+        sources = {}
         for pending in pending_segments:
-            source_segment_id = str(pending["segment_id"])
-            feature = pending["feature"]
-            properties = pending["properties"]
-            geometry_payload = feature.get("geometry") if isinstance(feature, Mapping) else None
-            if not isinstance(geometry_payload, Mapping):
-                continue
-
-            geometry_input = shape(geometry_payload)
-            if geometry_input.is_empty:
-                continue
-
-            geometry_wgs84 = shapely_transform(input_to_wgs84.transform, geometry_input)
-            if geometry_wgs84.is_empty:
-                continue
-
-            for hillslope in hillslope_geometries:
-                topaz_id_hill = int(hillslope["topaz_id_hill"])
-                hillslope_geometry_wgs84 = hillslope["geometry_wgs84"]
-                overlap_geometry = geometry_wgs84.intersection(hillslope_geometry_wgs84)
-                overlap_length_m = self._geometry_line_length_m_wgs84(overlap_geometry, geod=geod)
-                if overlap_length_m <= 0.0:
-                    continue
-
-                try:
-                    hillslope_width_m = float(self.watershed_instance.hillslope_width(topaz_id_hill))
-                except Exception:
-                    hillslope_width_m = 0.0
-                inclusion_ratio = float(overlap_length_m / hillslope_width_m) if hillslope_width_m > 0 else 0.0
-
-                segment_hillslope_id = self._build_segment_hillslope_id(source_segment_id, topaz_id_hill)
-                hillslope_wepp_id = self._as_int_or_none(top2wepp.get(int(topaz_id_hill)))
-
-                record = hillslope_records.setdefault(
-                    topaz_id_hill,
-                    {
-                        "topaz_id_hill": int(topaz_id_hill),
-                        "wepp_id_hill": int(hillslope_wepp_id) if hillslope_wepp_id is not None else None,
-                        "segment_ids_included": [],
-                        "segment_ids_excluded": [],
-                        "segment_ids_capped": [],
-                        "inclusion_ratio_by_segment": {},
-                        "top_ofe_compensation_m": 0.0,
-                        "area_error_before_compensation_m2": 0.0,
-                        "area_error_after_compensation_m2": 0.0,
-                    },
-                )
-                record["inclusion_ratio_by_segment"][segment_hillslope_id] = float(inclusion_ratio)
-
-                status = "included"
-                if overlap_length_m < overlap_length_min_m:
-                    status = "excluded_overlap_length_min"
-                elif inclusion_ratio < inclusion_ratio_threshold:
-                    status = "excluded_inclusion_ratio"
-
-                candidate_payload = {
-                    "segment_hillslope_id": segment_hillslope_id,
-                    "source_segment_id": source_segment_id,
-                    "topaz_id_hill": int(topaz_id_hill),
-                    "hillslope_wepp_id": int(hillslope_wepp_id) if hillslope_wepp_id is not None else None,
-                    "overlap_length_m": float(overlap_length_m),
-                    "hillslope_width_m": float(hillslope_width_m),
-                    "inclusion_ratio": float(inclusion_ratio),
-                    "overlap_geometry_wgs84": overlap_geometry,
-                    "feature": feature,
-                    "properties": properties,
-                }
-                candidate_status_by_id[segment_hillslope_id] = {
-                    **candidate_payload,
-                    "status": status,
-                }
-
-                if status == "included" and hillslope_wepp_id is not None:
-                    included_pre_cap_by_hillslope[int(topaz_id_hill)].append(candidate_payload)
-                else:
-                    record["segment_ids_excluded"].append(segment_hillslope_id)
-
-        selected_by_wepp: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
-        capped_segment_count = 0
-
-        for topaz_id_hill, candidates in included_pre_cap_by_hillslope.items():
-            candidates_sorted = sorted(
-                candidates,
-                key=lambda row: (-float(row["overlap_length_m"]), str(row["segment_hillslope_id"])),
+            inputs = self._resolve_segment_run_inputs(
+                properties=pending["properties"], params=params, segment_id=pending["segment_id"],
+                design="outslope_unrutted", warning_counts=Counter(), warning_examples=[], warning_limit=0,
             )
-            record = hillslope_records[topaz_id_hill]
-
-            for index, candidate in enumerate(candidates_sorted):
-                segment_hillslope_id = str(candidate["segment_hillslope_id"])
-                if index < max_crossings_per_hillslope:
-                    record["segment_ids_included"].append(segment_hillslope_id)
-                    wepp_id_hill = self._as_int_or_none(candidate.get("hillslope_wepp_id"))
-                    if wepp_id_hill is not None:
-                        selected_by_wepp[int(wepp_id_hill)].append(candidate)
+            effective = {key: value for key, value in inputs.items() if key != "resolution_sources"}
+            # Include required raw-invalid values: missing inputs must remain failures,
+            # never get merged with a neighbor whose valid inputs would hide them.
+            for key, aliases in OUTSLOPE_UNRUTTED_REQUIRED_FIELD_KEYS.items():
+                raw = self._first_non_empty_property(pending["properties"], aliases)
+                parsed = self._coerce_float(raw)
+                effective[key] = parsed if parsed is not None and np.isfinite(parsed) else raw
+            sources[str(pending["segment_id"])] = {
+                **pending, "inputs": inputs,
+                "signature": json.dumps(effective, sort_keys=True, allow_nan=False),
+                "geometry": shapely_transform(input_to_wgs84.transform, shape(pending["feature"]["geometry"])),
+            }
+        selected_by_wepp = defaultdict(list)
+        statuses = {}
+        records = []
+        for hillslope in self._load_hillslope_geometries_wgs84():
+            topaz = int(hillslope["topaz_id_hill"])
+            wepp_id = self._as_int_or_none(top2wepp.get(topaz))
+            width = float(self.watershed_instance.hillslope_width(topaz))
+            if not np.isfinite(width) or width <= 0:
+                raise ValueError(f"Unrutted hillslope {topaz} width must be finite and positive.")
+            rows = []
+            for source, pending in sources.items():
+                geometry = pending["geometry"].intersection(hillslope["geometry_wgs84"])
+                parts = list(_unrutted.line_parts(geometry))
+                if parts:
+                    rows.append({"geometry": unary_union(parts), "source": source,
+                                 "signature": pending["signature"]})
+            if not rows:
+                continue
+            components = _unrutted.crossings(rows)
+            membership = Counter(source for row in components for source in row["sources"])
+            candidates = []
+            record = {"topaz_id_hill": topaz, "wepp_id_hill": wepp_id,
+                      "segment_ids_included": [], "segment_ids_excluded": [], "segment_ids_capped": [],
+                      "inclusion_ratio_by_segment": {}, "top_ofe_compensation_m": 0.0,
+                      "area_error_before_compensation_m2": 0.0, "area_error_after_compensation_m2": 0.0,
+                      "geometry_policy": _unrutted.POLICY, "connectivity_limitation": _unrutted.LIMITATION,
+                      "excluded_road_target_area_m2": 0.0, "excluded_road_area_unknown_count": 0,
+                      "area_accounting_status": "unavailable", "area_accounting_reason": "not_executed",
+                      **{key: None for key in ("reference_area_m2", "affected_area_m2", "remainder_area_m2",
+                         "area_residual_m2", "road_target_area_m2", "road_modeled_area_m2", "road_area_deficit_m2", "strip_width_factor")}}
+            for component in components:
+                source = component["sources"][0]
+                pending = sources[source]
+                suffix = "::" + component["key"][:12] if membership[source] > 1 else ""
+                identity = self._build_segment_hillslope_id(source + suffix, topaz)
+                length = self._geometry_line_length_m_wgs84(component["geometry"], geod=geod)
+                if not np.isfinite(length) or length <= 0:
+                    raise ValueError("Unrutted crossing length must be finite and positive.")
+                candidate = {"segment_hillslope_id": identity, "source_segment_id": source,
+                             "source_segment_ids": component["sources"], "geometry_key": component["key"],
+                             "topaz_id_hill": topaz, "hillslope_wepp_id": wepp_id,
+                             "overlap_length_m": length, "hillslope_width_m": width,
+                             "inclusion_ratio": length / width, "overlap_geometry_wgs84": component["geometry"],
+                             "feature": pending["feature"], "properties": pending["properties"],
+                             "road_target_area_m2": length * pending["inputs"]["road_width_m"]}
+                candidates.append(candidate)
+                record["inclusion_ratio_by_segment"][identity] = length / width
+            eligible = 0
+            for candidate in sorted(candidates, key=lambda row: (-row["overlap_length_m"], row["geometry_key"])):
+                identity = candidate["segment_hillslope_id"]
+                status = "included"
+                if candidate["overlap_length_m"] < 10.0:
+                    status = "excluded_overlap_length_min"
+                elif wepp_id is None:
+                    raise ValueError(f"Unrutted hillslope {topaz} is missing its WEPP mapping.")
+                elif eligible >= 3:
+                    status = "excluded_cap_limit"
+                if status == "included":
+                    eligible += 1
+                    selected_by_wepp[wepp_id].append(candidate)
+                    record["segment_ids_included"].append(identity)
                 else:
-                    capped_segment_count += 1
-                    record["segment_ids_capped"].append(segment_hillslope_id)
-                    record["segment_ids_excluded"].append(segment_hillslope_id)
-                    candidate_status_by_id[segment_hillslope_id]["status"] = "excluded_cap_limit"
-
-        included_segment_count = 0
-        excluded_segment_count = 0
-        for candidate in candidate_status_by_id.values():
-            status = str(candidate.get("status") or "")
-            if status == "included":
-                included_segment_count += 1
-            elif status.startswith("excluded_") and status != "excluded_cap_limit":
-                excluded_segment_count += 1
-
-        diagnostics = {
-            "outslope_unrutted_targeted_hillslope_count": int(
-                sum(1 for value in selected_by_wepp.values() if value)
-            ),
-            "outslope_unrutted_included_segment_count": int(included_segment_count),
-            "outslope_unrutted_excluded_segment_count": int(excluded_segment_count),
-            "outslope_unrutted_capped_segment_count": int(capped_segment_count),
-            "outslope_unrutted_hillslope_records": [
-                hillslope_records[topaz_id]
-                for topaz_id in sorted(hillslope_records)
-            ],
-        }
-
-        return selected_by_wepp, diagnostics, candidate_status_by_id
+                    record["segment_ids_excluded"].append(identity)
+                    record["excluded_road_target_area_m2"] += candidate["road_target_area_m2"]
+                    if status == "excluded_cap_limit":
+                        record["segment_ids_capped"].append(identity)
+                statuses[identity] = {**candidate, "status": status}
+            records.append(record)
+        counts = Counter(row["status"] for row in statuses.values())
+        diagnostics = {"outslope_unrutted_targeted_hillslope_count": len(selected_by_wepp),
+                       "outslope_unrutted_included_segment_count": counts["included"],
+                       "outslope_unrutted_excluded_segment_count": counts["excluded_overlap_length_min"],
+                       "outslope_unrutted_capped_segment_count": counts["excluded_cap_limit"],
+                       "outslope_unrutted_hillslope_records": records}
+        return dict(selected_by_wepp), diagnostics, statuses
 
     @staticmethod
     def _sample_dem_elevation(
@@ -5150,7 +5130,7 @@ class Roads(NoDbBase):
                                     )
                                 continue
 
-                            if hillslope_length_m <= 0.0 or hillslope_width_m <= 0.0:
+                            if not np.isfinite(hillslope_length_m) or not np.isfinite(hillslope_width_m) or hillslope_length_m <= 0.0 or hillslope_width_m <= 0.0:
                                 for candidate in candidates:
                                     segment_hillslope_id = str(candidate["segment_hillslope_id"])
                                     source_segment_id = str(candidate["source_segment_id"])
@@ -5337,10 +5317,8 @@ class Roads(NoDbBase):
 
                                 profile = dict(profile)
                                 profile["segment_length_m"] = max(1.0, float(overlap_length_m))
-                                parity_profile = self._apply_outslope_unrutted_geometry_parity(
-                                    road_length_m=float(profile["segment_length_m"]),
-                                    road_width_m=float(segment_inputs["road_width_m"]),
-                                    road_slope_pct=float(profile["slope_pct"]),
+                                parity_profile = _unrutted.road_geometry(
+                                    overlap_length_m, float(segment_inputs["road_width_m"]),
                                 )
 
                                 if fill_profile is None or routed_buffer_profile is None:
@@ -5399,8 +5377,10 @@ class Roads(NoDbBase):
                                         discha_dataset=discha_dataset,
                                         wgs84_to_discha=wgs84_to_discha,
                                     )
+                                placement_source = "distance_to_channel_median"
                                 if discha_median_m is None:
                                     discha_median_m = hillslope_length_m * 0.5
+                                    placement_source = "mid_hillslope_fallback"
 
                                 downslope_landuse_length_m = max(0.0, float(discha_median_m) - float(fill_profile["fill_length_m"]))
                                 has_downslope_landuse = downslope_landuse_length_m >= OUTSLOPE_UNRUTTED_LANDUSE_MIN_LENGTH_M
@@ -5473,6 +5453,7 @@ class Roads(NoDbBase):
                                         "overlap_length_m": overlap_length_m,
                                         "inclusion_ratio": inclusion_ratio,
                                         "discha_median_m": float(discha_median_m),
+                                        "placement_source": placement_source,
                                         "top_landuse_length_m": float(top_landuse_length_m),
                                         "bottom_landuse_length_m": float(downslope_landuse_length_m),
                                         "has_downslope_landuse": bool(has_downslope_landuse),
@@ -5574,6 +5555,8 @@ class Roads(NoDbBase):
                                 )
 
                             hillslope_area_m2 = float(hillslope_width_m * hillslope_length_m)
+                            if not np.isfinite(hillslope_area_m2):
+                                raise ValueError("Unrutted hillslope area must be finite.")
                             represented_area_before_m2 = float(
                                 sum(
                                     float(plan["strip_width_m"]) * _plan_total_length_m(plan)
@@ -5663,6 +5646,46 @@ class Roads(NoDbBase):
                                 hillslope_record["area_error_before_compensation_m2"] = float(area_error_before_m2)
                                 hillslope_record["area_error_after_compensation_m2"] = float(area_error_after_m2)
 
+                            emitted_area = 0.0
+                            for index, plan in enumerate(strip_plans):
+                                lengths = [plan["top_landuse_length_m"], plan["parity_profile"]["sim_length_m"], plan["fill_profile"]["fill_length_m"]]
+                                slopes = [plan["top_landuse_slope_pct"] / 100, 0.04, plan["fill_profile"]["fill_slope_pct"] / 100]
+                                if plan["has_downslope_landuse"]:
+                                    lengths.append(plan["bottom_landuse_length_m"])
+                                    slopes.append(plan["bottom_landuse_slope_pct"] / 100)
+                                plan["slope_path"] = Path(self.roads_runs_dir) / f"unrutted-h{topaz_id_hill}-{index}.slp"
+                                emitted_area += _unrutted.write_slope(plan["slope_path"], plan["strip_width_m"], lengths, slopes)
+                                target = plan["parity_profile"]["road_target_area_m2"]
+                                modeled = plan["strip_width_m"] * plan["parity_profile"]["sim_length_m"]
+                                plan["accounting"] = {
+                                    "geometry_policy": _unrutted.POLICY, "connectivity_limitation": _unrutted.LIMITATION,
+                                    "source_segment_ids": plan["candidate"]["source_segment_ids"],
+                                    "placement_source": plan["placement_source"],
+                                    "road_target_area_m2": target, "road_modeled_area_m2": modeled,
+                                    "road_area_deficit_m2": max(0.0, target - modeled),
+                                    "strip_width_factor": min(1.0, hillslope_width_m / width_sum_before_scaling),
+                                    "area_accounting_status": "complete", "area_accounting_reason": None,
+                                    "road_area_deficit_reason": "hillslope_width_limit" if modeled < target else None,
+                                }
+                            remainder_prepared_path = Path(self.roads_runs_dir) / f"unrutted-h{topaz_id_hill}-remainder.slp"
+                            if remainder_width_m >= 0.3:
+                                emitted_area += _unrutted.write_slope(remainder_prepared_path, remainder_width_m,
+                                    [hillslope_length_m], [strip_plans[0]["top_landuse_slope_pct"] / 100])
+                            if not np.isfinite(emitted_area) or abs(emitted_area - hillslope_area_m2) > OUTSLOPE_UNRUTTED_AREA_EPSILON_M2:
+                                raise ValueError(f"Unrutted emitted hillslope {topaz_id_hill} area does not close.")
+                            hillslope_record.update({
+                                "reference_area_m2": hillslope_area_m2,
+                                "affected_area_m2": represented_area_after_m2 - remainder_width_m * hillslope_length_m,
+                                "remainder_area_m2": remainder_width_m * hillslope_length_m,
+                                "area_residual_m2": area_error_after_m2,
+                                "emitted_area_residual_m2": hillslope_area_m2 - emitted_area,
+                                "road_target_area_m2": sum(plan["accounting"]["road_target_area_m2"] for plan in strip_plans),
+                                "road_modeled_area_m2": sum(plan["accounting"]["road_modeled_area_m2"] for plan in strip_plans),
+                                "road_area_deficit_m2": sum(plan["accounting"]["road_area_deficit_m2"] for plan in strip_plans),
+                                "strip_width_factor": min(1.0, hillslope_width_m / width_sum_before_scaling),
+                                "area_accounting_status": "complete", "area_accounting_reason": None,
+                            })
+
                             for plan in strip_plans:
                                 source_segment_id = str(plan["source_segment_id"])
                                 segment_hillslope_id = str(plan["segment_hillslope_id"])
@@ -5722,61 +5745,8 @@ class Roads(NoDbBase):
                                     ofe_order=ofe_order,
                                 )
 
-                                if has_downslope_landuse:
-                                    self._write_routed_four_ofe_landuse_road_fill_hill_slope_file(
-                                        segment_slope_path,
-                                        width_m=strip_width_m,
-                                        top_landuse_length_m=top_landuse_length_m,
-                                        top_landuse_slope_pct=float(plan["top_landuse_slope_pct"]),
-                                        road_length_m=parity_profile["sim_length_m"],
-                                        road_slope_pct=parity_profile["road_slope_pct"],
-                                        fill_length_m=fill_profile["fill_length_m"],
-                                        fill_slope_pct=fill_profile["fill_slope_pct"],
-                                        bottom_landuse_length_m=bottom_landuse_length_m,
-                                        bottom_landuse_slope_pct=float(plan["bottom_landuse_slope_pct"]),
-                                    )
-                                else:
-                                    self._write_routed_three_ofe_landuse_road_fill_slope_file(
-                                        segment_slope_path,
-                                        width_m=strip_width_m,
-                                        top_landuse_length_m=top_landuse_length_m,
-                                        top_landuse_slope_pct=float(plan["top_landuse_slope_pct"]),
-                                        road_length_m=parity_profile["sim_length_m"],
-                                        road_slope_pct=parity_profile["road_slope_pct"],
-                                        fill_length_m=fill_profile["fill_length_m"],
-                                        fill_slope_pct=fill_profile["fill_slope_pct"],
-                                    )
-
-                                self._append_roads_log(
-                                    "run",
-                                    "segment_inputs_ready",
-                                    {
-                                        "segment_id": source_segment_id,
-                                        "segment_hillslope_id": segment_hillslope_id,
-                                        "segment_run_id": segment_run_id,
-                                        "routing_mode": "outslope_unrutted_replacement",
-                                        "target_hillslope_wepp_id": int(wepp_id_int),
-                                        "target_hillslope_topaz_id": int(topaz_id_hill),
-                                        "design": "outslope_unrutted",
-                                        "surface": segment_inputs["surface"],
-                                        "traffic": segment_inputs["traffic"],
-                                        "soil_texture": segment_inputs["soil_texture"],
-                                        "rfg_pct": segment_inputs["rfg_pct"],
-                                        "road_width_m": segment_inputs["road_width_m"],
-                                        "fill_length_m": fill_profile["fill_length_m"],
-                                        "fill_slope_pct": fill_profile["fill_slope_pct"],
-                                        "segment_length_m": profile["segment_length_m"],
-                                        "overlap_length_m": overlap_length_m,
-                                        "inclusion_ratio": inclusion_ratio,
-                                        "top_landuse_length_m": top_landuse_length_m,
-                                        "bottom_landuse_length_m": bottom_landuse_length_m,
-                                        "strip_width_m": strip_width_m,
-                                        "discha_median_m": discha_median_m,
-                                        "contributor_ofe_count": len(ofe_order),
-                                        **parity_profile,
-                                        **routed_buffer_profile,
-                                    },
-                                )
+                                shutil.copyfile(plan["slope_path"], segment_slope_path)
+                                _unrutted.slope_area(segment_slope_path)
 
                                 try:
                                     sim_years = int(self.wepp_instance.climate_instance.input_years)
@@ -5921,6 +5891,7 @@ class Roads(NoDbBase):
                                     "top_landuse_length_m": top_landuse_length_m,
                                     "bottom_landuse_length_m": bottom_landuse_length_m,
                                     "discha_median_m": discha_median_m,
+                                    **plan["accounting"],
                                     **parity_profile,
                                     **fill_profile,
                                     **routed_buffer_profile,
@@ -5972,12 +5943,8 @@ class Roads(NoDbBase):
                                     rfg_pct=remainder_segment_inputs["rfg_pct"],
                                     ofe_order=remainder_order,
                                 )
-                                self._write_single_ofe_slope_file(
-                                    remainder_slope_path,
-                                    width_m=float(remainder_width_m),
-                                    length_m=float(hillslope_length_m),
-                                    slope_pct=float(strip_plans[0]["top_landuse_slope_pct"]),
-                                )
+                                shutil.copyfile(remainder_prepared_path, remainder_slope_path)
+                                _unrutted.slope_area(remainder_slope_path)
 
                                 try:
                                     sim_years = int(self.wepp_instance.climate_instance.input_years)
@@ -6116,6 +6083,18 @@ class Roads(NoDbBase):
                         )
                     )
 
+            for record in segment_execution_records:
+                if record.get("design") != "outslope_unrutted":
+                    continue
+                candidate = outslope_unrutted_candidate_status.get(record.get("segment_hillslope_id"), {})
+                record.setdefault("source_segment_ids", candidate.get("source_segment_ids", [record["segment_id"]]))
+                record.setdefault("geometry_policy", _unrutted.POLICY)
+                record.setdefault("connectivity_limitation", _unrutted.LIMITATION)
+                if record.get("status") != "completed":
+                    record.update(area_accounting_status="unavailable",
+                                  area_accounting_reason=record.get("reason", "execution_failed"))
+                    for key in ("road_target_area_m2", "road_modeled_area_m2", "road_area_deficit_m2", "strip_width_factor"):
+                        record.setdefault(key, None)
             self._attach_parameterization_records(segment_execution_records)
             Path(self.roads_segment_pass_manifest_path).write_text(
                 json.dumps(segment_execution_records, indent=2, sort_keys=True),

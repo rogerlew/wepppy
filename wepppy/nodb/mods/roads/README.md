@@ -38,12 +38,18 @@ Point-source preparation splits and orients monotonic line segments and identifi
 low points. Non-channel hillslope low points require successful run-stage tracing
 to a channel; unsuccessful traces are recorded as skipped contributors.
 
-Unrutted replacement uses hillslope-specific overlap rather than requiring
-point-source low-point delivery. Inclusion requires at least 10 m overlap and
-an overlap-length / modeled-hillslope-width ratio of at least 0.60. At most three
-qualifying crossings per hillslope are retained, ranked by descending overlap
-length with segment-ID tie breaking. Required fill/buffer inputs, area closure,
-and short downstream landuse handling are detailed in the
+Unrutted replacement keeps contour crossings intact through longitudinal elevation
+reversals and groups connected equal-input pieces before eligibility. It requires
+10 m overlap and retains at most three crossings per hillslope; the former 60%
+width gate is removed. Each strip models transverse road flow at 4%, with physical
+road width as road OFE length. Strips and remainder conserve original hillslope
+area. Width compression reports modeled road-area loss explicitly.
+
+This is a simplified parallel-profile abstraction: switchbacks and shared upslope
+contributing areas are not resolved. Missing fill/buffer inputs and non-positive
+upslope lengths still fail explicitly. Reprepare existing unrutted candidates
+before running the new policy. See the
+[strip contract](../../../../docs/schemas/roads-unrutted-strip-contract.md) and
 [implementation specification](specification.md#settled-step-4-contract-details-implemented-2026-04-08).
 
 ## Workflow and integration

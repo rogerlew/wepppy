@@ -29,10 +29,10 @@ does not establish correct physical allocation of contributing area.
 - [x] (2026-11-17 17:45 UTC) Scaffold scope, incident record and acceptance matrix.
 - [x] (2026-11-17 UTC) M1 draft formulas, canonical amendments and ADR-0146;
   both independent reviews pass after findings resolved.
-- [ ] M1 remaining: exact formula ratification and standalone checkpoint commit.
-- [ ] M2: Implement design-specific preparation and simplified strip accounting.
-- [ ] M3: Wire native inputs, strip execution, replacement PASS and provenance.
-- [ ] M4: Complete scoped tests, generated-artifact acceptance and independent reviews.
+- [x] (2026-11-17 UTC) Exact formula approved; checkpoint `8e87b2363` committed before code.
+- [x] (2026-11-17 UTC) M2 preparation, normalization and strip accounting implemented.
+- [x] (2026-11-17 UTC) M3 native execution, replacement PASS, provenance and shared-source presentation wired.
+- [x] (2026-11-17 UTC) M4: 191 scoped tests; fresh native forest slices/control; correctness/security reviews pass.
 
 ## Surprises & Discoveries
 
@@ -62,11 +62,18 @@ add UI, RQ, stub or Rust checks only where implementation changes affect them.
 ## Outcomes & Retrospective
 
 
-Canonical amendment drafts and ADR-0146 are prepared; both independent contract
-reviews pass. Exact formula ratification, checkpoint commit, implementation and
-runtime acceptance remain pending.
-The successor implementation work is M2–M4 in this package, not an implicit
-claim that scaffolding delivered the feature. The operator permits forest run mutation/forking; no wepp1 rollout is authorized.
+Implemented and locally validated after checkpoint `8e87b2363`. Two valid real
+partial-crossing slices (141/42) complete native execution, replacement aggregation,
+watershed and reports; emitted geometry closes within 1e-6 m². Source baseline
+and upload hashes remain unchanged. The no-road partition control shows runoff
+differences of about 5–6 ppm; it is a diagnostic, not proof of physical connectivity.
+
+The full copied upload retains eight non-positive-upstream failures. Synthetic
+fixture fill/buffer inputs were used explicitly; neither full-site repair nor site
+calibration is claimed. Review caught costly linework grouping and secondary-source
+result joins; endpoint traversal/spatial indexing and membership-aware readers fix
+these with regressions. Both reviewers pass, 191 scoped tests pass. Deployment,
+integration and publication remain separate. See tracker and retained artifacts.
 
 ## Context and Orientation
 
@@ -233,3 +240,6 @@ permits no new infrastructure or silent scientific fallback.
 Revision note: 2026-11-17 scaffold captures the agreed simplified scope and the
 operator's implementation-scoped testing direction; exact geometry policy remains
 an explicit pre-implementation decision rather than an invented approved formula.
+
+Revision note: 2026-11-17 execution completed locally with scoped evidence and
+explicit full-upload limitation; no relaxation of the approved placement failure policy.

@@ -1,6 +1,6 @@
 # ADR-0146: Simplified unrutted partial-crossing strips
 
-Status: Accepted; implementation pending
+Status: Accepted; implemented and scoped forest validation complete
 Date: 2026-11-17
 
 ## Context
@@ -53,7 +53,8 @@ fill/buffer attributes still apply. No new defaults or dependencies are introduc
 
 [Incident observations](../work-packages/20261117_roads_unrutted_partial_crossings/artifacts/20261117_incident_evidence.md)
 identify the prior 38-segment exclusion and the later 9-segment missing-input failure.
-Native candidate validation has not yet occurred.
+Native 141/42 slice validation and 191 scoped tests pass; full copied upload
+retains eight explicit infeasible-upstream failures. See work-package evidence.
 
 ## Risk and rollback
 

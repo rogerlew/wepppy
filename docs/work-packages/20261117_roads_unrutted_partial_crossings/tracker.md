@@ -1,73 +1,74 @@
 # Unrutted partial-crossing tracker
 
-**Updated:** 2026-11-17 17:45 UTC
-**Status:** Contract design prepared; formula approval and checkpoint pending. Implementation not started.
+**Updated:** 2026-11-17 UTC
+**Status:** Implemented and validated locally on forest; no deployment or full-site repair.
 **Branch:** `work/roads-unrutted-strip-contract`
 **Worktree:** `/tmp/wepppy-roads-unrutted-strip-contract`
+**Contract ancestor:** `8e87b236301364c4b743fd7bec87b7640b35cd46`
 
 ## Task board
 
-- [x] Capture agreed scope, rationale, incident observations, and test boundary.
-- [x] Create package, draft decision, acceptance matrix, and active ExecPlan.
-- [ ] Resolve formulas, feasibility policy, existing limits, and compatibility.
-- [ ] Amend current contracts and draft parameterization ADR.
-- [ ] Record exact ratification, two independent reviews and dispositions.
-- [ ] Commit standalone checkpoint ancestor; record SHA here before code edits.
-- [ ] Implement changed Roads paths and scoped regressions.
-- [ ] Validate native artifacts and disposable 141/42 cases.
-- [ ] Complete independent correctness/security reviews and user/operator docs.
+- [x] Capture scope, rationale, incident and implementation-scoped test boundary.
+- [x] Resolve formula, feasibility, existing limits and compatibility.
+- [x] Amend current contracts and ADR-0146; record exact operator ratification.
+- [x] Obtain two independent contract reviews and commit checkpoint before code.
+- [x] Implement preparation, canonical crossings, native geometry and accounting.
+- [x] Preserve current-result lifecycle and shared-source map/detail association.
+- [x] Run scoped regressions and native forest acceptance slices/control.
+- [x] Close correctness/security findings and update user/operator/developer docs.
 
-## Decisions
+## Decisions and rationale
 
-2026-11-17 17:45 UTC — Roger endorsed a simplified strip abstraction, replacement
-of 60%, exact total hillslope-area accounting, road-area preservation where
-feasible, and explicit exclusion of switchback connectivity/flowpath walking.
-Full drainage partitioning is intentionally deferred. Exact policy remains pending.
+2026-11-17 UTC — Roger selected an intentionally simplified strip abstraction,
+replacement of 60%, conserved total hillslope area and road area where feasible.
+Flowpath walking and switchback connectivity are explicitly deferred.
 
-2026-11-17 17:45 UTC — Roger limited tests to implementation changes. Scoped
-regressions and direct changed-artifact evidence replace broad suite requirements
-for this package; do not add unrelated validation gates.
+Roger limited tests to implementation changes and authorized mutation/forking of
+the synced forest run. He explicitly approved physical-width road OFEs at 4%,
+overlap-based strip widths, proportional compression with visible road-area loss,
+and retained 10 m minimum/three-crossing cap: “i approve. proceed with implementation”.
+The reviewed contract was committed before implementation.
 
-## Risks and unresolved questions
+Independent review found segmentation dependence, emitted-area precision gaps,
+zero-contributor contract conflict, expensive geometry grouping, and missing
+secondary-source display associations. All are dispositioned in review artifacts;
+no medium/high findings remain. No new dependency or infrastructure is shipped.
 
-Road area and positive OFE lengths may conflict with hillslope closure. Width
-allocation can conserve area while misrepresenting physical connectivity. Existing
-parity transform, 10 m minima, and three-crossing cap need explicit disposition.
-Required fill/buffer inputs remain a separate operational blocker. See the
-[decision draft](artifacts/20261117_contract_decision.md).
+## Validation receipts
 
-## Validation and completion ledger
+- `artifacts/20261117_scoped_tests.log`: 191 passed, two existing dependency
+  deprecation warnings. Seven affected test modules; no full repository suite.
+- `artifacts/20261117_native_evidence.json`: fresh 141/42 slice execution, native
+  input hashes and area closure, replacement PASS closure receipts, exact watershed
+  consumer hash, 5,844 daily report rows, current detachment reader, retained
+  byte-equal native geometry and unchanged source upload/baseline hashes.
+- Runtime: existing forest image, uid 1000/gid 993/groups [993], umask 0022;
+  isolated validation service mounts candidate checkout without remounting app.
+- No-road control: original baseline parameters, two half-width profiles; total
+  runoff differs by roughly 5–6 parts per million. Diagnostic only.
+- Broad-exception changed-file enforcement passes (net -1). Markdown/ADR checks pass.
 
-Documentation lint: all six package files and PROJECT_TRACKER.md passed with zero
-errors/warnings using `markdown-doc lint` in the task worktree. Relative-link
-readback and uk2us preview passed. The installed `wctl doc-lint` wrapper resolved
-the shared checkout (zero task files); absolute worktree paths triggered an
-ignore-library panic. Direct canonical linter execution validated the actual files.
-Tooling follow-up: make doc wrappers honor the selected worktree like test wrappers.
-Contract reviews: two performed; A and B passed after fixes; no remaining medium/high findings.
-Checkpoint SHA: none. Code: not changed.
-Native acceptance: not run. Integration/publication/deployment/repair: not performed.
-No production action is authorized by the scaffold.
+## Known limitations and retained failures
 
-## Handoff
+Validation run: `/wc1/runs/ru/rupc-misty-validation`.
+Source: `/wc1/runs/mi/misty-eyed-divorcee`, unchanged.
+The validation copy uses explicit synthetic fill/buffer values from an existing
+fixture (30 m, 10%); these are not measured site data or new runtime defaults.
 
-Next: capture pending formula approval and final review disposition, then commit
-the checkpoint before implementing. Use [active ExecPlan](prompts/active/implementation_execplan.md); all future
-production changes require the accepted ancestor checkpoint. Keep this tracker and
-the plan's living sections current. Preserve unrelated shared-checkout WIP.
+The complete copied upload fails eight profiles for non-positive upstream OFE
+lengths. Some distance-to-channel medians exceed abstract hillslope lengths.
+This is the approved explicit failure policy, not silently corrected placement.
+The successful acceptance uses selected valid partial-crossing slices on 141 and
+42. It must not be reported as the entire site repaired or scientifically calibrated.
+Native WAT/PASS serialization reconciliation remains visible and follows existing
+accounting; planned/emitted slope geometry closes to the approved absolute bound.
 
-## Execution authorization — 2026-11-17
+## Handoff and completion states
 
-Roger instructed “proceed” and authorized mutation/forking of the synced forest
-run. M1 is active. Proposed formula contract and ADR-0146 are prepared for review;
-exact formula approval is pending the asynchronous question. Local host is forest;
-`/wc1/runs/mi/misty-eyed-divorcee` exists. Prefer a disposable fork.
+Implementation and scoped forest validation complete. Integration, publication,
+wepp1 deployment and full-site repair have not occurred. Preserve the validation
+copy and evidence. Future full-site use needs defensible fill/buffer inputs and
+an explicit decision about infeasible profile placement; do not silently clamp it.
 
-Final M1 preparation: canonical draft and ADR-0146 written; both reviews pass.
-All package Markdown passes lint; ADR date gate passes. Exact formula approval
-remains pending, so checkpoint commit and implementation have not started.
-
-## Ratification — 2026-11-17 UTC
-
-Roger approved the concrete geometry rule and instructed implementation. Both
-reviews pass. Checkpoint is accepted; implementation begins only after its commit.
+Documentation tooling note: installed wctl doc wrappers use the shared checkout;
+validate this worktree via explicit `--project-dir` or direct `markdown-doc`.

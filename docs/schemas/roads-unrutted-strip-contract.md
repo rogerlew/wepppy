@@ -1,7 +1,8 @@
 # Unrutted partial-crossing strip contract
 
 Status: accepted 2026-11-17 by Roger Lew; both independent contract reviews pass.
-Implementation conformance pending. RUPC-01 supersedes conflicting unrutted geometry
+Implementation and scoped forest conformance validated 2026-11-17; no production
+deployment or full-site repair claimed. RUPC-01 supersedes conflicting unrutted geometry
 and eligibility provisions in the Roads specification after this standalone
 checkpoint. Current deployed behavior is unchanged.
 

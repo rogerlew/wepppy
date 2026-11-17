@@ -140,3 +140,27 @@ def test_negative_and_remainder_not_mapped(tmp_path):
     assert result['roads_detachment']['remainder_profile_count'] == 1
     assert len(result['features']) == 1
     assert result['features'][0]['properties']['roads_detachment']['rate_t_ha_year'] == -2.75
+
+
+def test_coalesced_crossing_is_visible_on_all_source_features(tmp_path):
+    folder = sources(tmp_path)
+    path = folder / 'roads.inslope.monotonic.geojson'
+    data = json.loads(path.read_text())
+    feature = json.loads(json.dumps(data['features'][0]))
+    feature['properties']['segment_id'] = 'line2'
+    data['features'].append(feature)
+    path.write_text(json.dumps(data))
+    path = folder / 'roads.segment.pass.manifest.json'
+    records = json.loads(path.read_text())
+    for record in records:
+        record['source_segment_ids'] = ['line1', 'line2']
+    path.write_text(json.dumps(records))
+    result = view.read_detachment_view(tmp_path)
+    for feature in result['features']:
+        values = feature['properties']['roads_detachment']
+        assert values['state'] == 'complete'
+        assert values['profile_count'] == 2
+        assert values['annual_detachment_kg'] == 11.0
+        assert 'Shared crossing profile' in values['reason']
+    # The canonical source table remains one row per native profile, not feature.
+    assert pq.read_table(tmp_path / view.SUMMARY).num_rows == 2

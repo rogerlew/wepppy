@@ -52,7 +52,7 @@ Completed locally: [Browse filesystem transparency and timeout](docs/work-packag
 
 # PROJECT_TRACKER.md
 
-Scaffolded; contract checkpoint pending: [Unrutted Roads partial-crossing strips](docs/work-packages/20261117_roads_unrutted_partial_crossings/package.md) — Replace the 60% gate with simplified strips; preserve hillslope area and road area where feasible. Switchback connectivity and flowpath walking are deferred. Tests are scoped to implementation changes; no implementation or deployment.
+Implemented and validated locally: [Unrutted Roads partial-crossing strips](docs/work-packages/20261117_roads_unrutted_partial_crossings/package.md) — Reviewed checkpoint, 191 scoped tests and native forest 141/42 slice acceptance pass. Simplified area-conserving strips replace 60%; road-area deficits remain visible. Full copied upload retains eight infeasible-profile failures; synthetic validation inputs are explicit. No deployment.
 
 Completed locally: [WEPPcloud Forest Service basemap and attribution](docs/work-packages/20261116_weppcloud_forest_service_basemap/package.md) — Optional run/dashboard basemap retains Google Terrain default; both landing themes retain credits/limitations; obsolete Flask fallback removed with explicit 503 for unavailable exports; legacy header user-guide link repaired. Served-browser and independent reviews pass; scoped Python 327, controller 43, adapter 6 pass. Broad run stopped at operator request without failures; no production deployment.
 
