@@ -62,7 +62,8 @@ class _DummyQueue:
         return _DummyJob("job-123")
 
 
-def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize("original_basis", [False, True])
+def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, original_basis: bool) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
 
@@ -159,9 +160,19 @@ def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyP
         lambda **_kwargs: (Path("nlcd.tif"), Path("ssurgo.tif")),
     )
 
+    if original_basis:
+        from wepppy.nodb import culvert_stream_selection as selection
+        selection.write_json(batch_root/selection.POLICY,
+                             {'version': 1, 'selection_basis': selection.ORIGINAL_OUTLET_BASIS})
+        monkeypatch.setattr(selection, 'prepare_original_outlets', lambda *a: calls.append('original_outlets'))
+        monkeypatch.setattr(selection, 'prepare', lambda *a, **k: calls.append('candidates'))
     run_culvert_batch_rq(batch_uuid)
 
-    assert calls == ["generate", "prune_short", "prune_order", "chnjnt", "chnjnt"]
+    if original_basis:
+        assert calls[:4] == ['generate', 'original_outlets', 'prune_short', 'candidates']
+        assert 'prune_order' not in calls
+    else:
+        assert calls == ["generate", "prune_short", "prune_order", "chnjnt", "chnjnt"]
     runner = CulvertsRunner.getInstance(str(batch_root))
     assert runner is not None
     assert runner.rq_job_ids[culvert_rq_module.CULVERT_BATCH_RQ_JOB_KEY] == parent_job.id

@@ -9,9 +9,9 @@ Restore road-constrained CULVERT inputs without moving supplied points. Culvert_
 ## Progress
 
 - [x] Diagnose seven incident point-off-stream failures and establish operator direction.
-- [ ] Review and commit reconciled contract checkpoint.
-- [ ] Implement original-outlet preparation, selection, downstream propagation, archive and admission guards.
-- [ ] Run real-raster regression tests and incident replay; complete correctness review.
+- [x] Review and commit reconciled contract checkpoint (066b04755).
+- [x] Implement original-outlet preparation, selection, downstream propagation, archive and admission guards.
+- [x] Run real-raster regression tests and incident replay; complete correctness review. Full suite attempted but collection blocked by local Flask secret configuration.
 
 ## Surprises & Discoveries
 
@@ -35,8 +35,10 @@ Prepare immutable source-bound records before candidate rasters. Reuse only matc
 
 ## Outcomes & Retrospective
 
-Pending implementation and validation. No deployment performed.
+Implemented and reviewed locally. All33 incident outlets resolve/select; all seven formerly rejected culverts generate native TOPAZ topology. Focused tests pass; full suite collection is environment-blocked. See artifacts/validation.md for commands, hashes and limits. No deployment performed.
 
 ## Interfaces and dependencies
 
 Keep native WBT FindOutlet, Rasterio and existing watershed polygon rasterization. Add original_outlets.json at batch root with relative hashed input identities and per-ID resolved/failed results. New policy basis original_outlet_v1 makes this required. Selection receipts preserve supplied point fields and add resolved outlet identity. Existing models remain responsible for NoDb persistence and run-specific channel maps.
+
+2026-11-17 completion update: retained native replay and independent approval; full-suite limit is explicit.

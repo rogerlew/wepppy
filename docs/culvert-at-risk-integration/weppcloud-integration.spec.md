@@ -322,7 +322,7 @@ For new original_outlet_v1 admissions, resolve and persist outlets on original
 streams before pruning as specified in Per-run pruning candidates. Retain supplied
 road points separately. The older initialization/processing sequence below applies
 to retained policies; new-basis runs install the frozen original outlet and do not
-seed streams or rerun FindOutlet after selection. Implementation conformance pending.
+seed streams or rerun FindOutlet after selection. Implemented locally; production deployment pending.
 
 ### Batch initialization
 Payload validation/extraction happens in the rq-engine API handler; batch topo generation and run orchestration happen inside the RQ job (`run_culvert_batch_rq`).

@@ -1,0 +1,497 @@
+[
+  {
+    "point_id": "252",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      613505.3697052752,
+      3668588.0925594154
+    ],
+    "outlet": [
+      613505.5939240988,
+      3668580.682008873
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 7.413941827327562
+  },
+  {
+    "point_id": "253",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      612814.2043145567,
+      3667966.4635580997
+    ],
+    "outlet": [
+      612815.4868065037,
+      3667965.181066153
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 1.8137175048352607
+  },
+  {
+    "point_id": "255",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      611927.8391951935,
+      3666948.671933479
+    ],
+    "outlet": [
+      611929.5384798615,
+      3666948.671933479
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 1.6992846679640934
+  },
+  {
+    "point_id": "256",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      611675.7690669465,
+      3666568.2888599555
+    ],
+    "outlet": [
+      611677.7426396578,
+      3666566.315287244
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 2.79105329479427
+  },
+  {
+    "point_id": "573",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      612779.5101836132,
+      3667593.4766563238
+    ],
+    "outlet": [
+      612778.1837190662,
+      3667592.1501917774
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 1.8759041519074258
+  },
+  {
+    "point_id": "574",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      612779.5101836132,
+      3667593.4766563238
+    ],
+    "outlet": [
+      612778.1837190662,
+      3667592.1501917774
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 1.8759041519074258
+  },
+  {
+    "point_id": "577",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      611096.7631230674,
+      3668922.9539063624
+    ],
+    "outlet": [
+      611099.5447843755,
+      3668925.7355676703
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 3.933863147649866
+  },
+  {
+    "point_id": "580",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      610128.7030611282,
+      3669129.941098707
+    ],
+    "outlet": [
+      610129.6645109986,
+      3669130.902548577
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 1.359695446307159
+  },
+  {
+    "point_id": "581",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      609877.3698394239,
+      3669447.4799604253
+    ],
+    "outlet": [
+      609877.868670795,
+      3669447.9787917966
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 0.7054540904806884
+  },
+  {
+    "point_id": "582",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      609819.5739033648,
+      3669522.5849666717
+    ],
+    "outlet": [
+      609821.9140396386,
+      3669522.5849666717
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 2.340136273764074
+  },
+  {
+    "point_id": "583",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      610640.2570181844,
+      3669716.101230638
+    ],
+    "outlet": [
+      610642.5819632652,
+      3669718.426175719
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 3.287968865194045
+  },
+  {
+    "point_id": "584",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      610631.5820135499,
+      3669345.395301343
+    ],
+    "outlet": [
+      610633.2561914058,
+      3669345.3953013434
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 1.6741778559517115
+  },
+  {
+    "point_id": "586",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      610511.4153076146,
+      3668729.288509004
+    ],
+    "outlet": [
+      610512.0211572337,
+      3668729.8943586233
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 0.8568007483931993
+  },
+  {
+    "point_id": "587",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      611032.4113692886,
+      3668067.8677960653
+    ],
+    "outlet": [
+      611024.9386095003,
+      3668077.0903284657
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 11.870014436789504
+  },
+  {
+    "point_id": "588",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      611160.3973922903,
+      3668146.7985265823
+    ],
+    "outlet": [
+      611164.8251873913,
+      3668142.3707314814
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 6.261847883182757
+  },
+  {
+    "point_id": "590",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      611183.47673111,
+      3670568.9084483413
+    ],
+    "outlet": [
+      611183.47673111,
+      3670567.0714149238
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 1.8370334175415337
+  },
+  {
+    "point_id": "591",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      612626.0847991172,
+      3671987.47530775
+    ],
+    "outlet": [
+      612628.9713693159,
+      3671984.5887375516
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 4.082226723570764
+  },
+  {
+    "point_id": "755",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      613346.9976544032,
+      3666214.742118269
+    ],
+    "outlet": [
+      613347.0558024892,
+      3666221.2617284465
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 6.519869482077915
+  },
+  {
+    "point_id": "791",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      613440.9457073903,
+      3666507.9413124453
+    ],
+    "outlet": [
+      613440.3135210831,
+      3666501.0348842284
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 6.935301741309705
+  },
+  {
+    "point_id": "792",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      613780.5902777275,
+      3667657.430594793
+    ],
+    "outlet": [
+      613776.0413080212,
+      3667657.430594793
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 4.5489697062876076
+  },
+  {
+    "point_id": "1040",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      611067.9391543816,
+      3666460.103482375
+    ],
+    "outlet": [
+      611071.5674687973,
+      3666463.731796791
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 5.131211455389255
+  },
+  {
+    "point_id": "1751",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      611781.7673911491,
+      3666704.1124247503
+    ],
+    "outlet": [
+      611771.0003582517,
+      3666706.201865135
+    ],
+    "outlet_in_mask": false,
+    "offset_m": 10.96789672335633
+  },
+  {
+    "point_id": "2871",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      615664.950005723,
+      3666011.233352941
+    ],
+    "outlet": [
+      615678.4987673373,
+      3665997.4432038213
+    ],
+    "outlet_in_mask": false,
+    "offset_m": 19.332282690433445
+  },
+  {
+    "point_id": "2900",
+    "state": "selected",
+    "passes": 0,
+    "supplied_point": [
+      612081.3319411915,
+      3668412.818115404
+    ],
+    "outlet": [
+      612078.7508296117,
+      3668412.818115404
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 2.581111579784192
+  },
+  {
+    "point_id": "2901",
+    "state": "selected",
+    "passes": 0,
+    "supplied_point": [
+      610857.4202035494,
+      3671135.9434983465
+    ],
+    "outlet": [
+      610857.0747160312,
+      3671135.9434983465
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 0.34548751823604107
+  },
+  {
+    "point_id": "2902",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      610874.7563522802,
+      3670566.1015074532
+    ],
+    "outlet": [
+      610875.72625975,
+      3670567.0714149238
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 1.3716562985527503
+  },
+  {
+    "point_id": "2904",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      610864.4242382197,
+      3670494.4414897193
+    ],
+    "outlet": [
+      610866.4004878906,
+      3670492.4652400487
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 2.794839086976422
+  },
+  {
+    "point_id": "2905",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      610744.9083650948,
+      3670196.098754825
+    ],
+    "outlet": [
+      610745.1654537185,
+      3670203.3663124074
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 7.272103394015152
+  },
+  {
+    "point_id": "2909",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      610572.9855681423,
+      3668114.393415903
+    ],
+    "outlet": [
+      610577.3015602494,
+      3668114.393415903
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 4.3159921071492136
+  },
+  {
+    "point_id": "2915",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      610875.410369286,
+      3667819.857671634
+    ],
+    "outlet": [
+      610885.0520316095,
+      3667815.968716403
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 10.396423671038155
+  },
+  {
+    "point_id": "2930",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      612563.9357144735,
+      3671732.7928973474
+    ],
+    "outlet": [
+      612563.6909663001,
+      3671732.792897348
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 0.24474817339796573
+  },
+  {
+    "point_id": "2931",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      612557.1012962387,
+      3671667.5124943317
+    ],
+    "outlet": [
+      612554.3651944407,
+      3671667.512494332
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 2.7361017980147153
+  },
+  {
+    "point_id": "2939",
+    "state": "selected",
+    "passes": 1,
+    "supplied_point": [
+      613156.6518368124,
+      3669472.0675788852
+    ],
+    "outlet": [
+      613160.5403653013,
+      3669475.9561073747
+    ],
+    "outlet_in_mask": true,
+    "offset_m": 5.499209727124414
+  }
+]

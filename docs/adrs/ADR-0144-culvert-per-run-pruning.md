@@ -57,7 +57,8 @@ resolution starts remain provisional; this result does not authorize rollout.
 Operator/Codex conversation, 2026-11-17 UTC (exact message time unrecorded);
 operator is decision owner, Codex implements. The operator requested resolving
 exact outlets on the CULVERT-supplied stream network before pruning and reconciling
-the contracts. Implementation conformance is pending.
+the contracts. Implemented locally; production deployment is pending. See the
+[repair validation](../work-packages/20261117_culvert_original_outlets/artifacts/validation.md).
 
 FindOutlet now resolves the modeled outlet on original supplied streams before
 any pruning. Selection preserves that resolved cell; downstream delineation uses

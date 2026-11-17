@@ -416,6 +416,10 @@ def _write_run_skeletons_zip(batch_root: Path) -> Path:
             paths = {batch_root / stream_selection.POLICY, batch_root / stream_selection.MANIFEST}
             for entry in manifest.get('inputs', {}).values():
                 paths.add(stream_selection.resolve(batch_root, entry, verify=True))
+            if stream_selection.uses_original_outlet(batch_root):
+                outlets = stream_selection.read_json(batch_root / stream_selection.ORIGINAL_OUTLETS)
+                for entry in outlets['inputs'].values():
+                    paths.add(stream_selection.resolve(batch_root, entry, verify=True))
             for candidate in manifest['candidates']:
                 for key in ('streams', 'junctions'):
                     paths.add(stream_selection.resolve(batch_root, candidate[key], verify=True))

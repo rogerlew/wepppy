@@ -13,11 +13,21 @@ import numpy as np
 import rasterio
 from rasterio.warp import transform
 from rasterio.windows import Window
-from whitebox_tools import WhiteboxTools
+from whitebox_tools import WhiteboxTools, WhiteboxAppError, WhiteboxToolsRunningError
 
 POLICY = 'stream_selection_policy.json'
 MANIFEST = 'stream_candidates.json'
 RECEIPT = 'stream_selection.json'
+ORIGINAL_OUTLETS = 'original_outlets.json'
+ORIGINAL_OUTLET_BASIS = 'original_outlet_v1'
+
+__all__ = [
+    'POLICY', 'MANIFEST', 'RECEIPT', 'ORIGINAL_OUTLETS', 'ORIGINAL_OUTLET_BASIS',
+    'write_json', 'read_json', 'has_policy', 'uses_original_outlet',
+    'prepare_original_outlets', 'original_outlet', 'install_original_outlet',
+    'digest', 'artifact', 'resolve', 'grid', 'grid_record', 'ready_manifest',
+    'prepare', 'select', 'topology_lock', 'reuse_ready',
+]
 
 
 def write_json(path: Path, value: dict) -> None:
@@ -43,11 +53,125 @@ def read_json(path: Path) -> dict:
 
 def has_policy(root: Path) -> bool:
     if (root / POLICY).exists():
-        read_json(root / POLICY)
+        policy = read_json(root / POLICY)
+        if policy.get('selection_basis') not in (None, ORIGINAL_OUTLET_BASIS):
+            raise ValueError('Unknown stream selection basis')
+        if policy.get('selection_basis') is None and (
+                (root / ORIGINAL_OUTLETS).exists() or
+                ((root / MANIFEST).exists() and 'original_outlets' in read_json(root / MANIFEST).get('inputs', {})) or
+                any('resolved_outlet' in read_json(p) for p in (root / 'runs').glob(f'*/{RECEIPT}'))):
+            raise ValueError('Original outlet artifacts require their selection basis')
         return True
-    if (root / MANIFEST).exists() or any((root / 'runs').glob(f'*/{RECEIPT}')):
+    if (root / ORIGINAL_OUTLETS).exists() or (root / MANIFEST).exists() or any((root / 'runs').glob(f'*/{RECEIPT}')):
         raise ValueError('Stream selection metadata exists without policy intent')
     return False
+
+
+def uses_original_outlet(root: Path) -> bool:
+    return has_policy(root) and read_json(root / POLICY).get('selection_basis') == ORIGINAL_OUTLET_BASIS
+
+
+def _positive_cell(path: Path, row: int, col: int) -> bool:
+    with rasterio.open(path) as src:
+        if not (0 <= row < src.height and 0 <= col < src.width):
+            return False
+        value = src.read(1, window=Window(col, row, 1, 1), masked=True)
+        return bool(np.ma.filled(value > 0, False).any())
+
+
+def prepare_original_outlets(root: Path, pointer: Path, original: Path, dem: Path,
+                             points_path: Path, watersheds_path: Path, runner) -> None:
+    """Resolve native drainage outlets before pruning, under the batch topology lock."""
+    inputs = {key: artifact(root, path) for key, path in
+              [('pointer', pointer), ('original', original), ('dem', dem),
+               ('points', points_path), ('watersheds', watersheds_path)]}
+    path = root / ORIGINAL_OUTLETS
+    if path.exists():
+        previous = read_json(path)
+        if previous.get('state') == 'ready':
+            if previous.get('inputs') != inputs:
+                raise ValueError('Original outlet inputs changed')
+            return
+    if (root / MANIFEST).exists() or any((root / 'runs').glob(f'*/{RECEIPT}')):
+        raise ValueError('Cannot rebuild original outlets referenced by candidates')
+    record = {'version': 1, 'state': 'preparing', 'inputs': inputs, 'outlets': {}}
+    write_json(path, record)
+    try:
+        if grid(pointer) != grid(original) or grid(dem) != grid(original):
+            raise ValueError('Original outlet grid mismatch')
+        features = runner.load_watershed_features(str(watersheds_path))
+        points, point_crs = runner.load_culvert_points(str(points_path))
+        if not point_crs:
+            raise ValueError('Original outlet input points require CRS')
+        with tempfile.TemporaryDirectory(dir=root, prefix='.original-outlets-') as tmp:
+            mask, output = Path(tmp) / 'mask.tif', Path(tmp) / 'outlet.geojson'
+            wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+            wbt.set_working_dir(tmp)
+            for point_id, feature in features.items():
+                if point_id not in points:
+                    record['outlets'][point_id] = {'state': 'failed', 'reason': 'missing_supplied_point'}
+                    continue
+                item = {'supplied_point': list(points[point_id]), 'supplied_point_crs': point_crs}
+                feature.build_raster_mask(template_filepath=str(original), dst_filepath=str(mask))
+                output.unlink(missing_ok=True)
+                try:
+                    wbt.find_outlet(d8_pntr=str(pointer), streams=str(original),
+                                    watershed=str(mask), output=str(output))
+                except (WhiteboxAppError, WhiteboxToolsRunningError) as exc:
+                    if 'Failed to identify an outlet stream cell' not in str(exc):
+                        raise
+                    record['outlets'][point_id] = dict(item, state='failed', reason='no_original_stream_outlet')
+                    continue
+                geojson = json.loads(output.read_text())
+                xy = geojson['features'][0]['geometry']['coordinates'][:2]
+                with rasterio.open(original) as src:
+                    row, col = src.index(*xy)
+                    center = list(src.xy(row, col))
+                    crs = str(src.crs)
+                if not np.allclose(xy, center, rtol=0, atol=1e-6) or not _positive_cell(original, row, col):
+                    raise ValueError(f'FindOutlet returned invalid original stream cell for {point_id}')
+                record['outlets'][point_id] = dict(item, state='resolved', coordinates=center,
+                                                  crs=crs, cell=[row, col], geojson=geojson)
+        write_json(path, dict(record, state='ready'))
+    except (OSError, ValueError, KeyError, IndexError, RuntimeError, WhiteboxAppError, WhiteboxToolsRunningError) as exc:
+        write_json(path, dict(record, state='failed', error=type(exc).__name__))
+        raise
+
+
+def original_outlet(root: Path, point_id: str) -> dict:
+    record = read_json(root / ORIGINAL_OUTLETS)
+    if record.get('state') != 'ready':
+        raise ValueError('Original outlets are not ready')
+    for entry in record['inputs'].values():
+        resolve(root, entry, verify=True)
+    outlet = record['outlets'][point_id]
+    if outlet.get('state') != 'resolved':
+        raise ValueError(f'No original stream outlet for Point_ID {point_id}: {outlet.get("reason")}')
+    return outlet
+
+
+def install_original_outlet(root: Path, point_id: str, streams: Path, output: Path) -> None:
+    """Write the frozen outlet with run-grid indices, never rerun FindOutlet."""
+    ready_manifest(root)  # Includes immutable outlet record identity verification.
+    outlet = original_outlet(root, point_id)
+    with rasterio.open(streams) as src:
+        if str(src.crs) != outlet['crs']:
+            raise ValueError('Run outlet CRS differs from original')
+        row, col = src.index(*outlet['coordinates'])
+        if not np.allclose(src.xy(row, col), outlet['coordinates'], rtol=0, atol=1e-6):
+            raise ValueError('Run outlet grid differs from original')
+    if not _positive_cell(streams, row, col):
+        raise ValueError('Resolved original outlet missing from run stream network')
+    geojson = outlet['geojson']
+    props = geojson['features'][0]['properties']
+    # Native diagnostic row/column fields refer to the original batch grid.
+    # Keep them in original_outlets.json; run GeoJSON must use the cropped grid.
+    geojson['features'][0]['properties'] = {
+        'row': row, 'column': col, 'easting': outlet['coordinates'][0],
+        'northing': outlet['coordinates'][1], 'epsg': props.get('epsg'),
+        'selection_basis': ORIGINAL_OUTLET_BASIS,
+    }
+    write_json(output, geojson)
 
 
 def digest(path: Path) -> str:
@@ -86,6 +210,8 @@ def ready_manifest(root: Path) -> dict:
     manifest = read_json(root / MANIFEST)
     if manifest.get('state') != 'ready':
         raise ValueError('Stream candidates are not ready')
+    if uses_original_outlet(root):
+        resolve(root, manifest['inputs']['original_outlets'], verify=True)
     count = manifest.get('starting_passes')
     candidates = manifest.get('candidates')
     if type(count) is not int or count < 0 or not isinstance(candidates, list):
@@ -114,6 +240,11 @@ def _prepare(root: Path, pointer: Path, short_streams: Path, original: Path, cou
               [('pointer', pointer), ('original', original)]}
     if dem is not None:
         inputs['dem'] = artifact(root, dem)
+    if uses_original_outlet(root):
+        outlets = read_json(root / ORIGINAL_OUTLETS)
+        if outlets.get('state') != 'ready':
+            raise ValueError('Original outlets must be ready before pruning candidates')
+        inputs['original_outlets'] = artifact(root, root / ORIGINAL_OUTLETS)
     if (root / MANIFEST).exists() and read_json(root / MANIFEST).get('state') == 'ready':
         manifest = ready_manifest(root)
         if manifest['starting_passes'] != count or manifest.get('inputs') != inputs:
@@ -169,11 +300,18 @@ def _select(root: Path, run: Path, point_id: str, xy: tuple, point_crs: str, mas
         raise ValueError('Missing stream selection policy')
     manifest = ready_manifest(root)
     receipt_path = run / RECEIPT
+    resolved = original_outlet(root, point_id) if uses_original_outlet(root) else None
+    if resolved and (resolved['supplied_point'] != list(xy) or resolved['supplied_point_crs'] != point_crs):
+        raise ValueError('Supplied point differs from original outlet inputs')
+    selection_xy = resolved['coordinates'] if resolved else xy
+    selection_crs = resolved['crs'] if resolved else point_crs
     if receipt_path.exists():
         receipt = read_json(receipt_path)
         if (receipt.get('state') != 'selected' or receipt.get('point_id') != point_id
                 or receipt.get('point') != list(xy) or receipt.get('point_crs') != point_crs):
             raise ValueError('Invalid or failed stream selection receipt')
+        if resolved and receipt.get('resolved_outlet') != resolved:
+            raise ValueError('Selection receipt original outlet changed')
         candidate = next((c for c in manifest['candidates'] if c['passes'] == receipt.get('selected_passes')), None)
         if candidate is None or candidate != receipt.get('candidate'):
             raise ValueError('Stream selection receipt does not match manifest')
@@ -186,7 +324,7 @@ def _select(root: Path, run: Path, point_id: str, xy: tuple, point_crs: str, mas
         with rasterio.open(streams) as src, rasterio.open(mask) as target:
             if grid(streams) != grid(mask):
                 raise ValueError('Selection mask grid mismatch')
-            xs, ys = transform(point_crs, src.crs, [xy[0]], [xy[1]])
+            xs, ys = transform(selection_crs, src.crs, [selection_xy[0]], [selection_xy[1]])
             row, col = src.index(xs[0], ys[0])
             intersects = False
             if 0 <= row < src.height and 0 <= col < src.width:
@@ -198,10 +336,18 @@ def _select(root: Path, run: Path, point_id: str, xy: tuple, point_crs: str, mas
                     if inside.any() and np.any(inside & np.ma.filled(src.read(1, window=window, masked=True) > 0, False)):
                         coverage = True
                         break
-        reason = 'selected' if intersects and coverage else 'point_off_stream' if not intersects else 'no_watershed_coverage'
+        if not intersects:
+            reason = 'outlet_not_retained' if resolved else 'point_off_stream'
+        else:
+            reason = 'selected' if coverage else 'no_watershed_coverage'
         attempted.append({'passes': candidate['passes'], 'reason': reason})
         receipt = {'version': 1, 'point_id': point_id, 'starting_passes': manifest['starting_passes'],
                    'point': list(xy), 'point_crs': point_crs, 'cell': [row, col], 'attempted': attempted}
+        if resolved:
+            receipt['resolved_outlet'] = resolved
+            with rasterio.open(streams) as src:
+                px, py = transform(point_crs, src.crs, [xy[0]], [xy[1]])
+                receipt['cell'] = list(src.index(px[0], py[0]))
         if intersects and coverage:
             paths = tuple(str(resolve(root, candidate[k], verify=True)) for k in ('streams', 'junctions'))
             write_json(receipt_path, dict(receipt, state='selected', selected_passes=candidate['passes'], candidate=candidate))

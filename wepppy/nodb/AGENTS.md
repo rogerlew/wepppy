@@ -210,3 +210,7 @@ field by field or delete unrelated live ownership.
 
 Culvert per-run candidate/receipt lifecycle and legacy compatibility follow
 `docs/schemas/culvert-stream-selection-contract.md`.
+
+New culvert admissions resolve and persist original-stream outlets before pruning;
+retain road-point coordinates separately and install the fixed outlet downstream.
+See the selection contract for original_outlet_v1 and retained-policy compatibility.

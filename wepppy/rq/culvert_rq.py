@@ -40,6 +40,7 @@ from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb import culvert_stream_selection as stream_selection
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
 from wepppy.nodb.core.watershed import NoOutletFoundError
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.skeletonize import RUN_SKELETON_ALLOWLIST, skeletonize_run
 from wepppy.nodb.wepp_nodb_post_utils import (
     activate_query_engine_for_run,
@@ -251,6 +252,16 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
                 Path(streams_src),
                 Path(flovec_src),
                 Path(netful_src),
+            )
+
+        if stream_selection.uses_original_outlet(batch_root):
+            points_src = runner._resolve_payload_path(
+                payload_metadata, "culvert_points", runner.DEFAULT_CULVERT_POINTS_REL_PATH,
+                str(batch_root),
+            )
+            stream_selection.prepare_original_outlets(
+                batch_root, Path(flovec_src), Path(streams_src), Path(dem_src),
+                Path(points_src), Path(watersheds_src), runner,
             )
 
         # Get cellsize from DEM for minimal stream pruning (2 * cellsize)
@@ -1440,7 +1451,22 @@ def _process_culvert_run(
             # Try find_outlet; if it fails due to no streams, seed and retry.
             outlet_pixel: Optional[Tuple[int, int]] = None
             try:
-                watershed.find_outlet(watershed_feature=watershed_feature)
+                batch_root = _resolve_batch_root(culvert_batch_uuid)
+                if stream_selection.uses_original_outlet(batch_root):
+                    watershed_feature.build_raster_mask(
+                        template_filepath=watershed.ron_instance.dem_fn,
+                        dst_filepath=watershed.target_watershed_path,
+                    )
+                    stream_selection.install_original_outlet(
+                        batch_root, run_id, Path(wbt.netful), Path(wbt.outlet_geojson),
+                    )
+                    watershed.outlet = wbt.set_outlet_from_geojson(logger=logger)
+                    try:
+                        RedisPrep.getInstance(wd).timestamp(TaskEnum.find_outlet)
+                    except FileNotFoundError:
+                        pass
+                else:
+                    watershed.find_outlet(watershed_feature=watershed_feature)
                 area_error = _minimum_watershed_area_error(
                     run_id=run_id,
                     watershed_feature=watershed_feature,
@@ -1715,7 +1741,7 @@ def _sum_d8_neighbor_mask(
                 row_stop - row_start,
             )
             data = src.read(1, window=window)
-    except Exception:
+    except Exception:  # broad-except: diagnostic mask read must not replace the model failure
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq.py:1597", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return None

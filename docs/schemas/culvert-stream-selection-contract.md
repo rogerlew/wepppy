@@ -1,6 +1,6 @@
 # Culvert per-run stream selection
 
-Status: amended 2026-11-17 by operator direction; implementation conformance pending.
+Status: amended 2026-11-17 by operator direction; implemented locally; production deployment pending.
 
 ## Authority and purpose
 
