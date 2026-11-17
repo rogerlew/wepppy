@@ -1,17 +1,17 @@
 # Roads code quality refactor tracker
 
-**Status**: Open; execution started; M1 baseline in progress
-**Updated**: 2026-11-17 22:37 UTC
+**Status**: Open; implementation complete, final acceptance in progress
+**Updated**: 2026-11-17 UTC
 
 ## Task Board
 
 - [x] Inspect controller, existing helpers, contracts, and test entry points.
 - [x] Record measured baseline and bounded extraction map.
 - [x] Create package and active ExecPlan on isolated task branch.
-- [ ] M1: Characterize facade, persistence, failure, and artifact behavior.
-- [ ] M2: Extract input parsing and preparation orchestration.
-- [ ] M3: Extract native writers and design-specific execution stages.
-- [ ] M4: Extract PASS routing, accounting/publication, and queries.
+- [x] M1: Characterize facade, persistence, failure, and artifact behavior.
+- [x] M2: Extract input parsing and preparation orchestration.
+- [x] M3: Extract native writers and design-specific execution stages.
+- [x] M4: Extract PASS routing, accounting/publication, and queries.
 - [ ] M5: Complete parity evidence, reviews, documentation, and quality assessment.
 
 ## Decisions
@@ -22,15 +22,15 @@
 
 ## Risks and open evidence
 
-Native-project source availability and the candidate container identity are not yet verified. Host complexity measurement is unavailable. Existing native-suite documentation has stale unrutted negative-case wording; characterize the current source before choosing positive/negative fixtures. Shared checkout has unrelated WIP; work is isolated at `/home/workdir/wepppy-roads-code-quality` on `codex/roads-code-quality-package`.
+Native source fixtures and isolated container identities are verified. RUPC-02 validation wording is reconciled with operator approval. Candidate native/project comparisons and the broad suite remain open. Complexity is measured using the existing /usr/bin/python interpreter with Radon; see artifacts/quality_metrics.md. Shared checkout has unrelated WIP; work is isolated at `/home/workdir/wepppy-roads-code-quality` on `codex/roads-code-quality-package`.
 
 ## Verification
 
-Planning measurements are in [baseline.md](artifacts/baseline.md). All four package Markdown files plus root AGENTS and PROJECT_TRACKER passed `wctl doc-lint` using individual absolute file paths (six files, zero errors/warnings). Spelling previews and `git diff --check` were clean; root AGENTS size gate passed at 160 lines. Relative directory lint inspected zero files; absolute directory lint reported file-resolution errors, so neither directory invocation counted as validation. Individual absolute paths avoided that wrapper/path issue. No runtime implementation or runtime test result is claimed.
+Planning measurements are in [baseline.md](artifacts/baseline.md). All four package Markdown files plus root AGENTS and PROJECT_TRACKER passed `wctl doc-lint` using individual absolute file paths (six files, zero errors/warnings). Spelling previews and `git diff --check` were clean; root AGENTS size gate passed at 160 lines. Relative directory lint inspected zero files; absolute directory lint reported file-resolution errors, so neither directory invocation counted as validation. Individual absolute paths avoided that wrapper/path issue. This paragraph records the original planning gate; runtime results follow below.
 
 ## Next action
 
-Execute M1 in the [active plan](prompts/active/roads_code_quality_refactor_execplan.md). Recheck source drift and relevant instructions first. Use one writer per source file and one integrator. Keep this tracker and the plan current at each milestone.
+Complete M5 in the [active plan](prompts/active/roads_code_quality_refactor_execplan.md). Recheck source drift and relevant instructions first. Use one writer per source file and one integrator. Keep this tracker and the plan current at each milestone.
 
 ## Completion states
 
@@ -65,3 +65,27 @@ missing mixed-design accumulator coverage; a focused regression is in progress.
 Security requested direct evidence for the new bounded sanitized warning on the
 legacy diagnostic-list continuation path; tests are prepared. Both remain open
 until their candidate test receipts pass.
+
+## Final acceptance progress - 2026-11-17 UTC
+
+Production source checkpoint: `5ef264810`. Mixed execution and direct sanitized
+diagnostic tests pass (4/4), closing the two review coverage gaps. All 143 facade
+signatures/decorators remain unchanged. Source reviews have no medium/high
+findings. The ordinary archive test fixture required isolation from inherited
+vector-retention settings: the broad run's RecordingRedis.eval failure reproduced
+on the original 96555f2f9 baseline; the bounded fixture correction passes 73 tests.
+No production archive/retention behavior changed. The broad suite is rerunning
+with read-only shared Git metadata mounted for worktree-aware repository checks.
+Candidate native validation passed 527 tests (516 profiles); all 6,192 native
+files are byte-identical and all 516 parsed scientific summaries match. All five
+project controls match across 4,577 artifact comparisons, with 92 parquet
+field-metadata schema checks. Historical publication checks pass (3 tests),
+retaining original report/results/provenance and explicit stale status. Broad
+validation remains pending.
+
+Second broad run: 1,769 passed, 41 skipped, one inherited fork-route fixture
+failure (`DummyRedis.sismember`), reproduced on immutable baseline. The analogous
+test-only environment isolation correction passes all 65 route tests and is
+independently reviewed, committed as `43cb4e78f`. Third broad run in progress.
+Final focused Roads selection passes 413 tests, one skipped. All 37 frozen
+Roads source hashes match the tested snapshot and committed `d6ecf9a2a`.

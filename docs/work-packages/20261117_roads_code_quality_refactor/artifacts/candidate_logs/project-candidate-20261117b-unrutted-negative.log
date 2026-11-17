@@ -1,0 +1,17 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy-roads-code-quality:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-_qjfdbgs a170790e7ef7064d3e1731ae323e1178e3b6fc2d8b96db1e21ee24564007b722 && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python /tmp/roads-refactor-validation/candidate_project_parity.py candidate-20261117b --design unrutted-negative'
+time="2026-11-17T15:10:04-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-c7ab2c3f1689 Creating 
+ Container docker-weppcloud-run-c7ab2c3f1689 Created 
+SOURCE_IMPORTED /workdir/wepppy/wepppy/nodb/mods/roads/roads.py
+PROJECT_DONE unrutted-negative /wc1/runs/rq/roads-quality-candidate-20261117b-unrutted-negative

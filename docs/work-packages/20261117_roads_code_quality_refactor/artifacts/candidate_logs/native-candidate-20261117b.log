@@ -1,0 +1,34 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy-roads-code-quality:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-spy1m3o6 400566931ff5689389c04b8a6ebb907da5647db60f44c57d208963635ae710b2 && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy:/tmp/roads-refactor-validation MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/roads/test_roads_contracts.py tests/roads/test_roads_matrix.py --basetemp=/tmp/roads-refactor-validation/native-candidate-20261117b --maxfail=1 -q'
+time="2026-11-17T15:08:18-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-3143f66fd20d Creating 
+ Container docker-weppcloud-run-3143f66fd20d Created 
+........................................................................ [ 13%]
+........................................................................ [ 27%]
+........................................................................ [ 40%]
+........................................................................ [ 54%]
+........................................................................ [ 68%]
+........................................................................ [ 81%]
+........................................................................ [ 95%]
+.......................                                                  [100%]
+=============================== warnings summary ===============================
+tests/roads/test_roads_contracts.py::test_all_four_textures_and_factor_coverage
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/roads/test_roads_contracts.py::test_all_four_textures_and_factor_coverage
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+527 passed, 2 warnings in 373.32s (0:06:13)

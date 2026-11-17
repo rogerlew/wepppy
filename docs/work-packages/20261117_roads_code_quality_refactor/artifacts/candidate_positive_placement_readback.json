@@ -1,0 +1,17 @@
+{
+  "root": "/wc1/runs/rq/roads-quality-candidate-20261117b-unrutted-positive",
+  "roads_nodb_sha256": "9dadac4b9c727abacffea9c278f740b8d655cef0b9204abbfa9bc854b028ecd0",
+  "profiles": 24,
+  "strips": 15,
+  "remainders": 9,
+  "top_placed_strips": 6,
+  "all_strip_source_ids_nonempty": true,
+  "top_placed_ids": [
+    "roads-seg-000006::cac93d14f326::h42",
+    "roads-seg-000005::h42",
+    "roads-seg-000005::7d9376e34ba1::h43",
+    "roads-seg-000005::effc04073fe3::h62",
+    "roads-seg-000007::h82",
+    "roads-seg-000007::07b3c7655e24::h141"
+  ]
+}

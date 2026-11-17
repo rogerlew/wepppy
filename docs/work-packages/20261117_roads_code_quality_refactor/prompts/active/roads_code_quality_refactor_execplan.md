@@ -18,7 +18,9 @@ Make the Roads controller easier to change and review without changing the scien
 
 ## Surprises & Discoveries
 
-The current source is 5,907 SLOC (6,447 physical lines), not the earlier 5,834 count. The host quality analyzer cannot measure cyclomatic complexity because its optional radon support is unavailable. Existing `_unrutted` and parameterization collaborators should be extended or reused rather than duplicated. Native-suite documentation still names old non-positive-upstream expected failures, while the current contract supports top placement; establish actual baseline outcomes first.
+The current source is 5,907 SLOC (6,447 physical lines), not the earlier 5,834 count. The default python3 and container lack optional Radon support; final QA discovered an existing /usr/bin/python with Radon 6.0.1 and measured complexity without installing dependencies. Existing `_unrutted` and parameterization collaborators should be extended or reused rather than duplicated. Native-suite documentation still names old non-positive-upstream expected failures, while the current contract supports top placement; establish actual baseline outcomes first.
+
+The first broad run exposed inherited archive-fixture environment coupling, reproduced on the immutable baseline. A bounded test-only environment reset passes 73 archive tests. No production archive behavior changed. Default wctl test execution correctly refused the task checkout mismatch; isolated one-off containers use the canonical nonce guard and read-only shared Git metadata.
 
 ## Decision Log
 
@@ -28,9 +30,11 @@ The current source is 5,907 SLOC (6,447 physical lines), not the earlier 5,834 c
 
 2026-11-17, Codex: Adapt the module-quality workflow to root AGENTS: quality bands remain observe-only. Aim below red for every extracted file, retain numeric deltas and reviewer rationale, and avoid metric-driven fragmentation. The template's automatic red-band merge block does not override root instructions.
 
+2026-11-17, operator: Use RUPC-02 as authority for current project validation, retaining explicit road-plus-fill overflow rejection. Exact scope and rationale are in artifacts/contract_reconciliation.md. Historical outputs remain unchanged and stale; independently reviewed source drift is acknowledged in the staleness ledger with provenance and fresh refactor evidence linked separately.
+
 ## Outcomes & Retrospective
 
-Execution authorized on 2026-11-17. M1 mapping is retained; baseline tests are running in an isolated checkout-verified container. Production extraction has not started.
+Implementation is complete at 5ef264810. The facade fell from 5,907 to 1,888 SLOC and its execution method from 2,069 to 269 lines. Aggregate source grew 31% because compatibility adapters and explicit stage parameters were retained. Source reviews have no medium/high findings. All 516 native profiles have byte-identical files and exact parsed scientific summaries; all five project controls match across 4,577 artifact comparisons. Broad acceptance remains pending. See artifacts/quality_metrics.md for residual unchanged validation/query hotspots and artifacts/qa_review.md for tradeoffs.
 
 ## Context and Orientation
 

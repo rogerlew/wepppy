@@ -16,6 +16,10 @@
       "recorded": null,
       "current": "1f2ee6564fa5e01a63dde1503b120a483943b9a759fd29ac778dcc7b26354246"
     },
+    "tests/roads/test_roads_project.py": {
+      "recorded": "e5e53d386bcd12b26020604be4508fb5db1d0bfa42c261b3de13a14c27cb1693",
+      "current": "7ff4de831cc04e5cee9c54779e3f168af0177072a4a546b2f8ed16d651c8b73f"
+    },
     "tests/roads/test_roads_publication.py": {
       "recorded": "bf9ad2005a07c853888013eda9de8990d783efa5d64a10fb77f9fa438956f60c",
       "current": "b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862"
@@ -24,9 +28,89 @@
       "recorded": null,
       "current": "1ae7e36579948c79c8b7d938900b30e0dc47158b6a421f7c41de4211634919db"
     },
+    "tests/roads/unrutted_project.py": {
+      "recorded": null,
+      "current": "6a8e9ed608c2d172cb8cd53ce18b3a3b927c153b4eb75a0a90ed12d57827c72d"
+    },
+    "wepppy/nodb/mods/roads/_constants.py": {
+      "recorded": null,
+      "current": "a44595427152e3ab93d80f4d9cefe940430d7f7b732ab596ace9fd2c53f10561"
+    },
+    "wepppy/nodb/mods/roads/_execution.py": {
+      "recorded": null,
+      "current": "15c408dec725c4e7e93e75984c2884ed67f337034102209502a1bb79d6c87b0d"
+    },
+    "wepppy/nodb/mods/roads/_inputs.py": {
+      "recorded": null,
+      "current": "31c51b50f207cde9fb7a130d02738ddee3b4bccd7045957e25442a94063559d6"
+    },
+    "wepppy/nodb/mods/roads/_management_inputs.py": {
+      "recorded": null,
+      "current": "f92d3b2ab7d6a8a2025d41e94d8f93d683d583fd51f04d17199f2331bc63ca3f"
+    },
+    "wepppy/nodb/mods/roads/_native_runner.py": {
+      "recorded": null,
+      "current": "cc553403ea447b9eb8044e10df50e59db7a00235b9921341d4456a2f61210e20"
+    },
     "wepppy/nodb/mods/roads/_parameterization_comparisons.py": {
       "recorded": null,
-      "current": "6e6ee7abbebc1916931a056477cd8064fc83b83262ef5e9791b781df4d293f0a"
+      "current": "394599497dd62f6ac2cee494829aef44239bb5caf1504745c00596228fe4ba04"
+    },
+    "wepppy/nodb/mods/roads/_parameterization_support.py": {
+      "recorded": null,
+      "current": "362ac0339308df1ec41b362aaca2de654ef25763713cba79019177d0b986b33f"
+    },
+    "wepppy/nodb/mods/roads/_pass_routing.py": {
+      "recorded": null,
+      "current": "4e954fb59c108d21ebbb67a2deadda027cd01d4c8182bc9b37e0217cd5ef6d47"
+    },
+    "wepppy/nodb/mods/roads/_point_source.py": {
+      "recorded": null,
+      "current": "8e489ea4020adf32fdc0d24a672cb0153f27db91ad524df4fada90da066f4d4a"
+    },
+    "wepppy/nodb/mods/roads/_prepare.py": {
+      "recorded": null,
+      "current": "b77a2208c634d2e8f5189a5c84e80320b34ce9d8f10977d389cce82baf1b340d"
+    },
+    "wepppy/nodb/mods/roads/_queries.py": {
+      "recorded": null,
+      "current": "f2fc4179d65b9eda931ac823abdffa86d0ce7d3fa3b73bc2796695b8739832a3"
+    },
+    "wepppy/nodb/mods/roads/_reporting.py": {
+      "recorded": null,
+      "current": "493a509c8d2cc4e23a7993cede9dc1b9b044587b984d804a898587a8e3820a82"
+    },
+    "wepppy/nodb/mods/roads/_slope_inputs.py": {
+      "recorded": null,
+      "current": "fd23e48ca799755eb4e36a16fdc1e3fe49fdd0dc2cfe7c184150637ab8ba459b"
+    },
+    "wepppy/nodb/mods/roads/_soil_inputs.py": {
+      "recorded": null,
+      "current": "fcbdf4d840cf9cd555f79eae79de5a90cba33e78d47740e3149c9a5c935fe595"
+    },
+    "wepppy/nodb/mods/roads/_spatial.py": {
+      "recorded": null,
+      "current": "02b84f6bffd77f95854736dd842874e067aa29f31d1e38034c3439b57f04137e"
+    },
+    "wepppy/nodb/mods/roads/_unrutted.py": {
+      "recorded": null,
+      "current": "9ab3aa83737b259ee6fe9a74b21391764de4757db6e62e3e50a5891d50bc9784"
+    },
+    "wepppy/nodb/mods/roads/_unrutted_execution.py": {
+      "recorded": null,
+      "current": "b89ff1633caf18b8ecc26987f4943729078f156876a78bb84e4ae1d07873232f"
+    },
+    "wepppy/nodb/mods/roads/_unrutted_native.py": {
+      "recorded": null,
+      "current": "587670bd59956c1ee04d066542b3ff837c1627a5d1ba592c6dc955e2511f4001"
+    },
+    "wepppy/nodb/mods/roads/_unrutted_planning.py": {
+      "recorded": null,
+      "current": "340fb7d58ae15f775476fcb541f0df9d39f67bb463aaeba3f61d296153a469ae"
+    },
+    "wepppy/nodb/mods/roads/monotonic_segments.py": {
+      "recorded": "2b8d6be522233b6444ca21639dfc46a63775125178f97241cc8c4120f911ad5f",
+      "current": "6600bdf6b03f675f31165dce8442d712dd093e7c0fc9c069691ef8d1c8b6ae06"
     },
     "wepppy/nodb/mods/roads/parameterization.py": {
       "recorded": null,
@@ -34,11 +118,11 @@
     },
     "wepppy/nodb/mods/roads/roads.py": {
       "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
-      "current": "72c38b63ec51ffade9fc10268cd092204bd071272099906a51ddbd9c8fd81c52"
+      "current": "a53920220275bc46afc2ba405f061788c3621b87fc22b4c0bcbd3a3796775321"
     },
     "wepppy/wepp/interchange/_roads_lifecycle.py": {
       "recorded": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
-      "current": "187f6b3003859ba1b5a02bffc9909243951409313100e5dcd5ba0a8966ff2760"
+      "current": "86019c49af0c34382f6f1301d22588e53bb10c048b13744e4ac4499457352eaa"
     },
     "wepppy/wepp/management/managements.py": {
       "recorded": null,
@@ -222,6 +306,112 @@
       "current_sha256": "187f6b3003859ba1b5a02bffc9909243951409313100e5dcd5ba0a8966ff2760",
       "scope": "Add restore_retained for a failed upload mutation under the existing Roads writer guard; restore prior outputs, runs, segments and caches from that mutation snapshot. Existing retention, model execution, formulas and output accounting are unchanged. Historical full-project routing evidence remains explicitly stale; this review does not refresh it.",
       "evidence": "docs/work-packages/20261116_vector_upload_normalization/artifacts/20261117_resumed_qa_review.md#roads-publication-provenance-disposition"
+    },
+    {
+      "date": "2026-11-17",
+      "reviewed_source_revision": "5ef26481068cada863371d34b2d62ffd2c6e77fa",
+      "scope": "Acknowledge prior independently reviewed RUPC-01/RUPC-02 drift plus behavior-preserving Roads facade extraction and current-policy project harness. Original published report, matrix results, execution provenance and explicit stale status remain unchanged. Fresh candidate parity is separate evidence, not recertification of historical results.",
+      "source_deltas": {
+        "tests/roads/test_roads_project.py": {
+          "previous_reviewed": "e5e53d386bcd12b26020604be4508fb5db1d0bfa42c261b3de13a14c27cb1693",
+          "current": "7ff4de831cc04e5cee9c54779e3f168af0177072a4a546b2f8ed16d651c8b73f"
+        },
+        "tests/roads/unrutted_project.py": {
+          "previous_reviewed": null,
+          "current": "6a8e9ed608c2d172cb8cd53ce18b3a3b927c153b4eb75a0a90ed12d57827c72d"
+        },
+        "wepppy/nodb/mods/roads/_constants.py": {
+          "previous_reviewed": null,
+          "current": "a44595427152e3ab93d80f4d9cefe940430d7f7b732ab596ace9fd2c53f10561"
+        },
+        "wepppy/nodb/mods/roads/_execution.py": {
+          "previous_reviewed": null,
+          "current": "15c408dec725c4e7e93e75984c2884ed67f337034102209502a1bb79d6c87b0d"
+        },
+        "wepppy/nodb/mods/roads/_inputs.py": {
+          "previous_reviewed": null,
+          "current": "31c51b50f207cde9fb7a130d02738ddee3b4bccd7045957e25442a94063559d6"
+        },
+        "wepppy/nodb/mods/roads/_management_inputs.py": {
+          "previous_reviewed": null,
+          "current": "f92d3b2ab7d6a8a2025d41e94d8f93d683d583fd51f04d17199f2331bc63ca3f"
+        },
+        "wepppy/nodb/mods/roads/_native_runner.py": {
+          "previous_reviewed": null,
+          "current": "cc553403ea447b9eb8044e10df50e59db7a00235b9921341d4456a2f61210e20"
+        },
+        "wepppy/nodb/mods/roads/_parameterization_comparisons.py": {
+          "previous_reviewed": "6e6ee7abbebc1916931a056477cd8064fc83b83262ef5e9791b781df4d293f0a",
+          "current": "394599497dd62f6ac2cee494829aef44239bb5caf1504745c00596228fe4ba04"
+        },
+        "wepppy/nodb/mods/roads/_parameterization_support.py": {
+          "previous_reviewed": null,
+          "current": "362ac0339308df1ec41b362aaca2de654ef25763713cba79019177d0b986b33f"
+        },
+        "wepppy/nodb/mods/roads/_pass_routing.py": {
+          "previous_reviewed": null,
+          "current": "4e954fb59c108d21ebbb67a2deadda027cd01d4c8182bc9b37e0217cd5ef6d47"
+        },
+        "wepppy/nodb/mods/roads/_point_source.py": {
+          "previous_reviewed": null,
+          "current": "8e489ea4020adf32fdc0d24a672cb0153f27db91ad524df4fada90da066f4d4a"
+        },
+        "wepppy/nodb/mods/roads/_prepare.py": {
+          "previous_reviewed": null,
+          "current": "b77a2208c634d2e8f5189a5c84e80320b34ce9d8f10977d389cce82baf1b340d"
+        },
+        "wepppy/nodb/mods/roads/_queries.py": {
+          "previous_reviewed": null,
+          "current": "f2fc4179d65b9eda931ac823abdffa86d0ce7d3fa3b73bc2796695b8739832a3"
+        },
+        "wepppy/nodb/mods/roads/_reporting.py": {
+          "previous_reviewed": null,
+          "current": "493a509c8d2cc4e23a7993cede9dc1b9b044587b984d804a898587a8e3820a82"
+        },
+        "wepppy/nodb/mods/roads/_slope_inputs.py": {
+          "previous_reviewed": null,
+          "current": "fd23e48ca799755eb4e36a16fdc1e3fe49fdd0dc2cfe7c184150637ab8ba459b"
+        },
+        "wepppy/nodb/mods/roads/_soil_inputs.py": {
+          "previous_reviewed": null,
+          "current": "fcbdf4d840cf9cd555f79eae79de5a90cba33e78d47740e3149c9a5c935fe595"
+        },
+        "wepppy/nodb/mods/roads/_spatial.py": {
+          "previous_reviewed": null,
+          "current": "02b84f6bffd77f95854736dd842874e067aa29f31d1e38034c3439b57f04137e"
+        },
+        "wepppy/nodb/mods/roads/_unrutted.py": {
+          "previous_reviewed": null,
+          "current": "9ab3aa83737b259ee6fe9a74b21391764de4757db6e62e3e50a5891d50bc9784"
+        },
+        "wepppy/nodb/mods/roads/_unrutted_execution.py": {
+          "previous_reviewed": null,
+          "current": "b89ff1633caf18b8ecc26987f4943729078f156876a78bb84e4ae1d07873232f"
+        },
+        "wepppy/nodb/mods/roads/_unrutted_native.py": {
+          "previous_reviewed": null,
+          "current": "587670bd59956c1ee04d066542b3ff837c1627a5d1ba592c6dc955e2511f4001"
+        },
+        "wepppy/nodb/mods/roads/_unrutted_planning.py": {
+          "previous_reviewed": null,
+          "current": "340fb7d58ae15f775476fcb541f0df9d39f67bb463aaeba3f61d296153a469ae"
+        },
+        "wepppy/nodb/mods/roads/monotonic_segments.py": {
+          "previous_reviewed": "2b8d6be522233b6444ca21639dfc46a63775125178f97241cc8c4120f911ad5f",
+          "current": "6600bdf6b03f675f31165dce8442d712dd093e7c0fc9c069691ef8d1c8b6ae06"
+        },
+        "wepppy/nodb/mods/roads/roads.py": {
+          "previous_reviewed": "72c38b63ec51ffade9fc10268cd092204bd071272099906a51ddbd9c8fd81c52",
+          "current": "a53920220275bc46afc2ba405f061788c3621b87fc22b4c0bcbd3a3796775321"
+        },
+        "wepppy/wepp/interchange/_roads_lifecycle.py": {
+          "previous_reviewed": "187f6b3003859ba1b5a02bffc9909243951409313100e5dcd5ba0a8966ff2760",
+          "current": "86019c49af0c34382f6f1301d22588e53bb10c048b13744e4ac4499457352eaa"
+        }
+      },
+      "evidence": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/provenance_review.md",
+      "source_review": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/qa_review.md",
+      "outcome_evidence": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_validation.md"
     }
   ]
 }

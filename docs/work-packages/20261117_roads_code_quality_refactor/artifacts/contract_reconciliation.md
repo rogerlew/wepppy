@@ -13,9 +13,10 @@ section and `tests/roads/README.md` are reconciled to that existing behavior.
 
 No production behavior, defaults, geometry formula, queue, schema, security
 boundary or parameterization changes are authorized by this reconciliation.
-Historical published artifacts stay unchanged. Current-policy project harness
-updates and fresh native output evidence are still required; no prior report is
-recertified by replacing hashes or wording.
+Historical published artifacts stay unchanged. The current-policy project harness now exercises the approved positive and
+oversized-negative controls; fresh evidence is recorded separately in
+`candidate_validation.md`. No prior report is recertified by replacing hashes or
+wording.
 
 ## Compatibility and regression plan
 

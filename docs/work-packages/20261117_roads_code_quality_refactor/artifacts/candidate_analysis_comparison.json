@@ -1,0 +1,12 @@
+{
+  "baseline": "/tmp/roads-refactor-validation/native-baseline/roads_matrix0/analysis.json",
+  "candidate": "/tmp/roads-refactor-validation/native-candidate-20261117b/roads_matrix0/analysis.json",
+  "analysis_sha256": {
+    "/tmp/roads-refactor-validation/native-baseline/roads_matrix0/analysis.json": "4ff6354f42c56e192982053bc0aff3febe911e41ff2817db98370d73e3509ff8",
+    "/tmp/roads-refactor-validation/native-candidate-20261117b/roads_matrix0/analysis.json": "9255b0d1144a5eb650630475bd2edfc0abde93096462db61dd7557d3cd90fb25"
+  },
+  "cases": 516,
+  "comparison": "All analyzed case and parsed scientific summary values exact; only elapsed_seconds excluded. Input/output/template hash receipts remain exact.",
+  "differences": [],
+  "pass": true
+}

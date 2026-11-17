@@ -1,6 +1,6 @@
 # Roads controller code quality refactor
 
-**Status**: Open; planning complete, implementation pending (2026-11-17)
+**Status**: Open; implementation complete, final acceptance in progress (2026-11-17)
 **Timezone**: UTC
 
 ## Overview
@@ -32,7 +32,7 @@ Applicable to execution and all writer/publication extractions. Retain intent an
 
 Exercise writers and native consumers directly, including failed/partial execution and retry. Full-project acceptance uses disposable copies of an available real project under `/wc1/runs/`, with source hashes retained; never mutate the source. Record unavailable fixtures or runtime as explicit open gates. Native binaries are not changed here: use and hash the currently installed executable, and verify the candidate Python checkout consumed by the container. No binary rebuild is required by this package.
 
-Current claim: package prepared only; no refactor or runtime validation claimed.
+Current claim: refactor implemented and focused tests pass; final native/project parity, broad-suite validation and review closeout remain in progress.
 
 ## Success Criteria
 
@@ -50,7 +50,7 @@ Parameterization change present: no. ADR required: no. Defaults, formulas, thres
 
 ## Security Impact and Review Gate
 
-Implementation triage: **high**, because extraction traverses uploaded paths, workspace cleanup/link/copy operations, native execution, and result publication. Dedicated `artifacts/security_review.md` is required at implementation closeout using the security review template. The current documentation-only scaffold changes no attack surface. Preserve existing sanitization, authorization, execution identities, error translation, cancellation rollback, and path containment.
+Implementation triage: **high**, because extraction traverses uploaded paths, workspace cleanup/link/copy operations, native execution, and result publication. Dedicated `artifacts/security_review.md` is required at implementation closeout using the security review template. The implementation preserves existing execution and publication boundaries. Preserve existing sanitization, authorization, execution identities, error translation, cancellation rollback, and path containment.
 
 ## Stakeholders and dependencies
 
@@ -63,6 +63,6 @@ Related implementation history: [Unrutted partial crossings](../20261117_roads_u
 - [Active ExecPlan](prompts/active/roads_code_quality_refactor_execplan.md)
 - [Tracker](tracker.md)
 - [Baseline and extraction map](artifacts/baseline.md)
-- Future production extraction, regression coverage, artifact parity receipts, reviews, and module documentation.
+- Production extraction, regression coverage, artifact parity receipts, reviews, and module documentation (final acceptance pending).
 
 This is a multi-milestone effort. Local acceptance, remote integration, publication, and deployment are separate states; no deployment is included. Use `docs/standards/integration-history-governance.md` for any later integration receipt.

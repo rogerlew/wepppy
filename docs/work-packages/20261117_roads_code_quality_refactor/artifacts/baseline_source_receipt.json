@@ -1,0 +1,57 @@
+{
+  "commit": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "source_sha256": {
+    "wepppy/nodb/mods/roads/_segment_loss_summary.py": "ec7748c28f68415bafa5fddf73d38196d27f0906d6ba6573cc294f821878f097",
+    "wepppy/nodb/mods/roads/__init__.py": "d0a350a879c7fb026826a3fa8c212cea7ddeedbf06c8722fe96134c08a8fa34f",
+    "wepppy/nodb/mods/roads/roads.py": "ddb110e083fbc85eb29da9efbc66c636ee3333247e1ddbbd6a7337588564f7c5",
+    "wepppy/nodb/mods/roads/_parameterization_comparisons.py": "394599497dd62f6ac2cee494829aef44239bb5caf1504745c00596228fe4ba04",
+    "wepppy/nodb/mods/roads/_unrutted.py": "9ab3aa83737b259ee6fe9a74b21391764de4757db6e62e3e50a5891d50bc9784",
+    "wepppy/nodb/mods/roads/parameterization.py": "e5ce6f6972ecfa7eee88f11846269235d727f0d2f4e7675e0f3e37a8707c1d14",
+    "wepppy/nodb/mods/roads/monotonic_segments.py": "6600bdf6b03f675f31165dce8442d712dd093e7c0fc9c069691ef8d1c8b6ae06",
+    "tests/roads/roads_project.py": "8e997746b776ef98fec2a55cb0796b095ccb7c1045c198f9126955890448518a",
+    "tests/roads/roads_report.py": "63b58f77da44884bd53a471fd0ac0bea08a68fe36aadfd8dd71b8be380e1dd9f",
+    "tests/roads/__init__.py": "bef705ed73208990edbfc6d17dcb3840f089f0b81eb745b82fc83022dc478848",
+    "tests/roads/test_roads_sensitivity.py": "1ae7e36579948c79c8b7d938900b30e0dc47158b6a421f7c41de4211634919db",
+    "tests/roads/roads_analysis.py": "4d0540a2d7c20a86e6414a6ef30c4607d324a4102cd62414fc7f68fad9b69ed1",
+    "tests/roads/extract_fixture.py": "bbc61ec16c77fe8942bc59e667741f357830d3712c642a886ecb4ac55b3769bb",
+    "tests/roads/test_roads_matrix.py": "a76a7bcca313bc473569e67e1233443c6fe3ff2c431e0b994bdeba65513aafd4",
+    "tests/roads/test_roads_contracts.py": "1d41612edae722fb4c322a62ee2e27bafb462f131f85d7b14908cfe42e9292ab",
+    "tests/roads/test_roads_publication.py": "b8f05c18572804c6994320edae38a12c8e529aab4344f3f5856fbd9110ee7862",
+    "tests/roads/roads_matrix.py": "fc87fba11e1984da44364fe698cd7a87013f43e7ea3977b5781888ee96d1e73e",
+    "tests/roads/test_roads_project.py": "e5e53d386bcd12b26020604be4508fb5db1d0bfa42c261b3de13a14c27cb1693",
+    "tests/roads/roads_sensitivity.py": "1f2ee6564fa5e01a63dde1503b120a483943b9a759fd29ac778dcc7b26354246"
+  },
+  "fixture_source": "/wc1/runs/cl/clogging-starch",
+  "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+  "user": "1000:993",
+  "quality": {
+    "python_file_sloc": 5907,
+    "python_function_len": 2069,
+    "python_cc": null,
+    "radon_available_host": false,
+    "radon_available_container": false
+  },
+  "focused": {
+    "passed": 407,
+    "skipped": 1,
+    "failed": 2,
+    "seconds": 41.66,
+    "log": "/tmp/roads-refactor-validation/focused-all.log",
+    "environment_override": {
+      "VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT": "/tmp"
+    },
+    "baseline_failures": [
+      "tests/weppcloud/routes/test_roads_bp.py::test_report_roads_summary_includes_scoped_links_and_segment_exports",
+      "tests/weppcloud/routes/test_roads_bp.py::test_report_roads_results_renders_run_results_panel"
+    ]
+  },
+  "native": {
+    "passed": 527,
+    "seconds": 359.08,
+    "matrix_profiles": 516,
+    "log": "/tmp/roads-refactor-validation/native.log",
+    "analysis_log": "/tmp/roads-refactor-validation/analysis.log",
+    "analysis_profiles": 516,
+    "analysis_sha256": "4ff6354f42c56e192982053bc0aff3febe911e41ff2817db98370d73e3509ff8"
+  }
+}
