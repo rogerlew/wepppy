@@ -103,7 +103,7 @@ payload.zip
 | `WS_deln/pour_points_snapped_to_RSCS_UTM.shp` | `culverts/culvert_points.geojson` | Pour points snapped to road-stream crossings |
 
 **Note:** We use RSCS-snapped pour points (snapped to Road-Stream Crossing Sites) rather than
-the original `Pour_Point_UTM.shp`. This ensures culvert points are on the stream network,
+the original `Pour_Point_UTM.shp`. These preserve producer-approved road/crossing locations,
 improving outlet detection fidelity in wepp.cloud.
 
 **Open Standards Preference:** wepp.cloud uses **GeoTIFF** (OGC) and **GeoJSON** (IETF RFC 7946)—open,
@@ -292,9 +292,14 @@ You can override this by setting `order_reduction_passes` in `model-parameters.j
 New batches start with four passes through effective resolution 1.5 m, three
 through 3 m, two through 6 m, and one above 6 m. Effective resolution is
 `cellsize_m * sqrt(flow_accum_threshold / 100)` (threshold defaults to100).
-Each culvert tries successively finer candidates until its supplied point
-intersects a channel and its watershed contains stream coverage. Zero uses the
-original supplied streams. If none qualifies, that run fails explicitly.
+Before pruning, resolve the modeled outlet with native FindOutlet on the original
+supplied stream network and watershed mask. Keep the supplied road-constrained
+culvert point unchanged; it need not occupy a stream cell. Each culvert tries
+successively finer candidates until its resolved original outlet is retained and
+its watershed contains stream coverage. Use that same outlet for delineation.
+Zero uses original supplied streams; unresolved outlets fail individually.
+New admissions record selection_basis=original_outlet_v1 and original_outlets.json;
+retained policies keep their prior semantics. See the canonical selection contract.
 
 Explicit `order_reduction_passes` sets the starting maximum; it does not disable
 connection-preserving fallback. An explicit zero selects original streams.
@@ -321,6 +326,10 @@ wepp.cloud uses the following data sources and configurations for culvert batch 
 
 ### Outlet Finding Algorithm
 
+For original_outlet_v1, run this algorithm before pruning and preserve its
+resolved outlet through candidate selection and run delineation. Supplied road
+points remain unchanged. Retained policies keep their prior execution order.
+
 wepp.cloud does not use the culvert point directly as the watershed outlet. Instead, it uses the
 [FindOutlet](https://github.com/rogerlew/weppcloud-wbt) algorithm to locate a hydrologically valid
 outlet on the stream network. This ensures the modeled watershed actually drains to a stream cell
@@ -342,7 +351,11 @@ The outlet coordinates in `run_metadata.json` reflect the algorithmically determ
 may differ slightly from the input culvert point. The `culvert_outlet_distance_m` validation metric
 captures this offset.
 
-**Single-hillslope fallback for streamless watersheds:**
+**Single-hillslope fallback for streamless watersheds (retained policies only):**
+
+New original_outlet_v1 batches must resolve an outlet on original supplied streams
+before pruning; unresolved watersheds fail individually without stream seeding.
+The following historical fallback does not apply to that basis.
 
 When a culvert watershed contains no stream pixels (common for very small catchments or areas where
 the stream network was pruned), FindOutlet fails. wepp.cloud implements a fallback:

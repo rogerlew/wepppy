@@ -37,9 +37,8 @@ cost; no new service or dependency is introduced.
 ## Risk and rollback
 
 This is Santee-supported heuristic policy, not general scientific calibration.
-Four-metre terrain diagnostics contain an unresolved TOPAZ failure. Exact point
-intersection can reject legacy input inconsistencies; preserve old batches and
-fail new invalid inputs explicitly. Do not promote before real forest artifact
+Four-metre terrain diagnostics contain an unresolved TOPAZ failure. The original supplied-point intersection rule rejected valid road-constrained
+inputs; the amendment below replaces it for new admissions. Preserve old batches. Do not promote before real forest artifact
 validation. Rollback applies to new admission policy; retain evidence and avoid
 rewriting existing run artifacts.
 
@@ -52,3 +51,25 @@ resolved outlets remain on the consumed channels, both runs succeeded, and the
 finalizer reports 2 successes, 0 failures, 0 skipped outlets. See the package
 `artifacts/per-run-validation.md` for artifact and regression evidence. Other
 resolution starts remain provisional; this result does not authorize rollout.
+
+## Amendment: original outlet preservation (2026-11-17)
+
+Operator/Codex conversation, 2026-11-17 UTC (exact message time unrecorded);
+operator is decision owner, Codex implements. The operator requested resolving
+exact outlets on the CULVERT-supplied stream network before pruning and reconciling
+the contracts. Implementation conformance is pending.
+
+FindOutlet now resolves the modeled outlet on original supplied streams before
+any pruning. Selection preserves that resolved cell; downstream delineation uses
+the same outlet. The supplied road point remains unchanged and need not be on a
+stream cell. No thresholds change. Nearest-stream snapping was rejected because
+it can select another drainage and move the road-constrained input.
+
+Incident batch ab283192-441e-41a1-baad-6c2df0c36d31 rejected seven valid road
+fallback points adjacent to stream cells. This conflicts with the January guide's
+explicit distinction between supplied point and modeled outlet. New admissions
+use an explicit selection basis and immutable original outlet records; retained
+policies keep their prior semantics. Recovery is a fresh submission, not silently
+rewriting old receipts. Validate original and consumed stream membership, crop
+translation, archive/resume and failed outlet observability. This repair does
+not address the separate SSURGO service failures.
