@@ -7,7 +7,7 @@ image evidence in `20261116_m2_validation.md`. The launcher preserves the
 accepted fixed-argv, minimal-environment, process-group drain, provenance and
 private-scratch patterns. Direct valid/projected/hostile tests are useful.
 
-**Verdict: CHANGES REQUIRED.** No High finding was identified. Two Medium
+**Initial verdict: CHANGES REQUIRED.** No High finding was identified. Two Medium
 correctness/contract findings remain open; M2 must not be closed until both are
 fixed and regression-tested.
 
@@ -125,3 +125,27 @@ Required closure: enforce the canonical coordinate/geometry tree depth at the
 Python IPC readback boundary (preferably without unbounded recursion), translate
 over-depth input to `vector_converter_unavailable`, add a focused nested-
 coordinate regression, and rerun the final review.
+
+## Final re-review at `e172f9f8a`
+
+Focused command result:
+
+```text
+/home/workdir/wepppy/.venv/bin/pytest -q \
+  tests/shape_converter/unit/test_geoparquet_input.py
+19 passed
+```
+
+The final amendment enforces the depth-16 coordinate/geometry-tree ceiling and
+the deep-coordinate regression receives bounded HTTP 503
+`vector_converter_unavailable`. Direct bounds, finite-number, huge-integer,
+boolean-coordinate, CLI exit/signal, process-drain and canary cases remain green.
+Conversion metadata now also obtains the parser name/version, binary SHA-256,
+Cargo.lock SHA-256 and source revision through a revalidated adjacent provenance
+sidecar; its unit assertion passes.
+
+**M2-CR-01: resolved. M2-CR-02: resolved. Final verdict: PASS.** Unresolved
+findings: High 0, Medium 0. The route-level and full red-corpus items above remain
+M5 coverage work, not an M2 correctness hold. This pass applies to the committed
+local implementation through `e172f9f8a`; it does not approve image publication,
+remote integration or deployment.

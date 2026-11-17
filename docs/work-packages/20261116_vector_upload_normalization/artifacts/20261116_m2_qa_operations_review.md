@@ -16,7 +16,10 @@ outer deadline. It advanced through 11 tests and timed out. The isolated
 while entering the module app's `TestClient` lifespan. This is an incomplete
 gate, not evidence that a particular M2 code path caused the hang.
 
-## Findings
+## Initial findings
+
+The following table records the initial review state. Every item was rechecked
+against the final3 evidence and is dispositioned in the final re-review below.
 
 | ID | Severity | Finding | Required closure | Status |
 | --- | --- | --- | --- | --- |
@@ -43,15 +46,46 @@ credible. They do not close the operational scenarios above.
   extract common parser-launch configuration and provenance helpers, but doing
   so before acceptance would add unnecessary regression risk. Treat this as
   non-blocking debt.
-- Exact package inventory bodies currently live in `/tmp`; hashes alone are not
-  independently inspectable after that workspace disappears.
+- The final candidate now retains the machine-readable SBOM and complete
+  vulnerability report in the work package; the initial temporary-inventory
+  concern is superseded.
+
+## Final3 re-review
+
+The final candidate is source revision
+`e172f9f8a23c10774f87828181048c72188ba78a` and local image
+`sha256:ed4d93692add1f7cd1527ed6948353e584a213865ebcc3006b1adf84f5c62386`.
+The embedded parser provenance names that same revision. The retained SPDX and
+Grype report hashes were independently reproduced from the work-package files:
+
+- SPDX JSON:
+  `00fad0f0e8c143c47f78b67f6a0706f3d64e0103e4fd8217b10130445799dffa`;
+- Grype JSON:
+  `a359b57d30d90cdbc9e98d06eb80f47a1aeeda281583f56f0de95eb26c163345`.
+
+| ID | Final disposition | Evidence |
+| --- | --- | --- |
+| M2-QAOPS-01 | Resolved | The exact HTTP image processed the reviewed 100,000-row fixture and returned 100,000 features, source-digest equality and a 10,288,931-byte canonical artifact. Sampled peaks were 293.2 MiB, about one CPU, 50 PIDs, nine PID-1 descriptors and 16,797,373 scratch bytes, all below the resolved 1.5 GiB/1.5 CPU/256 PID/384 MiB tmpfs envelope; scratch was empty afterward. Four concurrent near-limit/hostile/valid requests produced one bounded success and three `service_saturated` responses, followed by a successful digest-matching control. A real 250 ms client abort retained admission ownership until parser/output/scratch drained within the observed 26-second window; executable-path and scratch readback were clean, and the recovery request succeeded. Repeated task-cancellation/process-group behavior remains covered by focused unit tests. |
+| M2-QAOPS-02 | Resolved for M2 | The focused candidate suite increased to 19 passing tests, the CLI retains 30 locked/offline tests, and the exact image now has successful GeoParquet and Shapefile inspect/convert artifact readbacks with matching semantic and digest evidence. The full local suite stall is explicitly retained as a pre-existing `TestClient`/lifespan harness defect and is not counted green; exact-image controls exercise the shared production runtime boundary. Repairing the local harness remains non-blocking tooling debt, not an unobserved M2 format regression. |
+| M2-QAOPS-03 | Resolved | Development and production Compose models resolve, and production qualification binds the exact image with UID/GID 10001, read-only root, dropped capabilities, no-new-privileges, no volumes, internal sandbox network and the resource envelope above. Removing the GeoParquet parser produced body-level `unavailable`, GeoParquet HTTP 503, continued Shapefile HTTP 200 and empty scratch; restoring final3 restored readiness and digest-matching conversion without persisted converter state. Missing production `VECTOR_UPLOAD_RUN_FILESYSTEM_ID` remains a deliberate activation stop. A production-host rollback receipt remains a separately authorized M5/deployment gate. |
+| M2-QAOPS-04 | Resolved | Pinned Syft 1.57.1 produced retained SPDX 2.3 JSON for a daemon-free archive of the exact image: 103 packages and 2,845 files. Pinned Grype 0.121.3 produced the retained complete 212-match report. Its 59 High, 70 Medium, 17 Low, 50 Negligible and 16 Unknown records have explicit reachability/fix dispositions in the validation receipt; no available same-branch/package remediation is omitted from this local candidate. RustSec remains clear for the exact GeoParquet lock. A fresh publication-time scan and newly available updates remain rollout gates. |
+| M2-QAOPS-05 | Resolved | The real abort/drain/process and recovery receipt supplements the fast mocked lifecycle tests. Keeping both layers is appropriate. |
+| M2-QAOPS-06 | Resolved for M2; rollout assertion retained | The missing-parser probe proves the compatible whole-service HTTP 200 plus body-level format unavailability and GeoParquet 503. Rollout/preflight monitoring must assert `geoparquet_parser == ready`; changing whole-service status would regress intentional Shapefile availability. |
+
+The vulnerability disposition is accepted only for this constrained local
+candidate: non-root, read-only, capability-free, offline parser execution with
+a fixed minimal child environment and no invocation of the reported command,
+locale, document-formatting, SQLite extension/session/FTS, TLS-PSK or similar
+surfaces. Publication must repeat the scan and apply any then-available base or
+Python package updates; this review does not waive that gate.
 
 ## Verdict
 
-**HOLD for M2 QA/operations acceptance.** Unresolved findings: High 0, Medium 4,
-Low 2. The focused implementation tests and exact-image smoke pass, but the
-candidate has not yet satisfied the active plan's full regression, exact-image
-resource/lifecycle, resolved-Compose/recovery, or SBOM/vulnerability evidence
-gates. This verdict does not authorize or require publication or deployment;
-all closure work can be performed locally or in the existing isolated candidate
-harness.
+**PASS for local M2 QA/operations acceptance.** Unresolved implementation
+findings: High 0, Medium 0. The exact final3 candidate satisfies the scoped
+format-regression, near-limit resource, concurrency, lifecycle cleanup,
+resolved-Compose, fail-closed recovery and supply-chain evidence gates. The
+pre-existing local `TestClient` stall is retained as non-blocking test-harness
+debt. Fresh publication scanning, production-host recovery proof, image
+publication, remote integration and deployment remain separate gates and are
+not authorized by this verdict.
