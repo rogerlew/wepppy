@@ -1116,3 +1116,29 @@ if INVALID_MUKEY in ssc.invalidSoils:
 **Version:** v.0.1.0
 
 **Last Updated:** 2025-10-23
+
+
+## Service outage messages
+
+Tabular-service HTTP 5xx responses use the same `SsurgoRequestError` message as
+connection failures and exhausted timeouts:
+`https://sdmdataaccess.nrcs.usda.gov SSURGO API is not available. Try again later.`
+The soil control displays this message through its existing exception summary;
+users should retry building soils later. HTTP status is retained in worker logs.
+Client/query errors retain their diagnostics. HTTP errors do not add retries or
+change cache, fallback, or soil parameterization behavior.
+
+This corrects the raw HTML/SQL summary observed on wepp1 for
+`acknowledged-packrat`, job `b24ab506-5f30-4c32-8136-fd0163816387` (HTTP 502).
+It restores the human-readable error presentation described in
+[controller contract](../../../docs/ui-docs/controller-contract.md#job-hints),
+“Split hint vs. status”.
+All component, horizon, and texture fetches share the corrected tabular helper,
+including STATSGO2. The separate WFS extent helper has no in-repository callers
+and is outside this confirmed incident path.
+
+Regression coverage exercises HTTP 500/502/503/504, retained HTTP 400 diagnostics,
+successful XML responses, SSL failures, and timeouts. These request-boundary
+checks do not depend on whether the project cache is absent, empty, or populated:
+a cache miss reaches the helper; a cache hit avoids the request. Existing failed
+jobs retain their original traceback; this correction applies to future jobs.

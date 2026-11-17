@@ -361,6 +361,10 @@ def _make_sda_post_request(query):
     for attempt in range(_SSURGO_MAX_RETRIES):
         try:
             r = requests.post(_ssurgo_url, data=payload, headers=headers, timeout=30)
+            if 500 <= r.status_code < 600:
+                message = _SSURGO_UNAVAILABLE_MESSAGE
+                _LOG.error("%s (HTTP %s)", message, r.status_code)
+                raise SsurgoRequestError(message)
             if r.status_code != 200:
                 raise SsurgoRequestError((r.content, query))
             return r.content
