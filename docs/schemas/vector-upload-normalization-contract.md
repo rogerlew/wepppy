@@ -398,6 +398,11 @@ exact destination's `fork_copy` cleanup/rebuild obligation before enqueueing a
 new copy. It cannot consume an unrelated repair identity. Files, containing
 directories, linking ancestors and retained stale trees are synced before the
 ledger rebuild and marker clearance.
+
+Copies require reconciled source accounting: an explicit noncommitted receipt
+accounting status or a matching noncommitted Redis reservation blocks the copy
+before mutation. Legacy receipts without accounting fields remain supported;
+terminal status alone does not prove reconciliation.
 ## Hostile-file quarantine and abuse review
 
 Every rejected complete original is classified `quarantined` in its receipt.

@@ -335,3 +335,33 @@ def test_unbound_child_reservation_scope_is_fenced(environment):
     finally:
         lease.release()
         reservation.release_prewrite()
+
+
+@pytest.mark.parametrize('receipt_accounting', ['pending', 'committed'])
+def test_copy_requires_source_reservation_reconciliation(environment, receipt_accounting):
+    env = environment
+    source, target = env.root / 'source', env.root / 'copy'
+    attempt = evidence(source, status='incomplete')
+    reservation = n.RedisRetentionLedger(env.conn).reserve(
+        project_key=f'run:source-{uuid.uuid4().hex}', actor=n.RetentionActor('human', 7),
+        worst_case_bytes=10000, filesystem_root=env.root,
+    )
+    reservation.bind_attempt(attempt)
+    receipt_path = attempt / 'normalization.json'
+    receipt = json.loads(receipt_path.read_text())
+    receipt.update(reservation_id=reservation.reservation_id, accounting_status=receipt_accounting)
+    receipt_path.write_text(json.dumps(receipt))
+    with pytest.raises(n.VectorUploadError, match='[Rr]econcil'):
+        with operation(env, source, target):
+            shutil.copytree(source, target)
+    assert not target.exists()
+    assert principal(env, 8) == 0
+    assert not env.conn.smembers(env.prefix + ':rebuild-pending')
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True, stale_seconds=0)
+    original_bytes = total(env)
+    with operation(env, source, target):
+        shutil.copytree(source, target)
+    copied_bytes = n._regular_tree_size(target / attempt.relative_to(source))
+    assert principal(env, 7) == original_bytes
+    assert principal(env, 8) == copied_bytes
+    assert total(env) == original_bytes + copied_bytes

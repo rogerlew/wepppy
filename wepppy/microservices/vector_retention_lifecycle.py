@@ -103,7 +103,23 @@ def _read_receipt(path: Path) -> tuple[bytes, dict[str, Any]]:
     value = retention._strict_json(raw)
     if value.get("schema") != "vector-normalization-v1" or value.get("status") not in _TERMINAL:
         raise _error("Reconcile nonterminal or invalid retained evidence before copying.")
+    if value.get("accounting_status", "committed") != "committed":
+        raise _error("Reconcile retained evidence accounting before copying.")
     return raw, value
+
+
+def _assert_source_reservations_committed(maintenance: Any, receipts: Sequence[Path]) -> None:
+    prefix = f"vector-upload-retention:{os.environ['VECTOR_UPLOAD_RUN_FILESYSTEM_ID'].strip()}"
+    for receipt in receipts:
+        _raw, value = _read_receipt(receipt)
+        reservation_id = value.get("reservation_id")
+        if not reservation_id:
+            continue
+        if not isinstance(reservation_id, str) or len(reservation_id) > 64:
+            raise _error("Reconcile invalid retained evidence reservation identity before copying.")
+        metadata = maintenance.connection.hgetall(f"{prefix}:reservation:{reservation_id}")
+        if metadata and metadata.get("state") != "committed":
+            raise _error("Reconcile the source retention reservation before copying.")
 
 
 def _inventory(tree: Path) -> tuple[int, list[Path]]:
@@ -401,6 +417,7 @@ def retained_tree_operation(
         if source is not None:
             _reject_linked_evidence(source)
             source_bytes, receipts = _inventory(source)
+            _assert_source_reservations_committed(maintenance, receipts)
             allowance = _copy_allowance(receipts, actor, source_bytes)
             # Existing bytes remain charged: cleanup may defer removal of a
             # renamed workspace, so speculative replacement credit is unsafe.
