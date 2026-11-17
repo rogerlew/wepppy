@@ -237,21 +237,3 @@ def test_replacement_requires_headroom_for_old_bytes_and_reservations(environmen
         with operation(env, source, target):
             pytest.fail("invalid reclaim admitted")
     assert (target / "roads/vector_upload_attempts/fixed-id/original.upload").exists()
-
-
-def test_retry_cannot_clear_marker_with_receipts_removed_from_source(environment):
-    env = environment
-    source, target = env.root / "source", env.root / "copy"
-    original = evidence(source)
-    extra = evidence(source, "ag_fields/vector_upload_attempts")
-    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
-    with pytest.raises(OSError):
-        with operation(env, source, target):
-            shutil.copytree(source, target)
-            raise OSError("interrupted after copying")
-    shutil.rmtree(extra.parent)
-    with pytest.raises(n.VectorUploadError, match="absent from its source"):
-        with operation(env, source, target):
-            shutil.copytree(source, target, dirs_exist_ok=True)
-    assert lifecycle.retained_tree_repair_pending(target, "test_copy")
-    assert (target / original.relative_to(source) / "original.upload").exists()

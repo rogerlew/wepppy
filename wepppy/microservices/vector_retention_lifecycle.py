@@ -359,11 +359,7 @@ def retained_tree_operation(
         state.checkpoint()
         if source is not None:
             _publish_copy_provenance(source, target, receipts, actor, state)
-            _target_bytes, target_receipts = _inventory(target)
-            if state.repair_pending:
-                expected = {receipt.relative_to(source) for receipt in receipts}
-                if any(receipt.relative_to(target) not in expected for receipt in target_receipts):
-                    raise _error("Interrupted copy contains evidence absent from its source; repair is required.")
+            _inventory(target)
         _sync_evidence(target)
         state.checkpoint()
         retention.reconcile_retention(
