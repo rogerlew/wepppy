@@ -16,9 +16,11 @@ import shlex
 import shutil
 import time
 import tempfile
+import uuid
+from copy import deepcopy
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
 import numpy as np
 import rasterio
@@ -1092,7 +1094,12 @@ class Roads(NoDbBase):
                 raise ValueError("Roads GeoJSON supports only LineString or MultiLineString geometries.")
 
     @roads_lifecycle.mutation
-    def set_uploaded_geojson(self, src_path: str) -> Dict[str, Any]:
+    def set_uploaded_geojson(
+        self,
+        src_path: str,
+        *,
+        publication_commit: Callable[[], None] | None = None,
+    ) -> Dict[str, Any]:
         source_path = Path(src_path)
         if not source_path.is_absolute():
             source_path = Path(self.wd) / source_path
@@ -1154,11 +1161,16 @@ class Roads(NoDbBase):
         input_crs_source = crs_inference.source
 
         self._ensure_roads_dirs()
-        roads_lifecycle.retain(self.wd, replace_segments=True)
         target_path = Path(self.roads_upload_dir) / "roads.uploaded.geojson"
-        shutil.copy2(source_path, target_path)
+        backup_path = target_path.with_name(f".{target_path.name}.{uuid.uuid4().hex}.backup")
+        staged_path = target_path.with_name(f".{target_path.name}.{uuid.uuid4().hex}.tmp")
+        had_target = target_path.exists()
+        if had_target:
+            shutil.copy2(target_path, backup_path)
+        shutil.copy2(source_path, staged_path)
+        retained_snapshot = None
 
-        digest = hashlib.sha256(target_path.read_bytes()).hexdigest()
+        digest = hashlib.sha256(staged_path.read_bytes()).hexdigest()
         relpath = str(target_path.relative_to(self.wd))
         now = int(time.time())
         attribute_catalog = self._build_attribute_catalog(payload=payload, params=params)
@@ -1168,33 +1180,73 @@ class Roads(NoDbBase):
             previous_map=previous_map,
         )
         params["attribute_field_map"] = discovered_map
-
-        with self.locked():
-            self._uploaded_geojson_relpath = relpath
-            self._uploaded_geojson_sha256 = digest
-            self._uploaded_attribute_catalog = attribute_catalog
-            self._roads_params = params
-            self._timestamps["upload_geojson"] = now
-            self._clear_stale_run_state_locked()
-            status = str(self._status)
-
-        self._append_roads_log(
-            "upload",
-            "upload_completed",
-            {
-                "uploaded_geojson_relpath": relpath,
-                "uploaded_geojson_sha256": digest,
-                "feature_count": len(payload.get("features", [])),
-                "uploaded_at": now,
-                "configured_input_crs": configured_input_crs,
-                "source_crs": source_crs,
-                "effective_input_crs": effective_input_crs,
-                "input_crs_source": input_crs_source,
-                "discovered_attribute_field_count": int(attribute_catalog.get("field_count", 0)),
-                "attribute_field_map": discovered_map,
-                "status": status,
-            },
-        )
+        publication_committed = False
+        try:
+            retained_snapshot = roads_lifecycle.retain(self.wd, replace_segments=True)
+            with self.locked():
+                prior_state = {
+                    name: deepcopy(getattr(self, name, None))
+                    for name in (
+                        "_uploaded_geojson_relpath",
+                        "_uploaded_geojson_sha256",
+                        "_uploaded_attribute_catalog",
+                        "_roads_params",
+                        "_timestamps",
+                        "_last_prepare_summary",
+                        "_last_run_summary",
+                        "_status",
+                        "_errors",
+                    )
+                }
+                try:
+                    os.replace(staged_path, target_path)
+                    self._uploaded_geojson_relpath = relpath
+                    self._uploaded_geojson_sha256 = digest
+                    self._uploaded_attribute_catalog = attribute_catalog
+                    self._roads_params = params
+                    self._timestamps["upload_geojson"] = now
+                    self._clear_stale_run_state_locked()
+                    status = str(self._status)
+                    if publication_commit is not None:
+                        publication_commit()
+                    publication_committed = True
+                except BaseException:  # broad-except: transaction rollback includes cancellation
+                    if had_target:
+                        os.replace(backup_path, target_path)
+                    else:
+                        target_path.unlink(missing_ok=True)
+                    roads_lifecycle.restore_retained(self.wd, retained_snapshot)
+                    for name, value in prior_state.items():
+                        setattr(self, name, value)
+                    raise
+            try:
+                self._append_roads_log(
+                    "upload",
+                    "upload_completed",
+                    {
+                        "uploaded_geojson_relpath": relpath,
+                        "uploaded_geojson_sha256": digest,
+                        "feature_count": len(payload.get("features", [])),
+                        "uploaded_at": now,
+                        "configured_input_crs": configured_input_crs,
+                        "source_crs": source_crs,
+                        "effective_input_crs": effective_input_crs,
+                        "input_crs_source": input_crs_source,
+                        "discovered_attribute_field_count": int(attribute_catalog.get("field_count", 0)),
+                        "attribute_field_map": discovered_map,
+                        "status": status,
+                    },
+                )
+            except OSError:
+                self.logger.warning("Accepted Roads upload completion log is deferred", exc_info=True)
+        except BaseException:  # broad-except: transaction rollback includes cancellation
+            if publication_committed:
+                raise
+            staged_path.unlink(missing_ok=True)
+            raise
+        finally:
+            staged_path.unlink(missing_ok=True)
+            backup_path.unlink(missing_ok=True)
 
         return {
             "uploaded_geojson_relpath": relpath,

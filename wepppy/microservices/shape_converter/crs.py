@@ -220,6 +220,7 @@ def reproject_geometries(
     geometries: tuple[BaseGeometry | None, ...],
     source_crs: CRS | None,
     target_crs: CRS | None,
+    require_best_operation: bool = False,
 ) -> tuple[BaseGeometry | None, ...]:
     """Reproject geometries from source to target CRS."""
 
@@ -227,7 +228,13 @@ def reproject_geometries(
         return geometries
 
     try:
-        transformer = Transformer.from_crs(source_crs, target_crs, always_xy=True)
+        transformer = Transformer.from_crs(
+            source_crs,
+            target_crs,
+            always_xy=True,
+            allow_ballpark=not require_best_operation,
+            only_best=require_best_operation,
+        )
     except (CRSError, ProjError, RuntimeError, TypeError, ValueError) as exc:
         raise ShapeConverterError(
             code="reprojection_failed",

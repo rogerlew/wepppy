@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import json
+import threading
 from pathlib import Path
 
 import importlib
@@ -10,6 +12,7 @@ import pytest
 from flask import Flask
 
 from wepppy.nodb.batch_runner import BatchRunner
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
 
 try:
@@ -80,6 +83,76 @@ def _register_geojson(app: Flask, source_path: Path) -> None:
         runner = BatchRunner.getInstance(str(root / "demo"))
         collection = WatershedCollection(str(source_path))
         runner.register_geojson(collection)
+
+
+def test_transactional_registration_does_not_clobber_concurrent_template_update(app: Flask) -> None:
+    with app.app_context():
+        root = Path(app.config["BATCH_RUNNER_ROOT"])
+        runner = BatchRunner.getInstance(str(root / "demo"))
+        destination = Path(runner.resources_dir) / "watershed.geojson"
+        destination.write_text('{"marker":"old"}', encoding="ascii")
+        candidate = DATA_DIR / "simple.geojson"
+        attempted = threading.Event()
+        blocked = threading.Event()
+        retry = threading.Event()
+        completed = threading.Event()
+        errors: list[BaseException] = []
+        observed: list[object] = []
+
+        def update_template() -> None:
+            try:
+                attempted.set()
+                try:
+                    with runner.locked():
+                        observed.append(json.loads(destination.read_text()))
+                except NoDbAlreadyLockedError:
+                    blocked.set()
+                else:
+                    raise AssertionError("concurrent mutation entered publication transaction")
+                assert retry.wait(timeout=2.0)
+                with runner.locked():
+                    observed.append(json.loads(destination.read_text()))
+                    runner._runid_template_state = {
+                        "template": "concurrent-update-after-rollback",
+                        "status": "valid",
+                        "summary": {"is_valid": True},
+                    }
+                completed.set()
+            except BaseException as exc:
+                errors.append(exc)
+                blocked.set()
+
+        worker: threading.Thread | None = None
+
+        def fail_receipt() -> None:
+            nonlocal worker
+            worker = threading.Thread(target=update_template)
+            worker.start()
+            assert attempted.wait(timeout=1.0)
+            assert blocked.wait(timeout=1.0)
+            assert not errors
+            assert not observed
+            assert not completed.is_set()
+            raise OSError("receipt fsync failed")
+
+        try:
+            with pytest.raises(OSError, match="receipt fsync failed"):
+                runner.publish_geojson_transactional(
+                    candidate,
+                    destination,
+                    publication_commit=fail_receipt,
+                )
+        finally:
+            retry.set()
+            if worker is not None:
+                worker.join(timeout=3.0)
+        assert worker is not None and not worker.is_alive()
+        assert not errors
+        assert completed.is_set()
+        assert observed == [{"marker": "old"}]
+        reloaded = BatchRunner.load_detached(str(root / "demo"))
+        assert json.loads(destination.read_text())["marker"] == "old"
+        assert reloaded.runid_template_state["template"] == "concurrent-update-after-rollback"
 
 
 def test_validate_template_requires_resource(client, app):

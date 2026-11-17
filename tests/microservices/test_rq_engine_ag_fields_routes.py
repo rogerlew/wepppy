@@ -1,18 +1,25 @@
 from __future__ import annotations
 
+import hashlib
 import io
 import json
+import os
+import pickle
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from itsdangerous import Signer
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import ag_fields_routes
+from wepppy.microservices.rq_engine import auth as rq_auth
+from wepppy.microservices.rq_engine import session_routes
 from wepppy.microservices.rq_engine.auth import AuthError
+from wepppy.weppcloud.utils import auth_tokens
 
 
 pytestmark = pytest.mark.microservice
@@ -50,13 +57,21 @@ class DummyAgFields:
         self.watershed_job_ids = {}
         self.saved_rows = None
 
-    def validate_field_boundary_geojson(self, path: Path, *, source_filename: str | None = None):
-        # Validation sees a sibling staging file before accepted-source promotion.
-        assert path.name.endswith(".field-boundaries-upload.geojson")
-        assert path.parent == Path(self.ag_fields_dir)
-        assert path.read_bytes() == b"{}"
-        assert source_filename == "fields.geojson"
+    def validate_field_boundary_geojson(
+        self,
+        path: Path,
+        *,
+        source_filename: str | None = None,
+        publication_commit=None,
+    ):
+        assert path.name == "candidate.geojson"
+        payload = json.loads(path.read_text())
+        assert isinstance(payload["features"][0]["properties"]["field_id"], int)
+        assert source_filename in {"fields.geojson", "fields.zip", "fields.parquet", "fields.geoparquet"}
+        (Path(self.ag_fields_dir) / "fields.WGS.geojson").write_bytes(path.read_bytes())
         self.field_boundaries_source_filename = source_filename
+        if publication_commit is not None:
+            publication_commit()
         return {"field_id_duplicates": [7]}
 
     def confirm_schema(self, field_id_key: str, rotation_accessor: str) -> None:
@@ -157,6 +172,7 @@ class DummyAgFields:
 def route_context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     from tests.factories.feature_access import stub_feature_accounts
     stub_feature_accounts(monkeypatch)
+    monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
     controller = DummyAgFields(tmp_path)
     auth_calls: list[tuple[object, str]] = []
     monkeypatch.setattr(ag_fields_routes, "require_jwt", lambda request, required_scopes=None: {"sub": "2", "scopes": required_scopes})
@@ -169,7 +185,60 @@ def route_context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(ag_fields_routes.AgFields, "getInstance", lambda wd: controller)
     monkeypatch.setattr(ag_fields_routes.AgFields, "tryGetInstance", lambda wd: controller)
     monkeypatch.setattr(ag_fields_routes.RedisPrep, "tryGetInstance", lambda wd: None)
+
+    class Reservation:
+        reservation_id = "ag-fields-test-reservation"
+
+        def commit(self, _exact_bytes: int) -> None:
+            return None
+
+        def release_prewrite(self) -> None:
+            return None
+
+    class Ledger:
+        def reserve(self, **_kwargs):
+            return Reservation()
+
+    class Lease:
+        def __init__(self) -> None:
+            self.owned = True
+
+        def assert_owned(self) -> None:
+            assert self.owned
+
+        def release(self) -> None:
+            self.owned = False
+
+    real_prepare = ag_fields_routes.prepare_vector_upload
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "prepare_vector_upload",
+        lambda **kwargs: real_prepare(
+            **kwargs,
+            ledger=Ledger(),
+            scope_lease_factory=lambda _key: Lease(),
+        ),
+    )
     return controller, auth_calls
+
+
+def _field_boundaries_bytes() -> bytes:
+    return json.dumps(
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"field_id": 7, "Crop2001": "Corn"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 0.0]]],
+                    },
+                }
+            ],
+        },
+        separators=(",", ":"),
+    ).encode()
 
 
 @pytest.mark.parametrize(
@@ -220,7 +289,7 @@ def test_boundary_upload_returns_controller_summary(route_context) -> None:
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/demo/cfg/agfields/boundaries",
-            files={"field_boundaries": ("fields.geojson", b"{}")},
+            files={"field_boundaries": ("fields.geojson", _field_boundaries_bytes())},
         )
 
     assert response.status_code == 200
@@ -232,6 +301,223 @@ def test_boundary_upload_returns_controller_summary(route_context) -> None:
     }
     assert controller.field_boundaries_source_filename == "fields.geojson"
     assert auth_calls[-1][1] == "demo"
+
+
+def test_signed_browser_session_provenance_and_hostile_quarantine_are_minimal(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    from wepppy.microservices.rq_engine import feature_access as feature_access_adapter
+
+    controller, _auth_calls = route_context
+    secret = "signed-session-provenance-secret"
+    sessions = {
+        "owner-session": pickle.dumps({"_user_id": "77", "email": "owner@example.test"}),
+        "other-session": pickle.dumps({"_user_id": "88", "email": "other@example.test"}),
+    }
+
+    class SessionRedis:
+        def get(self, key: str):
+            return sessions.get(key.removeprefix("session:"))
+
+        def exists(self, key: str) -> int:
+            return int(key.startswith("session:") and key.removeprefix("session:") in sessions)
+
+        def close(self) -> None:
+            return None
+
+    monkeypatch.setattr(session_routes.redis, "Redis", lambda **_kwargs: SessionRedis())
+    monkeypatch.setattr(session_routes, "_secret_key", lambda: secret)
+    monkeypatch.setattr(session_routes, "_resolve_roles_for_user_id", lambda _user_id: ["User"])
+    monkeypatch.setattr(
+        session_routes,
+        "_session_user_authorized_for_run",
+        lambda runid, user_id, _roles: runid == "demo" and user_id == 77,
+    )
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda _runid: False)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda _jti: None)
+    monkeypatch.setattr(rq_auth, "_check_session_revocation", lambda _sid: None)
+    monkeypatch.setattr(rq_auth, "_check_session_marker", lambda _sid, _runid: None)
+    monkeypatch.setattr(rq_auth, "_reject_fork_preparing_run", lambda _runid: None)
+    monkeypatch.setattr(ag_fields_routes, "require_jwt", rq_auth.require_jwt)
+    monkeypatch.setattr(ag_fields_routes, "authorize_run_access", rq_auth.authorize_run_access)
+    monkeypatch.setattr(ag_fields_routes, "require_feature_access", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(ag_fields_routes, "_invalidate_ag_fields_preflight", lambda _wd: None)
+    monkeypatch.setattr(feature_access_adapter, "require_workflow_access", lambda *_args, **_kwargs: None)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "signed-session-jwt-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+    signer = Signer(secret, salt="flask-session", key_derivation="hmac")
+
+    with TestClient(rq_engine.app) as client:
+        owner_cookie = signer.sign(b"owner-session").decode()
+        token_response = client.post(
+            "/api/runs/demo/cfg/session-token",
+            cookies={"session": owner_cookie},
+            headers={"Origin": "http://testserver"},
+        )
+        assert token_response.status_code == 200
+        token = token_response.json()["token"]
+        accepted = client.post(
+            "/api/runs/demo/cfg/agfields/boundaries",
+            headers={"Authorization": f"Bearer {token}"},
+            files={"field_boundaries": ("fields.geojson", _field_boundaries_bytes())},
+        )
+        assert accepted.status_code == 200
+
+        hostile = json.loads(_field_boundaries_bytes())
+        hostile["features"][0]["geometry"] = {"type": "Point", "coordinates": [0.0, 0.0]}
+        with caplog.at_level("WARNING", logger="wepppy.microservices.vector_upload_normalization"):
+            rejected = client.post(
+                "/api/runs/demo/cfg/agfields/boundaries",
+                headers={"Authorization": f"Bearer {token}"},
+                files={"field_boundaries": ("hostile.geojson", json.dumps(hostile).encode())},
+            )
+        assert rejected.status_code == 400
+
+        other_cookie = signer.sign(b"other-session").decode()
+        denied = client.post(
+            "/api/runs/demo/cfg/session-token",
+            cookies={"session": other_cookie},
+            headers={"Origin": "http://testserver"},
+        )
+        assert denied.status_code == 401
+
+    receipts = [
+        json.loads(path.read_text())
+        for path in (Path(controller.ag_fields_dir) / "vector_upload_attempts").glob("*/normalization.json")
+    ]
+    assert {receipt["status"] for receipt in receipts} == {"accepted", "rejected"}
+    assert all(receipt["actor"] == {"kind": "human", "user_id": 77} for receipt in receipts)
+    event = next(record.getMessage() for record in caplog.records if "vector_upload_security_event_v1" in record.getMessage())
+    assert '"actor":{"kind":"human","user_id":77}' in event
+    for forbidden in ("session", "email", "roles", "claims", "127.0.0.1"):
+        assert forbidden not in event
+
+
+def test_boundary_geoparquet_retains_source_and_publishes_canonical_candidate(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _auth_calls = route_context
+    source = b"PAR1ag-fields-controlPAR1"
+    geojson = json.loads(_field_boundaries_bytes())
+    canonical = json.dumps(geojson, separators=(",", ":")).encode()
+
+    class Response:
+        status_code = 200
+        headers = {}
+
+        def iter_content(self, **_kwargs):
+            yield json.dumps({
+                "request_id": "ag-fields-converter-request",
+                "geojson": geojson,
+                "metadata": {
+                    "source_size": len(source),
+                    "source_sha256": hashlib.sha256(source).hexdigest(),
+                    "canonical_size": len(canonical),
+                    "canonical_sha256": hashlib.sha256(canonical).hexdigest(),
+                    "parser_provenance": {
+                        "binary_name": "geoparquet_parser_cli",
+                        "binary_version": "geoparquet_parser_cli 0.0.0",
+                        "binary_sha256": "1" * 64,
+                        "cargo_lock_sha256": "2" * 64,
+                        "source_revision": "3" * 40,
+                    },
+                },
+            }).encode()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(
+        "wepppy.microservices.vector_upload_normalization.requests.post",
+        lambda *_args, **_kwargs: Response(),
+    )
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", "http://shape-converter.test/convert")
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/demo/cfg/agfields/boundaries",
+            files={"field_boundaries": ("fields.parquet", source)},
+        )
+
+    assert response.status_code == 200
+    canonical_path = Path(controller.ag_fields_dir) / "fields.WGS.geojson"
+    accepted = json.loads(canonical_path.read_text())
+    assert accepted["crs"]["properties"]["name"] == "EPSG:4326"
+    attempt = next((Path(controller.ag_fields_dir) / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    assert receipt["status"] == "accepted"
+    assert receipt["source_sha256"] == hashlib.sha256(source).hexdigest()
+    assert next((attempt / "original").iterdir()).read_bytes() == source
+    assert controller.field_boundaries_source_filename == "fields.parquet"
+
+
+def test_exact_converter_formats_cross_agfields_http_boundary(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _auth_calls = route_context
+    converter_url = os.getenv("VECTOR_UPLOAD_INTEGRATION_URL")
+    fixture_root_value = os.getenv("VECTOR_UPLOAD_INTEGRATION_FIXTURES")
+    if not converter_url or not fixture_root_value:
+        pytest.skip("exact converter integration environment is not configured")
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", converter_url)
+    fixture_root = Path(fixture_root_value)
+    semantics: list[dict[str, object]] = []
+    with TestClient(rq_engine.app) as client:
+        for suffix, fixture_suffix in (("geojson", "geojson"), ("zip", "zip"), ("parquet", "parquet"), ("geoparquet", "parquet")):
+            response = client.post(
+                "/api/runs/demo/cfg/agfields/boundaries",
+                files={"field_boundaries": (f"fields.{suffix}", (fixture_root / f"polygon.{fixture_suffix}").read_bytes())},
+            )
+            assert response.status_code == 200
+            payload = json.loads((Path(controller.ag_fields_dir) / "fields.WGS.geojson").read_text())
+            semantics.append({"geometry": payload["features"][0]["geometry"], "properties": payload["features"][0]["properties"]})
+    from shapely.geometry import shape
+    baseline = shape(semantics[0]["geometry"])
+    assert all(item["properties"] == semantics[0]["properties"] for item in semantics[1:])
+    assert all(baseline.equals(shape(item["geometry"])) for item in semantics[1:])
+
+
+def test_boundary_geometry_rejection_preserves_accepted_fields(route_context) -> None:
+    controller, _auth_calls = route_context
+    with TestClient(rq_engine.app) as client:
+        accepted_response = client.post(
+            "/api/runs/demo/cfg/agfields/boundaries",
+            files={"field_boundaries": ("fields.geojson", _field_boundaries_bytes())},
+        )
+        canonical_path = Path(controller.ag_fields_dir) / "fields.WGS.geojson"
+        accepted_bytes = canonical_path.read_bytes()
+        accepted_source_filename = controller.field_boundaries_source_filename
+        rejected_payload = json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {"field_id": 9},
+                        "geometry": {"type": "Point", "coordinates": [0.0, 0.0]},
+                    }
+                ],
+            }
+        ).encode()
+        rejected_response = client.post(
+            "/api/runs/demo/cfg/agfields/boundaries",
+            files={"field_boundaries": ("rejected.json", rejected_payload)},
+        )
+
+    assert accepted_response.status_code == 200
+    assert rejected_response.status_code == 400
+    assert rejected_response.json()["error"]["code"] == "invalid_vector"
+    assert canonical_path.read_bytes() == accepted_bytes
+    assert controller.field_boundaries_source_filename == accepted_source_filename
+    receipts = [
+        json.loads(path.read_text())
+        for path in (Path(controller.ag_fields_dir) / "vector_upload_attempts").glob("*/normalization.json")
+    ]
+    assert sorted(receipt["status"] for receipt in receipts) == ["accepted", "rejected"]
 
 
 def test_successful_sync_mutations_invalidate_ag_fields_preflight(
@@ -250,7 +536,7 @@ def test_successful_sync_mutations_invalidate_ag_fields_preflight(
         responses = [
             client.post(
                 "/api/runs/demo/cfg/agfields/boundaries",
-                files={"field_boundaries": ("fields.geojson", b"{}")},
+                files={"field_boundaries": ("fields.geojson", _field_boundaries_bytes())},
             ),
             client.post(
                 "/api/runs/demo/cfg/agfields/schema",
@@ -284,9 +570,9 @@ def test_boundary_upload_rejects_extension_and_oversize(
         )
 
     assert bad_extension.status_code == 400
-    assert bad_extension.json()["error"]["message"].startswith("Invalid file extension")
+    assert "GeoJSON, Shapefile ZIP, or GeoParquet" in bad_extension.json()["error"]["message"]
     assert oversize.status_code == 413
-    assert oversize.json()["error"]["code"] == "payload_too_large"
+    assert oversize.json()["error"]["code"] == "vector_limit_exceeded"
 
 
 def test_schema_failure_leaves_field_id_unchanged(route_context) -> None:
@@ -1271,3 +1557,15 @@ def test_leaf_job_status_uses_enum_value(monkeypatch, status):
         get_status=lambda refresh=False: getattr(JobStatus, status.upper())
     ))
     assert ag_fields_routes._rq_job_status("agfields_run_wepp", "leaf", object()) == status
+
+
+def test_session_human_is_used_for_ag_fields_retention(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "current_auth_actor",
+        lambda: {"token_class": "session", "user_id": 77, "session_id": "not-persisted"},
+    )
+    assert ag_fields_routes._retention_actor_from_request().receipt_value() == {
+        "kind": "human",
+        "user_id": 77,
+    }

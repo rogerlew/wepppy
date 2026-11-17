@@ -32,6 +32,11 @@ from wepppy.microservices.browse.security import (
     validate_resolved_target,
     derive_allowed_symlink_roots,
 )
+from wepppy.microservices.browse.sensitive_vectors import (
+    can_access_run_sensitive_vector,
+    is_sensitive_vector_path,
+    sensitive_child_names,
+)
 from wepppy.runtime_paths import (
     NoDirError,
     listdir as nodir_listdir,
@@ -595,6 +600,18 @@ async def _files_list_response(
     page = (offset // limit) + 1
     page_offset = offset % limit
 
+    sensitive_children = set(sensitive_child_names(rel_path))
+    try:
+        for entry in os.scandir(abs_path):
+            resolved_relpath = os.path.relpath(os.path.realpath(entry.path), wd)
+            if is_sensitive_vector_path(resolved_relpath):
+                sensitive_children.add(entry.name.casefold())
+    except OSError:
+        pass
+    sensitive_children = frozenset(sensitive_children)
+    excluded_names = sensitive_children
+    if sensitive_children and can_access_run_sensitive_vector(auth_context, runid):
+        excluded_names = frozenset()
     entries, total_items, using_manifest = await deps.get_page_entries(
         wd,
         abs_path,
@@ -604,6 +621,7 @@ async def _files_list_response(
         sort_by=sort_by,
         sort_order=sort_order,
         hide_mixed_nodir=hide_mixed_nodir,
+        excluded_names=excluded_names,
     )
 
     if total_items == 0 or offset >= total_items:
@@ -620,6 +638,7 @@ async def _files_list_response(
                 sort_by=sort_by,
                 sort_order=sort_order,
                 hide_mixed_nodir=hide_mixed_nodir,
+                excluded_names=excluded_names,
             )
             using_manifest = using_manifest or next_using_manifest
             needed = limit - len(entries)
@@ -838,6 +857,7 @@ async def _files_meta_response(
     abs_path: str,
     using_manifest: bool,
     deps: FilesApiDependencies,
+    auth_context=None,
 ) -> JSONResponse:
     name = "" if rel_path in (".", "") else os.path.basename(abs_path.rstrip(os.sep))
     is_symlink = os.path.islink(abs_path)
@@ -851,7 +871,17 @@ async def _files_meta_response(
 
     hr_value = ""
     if is_dir:
-        child_count = await deps.get_total_items(abs_path)
+        sensitive_children = sensitive_child_names(rel_path)
+        if sensitive_children and not can_access_run_sensitive_vector(auth_context, runid):
+            _entries, child_count, _cached = await deps.get_page_entries(
+                wd,
+                abs_path,
+                page=1,
+                page_size=1,
+                excluded_names=sensitive_children,
+            )
+        else:
+            child_count = await deps.get_total_items(abs_path)
         hr_value = f"{child_count} items"
 
     entry_payload = _build_files_entry_payload(
@@ -1045,6 +1075,13 @@ async def _handle_files_request(
     if resolved_violation is not None:
         _raise_outside_or_invalid_path()
 
+    resolved_relpath = os.path.relpath(os.path.realpath(abs_path), wd)
+    if (
+        (is_sensitive_vector_path(rel_path) or is_sensitive_vector_path(resolved_relpath))
+        and not can_access_run_sensitive_vector(auth_context, runid)
+    ):
+        _raise_forbidden_path("sensitive_vector_artifact")
+
     using_manifest = os.path.exists(deps.manifest_path(wd))
 
     if meta:
@@ -1056,6 +1093,7 @@ async def _handle_files_request(
             abs_path=abs_path,
             using_manifest=using_manifest,
             deps=deps,
+            auth_context=auth_context,
         )
 
     if not os.path.isdir(abs_path):

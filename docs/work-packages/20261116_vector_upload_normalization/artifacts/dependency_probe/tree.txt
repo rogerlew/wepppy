@@ -1,0 +1,46 @@
+vector-upload-dependency-probe v0.0.0 (/tmp/wepppy-vector-upload-normalization/docs/work-packages/20261116_vector_upload_normalization/artifacts/dependency_probe)
+├── parquet v60.1.0
+│   ├── ahash v0.8.12
+│   │   ├── cfg-if v1.0.5
+│   │   ├── getrandom v0.3.4
+│   │   │   ├── cfg-if v1.0.5
+│   │   │   └── libc v0.2.191
+│   │   ├── once_cell v1.21.4
+│   │   └── zerocopy v0.8.63
+│   │       └── zerocopy-derive v0.8.63 (proc-macro)
+│   │           ├── proc-macro2 v1.0.107
+│   │           │   └── unicode-ident v1.0.27
+│   │           ├── quote v1.0.47
+│   │           │   └── proc-macro2 v1.0.107 (*)
+│   │           └── syn v2.0.119
+│   │               ├── proc-macro2 v1.0.107 (*)
+│   │               ├── quote v1.0.47 (*)
+│   │               └── unicode-ident v1.0.27
+│   │   [build-dependencies]
+│   │   └── version_check v0.9.5
+│   ├── bytes v1.12.1
+│   ├── chrono v0.4.44
+│   │   ├── iana-time-zone v0.1.65
+│   │   └── num-traits v0.2.19
+│   │       └── libm v0.2.16
+│   │       [build-dependencies]
+│   │       └── autocfg v1.5.1
+│   ├── half v2.7.1
+│   │   ├── cfg-if v1.0.5
+│   │   ├── num-traits v0.2.19 (*)
+│   │   └── zerocopy v0.8.63 (*)
+│   ├── hashbrown v0.17.1
+│   ├── num-bigint v0.5.1
+│   │   ├── num-integer v0.1.47
+│   │   │   └── num-traits v0.2.19 (*)
+│   │   └── num-traits v0.2.19 (*)
+│   ├── num-integer v0.1.47 (*)
+│   ├── num-traits v0.2.19 (*)
+│   ├── seq-macro v0.3.6 (proc-macro)
+│   ├── snap v1.1.2
+│   └── twox-hash v2.1.5
+└── serde_json v1.0.145
+    ├── itoa v1.0.19
+    ├── memchr v2.8.3
+    ├── ryu v1.0.23
+    └── serde_core v1.0.229

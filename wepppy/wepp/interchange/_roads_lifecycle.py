@@ -307,6 +307,33 @@ def retain(root: str | Path, *, replace_segments=False) -> Path | None:
     return snapshot
 
 
+def restore_retained(root: str | Path, snapshot: str | Path | None) -> None:
+    """Restore one failed mutation's retained current outputs."""
+    if snapshot is None:
+        return
+    root = Path(root).resolve()
+    snapshot = Path(snapshot).resolve()
+    history = _path(root, HISTORY).resolve()
+    if snapshot.parent != history or root not in _WRITERS.get():
+        raise RuntimeError("Roads retained-output restore requires its mutation guard")
+    for relative in (OUTPUT, RUNS, SEGMENTS, *[CACHE / (CACHE_KEY + suffix) for suffix in ('.parquet', '.meta.json', '.attempts')]):
+        source = snapshot / relative
+        if not source.exists():
+            continue
+        target = _path(root, relative)
+        if target.is_dir() and not target.is_symlink():
+            shutil.rmtree(target)
+        else:
+            target.unlink(missing_ok=True)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if source.is_dir() and not source.is_symlink():
+            shutil.copytree(source, target, symlinks=True)
+        else:
+            shutil.copy2(source, target)
+    shutil.rmtree(snapshot)
+    _INVALIDATED.set(_INVALIDATED.get() - {root})
+
+
 def segment_ids(features):
     if not isinstance(features, list):
         raise ValueError('Prepared Roads features must be a list')

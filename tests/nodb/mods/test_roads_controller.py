@@ -159,6 +159,66 @@ def test_set_uploaded_geojson_stages_file_and_checksum(tmp_path: Path) -> None:
     assert summary["feature_count"] == 1
 
 
+def test_set_uploaded_geojson_rolls_back_file_and_persisted_state_on_commit_failure(
+    tmp_path: Path,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    original = tmp_path / "original.geojson"
+    replacement = tmp_path / "replacement.geojson"
+    _write_roads_geojson(original)
+    _write_roads_geojson(replacement)
+    original.write_text(original.read_text().replace('"features":', '"marker":"old","features":'))
+    replacement.write_text(replacement.read_text().replace('"features":', '"marker":"new","features":'))
+    accepted = controller.set_uploaded_geojson(str(original))
+    canonical = tmp_path / accepted["uploaded_geojson_relpath"]
+    prior_bytes = canonical.read_bytes()
+    prior_state = controller.query_summary()
+    prior_completed = Path(controller.roads_log_path).read_bytes().count(b"upload_completed")
+
+    def fail_commit() -> None:
+        raise OSError("receipt fsync failed")
+
+    with pytest.raises(OSError, match="receipt fsync failed"):
+        controller.set_uploaded_geojson(str(replacement), publication_commit=fail_commit)
+
+    assert canonical.read_bytes() == prior_bytes
+    assert Path(controller.roads_log_path).read_bytes().count(b"upload_completed") == prior_completed
+    assert controller.query_summary()["uploaded_geojson_sha256"] == prior_state["uploaded_geojson_sha256"]
+    reloaded = Roads.load_detached(str(tmp_path))
+    assert reloaded.query_summary()["uploaded_geojson_sha256"] == prior_state["uploaded_geojson_sha256"]
+
+
+def test_set_uploaded_geojson_does_not_rollback_after_publication_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    source = tmp_path / "replacement.geojson"
+    _write_roads_geojson(source)
+    committed: list[bool] = []
+    append_log = Roads._append_roads_log
+
+    def interrupt_completion(self, stage, event, details=None):
+        if event == "upload_completed":
+            raise KeyboardInterrupt()
+        return append_log(self, stage, event, details)
+
+    monkeypatch.setattr(Roads, "_append_roads_log", interrupt_completion)
+
+    with pytest.raises(KeyboardInterrupt):
+        controller.set_uploaded_geojson(
+            str(source),
+            publication_commit=lambda: committed.append(True),
+        )
+
+    assert committed == [True]
+    reloaded = Roads.load_detached(str(tmp_path))
+    summary = reloaded.query_summary()
+    assert summary["uploaded_geojson_sha256"] == hashlib.sha256(
+        (tmp_path / summary["uploaded_geojson_relpath"]).read_bytes()
+    ).hexdigest()
+
+
 def test_set_uploaded_geojson_uses_geojson_crs_when_present(tmp_path: Path) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
     source_path = tmp_path / "input.geojson"

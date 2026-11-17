@@ -23,6 +23,11 @@ from wepppy.weppcloud.utils.auth_tokens import JWTConfigurationError, JWTDecodeE
 from wepppy.weppcloud.utils.browse_cookie import browse_cookie_name_candidates
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.microservices.browse.errors import PublicHTTPException
+from wepppy.microservices.browse.sensitive_vectors import (
+    can_access_batch_sensitive_vector,
+    can_access_run_sensitive_vector,
+    is_sensitive_vector_path,
+)
 
 DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
 BROWSE_JWT_COOKIE_NAME_ENV = "WEPP_BROWSE_JWT_COOKIE_NAME"
@@ -404,6 +409,14 @@ def authorize_run_request(
                 status_code=403,
                 code="forbidden",
             )
+        if is_sensitive_vector_path(subpath) and not can_access_run_sensitive_vector(
+            context, _authorization_runid(runid)
+        ):
+            raise BrowseAuthError(
+                "Project owner or root access is required for retained upload evidence",
+                status_code=403,
+                code="forbidden",
+            )
         return context
 
     context = resolve_auth_context(request, runid=runid, config=config)
@@ -529,6 +542,16 @@ def authorize_group_request(
         if root_only and not context.is_root:
             raise BrowseAuthError(
                 "Root role required for this path",
+                status_code=403,
+                code="forbidden",
+            )
+        if (
+            feature_id == "batch_runner"
+            and is_sensitive_vector_path(subpath)
+            and not can_access_batch_sensitive_vector(context, identifier)
+        ):
+            raise BrowseAuthError(
+                "Batch project membership or root access is required for retained upload evidence",
                 status_code=403,
                 code="forbidden",
             )

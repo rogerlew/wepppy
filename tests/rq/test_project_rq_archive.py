@@ -1,15 +1,22 @@
 from __future__ import annotations
 
 import errno
+import io
 from configparser import RawConfigParser
 from datetime import datetime, timezone
 import json
+import os
+import shutil
+import stat
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import redis
 
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.microservices.vector_upload_normalization import VectorUploadError
 from wepppy.nodb.project_config_reader import load_project_config
 from wepppy.nodb.project_config_snapshot import materialize_preset_snapshot, resolve_preset_snapshot
 from wepppy.nodb.project_config_update import (
@@ -21,6 +28,64 @@ from wepppy.project_config_sanitization import scan_archive
 from wepppy.project_config_serialization import parse_config_text, serialize_config
 
 pytestmark = pytest.mark.unit
+
+
+def test_private_zip_cap_allows_header_rewrites_at_exact_final_size(tmp_path):
+    from wepppy.rq.project_rq_archive import _BoundedPrivateArchiveFile
+
+    payload = b'archive source bytes' * 100
+    baseline = io.BytesIO()
+    with zipfile.ZipFile(baseline, 'w', compression=zipfile.ZIP_DEFLATED) as zipped:
+        zipped.writestr('payload.bin', payload)
+    limit = len(baseline.getvalue())
+    offsets = []
+
+    class ObservedArchiveFile(_BoundedPrivateArchiveFile):
+        def write(self, data):
+            offsets.append(self.tell())
+            return super().write(data)
+
+    target = tmp_path / 'bounded.zip'
+    with ObservedArchiveFile(str(target), limit) as output:
+        with zipfile.ZipFile(output, 'w', compression=zipfile.ZIP_DEFLATED) as zipped:
+            zipped.writestr('payload.bin', payload)
+    assert any(right < left for left, right in zip(offsets, offsets[1:]))
+    assert target.stat().st_size == limit
+    with zipfile.ZipFile(target) as zipped:
+        assert zipped.read('payload.bin') == payload
+
+
+def test_private_zip_cap_rejects_central_directory_before_growth(tmp_path):
+    from wepppy.rq.project_rq_archive import _BoundedPrivateArchiveFile
+
+    baseline = io.BytesIO()
+    with zipfile.ZipFile(baseline, 'w', compression=zipfile.ZIP_STORED) as zipped:
+        zipped.writestr('payload.bin', b'complete source')
+        member_end = baseline.tell()
+    assert len(baseline.getvalue()) > member_end
+    target = tmp_path / 'bounded.zip'
+    with _BoundedPrivateArchiveFile(str(target), member_end) as output:
+        zipped = zipfile.ZipFile(output, 'w', compression=zipfile.ZIP_STORED)
+        zipped.writestr('payload.bin', b'complete source')
+        with pytest.raises(VectorUploadError, match='reserved size'):
+            zipped.close()
+        output.flush()
+        assert target.stat().st_size == member_end
+
+
+def test_private_zip_cap_limits_file_extent_after_seeks(tmp_path):
+    from wepppy.rq.project_rq_archive import _BoundedPrivateArchiveFile
+
+    target = tmp_path / 'bounded.zip'
+    with _BoundedPrivateArchiveFile(str(target), 8) as output:
+        output.write(b'12345678')
+        output.seek(1)
+        output.write(b'XX')
+        for offset in (7, 8, 1024):
+            output.seek(offset)
+            with pytest.raises(VectorUploadError, match='reserved size'):
+                output.write(b'zz')
+    assert target.read_bytes() == b'1XX45678'
 
 
 class _PrepStub:
@@ -59,9 +124,19 @@ def _owned_project(root: Path) -> tuple[Path, Path, tuple[str, str]]:
 @pytest.fixture()
 def archive_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     import wepppy.rq.project_rq as project
+    from wepppy.rq import project_rq_archive as archive_module
 
     published: list[tuple[str, str]] = []
     prep_by_run: dict[str, _PrepStub] = {}
+
+    class Lease:
+        def assert_owned(self) -> None:
+            return None
+
+        def release(self) -> None:
+            return None
+
+    monkeypatch.setattr(archive_module, "RedisScopeLeaseFactory", lambda: lambda _scope: Lease())
 
     monkeypatch.setattr(project, "get_current_job", lambda: SimpleNamespace(id="job-archive"))
     monkeypatch.setattr(project, "get_wd", lambda runid: str(tmp_path / runid))
@@ -206,6 +281,118 @@ def test_archive_rq_preserves_nodir_cache_entries(
     assert ".nodir/projections/read.json" in names
     assert ".nodir/cache/watershed/123/entry.bin" in names
     assert prep_by_run["demo"].cleared == 1
+
+
+def test_archive_holds_vector_scope_before_sensitive_tree_scan(
+    archive_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    project, tmp_path, _published, _prep_by_run = archive_rq_environment
+    run_dir = tmp_path / "demo"
+    run_dir.mkdir(parents=True)
+    (run_dir / "input.txt").write_text("input", encoding="utf-8")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "archive-order-test")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
+    state = {"locked": False}
+
+    class Lease:
+        def assert_owned(self) -> None:
+            assert state["locked"] is True
+
+        def release(self) -> None:
+            state["locked"] = False
+
+    def acquire(scope: str) -> Lease:
+        assert scope == "run:demo"
+        state["locked"] = True
+        return Lease()
+
+    from wepppy.rq import project_rq_archive as archive_module
+    original_scan = archive_module._calculate_run_payload_bytes
+
+    def checked_scan(path: Path) -> tuple[int, int]:
+        assert state["locked"] is True
+        return original_scan(path)
+
+    monkeypatch.setattr(archive_module, "RedisScopeLeaseFactory", lambda: acquire)
+    monkeypatch.setattr(archive_module, "_calculate_run_payload_bytes", checked_scan)
+
+    project.archive_rq("demo", comment="locked snapshot")
+
+    assert state["locked"] is False
+    assert len(list((run_dir / "archives").glob("*.zip"))) == 1
+
+
+@pytest.mark.parametrize("as_directory", [False, True])
+def test_archive_rejects_file_and_directory_symlinks(
+    archive_rq_environment,
+    tmp_path: Path,
+    as_directory: bool,
+) -> None:
+    project, root, _published, _prep = archive_rq_environment
+    run_dir = root / "demo"
+    run_dir.mkdir(parents=True)
+    target = tmp_path / ("outside-dir" if as_directory else "outside.txt")
+    if as_directory:
+        target.mkdir()
+        (target / "secret.txt").write_text("secret")
+    else:
+        target.write_text("secret")
+    (run_dir / "alias").symlink_to(target, target_is_directory=as_directory)
+
+    with pytest.raises(ValueError, match="symbolic links"):
+        project.archive_rq("demo", comment="must fail")
+
+    assert not list((run_dir / "archives").rglob("*.zip"))
+
+
+def test_archive_aborts_before_publication_when_vector_scope_is_lost(
+    archive_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    project, root, _published, _prep = archive_rq_environment
+    run_dir = root / "demo"
+    (run_dir / "vector_upload_attempts" / "attempt").mkdir(parents=True)
+    (run_dir / "vector_upload_attempts" / "attempt" / "normalization.json").write_text("{}")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "archive-lease-loss")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(root))
+
+    class Lease:
+        assertions = 0
+
+        def assert_owned(self) -> None:
+            self.assertions += 1
+            if self.assertions >= 3:
+                raise VectorUploadError(
+                    "vector_retention_quota_exceeded",
+                    "lease lost",
+                    status_code=507,
+                )
+
+        def release(self) -> None:
+            return None
+
+    class Reservation:
+        reservation_id = "archive-lease-loss"
+
+        def bind_attempt(self, _attempt_dir: Path) -> None:
+            return None
+
+        def commit(self, _exact_bytes: int) -> None:
+            return None
+
+        def release_prewrite(self) -> None:
+            return None
+
+    from wepppy.rq import project_rq_archive as archive_module
+    monkeypatch.setattr(archive_module, "RedisScopeLeaseFactory", lambda: lambda _scope: Lease())
+    monkeypatch.setattr(archive_module, "assert_project_retention_capacity", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(archive_module, "RedisRetentionLedger", lambda: SimpleNamespace(reserve=lambda **_kwargs: Reservation()))
+
+    with pytest.raises(VectorUploadError, match="lease lost"):
+        project.archive_rq("demo", comment="must fail")
+
+    assert not list((run_dir / "archives").rglob("*.zip"))
 
 
 def test_archive_recovers_pending_update_and_preserves_one_pair(
@@ -676,6 +863,152 @@ def test_archive_restores_directory_modes_and_empty_folders(archive_rq_environme
     assert stat.S_IMODE(private.stat().st_mode) == 0o700
     assert stat.S_IMODE(empty.stat().st_mode) == 0o750
     assert payload.read_bytes() == b'failed native candidate'
+
+
+def test_vector_attempts_archive_privately_with_hash_sidecar_and_restore(
+    archive_rq_environment, monkeypatch: pytest.MonkeyPatch,
+):
+    project, tmp_path, _published, _prep = archive_rq_environment
+    run = tmp_path / "demo"
+    attempt = run / "roads" / "vector_upload_attempts" / "attempt-1"
+    original_dir = attempt / "original"
+    original_dir.mkdir(parents=True, mode=0o700)
+    attempt.chmod(0o700)
+    original_dir.chmod(0o700)
+    original = original_dir / "roads.zip.upload"
+    original.write_bytes(b"hostile-review-fixture")
+    original.chmod(0o600)
+    (attempt / "normalization.json").write_text('{"status":"rejected"}')
+
+    filesystem_id = f"archive-{tmp_path.name}"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", filesystem_id)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
+    connection_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path("/run/secrets/redis_password")
+    if not password_path.exists():
+        password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/nonexistent"))
+    if password_path.exists():
+        connection_kwargs["password"] = password_path.read_text().strip()
+    connection = redis.client.Redis(**connection_kwargs)
+    from wepppy.microservices.vector_upload_normalization import RedisRetentionLedger, RedisScopeLeaseFactory
+    from wepppy.microservices import vector_upload_normalization as normalization_module
+    from wepppy.rq import project_rq_archive as archive_module
+    monkeypatch.setattr(archive_module, "RedisRetentionLedger", lambda: RedisRetentionLedger(connection))
+    monkeypatch.setattr(archive_module, "RedisScopeLeaseFactory", lambda: RedisScopeLeaseFactory(connection))
+    monkeypatch.setattr(
+        archive_module,
+        "acquire_retention_maintenance_lease",
+        lambda: normalization_module.acquire_retention_maintenance_lease(connection),
+    )
+    monkeypatch.setattr(
+        archive_module,
+        "begin_retention_rebuild_obligation",
+        lambda root, **kwargs: normalization_module.begin_retention_rebuild_obligation(
+            root, connection=connection, **kwargs
+        ),
+    )
+    monkeypatch.setattr(
+        archive_module,
+        "complete_retention_rebuild_obligation",
+        lambda path: normalization_module.complete_retention_rebuild_obligation(
+            path, connection=connection
+        ),
+    )
+    monkeypatch.setattr(
+        archive_module,
+        "reconcile_retention",
+        lambda root, **kwargs: normalization_module.reconcile_retention(
+            root, connection=connection, **kwargs
+        ),
+    )
+    monkeypatch.setattr(
+        normalization_module.shutil,
+        "disk_usage",
+        lambda _path: SimpleNamespace(total=30_000_000_000, used=1_000_000_000, free=29_000_000_000),
+    )
+    prefix = f"vector-upload-retention:{filesystem_id}"
+    try:
+        existing = list(connection.scan_iter(match=f"{prefix}:*"))
+        if existing:
+            connection.delete(*existing)
+        connection.hset(f"{prefix}:totals", mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0})
+        project.archive_rq(
+            "demo",
+            comment="private vector evidence",
+            retention_actor={"kind": "human", "identifier": 42},
+        )
+        archive = next((run / "archives" / "private").glob("*/*.zip"))
+        sidecar = archive.with_suffix(".zip.sensitive.json")
+        metadata = json.loads(sidecar.read_text())
+        assert metadata["contains_vector_upload_attempts"] is True
+        assert metadata["archive_sha256"] == __import__("hashlib").sha256(archive.read_bytes()).hexdigest()
+        assert stat.S_IMODE(archive.stat().st_mode) == 0o600
+        assert stat.S_IMODE(sidecar.stat().st_mode) == 0o600
+        receipt = json.loads((archive.parent / "normalization.json").read_text())
+        assert receipt["canonical_path"] == archive.relative_to(run).as_posix()
+        assert receipt["actor"] == {"kind": "human", "user_id": 42}
+        with zipfile.ZipFile(archive) as zipped:
+            assert zipped.read("roads/vector_upload_attempts/attempt-1/original/roads.zip.upload") == b"hostile-review-fixture"
+
+        shutil.rmtree(run / "roads")
+        project.restore_archive_rq("demo", archive.relative_to(run / "archives").as_posix())
+        restored = run / "roads" / "vector_upload_attempts" / "attempt-1" / "original" / "roads.zip.upload"
+        assert restored.read_bytes() == b"hostile-review-fixture"
+        assert stat.S_IMODE(restored.stat().st_mode) == 0o600
+    finally:
+        keys = list(connection.scan_iter(match=f"{prefix}:*"))
+        if keys:
+            connection.delete(*keys)
+
+
+def test_restore_acquires_global_maintenance_before_project_scope_for_incoming_evidence(
+    archive_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wepppy.rq import project_rq_archive as archive_module
+
+    project, tmp_path, _published, _prep = archive_rq_environment
+    run = tmp_path / "demo"
+    archives = run / "archives"
+    archives.mkdir(parents=True)
+    archive = archives / "incoming-sensitive.zip"
+    with zipfile.ZipFile(archive, "w") as zipped:
+        zipped.writestr("roads/vector_upload_attempts/attempt/normalization.json", "{}")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "restore-lock-order")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
+    monkeypatch.setattr(project, "lock_statuses", lambda _runid: {"ron.nodb": True})
+    events: list[str] = []
+
+    class Lease:
+        # This ordering fixture has no descendant reservations; the real
+        # reservation discovery is covered by test_vector_archive_recovery.py.
+        connection = SimpleNamespace(scan_iter=lambda **_: ())
+
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+        def assert_owned(self) -> None:
+            events.append(f"assert:{self.name}")
+
+        def release(self) -> None:
+            events.append(f"release:{self.name}")
+
+    monkeypatch.setattr(
+        archive_module,
+        "acquire_retention_maintenance_lease",
+        lambda: events.append("acquire:maintenance") or Lease("maintenance"),
+    )
+    monkeypatch.setattr(
+        archive_module,
+        "RedisScopeLeaseFactory",
+        lambda: lambda scope: events.append(f"acquire:{scope}") or Lease(scope),
+    )
+
+    with pytest.raises(RuntimeError, match="Cannot restore while NoDb files are locked"):
+        project.restore_archive_rq("demo", archive.name)
+
+    assert events.index("acquire:maintenance") < events.index("acquire:run:demo")
+    assert events[-2:] == ["release:run:demo", "release:maintenance"]
 
 
 def test_restore_stages_private_ancestry_before_payload_and_restores_zero_mode(

@@ -16,9 +16,37 @@ from pyproj import CRS, Geod, Transformer
 
 from wepppy.all_your_base.geo.shapefile import signed_area
 
-__all__ = ["WatershedFeature", "WatershedCollection"]
+__all__ = ["WatershedFeature", "WatershedCollection", "validate_new_upload_polygon_geojson"]
 
 WGS84_GEOD = Geod(ellps="WGS84")
+
+
+def validate_new_upload_polygon_geojson(payload: Dict[str, Any]) -> None:
+    """Validate polygon-only admission for a new Batch upload.
+
+    This deliberately does not run from ``WatershedCollection`` construction so
+    legacy saved projects retain their existing reload behavior.
+    """
+    if not isinstance(payload, dict) or payload.get("type") != "FeatureCollection":
+        raise ValueError("GeoJSON resource must be a FeatureCollection")
+    features = payload.get("features")
+    if not isinstance(features, list) or not features:
+        raise ValueError("GeoJSON resource contains no features")
+    def has_coordinate_pair(value: Any) -> bool:
+        if not isinstance(value, list):
+            return False
+        if len(value) >= 2 and all(isinstance(item, (int, float)) for item in value[:2]):
+            return True
+        return any(has_coordinate_pair(item) for item in value)
+
+    for index, feature in enumerate(features):
+        geometry = feature.get("geometry") if isinstance(feature, dict) else None
+        geometry_type = geometry.get("type") if isinstance(geometry, dict) else None
+        coordinates = geometry.get("coordinates") if isinstance(geometry, dict) else None
+        if geometry_type not in {"Polygon", "MultiPolygon"} or not has_coordinate_pair(coordinates):
+            raise ValueError(
+                f"Watershed feature {index} must have a nonempty Polygon or MultiPolygon geometry"
+            )
 
 
 def _is_valid_batch_leaf_runid(runid: str) -> bool:

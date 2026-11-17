@@ -15,6 +15,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
+from wepppy.microservices.vector_retention_lifecycle import discover_retention_scopes, has_retained_evidence
+from wepppy.microservices.vector_upload_normalization import (
+    RedisScopeLeaseFactory,
+    VectorUploadError,
+    acquire_retention_maintenance_lease,
+    begin_retention_rebuild_obligation,
+    complete_retention_rebuild_obligation,
+    reconcile_retention,
+)
+
 
 @dataclass(frozen=True)
 class DeleteRuntime:
@@ -32,6 +42,10 @@ def _publish(runtime: DeleteRuntime, channel: str, message: str) -> None:
     if sys.exception() is not None:
         message = safe_text(message, source_profile=current_profile(WORKER))
     runtime.publish_status(channel, message)
+
+
+def _has_retained_vector_evidence(target: Path) -> bool:
+    return has_retained_evidence(target)
 
 
 def _try_mark_delete_state(
@@ -75,9 +89,31 @@ def _delete_db_record(runid: str) -> None:
         user_datastore.delete_run(run)
 
 
+def _retention_delete_root(target: Path, *, has_evidence: bool) -> Path | None:
+    """Validate destructive retention configuration before workflow mutation."""
+    if target.is_symlink():
+        raise RuntimeError("Vector evidence deletion target must not be a symlink")
+    identity = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    if not identity:
+        if has_evidence:
+            raise RuntimeError("Vector evidence retention identity is not configured")
+        return None
+    configured = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+    if not configured:
+        raise RuntimeError("Vector evidence filesystem root is not configured")
+    root = Path(configured).resolve(strict=True)
+    relative = target.resolve().relative_to(root)
+    if not relative.parts:
+        raise RuntimeError("Cannot delete the vector evidence filesystem root")
+    return root
+
+
 def delete_run_rq(runid: str, wd: str | None = None, *, delete_files: bool = False, runtime: DeleteRuntime) -> None:
     """Serialize deletion against catalog publishers without recreating a missing run."""
-    target = Path(wd or runtime.get_wd(runid)).resolve()
+    target = Path(wd or runtime.get_wd(runid))
+    if delete_files:
+        _retention_delete_root(target, has_evidence=_has_retained_vector_evidence(target))
+    target = target.resolve()
     with catalog_lifecycle_guard(target, allow_missing=True):
         _delete_run_guarded(runid, str(target), delete_files=delete_files, runtime=runtime)
 
@@ -98,64 +134,126 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
     delete_error: Exception | None = None
     deferred_errnos = {errno.ENOTEMPTY, errno.EACCES, errno.EBUSY}
 
-    mark_failed = not _try_mark_delete_state(
-        wd=str(target),
-        state="queued",
-        touched_by="delete_rq",
-        status_channel=status_channel,
-        job_id=str(job_id),
-        runtime=runtime,
-        failure_label="TTL delete mark failed",
-    )
 
-    if delete_files and target.exists():
-        for attempt in range(1, attempts + 1):
-            try:
-                runtime.rmtree(target)
-            except FileNotFoundError:
-                break
-            except OSError as exc:
-                delete_error = exc
-                if exc.errno in deferred_errnos:
-                    delete_deferred = True
+    retention_leases = []
+    maintenance_lease = None
+    retention_root = None
+    rebuild_obligation = None
+    retention_identity = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    try:
+        if delete_files and not retention_identity and target.exists() and _has_retained_vector_evidence(target):
+            raise RuntimeError("Vector evidence retention identity is not configured")
+        if delete_files and retention_identity:
+            configured_root = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+            if not configured_root:
+                raise RuntimeError("Vector evidence filesystem root is not configured")
+            retention_root = Path(configured_root).resolve(strict=True)
+            target.relative_to(retention_root)
+            maintenance_lease = acquire_retention_maintenance_lease()
+            factory = RedisScopeLeaseFactory()
+            for key in sorted(discover_retention_scopes(
+                maintenance_lease, retention_root, (target,), (f"run:{runid}",),
+            )):
+                retention_leases.append(factory(key))
+            for lease in retention_leases:
+                lease.assert_owned()
+            maintenance_lease.assert_owned()
+            rebuild_obligation = begin_retention_rebuild_obligation(
+                retention_root,
+                operation="project_delete",
+                target=target.relative_to(retention_root).as_posix(),
+            )
+        mark_failed = not _try_mark_delete_state(
+            wd=str(target),
+            state="queued",
+            touched_by="delete_rq",
+            status_channel=status_channel,
+            job_id=str(job_id),
+            runtime=runtime,
+            failure_label="TTL delete mark failed",
+        )
+        if delete_files and target.exists():
+            for attempt in range(1, attempts + 1):
+                if retention_leases:
+                    maintenance_lease.assert_owned()
+                    for lease in retention_leases:
+                        lease.assert_owned()
+                try:
+                    runtime.rmtree(target)
+                except FileNotFoundError:
+                    break
+                except OSError as exc:
+                    delete_error = exc
+                    if exc.errno in deferred_errnos:
+                        delete_deferred = True
+                        runtime.logger.warning(
+                            "delete_run_rq deferred filesystem delete for %s (attempt %s/%s): %s",
+                            target,
+                            attempt,
+                            attempts,
+                            exc,
+                        )
+                        if attempt < attempts:
+                            runtime.sleep(delay_s)
+                            delay_s = min(delay_s * 2, 5.0)
+                            continue
+                        break
+                    delete_failed = True
+                    delete_deferred = False
+                    _publish(runtime, status_channel, f"rq:{job_id} STATUS delete failed ({exc})")
+                    break
+                else:
+                    if not target.exists():
+                        descriptor = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+                        try:
+                            os.fsync(descriptor)
+                        finally:
+                            os.close(descriptor)
+                        break
+            if target.exists():
+                if delete_error is None:
+                    delete_error = OSError(errno.ENOTEMPTY, f"Failed to remove {target}")
+                if delete_deferred:
                     runtime.logger.warning(
-                        "delete_run_rq deferred filesystem delete for %s (attempt %s/%s): %s",
+                        "delete_run_rq deferred filesystem delete for %s (directory still present)",
                         target,
-                        attempt,
-                        attempts,
-                        exc,
                     )
-                    if attempt < attempts:
-                        runtime.sleep(delay_s)
-                        delay_s = min(delay_s * 2, 5.0)
-                        continue
-                    break
-                delete_failed = True
-                delete_deferred = False
-                _publish(
-                    runtime,
-                    status_channel,
-                    f"rq:{job_id} STATUS delete failed ({exc})",
-                )
-                break
-            else:
-                if not target.exists():
-                    break
-        if target.exists():
-            if delete_error is None:
-                delete_error = OSError(errno.ENOTEMPTY, f"Failed to remove {target}")
-            if delete_deferred:
-                runtime.logger.warning(
-                    "delete_run_rq deferred filesystem delete for %s (directory still present)",
-                    target,
-                )
-            else:
-                delete_failed = True
-                _publish(
-                    runtime,
-                    status_channel,
-                    f"rq:{job_id} STATUS delete deferred (directory still present)",
-                )
+                else:
+                    delete_failed = True
+                    _publish(runtime, status_channel, f"rq:{job_id} STATUS delete deferred (directory still present)")
+        if delete_files and not target.exists() and retention_leases and retention_root is not None:
+            for lease in retention_leases:
+                lease.assert_owned()
+            descriptor = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+            try:
+                os.fsync(descriptor)
+            finally:
+                os.close(descriptor)
+            reconcile_retention(
+                retention_root,
+                apply=True,
+                rebuild_ledger=True,
+                stale_seconds=0,
+                committed_only=True,
+                maintenance_lease=maintenance_lease,
+                required_scope_leases=tuple(retention_leases),
+            )
+            if rebuild_obligation is not None:
+                maintenance_lease.assert_owned()
+                for lease in retention_leases:
+                    lease.assert_owned()
+                complete_retention_rebuild_obligation(rebuild_obligation)
+    finally:
+        for lease in reversed(retention_leases):
+            try:
+                lease.release()
+            except VectorUploadError:
+                runtime.logger.warning("Project retention scope release deferred to TTL", exc_info=True)
+        if maintenance_lease is not None:
+            try:
+                maintenance_lease.release()
+            except VectorUploadError:
+                runtime.logger.warning("Vector maintenance release deferred to TTL", exc_info=True)
 
     if target.exists() and (delete_failed or delete_deferred or mark_failed):
         _try_mark_delete_state(

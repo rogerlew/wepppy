@@ -115,6 +115,30 @@ def validate_parser_executable(binary: Path) -> tuple[bool, str | None]:
     return True, None
 
 
+def read_parser_provenance(binary: Path) -> dict[str, str]:
+    """Return the bounded runtime identity after revalidating its sidecar."""
+    valid, reason = validate_parser_executable(binary)
+    if not valid:
+        raise ValueError(reason or "parser provenance is invalid")
+    sidecar = Path(f"{binary}.json")
+    descriptor = os.open(sidecar, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    with os.fdopen(descriptor, "r", encoding="utf-8") as stream:
+        payload = json.load(stream)
+    binary_data = payload["binary"]
+    build_data = payload["build"]
+    source_data = payload["source"]
+    result = {
+        "binary_name": binary_data["name"],
+        "binary_version": binary_data["version"],
+        "binary_sha256": binary_data["sha256"],
+        "cargo_lock_sha256": build_data["cargo_lock_sha256"],
+        "source_revision": source_data["revision"],
+    }
+    if not all(isinstance(value, str) and value for value in result.values()):
+        raise ValueError("parser provenance is incomplete")
+    return result
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -123,4 +147,4 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-__all__ = ["PROVENANCE_SCHEMA", "validate_parser_executable"]
+__all__ = ["PROVENANCE_SCHEMA", "read_parser_provenance", "validate_parser_executable"]

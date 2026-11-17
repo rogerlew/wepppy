@@ -30,6 +30,11 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
+from wepppy.microservices.browse.sensitive_vectors import (
+    can_access_batch_sensitive_vector,
+    can_access_run_sensitive_vector,
+    is_sensitive_vector_path,
+)
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as nodir_resolve
 from wepppy.runtime_paths.fs import stat as nodir_stat
@@ -167,6 +172,12 @@ def build_handlers(
             except BrowseAuthError as exc:
                 raise exc.to_http_exception() from exc
 
+        if is_sensitive_vector_path(rel_path):
+            raise HTTPException(
+                status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                detail="Retained upload evidence is download-only.",
+            )
+
         allow_recorder = auth_context.is_root
         raw_violation = validate_raw_subpath(rel_path)
         if raw_violation is not None:
@@ -197,6 +208,20 @@ def build_handlers(
 
         requested_target = os.path.abspath(os.path.join(wd, logical_rel_path))
         assert_within_root(wd, requested_target)
+        resolved_relpath = os.path.relpath(os.path.realpath(requested_target), wd)
+        if is_sensitive_vector_path(resolved_relpath):
+            if auth_mode == "run":
+                sensitive_access = can_access_run_sensitive_vector(auth_context, runid)
+            elif group_public_runid:
+                sensitive_access = can_access_batch_sensitive_vector(auth_context, runid)
+            else:
+                sensitive_access = False
+            if not sensitive_access:
+                raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Access denied.")
+            raise HTTPException(
+                status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                detail="Retained upload evidence is download-only.",
+            )
         resolved_violation = validate_resolved_target(wd, requested_target)
         if resolved_violation is not None:
             if allow_recorder and resolved_violation == PATH_SECURITY_FORBIDDEN_RECORDER:

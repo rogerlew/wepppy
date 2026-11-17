@@ -27,7 +27,7 @@ from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from enum import Enum
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional, Set, Tuple
+from typing import Any, Callable, Dict, Iterable, Iterator, List, Mapping, Optional, Set, Tuple
 from uuid import uuid4
 
 import pandas as pd
@@ -223,6 +223,7 @@ class AgFields(NoDbBase):
         fn: str | os.PathLike[str],
         *,
         source_filename: Optional[str] = None,
+        publication_commit: Callable[[], None] | None = None,
     ) -> Dict[str, List[Any]]:
         """
         Validate a user-supplied field boundary GeoJSON and normalize it into the canonical
@@ -239,6 +240,12 @@ class AgFields(NoDbBase):
         source_path = next((p for p in search_paths if p.exists()), None)
         if source_path is None:
             raise FileNotFoundError(f'Field boundary geojson file not found: {search_paths[0]}')
+
+        try:
+            source_payload = json.loads(source_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            raise ValueError("Field boundary upload must be valid GeoJSON.") from exc
+        self._validate_field_boundary_geometries(source_payload)
 
         source_basename = PurePosixPath(str(source_filename or '').replace('\\', '/')).name.strip()
         if not source_basename:
@@ -259,8 +266,13 @@ class AgFields(NoDbBase):
         )
         os.close(geojson_fd)
         os.close(parquet_fd)
-
+        canonical_backup = canonical_path.with_name(f'.{canonical_path.name}.backup')
+        parquet_path = Path(self.rotation_schedule_parquet)
+        parquet_backup = parquet_path.with_name(f'.{parquet_path.name}.backup')
+        had_canonical = False
+        had_parquet = False
         try:
+            publication_committed = False
             try:
                 shutil.copy2(source_path, staged_geojson)
             except OSError as exc:
@@ -282,27 +294,96 @@ class AgFields(NoDbBase):
             df.to_parquet(staged_parquet, index=False)
             geojson_hash = self._file_sha1(staged_geojson)
 
-            with self.locked():
-                os.replace(staged_geojson, canonical_path)
-                os.replace(staged_parquet, self.rotation_schedule_parquet)
-                self._field_boundaries_geojson = canonical_name
-                self._field_boundaries_source_filename = source_basename
-                self._field_n = len(df)
-                self._geojson_hash = geojson_hash
-                self._geojson_timestamp = int(time.time())
-                self._geojson_is_valid = True
-                self._field_columns = [str(col) for col in df.columns]
-                self._field_id_key = None
-                self._rotation_accessor = None
+            try:
+                with self.locked():
+                    had_canonical = canonical_path.exists()
+                    had_parquet = parquet_path.exists()
+                    if had_canonical:
+                        shutil.copy2(canonical_path, canonical_backup)
+                    if had_parquet:
+                        shutil.copy2(parquet_path, parquet_backup)
+                    prior_state = {
+                        name: deepcopy(getattr(self, name, None))
+                        for name in (
+                            "_field_boundaries_geojson",
+                            "_field_boundaries_source_filename",
+                            "_field_n",
+                            "_geojson_hash",
+                            "_geojson_timestamp",
+                            "_geojson_is_valid",
+                            "_field_columns",
+                            "_field_id_key",
+                            "_rotation_accessor",
+                        )
+                    }
+                    try:
+                        os.replace(staged_geojson, canonical_path)
+                        os.replace(staged_parquet, self.rotation_schedule_parquet)
+                        self._field_boundaries_geojson = canonical_name
+                        self._field_boundaries_source_filename = source_basename
+                        self._field_n = len(df)
+                        self._geojson_hash = geojson_hash
+                        self._geojson_timestamp = int(time.time())
+                        self._geojson_is_valid = True
+                        self._field_columns = [str(col) for col in df.columns]
+                        self._field_id_key = None
+                        self._rotation_accessor = None
+                        if publication_commit is not None:
+                            publication_commit()
+                        publication_committed = True
+                    except BaseException:  # broad-except: transaction rollback includes cancellation
+                        if had_canonical:
+                            os.replace(canonical_backup, canonical_path)
+                        else:
+                            canonical_path.unlink(missing_ok=True)
+                        if had_parquet:
+                            os.replace(parquet_backup, parquet_path)
+                        else:
+                            parquet_path.unlink(missing_ok=True)
+                        for name, value in prior_state.items():
+                            setattr(self, name, value)
+                        raise
+                relative_path = os.path.relpath(self.rotation_schedule_parquet, self.wd)
+                try:
+                    request_catalog_refresh(self.wd, relative_path)
+                except Exception:  # broad-except: accepted derived-catalog refresh telemetry boundary
+                    self.logger.warning(
+                        "Accepted AgFields catalog refresh is deferred",
+                        exc_info=True,
+                    )
+            except BaseException:  # broad-except: transaction rollback includes cancellation
+                if publication_committed:
+                    raise
+                raise
         finally:
-            for staged_path in (staged_geojson, staged_parquet):
+            for staged_path in (staged_geojson, staged_parquet, canonical_backup, parquet_backup):
                 if os.path.exists(staged_path):
                     os.unlink(staged_path)
 
-        relative_path = os.path.relpath(self.rotation_schedule_parquet, self.wd)
-        request_catalog_refresh(self.wd, relative_path)
-
         return dict(field_id_duplicates=sorted(duplicates))
+
+    @staticmethod
+    def _validate_field_boundary_geometries(payload: Any) -> None:
+        def has_coordinate_pair(value: Any) -> bool:
+            if not isinstance(value, list):
+                return False
+            if len(value) >= 2 and all(isinstance(item, (int, float)) for item in value[:2]):
+                return True
+            return any(has_coordinate_pair(item) for item in value)
+
+        if not isinstance(payload, dict) or payload.get("type") != "FeatureCollection":
+            raise ValueError("Field boundary GeoJSON must be a FeatureCollection.")
+        features = payload.get("features")
+        if not isinstance(features, list) or not features:
+            raise ValueError("Field boundary GeoJSON must contain at least one polygon feature.")
+        for index, feature in enumerate(features):
+            geometry = feature.get("geometry") if isinstance(feature, dict) else None
+            geometry_type = geometry.get("type") if isinstance(geometry, dict) else None
+            coordinates = geometry.get("coordinates") if isinstance(geometry, dict) else None
+            if geometry_type not in {"Polygon", "MultiPolygon"} or not has_coordinate_pair(coordinates):
+                raise ValueError(
+                    f"Field boundary feature {index} must have a nonempty Polygon or MultiPolygon geometry."
+                )
 
     def get_unique_crops(self) -> Set[str]:
         """Return the distinct crop names referenced by the rotation schedule."""

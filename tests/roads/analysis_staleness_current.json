@@ -34,11 +34,11 @@
     },
     "wepppy/nodb/mods/roads/roads.py": {
       "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
-      "current": "f924f48f20778ce33505273aecf5220d3ec3376d424a16e2c83a654200691c4b"
+      "current": "72c38b63ec51ffade9fc10268cd092204bd071272099906a51ddbd9c8fd81c52"
     },
     "wepppy/wepp/interchange/_roads_lifecycle.py": {
       "recorded": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
-      "current": "aa5b7e7b8a76aeaa877af5e39d45f092abf09eeb3304b22f57c3e74745459a92"
+      "current": "187f6b3003859ba1b5a02bffc9909243951409313100e5dcd5ba0a8966ff2760"
     },
     "wepppy/wepp/management/managements.py": {
       "recorded": null,
@@ -202,6 +202,26 @@
       "current_sha256": "aa5b7e7b8a76aeaa877af5e39d45f092abf09eeb3304b22f57c3e74745459a92",
       "scope": "Sanitize exception-derived diagnostic output only; no scientific inputs, formulas, routing, model execution or successful result changes. Historical full-project evidence remains explicitly stale.",
       "evidence": "docs/work-packages/20261111_safe_traceback_sanitization/artifacts/20261111_correctness_review.md"
+    },
+    {
+      "date": "2026-11-17",
+      "commit": "0e861887e132b41b00a108292d7833d21750b146",
+      "reviewed_source_revision": "f964831084159eb4cf68cb533dc48235cb580989",
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "previous_reviewed_sha256": "f924f48f20778ce33505273aecf5220d3ec3376d424a16e2c83a654200691c4b",
+      "current_sha256": "72c38b63ec51ffade9fc10268cd092204bd071272099906a51ddbd9c8fd81c52",
+      "scope": "Make vector upload publication transactional: stage canonical bytes, retain prior outputs, restore canonical/controller/output state on failed receipt commit, and preserve committed publication after a later completion-log failure. Input interpretation, model parameterization, simulation builders and numerical results are unchanged. Historical full-project routing evidence remains explicitly stale; this review does not refresh it.",
+      "evidence": "docs/work-packages/20261116_vector_upload_normalization/artifacts/20261117_resumed_qa_review.md#roads-publication-provenance-disposition"
+    },
+    {
+      "date": "2026-11-17",
+      "commit": "4654150c96183eb7913f8f086526c88ad6ee3ce9",
+      "reviewed_source_revision": "f964831084159eb4cf68cb533dc48235cb580989",
+      "path": "wepppy/wepp/interchange/_roads_lifecycle.py",
+      "previous_reviewed_sha256": "aa5b7e7b8a76aeaa877af5e39d45f092abf09eeb3304b22f57c3e74745459a92",
+      "current_sha256": "187f6b3003859ba1b5a02bffc9909243951409313100e5dcd5ba0a8966ff2760",
+      "scope": "Add restore_retained for a failed upload mutation under the existing Roads writer guard; restore prior outputs, runs, segments and caches from that mutation snapshot. Existing retention, model execution, formulas and output accounting are unchanged. Historical full-project routing evidence remains explicitly stale; this review does not refresh it.",
+      "evidence": "docs/work-packages/20261116_vector_upload_normalization/artifacts/20261117_resumed_qa_review.md#roads-publication-provenance-disposition"
     }
   ]
 }
