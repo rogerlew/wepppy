@@ -35,6 +35,7 @@ class BootstrapOperationResult:
 class BootstrapForwardAuthContext:
     runid: str
     email: str
+    user_id: int | None = None
 
 
 class BootstrapOperationError(ValueError):
@@ -112,22 +113,40 @@ def verify_forward_auth_context(
     if not isinstance(email, str) or not email:
         raise BootstrapOperationError("missing subject", status_code=401)
 
-    return BootstrapForwardAuthContext(runid=runid, email=email)
+    user_id = None
+    if "user_id" in claims:
+        user_id = _positive_user_id(claims["user_id"])
+    return BootstrapForwardAuthContext(runid=runid, email=email, user_id=user_id)
+
+
+def _positive_user_id(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, (int, str)) or not str(value).isascii() or not str(value).isdecimal() or int(value) <= 0:
+        raise BootstrapOperationError("invalid user identity", status_code=401)
+    return int(value)
+
+
+def _resolve_user_by_id(user_id: int) -> Any | None:
+    from wepppy.weppcloud.app import User, app as flask_app
+    from sqlalchemy.orm import selectinload
+    with flask_app.app_context():
+        return User.query.options(selectinload(User.roles)).filter_by(id=user_id).first()
 
 
 def _resolve_run_record(runid: str) -> Any | None:
     from wepppy.weppcloud.app import Run, app as flask_app
 
+    from sqlalchemy.orm import selectinload
     with flask_app.app_context():
-        return Run.query.filter(Run.runid == runid).first()
+        return Run.query.options(selectinload(Run.users)).filter(Run.runid == runid).first()
 
 
 def _resolve_user_by_email(email: str) -> Any | None:
     from sqlalchemy import func
     from wepppy.weppcloud.app import User, app as flask_app
 
+    from sqlalchemy.orm import selectinload
     with flask_app.app_context():
-        return User.query.filter(func.lower(User.email) == email.lower()).first()
+        return User.query.options(selectinload(User.roles)).filter(func.lower(User.email) == email.lower()).first()
 
 
 def user_has_run_access(user: Any, run: Any) -> bool:
@@ -144,7 +163,7 @@ def user_has_run_access(user: Any, run: Any) -> bool:
         return True
 
     try:
-        return user in run.users
+        return any(str(member.id) == str(user.id) for member in run.users)
     except Exception:
         return False
 
@@ -155,6 +174,7 @@ def ensure_bootstrap_eligibility(
     require_owner: bool,
     enforce_not_disabled: bool = True,
     email: str | None = None,
+    user_id: int | str | None = None,
     require_user_access: bool = False,
 ) -> tuple[Any, Any | None]:
     from wepppy.declarative.policy import reject_mutation
@@ -169,11 +189,15 @@ def ensure_bootstrap_eligibility(
     if require_owner and not getattr(run, "owner_id", None):
         raise BootstrapOperationError("anonymous runs cannot enable bootstrap", status_code=400)
 
-    if email is None:
+    if user_id is not None:
+        user = _resolve_user_by_id(_positive_user_id(user_id))
+    elif email is not None:
+        user = _resolve_user_by_email(email)
+    elif require_user_access:
+        raise BootstrapOperationError("missing user identity", status_code=401)
+    else:
         return run, None
-
-    user = _resolve_user_by_email(email)
-    if user is None:
+    if user is None or not user.active:
         raise BootstrapOperationError("user not found", status_code=400)
 
     if require_user_access and not user_has_run_access(user, run):
@@ -205,6 +229,7 @@ def enable_bootstrap_operation(
     *,
     actor: str,
     email: str | None = None,
+    user_id: int | str | None = None,
     require_user_access: bool = False,
 ) -> BootstrapOperationResult:
     ensure_bootstrap_eligibility(
@@ -212,6 +237,7 @@ def enable_bootstrap_operation(
         require_owner=True,
         enforce_not_disabled=True,
         email=email,
+        user_id=user_id,
         require_user_access=require_user_access,
     )
     try:
@@ -231,18 +257,19 @@ def mint_bootstrap_token_operation(
     user_id: str,
     require_user_access: bool = False,
 ) -> BootstrapOperationResult:
-    if not user_email or not user_id:
+    try:
+        user_id = str(_positive_user_id(user_id))
+    except BootstrapOperationError as exc:
         raise BootstrapOperationError(
             "User identity claims are required to mint bootstrap tokens",
-            status_code=403,
-            code="forbidden",
-        )
+            status_code=403, code="forbidden",
+        ) from exc
 
     ensure_bootstrap_eligibility(
         runid,
         require_owner=True,
         enforce_not_disabled=True,
-        email=user_email if require_user_access else None,
+        user_id=user_id if require_user_access else None,
         require_user_access=require_user_access,
     )
     wepp = ensure_bootstrap_opt_in(runid)

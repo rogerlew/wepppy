@@ -179,7 +179,7 @@ def _owner_email_map(runs: List[Any]) -> Dict[str, str]:
     if not owner_ints:
         return {}
     owners = User.query.filter(User.id.in_(owner_ints)).all()
-    return {str(owner.id): owner.email for owner in owners}
+    return {str(owner.id): owner.email or f"User {owner.id}" for owner in owners}
 
 
 def _run_row_from_run(run: Any, owner_email: Optional[str]) -> Dict[str, Any]:
@@ -612,8 +612,6 @@ def mint_profile_token():
             return error_factory('Current user is missing an id.', status_code=400)
 
         email = str(getattr(current_user, 'email', '') or '').strip()
-        if not email:
-            return error_factory('Current user is missing an email address.', status_code=400)
 
         role_names = _current_user_roles()
         if not _can_mint_profile_user_token(role_names):
@@ -630,7 +628,7 @@ def mint_profile_token():
             expires_in=PROFILE_TOKEN_TTL_SECONDS,
             extra_claims={
                 'token_class': 'user',
-                'email': email,
+                **({'email': email} if email else {}),
                 'roles': role_names,
                 'groups': group_names,
             },
@@ -678,8 +676,6 @@ def mint_run_token(runid: str, config: str):
             return error_factory('Current user is missing an id.', status_code=400)
 
         email = str(getattr(current_user, 'email', '') or '').strip()
-        if not email:
-            return error_factory('Current user is missing an email address.', status_code=400)
 
         role_names = _current_user_roles()
         group_names = _current_user_groups()
@@ -691,7 +687,7 @@ def mint_run_token(runid: str, config: str):
             expires_in=RUN_TOKEN_TTL_SECONDS,
             extra_claims={
                 'token_class': 'service',
-                'email': email,
+                **({'email': email} if email else {}),
                 'roles': role_names,
                 'groups': group_names,
                 'service_groups': ['admin-run-token'],

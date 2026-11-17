@@ -62,11 +62,12 @@ def verify_token():
             forwarded_path=forwarded_path,
             external_host=_get_external_host(),
         )
-        ensure_bootstrap_eligibility(
+        _run, resolved_user = ensure_bootstrap_eligibility(
             context.runid,
             require_owner=True,
             enforce_not_disabled=True,
             email=context.email,
+            user_id=context.user_id,
             require_user_access=True,
         )
         ensure_bootstrap_opt_in(context.runid)
@@ -78,7 +79,8 @@ def verify_token():
         return _reject("bootstrap verification failed")
 
     response = make_response("", 200)
-    response.headers["X-Auth-User"] = context.email
+    response.headers["X-Auth-User"] = (getattr(resolved_user, "email", None) or
+        (f"user:{context.user_id}" if context.user_id is not None else context.email))
     return response
 
 
@@ -91,7 +93,7 @@ def enable_bootstrap(runid: str, config: str):
         result = enable_bootstrap_operation(
             runid,
             actor=_bootstrap_actor_for_current_user(),
-            email=str(getattr(current_user, "email", "") or "").strip(),
+            user_id=current_user.id,
             require_user_access=True,
         )
         response = success_factory(result.payload)

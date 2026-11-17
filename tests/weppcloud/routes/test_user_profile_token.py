@@ -354,7 +354,8 @@ def test_rendered_profile_links_to_diagnostics_route(profile_auth_client) -> Non
     template_source = PROFILE_TEMPLATE.read_text(encoding="utf-8")
     env = Environment(
         loader=DictLoader({
-            "security/_layout.html": "{% block content %}{% endblock %}",
+            "base_pure.htm": "{% block body %}{% endblock %}",
+            "security/_messages.html": "",
             "security/_macros.html": (
                 "{% macro render_field_with_errors() %}{% endmacro %}"
                 "{% macro render_checkbox_with_errors() %}{% endmacro %}"
@@ -367,6 +368,7 @@ def test_rendered_profile_links_to_diagnostics_route(profile_auth_client) -> Non
         oauth_accounts=SimpleNamespace(all=lambda: []),
         first_name="Test",
         last_name="User",
+        mailbox_verified_at=__import__("datetime").datetime(2026,11,17),
         email="user@example.com",
         roles=[],
         has_role=lambda _role: False,
@@ -383,6 +385,8 @@ def test_rendered_profile_links_to_diagnostics_route(profile_auth_client) -> Non
             user=user,
             oauth_providers={},
             can_mint_profile_token=False,
+            account_display_email=lambda user: user.email,
+            account_mailbox_verified=lambda user: True,
         )
         rendered = env.get_template("user/profile.html").render()
 
@@ -743,3 +747,18 @@ def test_claim_names_logs_and_degrades_on_sqlalchemy_error(
     caplog.set_level(logging.WARNING, logger=module.logger.name)
     assert module._claim_names(_ExplodingClaims()) == []
     assert "failed to evaluate dynamic relationship via .all()" in caplog.text
+
+
+def test_profile_token_without_login_email_retains_user_identity(profile_auth_client,monkeypatch):
+    fixture=profile_auth_client
+    _configure_jwt_env(monkeypatch,fixture['module'])
+    _grant_role(fixture,'PowerUser')
+    with fixture['app'].app_context():
+        user=fixture['db'].session.get(fixture['user_model'],fixture['user_id'])
+        user.email=None
+        fixture['db'].session.commit()
+    fixture['client'].get(f"/test-login/{fixture['user_id']}")
+    response=fixture['client'].post('/profile/mint-token')
+    assert response.status_code==200
+    claims=fixture['module'].auth_tokens.decode_token(response.get_json()['Content']['token'],audience='rq-engine')
+    assert claims['sub']==str(fixture['user_id']) and 'email' not in claims

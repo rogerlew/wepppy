@@ -10,16 +10,14 @@ People can sign in through CILogon to a separate WEPPcloud account. Local creden
 
 ## Progress
 
-
-- [x] (2026-11-17 19:13 UTC) Inspect OAuth, registration, profile, and secret conventions; stage inactive credentials on wepp1.
-- [x] (2026-11-17 19:16 UTC) Create isolated task worktree and scaffold.
-- [x] (2026-11-17 19:50 UTC) Record independent CILogon policy and exact operator-approved login copy; replace superseded proposals.
-- [x] (2026-11-17 UTC) Complete two independent contract reviews and reviewer readback; close all documentation findings.
-- [ ] M1 remaining: Resolve new-local password setup choice and commit accepted checkpoint.
-- [ ] M2: Implement additive account model and migration with complete consumer compatibility.
-- [ ] M3: Implement CILogon, shared-provider matching, verification lifecycle, and responsive UI.
-- [ ] M4: Complete tests, independent implementation reviews, and environment acceptance.
-- [ ] M5: Deliver rollout-ready handoff; keep production deployment deferred.
+- [x] Inspect OAuth/registration/profile and stage inactive wepp1 credentials (2026-11-17).
+- [x] Obtain two independent contract reviews and approve email-first signup; checkpoint `9eb2dfcf0`.
+- [x] Review nullable-identity consumer extension; checkpoint `874de621c`.
+- [x] M2: Implement additive identity/provenance migration and repair nullable-email consumers; SQLite compatibility evidence retained.
+- [x] M3: Implement isolated CILogon, verified shared-provider matching, mailbox setup/verification, and responsive account pages.
+- [x] M4 local review: close security/correctness source findings; execute signed-token, real ORM, mail-sink, browser and frontend checks.
+- [ ] M4 environment gates: populated PostgreSQL migration/concurrency, registered nonproduction providers, real mail delivery, and production-equivalent secret mounts. Full Python gate currently encounters isolated-environment prerequisites; see validation artifact.
+- [x] M5: Deliver local implementation/review handoff with 429 focused Python passes, 36 diagnostic/asset passes, frontend/browser evidence, and explicit environment gates; production migration/activation/deployment remain deferred.
 
 ## Surprises & Discoveries
 
@@ -40,14 +38,14 @@ The operator requires new-local email verification, existing local login preserv
 ## Outcomes & Retrospective
 
 
-Documentation and inactive host credential staging exist. Code, migrations, live configuration, login behavior, and deployment are unchanged. Contract review findings are closed on independent readback. The password-selection decision and accepted checkpoint commit still precede implementation. Prior research records trust uncertainty, not a demonstrated arbitrary-email exploit against CILogon.
+Implementation and local review evidence are retained in the task worktree. Separate CILogon identity, mailbox-first password setup, legacy access, and responsive account UI are implemented. Independent reviews found consumer gaps in recovery, token issuance, Bootstrap, and nullable owner display; these were repaired. See tracker and validation artifact for executed counts and rollout evidence still pending. Production code/configuration/database state remains unchanged. Prior research records trust uncertainty, not a demonstrated arbitrary-email exploit against CILogon.
 
 ## Context and Orientation
 
 
 Worktree `/home/workdir/wepppy-cilogon-oidc`, branch `work/cilogon-oidc-scaffold`, starting source `3950b57520c029c75df67565238b94543a31b03a`. Preserve unrelated WIP in the original checkout. Read nearest AGENTS before editing app, tests, Docker, CSS, and browser tests.
 
-`configuration.py::_load_oauth_providers` registers providers. `utils/oauth.py` creates Authlib clients and PKCE. `routes/_security/oauth.py` implements login, callback, email selection, linking, and disconnect. `auth_forms.py` extends registration/login. `app.py` defines User/OAuthAccount/datastore and initializes Flask-Security. `routes/user.py` renders profile; `templates/user/profile.html` currently extends the narrow auth layout. `templates/security/login_user.html` renders provider buttons. Alembic lives under `wepppy/weppcloud/migrations`.
+`configuration.py::_load_oauth_providers` registers providers. `utils/oauth.py` creates Authlib clients and PKCE. `routes/_security/oauth.py` implements login, callback, email selection, linking, and disconnect. `auth_forms.py` extends registration/login. `app.py` defines User/OAuthAccount/datastore and initializes Flask-Security. `routes/user.py` renders profile; `templates/user/profile.html` now extends the normal page layout. `templates/security/login_user.html` renders provider buttons. Alembic lives under `wepppy/weppcloud/migrations`.
 
 Canonical authority is `docs/schemas/weppcloud-account-email-verification-contract.md`, with session, CSRF, and safe-traceback contracts amended in this checkpoint. Preserve existing current contracts rather than treating code or old work-package proposals as behavioral authority.
 
@@ -101,7 +99,7 @@ After checkpoint acceptance and implementation, in the checkout used by the runn
     python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master
     python3 tools/code_quality_observability.py --base-ref origin/master
 
-Add new lifecycle/migration suites discovered during implementation. Run stub gates when changing API surfaces. Record actual results and source identity, not predicted pass counts. Lint each changed Markdown file through `wctl doc-lint --path /absolute/path/file.md`; installed wctl currently resolves relative paths from the shared checkout. No application tests are necessary for this documentation-only review task.
+Add new lifecycle/migration suites discovered during implementation. Run stub gates when changing API surfaces. Record actual results and source identity, not predicted pass counts. Lint each changed Markdown file through `wctl doc-lint --path /absolute/path/file.md`; installed wctl currently resolves relative paths from the shared checkout. Local test runs now use the operator-approved isolated container and this exact worktree.
 
 ## Validation and Acceptance
 
@@ -122,3 +120,5 @@ Revision note (2026-11-17 19:50 UTC): rewritten around independent CILogon ident
 
 
 Approval update: operator explicitly approved email-first signup with password selection after the verification link and requested proceeding. OPEN-P1 is resolved. Implementation and its required standalone checkpoint commit are authorized; production deployment/migration remain deferred. Historical pending-choice statements above describe the preceding review state.
+
+Implementation discoveries: role/token/Bootstrap consumers assumed a nonempty login email. The reviewed consumer checkpoint replaces those assumptions with stable user IDs; contacts remain nonauthoritative. Bootstrap eager loading and ID membership comparison are necessary across resolver app contexts. Browser checks exposed a wide theme selector and token-row overflow, fixed in the account-page stylesheet. Tests use synthetic credentials and real signed claims/mailbox tokens; production parity remains a distinct gate.

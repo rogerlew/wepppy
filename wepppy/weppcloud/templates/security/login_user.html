@@ -15,10 +15,11 @@
 {% block content %}
   {% if enabled_oauth_providers %}
     <div class="wc-oauth-container">
-      <p class="wc-oauth-intro">Sign in with a connected account:</p>
+      <p class="wc-oauth-intro"><strong>Google, GitHub, or email and password</strong><br>
+      Use the same email address to access the same WEPPcloud account and projects.</p>
       <div class="wc-oauth-actions">
         {% set next_param = request.args.get('next') %}
-        {% for provider_id, provider in enabled_oauth_providers|dictsort %}
+        {% for provider_id, provider in enabled_oauth_providers|dictsort if provider_id != 'cilogon' %}
           {% set provider_slug = provider_id | replace('_', '-') %}
           {% set provider_name = provider.name or provider_id|capitalize %}
           {% set provider_lower = provider_id|lower %}
@@ -106,6 +107,13 @@
         </div>
       </fieldset>
     </form>
+  {% endif %}
+  {% if enabled_oauth_providers and enabled_oauth_providers.get('cilogon') %}
+    <section class="wc-oauth-container" aria-labelledby="cilogon-heading">
+      <h2 id="cilogon-heading">CILogon — university or organization sign-in</h2>
+      <p>CILogon uses a separate WEPPcloud account, even if your email address is the same. Projects from your other account won’t appear here.</p>
+      <a class="wc-oauth-button wc-oauth-cilogon" href="{{ url_for('security_oauth.oauth_login', provider='cilogon', next=request.args.get('next')) }}">Continue with CILogon</a>
+    </section>
   {% endif %}
 {% endblock %}
 

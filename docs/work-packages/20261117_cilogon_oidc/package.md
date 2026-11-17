@@ -1,8 +1,8 @@
 # CILogon accounts, local email verification, and responsive profile
 
-**Status**: Contract update and independent review; implementation pending; deployment deferred.  
-**Started**: 2026-11-17 19:13 UTC  
-**Updated**: 2026-11-17 19:50 UTC  
+**Status**: Implemented; local validation and independent review; rollout gates pending; deployment deferred.
+**Started**: 2026-11-17 19:13 UTC
+**Updated**: 2026-11-17 19:50 UTC
 **Owner**: WEPPcloud operator; Codex implementation support.
 
 ## Overview
@@ -11,7 +11,7 @@ Add independent CILogon accounts alongside shared local/Google/GitHub accounts. 
 
 ## Scope and authority
 
-The current task is to update the work package/contracts, dispatch independent reviews, and disposition findings. Earlier execution authorization is retained, but this turn stops at the reviewed documentation checkpoint and any unresolved product decisions. No code, production migration, deployment, service restart, credential activation, or image publication is included.
+The operator authorized implementation after accepting email-first signup and the reviewed contracts. Code, tests, user/operator documentation, and independent findings disposition are in scope. Production migration, deployment, service restart, credential activation, and image publication remain deferred.
 
 The [account contract](../../schemas/weppcloud-account-email-verification-contract.md) is the intended authority for identity boundaries, exact approved login copy, local verification, profile UX, and migration compatibility. CILogon issuer/subject determines its separate account regardless of email. Google/GitHub verified email may match the shared local account. Existing roles, runs, and ORCID behavior remain compatible.
 
@@ -37,7 +37,11 @@ Implementation, local validation, environment validation, and deployment are sep
 
 ## Work
 
-[ExecPlan](prompts/active/implementation_execplan.md) defines milestones; [tracker](tracker.md) records status. The preimplementation checkpoint must include canonical amendments, operator decisions, independent review disposition, and a standalone ancestor commit before code changes. No commit or implementation approval is inferred for the unresolved password-selection choice.
+[ExecPlan](prompts/active/implementation_execplan.md) defines milestones; [tracker](tracker.md) records status. The preimplementation checkpoint must include canonical amendments, operator decisions, independent review disposition, and a standalone ancestor commit before code changes. Email-first password setup is approved; standalone accepted checkpoints precede implementation.
 
 
 Approval update: operator explicitly approved email-first signup with password selection after the verification link and requested proceeding. OPEN-P1 is resolved. Implementation and its required standalone checkpoint commit are authorized; production deployment/migration remain deferred. Historical pending-choice statements above describe the preceding review state.
+
+## Implementation checkpoint (2026-11-17)
+
+Email-first signup is approved and implemented after checkpoint `9eb2dfcf0`; nullable identity consumers are governed by reviewed checkpoint `874de621c`. See the current [tracker](tracker.md), [implementation guide](../../oauth_spec.md), and [user help](../../user-guide/sign-in.md). Earlier pending-choice statements describe the superseded review phase. Independent implementation reviews and browser evidence are in artifacts. Production activation, migration, and deployment remain deferred; local review is not rollout clearance.

@@ -11,6 +11,8 @@ from urllib.parse import urlsplit
 import re
 
 from authlib.integrations.base_client.errors import OAuthError
+from authlib.jose.errors import JoseError
+from sqlalchemy.exc import IntegrityError
 from flask import flash, session
 from flask_security import current_user
 from flask_security.utils import login_user, hash_password
@@ -44,6 +46,7 @@ security_oauth_bp = Blueprint("security_oauth", __name__)
 
 _SESSION_PKCE_KEY = "oauth_pkce_verifier"
 _SESSION_NEXT_KEY = "oauth_next"
+_SESSION_NONCE_KEY = "oauth_cilogon_nonce"
 _ORCID_ID_PATTERN = re.compile(r"^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9Xx]$")
 
 
@@ -179,7 +182,7 @@ def _extract_name_from_profile(profile: Dict[str, Any]) -> Tuple[Optional[str], 
     if given_name or family_name:
         return given_name, family_name
 
-    if not display_name:
+    if not isinstance(display_name, str) or not display_name:
         return None, None
 
     parts = display_name.strip().split(None, 1)
@@ -189,7 +192,7 @@ def _extract_name_from_profile(profile: Dict[str, Any]) -> Tuple[Optional[str], 
 
 
 def _normalize_email(email: Optional[str]) -> Optional[str]:
-    if not email:
+    if not isinstance(email, str) or not email.strip():
         return None
     return email.strip().lower()
 
@@ -226,9 +229,27 @@ def _find_user_by_email(datastore, email: str) -> Optional["User"]:
 
 def _fetch_primary_verified_email(client, provider_settings: Dict, profile: Dict) -> Tuple[Optional[str], bool]:
     email = profile.get("email")
+    provider_name = provider_settings.get("name", "").lower()
+    if provider_name == "google":
+        return _normalize_email(email), profile.get("email_verified") is True
+    if provider_name == "github":
+        # Only the authenticated emails endpoint establishes GitHub email ownership.
+        try:
+            response = client.get(provider_settings.get("emails_url") or "user/emails")
+            payload = response.json() if response.ok else None
+        except (RequestException, ValueError):
+            logger.warning("OAuth email retrieval failed for provider=github")
+            return None, False
+        if not isinstance(payload, list):
+            return None, False
+        records = [r for r in payload if isinstance(r, dict) and r.get("verified") is True
+                   and _normalize_email(r.get("email"))]
+        primary = next((r for r in records if r.get("primary") is True), None)
+        record = primary or (records[0] if records else None)
+        return (_normalize_email(record["email"]), True) if record else (None, False)
     verified = profile.get("email_verified") or profile.get("verified") or False
 
-    if email and verified:
+    if email and verified and provider_name != "github":
         return _normalize_email(email), True
 
     provider = provider_settings.get("name", "").lower()
@@ -247,10 +268,10 @@ def _fetch_primary_verified_email(client, provider_settings: Dict, profile: Dict
             records = emails_section.get("email")
             if isinstance(records, list):
                 for record in records:
-                    if record.get("primary") and record.get("verified"):
+                    if record.get("primary") and record.get("verified") is True:
                         return _normalize_email(record.get("email")), True
                 for record in records:
-                    if record.get("verified"):
+                    if record.get("verified") is True:
                         return _normalize_email(record.get("email")), True
                 for record in records:
                     if record.get("email"):
@@ -284,11 +305,11 @@ def _fetch_primary_verified_email(client, provider_settings: Dict, profile: Dict
             return _normalize_email(email), bool(email and verified)
 
         for record in payload:
-            if record.get("primary") and record.get("verified"):
+            if record.get("primary") and record.get("verified") is True:
                 return _normalize_email(record.get("email")), True
 
         for record in payload:
-            if record.get("verified"):
+            if record.get("verified") is True:
                 return _normalize_email(record.get("email")), True
 
     normalized = _normalize_email(email)
@@ -424,9 +445,15 @@ def oauth_login(provider: str):
 
     redirect_uri = _build_redirect_uri(provider, provider_settings)
 
+    authorization_options = {}
+    if provider in {"cilogon", "google"}:
+        nonce = secrets.token_urlsafe(32)
+        _store_session_value(_SESSION_NONCE_KEY, provider, nonce)
+        authorization_options["nonce"] = nonce
     try:
         return client.authorize_redirect(
             redirect_uri,
+            **authorization_options,
             code_challenge=code_challenge,
             code_challenge_method="S256",
         )
@@ -442,20 +469,26 @@ def callback(provider: str):
     if not provider_enabled(provider_settings):
         abort(404)
 
+    if current_user and current_user.is_authenticated:
+        _pop_session_value(_SESSION_PKCE_KEY, provider)
+        _pop_session_value(_SESSION_NONCE_KEY, provider)
+        _pop_session_value(_SESSION_NEXT_KEY, provider)
+        flash("You are already signed in. Sign out before switching accounts.", "info")
+        return redirect(url_for(current_app.config.get("SECURITY_POST_LOGIN_VIEW", "security_ui.welcome")))
+
     provider_error = _callback_provider_error()
     if provider_error:
         error_code, error_description = provider_error
         _pop_session_value(_SESSION_PKCE_KEY, provider)
+        _pop_session_value(_SESSION_NONCE_KEY, provider)
         _pop_session_value(_SESSION_NEXT_KEY, provider)
         if error_code.lower() == "access_denied":
             logger.info("OAuth callback canceled by user for provider=%s", provider)
             flash("Sign-in was canceled.", "warning")
         else:
             logger.warning(
-                "OAuth callback returned provider error for provider=%s error=%s description=%s",
+                "OAuth callback returned provider error for provider=%s",
                 provider,
-                error_code,
-                error_description or "<empty>",
             )
             flash("Login failed at the identity provider.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
@@ -469,10 +502,19 @@ def callback(provider: str):
         flash("OAuth session expired. Please try again.", "warning")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
 
+    nonce = _pop_session_value(_SESSION_NONCE_KEY, provider) if provider in {"cilogon", "google"} else None
     try:
         token = client.authorize_access_token(code_verifier=code_verifier)
-    except (OAuthError, RequestException, TypeError, ValueError) as exc:
-        logger.warning("OAuth callback token exchange failed for provider=%s: %s", provider, exc)
+        if provider in {"cilogon", "google"}:
+            if not nonce or not token.get("id_token"):
+                raise ValueError("Missing OIDC session or ID token")
+            claims = client.parse_id_token(token, nonce=nonce,
+                claims_options={"iss": {"essential": True, "values": ["https://cilogon.org"] if provider == "cilogon" else ["https://accounts.google.com", "accounts.google.com"]}})
+            if not claims or claims.get("nonce") != nonce or not isinstance(claims.get("sub"), str) or not claims["sub"]:
+                raise ValueError("Invalid OIDC identity")
+            token["userinfo"] = claims
+    except (OAuthError, JoseError, RequestException, TypeError, ValueError) as exc:
+        logger.warning("OAuth callback token exchange failed for provider=%s", provider)
         if isinstance(exc, OAuthError) and (exc.error or "").lower() == "access_denied":
             flash("Sign-in was canceled.", "warning")
         else:
@@ -486,7 +528,7 @@ def callback(provider: str):
             headers["Accept"] = "application/json"
         response = client.get(userinfo_endpoint, headers=headers)
     except RequestException as exc:
-        logger.warning("OAuth userinfo request failed for provider=%s: %s", provider, exc)
+        logger.warning("OAuth userinfo request failed for provider=%s", provider)
         flash("Login failed while retrieving profile information.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
 
@@ -506,10 +548,33 @@ def callback(provider: str):
         flash("Unexpected response from the identity provider.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
 
+    if not isinstance(profile, dict):
+        flash("Unexpected response from the identity provider.", "error")
+        return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
+    if provider in {"cilogon", "google"} and profile.get("sub") != token["userinfo"]["sub"]:
+        flash("The identity provider returned inconsistent account information.", "error")
+        return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
+
     provider_uid = _extract_provider_uid(profile, token)
     if not provider_uid:
         flash("The identity provider did not return a stable identifier.", "error")
         return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
+
+    if provider in {"cilogon", "google", "github"}:
+        from wepppy.weppcloud.account_security import mailbox_verified, normalize_email, resolve_federated_account
+        if provider == "cilogon":
+            email, owned = normalize_email(profile.get("email")), False
+        else:
+            email, owned = _fetch_primary_verified_email(client, provider_settings, token["userinfo"] if provider == "google" else profile)
+        try:
+            user = resolve_federated_account(_get_user_datastore(), provider, provider_uid, email, owned, profile, token)
+        except (ValueError, IntegrityError):
+            flash("Unable to sign in. Check that your provider has a verified email, or contact support if the problem continues.", "error")
+            return redirect(url_for(current_app.config.get("SECURITY_LOGIN_ERROR_VIEW", "security_ui.login")))
+        login_user(user, remember=True)
+        if provider != "cilogon" and user.local_credential_state in {"legacy", "pending", "enabled"} and not mailbox_verified(user):
+            flash("Verify your email from your User Profile to secure your local WEPPcloud sign-in.", "warning")
+        return redirect(_resolve_next(provider) or url_for(current_app.config.get("SECURITY_POST_LOGIN_VIEW", "security_ui.welcome")))
 
     provider_lower = provider.lower()
     email, verified = _fetch_primary_verified_email(client, provider_settings, profile)
@@ -561,6 +626,11 @@ def callback_alias(provider: str):
     return callback(provider_normalized)
 
 
+def _lock_account_for_disconnect(datastore):
+    # Serialize concurrent unlink requests so two providers cannot both be removed.
+    return datastore.user_model.query.filter_by(id=current_user.id).with_for_update().populate_existing().one()
+
+
 @security_oauth_bp.route("/oauth/<provider>/disconnect", methods=["POST"], strict_slashes=False)
 def disconnect(provider: str):
     if not current_user.is_authenticated:
@@ -569,19 +639,25 @@ def disconnect(provider: str):
     OAuthAccount = _get_oauth_account_model()
     datastore = _get_user_datastore()
 
+    user = _lock_account_for_disconnect(datastore)
     account = OAuthAccount.query.filter_by(
         provider=provider,
-        user_id=current_user.id,
+        user_id=user.id,
     ).first()
 
     if not account:
         abort(404)
 
-    if not current_user.password and current_user.oauth_accounts.count() <= 1:
+    from flask_security.utils import verify_password
+    state = user.local_credential_state
+    local_usable = bool(user.password) and state == "enabled"
+    if state == "legacy" and user.password and request.form.get("password"):
+        local_usable = verify_password(request.form["password"], user.password)
+    if not local_usable and user.oauth_accounts.count() <= 1:
         flash("Cannot remove the only linked sign-in method.", "warning")
         return redirect(url_for("user.profile"))
 
-    datastore.unlink_oauth_account(current_user, provider)
+    datastore.unlink_oauth_account(user, provider)
     flash(f"{provider.title()} account disconnected.", "success")
     return redirect(url_for("user.profile"))
 

@@ -1,6 +1,6 @@
 # WEPPcloud account identity and local email verification
 
-**Status**: Operator-approved product direction; implementation pending. Two independent contract reviews completed; documentation findings closed. Email-first local signup and password choice after mailbox proof are operator-approved; implementation conformance remains pending.
+**Status**: Operator-approved and implemented in the task branch. Independent local reviews and focused validation are complete; PostgreSQL, live-provider, mail-delivery, production-mount acceptance and deployment remain pending.
 
 ## Authority and scope
 

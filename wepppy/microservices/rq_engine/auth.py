@@ -215,7 +215,7 @@ def _authorize_user_claims(claims: Mapping[str, Any], runid: str) -> None:
     for owner in owners:
         if token_sub and str(getattr(owner, "id", "")) == token_sub:
             return
-        if token_email and getattr(owner, "email", "").lower() == token_email:
+        if token_email and (getattr(owner, "email", None) or "").lower() == token_email:
             return
 
     raise AuthError("Token not authorized for run", status_code=403, code="forbidden")

@@ -152,11 +152,13 @@ class WeppBootstrapService:
         if not external_host:
             raise RuntimeError("EXTERNAL_HOST must be set to mint bootstrap tokens")
 
+        if isinstance(user_id, bool) or not str(user_id).isascii() or not str(user_id).isdecimal() or int(user_id) <= 0:
+            raise ValueError("A positive user ID is required for bootstrap tokens")
         issued = auth_tokens.issue_token(
-            user_email,
+            user_email or f"user:{user_id}",
             audience=external_host,
             expires_in=expires_seconds,
-            extra_claims={"runid": wepp.runid},
+            extra_claims={"runid": wepp.runid, "user_id": int(user_id)},
         )
         token = issued["token"]
         prefix = wepp.runid[:2]

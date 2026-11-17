@@ -1,0 +1,18 @@
+/* Account pages: allow header controls and profile cards to fit narrow screens. */
+.wc-header__tools, .wc-theme-switcher, .wc-theme-switcher .wc-run-header__field {
+  min-width: 0;
+  max-width: 100%;
+}
+.wc-theme-switcher__select { width: 100%; min-width: 0; max-width: 100%; }
+
+.wc-profile { max-width: none; min-width: 0; overflow-wrap: anywhere; }
+.wc-profile .wc-panel { margin-block: 1.5rem; padding: 1rem; border: 1px solid var(--wc-color-border, #ccc); border-radius: .25rem; }
+.wc-profile-token .wc-field__input-row { flex-wrap: wrap; }
+.wc-profile-token textarea { min-width: 0 !important; max-width: 100%; box-sizing: border-box; }
+.wc-profile input, .wc-profile textarea { max-width: 100%; box-sizing: border-box; }
+.wc-profile-providers__item { flex-wrap: wrap; gap: .75rem; }
+.wc-profile-providers__meta, .wc-profile-providers__text { min-width: 0; }
+@media (max-width: 40rem) { .wc-profile-details__row { display: block; } .wc-profile-details__value { margin-left: 0; } }
+
+.wc-profile-token [hidden] { display: none; }
+.wc-profile .wc-panel form { margin-block: .75rem; }
