@@ -1,5 +1,6 @@
 import io
 import json
+import os
 from pathlib import Path
 from typing import Any
 import pytest
@@ -1286,6 +1287,73 @@ def test_omni_contrast_routes_normalize_before_persisting_geojson_upload(
     assert original.read_bytes() == _contrast_polygon_bytes()
     assert receipt["status"] == "accepted"
     assert receipt["canonical_path"].startswith("_pups/omni/contrasts/_uploads/")
+
+
+@pytest.mark.parametrize(
+    ("endpoint", "expected_status"),
+    [("run-omni-contrasts", 202), ("run-omni-contrasts-dry-run", 200)],
+)
+def test_exact_converter_formats_cross_omni_http_boundaries(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    endpoint: str,
+    expected_status: int,
+) -> None:
+    converter_url = os.getenv("VECTOR_UPLOAD_INTEGRATION_URL")
+    fixture_root_value = os.getenv("VECTOR_UPLOAD_INTEGRATION_FIXTURES")
+    if not converter_url or not fixture_root_value:
+        pytest.skip("exact converter integration environment is not configured")
+    monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", converter_url)
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-exact-omni")
+    _stub_prep(monkeypatch)
+    wd = tmp_path / "run"
+    monkeypatch.setattr(omni_routes, "get_wd", lambda _runid: str(wd))
+    accepted_paths: list[Path] = []
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            accepted_paths.append(Path(payload["omni_contrast_geojson_path"]))
+
+        def build_contrasts(self, *_args, **_kwargs) -> None:
+            return None
+
+        def build_contrasts_dry_run_report(self, *_args, **_kwargs):
+            return {"contrast_count": 1}
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda _wd: DummyOmni())
+    monkeypatch.setattr(
+        omni_routes.OmniContrastBuildService,
+        "prevalidate_user_defined_geojson",
+        lambda _path: None,
+    )
+    fixture_root = Path(fixture_root_value)
+    semantics: list[dict[str, object]] = []
+    with TestClient(rq_engine.app) as client:
+        for suffix, fixture_suffix in (("geojson", "geojson"), ("zip", "zip"), ("parquet", "parquet"), ("geoparquet", "parquet")):
+            response = client.post(
+                f"/api/runs/run-1/cfg/{endpoint}",
+                data={
+                    "omni_contrast_selection_mode": "user_defined_areas",
+                    "omni_contrast_pairs": '[{"control_scenario":"uniform_low","contrast_scenario":"mulch"}]',
+                    "omni_control_scenario": "uniform_low",
+                    "omni_contrast_scenario": "mulch",
+                },
+                files={
+                    "omni_contrast_geojson": (
+                        f"areas.{suffix}",
+                        (fixture_root / f"polygon.{fixture_suffix}").read_bytes(),
+                    )
+                },
+            )
+            assert response.status_code == expected_status
+            payload = json.loads(accepted_paths[-1].read_text())
+            semantics.append({"geometry": payload["features"][0]["geometry"], "properties": payload["features"][0]["properties"]})
+    from shapely.geometry import shape
+    baseline = shape(semantics[0]["geometry"])
+    assert all(item["properties"] == semantics[0]["properties"] for item in semantics[1:])
+    assert all(baseline.equals(shape(item["geometry"])) for item in semantics[1:])
 
 
 def test_omni_upload_rolls_back_staged_file_when_build_fails(

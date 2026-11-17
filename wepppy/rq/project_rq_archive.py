@@ -27,6 +27,7 @@ from wepppy.microservices.vector_upload_normalization import (
     RedisRetentionLedger,
     RedisScopeLeaseFactory,
     RetentionActor,
+    assert_project_retention_capacity,
 )
 
 _ARCHIVE_DISK_HEADROOM_RATIO = 0.02
@@ -107,6 +108,8 @@ def _calculate_run_payload_bytes(wd: Path) -> tuple[int, int]:
     file_count = 0
 
     for root, dirs, files in os.walk(wd):
+        if any((Path(root) / name).is_symlink() for name in (*dirs, *files)):
+            raise ValueError("Project archives cannot include symbolic links")
         rel_root = os.path.relpath(root, wd)
         if rel_root == ".":
             rel_root = ""
@@ -136,7 +139,9 @@ def _calculate_run_payload_bytes(wd: Path) -> tuple[int, int]:
 
 
 def _contains_vector_upload_attempts(wd: Path) -> bool:
-    for root, dirs, _files in os.walk(wd):
+    for root, dirs, files in os.walk(wd):
+        if any((Path(root) / name).is_symlink() for name in (*dirs, *files)):
+            raise ValueError("Project archives cannot include symbolic links")
         relative = os.path.relpath(root, wd)
         if _is_archive_excluded_relpath(relative):
             dirs[:] = []
@@ -162,6 +167,39 @@ def _write_private_archive_sidecar(path: Path, payload: Mapping[str, Any]) -> No
         temp.unlink(missing_ok=True)
 
 
+def _verify_private_archive(archive_path: Path, wd: Path) -> None:
+    try:
+        relative = archive_path.relative_to(wd)
+    except ValueError as exc:
+        raise ValueError("Invalid private archive path") from exc
+    if relative.parts[:2] != ("archives", "private"):
+        return
+    sidecar_path = archive_path.with_suffix(".zip.sensitive.json")
+    receipt_path = archive_path.parent / "normalization.json"
+    try:
+        sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        size = archive_path.stat().st_size
+        digest = hashlib.sha256()
+        with archive_path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise ValueError("Private archive provenance is invalid") from exc
+    archive_digest = digest.hexdigest()
+    if (
+        sidecar.get("schema") != "vector-upload-private-archive-v1"
+        or sidecar.get("archive") != archive_path.name
+        or sidecar.get("archive_size") != size
+        or sidecar.get("archive_sha256") != archive_digest
+        or sidecar.get("contains_vector_upload_attempts") is not True
+        or receipt.get("schema") != "vector-normalization-v1"
+        or receipt.get("status") not in {"accepted", "accepted_recovered"}
+        or receipt.get("canonical_path") != relative.as_posix()
+        or receipt.get("canonical_size") != size
+        or receipt.get("canonical_sha256") != archive_digest
+    ):
+        raise ValueError("Private archive provenance is invalid")
 def _collect_restore_members(
     zf: zipfile.ZipFile,
     wd: Path,
@@ -312,7 +350,13 @@ def _clear_archive_job_id(runtime: ArchiveRuntime, prep: Any | None, runid: str)
             pass
 
 
-def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> None:
+def archive_rq(
+    runid: str,
+    comment: str | None,
+    retention_actor: Mapping[str, Any] | None = None,
+    *,
+    runtime: ArchiveRuntime,
+) -> None:
     job = runtime.get_current_job()
     job_id = getattr(job, "id", "sync")
     func_name = "archive_rq"
@@ -348,6 +392,7 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
             )
             if retention_configured:
                 retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+                retention_lease.assert_owned()
 
             payload_bytes, payload_file_count = _calculate_run_payload_bytes(wd_path)
             required_bytes = _estimate_archive_required_bytes(payload_bytes, payload_file_count)
@@ -371,9 +416,23 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
                 os.chmod(bundle_dir, 0o700)
                 archive_path_obj = bundle_dir / archive_name
                 archive_name = archive_path_obj.relative_to(archives_dir).as_posix()
+                assert_project_retention_capacity(
+                    (
+                        wd_path / "roads" / "vector_upload_attempts",
+                        wd_path / "ag_fields" / "vector_upload_attempts",
+                        wd_path / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
+                        archives_dir / "private",
+                    ),
+                    worst_case_bytes=required_bytes + 1024 * 1024,
+                )
+                actor_payload = retention_actor if isinstance(retention_actor, Mapping) else {}
+                actor = RetentionActor(
+                    str(actor_payload.get("kind") or "unattributed"),
+                    actor_payload.get("identifier"),
+                )
                 retention_reservation = RedisRetentionLedger().reserve(
                     project_key=f"run:{runid}",
-                    actor=RetentionActor("unattributed", None),
+                    actor=actor,
                     worst_case_bytes=required_bytes + 1024 * 1024,
                     filesystem_root=wd_path,
                 )
@@ -393,6 +452,10 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
 
             with runtime.zip_file_cls(archive_path_tmp, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
                 for root, dirs, files in os.walk(wd):
+                    if retention_lease is not None:
+                        retention_lease.assert_owned()
+                    if any(os.path.islink(os.path.join(root, name)) for name in (*dirs, *files)):
+                        raise ValueError("Project archives cannot include symbolic links")
                     rel_root = os.path.relpath(root, wd)
                     if rel_root == ".":
                         rel_root = ""
@@ -413,6 +476,8 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
                         zf.write(root, rel_root + "/")
 
                     for filename in files:
+                        if retention_lease is not None:
+                            retention_lease.assert_owned()
                         abs_path = os.path.join(root, filename)
                         arcname = os.path.relpath(abs_path, wd)
                         if _is_archive_excluded_relpath(arcname):
@@ -424,6 +489,8 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
                 if comment_bytes:
                     zf.comment = comment_bytes
 
+            if retention_lease is not None:
+                retention_lease.assert_owned()
             os.replace(archive_path_tmp, archive_path)
             if contains_sensitive:
                 archive_size = archive_path_obj.stat().st_size
@@ -451,11 +518,12 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
                         "outcome": "retained",
                         "enforcement_stage": "private_archive",
                         "accounting_status": "committed",
+                        "actor": actor.receipt_value(),
                         "reservation_id": retention_reservation.reservation_id,
                         "project_root": wd_path.resolve(strict=True).relative_to(
                             Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"]).resolve(strict=True)
                         ).as_posix(),
-                        "canonical_path": archive_name,
+                        "canonical_path": (Path("archives") / archive_name).as_posix(),
                         "canonical_size": archive_size,
                         "canonical_sha256": archive_sha256,
                     },
@@ -519,10 +587,13 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
     prep = None
     restore_started = False
     restore_completed = False
+    retention_lease = None
     try:
         prep = runtime.get_prep_from_runid(runid)
         notification_wd = runtime.get_wd(runid)
         wd = Path(notification_wd).resolve()
+        retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+        retention_lease.assert_owned()
 
         archives_dir = wd / "archives"
         archive_path = (archives_dir / archive_name).resolve()
@@ -533,6 +604,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         # Ensure the archive resides inside the archives directory.
         if archives_dir not in archive_path.parents:
             raise ValueError("Invalid archive path")
+        _verify_private_archive(archive_path, wd)
 
         runtime.publish_status(status_channel, f"Preparing to restore from {archive_name}")
 
@@ -545,6 +617,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 )
 
             restore_members, restore_bytes, restore_file_count = _collect_restore_members(zf, wd)
+            retention_lease.assert_owned()
             from wepppy.declarative.archive import validate_restore
             preserve_declarative = validate_restore(wd, zf, restore_members)
             directory_modes = _restore_directory_modes(restore_members, wd)
@@ -589,6 +662,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 restore_started = True
                 try:
                     for entry in sorted(wd.iterdir()):
+                        retention_lease.assert_owned()
                         if preserve_declarative and entry.name in {"provenance", "READONLY"}:
                             continue
                         if entry.name in {"archives", ".config-amendment.lock", "roads.lifecycle.lock", "redisprep.dump"}:
@@ -610,10 +684,12 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                     # ZIP ordering cannot expose a private payload before its ancestry
                     # is restricted. Owner access is temporary for readonly directories.
                     for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts)):
+                        retention_lease.assert_owned()
                         directory.mkdir(mode=mode | 0o700, parents=True, exist_ok=True)
                         os.chmod(directory, mode | 0o700)
 
                     for member, target_path, relative_target in restore_members:
+                        retention_lease.assert_owned()
                         if preserve_declarative and relative_target.parts[0] in {"provenance", "READONLY"}:
                             continue
                         if member.is_dir():
@@ -696,6 +772,13 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive RESTORE_FAILED")
         raise
     finally:
+        if retention_lease is not None:
+            try:
+                retention_lease.release()
+            except ValueError:
+                logging.getLogger(__name__).warning(
+                    "Restore vector retention lock release deferred", exc_info=True,
+                )
         if not restore_started or restore_completed:
             _clear_archive_job_id(runtime, prep, runid)
         else:

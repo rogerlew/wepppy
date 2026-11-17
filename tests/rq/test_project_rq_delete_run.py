@@ -150,6 +150,49 @@ def test_delete_run_rq_reports_non_retryable_delete_errors(
     assert any("delete deferred" in message for message in published)
 
 
+def test_delete_run_holds_vector_scope_and_rebuilds_ledger_after_durable_removal(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from wepppy.rq import project_rq_delete as delete_module
+
+    runid = "retained-run"
+    run_dir = tmp_path / runid
+    (run_dir / "roads" / "vector_upload_attempts" / "attempt").mkdir(parents=True)
+    (run_dir / "roads" / "vector_upload_attempts" / "attempt" / "normalization.json").write_text("{}")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "delete-test")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: SimpleNamespace(id="delete-job"))
+    monkeypatch.setattr(project_rq.StatusMessenger, "publish", lambda *_args: None)
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda _runid: [])
+    monkeypatch.setattr(project_rq, "clear_locks", lambda _runid: None)
+    monkeypatch.setattr("wepppy.weppcloud.utils.run_ttl.mark_delete_state", lambda *_args, **_kwargs: None)
+    import flask
+    monkeypatch.setattr(flask, "has_app_context", lambda: True)
+    _stub_user_models(monkeypatch, runid)
+    events: list[str] = []
+
+    class Lease:
+        def assert_owned(self) -> None:
+            events.append("assert")
+
+        def release(self) -> None:
+            events.append("release")
+
+    monkeypatch.setattr(delete_module, "RedisScopeLeaseFactory", lambda: lambda scope: events.append(scope) or Lease())
+    monkeypatch.setattr(
+        delete_module,
+        "reconcile_retention",
+        lambda root, **kwargs: events.append(f"rebuild:{root}") or {},
+    )
+
+    project_rq.delete_run_rq(runid, wd=str(run_dir), delete_files=True)
+
+    assert not run_dir.exists()
+    assert events[0] == f"run:{runid}"
+    assert events[-2:] == [f"rebuild:{tmp_path}", "release"]
+
+
 def test_gc_runs_rq_deferred_delete_suppresses_messages(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

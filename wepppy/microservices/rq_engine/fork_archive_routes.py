@@ -5,6 +5,8 @@ from wepppy.query_engine.catalog_refresh import (
 )
 
 import logging
+import hashlib
+import json
 import os
 from pathlib import Path
 import fcntl
@@ -57,10 +59,14 @@ from wepppy.rq.wepp_rq import (
     ensure_no_active_wepp_job,
     reconcile_deferred_wepp_jobs,
 )
+from wepppy.microservices.vector_upload_normalization import (
+    RedisScopeLeaseFactory,
+    reconcile_retention,
+)
 from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
 
-from .auth import AuthError, authorize_run_access, require_jwt
+from .auth import AuthError, authorize_run_access, require_jwt, _normalize_roles
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
@@ -535,6 +541,14 @@ def has_archive(runid: str) -> bool:
     for entry in os.scandir(archives_dir):
         if entry.is_file() and entry.name.endswith(".zip"):
             return True
+    private_root = Path(archives_dir) / "private"
+    if private_root.is_dir() and not private_root.is_symlink():
+        for bundle in private_root.iterdir():
+            if bundle.is_dir() and not bundle.is_symlink() and any(
+                child.is_file() and not child.is_symlink() and child.suffix.lower() == ".zip"
+                for child in bundle.iterdir()
+            ):
+                return True
     return False
 
 
@@ -607,14 +621,16 @@ def _reconcile_archive_receipt(
 
 
 def _resolve_run_archive_path(wd: str, archive_name: str) -> str:
-    """Resolve one ordinary zip basename directly below this run's archives."""
+    """Resolve an ordinary basename or one validated private archive identity."""
     name = str(archive_name).strip()
-    if (
-        not name
-        or name != os.path.basename(name)
-        or name in {".", ".."}
-        or not name.lower().endswith(".zip")
-    ):
+    normalized = name.replace("\\", "/")
+    parts = normalized.split("/")
+    ordinary = len(parts) == 1
+    private = len(parts) == 3 and parts[0] == "private"
+    if not name or not (ordinary or private) or any(
+        not part or part in {".", ".."} or part != os.path.basename(part)
+        for part in parts
+    ) or not parts[-1].lower().endswith(".zip"):
         raise ValueError("Invalid archive_name")
     canonical_wd = os.path.realpath(wd)
     archives_entry = os.path.join(canonical_wd, "archives")
@@ -623,13 +639,80 @@ def _resolve_run_archive_path(wd: str, archive_name: str) -> str:
     archives_root = os.path.realpath(archives_entry)
     if archives_root != archives_entry:
         raise ValueError("Invalid archives directory")
-    archive_path = os.path.join(archives_root, name)
+    archive_path = os.path.join(archives_root, *parts)
     if os.path.lexists(archive_path) and os.path.islink(archive_path):
         raise ValueError("Invalid archive_name")
     resolved = os.path.realpath(archive_path)
-    if os.path.dirname(resolved) != archives_root:
+    expected_parent = archives_root if ordinary else os.path.join(archives_root, parts[0], parts[1])
+    if os.path.dirname(resolved) != expected_parent:
         raise ValueError("Invalid archive_name")
+    if private and os.path.exists(resolved):
+        bundle = Path(expected_parent)
+        if bundle.is_symlink() or bundle.parent.is_symlink():
+            raise ValueError("Invalid archive_name")
+        sidecar_path = Path(resolved).with_suffix(".zip.sensitive.json")
+        receipt_path = bundle / "normalization.json"
+        try:
+            sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            size = Path(resolved).stat().st_size
+            digest = hashlib.sha256()
+            with Path(resolved).open("rb") as stream:
+                for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                    digest.update(chunk)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise ValueError("Private archive provenance is invalid") from exc
+        expected_rel = Path(resolved).relative_to(Path(canonical_wd)).as_posix()
+        if (
+            sidecar.get("schema") != "vector-upload-private-archive-v1"
+            or sidecar.get("archive") != Path(resolved).name
+            or sidecar.get("archive_size") != size
+            or sidecar.get("archive_sha256") != digest.hexdigest()
+            or sidecar.get("contains_vector_upload_attempts") is not True
+            or receipt.get("schema") != "vector-normalization-v1"
+            or receipt.get("status") not in {"accepted", "accepted_recovered"}
+            or receipt.get("canonical_path") != expected_rel
+            or receipt.get("canonical_size") != size
+            or receipt.get("canonical_sha256") != digest.hexdigest()
+        ):
+            raise ValueError("Private archive provenance is invalid")
     return resolved
+
+
+def _authorize_private_archive(claims: Mapping[str, Any], runid: str, archive_name: str) -> None:
+    if not str(archive_name).replace("\\", "/").startswith("private/"):
+        return
+    if _normalize_roles(claims.get("roles")) & {"admin", "root"}:
+        return
+    principal = claims.get("feature_access_principal")
+    candidate = claims.get("user_id")
+    if candidate is None and isinstance(principal, Mapping) and principal.get("kind") == "human":
+        candidate = principal.get("id")
+    try:
+        user_id = int(candidate)
+    except (TypeError, ValueError):
+        user_id = 0
+    if user_id > 0 and any(int(getattr(owner, "id", 0) or 0) == user_id for owner in (get_run_owners_lazy(runid) or ())):
+        return
+    raise AuthError("Private archive requires project owner or Admin/Root", status_code=403, code="forbidden")
+
+
+def _archive_retention_actor(claims: Mapping[str, Any]) -> dict[str, object]:
+    principal = claims.get("feature_access_principal")
+    candidate = claims.get("user_id")
+    if candidate is None and isinstance(principal, Mapping) and principal.get("kind") == "human":
+        candidate = principal.get("id")
+    try:
+        user_id = int(candidate)
+    except (TypeError, ValueError):
+        user_id = 0
+    if user_id > 0:
+        return {"kind": "human", "identifier": user_id}
+    token_class = str(claims.get("token_class") or "").strip().lower()
+    subject = str(claims.get("sub") or "").strip()[:160]
+    if token_class in {"service", "mcp"} and subject:
+        return {"kind": token_class, "identifier": subject}
+    return {"kind": "unattributed", "identifier": None}
 
 
 def _ensure_anonymous_access(runid: str, wd: str) -> None:
@@ -1440,6 +1523,7 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
         authorize_run_access(claims, runid)
+        _authorize_private_archive(claims, runid, "private/archive")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -1501,7 +1585,7 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
             lease.checkpoint()
             job = queue.enqueue_call(
                 archive_rq,
-                (runid, comment),
+                (runid, comment, _archive_retention_actor(claims)),
                 timeout=RQ_TIMEOUT,
                 job_id=job_id,
             )
@@ -1561,6 +1645,7 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
             archive_name = archive_name[0] if archive_name else None
         if not archive_name:
             return error_response("Missing archive_name parameter", status_code=400)
+        _authorize_private_archive(claims, runid, str(archive_name))
 
         wd = get_wd(runid)
         if not _exists(wd):
@@ -1670,6 +1755,7 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
             archive_name = archive_name[0] if archive_name else None
         if not archive_name:
             return error_response("Missing archive_name parameter", status_code=400)
+        _authorize_private_archive(claims, runid, str(archive_name))
 
         wd = get_wd(runid)
         if not _exists(wd):
@@ -1709,7 +1795,24 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
                     status_code=400,
                 )
             lease.checkpoint()
-            os.remove(archive_path)
+            relative_archive = Path(archive_path).relative_to(Path(wd).resolve())
+            if relative_archive.parts[:2] == ("archives", "private"):
+                vector_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+                try:
+                    vector_lease.assert_owned()
+                    shutil.rmtree(Path(archive_path).parent)
+                finally:
+                    vector_lease.release()
+                filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"])
+                reconcile_retention(
+                    filesystem_root,
+                    apply=True,
+                    rebuild_ledger=True,
+                    stale_seconds=0,
+                    committed_only=True,
+                )
+            else:
+                os.remove(archive_path)
             prep.clear_archive_job_id()
         StatusMessenger.publish(f"{runid}:archive", f"Archive deleted: {archive_name}")
 

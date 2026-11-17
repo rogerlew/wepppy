@@ -3,8 +3,8 @@
 ## Quick Status
 
 **Timezone**: UTC  
-**Last updated**: 2026-11-16  
-**Current phase**: M5 final successor review
+**Last updated**: 2026-11-17
+**Current phase**: M5 exact-candidate successor review
 **Security impact**: high  
 **Starting revision**: `05e3450fa7d3b24572e65161100670ae542a6ea8`  
 **M0 contract ancestor**: `1aebebfe0`  
@@ -24,8 +24,9 @@
 - [x] M0: conditionally accept the exact Rust dependency graph behind owned preflight.
 - [x] M0: retain red tests and hostile fixtures for every accepted/rejected state.
 - [x] M1: implement and directly test `geoparquet_parser_cli` at `eb6b0d3fb`.
-- [x] M2: exact final3 image `sha256:ed4d93692add…c62386` qualified with SBOM,
-      resource/cancellation/recovery evidence and independent reviews.
+- [x] M2: final3 qualification passed; readiness-bound final4
+      `sha256:ec801ab0c90e…73ce03` supersedes it as the local exact candidate
+      with daemon-free SBOM/scan evidence.
 - [x] M3-M4: integrate all four browser/workflow upload paths without bypassing
       receiving validation; preserve originals, provenance and failed replacement.
 - [ ] M5: final correctness/code/QA/security/operations successor re-reviews.
@@ -220,12 +221,14 @@ occur. Independent M2 review remains open while M3 source integration begins.
 
 ## M3-M5 closure candidate - 2026-11-17
 
-M2 review passed for exact final3. Workflow integration was committed at
+M2 review passed for exact final3. Readiness-bound final4 is the current local
+exact candidate. Workflow integration was committed at
 `9ac7cb8f6`; the successor closure candidate adds reversible mutation, monotonic
 terminal receipts, durable Redis reconciliation/rebuild, private sensitive
 archives, resolved-alias protection, verified session-human provenance, bounded
 converter responses/error mapping, and independent binary UI/server activation.
-Focused disposable-container validation passes 455 tests. Exact final3 passes
-five workflow receiving profiles for GeoJSON, Shapefile ZIP, `.parquet`, and
-`.geoparquet`. Final five-lane re-review is required before M5 acceptance.
+The expanded affected suite, exact final4 common-helper test and actual HTTP
+boundary tests cover Roads, AgFields, Omni run/dry-run and Batch for GeoJSON,
+Shapefile ZIP, `.parquet`, and `.geoparquet`. Final five-lane re-review is
+required before M5 acceptance.
 Publication, production deploy, and remote-host proof remain outside authority.

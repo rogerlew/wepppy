@@ -27,7 +27,7 @@ from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from enum import Enum
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional, Set, Tuple
+from typing import Any, Callable, Dict, Iterable, Iterator, List, Mapping, Optional, Set, Tuple
 from uuid import uuid4
 
 import pandas as pd
@@ -223,6 +223,7 @@ class AgFields(NoDbBase):
         fn: str | os.PathLike[str],
         *,
         source_filename: Optional[str] = None,
+        publication_commit: Callable[[], None] | None = None,
     ) -> Dict[str, List[Any]]:
         """
         Validate a user-supplied field boundary GeoJSON and normalize it into the canonical
@@ -270,6 +271,20 @@ class AgFields(NoDbBase):
         parquet_backup = parquet_path.with_name(f'.{parquet_path.name}.backup')
         had_canonical = canonical_path.exists()
         had_parquet = parquet_path.exists()
+        prior_state = {
+            name: deepcopy(getattr(self, name, None))
+            for name in (
+                "_field_boundaries_geojson",
+                "_field_boundaries_source_filename",
+                "_field_n",
+                "_geojson_hash",
+                "_geojson_timestamp",
+                "_geojson_is_valid",
+                "_field_columns",
+                "_field_id_key",
+                "_rotation_accessor",
+            )
+        }
 
         try:
             try:
@@ -311,7 +326,11 @@ class AgFields(NoDbBase):
                     self._field_columns = [str(col) for col in df.columns]
                     self._field_id_key = None
                     self._rotation_accessor = None
-            except BaseException:  # transaction cleanup boundary, including cancellation
+                relative_path = os.path.relpath(self.rotation_schedule_parquet, self.wd)
+                request_catalog_refresh(self.wd, relative_path)
+                if publication_commit is not None:
+                    publication_commit()
+            except BaseException:  # broad-except: transaction rollback includes cancellation
                 if had_canonical:
                     os.replace(canonical_backup, canonical_path)
                 else:
@@ -320,14 +339,14 @@ class AgFields(NoDbBase):
                     os.replace(parquet_backup, parquet_path)
                 else:
                     parquet_path.unlink(missing_ok=True)
+                with self.locked():
+                    for name, value in prior_state.items():
+                        setattr(self, name, value)
                 raise
         finally:
             for staged_path in (staged_geojson, staged_parquet, canonical_backup, parquet_backup):
                 if os.path.exists(staged_path):
                     os.unlink(staged_path)
-
-        relative_path = os.path.relpath(self.rotation_schedule_parquet, self.wd)
-        request_catalog_refresh(self.wd, relative_path)
 
         return dict(field_id_duplicates=sorted(duplicates))
 

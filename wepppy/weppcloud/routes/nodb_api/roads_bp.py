@@ -379,8 +379,10 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
             validator=_validate_candidate,
         )
         canonical_path = Path(controller.roads_upload_dir) / "roads.uploaded.geojson"
-        summary = prepared.publish(
-            mutation=lambda candidate: controller.set_uploaded_geojson(str(candidate)),
+        summary = prepared.publish_transactional(
+            mutation=lambda candidate, commit: controller.set_uploaded_geojson(
+                str(candidate), publication_commit=commit,
+            ),
             canonical_path=canonical_path,
             canonical_relative_path=os.fspath(canonical_path.relative_to(wd)),
         )

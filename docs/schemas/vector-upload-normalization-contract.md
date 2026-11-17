@@ -248,7 +248,10 @@ If receipt creation failed before any source byte was read, remove the empty UUI
 directory. For source_stored/prepared recovery, compare exact canonical hashes
 and authoritative state under the lock. Mark unambiguous committed state
 `accepted_recovered`, otherwise `incomplete`, retaining all evidence and reporting
-uncertainty. Any original/source_stored/prepared receipt persistence failure stops
+uncertainty. A workflow without a read-only authoritative recovery adapter must
+take the conservative branch directly and retain `incomplete`; canonical file
+existence or hash alone is never acceptance evidence. Any
+original/source_stored/prepared receipt persistence failure stops
 before accepted-resource mutation.
 
 Retention uses the accepted count/byte/free-space limits and 600-second project-

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -51,13 +52,21 @@ class DummyAgFields:
         self.watershed_job_ids = {}
         self.saved_rows = None
 
-    def validate_field_boundary_geojson(self, path: Path, *, source_filename: str | None = None):
+    def validate_field_boundary_geojson(
+        self,
+        path: Path,
+        *,
+        source_filename: str | None = None,
+        publication_commit=None,
+    ):
         assert path.name == "candidate.geojson"
         payload = json.loads(path.read_text())
-        assert payload["features"][0]["properties"]["field_id"] == 7
-        assert source_filename in {"fields.geojson", "fields.parquet"}
+        assert isinstance(payload["features"][0]["properties"]["field_id"], int)
+        assert source_filename in {"fields.geojson", "fields.zip", "fields.parquet", "fields.geoparquet"}
         (Path(self.ag_fields_dir) / "fields.WGS.geojson").write_bytes(path.read_bytes())
         self.field_boundaries_source_filename = source_filename
+        if publication_commit is not None:
+            publication_commit()
         return {"field_id_duplicates": [7]}
 
     def confirm_schema(self, field_id_key: str, rotation_accessor: str) -> None:
@@ -158,6 +167,7 @@ class DummyAgFields:
 def route_context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     from tests.factories.feature_access import stub_feature_accounts
     stub_feature_accounts(monkeypatch)
+    monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
     controller = DummyAgFields(tmp_path)
     auth_calls: list[tuple[object, str]] = []
     monkeypatch.setattr(ag_fields_routes, "require_jwt", lambda request, required_scopes=None: {"sub": "2", "scopes": required_scopes})
@@ -344,6 +354,33 @@ def test_boundary_geoparquet_retains_source_and_publishes_canonical_candidate(
     assert receipt["source_sha256"] == hashlib.sha256(source).hexdigest()
     assert next((attempt / "original").iterdir()).read_bytes() == source
     assert controller.field_boundaries_source_filename == "fields.parquet"
+
+
+def test_exact_converter_formats_cross_agfields_http_boundary(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _auth_calls = route_context
+    converter_url = os.getenv("VECTOR_UPLOAD_INTEGRATION_URL")
+    fixture_root_value = os.getenv("VECTOR_UPLOAD_INTEGRATION_FIXTURES")
+    if not converter_url or not fixture_root_value:
+        pytest.skip("exact converter integration environment is not configured")
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", converter_url)
+    fixture_root = Path(fixture_root_value)
+    semantics: list[dict[str, object]] = []
+    with TestClient(rq_engine.app) as client:
+        for suffix, fixture_suffix in (("geojson", "geojson"), ("zip", "zip"), ("parquet", "parquet"), ("geoparquet", "parquet")):
+            response = client.post(
+                "/api/runs/demo/cfg/agfields/boundaries",
+                files={"field_boundaries": (f"fields.{suffix}", (fixture_root / f"polygon.{fixture_suffix}").read_bytes())},
+            )
+            assert response.status_code == 200
+            payload = json.loads((Path(controller.ag_fields_dir) / "fields.WGS.geojson").read_text())
+            semantics.append({"geometry": payload["features"][0]["geometry"], "properties": payload["features"][0]["properties"]})
+    from shapely.geometry import shape
+    baseline = shape(semantics[0]["geometry"])
+    assert all(item["properties"] == semantics[0]["properties"] for item in semantics[1:])
+    assert all(baseline.equals(shape(item["geometry"])) for item in semantics[1:])
 
 
 def test_boundary_geometry_rejection_preserves_accepted_fields(route_context) -> None:

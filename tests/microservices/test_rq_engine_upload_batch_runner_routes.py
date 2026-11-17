@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -179,6 +180,48 @@ def test_upload_geojson_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     assert receipt["canonical_path"] == "resources/data.geojson"
 
 
+def test_exact_converter_formats_cross_batch_http_boundary(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    converter_url = os.getenv("VECTOR_UPLOAD_INTEGRATION_URL")
+    fixture_root_value = os.getenv("VECTOR_UPLOAD_INTEGRATION_FIXTURES")
+    if not converter_url or not fixture_root_value:
+        pytest.skip("exact converter integration environment is not configured")
+    batch_runner = DummyBatchRunner(tmp_path)
+    monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", converter_url)
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda *_args, **_kwargs: {"sub": "2", "roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(upload_batch_runner_routes, "require_feature_access", lambda *_args: None)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda _batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "WatershedCollection", DummyCollection)
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+    fixture_root = Path(fixture_root_value)
+    semantics: list[dict[str, object]] = []
+    with TestClient(rq_engine.app) as client:
+        for suffix, fixture_suffix in (("geojson", "geojson"), ("zip", "zip"), ("parquet", "parquet"), ("geoparquet", "parquet")):
+            response = client.post(
+                "/api/batch/_/demo/upload-geojson",
+                files={"geojson_file": (f"polygon.{suffix}", (fixture_root / f"polygon.{fixture_suffix}").read_bytes())},
+            )
+            assert response.status_code == 200
+            payload = json.loads((tmp_path / "resources" / "polygon.geojson").read_text())
+            semantics.append({"geometry": payload["features"][0]["geometry"], "properties": payload["features"][0]["properties"]})
+    from shapely.geometry import shape
+    baseline = shape(semantics[0]["geometry"])
+    assert all(item["properties"] == semantics[0]["properties"] for item in semantics[1:])
+    assert all(baseline.equals(shape(item["geometry"])) for item in semantics[1:])
+
+
 def test_upload_geojson_rejects_oversize_payload(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -252,6 +295,7 @@ def test_upload_geojson_normalizes_binary_and_publishes_converter_provenance(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
+    monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
     batch_runner = DummyBatchRunner(tmp_path)
     canonical = _polygon_bytes(label="converted")
     converter_calls: list[str] = []

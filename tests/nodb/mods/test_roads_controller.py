@@ -159,6 +159,33 @@ def test_set_uploaded_geojson_stages_file_and_checksum(tmp_path: Path) -> None:
     assert summary["feature_count"] == 1
 
 
+def test_set_uploaded_geojson_rolls_back_file_and_persisted_state_on_commit_failure(
+    tmp_path: Path,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    original = tmp_path / "original.geojson"
+    replacement = tmp_path / "replacement.geojson"
+    _write_roads_geojson(original)
+    _write_roads_geojson(replacement)
+    original.write_text(original.read_text().replace('"features":', '"marker":"old","features":'))
+    replacement.write_text(replacement.read_text().replace('"features":', '"marker":"new","features":'))
+    accepted = controller.set_uploaded_geojson(str(original))
+    canonical = tmp_path / accepted["uploaded_geojson_relpath"]
+    prior_bytes = canonical.read_bytes()
+    prior_state = controller.query_summary()
+
+    def fail_commit() -> None:
+        raise OSError("receipt fsync failed")
+
+    with pytest.raises(OSError, match="receipt fsync failed"):
+        controller.set_uploaded_geojson(str(replacement), publication_commit=fail_commit)
+
+    assert canonical.read_bytes() == prior_bytes
+    assert controller.query_summary()["uploaded_geojson_sha256"] == prior_state["uploaded_geojson_sha256"]
+    reloaded = Roads.load_detached(str(tmp_path))
+    assert reloaded.query_summary()["uploaded_geojson_sha256"] == prior_state["uploaded_geojson_sha256"]
+
+
 def test_set_uploaded_geojson_uses_geojson_crs_when_present(tmp_path: Path) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
     source_path = tmp_path / "input.geojson"

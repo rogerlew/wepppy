@@ -6,7 +6,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_job",
-    "source_lineno": 202,
+    "source_lineno": 229,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -16,7 +16,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_watershed_jobs",
-    "source_lineno": 269,
+    "source_lineno": 296,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -26,7 +26,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_watershed_jobs",
-    "source_lineno": 295,
+    "source_lineno": 322,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -156,7 +156,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "archive_run",
-    "source_lineno": 1502,
+    "source_lineno": 1586,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -166,7 +166,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "fork_project",
-    "source_lineno": 1378,
+    "source_lineno": 1461,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -176,7 +176,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "restore_archive",
-    "source_lineno": 1609,
+    "source_lineno": 1694,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -270,7 +270,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_delete_omni_contrasts",
-    "source_lineno": 991,
+    "source_lineno": 1286,
     "source_module": "wepppy/microservices/rq_engine/omni_routes.py"
   },
   {
@@ -280,7 +280,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_run_omni",
-    "source_lineno": 696,
+    "source_lineno": 938,
     "source_module": "wepppy/microservices/rq_engine/omni_routes.py"
   },
   {
@@ -290,7 +290,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_run_omni_contrasts",
-    "source_lineno": 837,
+    "source_lineno": 1107,
     "source_module": "wepppy/microservices/rq_engine/omni_routes.py"
   },
   {
@@ -1763,7 +1763,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_roads_job",
-    "source_lineno": 472,
+    "source_lineno": 470,
     "source_module": "wepppy/weppcloud/routes/nodb_api/roads_bp.py"
   },
   {

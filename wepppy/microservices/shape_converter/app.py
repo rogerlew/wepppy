@@ -50,7 +50,7 @@ from .convert import (
 )
 from .errors import ShapeConverterError, error_response
 from .inspect import inspect_uploaded_archive
-from .parser_provenance import validate_parser_executable
+from .parser_provenance import read_parser_provenance, validate_parser_executable
 
 SERVICE_SCOPE = "shape-converter"
 DEFAULT_SCRATCH_ROOT = Path("/tmp/shape-converter")
@@ -407,6 +407,11 @@ async def health_ready(request: Request) -> JSONResponse:
                 else "unavailable"
             ),
             "provenance": "binary_binding_verified",
+            "geoparquet_parser_provenance": (
+                read_parser_provenance(_geoparquet_parser_cli_path())
+                if bool(getattr(request.app.state, "startup_geoparquet_ready", False))
+                else None
+            ),
         }
     )
 

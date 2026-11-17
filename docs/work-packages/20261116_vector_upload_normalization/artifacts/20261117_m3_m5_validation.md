@@ -2,18 +2,22 @@
 
 ## Candidate and exact image
 
-- Workflow ancestor: `9ac7cb8f6` plus the successor commit named by the final
-  review artifacts.
-- Shape-converter: `wepppy/shape-converter:vector-upload-m2-final3`, image ID
-  `sha256:ed4d93692add1f7cd1527ed6948353e584a213865ebcc3006b1adf84f5c62386`.
+- Workflow ancestor: `9ac7cb8f6`; the exact tested successor is named by the
+  final review artifacts.
+- Shape-converter: `wepppy/shape-converter:vector-upload-m2-final4`, image ID
+  `sha256:ec801ab0c90e595dcc1a4f58b9be52398b8073a75a72591c34149b543a73ce03`.
 - Publication and deployment: not performed.
 
 ## Direct validation
 
-The disposable `wepppy-dev:latest` container mounted the task checkout and used
-development Redis on `wepppy-net`.
+The task checkout was staged under `/tmp/vun-candidate` in the existing
+`weppcloud` development container after the canonical wrapper correctly refused
+the shared-checkout mount. This preserved the container's production-equivalent
+identity, `/wc1`, secrets and Redis wiring while making the candidate source
+unambiguous.
 
-- Normalization, Omni, archive/restore and structural UI suite: 455 passed.
+- Readiness, normalization, Omni, AgFields, Batch, archive/restore, project
+  deletion, Roads and structural UI suite: 480 passed, 5 skipped.
 - Earlier consolidated Roads, AgFields, Batch, browse, Files API and normalizer
   suite: 282 passed.
 - Earlier browse regression suite: 345 passed; one unrelated configured-host
@@ -21,27 +25,36 @@ development Redis on `wepppy-net`.
 - Structural accessibility suite: 286 passed.
 - Frontend Jest: 74 passed; ESLint passed.
 
-The exact final3 image ran on the isolated converter network. Roads, AgFields,
-Omni run, Omni dry-run and Batch each accepted semantically equivalent GeoJSON,
-Shapefile ZIP, `.parquet`, and `.geoparquet` input. All 20 attempts read back the
-retained original SHA-256, terminal receipt, canonical geometry equality and
-property equality. The integration module reports 5 passed.
+The exact final4 image ran on the isolated converter network. The common-helper
+integration module passed 5 tests and read back source SHA-256, terminal receipt,
+canonical geometry and properties. Separate actual HTTP receiving-boundary tests
+then exercised Roads, AgFields, Omni run, Omni dry-run and Batch for semantically
+equivalent GeoJSON, Shapefile ZIP, `.parquet`, and `.geoparquet` input. Those
+five boundaries parsed their canonical workflow resource and compared property
+equality plus Shapely geometry equality; the boundary selection passed 5 tests.
 
 ## Failure and recovery evidence
 
 - Receiving validation rejects unsupported geometry before replacement.
-- Roads, AgFields, Omni and Batch retain or restore the prior canonical file and
-  durable state when publication/build persistence fails.
+- Roads and AgFields keep their rollback snapshot through receipt commit; injected
+  commit failure preserves prior canonical bytes and persisted controller state
+  after detached reload. Omni build failure and Batch replacement failure preserve
+  their prior accepted resource.
 - Accepted publication is monotonic when Redis commit fails; accounting remains
   pending for reconciliation rather than becoming a false rejection.
 - Eight real Redis reservations exhaust admission; stale reconciliation releases
   proven pre-write reservations and restores admission.
-- Reconciliation blocks new reservations, never parses retained payloads, and
-  can rebuild global/principal totals from terminal receipts after Redis loss or
-  project deletion. Dry-run is the default.
-- Sensitive archive creation takes the upload scope before scanning, publishes
-  only below `archives/private`, records SHA-256/mode metadata, and restores
-  original/candidate/receipt bytes without making them public.
+- Reconciliation blocks new reservations, renews and checks its owner token before
+  every mutation, never parses retained payloads, and can rebuild global/principal
+  totals from terminal receipts after Redis loss or project deletion. A real Redis
+  lock-theft test proves it stops before receipt/counter mutation. Dry-run is the
+  default.
+- Sensitive archive creation renews the upload scope while scanning/writing,
+  rejects symlinks, publishes only below `archives/private`, records SHA-256/mode
+  metadata and verified actor provenance, and restores original/candidate/receipt
+  bytes without making them public. Owner/root HTTP restore/delete and non-owner
+  denial are covered. Whole-project deletion holds the same scope and rebuilds
+  the ledger only after durable directory removal.
 - Raw and resolved sensitive aliases are hidden and denied by browse and Files
   API paths.
 
@@ -64,7 +77,13 @@ downstream artifact readback.
 
 Production rollout requires separate authorization and must prove the same
 canaries under real identities, mounts, Redis and Caddy/internal networks.
-Observe ledger totals, stale reservations, `vector_upload_security_event_v1`,
-converter saturation/timeouts, HTTP 5xx/507, free space and private archive
-growth. Any unexplained drift, persistent reservation, receipt/resource mismatch,
-public sensitive path, or converter provenance mismatch blocks activation.
+Use a minimum 60-minute observation window after the last production canary.
+Disable binary admission immediately for any provenance/readiness mismatch,
+public sensitive-path exposure, receipt/resource mismatch, nonzero ledger audit
+drift, or stale reservation older than 15 minutes. Also disable when vector-upload
+5xx/507 responses exceed 1% over any rolling five-minute window, converter
+saturation persists for five consecutive minutes, or free space falls below the
+configured 1 GiB reserve plus 5 GiB operating margin. Read back one direct
+GeoJSON canary after disable; failure escalates to application rollback. Observe
+ledger totals, `vector_upload_security_event_v1`, converter timeouts, free space
+and private archive growth throughout the window.

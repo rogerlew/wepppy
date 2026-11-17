@@ -68,8 +68,9 @@ GeoParquet.
       SHA-256 receipts, receiving validation, reversible replacement and reload.
 - [x] (2026-11-17) M4: integrate Omni run/dry-run and Batch Runner with the same
       boundary, polygon-only Batch admission and rollback safety.
-- [ ] M5: implementation, focused validation and rollout/recovery documentation
-      are complete; final independent successor re-reviews are active.
+- [ ] M5: implementation, focused validation, exact final4 qualification and
+      rollout/recovery documentation are complete; final independent successor
+      re-reviews of the exact committed candidate remain active.
 
 ## Surprises & Discoveries
 
@@ -110,6 +111,12 @@ GeoParquet.
 - Redis TTLs cannot be the only recovery authority for charged reservations.
   Durable reservation records plus receipt reconciliation and a bounded
   filesystem rebuild recover crashes, Redis loss, and project deletion.
+- A successful workflow callback is not the end of replacement authority. Roads
+  and AgFields must retain canonical and NoDb snapshots until the accepted
+  receipt is durable; their commit callback now sits inside that rollback scope.
+- The Docker-socket SBOM path was denied. Exporting the exact image and scanning
+  the read-only daemon-free archive produced equivalent retained Syft/Grype
+  evidence without granting a scanner daemon authority.
 
 ## Decision Log
 
@@ -147,6 +154,13 @@ GeoParquet.
   idempotent commit or operator reconciliation. Rebuild committed bytes only
   from terminal verified receipts while the filesystem reconciliation lock
   blocks new reservations.
+- **2026-11-17, crash ambiguity** - Do not infer acceptance from canonical hash
+  alone. Online Roads/AgFields replacement is transactional through receipt
+  commit; stale prepared state without a workflow authority adapter remains
+  `incomplete` and quarantined.
+- **2026-11-17, exact candidate** - Final4 supersedes final3 locally because its
+  readiness response exposes the already verified parser binary, Cargo lock and
+  source revision required by fail-closed receiver preflight.
 
 ## Outcomes & Retrospective
 
@@ -166,10 +180,10 @@ correctness/security reviews pass. M2 implementation is committed at
 `0e58feced`; its exact local image passes preliminary API/provenance/containment
 qualification recorded in `artifacts/20261116_m2_validation.md`. M2 independent
 review passed. M3/M4 are implemented at `9ac7cb8f6` plus the current closure
-candidate. Focused candidate tests pass 455/455; exact final3 passes all five
-workflow receiving profiles across four supported suffixes. Final M5 re-review
-remains open. No image was published and no production deployment or remote-host
-acceptance was performed.
+candidate. Exact final4 passes the common helper plus actual Roads, AgFields,
+Omni run/dry-run and Batch HTTP boundaries across four supported suffixes. Final
+M5 re-review remains open. No image was published and no production deployment
+or remote-host acceptance was performed.
 
 Resumed M0 review is active in independent correctness, security/dependency, QA
 and operations lanes. Proposed resource ADR and threat matrix now exist; neither

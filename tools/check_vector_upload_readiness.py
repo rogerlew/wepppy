@@ -39,6 +39,8 @@ def main() -> int:
     connection = redis.Redis(**redis_connection_kwargs(RedisDB.LOCK, decode_responses=True))
     connection.ping()
     totals = connection.hgetall(f"vector-upload-retention:{filesystem_id}:totals")
+    if totals.get("initialized") != "1":
+        raise SystemExit("vector upload ledger is not initialized; run a verified ledger rebuild")
 
     binary_enabled = os.getenv("VECTOR_UPLOAD_BINARY_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
     readiness: dict[str, object] | None = None
@@ -49,8 +51,25 @@ def main() -> int:
         response = requests.get(ready_url, timeout=(3.0, 10.0), allow_redirects=False)
         response.raise_for_status()
         readiness = response.json()
-        if readiness.get("status") != "ready" or readiness.get("geoparquet_parser") != "ready":
+        if (
+            readiness.get("status") != "ok"
+            or readiness.get("check") != "ready"
+            or readiness.get("geoparquet_parser") != "ready"
+        ):
             raise SystemExit("shape-converter readiness does not prove the GeoParquet parser")
+        provenance = readiness.get("geoparquet_parser_provenance")
+        expected_binary = os.getenv("VECTOR_UPLOAD_EXPECTED_GEOPARQUET_BINARY_SHA256", "").strip()
+        expected_lock = os.getenv("VECTOR_UPLOAD_EXPECTED_GEOPARQUET_CARGO_LOCK_SHA256", "").strip()
+        expected_revision = os.getenv("VECTOR_UPLOAD_EXPECTED_SHAPE_CONVERTER_REVISION", "").strip()
+        if not expected_binary or not expected_lock or not expected_revision:
+            raise SystemExit("expected shape-converter parser identity is not configured")
+        if (
+            not isinstance(provenance, dict)
+            or provenance.get("binary_sha256") != expected_binary
+            or provenance.get("cargo_lock_sha256") != expected_lock
+            or provenance.get("source_revision") != expected_revision
+        ):
+            raise SystemExit("shape-converter parser identity does not match the qualified candidate")
 
     print(json.dumps({
         "binary_enabled": binary_enabled,

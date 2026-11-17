@@ -276,6 +276,7 @@ def test_real_redis_reconciliation_releases_eight_abandoned_prewrite_reservation
         existing = list(connection.scan_iter(match=f"{prefix}:*"))
         if existing:
             connection.delete(*existing)
+        connection.hset(f"{prefix}:totals", mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0})
         ledger = RedisRetentionLedger(connection)
         connection.set(f"{prefix}:reconcile", "operator", ex=30)
         with pytest.raises(VectorUploadError):
@@ -320,6 +321,37 @@ def test_real_redis_reconciliation_releases_eight_abandoned_prewrite_reservation
         assert int(totals.get("inflight", 0)) == 0
         assert int(totals.get("reserved", 0)) == 0
 
+        project_root = tmp_path / "project"
+        project_root.mkdir()
+        prepared = prepare_vector_upload(
+            raw_filename="bound.geojson",
+            stream=io.BytesIO(json.dumps(_polygon_payload()).encode()),
+            endpoint_max_bytes=1024 * 1024,
+            attempt_root=tmp_path / "project" / "vector_upload_attempts",
+            evidence_roots=(tmp_path / "project" / "vector_upload_attempts",),
+            filesystem_root=project_root,
+            project_key="run:bound-crash",
+            workflow="test",
+            project_identity="bound-crash",
+            actor=RetentionActor("human", 42),
+            validator=lambda _path, _payload: {"valid": True},
+            ledger=ledger,
+            scope_lease_factory=lambda _key: _Lease(),
+        )
+        recovered_bound = reconcile_retention(
+            tmp_path,
+            apply=True,
+            connection=connection,
+            now=int(__import__("time").time()) + 601,
+        )
+        assert any(
+            action["reservation"] == prepared.reservation.reservation_id
+            and action["action"] == "incomplete"
+            for action in recovered_bound["actions"]
+        )
+        bound_receipt = json.loads((prepared.attempt_dir / "normalization.json").read_text())
+        assert bound_receipt["status"] == "incomplete"
+
         retained = tmp_path / "run" / "vector_upload_attempts" / "attempt-1"
         retained.mkdir(parents=True)
         (retained / "original.upload").write_bytes(b"retained evidence")
@@ -335,11 +367,90 @@ def test_real_redis_reconciliation_releases_eight_abandoned_prewrite_reservation
             connection=connection,
             rebuild_ledger=True,
         )
-        expected = sum(item.stat().st_size for item in retained.iterdir())
+        expected = sum(
+            item.stat().st_size
+            for evidence_root in (retained, prepared.attempt_dir)
+            for item in evidence_root.rglob("*")
+            if item.is_file()
+        )
         assert rebuilt["ledger_audit"]["computed_committed"] == expected
         assert rebuilt["ledger_audit"]["rebuilt"] is True
         totals = connection.hgetall(f"{prefix}:totals")
         assert int(totals["committed"]) == expected
+    finally:
+        keys = list(connection.scan_iter(match=f"{prefix}:*"))
+        if keys:
+            connection.delete(*keys)
+
+
+def test_real_redis_reconciliation_stops_before_mutation_after_lock_loss(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.microservices.vector_upload_normalization as normalization
+
+    filesystem_id = f"pytest-lock-loss-{tmp_path.name}"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", filesystem_id)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
+    connection_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/run/secrets/redis_password"))
+    if password_path.exists():
+        connection_kwargs["password"] = password_path.read_text().strip()
+    connection = redis.client.Redis(**connection_kwargs)
+    prefix = f"vector-upload-retention:{filesystem_id}"
+    try:
+        connection.hset(
+            f"{prefix}:totals",
+            mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0},
+        )
+        project = tmp_path / "project"
+        project.mkdir()
+        prepared = prepare_vector_upload(
+            raw_filename="accepted.geojson",
+            stream=io.BytesIO(json.dumps(_polygon_payload()).encode()),
+            endpoint_max_bytes=1024 * 1024,
+            attempt_root=project / "vector_upload_attempts",
+            evidence_roots=(project / "vector_upload_attempts",),
+            filesystem_root=project,
+            project_key="run:lock-loss",
+            workflow="test",
+            project_identity="lock-loss",
+            actor=RetentionActor("human", 42),
+            validator=lambda _path, _payload: {"valid": True},
+            ledger=RedisRetentionLedger(connection),
+            scope_lease_factory=lambda _key: _Lease(),
+        )
+        canonical = project / "accepted.geojson"
+        prepared.publish(
+            mutation=lambda candidate: canonical.write_bytes(candidate.read_bytes()),
+            canonical_path=canonical,
+            canonical_relative_path="accepted.geojson",
+        )
+        receipt_path = prepared.attempt_dir / "normalization.json"
+        before_receipt = receipt_path.read_bytes()
+        before_totals = connection.hgetall(f"{prefix}:totals")
+        original_hash = normalization._hash_regular
+        stolen = False
+
+        def steal_reconcile_lock(path: Path):
+            nonlocal stolen
+            result = original_hash(path)
+            if not stolen:
+                connection.set(f"{prefix}:reconcile", "new-owner", ex=600)
+                stolen = True
+            return result
+
+        monkeypatch.setattr(normalization, "_hash_regular", steal_reconcile_lock)
+        with pytest.raises(VectorUploadError, match="lock ownership was lost"):
+            reconcile_retention(
+                tmp_path,
+                apply=True,
+                connection=connection,
+                now=int(__import__("time").time()) + 601,
+            )
+
+        assert receipt_path.read_bytes() == before_receipt
+        assert connection.hgetall(f"{prefix}:totals") == before_totals
     finally:
         keys = list(connection.scan_iter(match=f"{prefix}:*"))
         if keys:

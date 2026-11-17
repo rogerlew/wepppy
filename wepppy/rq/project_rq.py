@@ -3075,8 +3075,17 @@ def fork_rq(
 
 
 @with_exception_logging
-def archive_rq(runid: str, comment: Optional[str] = None) -> None:
-    _archive_helpers.archive_rq(runid, comment, runtime=_archive_runtime())
+def archive_rq(
+    runid: str,
+    comment: Optional[str] = None,
+    retention_actor: Mapping[str, Any] | None = None,
+) -> None:
+    _archive_helpers.archive_rq(
+        runid,
+        comment,
+        retention_actor,
+        runtime=_archive_runtime(),
+    )
 
 
 @with_exception_logging

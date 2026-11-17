@@ -17,9 +17,10 @@ import shutil
 import time
 import tempfile
 import uuid
+from copy import deepcopy
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
 import numpy as np
 import rasterio
@@ -1093,7 +1094,12 @@ class Roads(NoDbBase):
                 raise ValueError("Roads GeoJSON supports only LineString or MultiLineString geometries.")
 
     @roads_lifecycle.mutation
-    def set_uploaded_geojson(self, src_path: str) -> Dict[str, Any]:
+    def set_uploaded_geojson(
+        self,
+        src_path: str,
+        *,
+        publication_commit: Callable[[], None] | None = None,
+    ) -> Dict[str, Any]:
         source_path = Path(src_path)
         if not source_path.is_absolute():
             source_path = Path(self.wd) / source_path
@@ -1174,6 +1180,20 @@ class Roads(NoDbBase):
             previous_map=previous_map,
         )
         params["attribute_field_map"] = discovered_map
+        prior_state = {
+            name: deepcopy(getattr(self, name, None))
+            for name in (
+                "_uploaded_geojson_relpath",
+                "_uploaded_geojson_sha256",
+                "_uploaded_attribute_catalog",
+                "_roads_params",
+                "_timestamps",
+                "_last_prepare_summary",
+                "_last_run_summary",
+                "_status",
+                "_errors",
+            )
+        }
 
         try:
             retained_snapshot = roads_lifecycle.retain(self.wd, replace_segments=True)
@@ -1186,35 +1206,39 @@ class Roads(NoDbBase):
                 self._timestamps["upload_geojson"] = now
                 self._clear_stale_run_state_locked()
                 status = str(self._status)
-        except BaseException:  # transaction cleanup boundary, including cancellation
+            self._append_roads_log(
+                "upload",
+                "upload_completed",
+                {
+                    "uploaded_geojson_relpath": relpath,
+                    "uploaded_geojson_sha256": digest,
+                    "feature_count": len(payload.get("features", [])),
+                    "uploaded_at": now,
+                    "configured_input_crs": configured_input_crs,
+                    "source_crs": source_crs,
+                    "effective_input_crs": effective_input_crs,
+                    "input_crs_source": input_crs_source,
+                    "discovered_attribute_field_count": int(attribute_catalog.get("field_count", 0)),
+                    "attribute_field_map": discovered_map,
+                    "status": status,
+                },
+            )
+            if publication_commit is not None:
+                publication_commit()
+        except BaseException:  # broad-except: transaction rollback includes cancellation
             staged_path.unlink(missing_ok=True)
             if had_target:
                 os.replace(backup_path, target_path)
             else:
                 target_path.unlink(missing_ok=True)
             roads_lifecycle.restore_retained(self.wd, retained_snapshot)
+            with self.locked():
+                for name, value in prior_state.items():
+                    setattr(self, name, value)
             raise
         finally:
             staged_path.unlink(missing_ok=True)
             backup_path.unlink(missing_ok=True)
-
-        self._append_roads_log(
-            "upload",
-            "upload_completed",
-            {
-                "uploaded_geojson_relpath": relpath,
-                "uploaded_geojson_sha256": digest,
-                "feature_count": len(payload.get("features", [])),
-                "uploaded_at": now,
-                "configured_input_crs": configured_input_crs,
-                "source_crs": source_crs,
-                "effective_input_crs": effective_input_crs,
-                "input_crs_source": input_crs_source,
-                "discovered_attribute_field_count": int(attribute_catalog.get("field_count", 0)),
-                "attribute_field_map": discovered_map,
-                "status": status,
-            },
-        )
 
         return {
             "uploaded_geojson_relpath": relpath,

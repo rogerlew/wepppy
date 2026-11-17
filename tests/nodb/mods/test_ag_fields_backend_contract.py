@@ -184,6 +184,51 @@ def test_invalid_boundary_reupload_preserves_canonical_artifacts_and_state(
     assert controller.rotation_accessor == "Crop{}"
 
 
+def test_boundary_reupload_rolls_back_files_and_persisted_state_on_commit_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _controller(tmp_path)
+    canonical = Path(controller.ag_fields_dir) / "fields.WGS.geojson"
+    canonical.write_text("old-valid-content", encoding="utf-8")
+    parquet = Path(controller.rotation_schedule_parquet)
+    parquet.parent.mkdir(parents=True, exist_ok=True)
+    parquet.write_bytes(b"old-parquet")
+    with controller.locked():
+        controller._field_boundaries_geojson = canonical.name
+        controller._field_boundaries_source_filename = "old-fields.geojson"
+        controller._geojson_is_valid = True
+        controller._geojson_hash = "old-hash"
+        controller._field_columns = ["field_id", "Crop2001"]
+
+    source = tmp_path / "replacement.geojson"
+    source.write_text(
+        '{"type":"FeatureCollection","features":[{"type":"Feature",'
+        '"properties":{"field_id":7},"geometry":{"type":"Polygon",'
+        '"coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}',
+        encoding="utf-8",
+    )
+    import geopandas as geopandas_module
+    monkeypatch.setattr(
+        geopandas_module,
+        "read_file",
+        lambda *_args, **_kwargs: pd.DataFrame([{"field_id": 7, "Crop2001": "wheat"}]),
+    )
+    monkeypatch.setattr(pd.DataFrame, "to_parquet", lambda self, path, **_kwargs: Path(path).write_bytes(b"new-parquet"))
+
+    with pytest.raises(OSError, match="receipt fsync failed"):
+        controller.validate_field_boundary_geojson(
+            source,
+            publication_commit=lambda: (_ for _ in ()).throw(OSError("receipt fsync failed")),
+        )
+
+    assert canonical.read_text(encoding="utf-8") == "old-valid-content"
+    assert parquet.read_bytes() == b"old-parquet"
+    assert controller.geojson_hash == "old-hash"
+    reloaded = type(controller).load_detached(str(tmp_path))
+    assert reloaded.geojson_hash == "old-hash"
+
+
 @pytest.mark.parametrize(
     "geometry",
     [

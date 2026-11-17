@@ -688,17 +688,18 @@ async def upload_boundaries(runid: str, config: str, request: Request) -> JSONRe
         )
 
         def _publish_boundary() -> dict[str, Any]:
-            def _mutate(candidate: Path) -> dict[str, Any]:
+            def _mutate(candidate: Path, commit: Callable[[], None]) -> dict[str, Any]:
                 validation_result.update(
                     ag_fields.validate_field_boundary_geojson(
                         candidate,
                         source_filename=upload.filename,
+                        publication_commit=commit,
                     )
                 )
                 return validation_result
 
             canonical_path = Path(ag_fields.ag_fields_dir) / "fields.WGS.geojson"
-            return prepared.publish(
+            return prepared.publish_transactional(
                 mutation=_mutate,
                 canonical_path=canonical_path,
                 canonical_relative_path=os.fspath(canonical_path.relative_to(wd)),

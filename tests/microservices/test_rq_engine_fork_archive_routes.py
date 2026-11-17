@@ -1,6 +1,9 @@
 import contextlib
 import asyncio
+import hashlib
+import json
 import os
+from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
 
@@ -17,6 +20,29 @@ from wepppy.weppcloud.utils import runid as runid_utils
 
 
 pytestmark = pytest.mark.microservice
+
+
+def _private_archive_fixture(run_dir: Path) -> tuple[str, Path]:
+    bundle = run_dir / "archives" / "private" / "bundle-1"
+    bundle.mkdir(parents=True)
+    archive = bundle / "snapshot.zip"
+    archive.write_bytes(b"PK\x05\x06" + (b"\x00" * 18))
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    (bundle / "snapshot.zip.sensitive.json").write_text(json.dumps({
+        "schema": "vector-upload-private-archive-v1",
+        "archive": archive.name,
+        "archive_size": archive.stat().st_size,
+        "archive_sha256": digest,
+        "contains_vector_upload_attempts": True,
+    }))
+    (bundle / "normalization.json").write_text(json.dumps({
+        "schema": "vector-normalization-v1",
+        "status": "accepted",
+        "canonical_path": "archives/private/bundle-1/snapshot.zip",
+        "canonical_size": archive.stat().st_size,
+        "canonical_sha256": digest,
+    }))
+    return "private/bundle-1/snapshot.zip", archive
 
 @pytest.fixture(autouse=True)
 def legacy_project_policy(monkeypatch):
@@ -1187,13 +1213,22 @@ def test_archive_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None
     run_dir = tmp_path / "run"
     run_dir.mkdir()
 
-    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {
+            "feature_access_principal": {"version": 1, "kind": "human", "id": 7},
+            "roles": ["User"],
+        },
+    )
+    monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda _runid: [SimpleNamespace(id=7)])
     monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
     monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
     monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda runid: {})
 
-    constructor_calls = _stub_queue(monkeypatch, job_id="job-99")
+    enqueue_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    constructor_calls = _stub_queue(monkeypatch, job_id="job-99", enqueue_calls=enqueue_calls)
     _stub_prep(monkeypatch)
     monkeypatch.setattr(fork_archive_routes.StatusMessenger, "publish", lambda *args, **kwargs: None)
 
@@ -1207,6 +1242,11 @@ def test_archive_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None
     payload = response.json()
     assert payload["job_id"] == "job-99"
     assert constructor_calls[0][0] == ("fork-archive",)
+    assert enqueue_calls[0][0][1] == (
+        "run-1",
+        "demo",
+        {"kind": "human", "identifier": 7},
+    )
 
 
 @pytest.mark.parametrize(
@@ -1226,7 +1266,7 @@ def test_archive_maps_admission_failures(
     run_dir = tmp_path / "run"
     run_dir.mkdir()
     monkeypatch.setattr(
-        fork_archive_routes, "require_jwt", lambda _request, required_scopes=None: {}
+        fork_archive_routes, "require_jwt", lambda _request, required_scopes=None: {"roles": ["Root"]}
     )
     monkeypatch.setattr(
         fork_archive_routes, "authorize_run_access", lambda _claims, _runid: None
@@ -1266,7 +1306,7 @@ def test_archive_clears_stale_job_id_when_lookup_fails(
     run_dir = tmp_path / "run"
     run_dir.mkdir()
 
-    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {"roles": ["Root"]})
     monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
     monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
@@ -1302,7 +1342,7 @@ def test_archive_returns_conflict_when_existing_job_is_running(
     run_dir = tmp_path / "run"
     run_dir.mkdir()
 
-    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {"roles": ["Root"]})
     monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
     monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
@@ -1337,7 +1377,7 @@ def test_archive_preserves_job_id_when_status_lookup_errors(
     run_dir = tmp_path / "run"
     run_dir.mkdir()
 
-    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda request, required_scopes=None: {"roles": ["Root"]})
     monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
     monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
@@ -1401,6 +1441,96 @@ def test_restore_clears_stale_job_id_before_enqueue(
     assert prep.clear_calls == 0
     assert prep.archive_job_id == "job-restore"
     assert constructor_calls[0][0] == ("fork-archive",)
+
+
+@pytest.mark.parametrize(
+    ("claims", "owner_ids", "expected_status"),
+    [
+        ({"user_id": 7, "roles": ["User"]}, {7}, 200),
+        ({"user_id": 8, "roles": ["User"]}, {7}, 403),
+        ({"roles": ["Root"]}, set(), 200),
+    ],
+)
+def test_private_archive_restore_route_is_owner_or_root_only(
+    claims: dict[str, object],
+    owner_ids: set[int],
+    expected_status: int,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    archive_name, _archive = _private_archive_fixture(run_dir)
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda *_args, **_kwargs: claims)
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda *_args: None)
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "get_run_owners_lazy",
+        lambda _runid: [SimpleNamespace(id=value) for value in owner_ids],
+    )
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda _runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", os.path.exists)
+    monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda _runid: {})
+    monkeypatch.setattr(fork_archive_routes, "_archive_job_in_progress", lambda _prep: False)
+    monkeypatch.setattr(fork_archive_routes, "_reconcile_archive_receipt", lambda *_args, **_kwargs: "missing")
+    monkeypatch.setattr(fork_archive_routes.StatusMessenger, "publish", lambda *_args: None)
+    enqueue_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    _stub_queue(monkeypatch, job_id="job-private-restore", enqueue_calls=enqueue_calls)
+    _stub_prep(monkeypatch)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/restore-archive",
+            json={"archive_name": archive_name},
+        )
+
+    assert response.status_code == expected_status
+    if expected_status == 200:
+        assert enqueue_calls[0][0][1] == ("run-1", archive_name)
+
+
+def test_private_archive_delete_route_removes_bundle_then_rebuilds_ledger(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    archive_name, archive = _private_archive_fixture(run_dir)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda *_args, **_kwargs: {"user_id": 7})
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda *_args: None)
+    monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda _runid: [SimpleNamespace(id=7)])
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda _runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", os.path.exists)
+    monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda _runid: {})
+    monkeypatch.setattr(fork_archive_routes, "_archive_job_in_progress", lambda _prep: False)
+    monkeypatch.setattr(fork_archive_routes, "_reconcile_archive_receipt", lambda *_args, **_kwargs: "missing")
+    monkeypatch.setattr(fork_archive_routes.StatusMessenger, "publish", lambda *_args: None)
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+
+    class Lease:
+        def assert_owned(self) -> None:
+            return None
+
+        def release(self) -> None:
+            return None
+
+    monkeypatch.setattr(fork_archive_routes, "RedisScopeLeaseFactory", lambda: lambda _scope: Lease())
+    rebuilds: list[dict[str, object]] = []
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "reconcile_retention",
+        lambda *_args, **kwargs: rebuilds.append(kwargs) or {},
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/delete-archive",
+            json={"archive_name": archive_name},
+        )
+
+    assert response.status_code == 200
+    assert not archive.parent.exists()
+    assert rebuilds == [{"apply": True, "rebuild_ledger": True, "stale_seconds": 0, "committed_only": True}]
 
 
 @pytest.mark.parametrize(

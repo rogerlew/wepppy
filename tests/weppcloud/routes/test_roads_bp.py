@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, Optional
@@ -124,7 +125,7 @@ class RoadsStub(LockedMixin):
             self._parameterization_state = {"status": "bound", "overrides": payload["parameterization"].get("overrides", {})}
         return dict(self._params)
 
-    def set_uploaded_geojson(self, src_path: str) -> Dict[str, Any]:
+    def set_uploaded_geojson(self, src_path: str, *, publication_commit=None) -> Dict[str, Any]:
         src = Path(src_path)
         if not src.exists():
             raise FileNotFoundError(f"Roads input file not found: {src}")
@@ -156,6 +157,8 @@ class RoadsStub(LockedMixin):
         }
         self._params["attribute_field_map"] = dict(self._attribute_field_map)
         self._uploaded_geojson_relpath = rel
+        if publication_commit is not None:
+            publication_commit()
         return {
             "uploaded_geojson_relpath": rel,
             "feature_count": len(payload.get("features", [])),
@@ -236,6 +239,7 @@ def roads_client(
     tmp_path,
     rq_environment,
 ):
+    monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(roads_module.roads_bp)
@@ -465,6 +469,30 @@ def test_upload_geoparquet_retains_source_and_publishes_wgs84_candidate(
     assert receipt["source_sha256"] == hashlib.sha256(source).hexdigest()
     assert next((attempt / "original").iterdir()).read_bytes() == source
     assert RoadsStub.getInstance(run_dir).query_summary()["uploaded_geojson_relpath"] == "roads/roads.uploaded.geojson"
+
+
+def test_exact_converter_formats_cross_roads_http_boundary(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    converter_url = os.getenv("VECTOR_UPLOAD_INTEGRATION_URL")
+    fixture_root_value = os.getenv("VECTOR_UPLOAD_INTEGRATION_FIXTURES")
+    if not converter_url or not fixture_root_value:
+        pytest.skip("exact converter integration environment is not configured")
+    client, _RoadsStub, _RonStub, _RedisPrepStub, _rq_environment, run_dir = roads_client
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", converter_url)
+    fixture_root = Path(fixture_root_value)
+    semantics: list[dict[str, Any]] = []
+    for suffix, fixture_suffix in (("geojson", "geojson"), ("zip", "zip"), ("parquet", "parquet"), ("geoparquet", "parquet")):
+        response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
+            data={"file": (io.BytesIO((fixture_root / f"line.{fixture_suffix}").read_bytes()), f"line.{suffix}")},
+            content_type="multipart/form-data",
+        )
+        assert response.status_code == 200
+        payload = json.loads((Path(run_dir) / "roads" / "roads.uploaded.geojson").read_text())
+        semantics.append({"geometry": payload["features"][0]["geometry"], "properties": payload["features"][0]["properties"]})
+    assert semantics[1:] == semantics[:1] * 3
 
 
 def test_upload_geometry_rejection_preserves_accepted_roads(roads_client):

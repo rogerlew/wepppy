@@ -127,6 +127,7 @@ class ScopeLeaseFactory(Protocol):
 
 _RESERVE_LUA = """
 if redis.call('EXISTS', KEYS[4]) ~= 0 then return {-5, 0} end
+if redis.call('HGET', KEYS[1], 'initialized') ~= '1' then return {-6, 0} end
 local total_committed = tonumber(redis.call('HGET', KEYS[1], 'committed') or '0')
 local total_reserved = tonumber(redis.call('HGET', KEYS[1], 'reserved') or '0')
 local inflight = tonumber(redis.call('HGET', KEYS[1], 'inflight') or '0')
@@ -331,7 +332,7 @@ class RedisRetentionLedger:
             if shutil.disk_usage(actual_root).free - outstanding < _FREE_SPACE_RESERVE:
                 reservation = _RedisReservation(
                     self._client(), totals_key, principal_key, reservation_key,
-                    owner, reservation_id, actual_root,
+                    owner, reservation_id, expected_root,
                 )
                 reservation.release_prewrite()
                 raise VectorUploadError(
@@ -349,7 +350,7 @@ class RedisRetentionLedger:
             ) from exc
         return _RedisReservation(
             self._client(), totals_key, principal_key, reservation_key,
-            owner, reservation_id, actual_root,
+            owner, reservation_id, expected_root,
         )
 
 
@@ -361,6 +362,7 @@ def reconcile_retention(
     now: int | None = None,
     stale_seconds: int = _LEASE_SECONDS,
     rebuild_ledger: bool = False,
+    committed_only: bool = False,
 ) -> dict[str, object]:
     """Audit/recover reservations and optionally rebuild accounting from receipts."""
     filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
@@ -378,24 +380,40 @@ def reconcile_retention(
     lock_key = f"{prefix}:reconcile"
     lock_token = uuid.uuid4().hex
     try:
-        if not client.set(lock_key, lock_token, nx=True, ex=300):
+        if not client.set(lock_key, lock_token, nx=True, ex=_LEASE_SECONDS):
             raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reconciliation is already active.", status_code=507)
+
+        def assert_reconcile_owned() -> None:
+            renewed = client.eval(
+                _LOCK_RENEW_LUA, 1, lock_key, lock_token, _LEASE_SECONDS,
+            )
+            if int(renewed or 0) != 1:
+                raise VectorUploadError(
+                    "vector_retention_quota_exceeded",
+                    "Vector evidence reconciliation lock ownership was lost.",
+                    status_code=507,
+                )
+
         keys = list(client.scan_iter(match=f"{prefix}:reservation:*", count=100))
         if len(keys) > 10_000:
             raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reservation inventory exceeds the recovery bound.", status_code=507)
         actions: list[dict[str, object]] = []
         current = int(time.time()) if now is None else int(now)
         for key in sorted(keys):
+            assert_reconcile_owned()
             metadata = client.hgetall(key)
             created = int(metadata.get("created_unix") or 0)
             if current - created < stale_seconds:
                 continue
             relative = str(metadata.get("attempt_relpath") or "")
             state = str(metadata.get("state") or "reserved")
+            if committed_only and state != "committed":
+                continue
             if not relative:
                 action = {"reservation": key.rsplit(":", 1)[-1], "action": "release_prewrite"}
                 actions.append(action)
                 if apply and state != "committed":
+                    assert_reconcile_owned()
                     result = int(client.eval(_RECONCILE_LUA, 2, totals_key, key, "release", 0) or 0)
                     if result != 1:
                         raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence ledger drift requires operator repair.", status_code=507)
@@ -408,7 +426,11 @@ def reconcile_retention(
             except ValueError as exc:
                 raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reservation path escapes its filesystem.", status_code=507) from exc
             if not attempt.exists() or attempt.is_symlink() or not attempt.is_dir():
-                actions.append({"reservation": key.rsplit(":", 1)[-1], "action": "blocked_missing_attempt"})
+                action_name = "committed_evidence_removed" if state == "committed" else "blocked_missing_attempt"
+                actions.append({"reservation": key.rsplit(":", 1)[-1], "action": action_name})
+                if apply and state == "committed":
+                    assert_reconcile_owned()
+                    client.delete(key)
                 continue
             receipt_path = attempt / _RECEIPT_NAME
             try:
@@ -434,7 +456,7 @@ def reconcile_retention(
                 _atomic_json(receipt_path, receipt)
             status = str(receipt.get("status") or "")
             recovered_status = status
-            if status == "accepted":
+            if status in {"accepted", "accepted_recovered"}:
                 project_rel = receipt.get("project_root")
                 canonical_rel = receipt.get("canonical_path")
                 recovered_status = "incomplete"
@@ -443,7 +465,9 @@ def reconcile_retention(
                     try:
                         canonical.relative_to(root)
                         size, digest = _hash_regular(canonical)
-                        if size == receipt.get("canonical_size") and digest == receipt.get("canonical_sha256"):
+                        expected_size = receipt.get("canonical_size")
+                        expected_digest = receipt.get("canonical_sha256")
+                        if size == expected_size and digest == expected_digest:
                             recovered_status = "accepted_recovered"
                     except (OSError, ValueError, VectorUploadError):
                         pass
@@ -452,6 +476,7 @@ def reconcile_retention(
             actions.append({"reservation": key.rsplit(":", 1)[-1], "action": recovered_status})
             if not apply:
                 continue
+            assert_reconcile_owned()
             receipt.update(
                 status=recovered_status,
                 outcome="retained" if recovered_status == "accepted_recovered" else "quarantined",
@@ -471,10 +496,14 @@ def reconcile_retention(
             committed_bytes = 0
             principal_bytes: dict[str, int] = {}
             for walk_root, directories, filenames in os.walk(root, followlinks=False):
-                directories[:] = [
-                    name for name in directories
-                    if not (Path(walk_root) / name).is_symlink()
-                ]
+                assert_reconcile_owned()
+                symlink_dirs = [name for name in directories if (Path(walk_root) / name).is_symlink()]
+                if symlink_dirs:
+                    actions.append({
+                        "path": os.fspath(Path(walk_root).relative_to(root)),
+                        "action": "blocked_symlink_evidence",
+                    })
+                directories[:] = [name for name in directories if name not in symlink_dirs]
                 if _RECEIPT_NAME not in filenames:
                     continue
                 if receipt_count >= 10_000:
@@ -523,6 +552,7 @@ def reconcile_retention(
             }
             blocked = [item for item in actions if str(item.get("action", "")).startswith("blocked_")]
             if apply:
+                assert_reconcile_owned()
                 remaining_reservations = list(client.scan_iter(match=f"{prefix}:reservation:*", count=100))
                 if blocked or remaining_reservations:
                     raise VectorUploadError(
@@ -532,10 +562,20 @@ def reconcile_retention(
                     )
                 principal_keys = list(client.scan_iter(match=f"{prefix}:principal:*", count=100))
                 pipeline = client.pipeline(transaction=True)
+                pipeline.watch(lock_key)
+                if pipeline.get(lock_key) != lock_token:
+                    pipeline.reset()
+                    raise VectorUploadError(
+                        "vector_retention_quota_exceeded",
+                        "Vector evidence reconciliation lock ownership was lost.",
+                        status_code=507,
+                    )
+                pipeline.multi()
                 pipeline.delete(totals_key)
                 if principal_keys:
                     pipeline.delete(*principal_keys)
                 pipeline.hset(totals_key, mapping={
+                    "initialized": 1,
                     "committed": committed_bytes,
                     "reserved": 0,
                     "inflight": 0,
@@ -563,6 +603,7 @@ def reconcile_retention(
 
 
 _LOCK_RELEASE_LUA = "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('DEL',KEYS[1]) end return 0"
+_LOCK_RENEW_LUA = "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('EXPIRE',KEYS[1],ARGV[2]) end return 0"
 
 
 @dataclass(slots=True)
@@ -574,7 +615,9 @@ class _RedisScopeLease:
 
     def assert_owned(self) -> None:
         try:
-            owned = not self._released and self.connection.get(self.key) == self.token
+            owned = not self._released and int(self.connection.eval(
+                _LOCK_RENEW_LUA, 1, self.key, self.token, _LEASE_SECONDS,
+            ) or 0) == 1
         except redis.RedisError as exc:
             raise VectorUploadError(
                 "vector_retention_quota_exceeded",
@@ -723,6 +766,27 @@ def _tree_stats(evidence_roots: Iterable[Path]) -> tuple[int, int, int]:
                 if item.parent.name == "original" and item.name.endswith(".upload"):
                     originals += info.st_size
     return attempts, originals, total
+
+
+def assert_project_retention_capacity(
+    evidence_roots: Iterable[Path],
+    *,
+    worst_case_bytes: int,
+    original_allowance: int = 0,
+) -> None:
+    attempts, originals, live_bytes = _tree_stats(evidence_roots)
+    if attempts >= _ATTEMPT_LIMIT or originals + original_allowance > _ORIGINAL_BYTES_LIMIT:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence project quota is exhausted.",
+            status_code=507,
+        )
+    if live_bytes + worst_case_bytes > _LIVE_TREE_LIMIT or live_bytes + worst_case_bytes > _TOTAL_EVIDENCE_LIMIT:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence project quota is exhausted.",
+            status_code=507,
+        )
 
 
 def _ensure_attempt_root(attempt_root: Path, filesystem_root: Path) -> None:
@@ -1072,6 +1136,56 @@ class PreparedVectorUpload:
             _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
         self._finished = True
 
+    def _complete_publication(
+        self,
+        *,
+        canonical_path: Path,
+        canonical_relative_path: str | None,
+        suppress_accounting_error: bool = False,
+    ) -> None:
+        canonical_size, canonical_sha256 = _hash_regular(canonical_path)
+        if canonical_size != self.candidate_size or canonical_sha256 != self.candidate_sha256:
+            raise VectorUploadError(
+                "vector_source_integrity_error",
+                "Published workflow GeoJSON does not match the validated candidate.",
+                status_code=502,
+                attempt_id=self.attempt_id,
+            )
+        self.receipt.update(
+            status="accepted", outcome="retained", enforcement_stage="accepted_publication",
+            canonical_path=canonical_relative_path or canonical_path.name,
+            canonical_size=canonical_size,
+            canonical_sha256=canonical_sha256,
+            accounting_status="pending",
+        )
+        try:
+            self.candidate_path.unlink(missing_ok=True)
+        except OSError:
+            _LOGGER.warning("Accepted vector candidate cleanup deferred", exc_info=True)
+        self.receipt["accounting_status"] = "committed"
+        self._persist()
+        exact = _regular_tree_size(self.attempt_dir)
+        try:
+            self.reservation.commit(exact)
+        except VectorUploadError:
+            self.receipt["accounting_status"] = "pending"
+            try:
+                self._persist()
+            finally:
+                self._finished = True
+            try:
+                self.lease.release()
+            except VectorUploadError:
+                _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
+            if not suppress_accounting_error:
+                raise
+            return
+        self._finished = True
+        try:
+            self.lease.release()
+        except VectorUploadError:
+            _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
+
     def publish(
         self,
         *,
@@ -1083,9 +1197,14 @@ class PreparedVectorUpload:
         if self._finished:
             raise RuntimeError("vector upload attempt is already terminal")
         self.lease.assert_owned()
+        self.receipt.update(
+            canonical_path=canonical_relative_path or canonical_path.name,
+            publication_intent=True,
+        )
+        self._persist()
         try:
             result = mutation(self.candidate_path)
-        except Exception:
+        except Exception:  # broad-except: workflow mutation boundary records terminal recovery state
             # A workflow callback is required to roll back its own authoritative
             # state. If the candidate nevertheless became canonical, preserve an
             # explicit recovery state instead of falsely recording rejection.
@@ -1099,53 +1218,48 @@ class PreparedVectorUpload:
                 self.reject("workflow_publication_failed")
             raise
         try:
-            canonical_size, canonical_sha256 = _hash_regular(canonical_path)
-            if canonical_size != self.candidate_size or canonical_sha256 != self.candidate_sha256:
-                raise VectorUploadError(
-                    "vector_source_integrity_error",
-                    "Published workflow GeoJSON does not match the validated candidate.",
-                    status_code=502,
-                    attempt_id=self.attempt_id,
-                )
-            self.receipt.update(
-                status="accepted", outcome="retained", enforcement_stage="accepted_publication",
-                canonical_path=canonical_relative_path or canonical_path.name,
-                canonical_size=canonical_size,
-                canonical_sha256=canonical_sha256,
-                accounting_status="pending",
+            self._complete_publication(
+                canonical_path=canonical_path,
+                canonical_relative_path=canonical_relative_path,
             )
-            try:
-                self.candidate_path.unlink(missing_ok=True)
-            except OSError:
-                _LOGGER.warning("Accepted vector candidate cleanup deferred", exc_info=True)
-            self.receipt["accounting_status"] = "committed"
-            self._persist()
-            exact = _regular_tree_size(self.attempt_dir)
-            try:
-                self.reservation.commit(exact)
-            except VectorUploadError:
-                # The accepted workflow and receipt are monotonic. A durable
-                # reservation record lets the reconciliation command finish
-                # accounting without rewriting this attempt as rejected.
-                self.receipt["accounting_status"] = "pending"
-                try:
-                    self._persist()
-                finally:
-                    self._finished = True
-                try:
-                    self.lease.release()
-                except VectorUploadError:
-                    _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
-                raise
-            self._finished = True
-            try:
-                self.lease.release()
-            except VectorUploadError:
-                _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
             return result
-        except Exception:
+        except Exception:  # broad-except: publication boundary terminalizes uncertain workflow state
             if not self._finished:
                 self._incomplete_after_mutation("workflow_readback_failed")
+            raise
+
+    def publish_transactional(
+        self,
+        *,
+        mutation: Callable[[Path, Callable[[], None]], Any],
+        canonical_path: Path,
+        canonical_relative_path: str | None = None,
+    ) -> Any:
+        """Publish while the workflow retains its rollback snapshot through receipt commit."""
+        if self._finished:
+            raise RuntimeError("vector upload attempt is already terminal")
+        self.lease.assert_owned()
+        self.receipt.update(
+            canonical_path=canonical_relative_path or canonical_path.name,
+            publication_intent=True,
+        )
+        self._persist()
+
+        def commit() -> None:
+            self._complete_publication(
+                canonical_path=canonical_path,
+                canonical_relative_path=canonical_relative_path,
+                suppress_accounting_error=True,
+            )
+
+        try:
+            result = mutation(self.candidate_path, commit)
+            if not self._finished:
+                raise RuntimeError("workflow publication returned without committing the vector receipt")
+            return result
+        except Exception:  # broad-except: workflow transaction boundary records rollback outcome
+            if not self._finished:
+                self.reject("workflow_publication_failed")
             raise
 
     def __enter__(self) -> "PreparedVectorUpload":
@@ -1190,11 +1304,11 @@ def prepare_vector_upload(
     receipt: dict[str, object] | None = None
     try:
         lease = (scope_lease_factory or RedisScopeLeaseFactory())(project_key)
-        attempts, originals, live_bytes = _tree_stats(evidence_roots)
-        if attempts >= _ATTEMPT_LIMIT or originals + endpoint_max_bytes > _ORIGINAL_BYTES_LIMIT:
-            raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence project quota is exhausted.", status_code=507)
-        if live_bytes + worst_case > _LIVE_TREE_LIMIT or live_bytes + worst_case > _TOTAL_EVIDENCE_LIMIT:
-            raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence project quota is exhausted.", status_code=507)
+        assert_project_retention_capacity(
+            evidence_roots,
+            worst_case_bytes=worst_case,
+            original_allowance=endpoint_max_bytes,
+        )
         _ensure_attempt_root(attempt_root, filesystem_root)
         attempt_id = str(uuid.uuid4())
         attempt_dir = attempt_root / attempt_id
@@ -1316,7 +1430,7 @@ def prepare_vector_upload(
         candidate_path = attempt_dir / "candidate.geojson"
         candidate_size, candidate_sha256 = _write_candidate(candidate_path, content, candidate_limit)
         receipt.update(
-            status="candidate_stored", outcome="working", enforcement_stage="normalized_candidate",
+            outcome="working", enforcement_stage="normalized_candidate",
             candidate_path="candidate.geojson", candidate_size=candidate_size,
             candidate_sha256=candidate_sha256,
         )
@@ -1367,6 +1481,11 @@ def prepare_vector_upload(
             reservation.release_prewrite()
             if lease is not None:
                 lease.release()
+        elif receipt is None:
+            attempt_dir.rmdir()
+            reservation.release_prewrite()
+            if lease is not None:
+                lease.release()
         elif receipt is not None and receipt.get("status") == "rejected":
             pass
         else:
@@ -1391,6 +1510,7 @@ __all__ = [
     "PreparedVectorUpload",
     "RedisRetentionLedger",
     "RedisScopeLeaseFactory",
+    "assert_project_retention_capacity",
     "RetentionActor",
     "VectorUploadError",
     "prepare_vector_upload",

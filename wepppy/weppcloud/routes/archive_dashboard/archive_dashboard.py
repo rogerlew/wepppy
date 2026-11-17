@@ -22,6 +22,7 @@ from wepppy.weppcloud.utils.helpers import (
     exception_factory,
     run_lifecycle_mutation,
     url_for_run,
+    get_run_owners_lazy,
 )
 
 from .._run_context import load_run_context
@@ -31,6 +32,16 @@ archive_bp = Blueprint('archive', __name__, template_folder='templates')
 
 
 _RUNNING_ARCHIVE_JOB_STATUSES = {'queued', 'started', 'scheduled'}
+
+
+def _can_list_private_archives(runid: str) -> bool:
+    if current_user.has_role('Admin') or current_user.has_role('Root'):
+        return True
+    try:
+        user_id = int(current_user.id)
+    except (TypeError, ValueError):
+        return False
+    return any(int(getattr(owner, 'id', 0) or 0) == user_id for owner in (get_run_owners_lazy(runid) or ()))
 
 
 def _resolve_archive_job_state(prep: RedisPrep) -> tuple[bool, str | None]:
@@ -46,7 +57,7 @@ def _resolve_archive_job_state(prep: RedisPrep) -> tuple[bool, str | None]:
             status = job.get_status(refresh=True)
     except NoSuchJobError:
         status = None
-    except Exception:
+    except Exception:  # broad-except: archive status boundary fails closed as in progress
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py:43", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return True, archive_job_id
@@ -64,7 +75,7 @@ def rq_archive_dashboard(runid, config):
         authorize(runid, config)
         load_run_context(runid, config)
         return render_template('rq-archive-dashboard.htm', runid=runid, config=config, user=current_user)
-    except Exception as e:
+    except Exception as e:  # broad-except: Flask route translates through canonical exception factory
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py:60", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(e)
@@ -83,14 +94,16 @@ def rq_archive_list(runid, config):
         os.makedirs(archives_dir, exist_ok=True)
 
         entries = []
-        pattern = os.path.join(archives_dir, '*.zip')
-        for path in sorted(glob(pattern), reverse=True):
+        paths = list(glob(os.path.join(archives_dir, '*.zip')))
+        if _can_list_private_archives(runid):
+            paths.extend(glob(os.path.join(archives_dir, 'private', '*', '*.zip')))
+        for path in sorted(paths, reverse=True):
             try:
                 stat = os.stat(path)
             except FileNotFoundError:
                 continue
 
-            rel_name = os.path.basename(path)
+            rel_name = os.path.relpath(path, archives_dir).replace(os.sep, '/')
             comment = ''
             try:
                 with zipfile.ZipFile(path) as zf:
@@ -121,7 +134,7 @@ def rq_archive_list(runid, config):
             'in_progress': in_progress,
             'job_id': archive_job_id,
         })
-    except Exception as e:
+    except Exception as e:  # broad-except: Flask route translates through canonical exception factory
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py:113", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(e)
