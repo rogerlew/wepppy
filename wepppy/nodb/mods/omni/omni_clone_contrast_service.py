@@ -77,6 +77,9 @@ def _reset_workspace(path: str | Path, *, logger: Any, project_key: str) -> None
                 stale_dir,
                 exc,
             )
+        retention_operation.sync_paths += tuple(
+            target.parent.glob(f"{glob_escape(target.name)}.stale.*")
+        )
 
 
 class OmniCloneContrastService:

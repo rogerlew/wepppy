@@ -1,164 +1,136 @@
 # Resumed independent security review
 
-Date: 2026-11-17
-Reviewer: independent `security_reviewer` (`frozen_security`)
-Reviewed source: `ee26389f099e9e950b5920d53790f8661548a5e3`
-Initial reviewed ancestor: `de15403aadbd7a659ef4717e77223ff4890b18c1`
-Comparison source: `0e861887e132b41b00a108292d7833d21750b146`
+Date: 2026-11-17. Independent reviewer: `security_reviewer` (`frozen_security`).
+Final reviewed source: `54ee356fd16845e7abf6da59d7df616f8b5fa6ce`.
+Comparison source: `0e861887e132b41b00a108292d7833d21750b146`.
+Sharing decision: `bbb216c0bc48674f8b24f5e69f20ec58e57b795a`.
 Exact local converter image:
-`sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98fa`
+`sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98fa`.
 
 ## Findings and disposition
 
-**HOLD package closeout: one High and one Medium security finding remain.**
-The earlier narrow deletion/auth source PASS is superseded by the independently
-confirmed clone consumers below. The reviewer did not author or modify runtime
-code or tests. Frozen validation of deletion and upload paths cannot close these
-uncovered paths. Production publication/deployment remain separately authorized.
+**PASS for the frozen source security review. No unresolved High or Medium
+source security finding remains in the reviewed package scope.** This supersedes
+this artifact's earlier HOLD at `ee26389f0`. The reviewer changed no production
+code or tests. Final runtime acceptance remains subject to the integrator's
+immutable-source validation receipt; this source-qualified verdict does not
+assert that the still-running combined/full suites passed.
 
-### SEC-RESUME-01 - Public-run fork exposes source-private vector evidence
+**SEC-RESUME-01, public/team fork inheritance: resolved by explicit operator
+policy.** The initial review demonstrated that ordinary public-run forking copies
+originals, rejected attempts and private archives to the new owner. The operator
+explicitly accepted this sharing behavior. The authoritative exception and its
+rationale are recorded in
+[the canonical contract, “Sharing, copies, and existing workspace resets”](../../../schemas/vector-upload-normalization-contract.md#sharing-copies-and-existing-workspace-resets)
+and [the sharing decision](20261117_sharing_contract_decision.md).
+Existing public/team fork access and destination ownership remain intact; direct
+source sensitive browse/download restrictions remain unchanged. The former
+filter/source-only recommendation is superseded and is not an open defect.
 
-Severity: **High**. Status: **Open**.
+**SEC-RESUME-02, unaccounted copies and workspace removal: closed in reviewed
+source.** Actual fork rsync, Batch leaf copy/reset, Batch Omni/base reset,
+developer smoke clone, Omni child cleanup and profile promotion/reentry now use
+the shared retention lifecycle at their existing filesystem boundary. The
+[consumer inventory](20261117_vector_retention_copy_reset_inventory.md) identifies
+each caller, tests and explicit exclusions. The helper admits incoming retained
+bytes, holds global/project authority, records durable repair identity, verifies
+copied bytes, rebuilds exact accounting and clears repair only after readback.
+Normal generated cleanup preserves the owning project's retained-attempt roots.
 
-`fork_project()` accepts authenticated public-run nonowners through ordinary
-`authorize_run_access()` (`fork_archive_routes.py:952-965`), then registers the
-caller as a destination owner (`:1528-1543`). `_build_fork_rsync_cmd()` includes
-neither `vector_upload_attempts` nor `archives/private` in its default exclusions
-(`project_rq_fork.py:580-603`); the real worker runs that command (`:1414-1433`).
-The copied files are subsequently readable under the destination owner's normal
-sensitive-artifact predicate (`browse/sensitive_vectors.py:74-93`). A caller
-without source-evidence authority therefore obtains originals, rejected/hostile
-uploads, source hashes and actor metadata by forking the public run.
+**COPY-ACCOUNTING-01, charging another principal for a copy: closed.** Immutable
+upload `actor`, source hash, project identity and attempt identity remain source
+provenance. Additive `retention_actor` charges the verified copying principal,
+or the existing unattributed bucket for automated/legacy callers. Fork admission
+derives that identity from verified claims/user resolution and puts minimized
+metadata in the job; request-supplied actor fields do not control it. Rebuild
+uses that attribution with legacy `actor` fallback. Bounded `copied_from` and
+`copy-source-receipt.json` record inheritance without claiming another upload.
 
-The reviewer executed the exact committed command builder, extracted from the
-`ee26389f0` Git blob, against a disposable sentinel project using real `rsync`.
-The command exited zero and copied all three controls byte-for-byte:
+## Implementation findings closed during this review
 
-- `roads/vector_upload_attempts/attempt/original/source.zip.upload`;
-- `roads/vector_upload_attempts/attempt/normalization.json`; and
-- `archives/private/bundle/private.zip`.
-
-Only reviewer-created sentinel files were used; no user project or service state
-was changed. The authorization-to-destination-owner exploit chain was traced in
-source; a full HTTP fork/browser reproduction remains required for closure.
-
-Required remediation: ratify the clone disposition without weakening existing
-public-run fork behavior or silently dropping required provenance. Either keep
-originals only in their source project with a non-disclosing reference, or copy
-only under explicit source-private authority with bounded reservation, destination
-receipt identity and private modes. Apply the decision at the actual copy boundary
-and prove public nonowner, owner/root, anonymous where applicable, failure/retry,
-and sensitive browse/download behavior. Until then source-private bytes must not
-be copied into a destination controlled by a newly authorized principal.
-
-### SEC-RESUME-02 - Clone and leaf reset bypass retained-evidence accounting
-
-Severity: **Medium**. Status: **Open**.
-
-The same broad copy assumption occurs in
-`BatchRunner._run_batch_hillslopes_owned()` (`batch_runner.py:580-593`):
-`copytree(base_wd, runid_wd)` duplicates attempts/private archives without a
-retention reservation or destination provenance, while `_reset_run_workspace()`
-renames/deletes an existing leaf without a rebuild obligation. Fork `rsync` has
-the uncharged-copy behavior too. The operator/developer `test_run_rq()` consumer
-(`project_rq.py:912,951,962`) likewise clones to `-latest` and recursively removes
-its old destination without retention repair. It is not evidence of an additional
-public endpoint, but is a confirmed consumer of the same broken assumption.
-
-Repeated clones can multiply retained bytes outside global/principal admission;
-leaf reruns can remove charged evidence while leaving stale totals. Copied
-receipts also preserve source project/reservation identities, so they cannot be
-claimed as destination acceptance/provenance records.
-
-Required remediation: apply the ratified clone decision consistently to fork,
-Batch generation/reset, and `test_run_rq()`. For copies, reserve and charge actual
-destination retained bytes or keep source-only originals with an authorized
-reference. For removal, use the existing exact-root durable accounting lifecycle
-or a documented bounded prohibition before mutation. Retain real-copy and
-reset/retry tests with exact global/principal totals, source/destination receipt
-readback, and unrelated active reservation preservation. Record any other
-confirmed clone consumer in the failure-class coverage inventory.
-
-
-The new changes restore the existing retained-evidence contract: complete inputs
-remain private and inert, while deletion and restoration retain recovery authority
-until exact-root accounting is rebuilt. They do not add parser authority,
-network destinations, privileges, authentication mechanisms or a new datastore.
-
-## Security surfaces rechecked
-
-| Surface | Evidence and disposition |
+| Confirmed issue | Final disposition and evidence |
 | --- | --- |
-| Run and whole-Batch deletion | `_retention_delete_root()` rejects missing identity/root for retained evidence, outside-root/root targets, and direct target symlinks before project state mutation. Batch validates its name and retains the active-job check inside the catalog guard. Its new guard acquires global maintenance before Batch and generated child-run scopes, records the durable operation identity, removes/fsyncs, rebuilds accounting, and checks owned leases before marker clearance. |
-| Failure and retry authority | The marker helper validates the configured root and existing marker directory, rejects ordinary and dangling symlink aliases, and keeps Redis authority when an atomic file write may have replaced the file before fsync failure. Admission mirrors surviving filesystem markers and refuses a pending or uninitialized ledger. Completion removes/fsyncs the filesystem marker before removing Redis authority. |
-| Nested destructive operations | The `ee26389f0` successor takes the union of filesystem and Redis pending identities. It rejects a different operation before creating its marker or permitting destructive work. An identical operation/target can resume from either authority. This prevents parent deletion from removing a workspace needed to finish an earlier archive/child repair. |
-| Private archive deletion and restore | Pending deletion retries revalidate lexical containment and symlink ancestry, including when missing provenance is allowed for the exact interrupted operation. Absent retries fsync the bundle parent. Restore validates retention identity and incoming/live sensitivity before catalog/RedisPrep mutation, rejects archive aliases, preserves private directory modes, and leaves obligations pending on partial removal, fsync or lease failure. |
-| Authentication and provenance | Existing owner/root private-archive authorization, JWT scope/run binding and signed Flask session handling remain intact. The new five-boundary provenance tests exercise actual token decoding and actor extraction, real retention leases/Lua accounting, terminal receipts, source bytes/SHA-256 and principal totals. Account-store/controller/queue seams are explicit and do not claim full remote identity parity. |
-| Logs and private artifacts | Receipts retain only the minimized verified actor identity and required sanitized submitted filename. Security events omit filenames, sessions, cookies, raw claims, roles, email and client IP. The prior QA wording that excluded filenames from every durable surface is correctly limited by the canonical private-receipt contract. |
-| Parser and supply chain | No shape-converter parser/image source changed in the reviewed successor. The exact running final5 image ID was independently read back. Its retained qualification, parser binary/lock/source identities and scan dispositions remain the image evidence; final4 remains disqualified. No dependency, public endpoint or Python hostile-parser fallback was introduced. |
+| Linked ordinary model subtree could materialize uncharged retained evidence | `_reject_linked_evidence()` rejects sensitive roots or receipt parents reached through directory links; `_roots()` and regular-tree checks reject sensitive symlinks. `test_linked_model_subtree_cannot_materialize_uncharged_evidence` covers the alias path. Ordinary non-evidence model links remain supported. |
+| Copy callback could return success after omitting a receipt but copying its payload | `_publish_copy_provenance()` rejects that partial subtree and post-copy `_inventory(target)` requires complete receipt coverage. `test_successful_callback_with_missing_receipt_leaves_repair_obligation` retains the marker. Deliberate omission of an entire model root remains valid. |
+| Explicit export flag could bypass missing identity for a known in-root destination | `_configured_root()` checks resolved containment when the root is known. `test_explicit_export_inside_root_requires_identity` covers the bypass. Both configured root and identity establish an ordinary external execution destination; absent settings do not prove that boundary. |
+| Speculative deletion credit could under-admit a replacement whose old workspace remains stale | `_admit_copy()` includes all existing committed/reserved bytes and incoming allowance, without reclaim credit. `test_replacement_requires_headroom_for_old_bytes_and_reservations` rejects before callback mutation. |
+| One lease-release exception could abandon other renewable scopes and global maintenance | `ExitStack` registers each acquired lease immediately and releases all owned leases. `test_release_failure_still_releases_all_owned_leases` verifies cleanup despite one release failure. Borrowed scopes stay with their owner. |
+| Failed Batch copy could become stale on retry, leaving uncharged bytes and source-actor attribution beside the replacement | With acquired `repair_pending`, Batch requires successful removal of the incomplete target before copying. It cannot defer that removal through stale rename. `test_batch_copy_retry_requires_partial_removal_before_recopy` creates complete copied receipts before failure, proves no recopy after removal failure, and checks no new stale sibling plus exact source/unattributed totals after retry. Normal completed-workspace resets retain existing deferred cleanup. |
 
-## Prior security finding closure
+The final successor removes a speculative blanket rule requiring every existing
+destination receipt to appear in the current source during retry. That rule would
+have changed established profile `dirs_exist_ok=True` merge semantics and blocked
+legitimate older snapshot records. The confirmed partial-stale defect is closed
+at its actual Batch consumer; this review requires no new merge policy, receipt
+state machine or workflow permission.
 
-The prior dedicated security artifact at `4654150c9` held three findings. Their
-remediated forms were traced in the frozen successor rather than assumed closed
-from later summary text.
+## Security controls rechecked
 
-- **SEC-REREVIEW-01, archive disclosure/lease lifetime: closed.** The shared
-  lease renews with owner checks and surfaces renewal failure to its owner.
-  Archive creation takes the run scope before classification, checks it during
-  traversal and before publication, rejects file/directory symlinks, and places
-  sensitive archives below the private root. Existing lease-loss and alias
-  regressions remain present in `test_project_rq_archive.py`.
-- **SEC-REREVIEW-02, private archive authority/integrity: closed.** Archive
-  creation invokes the current owner/root predicate and sends a minimized actor;
-  private restore/delete resolution remains owner/root-only. Worker restore
-  verifies private sidecar/hash/receipt authority before destructive mutation.
-  The archive receipt canonical path is rooted at the project, and restored
-  originals retain their inert suffix and private modes.
-- **SEC-REREVIEW-03, Redis loss and rebuild ownership: closed.** Reservation Lua
-  rejects an uninitialized ledger and pending rebuilds. Admission/readiness also
-  reject durable filesystem obligations. Reconciliation renews/checks global and
-  required scopes, preserves unrelated active reservation charges, watches its
-  authority/reservation state for the replacement transaction, and reads back
-  exact totals. Missing or ambiguous authority fails closed.
+- Global maintenance precedes project scopes. Borrowing an already-owned Omni
+  scope uses nonblocking global acquisition and cannot create a wait cycle.
+  Ownership checks protect mutation, publication, rebuild and marker clearance.
+  Whole-Batch deletion also fences independently writable child-run scopes.
+- Filesystem and Redis pending identities are combined. Another operation cannot
+  remove the workspace needed by pending repair; the identical operation can
+  retry from either authority. Stable tombstones/stale siblings remain part of
+  configuration checks when the target is absent. Deferred completed-workspace
+  bytes remain charged.
+- Source/destination overlap is rejected. Raw uploads remain opaque. Bounded
+  terminal receipts and complete tree sizes govern managed copies; copied files
+  are hashed against source, receipts privately published, and evidence synced.
+  Exact-root rebuild preserves unrelated active reservations. Flattened profile
+  archive exports remain discoverable through receipt-parent inventory.
+- Established profile execution/fork roots outside the configured ledger remain
+  on current storage. In-root reentry is charged; missing settings do not prove
+  an external destination. Explicit offline exports retain their existing
+  ownership boundary. No mount, identity, runtime root or permission changed.
+- Owner/root private-archive checks, JWT scopes/run binding, signed-session
+  provenance and direct sensitive-artifact restrictions remain. Receipts retain
+  minimized attribution; security events omit submitted filenames, raw claims,
+  tokens, email and client IP. No parser, converter image, dependency, public URL,
+  privilege or Python hostile-parser fallback changed in this successor.
 
-The new whole-Batch lifecycle closes the omitted consumer identified by frozen
-QA. Its tests verify both `_base` and generated-child scope contention, deleted
-and unrelated principal totals, and preservation of unrelated active charges.
-The added nested-repair regression covers both marker authorities separately.
+Earlier SEC-REREVIEW-01 archive lease/disclosure, SEC-REREVIEW-02 private archive
+integrity/authority and SEC-REREVIEW-03 Redis-loss/rebuild findings remain closed.
+Their regression coverage and exact converter qualification remain required.
 
-## Evidence inspected
+## Evidence and validation boundary
 
-The reviewer directly inspected committed source and the complete successor
-production diff, both canonical contract amendments, prior security dispositions,
-and the new tests:
+The reviewer inspected the committed successor, lifecycle helper/normalizer,
+confirmed copy/reset wrappers, canonical amendments, prior dispositions and new
+regression assertions. Relevant suites include lifecycle, copy consumers, fork
+retention, profile lifecycle, deletion, archive recovery, session provenance,
+private archive/auth, sensitive-artifact, normalizer and readiness tests.
 
-- `tests/rq/test_vector_retention_deletion.py`;
-- `tests/rq/test_vector_archive_recovery.py`;
-- `tests/microservices/test_vector_upload_session_provenance.py`;
-- existing normalizer, private archive/auth, and readiness regressions.
+Direct Docker image readback returned the exact final5 ID above. These SHA-256
+values independently matched the frozen worktree and immutable
+`weppcloud:/tmp/vun-final-acceptance` validation snapshot:
 
-`git diff --check 0e861887e..ee26389f0` passed. Direct Docker image readback returned
-the exact final5 ID recorded above. No runtime tests were initiated by this
-reviewer; the integrator is executing the combined immutable-source suite and
-retaining its commands, environment, hashes, node results and skips. Earlier
-working-copy totals are not promoted here to frozen-source evidence.
+| File | SHA-256 |
+| --- | --- |
+| `vector_retention_lifecycle.py` | `73fcd237c3cb571066735561d079c7b6200fe504710eac621e03635c49b15100` |
+| `vector_upload_normalization.py` | `9bc5a34bdf61ae8a1ebbc1f318995907277d0d5ab9db161ffaf1297511c09719` |
+| Canonical vector-upload contract | `9d1be8cd69cdae60727d74de80fd027d6c1f4b9c436ba62731ff5b6d07805ad5` |
+
+`git diff --check 0e861887e..54ee356fd -- wepppy tests services` passed. The wider
+documentation diff contains three Markdown hard-break trailing spaces in an
+earlier correctness checkpoint; the integrator was notified. This reviewer did
+not initiate runtime tests. At review cutoff, `/tmp/vun-final-focused.log` showed
+the immutable-source combined selection running; `/tmp/vun-final-full.log` had
+no completion result. Final results, exclusions and semantic artifact readback
+belong in the retained final validation receipt. Earlier mutable-tree totals are
+not promoted to frozen acceptance here.
 
 ## Residual limitations
 
-The two clone findings above are acceptance blockers, not residual Low debt.
-The operator clone disposition is pending; this review does not authorize a
-behavior or provenance exception.
-
 Previously recorded Low internal-peer hardening remains nonblocking: receiver
-HTTP uses connect/per-read limits rather than an independent absolute wall
-clock deadline, and trusted-converter unknown error-code bounds merit a later
-small cleanup. The qualified converter and byte-bounded response path constrain
-both; no public request-controlled URL or parser bypass was found.
+HTTP uses connect/per-read limits rather than an independent absolute wall-clock
+deadline, and trusted-converter unknown error-code bounds merit later cleanup.
+The qualified converter and byte-bounded response constrain those cases.
 
 Filesystem race protection assumes the established service identity and private
-artifact roots. This review does not claim containment of a hostile process
-already able to mutate those roots as the service user. Final production parity
-must exercise the real mounted roots, groups, umask, auth storage and orchestration.
-The retained image scan still requires its documented fresh publication-time scan;
-this source review does not waive it.
+artifact roots. This is not containment of a hostile process already able to
+mutate those roots as the service user. Consumer inventory exclusions remain.
+Production parity must exercise real mounts, groups, umask, auth storage and
+orchestration; publication requires the documented fresh scan. This source
+review neither performs nor authorizes deployment or publication.

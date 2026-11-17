@@ -921,6 +921,10 @@ def test_restore_acquires_global_maintenance_before_project_scope_for_incoming_e
     events: list[str] = []
 
     class Lease:
+        # This ordering fixture has no descendant reservations; the real
+        # reservation discovery is covered by test_vector_archive_recovery.py.
+        connection = SimpleNamespace(scan_iter=lambda **_: ())
+
         def __init__(self, name: str) -> None:
             self.name = name
 

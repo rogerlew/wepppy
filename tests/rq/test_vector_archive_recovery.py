@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
 import shutil
 from types import SimpleNamespace
 import zipfile
+import uuid
 
 import pytest
 import redis
@@ -41,7 +43,7 @@ def _tree_bytes(root: Path) -> int:
 @pytest.fixture
 def real_archive_retention(monkeypatch, tmp_path):
     """Real Lua/markers, namespaced keys, and no test-owned accounting shortcuts."""
-    filesystem_id = f"archive-recovery-{tmp_path.name}"
+    filesystem_id = f"archive-recovery-{uuid.uuid4().hex}"
     monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", filesystem_id)
     monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
     kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
@@ -289,6 +291,66 @@ def test_restore_rejects_archive_symlink_without_consuming_target(archive_rq_env
         project.restore_archive_rq("demo", "aliased.zip")
     assert not (run / "payload.txt").exists()
     assert outside.is_file()
+
+
+@pytest.mark.parametrize('phase', ['reserved', 'prepared'])
+def test_parent_restore_preserves_active_descendant_upload(
+    archive_rq_environment, real_archive_retention, phase,
+):
+    project, root, _published, _prep = archive_rq_environment
+    env = real_archive_retention
+    runid = f'parent-{uuid.uuid4().hex}'
+    run = root / runid
+    archives = run / 'archives'
+    archives.mkdir(parents=True)
+    (run / 'keep.txt').write_bytes(b'accepted project')
+    incoming = archives / 'incoming.zip'
+    with zipfile.ZipFile(incoming, 'w') as zipped:
+        zipped.writestr('keep.txt', b'restored project')
+    scope = f'run:{runid};;omni-contrast;;1'
+    child = run / '_pups/omni/contrasts/1'
+    ledger = retention.RedisRetentionLedger(env.connection)
+    prepared = None
+    if phase == 'prepared':
+        (child / 'roads').mkdir(parents=True)
+        attempt_root = child / 'roads/vector_upload_attempts'
+        prepared = retention.prepare_vector_upload(
+            raw_filename='child.geojson', stream=io.BytesIO(b'{"type":"FeatureCollection","features":[]}'),
+            endpoint_max_bytes=1024, attempt_root=attempt_root, evidence_roots=(attempt_root,),
+            filesystem_root=child, project_key=scope, workflow='roads', project_identity=scope[4:],
+            actor=retention.RetentionActor('human', 9), validator=lambda *_: {'valid': True},
+            ledger=ledger, scope_lease_factory=retention.RedisScopeLeaseFactory(env.connection),
+        )
+        lease = prepared.lease
+        original = prepared.attempt_dir / prepared.receipt['source_path']
+        original_bytes = original.read_bytes()
+    else:
+        reservation = ledger.reserve(project_key=scope, actor=retention.RetentionActor('human', 9),
+                                     worst_case_bytes=123, filesystem_root=run)
+        lease = retention.RedisScopeLeaseFactory(env.connection)(scope)
+        assert not child.exists()
+    before = env.connection.hgetall(f'{env.prefix}:totals')
+    try:
+        with pytest.raises(retention.VectorUploadError, match='Another vector evidence'):
+            project.restore_archive_rq(runid, incoming.name)
+        lease.assert_owned()
+        assert (run / 'keep.txt').read_bytes() == b'accepted project'
+        if prepared is not None:
+            assert original.read_bytes() == original_bytes
+            assert json.loads((prepared.attempt_dir / 'normalization.json').read_text())['status'] == 'prepared'
+        assert env.connection.hgetall(f'{env.prefix}:totals') == before
+        assert not env.connection.smembers(f'{env.prefix}:rebuild-pending')
+        assert not list((root / '.vector-upload-rebuild-pending').glob('*.json'))
+    finally:
+        if prepared is not None:
+            prepared.reject('test-complete')
+        else:
+            lease.release()
+            reservation.release_prewrite()
+    project.restore_archive_rq(runid, incoming.name)
+    assert (run / 'keep.txt').read_bytes() == b'restored project'
+    assert not child.exists()
+    assert int(env.connection.hget(f'{env.prefix}:totals', 'committed')) == 0
 
 
 @pytest.mark.parametrize("configuration", ["missing_id", "missing_root", "wrong_root"])

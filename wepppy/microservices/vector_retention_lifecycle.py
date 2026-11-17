@@ -89,6 +89,11 @@ def _has_evidence(tree: Path) -> bool:
     return any(retention._regular_tree_size(root) for root in _roots(tree))
 
 
+def has_retained_evidence(tree: Path) -> bool:
+    """Classify nested retained roots using the same discovery as accounting."""
+    return _has_evidence(Path(tree))
+
+
 def _read_receipt(path: Path) -> tuple[bytes, dict[str, Any]]:
     descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
     with os.fdopen(descriptor, "rb") as stream:
@@ -172,6 +177,7 @@ class TreeOperation:
     repair_pending: bool = False
     maintenance: Any = None
     leases: tuple[Any, ...] = ()
+    sync_paths: tuple[Path, ...] = ()
 
     def checkpoint(self) -> None:
         if self.maintenance is not None:
@@ -226,7 +232,7 @@ def _admit_copy(maintenance: Any, root: Path, allowance: int, actor: retention.R
     limit = retention._UNATTRIBUTED_LIMIT if bucket == "unattributed" else retention._PRINCIPAL_LIMIT
     if total_bytes + allowance > retention._GLOBAL_LIMIT or principal_bytes + allowance > limit:
         raise _error("Copied evidence exceeds the retention quota.")
-    if retention.shutil.disk_usage(root).free < allowance + retention._FREE_SPACE_RESERVE:
+    if retention.shutil.disk_usage(root).free < allowance + total_reserved + retention._FREE_SPACE_RESERVE:
         raise _error("Copied evidence would exhaust the filesystem reserve.")
 
 
@@ -267,6 +273,7 @@ def _publish_copy_provenance(source: Path, target: Path, receipts: list[Path], a
 
 
 def _sync_evidence(target: Path) -> None:
+    ancestors = set()
     for root in _roots(target):
         retention._regular_tree_size(root)
         directories = []
@@ -280,10 +287,49 @@ def _sync_evidence(target: Path) -> None:
                     os.close(descriptor)
         for directory in reversed(directories):
             retention._fsync_directory(directory)
+        ancestor = root.parent
+        while ancestor.is_relative_to(target):
+            ancestors.add(ancestor)
+            if ancestor == target:
+                break
+            ancestor = ancestor.parent
+    if target.exists():
+        ancestors.add(target)
+    for ancestor in sorted(ancestors, key=lambda path: len(path.parts), reverse=True):
+        retention._fsync_directory(ancestor)
     parent = target.parent
     while not parent.exists():
         parent = parent.parent
     retention._fsync_directory(parent)
+
+
+def discover_retention_scopes(
+    maintenance: Any, root: Path, paths: Sequence[Path], project_keys: Sequence[str],
+) -> set[str]:
+    """Include already-reserved descendant uploads before a parent mutation."""
+    scopes = set(project_keys)
+    resolved_paths = tuple(Path(path).resolve() for path in paths)
+    prefix = f"vector-upload-retention:{os.environ['VECTOR_UPLOAD_RUN_FILESYSTEM_ID'].strip()}"
+    for index, key in enumerate(maintenance.connection.scan_iter(match=f"{prefix}:reservation:*", count=100)):
+        if index >= 10_000:
+            raise _error("Retained evidence reservation inventory exceeds the recovery bound.")
+        maintenance.assert_owned()
+        metadata = maintenance.connection.hgetall(key)
+        if metadata.get("state") == "committed":
+            continue
+        scope = str(metadata.get("project") or "")
+        relative = str(metadata.get("attempt_relpath") or "")
+        descendant = any(scope.startswith(parent + ";;") for parent in project_keys)
+        if relative:
+            attempt = (root / relative).resolve()
+            if not attempt.is_relative_to(root):
+                raise _error("Retained evidence reservation path requires reconciliation.")
+            descendant = descendant or any(attempt.is_relative_to(path) for path in resolved_paths)
+        if descendant:
+            if not scope:
+                raise _error("Retained evidence reservation scope requires reconciliation.")
+            scopes.add(scope)
+    return scopes
 
 
 @contextmanager
@@ -319,7 +365,7 @@ def retained_tree_operation(
     borrowed = _BORROWED.get()
     cleanup = ExitStack()
     maintenance = None
-    state = TreeOperation()
+    state = TreeOperation(sync_paths=tuple(Path(path) for path in recovery_paths))
     actor = actor or retention.RetentionActor("unattributed", None)
     try:
         # Maintenance acquisition never waits. A borrowed caller scope cannot
@@ -327,7 +373,11 @@ def retained_tree_operation(
         maintenance = retention.acquire_retention_maintenance_lease()
         cleanup.callback(maintenance.release)
         state.maintenance = maintenance
-        for key in sorted(set(project_keys)):
+        affected_paths = (target, *(Path(path) for path in recovery_paths))
+        if source is not None:
+            affected_paths += (source,)
+        scopes = discover_retention_scopes(maintenance, root, affected_paths, project_keys)
+        for key in sorted(scopes):
             lease = borrowed.get(key)
             if lease is None:
                 lease = retention.RedisScopeLeaseFactory()(key)
@@ -361,6 +411,8 @@ def retained_tree_operation(
             _publish_copy_provenance(source, target, receipts, actor, state)
             _inventory(target)
         _sync_evidence(target)
+        for recovery_path in state.sync_paths:
+            _sync_evidence(recovery_path)
         state.checkpoint()
         retention.reconcile_retention(
             root, apply=True, rebuild_ledger=True, committed_only=True,
@@ -372,4 +424,4 @@ def retained_tree_operation(
         cleanup.close()
 
 
-__all__ = ["borrow_retention_scope", "retained_tree_operation", "retained_tree_repair_pending"]
+__all__ = ["has_retained_evidence", "discover_retention_scopes", "borrow_retention_scope", "retained_tree_operation", "retained_tree_repair_pending"]

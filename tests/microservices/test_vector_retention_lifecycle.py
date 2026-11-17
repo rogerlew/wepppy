@@ -237,3 +237,91 @@ def test_replacement_requires_headroom_for_old_bytes_and_reservations(environmen
         with operation(env, source, target):
             pytest.fail("invalid reclaim admitted")
     assert (target / "roads/vector_upload_attempts/fixed-id/original.upload").exists()
+
+
+def test_copy_syncs_evidence_ancestors_before_clearing_marker(environment, monkeypatch):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    evidence(source)
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    synced = []
+    real_sync = n._fsync_directory
+    def sync(path):
+        synced.append(Path(path))
+        real_sync(path)
+    monkeypatch.setattr(n, "_fsync_directory", sync)
+    with operation(env, source, target):
+        shutil.copytree(source, target)
+    assert target / "roads" in synced
+    assert target in synced
+    assert env.root in synced
+    assert synced.index(target / "roads") < synced.index(target)
+
+
+def test_copy_free_space_admission_includes_live_reservations(environment, monkeypatch):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    evidence(source)
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    env.conn.hset(env.prefix + ":totals", "reserved", 100000)
+    monkeypatch.setattr(n.shutil, "disk_usage", lambda _path: SimpleNamespace(free=n._FREE_SPACE_RESERVE + 10000))
+    with pytest.raises(n.VectorUploadError, match="filesystem reserve"):
+        with operation(env, source, target):
+            pytest.fail("outstanding reservations ignored")
+    assert not target.exists()
+
+
+def test_parent_cleanup_preserves_active_child_upload(environment):
+    import io
+    from wepppy.nodb.mods.omni.omni_state_contrast_mixin import OmniStateContrastMixin
+
+    env = environment
+    parent = env.root / 'parent'
+    child = parent / '_pups/omni/contrasts/1'
+    child.mkdir(parents=True)
+    parent_id = f'parent-{uuid.uuid4().hex}'
+    child_id = f'{parent_id};;omni-contrast;;1'
+    payload = json.dumps({'type': 'FeatureCollection', 'features': [{
+        'type': 'Feature', 'properties': {'field_id': 1}, 'geometry': {
+            'type': 'Polygon', 'coordinates': [[[0, 0], [1, 0], [1, 1], [0, 0]]],
+        },
+    }]}).encode()
+    attempt_root = child / 'ag_fields/vector_upload_attempts'
+    attempt_root.parent.mkdir()
+    prepared = n.prepare_vector_upload(
+        raw_filename='fields.geojson', stream=io.BytesIO(payload), endpoint_max_bytes=1048576,
+        attempt_root=attempt_root, evidence_roots=(attempt_root,), filesystem_root=child,
+        project_key=f'run:{child_id}', workflow='ag_fields', project_identity=child_id,
+        actor=n.RetentionActor('human', 42), validator=lambda *_: {'valid': True},
+        ledger=n.RedisRetentionLedger(env.conn),
+    )
+    original = prepared.attempt_dir / prepared.receipt['source_path']
+    controller = SimpleNamespace(wd=str(parent), runid=parent_id,
+                                 _contrast_sidecar_dir=lambda: str(parent / 'omni/contrasts'))
+    try:
+        with pytest.raises(n.VectorUploadError):
+            OmniStateContrastMixin._clean_stale_contrast_runs(controller, [])
+        prepared.lease.assert_owned()
+        assert original.read_bytes() == payload
+        assert not env.conn.smembers(env.prefix + ':rebuild-pending')
+    finally:
+        prepared.reject('test_cleanup')
+
+
+def test_unbound_child_reservation_scope_is_fenced(environment):
+    env = environment
+    parent = f'run:parent-{uuid.uuid4().hex}'
+    child = parent + ';;omni-contrast;;1'
+    reservation = n.RedisRetentionLedger(env.conn).reserve(
+        project_key=child, actor=n.RetentionActor('human', 42),
+        worst_case_bytes=20, filesystem_root=env.root,
+    )
+    lease = n.RedisScopeLeaseFactory()(child)
+    try:
+        with pytest.raises(n.VectorUploadError):
+            with lifecycle.retained_tree_operation(env.root / 'parent', project_keys=[parent]):
+                pytest.fail('unbound child scope was not fenced')
+        lease.assert_owned()
+    finally:
+        lease.release()
+        reservation.release_prewrite()

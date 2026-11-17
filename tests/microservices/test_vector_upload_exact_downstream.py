@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
+import uuid
 from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
@@ -10,6 +12,7 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 import rasterio
+import redis
 from rasterio.transform import from_bounds
 from pyproj import Transformer
 from shapely.geometry import shape
@@ -20,6 +23,8 @@ import pytest
 
 import wepppy.nodb.mods.roads.roads as roads_module
 import wepppy.nodb.mods.omni.omni as omni_module
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.microservices import vector_upload_normalization as retention
 from wepppy.microservices.vector_upload_normalization import (
     RetentionActor,
     prepare_vector_upload,
@@ -40,32 +45,6 @@ from wepppy.nodb.mods.roads.roads import Roads
 
 
 pytestmark = pytest.mark.integration
-
-
-class _Reservation:
-    reservation_id = "exact-downstream"
-
-    def bind_attempt(self, _attempt_dir: Path) -> None:
-        return None
-
-    def commit(self, _exact_bytes: int) -> None:
-        return None
-
-    def release_prewrite(self) -> None:
-        return None
-
-
-class _Ledger:
-    def reserve(self, **_kwargs):
-        return _Reservation()
-
-
-class _Lease:
-    def assert_owned(self) -> None:
-        return None
-
-    def release(self) -> None:
-        return None
 
 
 def _source(fixture_root: Path, geometry: str, suffix: str) -> Path:
@@ -102,24 +81,53 @@ def _prepare(
             attempt_root=attempts,
             evidence_roots=(attempts,),
             filesystem_root=project,
-            project_key=f"exact-downstream:{workflow}:{suffix}",
+            project_key=f"{'batch' if workflow == 'batch_runner' else 'run'}:{project.name}",
             workflow=workflow,
             project_identity="exact-downstream",
             actor=RetentionActor("human", 1),
             validator=lambda _path, payload: validate_feature_collection_geometries(payload, allowed),
             converter_url=converter_url,
-            ledger=_Ledger(),
-            scope_lease_factory=lambda _key: _Lease(),
         )
 
 
 @pytest.fixture()
 def exact_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     converter_url, fixture_root = exact_converter_environment()
+    identity = f"exact-downstream-{uuid.uuid4().hex}"
+    prefix = f"vector-upload-retention:{identity}"
     monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", identity)
     monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
-    monkeypatch.setattr(omni_module, "RedisScopeLeaseFactory", lambda: lambda _scope: _Lease())
-    return converter_url, fixture_root
+    kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/run/secrets/redis_password"))
+    if password_path.exists():
+        kwargs["password"] = password_path.read_text().strip()
+    connection = redis.client.Redis(**kwargs)
+    connection.ping()
+    # Inject only the real authenticated connection; admission, renewable scopes,
+    # maintenance, obligations, accounting and reconciliation remain production code.
+    monkeypatch.setattr(retention, "redis", SimpleNamespace(
+        Redis=lambda **_kwargs: connection, RedisError=redis.RedisError,
+    ))
+    connection.hset(prefix + ":totals", mapping={
+        "initialized": 1, "committed": 0, "reserved": 0, "inflight": 0,
+    })
+    try:
+        yield converter_url, fixture_root
+        receipts = list(tmp_path.rglob("normalization.json"))
+        assert receipts
+        retained_bytes = sum(retention._regular_tree_size(path.parent) for path in receipts)
+        totals = connection.hgetall(prefix + ":totals")
+        principal = connection.hgetall(prefix + ":principal:" + hashlib.sha256(b"human:1").hexdigest())
+        assert int(totals["committed"]) == int(principal["committed"]) == retained_bytes
+        assert int(totals["reserved"]) == int(totals["inflight"]) == int(principal["reserved"]) == 0
+        assert not connection.smembers(prefix + ":rebuild-pending")
+        assert not list((tmp_path / ".vector-upload-rebuild-pending").glob("*.json"))
+    finally:
+        keys = list(connection.scan_iter(match=prefix + ":*"))
+        if keys:
+            connection.delete(*keys)
+        connection.close()
 
 
 @pytest.mark.parametrize("suffix", ("geojson", "zip", "parquet", "geoparquet"))
@@ -341,11 +349,12 @@ def test_final5_omni_detached_reload_and_generated_build_report(
             "omni_contrast_geojson_name_key": "label",
         })
 
-    prepared.publish(
-        mutation=publish,
-        canonical_path=canonical,
-        canonical_relative_path="_pups/omni/contrasts/_uploads/exact/areas.geojson",
-    )
+    with controller.workflow_transaction(prepared.lease):
+        prepared.publish(
+            mutation=publish,
+            canonical_path=canonical,
+            canonical_relative_path="_pups/omni/contrasts/_uploads/exact/areas.geojson",
+        )
     reloaded = Omni.load_detached(str(project))
     assert Path(reloaded._contrast_geojson_path).read_bytes() == canonical.read_bytes()
     assert_receipt(prepared, _source(fixture_root, "polygon", suffix), canonical)

@@ -173,6 +173,10 @@ def test_delete_run_holds_vector_scope_and_rebuilds_ledger_after_durable_removal
     events: list[str] = []
 
     class Lease:
+        # No reservations in this ordering unit case; real discovery is covered
+        # by test_vector_retention_deletion.py.
+        connection = SimpleNamespace(scan_iter=lambda **_: ())
+
         def assert_owned(self) -> None:
             events.append("assert")
 
@@ -230,6 +234,8 @@ def test_delete_run_releases_global_maintenance_when_project_scope_acquisition_f
     released: list[str] = []
 
     class MaintenanceLease:
+        connection = SimpleNamespace(scan_iter=lambda **_: ())
+
         def release(self) -> None:
             released.append("maintenance")
 

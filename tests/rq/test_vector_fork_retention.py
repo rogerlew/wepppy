@@ -61,6 +61,7 @@ def fork_retention(monkeypatch, tmp_path, runtime_redis_credentials):
     monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
     connection = redis.client.Redis(**redis_connection_kwargs(RedisDB.LOCK, decode_responses=True))
     connection.ping()
+    monkeypatch.setattr(retention.redis, "Redis", lambda **_kwargs: connection)
     prefix = f"vector-upload-retention:{identity}"
     connection.hset(prefix + ":totals", mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0})
     real_maintenance = retention.acquire_retention_maintenance_lease
@@ -370,3 +371,27 @@ def test_profile_fork_and_reset_require_configuration_for_retained_evidence(
     with pytest.raises(retention.VectorUploadError, match="configured"):
         routes._delete_fork_replacement_tree(str(target), profile_id, lambda: None)
     assert (retained_target / "payload.upload").read_bytes() == target_bytes
+
+
+def test_authorized_replacement_recovers_interrupted_worker_copy(tmp_path, monkeypatch, fork_retention):
+    env = fork_retention
+    source, target = tmp_path / "source", tmp_path / "target"
+    original = _evidence(source)
+    env.rebuild()
+    source_total = int(env.connection.hget(env.prefix + ":totals", "committed"))
+    real_rsync = fork_helpers._run_rsync_with_bounded_output
+    def interrupted(**kwargs):
+        real_rsync(**kwargs)
+        raise OSError("interrupted worker copy")
+    with monkeypatch.context() as patch:
+        patch.setattr(fork_helpers, "_run_rsync_with_bounded_output", interrupted)
+        with pytest.raises(OSError, match="interrupted worker copy"):
+            _prepare(source, target, env, retention.RetentionActor("human", 77))
+    assert routes.retained_tree_repair_pending(target, "fork_copy")
+    routes._delete_fork_replacement_tree(str(target), env.target_id, lambda: None)
+    assert not target.exists()
+    assert not env.connection.smembers(env.prefix + ":rebuild-pending")
+    assert int(env.connection.hget(env.prefix + ":totals", "committed")) == source_total
+    assert (original / "payload.upload").exists()
+    _prepare(source, target, env, retention.RetentionActor("human", 77))
+    assert int(env.connection.hget(env.principal("human:77"), "committed")) == _size(target / original.relative_to(source))

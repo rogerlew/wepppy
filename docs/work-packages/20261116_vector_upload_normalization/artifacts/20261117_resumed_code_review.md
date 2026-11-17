@@ -103,3 +103,61 @@ preserve `vector_upload_attempts`, and the new tests cover clean/stale/reset/cle
 entrypoints. This fixes immediate deletion of retained originals without waiting
 for a clone-policy decision. Fork copying, Batch copy/reset and profile snapshot
 consumers remain subject to the inventory's explicit closure gate.
+
+## Independent sharing/copy/reset successor review
+
+Reviewer: `archive_review`, acting as the independent bounded correctness
+reviewer for the copy/reset successor. Reviewed source:
+`54ee356fd16845e7abf6da59d7df616f8b5fa6ce`. Contract checkpoint:
+`bbb216c0bc48674f8b24f5e69f20ec58e57b795a`.
+
+**HOLD at this source: one Medium fork-recovery defect remains; no High finding
+was identified in this scope.** The separately recorded operations durability
+finding also requires successor closure. This verdict supersedes the earlier
+copy-policy HOLD: the operator's public/team inheritance policy is settled.
+
+### VUN-CODE-RESUME-02 - Medium - ordinary fork retry cannot repair a failed worker copy
+
+An interrupted `project_rq_fork.prepare_fork_run()` leaves the deterministic
+`fork_copy` obligation for its destination. The authorized API retry first calls
+`fork_archive_routes._delete_fork_replacement_tree()`, which requests
+`fork_target_replace`. The common obligation helper correctly rejects that
+different identity, so the retry returns 507 before a new copy job can repair the
+destination. This is a reachable workflow recovery failure, not a request to
+weaken the general pending-operation barrier.
+
+An independent reproduction executed the actual frozen helper, replacement
+function and Redis client in `weppcloud:/tmp/vun-final-acceptance`, with a private
+temporary tree and unique Redis prefix. It copied retained evidence, injected an
+`OSError` within `fork_copy`, then invoked the replacement helper:
+
+    marker_before_api_recovery: ['fork_copy']
+    api_recovery_result: 507 vector_retention_quota_exceeded
+    target_still_exists: true
+    pending_marker_retained: 1
+
+Required closure: the already-authorized replacement path may recognize only an
+exact `fork_copy` obligation for the same destination, complete its deletion and
+accounting repair under that identity, and then permit the new copy. Unrelated
+operation/target identities must still block. The integrator's proposed narrow
+fix and actual-rsync failure/retry regression are consistent with this remedy;
+their immutable successor and passing result remain to be recorded.
+
+### Other review results and independence
+
+The review covered the shared lifecycle helper and normalizer attribution,
+managed copy admission, receipt inventory, path/link checks, source provenance,
+borrowed scope ownership, Batch leaf/base/Omni reset, Omni cleanup, developer test
+clone, fork actor forwarding and authorized replacement ordering. It found no
+additional High or Medium defect in those reviewed paths. Ancestor/stale-tree
+durability is tracked once as `OPS-COPY-01` in the independent operations review;
+outstanding-reservation free-space admission and descendant-scope fencing are
+included in the successor cross-review rather than duplicated here.
+
+This reviewer did not independently approve its own earlier profile adapters,
+profile tests or archive remediation. Those changes remain covered by the
+separate QA, security and operations lanes. No production or test source was
+changed during this review. The direct Redis reproduction is not a broad test
+suite result; final frozen-suite and artifact-readback evidence belongs in the
+integrator's final validation receipt. Deployment and publication remain outside
+this review.

@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
+from wepppy.microservices.vector_retention_lifecycle import discover_retention_scopes, has_retained_evidence
 from wepppy.microservices.vector_upload_normalization import (
     RedisScopeLeaseFactory,
     VectorUploadError,
@@ -44,16 +45,7 @@ def _publish(runtime: DeleteRuntime, channel: str, message: str) -> None:
 
 
 def _has_retained_vector_evidence(target: Path) -> bool:
-    return any(
-        os.path.lexists(path)
-        for path in (
-            target / "roads" / "vector_upload_attempts",
-            target / "ag_fields" / "vector_upload_attempts",
-            target / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
-            target / "resources" / "vector_upload_attempts",
-            target / "archives" / "private",
-        )
-    )
+    return has_retained_evidence(target)
 
 
 def _try_mark_delete_state(
@@ -143,7 +135,7 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
     deferred_errnos = {errno.ENOTEMPTY, errno.EACCES, errno.EBUSY}
 
 
-    retention_lease = None
+    retention_leases = []
     maintenance_lease = None
     retention_root = None
     rebuild_obligation = None
@@ -158,8 +150,13 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
             retention_root = Path(configured_root).resolve(strict=True)
             target.relative_to(retention_root)
             maintenance_lease = acquire_retention_maintenance_lease()
-            retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
-            retention_lease.assert_owned()
+            factory = RedisScopeLeaseFactory()
+            for key in sorted(discover_retention_scopes(
+                maintenance_lease, retention_root, (target,), (f"run:{runid}",),
+            )):
+                retention_leases.append(factory(key))
+            for lease in retention_leases:
+                lease.assert_owned()
             maintenance_lease.assert_owned()
             rebuild_obligation = begin_retention_rebuild_obligation(
                 retention_root,
@@ -177,9 +174,10 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
         )
         if delete_files and target.exists():
             for attempt in range(1, attempts + 1):
-                if retention_lease is not None:
+                if retention_leases:
                     maintenance_lease.assert_owned()
-                    retention_lease.assert_owned()
+                    for lease in retention_leases:
+                        lease.assert_owned()
                 try:
                     runtime.rmtree(target)
                 except FileNotFoundError:
@@ -223,8 +221,9 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
                 else:
                     delete_failed = True
                     _publish(runtime, status_channel, f"rq:{job_id} STATUS delete deferred (directory still present)")
-        if delete_files and not target.exists() and retention_lease is not None and retention_root is not None:
-            retention_lease.assert_owned()
+        if delete_files and not target.exists() and retention_leases and retention_root is not None:
+            for lease in retention_leases:
+                lease.assert_owned()
             descriptor = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
             try:
                 os.fsync(descriptor)
@@ -237,16 +236,17 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
                 stale_seconds=0,
                 committed_only=True,
                 maintenance_lease=maintenance_lease,
-                required_scope_leases=(retention_lease,),
+                required_scope_leases=tuple(retention_leases),
             )
             if rebuild_obligation is not None:
                 maintenance_lease.assert_owned()
-                retention_lease.assert_owned()
+                for lease in retention_leases:
+                    lease.assert_owned()
                 complete_retention_rebuild_obligation(rebuild_obligation)
     finally:
-        if retention_lease is not None:
+        for lease in reversed(retention_leases):
             try:
-                retention_lease.release()
+                lease.release()
             except VectorUploadError:
                 runtime.logger.warning("Project retention scope release deferred to TTL", exc_info=True)
         if maintenance_lease is not None:

@@ -41,7 +41,7 @@ from wepppy.rq import batch_outcome
 from wepppy.rq.submission_recovery import rq_submission_lock
 
 from wepppy.weppcloud.utils.helpers import get_wd, get_batch_root_dir
-from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
+from wepppy.microservices.vector_retention_lifecycle import discover_retention_scopes, retained_tree_operation
 from wepppy.rq.project_rq_delete import _has_retained_vector_evidence, _retention_delete_root
 from wepppy.microservices.vector_upload_normalization import (
     RedisScopeLeaseFactory, VectorUploadError, acquire_retention_maintenance_lease,
@@ -478,9 +478,11 @@ def _batch_retention_delete_guard(batch_name: str, target: Path, root: Path | No
     leases = []
     try:
         factory = RedisScopeLeaseFactory()
-        leases.append(factory(f"batch:{batch_name}"))
-        for runid in sorted(_collect_batch_runids(target, batch_name)):
-            leases.append(factory(f"run:{runid}"))
+        project_keys = (f"batch:{batch_name}", f"run:batch;;{batch_name}", *(
+            f"run:{runid}" for runid in _collect_batch_runids(target, batch_name)
+        ))
+        for key in sorted(discover_retention_scopes(maintenance, root, (target,), project_keys)):
+            leases.append(factory(key))
         maintenance.assert_owned()
         for lease in leases:
             lease.assert_owned()

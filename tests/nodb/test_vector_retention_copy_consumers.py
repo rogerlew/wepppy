@@ -14,6 +14,7 @@ import pytest
 import redis
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.microservices import vector_retention_lifecycle as lifecycle
 from wepppy.microservices import vector_upload_normalization as retention
 from wepppy.nodb import batch_runner as batch_module
 from wepppy.nodb.mods.omni import omni_clone_contrast_service as clone_module
@@ -262,17 +263,36 @@ def test_omni_bulk_cleanup_retry_preserves_owner_evidence_and_repairs_absent_chi
     assert_exact_ledger(env)
 
 
-def test_omni_workspace_reset_counts_deferred_stale_evidence(ledger_environment, monkeypatch):
+@pytest.mark.parametrize('consumer', ['batch', 'omni'])
+def test_workspace_reset_syncs_and_counts_deferred_stale_evidence(ledger_environment, monkeypatch, consumer):
     env = ledger_environment
-    target = env.root / 'run/_pups/omni/scenarios/example'
-    original = evidence(target, ROOTS[0])
+    if consumer == 'batch':
+        runner, _base, target = prepare_batch(env, monkeypatch, reset=True)
+        reset_module = batch_module
+    else:
+        target = env.root / 'run/_pups/omni/scenarios/example'
+        reset_module = clone_module
+    original = evidence(target, ROOTS[0], label='previous')
     source_bytes = (original / 'original.upload').read_bytes()
     initialize_ledger(env)
-    monkeypatch.setattr(clone_module, '_rmtree_with_retry', lambda *_: (_ for _ in ()).throw(OSError('deferred cleanup')))
-    clone_module._reset_workspace(target, logger=logging.getLogger(__name__), project_key=f'run:{env.root.name}')
-    assert not target.exists()
-    stale = next(target.parent.glob('example.stale.*'))
-    assert (stale / ROOTS[0] / 'source/original.upload').read_bytes() == source_bytes
+    synced = []
+    actual_sync = lifecycle._sync_evidence
+
+    def record_sync(path, *args, **kwargs):
+        synced.append(Path(path))
+        return actual_sync(path, *args, **kwargs)
+
+    monkeypatch.setattr(lifecycle, '_sync_evidence', record_sync)
+    monkeypatch.setattr(reset_module, '_rmtree_with_retry', lambda *_: (_ for _ in ()).throw(OSError('deferred cleanup')))
+    if consumer == 'batch':
+        with pytest.raises(_StopBeforeControllers):
+            runner._run_batch_hillslopes_owned(_FeatureStub('leaf'))
+    else:
+        clone_module._reset_workspace(target, logger=logging.getLogger(__name__), project_key=f'run:{env.root.name}')
+        assert not target.exists()
+    stale = next(target.parent.glob(f'{target.name}.stale.*'))
+    assert stale in synced
+    assert (stale / ROOTS[0] / 'previous/original.upload').read_bytes() == source_bytes
     assert_exact_ledger(env)
 
 

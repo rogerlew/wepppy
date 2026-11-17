@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import logging
 import os
 import shutil
 from pathlib import Path
 from types import SimpleNamespace
+import uuid
 
 import pytest
 import redis
@@ -21,7 +23,7 @@ pytestmark = pytest.mark.integration
 
 @pytest.fixture
 def deletion_environment(tmp_path, monkeypatch):
-    identity = f"deletion-{tmp_path.name}"
+    identity = f"deletion-{uuid.uuid4().hex}"
     monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", identity)
     monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
     monkeypatch.setenv("BATCH_RUNNER_ROOT", str(tmp_path))
@@ -238,6 +240,79 @@ def test_batch_deletion_fences_active_child_upload(deletion_environment, child):
         lease.release()
     env.invoke("batch", target)
     assert not target.exists()
+
+
+@pytest.mark.parametrize("kind", ["run", "batch"])
+@pytest.mark.parametrize("phase", ["reserved", "prepared"])
+def test_parent_deletion_preserves_active_descendant_upload(deletion_environment, monkeypatch, kind, phase):
+    env = deletion_environment
+    target = env.root / f"parent-{uuid.uuid4().hex}"
+    target.mkdir()
+    (target / 'keep.txt').write_bytes(b'accepted project')
+    parent_scope = f'run:{target.name}' if kind == 'run' else f'run:batch;;{target.name};;leaf'
+    scope = f'{parent_scope};;omni-contrast;;1'
+    child = target / ('_pups/omni/contrasts/1' if kind == 'run' else 'runs/leaf/_pups/omni/contrasts/1')
+    ledger = normalization.RedisRetentionLedger(env.conn)
+    prepared = None
+    if phase == 'prepared':
+        (child / 'roads').mkdir(parents=True)
+        attempt_root = child / 'roads/vector_upload_attempts'
+        payload = b'{"type":"FeatureCollection","features":[]}'
+        monkeypatch.setattr(normalization.shutil, 'disk_usage', lambda _: SimpleNamespace(
+            total=30_000_000_000, used=1_000_000_000, free=29_000_000_000))
+        prepared = normalization.prepare_vector_upload(
+            raw_filename='child.geojson', stream=io.BytesIO(payload), endpoint_max_bytes=1024,
+            attempt_root=attempt_root, evidence_roots=(attempt_root,), filesystem_root=child,
+            project_key=scope, workflow='roads', project_identity=scope[4:],
+            actor=normalization.RetentionActor('human', 9), validator=lambda *_: {'valid': True},
+            ledger=ledger, scope_lease_factory=normalization.RedisScopeLeaseFactory(env.conn),
+        )
+        lease = prepared.lease
+        original = prepared.attempt_dir / prepared.receipt['source_path']
+        original_bytes = original.read_bytes()
+    else:
+        reservation = ledger.reserve(project_key=scope, actor=normalization.RetentionActor('human', 9),
+                                     worst_case_bytes=123, filesystem_root=target)
+        lease = normalization.RedisScopeLeaseFactory(env.conn)(scope)
+        assert not child.exists()
+    before = env.conn.hgetall(f'{env.prefix}:totals')
+    try:
+        with pytest.raises(normalization.VectorUploadError, match='Another vector evidence'):
+            env.invoke(kind, target)
+        lease.assert_owned()
+        assert (target / 'keep.txt').read_bytes() == b'accepted project'
+        if prepared is not None:
+            assert original.read_bytes() == original_bytes
+            assert json.loads((prepared.attempt_dir / 'normalization.json').read_text())['status'] == 'prepared'
+        assert env.conn.hgetall(f'{env.prefix}:totals') == before
+        assert not env.mutations
+        assert not env.conn.smembers(f'{env.prefix}:rebuild-pending')
+        assert not list((env.root / '.vector-upload-rebuild-pending').glob('*.json'))
+    finally:
+        if prepared is not None:
+            prepared.reject('test-complete')
+        else:
+            lease.release()
+            reservation.release_prewrite()
+    env.invoke(kind, target)
+    assert not target.exists()
+    assert int(env.conn.hget(f'{env.prefix}:totals', 'committed')) == 0
+
+
+@pytest.mark.parametrize('kind', ['run', 'batch'])
+def test_parent_deletion_requires_identity_for_descendant_evidence(deletion_environment, monkeypatch, kind):
+    env = deletion_environment
+    target = env.root / f'parent-{uuid.uuid4().hex}'
+    child = target / ('_pups/omni/contrasts/1' if kind == 'run' else 'runs/leaf/_pups/omni/contrasts/1')
+    retained(child, 9)
+    original = next(child.rglob('original.upload'))
+    expected = original.read_bytes()
+    monkeypatch.delenv('VECTOR_UPLOAD_RUN_FILESYSTEM_ID')
+    with pytest.raises(RuntimeError, match='identity is not configured'):
+        env.invoke(kind, target)
+    assert original.read_bytes() == expected
+    assert not env.mutations
+    assert not env.conn.smembers(f'{env.prefix}:rebuild-pending')
 
 
 @pytest.mark.parametrize("kind", ["run", "batch"])

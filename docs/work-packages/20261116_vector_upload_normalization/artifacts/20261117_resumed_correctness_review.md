@@ -1,138 +1,103 @@
 # Resumed vector upload correctness review
 
-- Reviewed source: `ee26389f099e9e950b5920d53790f8661548a5e3`.
-- Earlier frozen candidate: `de15403aadbd7a659ef4717e77223ff4890b18c1`.
+- Reviewed source: `54ee356fd16845e7abf6da59d7df616f8b5fa6ce`.
 - Reviewer: dedicated `reviewer` agent `provenance_review`.
-- Exact unchanged converter image:
-  `sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98fa`.
-- Verdict: **HOLD: one High privacy finding and one Medium accounting finding.**
+- Verdict for this source: **HOLD: one High concurrency finding and one Medium free-space admission finding.** Proposed fixes require successor review.
+- Converter image remains `sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98fa`.
 
-This review examines production correctness and the actual downstream methods.
-The reviewer authored the new session-provenance regression module earlier in
-this resumption; independent QA of that module belongs to the separate frozen QA
-review, and this artifact does not independently approve those tests. No production
-code was changed during this review. Neither publication nor deployment is approved.
+This independent review covers the shared retention lifecycle, profile
+integration including separate storage roots and flattened archive exports,
+Batch copy/reset, and Omni cleanup/reset. It excludes the fork/route production
+changes, fork regression module, and session-provenance regression module this
+reviewer authored. Their independent reviewers are frozen QA, security and
+operations. No production source was changed during this review.
 
 ## Findings
 
-### VUN-CORRECTNESS-RESUME-01: High - ordinary forks copy private vector evidence to a new owner
+### VUN-CORRECTNESS-RESUME-03: High - parent cleanup can erase an active child upload
 
-The public-run fork route admits an ordinary non-owner through
-`authorize_run_access()` (`wepppy/microservices/rq_engine/fork_archive_routes.py:960-963`;
-`wepppy/microservices/rq_engine/auth.py:196-206`) and also explicitly supports
-anonymous public-run forks. The destination metadata grants the requesting human
-ownership (`fork_archive_routes.py:1531-1542`). Its worker calls the ordinary rsync
-builder, whose exclusions omit all four `vector_upload_attempts` roots and
-`archives/private` (`wepppy/rq/project_rq_fork.py:580-602`).
+`wepppy/microservices/vector_retention_lifecycle.py:330` acquires only the
+caller-supplied project scopes. Omni bulk cleanup supplies the parent scope at
+`wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:556`, then recursively deletes
+child directories at line 566. A child upload uses a distinct scope: AgFields
+passes the complete requested run ID at
+`wepppy/microservices/rq_engine/ag_fields_routes.py:682`. Authorization recognizes
+the parent owner for these child IDs in
+`wepppy/microservices/rq_engine/auth.py:188`.
 
-Consequently, a non-owner can copy a public source's private upload originals,
-rejected/hostile candidates, normalization receipts and private archives into a
-new destination. The sensitive-download predicate then recognizes that requester
-as the destination owner (`wepppy/microservices/browse/sensitive_vectors.py:74-93`).
-The public-source sensitive-read denial therefore does not protect the same bytes
-across the fork boundary. This contradicts the canonical contract's explicit
-owner/root evidence authority and ban on ordinary public-read access.
+An independent reproduction on the frozen source used real Redis, the real
+`prepare_vector_upload()` receiver, and real
+`OmniStateContrastMixin._clean_stale_contrast_runs()`. The upload retained a
+complete GeoJSON original under a contrast child's AgFields attempt directory
+and continued to own `run:<parent>;;omni-contrast;;1`. Parent cleanup completed
+under `run:<parent>` and erased the original. The regression assertion failed:
+`parent cleanup erased complete original under active child upload lease`.
+No user project or external artifact was involved.
 
-A harmless local reproduction invoked the real `_build_fork_rsync_cmd()` and
-actual `rsync` against a temporary source containing a private `.upload`, a
-private ZIP and a canonical GeoJSON. At the reviewed revision it returned:
+Committed-only rebuild preserves outstanding reservations, but that does not
+protect their files. Required closure is bounded discovery/acquisition of
+relevant descendant reservation scopes under the global maintenance fence,
+before filesystem mutation. Cover both physical attempt-path ancestry and a
+descendant reservation created before its attempt path has been bound. Preserve
+the existing borrowed-parent scope case. Assess the same parent/child assumption
+in separate project/archive deletion and restore consumers.
 
-    {"fork_copied_private_original": true,
-     "fork_copied_private_archive": true,
-     "fork_copied_canonical": true}
+The isolated reproduction is retained in the development container at
+`/tmp/vun-correctness-54/tests/nodb/test_review_child_scope.py`. Its final run
+failed the data-preservation assertion in 9.60 seconds.
 
-This reproduction used no user project, credential, remote service or destructive
-external action. It proves the copy step; the authorization consequence follows
-from the production source/ownership/download paths above.
+### VUN-CORRECTNESS-RESUME-04: Medium - copy free-space admission omits outstanding reservations
 
-Required closure: ratify whether ordinary copies retain private evidence only in
-the source with a provenance reference, or permit explicit source-authorized
-copies with accounting. In every case, a non-owner public fork must not acquire
-private source evidence. Apply the rule to worker-time copy, not just browser
-controls. Retain an end-to-end public non-owner fork test and inspect the copied
-filesystem and destination download result; preserve the accepted canonical
-GeoJSON needed to run the fork. The operator's disposition is pending as of this
-review. No dependent implementation choice is made here.
+`wepppy/microservices/vector_retention_lifecycle.py:218` reads reserved bytes and
+includes them in quota ceilings. Its free-space comparison at line 229 includes
+only the incoming copy allowance and protected filesystem reserve. Another
+already-admitted upload may consume its outstanding reservation afterward.
 
-### VUN-CORRECTNESS-RESUME-02: Medium - Batch cloning/reset and ordinary forks bypass retention accounting
+A read-only reproduction against the frozen helper supplied 200 bytes of
+outstanding reservations, a 200-byte incoming allowance, and free space equal to
+the protected reserve plus 300 bytes. `_admit_copy()` accepted, although the two
+admitted writes can reduce free space to 100 bytes below the protected reserve.
+The units scale to the actual upload limit; no filesystem pressure was created.
 
-The same fork rsync copies retained bytes without a destination reservation or
-accounting commit. Batch execution has a second confirmed copy path:
-`BatchRunner._run_batch_hillslopes_owned()` recursively copies `_base` to each
-new leaf with `shutil.copytree(base_wd, runid_wd)`
-(`wepppy/nodb/batch_runner.py:591-594`). A Roads, AgFields or Omni upload accepted
-into the base is copied, including its original and receipt, into every generated
-run without admission or destination provenance. Files retain the base attempt's
-identity and principal while occupying additional uncharged space.
+Required closure: include outstanding reserved bytes in the free-space check and
+retain a regression with sufficient space for the copy alone but insufficient
+space for the copy plus existing reservations.
 
-The rerun path invokes `_reset_run_workspace()` at `batch_runner.py:580-583`.
-That helper renames the entire child to a stale directory and recursively removes
-it (`:123-153`) without the retention scope, durable rebuild obligation or ledger
-repair. A leaf upload can therefore disappear with stale charged totals; partial
-removal can leave evidence moved outside its original project identity. This is
-the same failure class now repaired for whole-Batch deletion, reached through a
-separate established consumer. Canonical Batch input files themselves must remain
-available after the chosen repair.
+## Disposition of earlier findings
 
-Required closure: apply the operator-selected copy/provenance rule consistently
-to ordinary forks and Batch base-to-leaf copying. Preserve or durably reconcile
-retained child evidence during automatic reset, including partial removal and
-retry. Prove the global/principal totals against filesystem bytes with unrelated
-active reservations, and ensure copied receipts cannot masquerade as new upload
-acceptance. Do not silently discard newly retained originals or disable the
-established Batch rerun workflow to close accounting.
+- `VUN-CORRECTNESS-RESUME-01` is **closed by operator policy**, recorded in `docs/schemas/vector-upload-normalization-contract.md`, section **Sharing, copies, and existing workspace resets**, and standalone checkpoint `bbb216c0bc48674f8b24f5e69f20ec58e57b795a`. Public/team copies retain original/private evidence under existing destination ownership. The proposed source-only restriction was explicitly rejected.
+- The original unaccounted-copy/reset finding `VUN-CORRECTNESS-RESUME-02` has implementation coverage across the reviewed Batch, Omni and profile consumers. Closure depends on resolving the two concrete successor findings above and independent review of the excluded fork paths.
 
-## Closed or accepted production checks
+## Other reviewed behavior
 
-- Run and Batch deletion validate missing/outside-root configuration before TTL,
-  cache or filesystem mutations; direct deletion symlinks are rejected.
-- Whole-Batch deletion acquires global maintenance before its Batch and generated
-  child scopes, persists the dual obligation, fsyncs even an absent-target retry,
-  rebuilds exact-root totals and rechecks owned leases before marker completion.
-- Private bundle retry can repair partial deletion without requiring already
-  removed provenance, but continues to validate containment and symlink ancestry.
-  Private restore detects incoming sensitive members before project mutation.
-- Obligation creation retains Redis authority after a possibly completed file
-  replace/fsync failure, rejects existing/dangling symlink directories, and marker
-  completion validates its configured root before unlinking.
-- The `ee26389f0` amendment refuses a different destructive identity while either
-  filesystem or Redis authority contains pending work. The identical operation
-  can retry. Thus parent deletion cannot orphan a pending private repair by
-  deleting its owner/target first.
-- Roads preparation actually calls the monotonic segment converter with raster
-  inputs; Batch's real generation method writes `dem/target_watershed.geojson`
-  and registers the Ron boundary; AgFields writes rotation Parquet; both Omni
-  build entry points reach the user-defined-area report/sidecar writers. The
-  revised downstream tests exercise those production methods rather than
-  manufacturing their asserted acceptance artifacts. The clone/reset finding
-  above was identified while tracing that real Batch path.
-- The conservative nonterminal recovery decision remains accepted: absent an
-  authoritative workflow adapter, prepared/source-stored state stays incomplete.
-  No new recovery adapter is required by this review.
+- Copies preserve original actor, source identity, attempt identity and bytes. Additive `retention_actor` charges the copier; a bounded raw receipt/hash records inheritance. Automated callers use the unattributed bucket. Subsequent copying does not create a growing nested history.
+- Global maintenance precedes newly acquired project scopes; borrowed scopes remain owned by their workflow. Failure retains a deterministic repair obligation, and rebuild preserves unrelated active reservations.
+- Batch retry recognizes interrupted copies even when ordinary reset is disabled. It requires partial-destination removal before copying again. Deferred stale workspaces remain part of physical accounting.
+- Omni normal cleanup preserves its owning retained-attempt roots. Single-child retry recognizes an absent child with a pending obligation. Deferred stale evidence remains counted without speculative deletion credit.
+- Profile promotion remains a byte-preserving explicit offline export. Existing server-resolved execution destinations outside a fully configured ledger root remain on their established storage. Managed reentry/descendants are charged; missing configuration rejects evidence-bearing execution copies.
+- Flattened profile archive destinations retain receipt-parent discovery. Replacing an existing `private/bundle` export with an empty result releases its charge. Config-seed playback retains its existing selected-file behavior.
 
-## Validation boundary
+## Independent validation and limits
 
-Independent execution uses a `git archive` of the reviewed commit in
-`/tmp/vun-correctness-de154` inside the existing development `weppcloud` container;
-that directory was refreshed from `ee26389f0` before execution. The shared checkout
-and running service mounts were not changed. Canonical `wctl run-pytest` cannot
-select this task worktree because of the known container mount mismatch; the
-explicit `wctl exec` command tests the archive instead:
+The independent snapshot is a `git archive` of the reviewed SHA at
+`/tmp/vun-correctness-54` inside the existing development `weppcloud` container.
+The shared checkout and service mounts were unchanged. Canonical
+`wctl run-pytest` rejects the task checkout's mount mismatch, so execution used
+`wctl --project-dir /home/workdir/wepppy exec -T`, working directory and
+`PYTHONPATH=/tmp/vun-correctness-54`, and `/opt/venv/bin/python -m pytest` with:
 
-    wctl --project-dir /home/workdir/wepppy exec -T \
-      -w /tmp/vun-correctness-de154 \
-      -e PYTHONPATH=/tmp/vun-correctness-de154 weppcloud \
-      /opt/venv/bin/python -m pytest \
-      tests/rq/test_vector_retention_deletion.py \
-      tests/rq/test_vector_archive_recovery.py \
-      -q --maxfail=1 --basetemp=/tmp/vun-correctness-testdata
+- `tests/microservices/test_vector_retention_lifecycle.py`
+- `tests/nodb/test_vector_retention_copy_consumers.py`
+- `tests/profile_recorder/test_retained_profile_lifecycle.py`
+- `-q --maxfail=1 --basetemp=/tmp/vun-correctness54-testdata`
 
-Result is recorded below after completion. Root's frozen final5 downstream and
-combined validation receipts remain the authority for broader acceptance; this
-review does not relabel earlier aggregate runs as a fresh full-suite pass.
+Result: **44 passed**, zero failures/skips, four dependency/deprecation warnings,
+45.54 seconds. Those cases do not cover the newly reproduced conditions. The
+child-scope probe was a separate deliberately failing test stored only in the
+isolated snapshot.
 
-The two findings must close on a successor with the operator's copy-retention
-contract documented and tested. Production-equivalent remote-host canaries,
-publication and rollout remain separate gates even after local closure.
-
-Independent execution completed at 2026-11-17 08:28 UTC: **52 passed**, no failures or skips, 18 pre-existing dependency/deprecation warnings, 50.11 seconds. Documentation lint validated this artifact with zero errors and zero warnings.
+Batch tests stop before subsequent controller/model preparation. Profile
+HTTP/archive-job orchestration is stubbed in this lifecycle suite. The tests do
+exercise actual copy/reset/Redis readback, but do not establish a full production
+workflow. No full-suite result or remote-host parity is claimed here.
+Publication and production deployment remain separate gates.

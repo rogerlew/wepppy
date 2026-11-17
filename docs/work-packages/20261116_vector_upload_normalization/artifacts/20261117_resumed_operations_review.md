@@ -2,17 +2,61 @@
 
 Date: 2026-11-17
 Reviewer: independent `ops_security_control_agent` (`destructive_review`)
-Reviewed source: `ee26389f099e9e950b5920d53790f8661548a5e3`
-Reviewed tree: `1b68e22022412f58b67a88d3bc1abb2e06b69aa7`
+Reviewed source: `54ee356fd16845e7abf6da59d7df616f8b5fa6ce`
+Reviewed tree: `fccb328c62078e22e8283ffebac84c32b59009f4`
 Comparison source: `0e861887e132b41b00a108292d7833d21750b146`
 Exact local converter image:
 `sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98fa`
 
-Verdict: **PASS for the reviewed local operations changes. No unresolved High
-or Medium finding remains in this scope.** This is an independent source and
+Verdict: **HOLD: one Medium crash-durability finding remains in the copy/reset
+successor; no High finding is open in this scope.** This is an independent source and
 test-design review, not a substitute for the integrator's revision-bound runtime
 receipt. M5 also requires the other review lanes and the final validation gates.
 Publication, deployment, and remote-host parity are not authorized by this review.
+
+## Copy/reset successor review
+
+The sharing/copy authority checkpoint is `bbb216c0b`; this review does not
+reopen the operator's public/team inheritance decision. The final copy/reset
+source reviewed here is `54ee356fd16845e7abf6da59d7df616f8b5fa6ce`.
+
+The following findings from implementation review are closed in that source:
+
+- Every owned lease release is registered with `ExitStack`, so one release
+  failure cannot skip remaining scopes or global-maintenance cleanup.
+- Copies require full incoming-byte headroom. They receive no speculative
+  reclaim credit for old target bytes that deferred stale cleanup may retain.
+- Missing destination receipts with copied bytes fail instead of silently
+  omitting those bytes; destination inventory validates accounting before clear.
+- Configured containment preserves the default split-root profile topology;
+  in-root copies are charged, and missing configuration cannot silently admit
+  an evidence-bearing ordinary managed destination.
+- Receipt-parent discovery accounts for flattened profile private archives
+  whose mapped path lacks the original `archives/` component.
+- A pending partial Batch copy must be removed successfully before recopying.
+  It cannot be renamed to a second stale copy with uncompleted attribution.
+  Tests assert failed removal prevents recopy, preserves the pending marker,
+  and eventually restores exact original/copier principal totals.
+
+### OPS-COPY-01 - Medium - copy durability omits linking ancestor directories and retained stale paths
+
+`vector_retention_lifecycle._sync_evidence()` fsyncs files and directories inside
+each discovered retained root, then only `target.parent`. A newly copied
+`target/roads/vector_upload_attempts/...` therefore does not fsync `target/roads`
+or `target`, whose entries link the retained subtree. The marker can be cleared
+after ledger readback while those directory entries remain unproven durable.
+
+The same class affects deferred stale cleanup. The helper does not synchronize
+`recovery_paths`, and Batch's newly renamed `.stale.*` path is absent from the
+pre-operation snapshot. Partial cleanup can remove entries in that retained
+tree and then defer; a ledger computed from the remaining bytes must not be
+declared durable without synchronizing those directory mutations too.
+
+Required closure: fsync intervening directories through the target and parent
+in child-before-parent order, register and synchronize retained recovery/stale
+trees after mutation, and retain a real-copy descriptor-path trace that proves
+the ancestor and deferred-stale boundaries were synchronized before marker
+clearance. Failed synchronization must leave the deterministic obligation.
 
 ## Scope and independence
 

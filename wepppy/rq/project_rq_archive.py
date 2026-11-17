@@ -24,6 +24,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, ContextManager, Mapping, Sequence
 
+from wepppy.microservices.vector_retention_lifecycle import discover_retention_scopes
 from wepppy.microservices.vector_upload_normalization import (
     RedisRetentionLedger,
     RedisScopeLeaseFactory,
@@ -595,7 +596,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
     restore_started = False
     restore_completed = False
     retention_identity_failed = False
-    retention_lease = None
+    retention_leases = []
     maintenance_lease = None
     rebuild_obligation = None
     try:
@@ -656,18 +657,19 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
             prep = runtime.get_prep_from_runid(runid)
             restore_guards.enter_context(catalog_lifecycle_guard(wd))
             restore_guards.enter_context(runtime.project_config_lifecycle_guard(authority_wd))
-            if retention_configured and (private_archive or live_sensitive or incoming_sensitive):
-                maintenance_lease = acquire_retention_maintenance_lease()
             if retention_configured:
-                retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
-                retention_lease.assert_owned()
-            # The project scope now prevents a new upload from racing this
-            # classification. If evidence appeared before the scope was held,
-            # fail without mutation instead of inverting project -> global.
+                # Include reserved child uploads even before their attempt
+                # directory exists; global admission prevents new reservations.
+                maintenance_lease = acquire_retention_maintenance_lease()
+                factory = RedisScopeLeaseFactory()
+                for key in sorted(discover_retention_scopes(
+                    maintenance_lease, filesystem_root, (wd,), (f"run:{runid}",),
+                )):
+                    retention_leases.append(factory(key))
+                for lease in retention_leases:
+                    lease.assert_owned()
             if _contains_vector_upload_attempts(wd) and maintenance_lease is None:
                 raise RuntimeError("Vector evidence appeared during restore admission; retry the restore")
-            if retention_lease is not None:
-                retention_lease.assert_owned()
             from wepppy.declarative.archive import validate_restore
             preserve_declarative = validate_restore(wd, zf, restore_members)
             directory_modes = _restore_directory_modes(restore_members, wd)
@@ -718,8 +720,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 restore_started = True
                 try:
                     for entry in sorted(wd.iterdir()):
-                        if retention_lease is not None:
-                            retention_lease.assert_owned()
+                        for lease in retention_leases:
+                            lease.assert_owned()
                         if preserve_declarative and entry.name in {"provenance", "READONLY"}:
                             continue
                         if entry.name in {"archives", ".config-amendment.lock", "roads.lifecycle.lock", "redisprep.dump"}:
@@ -741,14 +743,14 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                     # ZIP ordering cannot expose a private payload before its ancestry
                     # is restricted. Owner access is temporary for readonly directories.
                     for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts)):
-                        if retention_lease is not None:
-                            retention_lease.assert_owned()
+                        for lease in retention_leases:
+                            lease.assert_owned()
                         directory.mkdir(mode=mode | 0o700, parents=True, exist_ok=True)
                         os.chmod(directory, mode | 0o700)
 
                     for member, target_path, relative_target in restore_members:
-                        if retention_lease is not None:
-                            retention_lease.assert_owned()
+                        for lease in retention_leases:
+                            lease.assert_owned()
                         if preserve_declarative and relative_target.parts[0] in {"provenance", "READONLY"}:
                             continue
                         if member.is_dir():
@@ -820,7 +822,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                     verify_protected(wd)
 
         if rebuild_obligation is not None:
-            retention_lease.assert_owned()
+            for lease in retention_leases:
+                lease.assert_owned()
             reconcile_retention(
                 filesystem_root,
                 apply=True,
@@ -828,10 +831,11 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 stale_seconds=0,
                 committed_only=True,
                 maintenance_lease=maintenance_lease,
-                required_scope_leases=(retention_lease,),
+                required_scope_leases=tuple(retention_leases),
             )
             maintenance_lease.assert_owned()
-            retention_lease.assert_owned()
+            for lease in retention_leases:
+                lease.assert_owned()
             complete_retention_rebuild_obligation(rebuild_obligation)
 
         from wepppy.nodb.persistence_events import notify_committed
@@ -858,9 +862,9 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive RESTORE_FAILED")
         raise
     finally:
-        if retention_lease is not None:
+        for lease in reversed(retention_leases):
             try:
-                retention_lease.release()
+                lease.release()
             except VectorUploadError:
                 logging.getLogger(__name__).warning(
                     "Restore vector retention lock release deferred", exc_info=True,

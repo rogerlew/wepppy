@@ -2,7 +2,9 @@
 
 Date: 2026-11-17
 Reviewer: independent `qa_reviewer` (`frozen_qa`)
-Source revision: `1bb088da5eb3aed6a2d591333ad7931644a21329`
+Source revision: `54ee356fd16845e7abf6da59d7df616f8b5fa6ce`
+Sharing-policy revision: `bbb216c0bc48674f8b24f5e69f20ec58e57b795a`
+Prior runtime-qualified selection: `1bb088da5eb3aed6a2d591333ad7931644a21329`
 Recovery-review ancestor: `ee26389f099e9e950b5920d53790f8661548a5e3`
 Initial reviewed ancestor: `de15403aadbd7a659ef4717e77223ff4890b18c1`
 Comparison revision: `0e861887e132b41b00a108292d7833d21750b146`
@@ -12,27 +14,27 @@ Image ID: `sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98
 ## Review boundary and current disposition
 
 The reviewer did not author the implementation or tests under review. Source and
-fixtures were read at the committed revision above; the initial worktree was
-clean. The three-file recovery successor and the later Omni retention/test
-fixture delta were then read independently. This is the secondary
-quality/test-adequacy review of the six findings in
-`20261117_final_qa_frozen_successor_review.md`. The scope is local implementation
-acceptance, not publication, remote integration or production deployment.
+fixtures were read independently across the committed successors. This review
+covers the six findings in `20261117_final_qa_frozen_successor_review.md` and the
+subsequent sharing/copy/reset implementation and its mapped consumers. The
+latest committed source was initially clean; later uncommitted final fixes are
+identified separately and are not silently included in that revision.
 
-**Overall M5 disposition: HOLD.** The six original QA findings are closed by
-the committed remediation and the retained revision-bound runtime evidence in
-`20261117_resumed_validation.json`. The remaining package blockers are
-`VUN-CORRECTNESS-RESUME-01` (High fork privacy) and
-`VUN-CORRECTNESS-RESUME-02` (Medium fork/Batch clone-reset accounting), recorded in
-`20261117_resumed_correctness_review.md`, plus the unfinished full final sanity
-and acceptance gates after their remediation. The operator's copy-retention
-contract must resolve before dependent behavior is chosen.
+**QA source disposition at `54ee356fd`: no additional High or Medium finding.**
+The six original findings remain closed by committed remediation and retained
+runtime evidence. `VUN-CORRECTNESS-RESUME-01` is resolved by the explicit operator
+sharing decision, not a privacy filtering change. The copy/reset accounting
+implementation and its consumer regressions address the second correctness
+finding in source; final runtime and independent primary-review closure remain
+required.
 
-Within the six original QA remediation areas, this review finds no additional
-High or Medium quality defect. The receipt preserves each source revision,
-individual runtime results and skips; earlier working-copy aggregates are not
-used as replacements for those records. Publication, deployment and remote-host
-acceptance remain separate from this local review.
+**Overall M5 disposition: HOLD pending final acceptance.** The operations finding
+on ancestor/stale-directory durability and final disk-reserve correction are
+being integrated after `54ee356fd`, and the final focused/full gates have no
+completed receipt yet. Reviewed uncommitted fixes and tests are suitable, but
+receive no committed-source or runtime pass claim here. The receipt preserves
+each source revision, result and skip rather than combining unrelated selections.
+Publication, deployment and remote-host acceptance remain separate gates.
 
 ## Finding dispositions
 
@@ -151,14 +153,55 @@ clear/rebuild/stale cleanup now preserves `vector_upload_attempts` alongside
 workspaces are still removed; all eight format/run-or-dry-run Omni downstream
 cases read the retained receipt after the actual build. The final 206-test
 selection passes with no skips. This closes the discovered cleanup consumer
-without implying that the still-open fork/clone consumers are repaired.
+without substituting for the later fork/clone lifecycle coverage below.
+
+## Sharing, copy and reset successor
+
+The policy at `bbb216c0b` explicitly permits an admitted public/team copier to
+inherit originals, rejected attempts, receipts and private archives. Direct
+sensitive-download restrictions remain unchanged. This review applies the
+canonical contract's "Sharing, copies, and existing workspace resets" section;
+inheritance is not reported again as an unauthorized disclosure.
+
+The `bbb216c0b..54ee356fd` production delta and all new regression modules were
+read independently against `20261117_vector_retention_copy_reset_inventory.md`.
+The shared lifecycle helper uses existing Redis maintenance/project leases and
+dual repair obligations. It preserves original upload provenance, adds bounded
+copy provenance and a separate retention actor, verifies copied payload hashes,
+admits full incoming physical bytes without speculative deletion credit, and
+rebuilds exact totals while preserving active reservations. Source ownership and
+recipient charges are tested separately. The helper makes the newly mapped
+ordering visible without introducing another store or queue.
+
+| Consumer group | QA evidence boundary |
+| --- | --- |
+| Ordinary forks and target replacement | Actual rsync, copied original/private-archive bytes, unchanged source receipt, verified actor forwarding, recipient quota rejection, stable tombstone and both/single-authority absent-target retries. |
+| Batch leaf/base/Omni subtree | Actual copy/reset entry points, all five retained roots, detached copied state, no-reset rerun, interrupted copy forcing retry, failed cleanup preventing another copy, and exact principal/global readback. Unrelated model execution is stopped after the boundary. |
+| Omni cleanup/reset | Actual bulk/stale/single-child cleanup, preservation of owning attempts, pending repair after failure, absent-child retry, deferred stale evidence accounting, and borrowing a live upload scope without losing its reservation. |
+| Profile promotion/playback/export | Actual assembler/session/service copy paths, preserved offline bytes/modes, managed reentry charges, split-root compatibility, missing-config refusal, deterministic reset, interrupted retry and private-archive export readback. Network/model setup is explicitly isolated. |
+| Shared copy helper | Accepted/rejected/reconciled-incomplete states, repeated-copy provenance, bounded receipts, quota rejection before mutation, linked evidence and missing-receipt refusal, reservation preservation, and release attempts after a release failure. |
+
+The fixtures use real Redis under per-test namespaces and compare complete
+physical bytes and exact charges rather than accepting callback success alone.
+The tests preserve existing model symlinks and profile merge/config-seed
+semantics. The inventory explicitly excludes culvert/D-Tale and fixture-only
+test-support deletion; this review makes no retention-safety claim for those
+paths or production public-fork canaries.
+
+The subsequent uncommitted correction adds all outstanding reservations to the
+disk-free admission requirement, syncs intervening evidence ancestors and newly
+retained stale trees, and adds direct pre-mutation/real-consumer assertions. The
+exact downstream fixture is also being upgraded from a fake ledger to real
+authenticated Redis with post-workflow receipt/totals/reservation/marker checks.
+Those changes were read and introduce no additional QA concern, but must be
+bound to the final source and completed runtime receipt before acceptance.
 
 ## Residual non-blocking debt
 
 - Run, Batch, private-delete and restore code repeat the same lease/obligation/
   reconcile/complete sequence. A later behavior-preserving extraction could reduce
   future ordering drift; the present explicit sequence remains reviewable.
-- The three new real-Redis test modules duplicate connection and namespaced-ledger
+- The real-Redis test modules duplicate connection and namespaced-ledger
   setup. A narrowly shared fixture could reduce maintenance cost while preserving
   each test's visible fault boundary. Random per-test namespace IDs would also
   make simultaneous independent runs of the same module easier to isolate.
@@ -168,19 +211,25 @@ without implying that the still-open fork/clone consumers are repaired.
 
 ## Validation observed by this reviewer
 
-- Verified exact source revision and clean initial worktree.
-- Read the complete successor production/test diff and all six prior findings.
+- Verified each reviewed source revision and clean initial worktrees.
+- Read the complete successor production/test diffs, all six prior findings,
+  ratified sharing policy and complete copy/reset consumer inventory.
 - Independently hashed all six retained equivalence fixtures; every size/hash
   matches `tests/data/vector_upload_final5/manifest.json`.
 - Independently read back final5's running image ID through Docker.
-- `git diff --check 0e861887e 1bb088da5` passed.
+- `git diff --check 0e861887e 1bb088da5` and
+  `git diff --check bbb216c0b 54ee356fd` passed.
 - Independently parsed the canonical JSON receipt, recomputed per-run result
   counts, and matched every earlier exact-receiver skip to its final passing
   node. No new runtime execution was needed for this evidence readback.
-- Reviewed primary correctness's two remaining fork/clone findings; they hold
-  package acceptance despite closure of the six original QA findings.
+- Reviewed primary correctness's fork/clone findings and the explicit policy
+  decision and lifecycle remediation that address them. Final accounting and
+  operations closure must come from their independent reviews and frozen gates.
 - Frontend evidence records lint, 126 Jest suites/1,091 tests and nine Node tests
   passed at unchanged frontend source. The broad sanity selection was interrupted
   after 475 actual tests passed and 28 skipped when scope reopened; it is
   explicitly incomplete and receives no complete-gate credit.
+- The new full gate in `/tmp/vun-final-acceptance` was still running when read;
+  `/tmp/vun-final-full.log` has no completion result. A final source-bound focused
+  and full receipt is required. Historical selections cannot replace it.
 - Document lint and spelling-normalization preview pass for this review artifact.

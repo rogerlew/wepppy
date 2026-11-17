@@ -1,8 +1,8 @@
 # Sharing contract correctness checkpoint review
 
-Reviewer: independent `reviewer` agent `provenance_review`.  
-Date: 2026-11-17 UTC.  
-Base: `0ba4be47be17b9e717c1f970a816c2f5cf3a1386`.  
+Reviewer: independent `reviewer` agent `provenance_review`.
+Date: 2026-11-17 UTC.
+Base: `0ba4be47be17b9e717c1f970a816c2f5cf3a1386`.
 Verdict: **PASS for the contract checkpoint; implementation acceptance remains open.**
 
 The review covers the draft canonical section “Sharing, copies, and existing

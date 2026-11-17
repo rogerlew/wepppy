@@ -156,7 +156,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "archive_run",
-    "source_lineno": 1671,
+    "source_lineno": 1740,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -166,7 +166,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "fork_project",
-    "source_lineno": 1546,
+    "source_lineno": 1607,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -176,7 +176,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "restore_archive",
-    "source_lineno": 1779,
+    "source_lineno": 1848,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -540,7 +540,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 665,
+    "source_lineno": 744,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -552,7 +552,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 676,
+    "source_lineno": 755,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -564,7 +564,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 701,
+    "source_lineno": 780,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -672,7 +672,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 781,
+    "source_lineno": 784,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -684,7 +684,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 789,
+    "source_lineno": 792,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -694,7 +694,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1630,
+    "source_lineno": 1640,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -704,7 +704,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1646,
+    "source_lineno": 1656,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -716,7 +716,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1654,
+    "source_lineno": 1664,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -728,7 +728,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 3013,
+    "source_lineno": 3032,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

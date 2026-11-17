@@ -599,6 +599,9 @@ class BatchRunner(NoDbBase):
                             shutil.rmtree(runid_wd)
                         else:
                             _reset_run_workspace(runid_wd, logger)
+                            retention_operation.sync_paths += tuple(
+                                target_path.parent.glob(f"{glob_escape(target_path.name)}.stale.*")
+                            )
                     retention_operation.checkpoint()
                     logger.info(f'copying base project to runid_wd: {runid_wd}')
                     shutil.copytree(base_wd, runid_wd)

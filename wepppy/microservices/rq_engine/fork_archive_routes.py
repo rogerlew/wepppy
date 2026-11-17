@@ -70,7 +70,7 @@ from wepppy.microservices.vector_upload_normalization import (
     reconcile_retention,
     retention_rebuild_obligation_pending,
 )
-from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation, retained_tree_repair_pending
 from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
 
@@ -837,10 +837,15 @@ def _delete_fork_replacement_tree(
     # Admission creates a new job id on each retry. A stable tombstone keeps
     # repeated absent-target retries from orphaning a previous partial removal.
     tombstone = target.with_name(f".{target.name}.replacing-retained")
+    # Authorized API recovery may replace a failed worker copy. Finish that
+    # exact destination obligation; unrelated pending operations still block.
+    operation = "fork_copy" if retained_tree_repair_pending(
+        target, "fork_copy", recovery_paths=(tombstone,),
+    ) else "fork_target_replace"
     with retained_tree_operation(
         target=target,
         project_keys=(f"run:{new_runid}",),
-        operation="fork_target_replace",
+        operation=operation,
         recovery_paths=(tombstone,),
     ) as retention:
         checkpoint()
@@ -1654,8 +1659,8 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
     "/runs/{runid}/{config}/archive",
     summary="Archive a run",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates lock/job state and asynchronously enqueues archive creation."
+        "Requires JWT `rq:enqueue` and authorized run access. "
+        "Checks locks/jobs and enqueues archive creation."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("archive_run"),
@@ -1759,8 +1764,8 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
     "/runs/{runid}/{config}/restore-archive",
     summary="Restore a run archive",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates archive/lock state and asynchronously enqueues archive restoration."
+        "Requires JWT `rq:enqueue` and authorized run access. "
+        "Checks the archive and locks, then enqueues restoration."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("restore_archive"),
@@ -1873,8 +1878,8 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
     "/runs/{runid}/{config}/delete-archive",
     summary="Delete a run archive",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates archive/lock state and synchronously deletes archive content; no queue enqueue."
+        "Requires JWT `rq:enqueue` and authorized run access. "
+        "Checks the archive and locks, then deletes it synchronously."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("delete_archive"),

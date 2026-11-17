@@ -385,6 +385,19 @@ An Omni workflow that already owns its renewable project scope may lend that
 scope to the helper. Global maintenance acquisition is nonblocking; contention
 fails before filesystem work, avoiding a lock-order wait cycle. Borrowed scopes
 remain owned by their original workflow and active reservations survive rebuild.
+
+Parent copies, resets, deletion and archive restoration fence existing child
+upload reservations as well as the named parent scope. While holding global
+maintenance, discover reservation scopes by composite project identity and bound
+attempt path; this covers the interval before an attempt directory is created.
+An active child upload blocks the parent mutation before any original is removed.
+Copies also include outstanding reserved bytes in the free-space check.
+
+After a failed fork worker copy, the authorized API replacement finishes the
+exact destination's `fork_copy` cleanup/rebuild obligation before enqueueing a
+new copy. It cannot consume an unrelated repair identity. Files, containing
+directories, linking ancestors and retained stale trees are synced before the
+ledger rebuild and marker clearance.
 ## Hostile-file quarantine and abuse review
 
 Every rejected complete original is classified `quarantined` in its receipt.

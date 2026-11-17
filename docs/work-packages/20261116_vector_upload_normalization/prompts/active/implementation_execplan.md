@@ -157,6 +157,15 @@ GeoParquet.
   retention disabled; the candidate now avoids that new dependency, and the
   revision-pure focused archive suite passes.
 
+- Final review reproduced parent cleanup erasing a complete original held by a
+  live Omni child upload. Shared lifecycle and direct run/Batch deletion and
+  archive restore now discover descendant reservation scopes before mutation.
+- Exact-image downstream fixtures needed real retention configuration and the
+  actual Omni workflow transaction after cleanup integration. All 25 real-ledger
+  downstream cases pass locally; successor combined gates remain pending.
+- Full sanity at `54ee356fd` reached 2,105 passes before the OpenAPI document
+  exceeded its existing size budget by 120 bytes. Concise route descriptions
+  preserve the response contract and size ceiling; successor rerun is required.
 ## Decision Log
 
 - **2026-11-17, clone-policy checkpoint** - Do not infer permission to exclude
@@ -228,14 +237,18 @@ GeoParquet.
 
 ## Outcomes & Retrospective
 
-Current disposition: implementation through `1bb088da5` is committed locally.
+Current disposition: sharing is ratified at `bbb216c0b`; copy/reset integration
+is committed through `54ee356fd`. Final review corrections and frozen
+verification are in progress. No operator decision remains open.
+
+Historical pre-sharing checkpoint: implementation through `1bb088da5` was committed locally.
 The original QA findings and Omni cleanup defect are repaired. Exact source/image
 and per-test evidence is in `artifacts/20261117_resumed_validation.json` (452/4
 focused predecessor; overlapping 206/0 successor; frontend gates pass). Full
 sanity was interrupted at the newly required operator contract decision and is
 not accepted. One High fork privacy and one Medium copy/reset accounting class
-remain. The operator clone-retention question is pending; M5 cannot close until
-its chosen policy covers the retained consumer inventory and final gates pass.
+remained at that checkpoint. The later sharing decision supersedes the privacy
+hold; accounting and final gates are tracked above.
 No remote integration, publication or deployment occurred.
 
 Current resumption: M0-M4 implementation is retained in the task worktree. M5
