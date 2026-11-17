@@ -2034,7 +2034,12 @@ def test_landuse_phase3_catalog_upload_update_delete_via_rq_engine(
     landuse = _DummyLandusePhase3(str(run_root))
     _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
 
-    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    source_man = (
+        Path(__file__).resolve().parents[2]
+        / "wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man"
+    )
+    # Upload fixtures must resolve even when pytest runs outside the repo root.
+    monkeypatch.chdir(tmp_path)
     assert source_man.exists()
 
     with TestClient(rq_engine.app) as client:
@@ -2104,7 +2109,10 @@ def test_landuse_phase3_upload_accepts_zip_with_finder_metadata_sidecars(
     landuse = _DummyLandusePhase3(str(run_root))
     _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
 
-    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    source_man = (
+        Path(__file__).resolve().parents[2]
+        / "wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man"
+    )
     with source_man.open("rb") as handle:
         man_payload = handle.read()
 
@@ -2134,7 +2142,10 @@ def test_landuse_phase3_upload_rejects_zip_with_nested_man_members(
     landuse = _DummyLandusePhase3(str(run_root))
     _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
 
-    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    source_man = (
+        Path(__file__).resolve().parents[2]
+        / "wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man"
+    )
     with source_man.open("rb") as handle:
         man_payload = handle.read()
 
@@ -2168,7 +2179,10 @@ def test_landuse_phase3_upload_rejects_symlink_escape(
     catalog_link.parent.mkdir(parents=True, exist_ok=True)
     catalog_link.symlink_to(escaped_target, target_is_directory=True)
 
-    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    source_man = (
+        Path(__file__).resolve().parents[2]
+        / "wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man"
+    )
     with source_man.open("rb") as handle:
         payload_bytes = handle.read()
 
@@ -2200,7 +2214,10 @@ def test_landuse_phase3_upload_enforces_max_bytes_and_conflict_contract(
         assert oversize.status_code == 413
 
     monkeypatch.setattr(landuse_routes.landuse_flask, "_LANDUSE_MAN_UPLOAD_MAX_BYTES", 5 * 1024 * 1024)
-    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    source_man = (
+        Path(__file__).resolve().parents[2]
+        / "wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man"
+    )
     with source_man.open("rb") as handle:
         payload_bytes = handle.read()
 
@@ -2228,7 +2245,10 @@ def test_landuse_phase3_upload_replace_true_overwrites_existing_file(
     landuse = _DummyLandusePhase3(str(run_root))
     _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
 
-    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    source_man = (
+        Path(__file__).resolve().parents[2]
+        / "wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man"
+    )
     with source_man.open("rb") as handle:
         original_payload = handle.read()
     replacement_payload = original_payload.replace(b"Old Forest", b"Old Forest (Replacement)")
