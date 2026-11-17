@@ -68,9 +68,10 @@ GeoParquet.
       SHA-256 receipts, receiving validation, reversible replacement and reload.
 - [x] (2026-11-17) M4: integrate Omni run/dry-run and Batch Runner with the same
       boundary, polygon-only Batch admission and rollback safety.
-- [ ] M5: implementation, focused validation, exact final4 qualification and
-      rollout/recovery documentation are complete; final independent successor
-      re-reviews of the exact committed candidate remain active.
+- [ ] M5: implementation, focused validation, corrected exact final5
+      qualification and rollout/recovery documentation are complete; final
+      independent successor re-reviews of the exact committed candidate remain
+      active.
 
 ## Surprises & Discoveries
 
@@ -117,6 +118,12 @@ GeoParquet.
 - The Docker-socket SBOM path was denied. Exporting the exact image and scanning
   the read-only daemon-free archive produced equivalent retained Syft/Grype
   evidence without granting a scanner daemon authority.
+- Final4's syntactically valid source-revision string did not resolve in Git.
+  Final5 uses the real M2 commit, and its seven-file embedded source manifest
+  matches that commit byte-for-byte. Final4 is disqualified from publication.
+- The first final5 equivalence rerun selected stale first-generation Parquet
+  fixtures and correctly failed them. The retained final3-qualified fixture
+  generation passed all exact-image selections; the failed run is not counted.
 
 ## Decision Log
 
@@ -158,9 +165,14 @@ GeoParquet.
   alone. Online Roads/AgFields replacement is transactional through receipt
   commit; stale prepared state without a workflow authority adapter remains
   `incomplete` and quarantined.
-- **2026-11-17, exact candidate** - Final4 supersedes final3 locally because its
-  readiness response exposes the already verified parser binary, Cargo lock and
-  source revision required by fail-closed receiver preflight.
+- **2026-11-17, corrected exact candidate** - Final5 disqualifies final4 and
+  supersedes final3 locally. It exposes the verified parser binary and Cargo
+  lock with a source revision that resolves in Git and matches the embedded
+  seven-file source manifest.
+- **2026-11-17, destructive retention repair** - Persist the rebuild obligation
+  in both the private filesystem and Redis before deletion/restore. Block new
+  reservations and readiness until an exact-root rebuild is read back and both
+  markers are cleared. Retry uses the same globally qualified identity.
 
 ## Outcomes & Retrospective
 
@@ -180,7 +192,7 @@ correctness/security reviews pass. M2 implementation is committed at
 `0e58feced`; its exact local image passes preliminary API/provenance/containment
 qualification recorded in `artifacts/20261116_m2_validation.md`. M2 independent
 review passed. M3/M4 are implemented at `9ac7cb8f6` plus the current closure
-candidate. Exact final4 passes the common helper plus actual Roads, AgFields,
+candidate. Exact final5 passes the common helper plus actual Roads, AgFields,
 Omni run/dry-run and Batch HTTP boundaries across four supported suffixes. Final
 M5 re-review remains open. No image was published and no production deployment
 or remote-host acceptance was performed.

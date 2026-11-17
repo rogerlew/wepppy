@@ -261,8 +261,12 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
     if uploader:
         metadata["uploaded_by"] = str(uploader)
 
-    def publish_candidate(candidate_path: Path) -> None:
+    def publish_candidate(candidate_path: Path, publication_commit) -> None:
         resources_dir.mkdir(parents=True, exist_ok=True)
+        prior_state = {
+            "_geojson_state": deepcopy(getattr(batch_runner, "_geojson_state", None)),
+            "_runid_template_state": deepcopy(getattr(batch_runner, "_runid_template_state", None)),
+        }
         backup_path: Path | None = None
         if dest_path.exists():
             descriptor, backup_name = tempfile.mkstemp(
@@ -283,20 +287,26 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
             except NoDbAlreadyLockedError:
                 clear_locks(batch_runner.runid)
                 batch_runner.register_geojson(watershed_collection, metadata=metadata)
+            publication_commit()
             published = True
         finally:
-            if not published:
+            if not published and not prepared.is_terminal:
                 staged_path.unlink(missing_ok=True)
                 if backup_path is not None:
                     os.replace(backup_path, dest_path)
                 else:
                     dest_path.unlink(missing_ok=True)
+                locked = getattr(batch_runner, "locked", None)
+                if callable(locked):
+                    with locked():
+                        for name, value in prior_state.items():
+                            setattr(batch_runner, name, value)
             if backup_path is not None:
                 backup_path.unlink(missing_ok=True)
 
     try:
         await run_in_threadpool(
-            lambda: prepared.publish(
+            lambda: prepared.publish_transactional(
                 mutation=publish_candidate,
                 canonical_path=dest_path,
                 canonical_relative_path=relative_path,

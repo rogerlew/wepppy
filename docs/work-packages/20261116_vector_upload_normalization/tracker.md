@@ -24,9 +24,11 @@
 - [x] M0: conditionally accept the exact Rust dependency graph behind owned preflight.
 - [x] M0: retain red tests and hostile fixtures for every accepted/rejected state.
 - [x] M1: implement and directly test `geoparquet_parser_cli` at `eb6b0d3fb`.
-- [x] M2: final3 qualification passed; readiness-bound final4
-      `sha256:ec801ab0c90e…73ce03` supersedes it as the local exact candidate
-      with daemon-free SBOM/scan evidence.
+- [x] M2: final3 qualification passed; corrected final5
+      `sha256:4487dec16cdb…e98fa` supersedes it as the local exact candidate.
+      Final4 is disqualified because its claimed source revision does not exist.
+      Final5 has Git-resolved source-manifest proof and fresh daemon-free
+      SBOM/scan evidence.
 - [x] M3-M4: integrate all four browser/workflow upload paths without bypassing
       receiving validation; preserve originals, provenance and failed replacement.
 - [ ] M5: final correctness/code/QA/security/operations successor re-reviews.
@@ -221,14 +223,31 @@ occur. Independent M2 review remains open while M3 source integration begins.
 
 ## M3-M5 closure candidate - 2026-11-17
 
-M2 review passed for exact final3. Readiness-bound final4 is the current local
-exact candidate. Workflow integration was committed at
+M2 review passed for exact final3. Corrected final5 is the current local exact
+candidate; final4 is disqualified. Workflow integration was committed at
 `9ac7cb8f6`; the successor closure candidate adds reversible mutation, monotonic
 terminal receipts, durable Redis reconciliation/rebuild, private sensitive
 archives, resolved-alias protection, verified session-human provenance, bounded
 converter responses/error mapping, and independent binary UI/server activation.
-The expanded affected suite, exact final4 common-helper test and actual HTTP
+The expanded affected suite, exact final5 common-helper test and actual HTTP
 boundary tests cover Roads, AgFields, Omni run/dry-run and Batch for GeoJSON,
 Shapefile ZIP, `.parquet`, and `.geoparquet`. Final five-lane re-review is
 required before M5 acceptance.
 Publication, production deploy, and remote-host proof remain outside authority.
+
+## Successor remediation and final5 evidence - 2026-11-17
+
+The successor closes the review findings for exact-root ledger authority,
+active project-scope reconciliation, active-reservation-preserving rebuild,
+Batch rollback lifetime, Roads/AgFields post-commit side effects, owner/root
+private-archive authority, and idempotent destructive lifecycle repair. A
+mode-private filesystem marker plus Redis pending set now blocks runtime
+admission and readiness until deletion/restore accounting is rebuilt and read
+back. Private archive retry uses the identical globally qualified identity.
+
+Affected validation is 303 passed, one skipped. The exact final5 parsers pass
+315 shape-converter tests, and 10 exact-image receiving-boundary selections pass
+across all four supported suffixes. Fresh final5 SPDX/Grype evidence and the
+tar-to-image-ID/source-manifest proof are retained in the package artifacts.
+Final independent successor reviews remain required; no image publication,
+remote integration or deployment occurred.

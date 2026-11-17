@@ -287,6 +287,7 @@ class AgFields(NoDbBase):
         }
 
         try:
+            publication_committed = False
             try:
                 shutil.copy2(source_path, staged_geojson)
             except OSError as exc:
@@ -326,11 +327,20 @@ class AgFields(NoDbBase):
                     self._field_columns = [str(col) for col in df.columns]
                     self._field_id_key = None
                     self._rotation_accessor = None
-                relative_path = os.path.relpath(self.rotation_schedule_parquet, self.wd)
-                request_catalog_refresh(self.wd, relative_path)
                 if publication_commit is not None:
                     publication_commit()
+                    publication_committed = True
+                relative_path = os.path.relpath(self.rotation_schedule_parquet, self.wd)
+                try:
+                    request_catalog_refresh(self.wd, relative_path)
+                except Exception:  # broad-except: accepted derived-catalog refresh telemetry boundary
+                    self.logger.warning(
+                        "Accepted AgFields catalog refresh is deferred",
+                        exc_info=True,
+                    )
             except BaseException:  # broad-except: transaction rollback includes cancellation
+                if publication_committed:
+                    raise
                 if had_canonical:
                     os.replace(canonical_backup, canonical_path)
                 else:

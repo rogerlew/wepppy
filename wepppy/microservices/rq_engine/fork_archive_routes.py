@@ -61,6 +61,8 @@ from wepppy.rq.wepp_rq import (
 )
 from wepppy.microservices.vector_upload_normalization import (
     RedisScopeLeaseFactory,
+    begin_retention_rebuild_obligation,
+    complete_retention_rebuild_obligation,
     reconcile_retention,
 )
 from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, get_wd
@@ -682,7 +684,7 @@ def _resolve_run_archive_path(wd: str, archive_name: str) -> str:
 def _authorize_private_archive(claims: Mapping[str, Any], runid: str, archive_name: str) -> None:
     if not str(archive_name).replace("\\", "/").startswith("private/"):
         return
-    if _normalize_roles(claims.get("roles")) & {"admin", "root"}:
+    if "root" in _normalize_roles(claims.get("roles")):
         return
     principal = claims.get("feature_access_principal")
     candidate = claims.get("user_id")
@@ -694,7 +696,7 @@ def _authorize_private_archive(claims: Mapping[str, Any], runid: str, archive_na
         user_id = 0
     if user_id > 0 and any(int(getattr(owner, "id", 0) or 0) == user_id for owner in (get_run_owners_lazy(runid) or ())):
         return
-    raise AuthError("Private archive requires project owner or Admin/Root", status_code=403, code="forbidden")
+    raise AuthError("Private archive requires project owner or Root", status_code=403, code="forbidden")
 
 
 def _archive_retention_actor(claims: Mapping[str, Any]) -> dict[str, object]:
@@ -1772,7 +1774,32 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
             archive_path = _resolve_run_archive_path(wd, str(archive_name))
         except ValueError as exc:
             return error_response(str(exc), status_code=400, code="validation_error")
+        relative_archive = Path(archive_path).relative_to(Path(wd).resolve())
+        is_private = relative_archive.parts[:2] == ("archives", "private")
         if not os.path.exists(archive_path):
+            if is_private:
+                filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"])
+                vector_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+                try:
+                    vector_lease.assert_owned()
+                    obligation = begin_retention_rebuild_obligation(
+                        filesystem_root,
+                        operation="private_archive_delete",
+                        target=(
+                            Path(wd).resolve().relative_to(filesystem_root.resolve())
+                            / relative_archive.parent
+                        ).as_posix(),
+                    )
+                    reconcile_retention(
+                        filesystem_root,
+                        apply=True,
+                        rebuild_ledger=True,
+                        stale_seconds=0,
+                        committed_only=True,
+                    )
+                    complete_retention_rebuild_obligation(obligation)
+                finally:
+                    vector_lease.release()
             return error_response(f"Archive {archive_name} not found", status_code=404)
 
         prep = RedisPrep.getInstance(wd)
@@ -1795,22 +1822,31 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
                     status_code=400,
                 )
             lease.checkpoint()
-            relative_archive = Path(archive_path).relative_to(Path(wd).resolve())
-            if relative_archive.parts[:2] == ("archives", "private"):
+            if is_private:
                 vector_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+                filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"])
                 try:
                     vector_lease.assert_owned()
+                    obligation = begin_retention_rebuild_obligation(
+                        filesystem_root,
+                        operation="private_archive_delete",
+                        target=(
+                            Path(wd).resolve().relative_to(filesystem_root.resolve())
+                            / relative_archive.parent
+                        ).as_posix(),
+                    )
                     shutil.rmtree(Path(archive_path).parent)
+                    vector_lease.assert_owned()
+                    reconcile_retention(
+                        filesystem_root,
+                        apply=True,
+                        rebuild_ledger=True,
+                        stale_seconds=0,
+                        committed_only=True,
+                    )
+                    complete_retention_rebuild_obligation(obligation)
                 finally:
                     vector_lease.release()
-                filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"])
-                reconcile_retention(
-                    filesystem_root,
-                    apply=True,
-                    rebuild_ledger=True,
-                    stale_seconds=0,
-                    committed_only=True,
-                )
             else:
                 os.remove(archive_path)
             prep.clear_archive_job_id()

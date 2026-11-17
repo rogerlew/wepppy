@@ -17,6 +17,8 @@ from typing import Any, Callable, Mapping
 
 from wepppy.microservices.vector_upload_normalization import (
     RedisScopeLeaseFactory,
+    begin_retention_rebuild_obligation,
+    complete_retention_rebuild_obligation,
     reconcile_retention,
 )
 
@@ -115,7 +117,8 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
 
     retention_lease = None
     retention_root = None
-    if delete_files and target.exists() and os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip():
+    rebuild_obligation = None
+    if delete_files and os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip():
         configured_root = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
         if not configured_root:
             raise RuntimeError("Vector evidence filesystem root is not configured")
@@ -123,6 +126,11 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
         target.relative_to(retention_root)
         retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
         retention_lease.assert_owned()
+        rebuild_obligation = begin_retention_rebuild_obligation(
+            retention_root,
+            operation="project_delete",
+            target=target.relative_to(retention_root).as_posix(),
+        )
 
     try:
         if delete_files and target.exists():
@@ -167,15 +175,17 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
                 else:
                     delete_failed = True
                     _publish(runtime, status_channel, f"rq:{job_id} STATUS delete deferred (directory still present)")
-            elif retention_lease is not None and retention_root is not None:
-                retention_lease.assert_owned()
-                reconcile_retention(
-                    retention_root,
-                    apply=True,
-                    rebuild_ledger=True,
-                    stale_seconds=0,
-                    committed_only=True,
-                )
+        if delete_files and not target.exists() and retention_lease is not None and retention_root is not None:
+            retention_lease.assert_owned()
+            reconcile_retention(
+                retention_root,
+                apply=True,
+                rebuild_ledger=True,
+                stale_seconds=0,
+                committed_only=True,
+            )
+            if rebuild_obligation is not None:
+                complete_retention_rebuild_obligation(rebuild_obligation)
     finally:
         if retention_lease is not None:
             retention_lease.release()

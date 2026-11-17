@@ -180,6 +180,17 @@ def test_delete_run_holds_vector_scope_and_rebuilds_ledger_after_durable_removal
             events.append("release")
 
     monkeypatch.setattr(delete_module, "RedisScopeLeaseFactory", lambda: lambda scope: events.append(scope) or Lease())
+    obligation = tmp_path / ".vector-upload-rebuild-pending" / "test.json"
+    monkeypatch.setattr(
+        delete_module,
+        "begin_retention_rebuild_obligation",
+        lambda *_args, **_kwargs: events.append("obligation:begin") or obligation,
+    )
+    monkeypatch.setattr(
+        delete_module,
+        "complete_retention_rebuild_obligation",
+        lambda path: events.append(f"obligation:complete:{path.name}"),
+    )
     monkeypatch.setattr(
         delete_module,
         "reconcile_retention",
@@ -190,7 +201,7 @@ def test_delete_run_holds_vector_scope_and_rebuilds_ledger_after_durable_removal
 
     assert not run_dir.exists()
     assert events[0] == f"run:{runid}"
-    assert events[-2:] == [f"rebuild:{tmp_path}", "release"]
+    assert events[-3:] == [f"rebuild:{tmp_path}", "obligation:complete:test.json", "release"]
 
 
 def test_gc_runs_rq_deferred_delete_suppresses_messages(

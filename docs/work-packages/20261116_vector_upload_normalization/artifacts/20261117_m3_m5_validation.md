@@ -4,8 +4,9 @@
 
 - Workflow ancestor: `9ac7cb8f6`; the exact tested successor is named by the
   final review artifacts.
-- Shape-converter: `wepppy/shape-converter:vector-upload-m2-final4`, image ID
-  `sha256:ec801ab0c90e595dcc1a4f58b9be52398b8073a75a72591c34149b543a73ce03`.
+- Shape-converter: `wepppy/shape-converter:vector-upload-m2-final5`, image ID
+  `sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98fa`.
+- Final4 is disqualified because its claimed source revision does not exist.
 - Publication and deployment: not performed.
 
 ## Direct validation
@@ -25,13 +26,17 @@ unambiguous.
 - Structural accessibility suite: 286 passed.
 - Frontend Jest: 74 passed; ESLint passed.
 
-The exact final4 image ran on the isolated converter network. The common-helper
+The exact final5 image ran on the isolated converter network. The common-helper
 integration module passed 5 tests and read back source SHA-256, terminal receipt,
 canonical geometry and properties. Separate actual HTTP receiving-boundary tests
 then exercised Roads, AgFields, Omni run, Omni dry-run and Batch for semantically
 equivalent GeoJSON, Shapefile ZIP, `.parquet`, and `.geoparquet` input. Those
 five boundaries parsed their canonical workflow resource and compared property
 equality plus Shapely geometry equality; the boundary selection passed 5 tests.
+The shape-converter suite passed 315 tests while bound to the parser binaries
+and sidecars copied from this exact image. The corrected final5 qualification,
+fresh SBOM/scan and source-manifest proof are retained in
+`20261117_m2_final5_qualification.md`.
 
 ## Failure and recovery evidence
 
@@ -49,6 +54,11 @@ equality plus Shapely geometry equality; the boundary selection passed 5 tests.
   totals from terminal receipts after Redis loss or project deletion. A real Redis
   lock-theft test proves it stops before receipt/counter mutation. Dry-run is the
   default.
+- Destructive project/private-archive deletion and private restore now persist a
+  deterministic filesystem and Redis rebuild obligation before mutation. New
+  reservations and activation readiness fail closed until the exact-root rebuild
+  is read back and the obligation is cleared. Retry after absence uses the same
+  globally qualified identity.
 - Sensitive archive creation renews the upload scope while scanning/writing,
   rejects symlinks, publishes only below `archives/private`, records SHA-256/mode
   metadata and verified actor provenance, and restores original/candidate/receipt

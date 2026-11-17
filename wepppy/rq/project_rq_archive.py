@@ -28,6 +28,9 @@ from wepppy.microservices.vector_upload_normalization import (
     RedisScopeLeaseFactory,
     RetentionActor,
     assert_project_retention_capacity,
+    begin_retention_rebuild_obligation,
+    complete_retention_rebuild_obligation,
+    reconcile_retention,
 )
 
 _ARCHIVE_DISK_HEADROOM_RATIO = 0.02
@@ -588,6 +591,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
     restore_started = False
     restore_completed = False
     retention_lease = None
+    rebuild_obligation = None
     try:
         prep = runtime.get_prep_from_runid(runid)
         notification_wd = runtime.get_wd(runid)
@@ -656,6 +660,14 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
 
             roads_guard = roads_lifecycle.restore_operation(wd)
             with roads_guard:
+                filesystem_root = None
+                if os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip():
+                    filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"]).resolve(strict=True)
+                    rebuild_obligation = begin_retention_rebuild_obligation(
+                        filesystem_root,
+                        operation="private_archive_restore",
+                        target=wd.relative_to(filesystem_root).as_posix(),
+                    )
                 # Commit the replacement fence BEFORE destruction; a killed
                 # restorer must not later masquerade as first initialization.
                 invalidate_catalog_incarnation(wd)
@@ -747,6 +759,18 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 if preserve_declarative:
                     from wepppy.declarative.records import verify_protected
                     verify_protected(wd)
+
+        if filesystem_root is not None:
+            retention_lease.assert_owned()
+            reconcile_retention(
+                filesystem_root,
+                apply=True,
+                rebuild_ledger=True,
+                stale_seconds=0,
+                committed_only=True,
+            )
+            if rebuild_obligation is not None:
+                complete_retention_rebuild_obligation(rebuild_obligation)
 
         from wepppy.nodb.persistence_events import notify_committed
         notify_committed(str(notification_wd), runid, "lifecycle")

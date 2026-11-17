@@ -24,6 +24,13 @@ def main() -> int:
     root = Path(configured_root).resolve(strict=True)
     if not root.is_mount():
         raise SystemExit(f"configured vector upload root is not a mount point: {root}")
+    obligations = root / ".vector-upload-rebuild-pending"
+    if obligations.is_symlink() or (obligations.exists() and not obligations.is_dir()):
+        raise SystemExit("vector upload rebuild-obligation path is invalid")
+    if obligations.exists() and any(obligations.iterdir()):
+        raise SystemExit(
+            "vector upload retention rebuild is pending; retry the recorded deletion/restore"
+        )
 
     descriptor, probe_name = tempfile.mkstemp(prefix=".vector-upload-preflight-", dir=root)
     try:
@@ -41,6 +48,11 @@ def main() -> int:
     totals = connection.hgetall(f"vector-upload-retention:{filesystem_id}:totals")
     if totals.get("initialized") != "1":
         raise SystemExit("vector upload ledger is not initialized; run a verified ledger rebuild")
+    pending_key = f"vector-upload-retention:{filesystem_id}:rebuild-pending"
+    if connection.scard(pending_key):
+        raise SystemExit(
+            "vector upload retention rebuild is pending; retry the recorded deletion/restore"
+        )
 
     binary_enabled = os.getenv("VECTOR_UPLOAD_BINARY_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
     readiness: dict[str, object] | None = None

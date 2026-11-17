@@ -286,9 +286,22 @@ descriptor/hash readback as `accepted_recovered`, `incomplete`, or
 `corrupt_attempt`, then charged by measured regular-file bytes. Audit is the
 default; mutation requires `--apply`. The same command can rebuild committed
 totals from terminal `vector-normalization-v1` receipts after Redis loss or
-project deletion. Rebuild refuses active reservations, symlinks, corrupt or
-nonterminal receipts, and over-bound inventories. Operators must never edit
-Redis counters or remove only part of an attempt/private archive.
+project deletion. A rebuild snapshots and preserves unrelated active
+reservation/principal charges while recomputing committed bytes; it refuses
+unverifiable active state, symlinks, corrupt or nonterminal receipts, and
+over-bound inventories. Only the exact configured filesystem root may rebuild
+the global ledger.
+
+Before project deletion, private-archive deletion, or destructive private
+archive restoration, persist a deterministic mode-private rebuild obligation
+under the configured filesystem root and mirror its identity in the existing
+Redis ledger. New reservations and activation readiness fail closed while any
+obligation is pending. Perform deletion/restoration and the exact-root rebuild
+under the project scope, verify ledger readback, then fsync removal of the file
+marker before clearing the Redis marker. Retry uses the identical operation and
+globally qualified target identity even when the target is already absent.
+Operators must never edit Redis counters or remove only part of an
+attempt/private archive.
 
 Binary activation is independent of direct GeoJSON admission.
 `VECTOR_UPLOAD_BINARY_ENABLED` defaults false; when false the server rejects

@@ -13,9 +13,12 @@ import redis
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.microservices.vector_upload_normalization import (
+    RedisScopeLeaseFactory,
     RedisRetentionLedger,
     RetentionActor,
     VectorUploadError,
+    begin_retention_rebuild_obligation,
+    complete_retention_rebuild_obligation,
     prepare_vector_upload,
     reconcile_retention,
     validate_feature_collection_geometries,
@@ -383,6 +386,63 @@ def test_real_redis_reconciliation_releases_eight_abandoned_prewrite_reservation
             connection.delete(*keys)
 
 
+def test_rebuild_obligation_blocks_new_reservations_until_durably_cleared(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    filesystem_id = f"pytest-obligation-{tmp_path.name}"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", filesystem_id)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
+    connection_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/run/secrets/redis_password"))
+    if password_path.exists():
+        connection_kwargs["password"] = password_path.read_text().strip()
+    connection = redis.client.Redis(**connection_kwargs)
+    prefix = f"vector-upload-retention:{filesystem_id}"
+    try:
+        existing = list(connection.scan_iter(match=f"{prefix}:*"))
+        if existing:
+            connection.delete(*existing)
+        connection.hset(
+            f"{prefix}:totals",
+            mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0},
+        )
+        obligation = begin_retention_rebuild_obligation(
+            tmp_path,
+            operation="delete-project",
+            target="run:test",
+            connection=connection,
+        )
+        pending_key = f"{prefix}:rebuild-pending"
+        assert connection.smembers(pending_key) == {obligation.stem}
+        assert obligation.is_file()
+
+        ledger = RedisRetentionLedger(connection)
+        with pytest.raises(VectorUploadError) as raised:
+            ledger.reserve(
+                project_key="run:blocked-pending-rebuild",
+                actor=RetentionActor("human", 7),
+                worst_case_bytes=1,
+                filesystem_root=tmp_path,
+            )
+        assert raised.value.code == "vector_retention_quota_exceeded"
+
+        complete_retention_rebuild_obligation(obligation, connection=connection)
+        assert not obligation.exists()
+        assert connection.scard(pending_key) == 0
+        reservation = ledger.reserve(
+            project_key="run:unblocked-after-rebuild",
+            actor=RetentionActor("human", 7),
+            worst_case_bytes=1,
+            filesystem_root=tmp_path,
+        )
+        reservation.release_prewrite()
+    finally:
+        keys = list(connection.scan_iter(match=f"{prefix}:*"))
+        if keys:
+            connection.delete(*keys)
+
+
 def test_real_redis_reconciliation_stops_before_mutation_after_lock_loss(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -451,6 +511,259 @@ def test_real_redis_reconciliation_stops_before_mutation_after_lock_loss(
 
         assert receipt_path.read_bytes() == before_receipt
         assert connection.hgetall(f"{prefix}:totals") == before_totals
+    finally:
+        keys = list(connection.scan_iter(match=f"{prefix}:*"))
+        if keys:
+            connection.delete(*keys)
+
+
+def test_real_redis_reconciliation_skips_active_project_scope_then_recovers(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    filesystem_id = f"pytest-active-scope-{tmp_path.name}"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", filesystem_id)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
+    connection_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/run/secrets/redis_password"))
+    if password_path.exists():
+        connection_kwargs["password"] = password_path.read_text().strip()
+    connection = redis.client.Redis(**connection_kwargs)
+    prefix = f"vector-upload-retention:{filesystem_id}"
+    try:
+        connection.hset(
+            f"{prefix}:totals",
+            mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0},
+        )
+        project = tmp_path / "project"
+        project.mkdir()
+        prepared = prepare_vector_upload(
+            raw_filename="active.geojson",
+            stream=io.BytesIO(json.dumps(_polygon_payload()).encode()),
+            endpoint_max_bytes=1024 * 1024,
+            attempt_root=project / "vector_upload_attempts",
+            evidence_roots=(project / "vector_upload_attempts",),
+            filesystem_root=project,
+            project_key="run:active-reconcile",
+            workflow="test",
+            project_identity="active-reconcile",
+            actor=RetentionActor("human", 42),
+            validator=lambda _path, _payload: {"valid": True},
+            ledger=RedisRetentionLedger(connection),
+            scope_lease_factory=RedisScopeLeaseFactory(connection),
+        )
+        receipt_path = prepared.attempt_dir / "normalization.json"
+        reservation_key = f"{prefix}:reservation:{prepared.reservation.reservation_id}"
+        before_receipt = receipt_path.read_bytes()
+        before_reservation = connection.hgetall(reservation_key)
+        before_totals = connection.hgetall(f"{prefix}:totals")
+        future = int(__import__("time").time()) + 601
+
+        active_report = reconcile_retention(
+            tmp_path,
+            apply=True,
+            connection=connection,
+            now=future,
+        )
+
+        assert active_report["actions"] == [{
+            "reservation": prepared.reservation.reservation_id,
+            "action": "active_scope_skipped",
+        }]
+        assert receipt_path.read_bytes() == before_receipt
+        assert connection.hgetall(reservation_key) == before_reservation
+        assert connection.hgetall(f"{prefix}:totals") == before_totals
+
+        prepared.lease.release()
+        recovered_report = reconcile_retention(
+            tmp_path,
+            apply=True,
+            connection=connection,
+            now=future,
+        )
+        assert recovered_report["actions"] == [{
+            "reservation": prepared.reservation.reservation_id,
+            "action": "incomplete",
+        }]
+        assert json.loads(receipt_path.read_text())["status"] == "incomplete"
+        assert not connection.exists(reservation_key)
+        totals = connection.hgetall(f"{prefix}:totals")
+        assert int(totals["inflight"]) == 0
+        assert int(totals["reserved"]) == 0
+    finally:
+        keys = list(connection.scan_iter(match=f"{prefix}:*"))
+        if keys:
+            connection.delete(*keys)
+
+
+def test_reconciliation_rejects_descendant_root_without_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    filesystem_id = f"pytest-descendant-{tmp_path.name}"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", filesystem_id)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
+    child = tmp_path / "runs"
+    child.mkdir()
+    connection_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/run/secrets/redis_password"))
+    if password_path.exists():
+        connection_kwargs["password"] = password_path.read_text().strip()
+    connection = redis.client.Redis(**connection_kwargs)
+    prefix = f"vector-upload-retention:{filesystem_id}"
+    totals_key = f"{prefix}:totals"
+    try:
+        connection.hset(
+            totals_key,
+            mapping={"initialized": 1, "committed": 17, "reserved": 0, "inflight": 0},
+        )
+        before = connection.hgetall(totals_key)
+        for apply in (False, True):
+            with pytest.raises(VectorUploadError, match="identity cannot be verified"):
+                reconcile_retention(
+                    child,
+                    apply=apply,
+                    rebuild_ledger=True,
+                    connection=connection,
+                )
+            assert connection.hgetall(totals_key) == before
+            assert not connection.exists(f"{prefix}:reconcile")
+    finally:
+        keys = list(connection.scan_iter(match=f"{prefix}:*"))
+        if keys:
+            connection.delete(*keys)
+
+
+def test_reconciliation_blocks_in_root_attempt_symlink_without_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    filesystem_id = f"pytest-symlink-{tmp_path.name}"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", filesystem_id)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
+    connection_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/run/secrets/redis_password"))
+    if password_path.exists():
+        connection_kwargs["password"] = password_path.read_text().strip()
+    connection = redis.client.Redis(**connection_kwargs)
+    prefix = f"vector-upload-retention:{filesystem_id}"
+    try:
+        connection.hset(
+            f"{prefix}:totals",
+            mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0},
+        )
+        reservation = RedisRetentionLedger(connection).reserve(
+            project_key="run:symlink",
+            actor=RetentionActor("human", 9),
+            worst_case_bytes=123,
+            filesystem_root=tmp_path,
+        )
+        alias = tmp_path / "project" / "vector_upload_attempts" / "alias"
+        alias.mkdir(parents=True)
+        reservation.bind_attempt(alias)
+        alias.rmdir()
+        target = tmp_path / "other" / "vector_upload_attempts" / "target"
+        target.mkdir(parents=True)
+        receipt_path = target / "normalization.json"
+        receipt_path.write_text(json.dumps({
+            "schema": "vector-normalization-v1",
+            "status": "rejected",
+            "reservation_id": "other",
+        }))
+        alias.symlink_to(target, target_is_directory=True)
+        reservation_key = f"{prefix}:reservation:{reservation.reservation_id}"
+        before_receipt = receipt_path.read_bytes()
+        before_reservation = connection.hgetall(reservation_key)
+        before_totals = connection.hgetall(f"{prefix}:totals")
+
+        report = reconcile_retention(
+            tmp_path,
+            apply=True,
+            connection=connection,
+            now=int(__import__("time").time()) + 601,
+        )
+
+        assert report["actions"] == [{
+            "reservation": reservation.reservation_id,
+            "action": "blocked_symlink_evidence",
+        }]
+        assert receipt_path.read_bytes() == before_receipt
+        assert connection.hgetall(reservation_key) == before_reservation
+        assert connection.hgetall(f"{prefix}:totals") == before_totals
+    finally:
+        keys = list(connection.scan_iter(match=f"{prefix}:*"))
+        if keys:
+            connection.delete(*keys)
+
+
+def test_rebuild_preserves_terminal_receipt_reservation_until_normal_commit(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.microservices.vector_upload_normalization as normalization
+
+    filesystem_id = f"pytest-rebuild-active-{tmp_path.name}"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", filesystem_id)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
+    connection_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/run/secrets/redis_password"))
+    if password_path.exists():
+        connection_kwargs["password"] = password_path.read_text().strip()
+    connection = redis.client.Redis(**connection_kwargs)
+    prefix = f"vector-upload-retention:{filesystem_id}"
+    try:
+        connection.hset(
+            f"{prefix}:totals",
+            mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0},
+        )
+        project = tmp_path / "project"
+        project.mkdir()
+        prepared = prepare_vector_upload(
+            raw_filename="pending.geojson",
+            stream=io.BytesIO(json.dumps(_polygon_payload()).encode()),
+            endpoint_max_bytes=1024 * 1024,
+            attempt_root=project / "vector_upload_attempts",
+            evidence_roots=(project / "vector_upload_attempts",),
+            filesystem_root=project,
+            project_key="run:pending-commit",
+            workflow="test",
+            project_identity="pending-commit",
+            actor=RetentionActor("human", 42),
+            validator=lambda _path, _payload: {"valid": True},
+            ledger=RedisRetentionLedger(connection),
+            scope_lease_factory=RedisScopeLeaseFactory(connection),
+        )
+        prepared.receipt.update(
+            status="rejected",
+            outcome="quarantined",
+            accounting_status="pending",
+        )
+        normalization._atomic_json(
+            prepared.attempt_dir / "normalization.json",
+            prepared.receipt,
+        )
+        exact = normalization._regular_tree_size(prepared.attempt_dir)
+
+        report = reconcile_retention(
+            tmp_path,
+            apply=True,
+            connection=connection,
+            rebuild_ledger=True,
+            stale_seconds=0,
+            committed_only=True,
+        )
+        assert any(action["action"] == "active_receipt_reserved" for action in report["actions"])
+        totals = connection.hgetall(f"{prefix}:totals")
+        assert int(totals["committed"]) == 0
+        assert int(totals["reserved"]) > 0
+        assert int(totals["inflight"]) == 1
+
+        prepared.reservation.commit(exact)
+        prepared.lease.release()
+        totals = connection.hgetall(f"{prefix}:totals")
+        assert int(totals["committed"]) == exact
+        assert int(totals["reserved"]) == 0
+        assert int(totals["inflight"]) == 0
     finally:
         keys = list(connection.scan_iter(match=f"{prefix}:*"))
         if keys:

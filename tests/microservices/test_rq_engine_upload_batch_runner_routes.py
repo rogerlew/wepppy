@@ -1,5 +1,6 @@
 import json
 import os
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -92,8 +93,8 @@ class DummyBatchRunner:
         self.wd = str(wd)
         self.resources_dir = str(wd / "resources")
         self.run_directives = {}
-        self.geojson_state = None
-        self.runid_template_state = None
+        self._geojson_state = None
+        self._runid_template_state = None
         self._sbs_resource = None
         self.sbs_grouped_update_calls: list[tuple[str | None, dict | None]] = []
 
@@ -102,6 +103,26 @@ class DummyBatchRunner:
 
     def register_geojson(self, collection, metadata=None) -> None:
         self.geojson_state = collection.analysis_results
+
+    @contextmanager
+    def locked(self):
+        yield self
+
+    @property
+    def geojson_state(self):
+        return self._geojson_state
+
+    @geojson_state.setter
+    def geojson_state(self, value) -> None:
+        self._geojson_state = value
+
+    @property
+    def runid_template_state(self):
+        return self._runid_template_state
+
+    @runid_template_state.setter
+    def runid_template_state(self, value) -> None:
+        self._runid_template_state = value
 
     def apply_sbs_resource_update(self, *, sbs_map: str | None = None, metadata: dict | None = None) -> None:
         self.sbs_grouped_update_calls.append((sbs_map, metadata))
@@ -406,6 +427,51 @@ def test_upload_geojson_registration_failure_restores_previous_bytes(
     receipt = json.loads((attempt / "normalization.json").read_text())
     assert receipt["status"] == "rejected"
     assert receipt["error_code"] == "workflow_publication_failed"
+
+
+def test_upload_geojson_receipt_failure_restores_previous_file_and_state(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    batch_runner = DummyBatchRunner(tmp_path)
+    accepted = tmp_path / "resources" / "data.geojson"
+    accepted.parent.mkdir()
+    previous = _polygon_bytes(label="previous")
+    accepted.write_bytes(previous)
+    previous_state = {"filename": "data.geojson", "marker": "previous"}
+    batch_runner.geojson_state = previous_state
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "WatershedCollection", DummyCollection)
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+    monkeypatch.setattr(
+        vector_upload_normalization.PreparedVectorUpload,
+        "_complete_publication",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("receipt fsync failed")),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-geojson",
+            files={"geojson_file": ("data.geojson", _polygon_bytes(label="replacement"))},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 500
+    assert accepted.read_bytes() == previous
+    assert batch_runner.geojson_state == previous_state
+    attempt = next((tmp_path / "resources" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    assert receipt["status"] == "rejected"
 
 
 def test_upload_geojson_rejects_point_before_replacement(

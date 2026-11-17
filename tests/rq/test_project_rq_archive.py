@@ -837,6 +837,27 @@ def test_vector_attempts_archive_privately_with_hash_sidecar_and_restore(
     monkeypatch.setattr(archive_module, "RedisRetentionLedger", lambda: RedisRetentionLedger(connection))
     monkeypatch.setattr(archive_module, "RedisScopeLeaseFactory", lambda: RedisScopeLeaseFactory(connection))
     monkeypatch.setattr(
+        archive_module,
+        "begin_retention_rebuild_obligation",
+        lambda root, **kwargs: normalization_module.begin_retention_rebuild_obligation(
+            root, connection=connection, **kwargs
+        ),
+    )
+    monkeypatch.setattr(
+        archive_module,
+        "complete_retention_rebuild_obligation",
+        lambda path: normalization_module.complete_retention_rebuild_obligation(
+            path, connection=connection
+        ),
+    )
+    monkeypatch.setattr(
+        archive_module,
+        "reconcile_retention",
+        lambda root, **kwargs: normalization_module.reconcile_retention(
+            root, connection=connection, **kwargs
+        ),
+    )
+    monkeypatch.setattr(
         normalization_module.shutil,
         "disk_usage",
         lambda _path: SimpleNamespace(total=30_000_000_000, used=1_000_000_000, free=29_000_000_000),

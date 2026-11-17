@@ -216,6 +216,11 @@ def test_boundary_reupload_rolls_back_files_and_persisted_state_on_commit_failur
     )
     monkeypatch.setattr(pd.DataFrame, "to_parquet", lambda self, path, **_kwargs: Path(path).write_bytes(b"new-parquet"))
 
+    refreshes: list[str] = []
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.ag_fields.ag_fields.request_catalog_refresh",
+        lambda *_args, **_kwargs: refreshes.append("refresh"),
+    )
     with pytest.raises(OSError, match="receipt fsync failed"):
         controller.validate_field_boundary_geojson(
             source,
@@ -224,9 +229,47 @@ def test_boundary_reupload_rolls_back_files_and_persisted_state_on_commit_failur
 
     assert canonical.read_text(encoding="utf-8") == "old-valid-content"
     assert parquet.read_bytes() == b"old-parquet"
+    assert refreshes == []
     assert controller.geojson_hash == "old-hash"
     reloaded = type(controller).load_detached(str(tmp_path))
     assert reloaded.geojson_hash == "old-hash"
+
+
+def test_boundary_reupload_does_not_rollback_after_publication_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _controller(tmp_path)
+    source = tmp_path / "replacement.geojson"
+    source.write_text(
+        '{"type":"FeatureCollection","features":[{"type":"Feature",'
+        '"properties":{"field_id":7},"geometry":{"type":"Polygon",'
+        '"coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}',
+        encoding="utf-8",
+    )
+    import geopandas as geopandas_module
+    monkeypatch.setattr(
+        geopandas_module,
+        "read_file",
+        lambda *_args, **_kwargs: pd.DataFrame([{"field_id": 7, "Crop2001": "wheat"}]),
+    )
+    monkeypatch.setattr(pd.DataFrame, "to_parquet", lambda self, path, **_kwargs: Path(path).write_bytes(b"new-parquet"))
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.ag_fields.ag_fields.request_catalog_refresh",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(KeyboardInterrupt()),
+    )
+    committed: list[bool] = []
+
+    with pytest.raises(KeyboardInterrupt):
+        controller.validate_field_boundary_geojson(
+            source,
+            publication_commit=lambda: committed.append(True),
+        )
+
+    assert committed == [True]
+    reloaded = type(controller).load_detached(str(tmp_path))
+    assert reloaded.field_boundaries_source_filename == source.name
+    assert Path(reloaded.rotation_schedule_parquet).read_bytes() == b"new-parquet"
 
 
 @pytest.mark.parametrize(

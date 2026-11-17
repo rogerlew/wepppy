@@ -35,7 +35,7 @@ _RUNNING_ARCHIVE_JOB_STATUSES = {'queued', 'started', 'scheduled'}
 
 
 def _can_list_private_archives(runid: str) -> bool:
-    if current_user.has_role('Admin') or current_user.has_role('Root'):
+    if current_user.has_role('Root'):
         return True
     try:
         user_id = int(current_user.id)

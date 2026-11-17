@@ -1195,6 +1195,7 @@ class Roads(NoDbBase):
             )
         }
 
+        publication_committed = False
         try:
             retained_snapshot = roads_lifecycle.retain(self.wd, replace_segments=True)
             with self.locked():
@@ -1206,26 +1207,32 @@ class Roads(NoDbBase):
                 self._timestamps["upload_geojson"] = now
                 self._clear_stale_run_state_locked()
                 status = str(self._status)
-            self._append_roads_log(
-                "upload",
-                "upload_completed",
-                {
-                    "uploaded_geojson_relpath": relpath,
-                    "uploaded_geojson_sha256": digest,
-                    "feature_count": len(payload.get("features", [])),
-                    "uploaded_at": now,
-                    "configured_input_crs": configured_input_crs,
-                    "source_crs": source_crs,
-                    "effective_input_crs": effective_input_crs,
-                    "input_crs_source": input_crs_source,
-                    "discovered_attribute_field_count": int(attribute_catalog.get("field_count", 0)),
-                    "attribute_field_map": discovered_map,
-                    "status": status,
-                },
-            )
             if publication_commit is not None:
                 publication_commit()
+                publication_committed = True
+            try:
+                self._append_roads_log(
+                    "upload",
+                    "upload_completed",
+                    {
+                        "uploaded_geojson_relpath": relpath,
+                        "uploaded_geojson_sha256": digest,
+                        "feature_count": len(payload.get("features", [])),
+                        "uploaded_at": now,
+                        "configured_input_crs": configured_input_crs,
+                        "source_crs": source_crs,
+                        "effective_input_crs": effective_input_crs,
+                        "input_crs_source": input_crs_source,
+                        "discovered_attribute_field_count": int(attribute_catalog.get("field_count", 0)),
+                        "attribute_field_map": discovered_map,
+                        "status": status,
+                    },
+                )
+            except OSError:
+                self.logger.warning("Accepted Roads upload completion log is deferred", exc_info=True)
         except BaseException:  # broad-except: transaction rollback includes cancellation
+            if publication_committed:
+                raise
             staged_path.unlink(missing_ok=True)
             if had_target:
                 os.replace(backup_path, target_path)

@@ -127,6 +127,7 @@ class ScopeLeaseFactory(Protocol):
 
 _RESERVE_LUA = """
 if redis.call('EXISTS', KEYS[4]) ~= 0 then return {-5, 0} end
+if redis.call('SCARD', KEYS[5]) ~= 0 then return {-7, 0} end
 if redis.call('HGET', KEYS[1], 'initialized') ~= '1' then return {-6, 0} end
 local total_committed = tonumber(redis.call('HGET', KEYS[1], 'committed') or '0')
 local total_reserved = tonumber(redis.call('HGET', KEYS[1], 'reserved') or '0')
@@ -315,9 +316,11 @@ class RedisRetentionLedger:
         principal_key = f"{prefix}:principal:{hashlib.sha256(principal.encode()).hexdigest()}"
         reservation_key = f"{prefix}:reservation:{reservation_id}"
         reconcile_key = f"{prefix}:reconcile"
+        rebuild_pending_key = f"{prefix}:rebuild-pending"
         try:
             result = self._client().eval(
-                _RESERVE_LUA, 4, totals_key, principal_key, reservation_key, reconcile_key,
+                _RESERVE_LUA, 5, totals_key, principal_key, reservation_key, reconcile_key,
+                rebuild_pending_key,
                 owner, int(worst_case_bytes), project_key,
                 _GLOBAL_INFLIGHT_LIMIT, _GLOBAL_LIMIT, principal_limit,
                 int(time.time()),
@@ -371,7 +374,9 @@ def reconcile_retention(
         raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence retention is not configured.", status_code=507)
     try:
         root = filesystem_root.resolve(strict=True)
-        root.relative_to(Path(configured_root).resolve(strict=True))
+        expected_root = Path(configured_root).resolve(strict=True)
+        if root != expected_root:
+            raise ValueError("reconciliation requires the exact configured root")
     except (OSError, ValueError) as exc:
         raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence filesystem identity cannot be verified.", status_code=507) from exc
     client = connection or redis.Redis(**redis_connection_kwargs(RedisDB.LOCK, decode_responses=True))
@@ -379,6 +384,7 @@ def reconcile_retention(
     totals_key = f"{prefix}:totals"
     lock_key = f"{prefix}:reconcile"
     lock_token = uuid.uuid4().hex
+    held_scope_leases: list[ScopeLease] = []
     try:
         if not client.set(lock_key, lock_token, nx=True, ex=_LEASE_SECONDS):
             raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reconciliation is already active.", status_code=507)
@@ -393,6 +399,8 @@ def reconcile_retention(
                     "Vector evidence reconciliation lock ownership was lost.",
                     status_code=507,
                 )
+            for held_lease in held_scope_leases:
+                held_lease.assert_owned()
 
         keys = list(client.scan_iter(match=f"{prefix}:reservation:*", count=100))
         if len(keys) > 10_000:
@@ -409,6 +417,23 @@ def reconcile_retention(
             state = str(metadata.get("state") or "reserved")
             if committed_only and state != "committed":
                 continue
+            if apply and state != "committed":
+                project_scope = str(metadata.get("project") or "").strip()
+                if not project_scope:
+                    actions.append({
+                        "reservation": key.rsplit(":", 1)[-1],
+                        "action": "blocked_missing_project_scope",
+                    })
+                    continue
+                scope_lease = _try_acquire_scope_lease(client, project_scope)
+                if scope_lease is None:
+                    actions.append({
+                        "reservation": key.rsplit(":", 1)[-1],
+                        "action": "active_scope_skipped",
+                    })
+                    continue
+                held_scope_leases.append(scope_lease)
+                scope_lease.assert_owned()
             if not relative:
                 action = {"reservation": key.rsplit(":", 1)[-1], "action": "release_prewrite"}
                 actions.append(action)
@@ -420,12 +445,30 @@ def reconcile_retention(
                 elif apply:
                     client.delete(key)
                 continue
-            attempt = (root / relative).resolve(strict=False)
+            relative_path = Path(relative)
             try:
+                if relative_path.is_absolute() or ".." in relative_path.parts:
+                    raise ValueError("reservation path is not relative")
+                unresolved_attempt = root
+                symlink_component = False
+                for component in relative_path.parts:
+                    if component in {"", "."}:
+                        continue
+                    unresolved_attempt /= component
+                    if unresolved_attempt.is_symlink():
+                        symlink_component = True
+                        break
+                if symlink_component:
+                    actions.append({
+                        "reservation": key.rsplit(":", 1)[-1],
+                        "action": "blocked_symlink_evidence",
+                    })
+                    continue
+                attempt = unresolved_attempt.resolve(strict=False)
                 attempt.relative_to(root)
             except ValueError as exc:
                 raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reservation path escapes its filesystem.", status_code=507) from exc
-            if not attempt.exists() or attempt.is_symlink() or not attempt.is_dir():
+            if not attempt.exists() or not attempt.is_dir():
                 action_name = "committed_evidence_removed" if state == "committed" else "blocked_missing_attempt"
                 actions.append({"reservation": key.rsplit(":", 1)[-1], "action": action_name})
                 if apply and state == "committed":
@@ -492,6 +535,24 @@ def reconcile_retention(
             client.delete(key)
         ledger_audit: dict[str, object] | None = None
         if rebuild_ledger:
+            rebuild_reservation_keys = list(
+                client.scan_iter(match=f"{prefix}:reservation:*", count=100)
+            )
+            if len(rebuild_reservation_keys) > 10_000:
+                raise VectorUploadError(
+                    "vector_retention_quota_exceeded",
+                    "Vector evidence reservation inventory exceeds the recovery bound.",
+                    status_code=507,
+                )
+            rebuild_reservation_snapshots = {
+                reservation_key: client.hgetall(reservation_key)
+                for reservation_key in rebuild_reservation_keys
+            }
+            noncommitted_reservation_ids = {
+                reservation_key.rsplit(":", 1)[-1]
+                for reservation_key, snapshot in rebuild_reservation_snapshots.items()
+                if str(snapshot.get("state") or "reserved") != "committed"
+            }
             receipt_count = 0
             committed_bytes = 0
             principal_bytes: dict[str, int] = {}
@@ -523,6 +584,12 @@ def reconcile_retention(
                     continue
                 if receipt.get("schema") != _RECEIPT_SCHEMA:
                     continue
+                if str(receipt.get("reservation_id") or "") in noncommitted_reservation_ids:
+                    actions.append({
+                        "path": os.fspath(receipt_path.relative_to(root)),
+                        "action": "active_receipt_reserved",
+                    })
+                    continue
                 status = str(receipt.get("status") or "")
                 if status not in {"accepted", "accepted_recovered", "rejected", "incomplete", "corrupt_attempt"}:
                     actions.append({
@@ -553,16 +620,33 @@ def reconcile_retention(
             blocked = [item for item in actions if str(item.get("action", "")).startswith("blocked_")]
             if apply:
                 assert_reconcile_owned()
-                remaining_reservations = list(client.scan_iter(match=f"{prefix}:reservation:*", count=100))
-                if blocked or remaining_reservations:
+                reserved_bytes = 0
+                inflight = 0
+                principal_reserved: dict[str, int] = {}
+                for reservation_key, snapshot in rebuild_reservation_snapshots.items():
+                    if str(snapshot.get("state") or "reserved") == "committed":
+                        continue
+                    try:
+                        amount = int(snapshot["amount"])
+                        principal_key = str(snapshot["principal"])
+                    except (KeyError, TypeError, ValueError):
+                        blocked.append({"action": "blocked_invalid_reservation"})
+                        continue
+                    if amount < 0 or not principal_key.startswith(f"{prefix}:principal:"):
+                        blocked.append({"action": "blocked_invalid_reservation"})
+                        continue
+                    reserved_bytes += amount
+                    inflight += 1
+                    principal_reserved[principal_key] = principal_reserved.get(principal_key, 0) + amount
+                if blocked:
                     raise VectorUploadError(
                         "vector_retention_quota_exceeded",
-                        "Vector evidence ledger rebuild is blocked by active or unverifiable evidence.",
+                        "Vector evidence ledger rebuild is blocked by unverifiable evidence.",
                         status_code=507,
                     )
                 principal_keys = list(client.scan_iter(match=f"{prefix}:principal:*", count=100))
                 pipeline = client.pipeline(transaction=True)
-                pipeline.watch(lock_key)
+                pipeline.watch(lock_key, totals_key, *rebuild_reservation_keys)
                 if pipeline.get(lock_key) != lock_token:
                     pipeline.reset()
                     raise VectorUploadError(
@@ -570,6 +654,14 @@ def reconcile_retention(
                         "Vector evidence reconciliation lock ownership was lost.",
                         status_code=507,
                     )
+                for reservation_key, snapshot in rebuild_reservation_snapshots.items():
+                    if pipeline.hgetall(reservation_key) != snapshot:
+                        pipeline.reset()
+                        raise VectorUploadError(
+                            "vector_retention_quota_exceeded",
+                            "Vector evidence reservation changed during ledger rebuild.",
+                            status_code=507,
+                        )
                 pipeline.multi()
                 pipeline.delete(totals_key)
                 if principal_keys:
@@ -577,13 +669,31 @@ def reconcile_retention(
                 pipeline.hset(totals_key, mapping={
                     "initialized": 1,
                     "committed": committed_bytes,
-                    "reserved": 0,
-                    "inflight": 0,
+                    "reserved": reserved_bytes,
+                    "inflight": inflight,
                 })
-                for bucket, amount in principal_bytes.items():
-                    principal_key = f"{prefix}:principal:{hashlib.sha256(bucket.encode()).hexdigest()}"
-                    pipeline.hset(principal_key, mapping={"committed": amount, "reserved": 0})
+                committed_by_key = {
+                    f"{prefix}:principal:{hashlib.sha256(bucket.encode()).hexdigest()}": amount
+                    for bucket, amount in principal_bytes.items()
+                }
+                for principal_key in set(committed_by_key) | set(principal_reserved):
+                    pipeline.hset(principal_key, mapping={
+                        "committed": committed_by_key.get(principal_key, 0),
+                        "reserved": principal_reserved.get(principal_key, 0),
+                    })
                 pipeline.execute()
+                rebuilt_totals = client.hgetall(totals_key)
+                if (
+                    rebuilt_totals.get("initialized") != "1"
+                    or int(rebuilt_totals.get("committed") or -1) != committed_bytes
+                    or int(rebuilt_totals.get("reserved") or -1) != reserved_bytes
+                    or int(rebuilt_totals.get("inflight") or -1) != inflight
+                ):
+                    raise VectorUploadError(
+                        "vector_retention_quota_exceeded",
+                        "Vector evidence ledger rebuild readback failed.",
+                        status_code=507,
+                    )
                 ledger_audit["rebuilt"] = True
         return {
             "filesystem_id": filesystem_id,
@@ -596,6 +706,14 @@ def reconcile_retention(
     except (OSError, TypeError, ValueError, redis.RedisError) as exc:
         raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reconciliation failed closed.", status_code=507) from exc
     finally:
+        for held_lease in held_scope_leases:
+            try:
+                held_lease.release()
+            except VectorUploadError:
+                _LOGGER.warning(
+                    "Vector retention reconciliation scope release deferred to TTL",
+                    exc_info=True,
+                )
         try:
             client.eval(_LOCK_RELEASE_LUA, 1, lock_key, lock_token)
         except redis.RedisError:
@@ -654,7 +772,7 @@ class RedisScopeLeaseFactory:
             connection = redis.Redis(**redis_connection_kwargs(RedisDB.LOCK, decode_responses=True))
         else:
             connection = self._connection
-        key = f"vector-upload-retention:scope:{hashlib.sha256(scope_key.encode()).hexdigest()}"
+        key = _scope_lease_key(scope_key)
         token = uuid.uuid4().hex
         deadline = time.monotonic() + 10.0
         try:
@@ -675,6 +793,27 @@ class RedisScopeLeaseFactory:
                 status_code=507,
             ) from exc
         return _RedisScopeLease(connection, key, token)
+
+
+def _scope_lease_key(scope_key: str) -> str:
+    return f"vector-upload-retention:scope:{hashlib.sha256(scope_key.encode()).hexdigest()}"
+
+
+def _try_acquire_scope_lease(connection: Any, scope_key: str) -> ScopeLease | None:
+    """Acquire an operation scope without waiting; active work must win recovery."""
+    key = _scope_lease_key(scope_key)
+    token = uuid.uuid4().hex
+    try:
+        acquired = connection.set(key, token, nx=True, ex=_LEASE_SECONDS)
+    except (OSError, TypeError, ValueError, redis.RedisError) as exc:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector upload retention lock is unavailable.",
+            status_code=507,
+        ) from exc
+    if not acquired:
+        return None
+    return _RedisScopeLease(connection, key, token)
 
 
 def _utc_now() -> str:
@@ -724,6 +863,92 @@ def _atomic_json(path: Path, payload: Mapping[str, object]) -> None:
             os.close(directory)
     finally:
         temp.unlink(missing_ok=True)
+
+
+def begin_retention_rebuild_obligation(
+    filesystem_root: Path,
+    *,
+    operation: str,
+    target: str,
+    connection: Any | None = None,
+) -> Path:
+    """Durably record that an irreversible retention mutation requires a rebuild."""
+    configured = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+    try:
+        root = filesystem_root.resolve(strict=True)
+        if not configured or root != Path(configured).resolve(strict=True):
+            raise ValueError("obligation root mismatch")
+    except (OSError, ValueError) as exc:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence filesystem identity cannot be verified.",
+            status_code=507,
+        ) from exc
+    obligations = root / ".vector-upload-rebuild-pending"
+    obligations.mkdir(mode=0o700, exist_ok=True)
+    os.chmod(obligations, 0o700)
+    identity = hashlib.sha256(f"{operation}\0{target}".encode()).hexdigest()
+    path = obligations / f"{identity}.json"
+    filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    if not filesystem_id:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence filesystem identity cannot be verified.",
+            status_code=507,
+        )
+    client = connection or redis.Redis(
+        **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    )
+    pending_key = f"vector-upload-retention:{filesystem_id}:rebuild-pending"
+    try:
+        client.sadd(pending_key, identity)
+        try:
+            _atomic_json(path, {
+                "schema": "vector-retention-rebuild-obligation-v1",
+                "operation": operation[:64],
+                "target": target[:512],
+                "created_utc": _utc_now(),
+            })
+        except (OSError, TypeError, ValueError):
+            client.srem(pending_key, identity)
+            raise
+    except redis.RedisError as exc:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence retention rebuild could not be recorded safely.",
+            status_code=507,
+        ) from exc
+    return path
+
+
+def complete_retention_rebuild_obligation(
+    path: Path,
+    *,
+    connection: Any | None = None,
+) -> None:
+    """Clear one rebuild obligation only after exact ledger readback succeeds."""
+    path.unlink(missing_ok=True)
+    if path.parent.exists():
+        _fsync_directory(path.parent)
+    filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    if not filesystem_id:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence filesystem identity cannot be verified.",
+            status_code=507,
+        )
+    pending_key = f"vector-upload-retention:{filesystem_id}:rebuild-pending"
+    try:
+        client = connection or redis.Redis(
+            **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+        )
+        client.srem(pending_key, path.stem)
+    except redis.RedisError as exc:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence retention rebuild could not be cleared safely.",
+            status_code=507,
+        ) from exc
 
 
 def _fsync_directory(path: Path) -> None:
@@ -1511,6 +1736,8 @@ __all__ = [
     "RedisRetentionLedger",
     "RedisScopeLeaseFactory",
     "assert_project_retention_capacity",
+    "begin_retention_rebuild_obligation",
+    "complete_retention_rebuild_obligation",
     "RetentionActor",
     "VectorUploadError",
     "prepare_vector_upload",

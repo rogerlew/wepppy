@@ -19,11 +19,16 @@ def _module():
 
 
 class _Redis:
+    pending: int = 0
+
     def ping(self) -> bool:
         return True
 
     def hgetall(self, _key: str) -> dict[str, str]:
         return {"initialized": "1", "committed": "0", "reserved": "0", "inflight": "0"}
+
+    def scard(self, _key: str) -> int:
+        return self.pending
 
 
 class _Response:
@@ -121,4 +126,32 @@ def test_readiness_rejects_malformed_json(
     _configure(monkeypatch, module, tmp_path)
     monkeypatch.setattr(module.requests, "get", lambda *_args, **_kwargs: _MalformedResponse({}))
     with pytest.raises(ValueError, match="malformed json"):
+        module.main()
+
+
+def test_readiness_rejects_pending_rebuild_obligation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    module = _module()
+    _configure(monkeypatch, module, tmp_path)
+    obligations = tmp_path / ".vector-upload-rebuild-pending"
+    obligations.mkdir()
+    (obligations / "pending.json").write_text("{}")
+    monkeypatch.setattr(module.requests, "get", lambda *_args, **_kwargs: _Response(_healthy()))
+    with pytest.raises(SystemExit, match="rebuild is pending"):
+        module.main()
+
+
+def test_readiness_rejects_redis_pending_rebuild_obligation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    module = _module()
+    _configure(monkeypatch, module, tmp_path)
+    connection = _Redis()
+    connection.pending = 1
+    monkeypatch.setattr(module.redis, "Redis", lambda **_kwargs: connection)
+    monkeypatch.setattr(module.requests, "get", lambda *_args, **_kwargs: _Response(_healthy()))
+    with pytest.raises(SystemExit, match="rebuild is pending"):
         module.main()

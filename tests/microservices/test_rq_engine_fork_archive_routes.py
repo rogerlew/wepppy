@@ -1448,6 +1448,7 @@ def test_restore_clears_stale_job_id_before_enqueue(
     [
         ({"user_id": 7, "roles": ["User"]}, {7}, 200),
         ({"user_id": 8, "roles": ["User"]}, {7}, 403),
+        ({"user_id": 8, "roles": ["Admin"]}, {7}, 403),
         ({"roles": ["Root"]}, set(), 200),
     ],
 )
@@ -1494,6 +1495,7 @@ def test_private_archive_delete_route_removes_bundle_then_rebuilds_ledger(
 ) -> None:
     run_dir = tmp_path / "run"
     archive_name, archive = _private_archive_fixture(run_dir)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "test-private-delete")
     monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
     monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda *_args, **_kwargs: {"user_id": 7})
     monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda *_args: None)
@@ -1515,6 +1517,18 @@ def test_private_archive_delete_route_removes_bundle_then_rebuilds_ledger(
             return None
 
     monkeypatch.setattr(fork_archive_routes, "RedisScopeLeaseFactory", lambda: lambda _scope: Lease())
+    obligation = tmp_path / ".vector-upload-rebuild-pending" / "test.json"
+    obligation_calls: list[dict[str, object]] = []
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "begin_retention_rebuild_obligation",
+        lambda *_args, **kwargs: obligation_calls.append(kwargs) or obligation,
+    )
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "complete_retention_rebuild_obligation",
+        lambda path: path == obligation,
+    )
     rebuilds: list[dict[str, object]] = []
     monkeypatch.setattr(
         fork_archive_routes,
@@ -1527,10 +1541,22 @@ def test_private_archive_delete_route_removes_bundle_then_rebuilds_ledger(
             "/api/runs/run-1/cfg/delete-archive",
             json={"archive_name": archive_name},
         )
+        retry = client.post(
+            "/api/runs/run-1/cfg/delete-archive",
+            json={"archive_name": archive_name},
+        )
 
     assert response.status_code == 200
+    assert retry.status_code == 404
     assert not archive.parent.exists()
-    assert rebuilds == [{"apply": True, "rebuild_ledger": True, "stale_seconds": 0, "committed_only": True}]
+    assert obligation_calls == [
+        {"operation": "private_archive_delete", "target": archive.parent.relative_to(tmp_path).as_posix()},
+        {"operation": "private_archive_delete", "target": archive.parent.relative_to(tmp_path).as_posix()},
+    ]
+    assert rebuilds == [
+        {"apply": True, "rebuild_ledger": True, "stale_seconds": 0, "committed_only": True},
+        {"apply": True, "rebuild_ledger": True, "stale_seconds": 0, "committed_only": True},
+    ]
 
 
 @pytest.mark.parametrize(
