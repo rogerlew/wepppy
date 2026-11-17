@@ -219,6 +219,7 @@ def test_obligation_fsync_failure_preserves_redis_and_replaced_file(deletion_env
     assert env.conn.smembers(f"{env.prefix}:rebuild-pending") == {paths[0].stem}
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("child", ["_base", "runs/child"])
 def test_batch_deletion_fences_active_child_upload(deletion_environment, child):
     env = deletion_environment
@@ -237,3 +238,36 @@ def test_batch_deletion_fences_active_child_upload(deletion_environment, child):
         lease.release()
     env.invoke("batch", target)
     assert not target.exists()
+
+
+@pytest.mark.parametrize("kind", ["run", "batch"])
+@pytest.mark.parametrize("authority", ["both", "filesystem", "redis"])
+def test_parent_delete_waits_for_pending_archive_repair(deletion_environment, kind, authority):
+    env = deletion_environment
+    target = env.root / "parent"
+    retained(target, 7)
+    marker = normalization.begin_retention_rebuild_obligation(
+        env.root, operation="private_archive_delete",
+        target="parent/archives/private/interrupted", connection=env.conn,
+    )
+    if authority == "filesystem":
+        env.conn.delete(f"{env.prefix}:rebuild-pending")
+    elif authority == "redis":
+        marker.unlink()
+    with pytest.raises(normalization.VectorUploadError, match="pending vector evidence repair"):
+        env.invoke(kind, target)
+    assert target.is_dir()
+    assert next(target.rglob("original.upload")).read_bytes() == b"retained-complete-source"
+    assert not env.mutations
+    # The exact original operation can resume from either authority.
+    same_marker = normalization.begin_retention_rebuild_obligation(
+        env.root, operation="private_archive_delete",
+        target="parent/archives/private/interrupted", connection=env.conn,
+    )
+    assert same_marker == marker
+    assert env.conn.smembers(f"{env.prefix}:rebuild-pending") == {marker.stem}
+    normalization.reconcile_retention(env.root, apply=True, rebuild_ledger=True, connection=env.conn)
+    normalization.complete_retention_rebuild_obligation(marker, connection=env.conn)
+    env.invoke(kind, target)
+    assert not target.exists()
+    assert not env.conn.smembers(f"{env.prefix}:rebuild-pending")

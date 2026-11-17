@@ -305,7 +305,10 @@ under the project scope, verify ledger readback, then fsync removal of the file
 marker before clearing the Redis marker. Retry uses the identical operation and
 globally qualified target identity even when the target is already absent.
 An absent retry still fsyncs the target parent before accounting repair. Recheck
-all owned leases after reconciliation and before clearing obligations; failures
+all owned leases after reconciliation and before clearing obligations. An unrelated
+destructive operation must wait for every pending repair, so parent deletion cannot
+remove the workspace required by an earlier archive/child retry. Identical
+operation/target retries remain admitted from either marker authority; failures
 retain repair authority. A failed obligation write may have already replaced its
 file, so it never rolls back the Redis obligation on a persistence error.
 Operators must never edit Redis counters or remove only part of an

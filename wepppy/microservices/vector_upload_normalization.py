@@ -1020,11 +1020,8 @@ def begin_retention_rebuild_obligation(
             "Vector evidence filesystem identity cannot be verified.",
             status_code=507,
         )
-    _filesystem_rebuild_obligation_ids(root)
+    filesystem_pending = _filesystem_rebuild_obligation_ids(root)
     obligations = root / ".vector-upload-rebuild-pending"
-    obligations.mkdir(mode=0o700, exist_ok=True)
-    os.chmod(obligations, 0o700)
-    _fsync_directory(root)
     identity = _retention_rebuild_obligation_identity(operation, target)
     path = obligations / f"{identity}.json"
     client = connection or redis.Redis(
@@ -1032,6 +1029,16 @@ def begin_retention_rebuild_obligation(
     )
     pending_key = f"vector-upload-retention:{filesystem_id}:rebuild-pending"
     try:
+        pending = filesystem_pending | set(client.smembers(pending_key))
+        if pending - {identity}:
+            raise VectorUploadError(
+                "vector_retention_quota_exceeded",
+                "Complete the pending vector evidence repair before another destructive operation.",
+                status_code=507,
+            )
+        obligations.mkdir(mode=0o700, exist_ok=True)
+        os.chmod(obligations, 0o700)
+        _fsync_directory(root)
         client.sadd(pending_key, identity)
         try:
             _atomic_json(path, {
