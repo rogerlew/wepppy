@@ -57,3 +57,11 @@ M4 checkpoint: queries, retained parameterization support, PASS/workspace stagin
 native runner and report/accounting helpers extracted. Expanded controller, RQ,
 route and lifecycle selection: 390 passed, one skipped. Native/project parity
 and final reviews remain mandatory after execution decomposition.
+
+M3 execution checkpoint: the integrated execution decomposition passes 390 focused
+tests, one skipped. The facade method is 269 lines versus 2,069. Independent
+correctness source review accepts with no medium/high findings. QA identified
+missing mixed-design accumulator coverage; a focused regression is in progress.
+Security requested direct evidence for the new bounded sanitized warning on the
+legacy diagnostic-list continuation path; tests are prepared. Both remain open
+until their candidate test receipts pass.

@@ -10,9 +10,9 @@ Make the Roads controller easier to change and review without changing the scien
 
 - [x] (2026-11-17 22:37 UTC) Inspected source, dependencies, test anchors, and canonical guidance.
 - [x] (2026-11-17 22:37 UTC) Measured baseline and prepared package/extraction map.
-- [ ] M1: Characterization and 527-test native baseline complete; immutable full-project controls running.
+- [x] (2026-11-17 UTC) M1: Characterization, 527-test native baseline and five immutable project controls complete. Mixed-design coverage gap tracked in M5.
 - [x] (2026-11-17 UTC) M2: Input extraction validated (305 passed, one skipped); preparation extraction validated (31 passed).
-- [ ] M3: Native writers/spatial extraction validated (251 passed); execution-stage decomposition pending.
+- [x] (2026-11-17 UTC) M3: Writers/spatial extraction (251 passed) and execution-stage decomposition (390 passed, one skipped) wired; final parity/review gates tracked in M5.
 - [x] (2026-11-17 UTC) M4: Routing/reporting/query extraction wired; 390 focused tests passed, one skipped.
 - [ ] M5: Complete final validation, reviews, documentation, and quality assessment.
 

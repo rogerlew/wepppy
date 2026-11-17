@@ -97,6 +97,9 @@ pointer encoding. See the [flow-direction contract](../../../../docs/schemas/roa
 | [_queries.py](_queries.py), [_parameterization_support.py](_parameterization_support.py) | Inspection views, retained templates and execution provenance |
 | [_pass_routing.py](_pass_routing.py), [_native_runner.py](_native_runner.py) | PASS climate identity, workspace staging and facade-injected native runners |
 | [_reporting.py](_reporting.py) | Modeled-area accounting and report resource regeneration |
+| [_execution.py](_execution.py) | Run-local outcome records, contributor orchestration and summary construction |
+| [_point_source.py](_point_source.py) | Point-source tracing, input assembly and contributor execution |
+| [_unrutted_execution.py](_unrutted_execution.py), [_unrutted_planning.py](_unrutted_planning.py), [_unrutted_native.py](_unrutted_native.py) | Unrutted selection, strip geometry and native strip/remainder execution |
 | [monotonic_segments.py](monotonic_segments.py) | Line segmentation and low-point attribution |
 | [parameterization.py](parameterization.py) | Retained baseline, validated role overrides and resolution |
 | [_parameterization_comparisons.py](_parameterization_comparisons.py) | Execution input evidence and compatible retained-run comparisons |
@@ -107,6 +110,13 @@ pointer encoding. See the [flow-direction contract](../../../../docs/schemas/roa
 | [roads_pure.htm](../../../weppcloud/templates/controls/roads_pure.htm) | Run-page control and user-guide link |
 | [roads.js](../../../weppcloud/controllers_js/roads.js) | Upload, mapping and job UI |
 | [roads_parameterization.js](../../../weppcloud/controllers_js/roads_parameterization.js) | Parameter inspection, editing and comparison UI |
+
+The facade retains existing method signatures, lifecycle decorators and transaction
+boundaries. Internal helpers call facade methods so existing caller/test seams
+remain available. Native runner callables are passed from the facade explicitly.
+Execution accumulators and open terrain datasets are local to one attempt and
+are never stored in `roads.nodb`. Adding a collaborator must not create another
+persistence owner or bypass the existing lifecycle guards.
 
 ## Parameterization ownership and overrides
 
