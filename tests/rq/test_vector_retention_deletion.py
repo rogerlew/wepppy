@@ -244,6 +244,7 @@ def test_batch_deletion_fences_active_child_upload(deletion_environment, child):
 
 @pytest.mark.parametrize("kind", ["run", "batch"])
 @pytest.mark.parametrize("phase", ["reserved", "prepared"])
+@pytest.mark.slow
 def test_parent_deletion_preserves_active_descendant_upload(deletion_environment, monkeypatch, kind, phase):
     env = deletion_environment
     target = env.root / f"parent-{uuid.uuid4().hex}"

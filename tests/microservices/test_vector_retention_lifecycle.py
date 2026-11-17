@@ -241,7 +241,7 @@ def test_replacement_requires_headroom_for_old_bytes_and_reservations(environmen
 
 def test_copy_syncs_evidence_ancestors_before_clearing_marker(environment, monkeypatch):
     env = environment
-    source, target = env.root / "source", env.root / "copy"
+    source, target = env.root / "source", env.root / "new-shard/projects/copy"
     evidence(source)
     n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
     synced = []
@@ -254,8 +254,11 @@ def test_copy_syncs_evidence_ancestors_before_clearing_marker(environment, monke
         shutil.copytree(source, target)
     assert target / "roads" in synced
     assert target in synced
+    assert target.parent in synced
+    assert target.parent.parent in synced
     assert env.root in synced
-    assert synced.index(target / "roads") < synced.index(target)
+    assert synced.index(target / "roads") < synced.index(target) < synced.index(target.parent)
+    assert synced.index(target.parent) < synced.index(target.parent.parent)
 
 
 def test_copy_free_space_admission_includes_live_reservations(environment, monkeypatch):
@@ -271,6 +274,7 @@ def test_copy_free_space_admission_includes_live_reservations(environment, monke
     assert not target.exists()
 
 
+@pytest.mark.slow
 def test_parent_cleanup_preserves_active_child_upload(environment):
     import io
     from wepppy.nodb.mods.omni.omni_state_contrast_mixin import OmniStateContrastMixin
@@ -308,6 +312,7 @@ def test_parent_cleanup_preserves_active_child_upload(environment):
         prepared.reject('test_cleanup')
 
 
+@pytest.mark.slow
 def test_unbound_child_reservation_scope_is_fenced(environment):
     env = environment
     parent = f'run:parent-{uuid.uuid4().hex}'

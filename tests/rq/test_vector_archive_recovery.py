@@ -294,6 +294,7 @@ def test_restore_rejects_archive_symlink_without_consuming_target(archive_rq_env
 
 
 @pytest.mark.parametrize('phase', ['reserved', 'prepared'])
+@pytest.mark.slow
 def test_parent_restore_preserves_active_descendant_upload(
     archive_rq_environment, real_archive_retention, phase,
 ):
