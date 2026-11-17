@@ -71,6 +71,7 @@ def real_archive_retention(monkeypatch, tmp_path):
                             lambda path: retention.complete_retention_rebuild_obligation(path, connection=connection))
         monkeypatch.setattr(module, "reconcile_retention",
                             lambda root, **kw: retention.reconcile_retention(root, connection=connection, **kw))
+    monkeypatch.setattr(archive, 'RedisRetentionLedger', lambda: retention.RedisRetentionLedger(connection))
     monkeypatch.setattr(routes, "retention_rebuild_obligation_pending",
                         lambda root, **kw: retention.retention_rebuild_obligation_pending(root, connection=connection, **kw))
     monkeypatch.setattr(retention.shutil, "disk_usage", lambda _path: SimpleNamespace(
@@ -352,6 +353,91 @@ def test_parent_restore_preserves_active_descendant_upload(
     assert (run / 'keep.txt').read_bytes() == b'restored project'
     assert not child.exists()
     assert int(env.connection.hget(f'{env.prefix}:totals', 'committed')) == 0
+
+
+def test_public_archive_aborts_before_writing_late_child_upload(
+    archive_rq_environment, real_archive_retention, monkeypatch,
+):
+    project, root, _published, _prep = archive_rq_environment
+    env = real_archive_retention
+    runid = f'archive-parent-{uuid.uuid4().hex}'
+    run = root / runid
+    child = run / '_pups/omni/contrasts/1'
+    (child / 'ag_fields').mkdir(parents=True)
+    payload = b'{"type":"FeatureCollection","features":[]}'
+    prepared = []
+    source_receipts = []
+    written = []
+    classify = archive._contains_vector_upload_attempts
+
+    def classify_then_upload(path):
+        result = classify(path)
+        if not prepared:
+            assert not result
+            attempt_root = child / 'ag_fields/vector_upload_attempts'
+            upload = retention.prepare_vector_upload(
+                raw_filename='late.geojson', stream=io.BytesIO(payload), endpoint_max_bytes=1024,
+                attempt_root=attempt_root, evidence_roots=(attempt_root,), filesystem_root=child,
+                project_key=f'run:{runid};;omni-contrast;;1', workflow='ag_fields',
+                project_identity=f'{runid};;omni-contrast;;1', actor=retention.RetentionActor('human', 9),
+                validator=lambda *_: {'valid': True}, ledger=retention.RedisRetentionLedger(env.connection),
+                scope_lease_factory=retention.RedisScopeLeaseFactory(env.connection),
+            )
+            prepared.append(upload)
+            source_receipts.append((upload.attempt_dir / 'normalization.json').read_bytes())
+        return result
+
+    class ObservedZipFile(zipfile.ZipFile):
+        def write(self, filename, arcname=None, *args, **kwargs):
+            written.append(str(arcname))
+            return super().write(filename, arcname, *args, **kwargs)
+
+    try:
+        with monkeypatch.context() as patch:
+            patch.setattr(archive, '_contains_vector_upload_attempts', classify_then_upload)
+            patch.setattr(project.zipfile, 'ZipFile', ObservedZipFile)
+            with pytest.raises(retention.VectorUploadError, match='retry the archive'):
+                project.archive_rq(runid)
+        upload = prepared[0]
+        original = upload.attempt_dir / upload.receipt['source_path']
+        assert original.read_bytes() == payload
+        assert (upload.attempt_dir / 'normalization.json').read_bytes() == source_receipts[0]
+        upload.lease.assert_owned()
+        assert all('vector_upload_attempts' not in Path(name).parts for name in written)
+        assert not list((run / 'archives').glob('*.zip*'))
+    finally:
+        for upload in prepared:
+            upload.reject('test-complete')
+
+    project.archive_rq(runid)
+    assert not list((run / 'archives').glob('*.zip*'))
+    private_archive = next((run / 'archives/private').rglob('*.zip'))
+    with zipfile.ZipFile(private_archive) as zipped:
+        assert zipped.read(original.relative_to(run).as_posix()) == payload
+    assert original.read_bytes() == payload
+    assert private_archive.with_suffix('.zip.sensitive.json').is_file()
+
+
+def test_parent_archive_classifies_nested_private_archive_without_attempt_roots(
+    archive_rq_environment, real_archive_retention,
+):
+    project, root, _published, _prep = archive_rq_environment
+    env = real_archive_retention
+    runid = f'archive-parent-{uuid.uuid4().hex}'
+    run = root / runid
+    child = run / '_pups/omni/contrasts/1'
+    _name, nested_archive = _private_archive_fixture(child)
+    original_bytes = nested_archive.read_bytes()
+    assert not list(run.rglob('vector_upload_attempts'))
+    retention.reconcile_retention(root, connection=env.connection, apply=True, rebuild_ledger=True)
+    project.archive_rq(runid)
+    assert not list((run / 'archives').glob('*.zip*'))
+    private_archive = next((run / 'archives/private').rglob('*.zip'))
+    with zipfile.ZipFile(private_archive) as zipped:
+        assert zipped.read(nested_archive.relative_to(run).as_posix()) == original_bytes
+        assert all(not name.startswith('archives/') for name in zipped.namelist())
+    assert nested_archive.read_bytes() == original_bytes
+    assert private_archive.with_suffix('.zip.sensitive.json').is_file()
 
 
 @pytest.mark.parametrize("configuration", ["missing_id", "missing_root", "wrong_root"])

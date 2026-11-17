@@ -24,7 +24,7 @@ keep their established layout. Both settings must establish that a destination
 is outside the ledger; missing settings do not imply external storage. Known
 offline profile exports are explicitly designated by their existing callers.
 
-Before enabling `VECTOR_UPLOAD_BINARY_ENABLED`, run
+Before deploying the receiver changes or enabling `VECTOR_UPLOAD_BINARY_ENABLED`, run
 `tools/check_vector_upload_readiness.py` in the receiver's configured runtime.
 It checks filesystem identity, private writes, initialized accounting, pending
 repairs and the expected converter binary/lock/source identity. Disabling the

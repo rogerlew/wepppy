@@ -239,19 +239,24 @@ def test_replacement_requires_headroom_for_old_bytes_and_reservations(environmen
     assert (target / "roads/vector_upload_attempts/fixed-id/original.upload").exists()
 
 
-def test_copy_syncs_evidence_ancestors_before_clearing_marker(environment, monkeypatch):
+@pytest.mark.parametrize("relative_target", [False, True])
+def test_copy_syncs_evidence_ancestors_before_clearing_marker(environment, monkeypatch, relative_target):
     env = environment
     source, target = env.root / "source", env.root / "new-shard/projects/copy"
     evidence(source)
     n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    if relative_target:
+        monkeypatch.chdir(env.root)
+        target = target.relative_to(env.root)
     synced = []
     real_sync = n._fsync_directory
     def sync(path):
-        synced.append(Path(path))
+        synced.append(Path(path).resolve())
         real_sync(path)
     monkeypatch.setattr(n, "_fsync_directory", sync)
     with operation(env, source, target):
         shutil.copytree(source, target)
+    target = target.resolve()
     assert target / "roads" in synced
     assert target in synced
     assert target.parent in synced

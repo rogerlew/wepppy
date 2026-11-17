@@ -298,7 +298,7 @@ def _sync_evidence(target: Path) -> None:
     for ancestor in sorted(ancestors, key=lambda path: len(path.parts), reverse=True):
         retention._fsync_directory(ancestor)
     boundary = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"]).resolve(strict=True)
-    parent = target.parent
+    parent = target.resolve().parent
     while parent.is_relative_to(boundary):
         if parent.exists():
             retention._fsync_directory(parent)

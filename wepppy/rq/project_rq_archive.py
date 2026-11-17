@@ -24,7 +24,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, ContextManager, Mapping, Sequence
 
-from wepppy.microservices.vector_retention_lifecycle import discover_retention_scopes
+from wepppy.microservices.vector_retention_lifecycle import (
+    _sensitive as _is_sensitive_vector_path,
+    discover_retention_scopes,
+)
 from wepppy.microservices.vector_upload_normalization import (
     RedisRetentionLedger,
     RedisScopeLeaseFactory,
@@ -153,10 +156,22 @@ def _contains_vector_upload_attempts(wd: Path) -> bool:
         if _is_archive_excluded_relpath(relative):
             dirs[:] = []
             continue
-        if "vector_upload_attempts" in dirs:
+        if any(_is_sensitive_vector_path(Path(relative) / name) for name in (*dirs, *files)):
             return True
-        dirs[:] = [name for name in dirs if name != "archives"]
+        dirs[:] = [
+            name for name in dirs
+            if not _is_archive_excluded_relpath(os.path.join(relative, name))
+        ]
     return False
+
+
+def _assert_archive_member_visibility(relative: str, *, contains_sensitive: bool) -> None:
+    if not contains_sensitive and _is_sensitive_vector_path(Path(relative)):
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Retained evidence appeared while creating the archive; retry the archive.",
+            status_code=507,
+        )
 
 
 def _write_private_archive_sidecar(path: Path, payload: Mapping[str, Any]) -> None:
@@ -390,10 +405,8 @@ def archive_rq(
             if locked:
                 raise RuntimeError("Cannot archive while files are locked: " + ", ".join(locked))
 
-            # Hold the same project-scoped lease used by vector uploads before
-            # inspecting or walking the tree. Otherwise an upload can create a
-            # retained attempt after the sensitivity check and leak it into a
-            # public archive.
+            # Hold the owning project's upload lease before inspection. Child
+            # scopes can still upload; each write guards public classification.
             retention_configured = bool(
                 os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
                 and os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
@@ -481,6 +494,7 @@ def archive_rq(
                     if rel_root:
                         # os.walk does not traverse symlink directories. Retain
                         # ordinary directory metadata, including empty folders.
+                        _assert_archive_member_visibility(rel_root, contains_sensitive=contains_sensitive)
                         zf.write(root, rel_root + "/")
 
                     for filename in files:
@@ -492,6 +506,7 @@ def archive_rq(
                             continue
 
                         runtime.publish_status(status_channel, f"Adding {arcname}")
+                        _assert_archive_member_visibility(arcname, contains_sensitive=contains_sensitive)
                         zf.write(abs_path, arcname)
 
                 if comment_bytes:

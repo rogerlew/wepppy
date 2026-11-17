@@ -469,6 +469,13 @@ bytes, modes and hashes. Browse/download tests must prove owner/root access,
 public denial and download-only handling. Saved legacy projects remain readable
 without new receipts.
 
+Archive creation rechecks each directory/file member before writing it. If a
+late child upload introduces retained evidence after a public classification,
+creation fails before those bytes enter the public temporary ZIP. Cleanup
+removes the incomplete archive; the original upload remains intact and a retry
+classifies the archive as private. Nested private archive bundles participate
+in the same sensitivity check. This preserves direct-download restrictions
+without changing authorized public/team fork inheritance.
 ## Specification references
 
 Format details are checked against the [GeoParquet 1.1 specification](https://geoparquet.org/releases/v1.1.0/)
