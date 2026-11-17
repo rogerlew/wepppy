@@ -146,6 +146,9 @@ services:
       ZOHO_NOREPLY_EMAIL_PASSWORD_FILE: /run/secrets/zoho_noreply_email_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
+      VECTOR_UPLOAD_RUN_FILESYSTEM_ID: ${VECTOR_UPLOAD_RUN_FILESYSTEM_ID:-dev-wc1}
+      VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT: ${VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT:-/wc1}
+      VECTOR_UPLOAD_SHAPE_CONVERTER_URL: ${VECTOR_UPLOAD_SHAPE_CONVERTER_URL:-http://caddy:8080/utils/shape-converter/v1/convert}
       PLAYWRIGHT_BROWSERS_PATH: /workdir/wepppy/wepppy/weppcloud/static-src/.playwright-browsers
       PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS: "1"
 
@@ -664,6 +667,9 @@ services:
       CAP_BASE_URL: ${CAP_VERIFY_BASE_URL:-${CAP_BASE_URL:-}}
       RQ_ENGINE_POLL_RATE_LIMIT_COUNT: ${RQ_ENGINE_POLL_RATE_LIMIT_COUNT:-1200}
       RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS: ${RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS:-60}
+      VECTOR_UPLOAD_RUN_FILESYSTEM_ID: ${VECTOR_UPLOAD_RUN_FILESYSTEM_ID:-dev-wc1}
+      VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT: ${VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT:-/wc1}
+      VECTOR_UPLOAD_SHAPE_CONVERTER_URL: ${VECTOR_UPLOAD_SHAPE_CONVERTER_URL:-http://caddy:8080/utils/shape-converter/v1/convert}
     command:
       - uvicorn
       - wepppy.microservices.rq_engine:app

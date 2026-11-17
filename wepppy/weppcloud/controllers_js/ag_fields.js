@@ -1418,7 +1418,7 @@ var AgFields = (function () {
             var input = controller.nodes.geojsonInput;
             var file = input && input.files ? input.files[0] : null;
             if (!file) {
-                setChip(controller.nodes.uploadStatus, "Choose a GeoJSON file before uploading.", "warning");
+                setChip(controller.nodes.uploadStatus, "Choose a GeoJSON, Shapefile ZIP, or GeoParquet file before uploading.", "warning");
                 return;
             }
             var formData = new FormData();

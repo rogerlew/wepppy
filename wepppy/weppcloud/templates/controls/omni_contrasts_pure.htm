@@ -13,7 +13,7 @@
     Scenario Runner; rerun Omni after updating these values.
   </p>
   <p class="wc-text-muted">
-    Selection modes: cumulative objective parameter, user-defined areas (GeoJSON),
+    Selection modes: cumulative objective parameter, user-defined areas (vector upload),
     user-defined hillslope groups (textbox), and stream-order pruning (WBT-only).
   </p>
   <p class="wc-text-muted">
@@ -50,7 +50,7 @@
          },
         {
           "value": "user_defined_areas",
-          "label": "User-defined areas (GeoJSON)",
+          "label": "User-defined areas (vector upload)",
           "selected": selected_mode == "user_defined_areas"
         },
         {
@@ -210,9 +210,9 @@
 
     {{ ui.file_upload(
          "omni_contrast_geojson",
-         "Contrast areas GeoJSON",
-         accept=".geojson,application/geo+json",
-         help="Upload a polygon GeoJSON; each feature becomes a contrast area (file order defines contrast IDs).",
+         "Contrast areas vector file",
+         accept=".geojson,.json,.zip,.parquet,.geoparquet,application/geo+json,application/json,application/zip,application/vnd.apache.parquet",
+         help="Upload polygon GeoJSON, Shapefile ZIP, or GeoParquet; each feature becomes a contrast area (file order defines contrast IDs).",
          extra_control_class="disable-readonly"
        ) }}
 

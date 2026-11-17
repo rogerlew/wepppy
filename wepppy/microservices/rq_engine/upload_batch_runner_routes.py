@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
+import tempfile
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,13 +14,22 @@ from .payloads import request_form, PayloadRoute
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from starlette.datastructures import UploadFile
 from werkzeug.utils import secure_filename
 
 from wepppy.nodb.base import NoDbAlreadyLockedError, clear_locks
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap, sbs_map_sanity_check
-from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
+from wepppy.topo.watershed_collection.watershed_collection import (
+    WatershedCollection,
+    validate_new_upload_polygon_geojson,
+)
+from wepppy.microservices.vector_upload_normalization import (
+    RetentionActor,
+    VectorUploadError,
+    prepare_vector_upload,
+)
 
 from .feature_access import require_feature_access
 from .auth import AuthError, require_jwt
@@ -117,6 +128,22 @@ def _resolve_uploader(claims: dict[str, Any]) -> Optional[str]:
     return None
 
 
+def _retention_actor(claims: dict[str, Any]) -> RetentionActor:
+    token_class = str(claims.get("token_class") or "").strip().lower()
+    if token_class == "user":
+        try:
+            user_id = int(claims.get("user_id") or claims.get("sub"))
+        except (TypeError, ValueError):
+            user_id = 0
+        if user_id > 0:
+            return RetentionActor("human", user_id)
+    if token_class in {"service", "mcp"}:
+        subject = str(claims.get("sub") or "").strip()
+        if subject:
+            return RetentionActor(token_class, subject)
+    return RetentionActor("unattributed", None)
+
+
 def _extract_upload(form, key: str) -> UploadFile | None:
     if len(form.getlist(key)) > 1:
         raise RequestPayloadError()
@@ -174,35 +201,44 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
     if not safe_name:
         return error_response("Filename contains no safe characters.", status_code=400)
 
-    lower_name = safe_name.lower()
-    if not lower_name.endswith((".geojson", ".json")):
-        return error_response("Only .geojson or .json files are supported.", status_code=400)
+    resources_dir = Path(batch_runner.resources_dir)
+    resources_dir.mkdir(parents=True, exist_ok=True)
+    canonical_name = f"{Path(safe_name).stem}.geojson"
+    dest_path = resources_dir / canonical_name
+    replaced = dest_path.exists()
+    attempt_root = resources_dir / "vector_upload_attempts"
+    analysis_results: dict[str, Any] = {}
 
-    resources_dir = batch_runner.resources_dir
-    dest_path = os.path.join(resources_dir, safe_name)
-    replaced = os.path.exists(dest_path)
-    analysis_results = {}
-    def validate_geojson(path):
+    def validate_geojson(path: Path, payload: dict[str, object]) -> dict[str, object]:
         nonlocal analysis_results
-        if not path.stat().st_size:
-            raise UploadError("GeoJSON file is empty.")
-        try:
-            analysis_results = WatershedCollection(str(path)).analysis_results
-        except ValueError as exc:
-            raise UploadError(f"GeoJSON must be a FeatureCollection: {exc}") from exc
+        validate_new_upload_polygon_geojson(payload)
+        collection = WatershedCollection(str(path))
+        analysis_results = collection.analysis_results
         if analysis_results.get("feature_count", 0) == 0:
-            raise UploadError("GeoJSON contains no features.")
+            raise ValueError("GeoJSON contains no features.")
+        return {
+            "feature_count": int(analysis_results["feature_count"]),
+            "geometry_types": ["Polygon", "MultiPolygon"],
+        }
+
     try:
-        save_upload_file(upload, allowed_extensions=("geojson", "json"),
-            dest_dir=Path(resources_dir), filename_transform=lambda _value: safe_name,
-            overwrite=True, max_bytes=_geojson_max_bytes(), post_save=validate_geojson)
-        size_bytes = os.path.getsize(dest_path)
-        watershed_collection = WatershedCollection(dest_path)
-    except UploadError as exc:
-        return error_response(str(exc), status_code=_upload_error_status(exc))
-    except Exception:  # Upload/native boundary; accepted source is not yet replaced on validation failure.
-        logger.exception("Failed to ingest GeoJSON upload")
-        return error_response("Failed to process GeoJSON upload.", status_code=500)
+        prepared = await run_in_threadpool(
+            lambda: prepare_vector_upload(
+                raw_filename=filename,
+                stream=upload.file,
+                endpoint_max_bytes=_geojson_max_bytes(),
+                attempt_root=attempt_root,
+                evidence_roots=(attempt_root,),
+                filesystem_root=Path(batch_runner.wd),
+                project_key=f"batch:{batch_name}",
+                workflow="batch_runner",
+                project_identity=batch_name,
+                actor=_retention_actor(dict(claims)),
+                validator=validate_geojson,
+            )
+        )
+    except VectorUploadError as exc:
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
 
     try:
         relative_path = os.path.relpath(dest_path, batch_runner.wd)
@@ -211,10 +247,10 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
 
     metadata = {
         "resource_type": "geojson",
-        "filename": safe_name,
+        "filename": canonical_name,
         "original_filename": filename,
         "relative_path": relative_path,
-        "content_type": upload.content_type,
+        "content_type": "application/geo+json",
         "replaced": replaced,
     }
 
@@ -223,15 +259,54 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
     if uploader:
         metadata["uploaded_by"] = str(uploader)
 
-    watershed_collection.update_analysis_results(metadata)
+    def publish_candidate(candidate_path: Path) -> None:
+        resources_dir.mkdir(parents=True, exist_ok=True)
+        backup_path: Path | None = None
+        if dest_path.exists():
+            descriptor, backup_name = tempfile.mkstemp(
+                prefix=f".{dest_path.name}.", suffix=".backup", dir=resources_dir
+            )
+            os.close(descriptor)
+            backup_path = Path(backup_name)
+            shutil.copy2(dest_path, backup_path)
+        staged_path = resources_dir / f".{dest_path.name}.{prepared.attempt_id}.tmp"
+        published = False
+        try:
+            shutil.copy2(candidate_path, staged_path)
+            os.replace(staged_path, dest_path)
+            watershed_collection = WatershedCollection(str(dest_path))
+            watershed_collection.update_analysis_results(metadata)
+            try:
+                batch_runner.register_geojson(watershed_collection, metadata=metadata)
+            except NoDbAlreadyLockedError:
+                clear_locks(batch_runner.runid)
+                batch_runner.register_geojson(watershed_collection, metadata=metadata)
+            published = True
+        finally:
+            if not published:
+                staged_path.unlink(missing_ok=True)
+                if backup_path is not None:
+                    os.replace(backup_path, dest_path)
+                else:
+                    dest_path.unlink(missing_ok=True)
+            if backup_path is not None:
+                backup_path.unlink(missing_ok=True)
 
     try:
-        batch_runner.register_geojson(watershed_collection, metadata=metadata)
-    except NoDbAlreadyLockedError:
-        clear_locks(batch_runner.runid)
-        batch_runner.register_geojson(watershed_collection, metadata=metadata)
+        await run_in_threadpool(
+            lambda: prepared.publish(
+                mutation=publish_candidate,
+                canonical_path=dest_path,
+                canonical_relative_path=relative_path,
+            )
+        )
+    except VectorUploadError as exc:
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
+    except (KeyError, OSError, RuntimeError, TypeError):
+        logger.exception("Failed to publish Batch vector upload")
+        return error_response("Failed to process GeoJSON upload.", status_code=500)
 
     snapshot = _build_batch_runner_snapshot(batch_runner)
     resource_payload = snapshot.get("resources", {}).get("watershed_geojson")

@@ -1,6 +1,7 @@
 import io
 import json
 from pathlib import Path
+from typing import Any
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
@@ -9,6 +10,7 @@ UploadFile = pytest.importorskip("starlette.datastructures").UploadFile
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import omni_routes
+from wepppy.microservices import vector_upload_normalization
 from wepppy.runtime_paths.errors import NoDirError
 
 
@@ -26,6 +28,67 @@ def legacy_project_policy(monkeypatch):
     from types import SimpleNamespace
     monkeypatch.setattr(omni_routes.Ron, "getInstance", lambda wd: SimpleNamespace(
         config_get_str=lambda section, key, default=None: default))
+
+
+class _VectorReservation:
+    reservation_id = "omni-route-test-reservation"
+
+    def commit(self, exact_bytes: int) -> None:
+        self.exact_bytes = exact_bytes
+
+    def release_prewrite(self) -> None:
+        self.released = True
+
+
+class _VectorLedger:
+    def reserve(self, **kwargs: Any) -> _VectorReservation:
+        return _VectorReservation()
+
+
+class _VectorLease:
+    def __init__(self) -> None:
+        self.owned = True
+
+    def assert_owned(self) -> None:
+        assert self.owned
+
+    def release(self) -> None:
+        self.owned = False
+
+
+@pytest.fixture(autouse=True)
+def bounded_vector_normalizer(monkeypatch: pytest.MonkeyPatch) -> None:
+    real_prepare = vector_upload_normalization.prepare_vector_upload
+
+    def prepare(**kwargs):
+        return real_prepare(
+            **kwargs,
+            ledger=_VectorLedger(),
+            scope_lease_factory=lambda _scope: _VectorLease(),
+        )
+
+    monkeypatch.setattr(omni_routes, "prepare_vector_upload", prepare)
+
+
+def _contrast_polygon_bytes(*, label: str = "Area one") -> bytes:
+    return json.dumps(
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"name": label},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [[-116.0, 46.0], [-115.9, 46.0], [-115.9, 46.1], [-116.0, 46.0]]
+                        ],
+                    },
+                }
+            ],
+        },
+        separators=(",", ":"),
+    ).encode()
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1129,26 +1192,49 @@ def test_run_omni_contrasts_stream_order_requires_wbt(monkeypatch: pytest.Monkey
     assert payload["error"]["message"] == "Stream-order pruning requires the WBT delineation backend."
 
 
-def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    "endpoint,expected_status",
+    [
+        ("run-omni-contrasts", 202),
+        ("run-omni-contrasts-dry-run", 200),
+    ],
+)
+def test_omni_contrast_routes_normalize_before_persisting_geojson_upload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    endpoint: str,
+    expected_status: int,
+) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-22")
     _stub_prep(monkeypatch)
-    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+    wd = tmp_path / "run"
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: str(wd))
 
     captured = {}
+    events: list[str] = []
 
     class DummyOmni:
         def parse_inputs(self, payload) -> None:
+            events.append("parse_inputs")
             captured["payload"] = payload
 
         def build_contrasts(self, *args, **kwargs) -> None:
             captured["build"] = kwargs
 
+        def build_contrasts_dry_run_report(self, *args, **kwargs):
+            captured["build"] = kwargs
+            return {"contrast_count": 1}
+
     monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    def prevalidate(path: str) -> None:
+        events.append("prevalidate")
+
     monkeypatch.setattr(
-        omni_routes,
-        "save_upload_file",
-        lambda *args, **kwargs: Path("/tmp/uploaded.geojson"),
+        omni_routes.OmniContrastBuildService,
+        "prevalidate_user_defined_geojson",
+        prevalidate,
     )
     pairs_payload = json.dumps(
         [
@@ -1159,28 +1245,47 @@ def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.Monke
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
-            "/api/runs/run-1/cfg/run-omni-contrasts",
+            f"/api/runs/run-1/cfg/{endpoint}",
             data={
                 "omni_contrast_selection_mode": "user_defined_areas",
                 "omni_contrast_pairs": pairs_payload,
                 "omni_control_scenario": "uniform_low",
                 "omni_contrast_scenario": "mulch",
             },
-            files={"omni_contrast_geojson": ("areas.geojson", b"{}", "application/geo+json")},
+            files={
+                "omni_contrast_geojson": (
+                    "areas.geojson",
+                    _contrast_polygon_bytes(),
+                    "application/geo+json",
+                )
+            },
         )
 
-    assert response.status_code == 202
+    assert response.status_code == expected_status
     payload = response.json()
-    assert payload["job_id"] == "job-22"
-    assert payload["message"] == "Job enqueued."
-    assert payload["status_url"] == "/rq-engine/api/jobstatus/job-22"
-    assert captured["payload"]["omni_contrast_geojson_path"] == "/tmp/uploaded.geojson"
+    if expected_status == 202:
+        assert payload["job_id"] == "job-22"
+        assert payload["message"] == "Job enqueued."
+        assert payload["status_url"] == "/rq-engine/api/jobstatus/job-22"
+    else:
+        assert payload["message"] == "Dry run complete."
+    accepted = Path(captured["payload"]["omni_contrast_geojson_path"])
+    assert accepted.parent.parent.name == "_uploads"
+    assert accepted.name == "areas.geojson"
+    assert accepted.read_bytes() == _contrast_polygon_bytes()
+    assert events == ["prevalidate", "prevalidate", "parse_inputs"]
     assert captured["payload"]["omni_contrast_pairs"] == [
         {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
     ]
     assert captured["build"]["contrast_pairs"] == [
         {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
     ]
+    attempt = next((wd / "_pups" / "omni" / "contrasts" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    original = next((attempt / "original").iterdir())
+    assert original.read_bytes() == _contrast_polygon_bytes()
+    assert receipt["status"] == "accepted"
+    assert receipt["canonical_path"].startswith("_pups/omni/contrasts/_uploads/")
 
 
 def test_run_omni_contrasts_rejects_oversize_geojson_upload_with_413(
@@ -1206,8 +1311,58 @@ def test_run_omni_contrasts_rejects_oversize_geojson_upload_with_413(
 
     assert response.status_code == 413
     payload = response.json()
-    assert payload["error"]["message"].startswith("Invalid GeoJSON upload:")
-    assert "maximum allowed size" in payload["error"]["message"]
+    assert payload["error"]["message"] == "Uploaded vector exceeds the endpoint size limit."
+    assert payload["error"]["code"] == "vector_limit_exceeded"
+
+
+@pytest.mark.parametrize("endpoint", ["run-omni-contrasts", "run-omni-contrasts-dry-run"])
+def test_omni_contrast_routes_reject_unsupported_geometry_before_parse_inputs(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    wd = tmp_path / "run"
+    prior = wd / "_pups" / "omni" / "contrasts" / "_uploads" / "prior" / "areas.geojson"
+    prior.parent.mkdir(parents=True)
+    prior_bytes = _contrast_polygon_bytes(label="previous")
+    prior.write_bytes(prior_bytes)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: str(wd))
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            raise AssertionError("parse_inputs must not run for rejected geometry")
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+    point = json.dumps(
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"name": "point"},
+                    "geometry": {"type": "Point", "coordinates": [-116.0, 46.0]},
+                }
+            ],
+        }
+    ).encode()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            f"/api/runs/run-1/cfg/{endpoint}",
+            data={
+                "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_contrast_pairs": '[{"control_scenario":"uniform_low","contrast_scenario":"mulch"}]',
+            },
+            files={"omni_contrast_geojson": ("areas.geojson", point, "application/geo+json")},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "invalid_vector"
+    assert prior.read_bytes() == prior_bytes
+    attempt = next((wd / "_pups" / "omni" / "contrasts" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    assert receipt["status"] == "rejected"
 
 
 def test_run_omni_contrasts_batch_returns_input_message_without_enqueue(

@@ -6,7 +6,7 @@
 
 {% set description %}
   <p class="wc-text-muted">
-    Upload watershed GeoJSON, validate run-id templates, and launch batch orchestration. Status streams through the panels on the right.
+    Upload watershed vector data, validate run-id templates, and launch batch orchestration. Status streams through the panels on the right.
   </p>
 {% endset %}
 
@@ -170,15 +170,15 @@
     <header class="wc-panel__header">
       <div class="wc-stack">
         <h3 class="wc-panel__title wc-heading__subtitle">Resource Intake</h3>
-        <p class="wc-text-muted">Upload the watershed GeoJSON driving batch expansion. Maximum size {{ geojson_limit_mb }}&nbsp;MB.</p>
+        <p class="wc-text-muted">Upload watershed GeoJSON, Shapefile ZIP, or GeoParquet driving batch expansion. Maximum size {{ geojson_limit_mb }}&nbsp;MB.</p>
       </div>
     </header>
 
     <div class="wc-stack" data-role="upload-form">
       {{ ui.file_upload(
         'geojson_file',
-        'GeoJSON file',
-        accept='.geojson,.json',
+        'Watershed vector file',
+        accept='.geojson,.json,.zip,.parquet,.geoparquet',
         help='Choose a FeatureCollection to enable template validation.',
         attrs=upload_attrs,
         max_width='100%'
@@ -189,14 +189,14 @@
                 data-role="upload-button"
                 data-action="batch-upload"
                 {% if not feature_enabled %}disabled{% endif %}>
-          Upload GeoJSON
+          Upload vector file
         </button>
       </div>
       <div class="wc-status-chip" data-role="upload-status" data-state="info"></div>
     </div>
 
     <div class="wc-status-chip" data-state="info" data-role="resource-empty">
-      No GeoJSON resource uploaded yet. Upload a FeatureCollection to enable template validation.
+      No watershed resource uploaded yet. Upload a polygon vector file to enable template validation.
     </div>
 
     <div class="wc-stack" data-role="resource-details" hidden>

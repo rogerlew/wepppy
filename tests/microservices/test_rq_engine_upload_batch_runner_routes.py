@@ -1,5 +1,7 @@
+import json
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 
@@ -7,6 +9,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import upload_batch_runner_routes
+from wepppy.microservices import vector_upload_normalization
 from wepppy.nodb.base import NoDbAlreadyLockedError
 
 
@@ -16,6 +19,67 @@ pytestmark = pytest.mark.microservice
 def feature_accounts(monkeypatch):
     from tests.factories.feature_access import stub_feature_accounts
     stub_feature_accounts(monkeypatch)
+
+
+class _Reservation:
+    reservation_id = "route-test-reservation"
+
+    def commit(self, exact_bytes: int) -> None:
+        self.exact_bytes = exact_bytes
+
+    def release_prewrite(self) -> None:
+        self.released = True
+
+
+class _Ledger:
+    def reserve(self, **kwargs: Any) -> _Reservation:
+        return _Reservation()
+
+
+class _Lease:
+    def __init__(self) -> None:
+        self.owned = True
+
+    def assert_owned(self) -> None:
+        assert self.owned
+
+    def release(self) -> None:
+        self.owned = False
+
+
+@pytest.fixture(autouse=True)
+def bounded_vector_normalizer(monkeypatch: pytest.MonkeyPatch) -> None:
+    real_prepare = vector_upload_normalization.prepare_vector_upload
+
+    def prepare(**kwargs):
+        return real_prepare(
+            **kwargs,
+            ledger=_Ledger(),
+            scope_lease_factory=lambda _scope: _Lease(),
+        )
+
+    monkeypatch.setattr(upload_batch_runner_routes, "prepare_vector_upload", prepare)
+
+
+def _polygon_bytes(*, label: str = "one") -> bytes:
+    return json.dumps(
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"name": label},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [[-116.0, 46.0], [-115.9, 46.0], [-115.9, 46.1], [-116.0, 46.0]]
+                        ],
+                    },
+                }
+            ],
+        },
+        separators=(",", ":"),
+    ).encode()
 
 
 
@@ -85,6 +149,7 @@ def test_upload_geojson_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
         lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
     )
     monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(upload_batch_runner_routes, "require_feature_access", lambda claims, feature: None)
     monkeypatch.setattr(
         upload_batch_runner_routes.BatchRunner,
         "getInstanceFromBatchName",
@@ -92,17 +157,26 @@ def test_upload_geojson_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     )
     monkeypatch.setattr(upload_batch_runner_routes, "WatershedCollection", DummyCollection)
     monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", "http://shape-converter.test/convert")
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/batch/_/demo/upload-geojson",
-            files={"geojson_file": ("data.geojson", b"{}")},
+            files={"geojson_file": ("data.geojson", _polygon_bytes())},
             headers={"Authorization": "Bearer token"},
         )
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["message"] == "GeoJSON uploaded successfully."
+    canonical = tmp_path / "resources" / "data.geojson"
+    assert canonical.read_bytes() == _polygon_bytes()
+    attempt = next((tmp_path / "resources" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    original = next((attempt / "original").iterdir())
+    assert original.read_bytes() == _polygon_bytes()
+    assert receipt["status"] == "accepted"
+    assert receipt["canonical_path"] == "resources/data.geojson"
 
 
 def test_upload_geojson_rejects_oversize_payload(
@@ -134,9 +208,9 @@ def test_upload_geojson_rejects_oversize_payload(
 
     assert response.status_code == 413
     payload = response.json()
-    assert payload["error"]["message"] == "File exceeds maximum allowed size"
-    assert payload["error"]["details"] == "File exceeds maximum allowed size"
-    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error"]["message"] == "Uploaded vector exceeds the endpoint size limit."
+    assert payload["error"]["details"] == "Uploaded vector exceeds the endpoint size limit."
+    assert payload["error"]["code"] == "vector_limit_exceeded"
     assert payload["error_id"]
 
 
@@ -168,10 +242,174 @@ def test_upload_geojson_rejects_invalid_extension(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["error"]["message"] == "Only .geojson or .json files are supported."
-    assert payload["error"]["details"] == "Only .geojson or .json files are supported."
-    assert payload["error"]["code"] == "validation_error"
+    assert payload["error"]["message"] == "Upload a GeoJSON, Shapefile ZIP, or GeoParquet file."
+    assert payload["error"]["details"] == "Upload a GeoJSON, Shapefile ZIP, or GeoParquet file."
+    assert payload["error"]["code"] == "unsupported_vector"
     assert payload["error_id"]
+
+
+def test_upload_geojson_normalizes_binary_and_publishes_converter_provenance(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    batch_runner = DummyBatchRunner(tmp_path)
+    canonical = _polygon_bytes(label="converted")
+    converter_calls: list[str] = []
+
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {
+            "token_class": "user",
+            "user_id": 7,
+            "sub": "7",
+            "roles": ["Admin"],
+            "email": "must-not-enter-receipt@example.test",
+        },
+    )
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", "http://shape-converter.test/convert")
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(upload_batch_runner_routes, "require_feature_access", lambda claims, feature: None)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "WatershedCollection", DummyCollection)
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+
+    def convert(**kwargs):
+        converter_calls.append(kwargs["submitted_name"])
+        return canonical, {
+            "request_id": "converter-request",
+            "source_size": kwargs["source_size"],
+            "source_sha256": kwargs["source_sha256"],
+            "canonical_size": len(canonical),
+            "canonical_sha256": vector_upload_normalization.hashlib.sha256(canonical).hexdigest(),
+            "parser_provenance": {
+                "binary_name": "shape_parser_cli",
+                "binary_version": "test",
+                "binary_sha256": "a" * 64,
+                "cargo_lock_sha256": "b" * 64,
+                "source_revision": "test-revision",
+            },
+        }
+
+    monkeypatch.setattr(vector_upload_normalization, "_converter_payload", convert)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-geojson",
+            files={"geojson_file": ("data.zip", b"bounded archive bytes")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 200
+    assert converter_calls == ["data.zip"]
+    assert (tmp_path / "resources" / "data.geojson").exists()
+    attempt = next((tmp_path / "resources" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    original = next((attempt / "original").iterdir())
+    assert original.read_bytes() == b"bounded archive bytes"
+    assert receipt["detected_format"] == "shapefile"
+    assert receipt["parser_provenance"]["binary_name"] == "shape_parser_cli"
+    assert receipt["actor"] == {"kind": "human", "user_id": 7}
+    assert "email" not in json.dumps(receipt)
+
+
+def test_upload_geojson_registration_failure_restores_previous_bytes(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    batch_runner = DummyBatchRunner(tmp_path)
+    accepted = tmp_path / "resources" / "data.geojson"
+    accepted.parent.mkdir()
+    previous = _polygon_bytes(label="previous")
+    accepted.write_bytes(previous)
+    previous_state = {"filename": "data.geojson", "marker": "previous"}
+    batch_runner.geojson_state = previous_state
+
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "WatershedCollection", DummyCollection)
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+
+    def fail_registration(collection, metadata=None) -> None:
+        raise RuntimeError("registration failed")
+
+    monkeypatch.setattr(batch_runner, "register_geojson", fail_registration)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-geojson",
+            files={"geojson_file": ("data.geojson", _polygon_bytes(label="replacement"))},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 500
+    assert accepted.read_bytes() == previous
+    assert batch_runner.geojson_state == previous_state
+    attempt = next((tmp_path / "resources" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    assert receipt["status"] == "rejected"
+    assert receipt["error_code"] == "workflow_publication_failed"
+
+
+def test_upload_geojson_rejects_point_before_replacement(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    batch_runner = DummyBatchRunner(tmp_path)
+    accepted = tmp_path / "resources" / "data.geojson"
+    accepted.parent.mkdir()
+    previous = _polygon_bytes(label="previous")
+    accepted.write_bytes(previous)
+    previous_state = {"filename": "data.geojson", "marker": "previous"}
+    batch_runner.geojson_state = previous_state
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"sub": "2", "roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "WatershedCollection", DummyCollection)
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+    point = json.dumps(
+        {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": {},
+                "geometry": {"type": "Point", "coordinates": [-116.0, 46.0]},
+            }],
+        }
+    ).encode()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-geojson",
+            files={"geojson_file": ("data.geojson", point)},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "invalid_vector"
+    assert accepted.read_bytes() == previous
+    assert batch_runner.geojson_state == previous_state
 
 
 def test_upload_sbs_map_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

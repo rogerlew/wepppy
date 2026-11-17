@@ -22,14 +22,14 @@
 
 {% set description %}
   <p class="wc-text-muted">
-    Upload a roads GeoJSON map, prepare segment lowpoint/channel/hillslope mapping, then run Roads watershed integration.
+    Upload a roads vector map, prepare segment lowpoint/channel/hillslope mapping, then run Roads watershed integration.
   </p>
   <p class="wc-text-muted">
     For roads setup guidance and model behavior, see
     {{ usersum_doc_link('src', 'wepppy/nodb/mods/roads/ENDUSER.md', 'Roads user guide') }}.
   </p>
   <ol class="wc-list">
-    <li><strong>Upload Roads GeoJSON</strong>: FeatureCollection with LineString or MultiLineString roads.</li>
+    <li><strong>Upload roads</strong>: GeoJSON, Shapefile ZIP, or GeoParquet with LineString or MultiLineString roads.</li>
     <li><strong>Prepare Segment Candidates</strong>: builds monotonic segments and writes decision diagnostics.</li>
     <li><strong>Run WEPPcloud Roads</strong>: runs mapped segments and watershed pass integration.</li>
   </ol>
@@ -51,8 +51,8 @@
 
     {{ ui.file_upload(
          "roads_geojson_file",
-         "Upload roads GeoJSON",
-         accept=".geojson,application/geo+json,application/json",
+         "Upload roads vector file",
+         accept=".geojson,.json,.zip,.parquet,.geoparquet,application/geo+json,application/json,application/zip,application/vnd.apache.parquet",
          help="Maximum file size: " ~ roads_max_upload_mb ~ " MB. Upload a FeatureCollection with LineString or MultiLineString geometries.",
          current_filename=roads_upload_relpath,
          extra_control_class="disable-readonly",
@@ -72,7 +72,7 @@
         type="button"
         class="pure-button pure-button-secondary disable-readonly"
         data-roads-action="upload">
-        Upload Roads GeoJSON
+        Upload roads vector file
       </button>
     {% endcall %}
     <p id="roads_upload_message" class="wc-field__help" aria-live="polite"></p>

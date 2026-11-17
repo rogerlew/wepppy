@@ -14,8 +14,8 @@ var Roads = (function () {
     var TASKS = {
         upload: {
             eventPrefix: "roads:upload",
-            label: "Uploading roads GeoJSON",
-            successMessage: "Roads GeoJSON uploaded successfully."
+            label: "Uploading roads vector file",
+            successMessage: "Roads vector file uploaded successfully."
         },
         prepare: {
             eventPrefix: "roads:prepare",
@@ -680,7 +680,7 @@ var Roads = (function () {
                 return;
             }
             if (!catalog || typeof catalog !== "object") {
-                mappingPreviewElement.innerHTML = "<p class=\"wc-field__help\">Upload a GeoJSON file to discover attributes.</p>";
+                mappingPreviewElement.innerHTML = "<p class=\"wc-field__help\">Upload a vector file to discover attributes.</p>";
                 return;
             }
 
@@ -1139,13 +1139,13 @@ var Roads = (function () {
 
             var file = uploadInputElement.files && uploadInputElement.files.length > 0 ? uploadInputElement.files[0] : null;
             if (!file) {
-                setUploadMessage("Select a .geojson file before uploading.");
+                setUploadMessage("Select a GeoJSON, Shapefile ZIP, or GeoParquet file before uploading.");
                 return Promise.resolve(null);
             }
 
             var filename = String(file.name || "");
-            if (!/\.geojson$/i.test(filename)) {
-                setUploadMessage("Roads upload must be a .geojson file.");
+            if (!/\.(?:geojson|json|zip|parquet|geoparquet)$/i.test(filename)) {
+                setUploadMessage("Roads upload must be GeoJSON, Shapefile ZIP, or GeoParquet.");
                 uploadInputElement.value = "";
                 return Promise.resolve(null);
             }

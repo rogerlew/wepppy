@@ -126,15 +126,15 @@
       <div class="wc-stack">
         <h3 class="wc-panel__title wc-heading__subtitle agfields-stage__heading">1. Field Boundaries</h3>
         <p class="wc-text-muted">
-          Upload a GeoJSON of field polygons with a literal <code>field_id</code> column and one crop column per observed year.
+          Upload GeoJSON, Shapefile ZIP, or GeoParquet field polygons with a literal <code>field_id</code> column and one crop column per observed year.
         </p>
       </div>
     </header>
 
     {{ ui.file_upload(
          'agfields_geojson',
-         'Field boundary GeoJSON',
-         accept='.geojson,.json',
+         'Field boundary vector file',
+         accept='.geojson,.json,.zip,.parquet,.geoparquet',
          help='Use the project UTM EPSG shown in the header for best precision; WGS84 is accepted, and any other projected CRS must include correct CRS metadata. Maximum file size: 10 MB.',
          field_name='field_boundaries',
          attrs={'data-role': 'geojson-input'},

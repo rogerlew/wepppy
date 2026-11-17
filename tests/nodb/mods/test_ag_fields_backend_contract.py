@@ -118,7 +118,12 @@ def test_boundary_reupload_clears_schema_and_marks_subfields_stale(
         controller._subfields_source_signature = controller._schema_signature()
 
     source = tmp_path / "replacement.geojson"
-    source.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+    source.write_text(
+        '{"type":"FeatureCollection","features":[{"type":"Feature",'
+        '"properties":{"field_id":7},"geometry":{"type":"Polygon",'
+        '"coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}',
+        encoding="utf-8",
+    )
     frame = pd.DataFrame([{"field_id": 7, "Crop2001": "wheat"}])
     import geopandas as geopandas_module
 
@@ -155,7 +160,12 @@ def test_invalid_boundary_reupload_preserves_canonical_artifacts_and_state(
         controller._rotation_accessor = "Crop{}"
 
     source = tmp_path / "invalid.geojson"
-    source.write_text("new-invalid-content", encoding="utf-8")
+    source.write_text(
+        '{"type":"FeatureCollection","features":[{"type":"Feature",'
+        '"properties":{},"geometry":{"type":"Polygon",'
+        '"coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}',
+        encoding="utf-8",
+    )
     import geopandas as geopandas_module
 
     monkeypatch.setattr(
@@ -172,6 +182,50 @@ def test_invalid_boundary_reupload_preserves_canonical_artifacts_and_state(
     assert controller.geojson_hash == "old-hash"
     assert controller.field_id_key == "field_id"
     assert controller.rotation_accessor == "Crop{}"
+
+
+@pytest.mark.parametrize(
+    "geometry",
+    [
+        None,
+        {"type": "Point", "coordinates": [0, 0]},
+        {"type": "LineString", "coordinates": [[0, 0], [1, 1]]},
+        {"type": "GeometryCollection", "geometries": []},
+        {"type": "Polygon", "coordinates": []},
+    ],
+)
+def test_boundary_geometry_rejection_preserves_existing_state(
+    tmp_path: Path,
+    geometry: object,
+) -> None:
+    controller = _controller(tmp_path)
+    canonical = Path(controller.ag_fields_dir) / "fields.WGS.geojson"
+    canonical.write_text("old-valid-content", encoding="utf-8")
+    with controller.locked():
+        controller._field_boundaries_geojson = canonical.name
+        controller._field_boundaries_source_filename = "old-fields.geojson"
+        controller._geojson_hash = "old-hash"
+        controller._geojson_is_valid = True
+
+    source = tmp_path / "invalid-geometry.geojson"
+    source.write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {"type": "Feature", "properties": {"field_id": 1}, "geometry": geometry}
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Polygon or MultiPolygon"):
+        controller.validate_field_boundary_geojson(source)
+
+    assert canonical.read_text(encoding="utf-8") == "old-valid-content"
+    assert controller.field_boundaries_source_filename == "old-fields.geojson"
+    assert controller.geojson_hash == "old-hash"
 
 
 def test_plant_upload_normalizes_case_replaces_and_suffixes_archive_collisions(

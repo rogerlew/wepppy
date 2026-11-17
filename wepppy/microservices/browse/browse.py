@@ -146,6 +146,13 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
+from wepppy.microservices.browse.sensitive_vectors import (
+    can_access_batch_sensitive_vector,
+    can_access_run_sensitive_vector,
+    is_retained_original,
+    is_sensitive_vector_path,
+    sensitive_child_names,
+)
 from wepppy.microservices.browse.parquet_tables import (
     current_rss_kb as _current_rss_kb,
     log_parquet_operation as _log_parquet_operation,
@@ -1012,6 +1019,7 @@ async def _browse_tree_helper(
     allow_recorder: bool,
     is_admin: bool,
     filter_pattern_default='',
+    excluded_names: frozenset[str] = frozenset(),
 ):
     return await _flow_browse_tree_helper(
         sys.modules[__name__],
@@ -1023,6 +1031,7 @@ async def _browse_tree_helper(
         allow_recorder=allow_recorder,
         is_admin=is_admin,
         filter_pattern_default=filter_pattern_default,
+        excluded_names=excluded_names,
     )
 
 
@@ -1228,6 +1237,11 @@ async def _handle_schema_request(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="Schema path is required.",
         )
+    if is_sensitive_vector_path(subpath_value):
+        raise HTTPException(
+            status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail="Retained upload evidence is download-only.",
+        )
 
     path_lower = subpath_value.lower()
     if not path_lower.endswith((".parquet", ".geoparquet", ".pq")):
@@ -1245,6 +1259,18 @@ async def _handle_schema_request(
         allow_recorder=allow_recorder,
         is_admin=is_admin,
     )
+    resolved_relpath = os.path.relpath(os.path.realpath(target_path), wd)
+    if is_sensitive_vector_path(resolved_relpath):
+        if config == "batch":
+            sensitive_access = can_access_batch_sensitive_vector(context, runid)
+        else:
+            sensitive_access = can_access_run_sensitive_vector(context, runid)
+        if not sensitive_access:
+            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Access denied.")
+        raise HTTPException(
+            status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail="Retained upload evidence is download-only.",
+        )
     if not os.path.isfile(target_path):
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -1292,6 +1318,11 @@ async def _handle_browse_request(
 
     allow_recorder = bool(context and context.is_root)
     is_admin = _is_admin_context(context)
+    if is_retained_original(subpath_value):
+        raise HTTPException(
+            status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail="Retained upload originals are download-only.",
+        )
     violation = validate_raw_subpath(subpath_value)
     if violation is not None:
         if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
@@ -1303,6 +1334,29 @@ async def _handle_browse_request(
         )
 
     wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
+    requested_target = os.path.abspath(os.path.join(wd, subpath_value))
+    resolved_relpath = os.path.relpath(os.path.realpath(requested_target), wd)
+    if is_sensitive_vector_path(resolved_relpath):
+        if config == "batch":
+            resolved_access = can_access_batch_sensitive_vector(context, runid)
+        else:
+            resolved_access = can_access_run_sensitive_vector(context, runid)
+        if not resolved_access:
+            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Access denied.")
+        if is_retained_original(resolved_relpath):
+            raise HTTPException(
+                status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                detail="Retained upload originals are download-only.",
+            )
+    sensitive_children = sensitive_child_names(subpath_value)
+    if not sensitive_children:
+        excluded_names = frozenset()
+    else:
+        if config == "batch":
+            sensitive_access = can_access_batch_sensitive_vector(context, runid)
+        else:
+            sensitive_access = can_access_run_sensitive_vector(context, runid)
+        excluded_names = frozenset() if sensitive_access else sensitive_children
     flask_request = FlaskRequestAdapter(request)
     result = await _browse_tree_helper(
         runid,
@@ -1312,6 +1366,7 @@ async def _handle_browse_request(
         config,
         allow_recorder=allow_recorder,
         is_admin=is_admin,
+        excluded_names=excluded_names,
     )
     return ensure_response(result)
 

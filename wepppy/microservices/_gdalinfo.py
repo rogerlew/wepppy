@@ -28,6 +28,11 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
+from wepppy.microservices.browse.sensitive_vectors import (
+    can_access_batch_sensitive_vector,
+    can_access_run_sensitive_vector,
+    is_sensitive_vector_path,
+)
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.microservices.browse.errors import nodir_server_exception
 from wepppy.runtime_paths.fs import resolve as nodir_resolve
@@ -133,6 +138,8 @@ async def gdalinfo_with_subpath(request: Request) -> JSONResponse:
             redirect_on_401=False,
         )
         raise
+    if is_sensitive_vector_path(subpath):
+        raise HTTPException(status_code=415, detail="Retained upload evidence is download-only.")
 
     allow_recorder = auth_context.is_root
     raw_violation = validate_raw_subpath(subpath)
@@ -149,6 +156,11 @@ async def gdalinfo_with_subpath(request: Request) -> JSONResponse:
         subpath=subpath,
         allow_recorder=allow_recorder,
     )
+    resolved_relpath = os.path.relpath(os.path.realpath(target_path), wd)
+    if is_sensitive_vector_path(resolved_relpath):
+        if not can_access_run_sensitive_vector(auth_context, runid):
+            raise HTTPException(status_code=403, detail="Access denied.")
+        raise HTTPException(status_code=415, detail="Retained upload evidence is download-only.")
 
 
     command = f"gdalinfo -json {shlex.quote(target_path)}"
@@ -192,8 +204,6 @@ async def gdalinfo_culvert_with_subpath(request: Request) -> JSONResponse:
         subpath=subpath,
         allow_recorder=allow_recorder,
     )
-
-
     command = f"gdalinfo -json {shlex.quote(target_path)}"
     returncode, stdout, stderr = await _run_shell_command(command, os.path.dirname(target_path) or None)
     if returncode != 0:
@@ -221,6 +231,8 @@ async def gdalinfo_batch_with_subpath(request: Request) -> JSONResponse:
         )
     except BrowseAuthError as exc:
         raise exc.to_http_exception() from exc
+    if is_sensitive_vector_path(subpath):
+        raise HTTPException(status_code=415, detail="Retained upload evidence is download-only.")
 
     allow_recorder = auth_context.is_root
     raw_violation = validate_raw_subpath(subpath)
@@ -239,6 +251,11 @@ async def gdalinfo_batch_with_subpath(request: Request) -> JSONResponse:
         subpath=subpath,
         allow_recorder=allow_recorder,
     )
+    resolved_relpath = os.path.relpath(os.path.realpath(target_path), wd)
+    if is_sensitive_vector_path(resolved_relpath):
+        if not can_access_batch_sensitive_vector(auth_context, batch_name):
+            raise HTTPException(status_code=403, detail="Access denied.")
+        raise HTTPException(status_code=415, detail="Retained upload evidence is download-only.")
 
 
     command = f"gdalinfo -json {shlex.quote(target_path)}"

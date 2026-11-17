@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import json
 import logging
 import os
+import shutil
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -18,11 +19,14 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
 from starlette.datastructures import FormData, UploadFile
+from starlette.concurrency import run_in_threadpool
+from werkzeug.utils import secure_filename
 
 from wepppy.nodb.single_input_policy import single_input_uploads_enabled
 from wepppy.nodb.core import Ron
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.omni import Omni, OmniScenario
+from wepppy.nodb.mods.omni.omni_contrast_build_service import OmniContrastBuildService
 from wepppy.nodb.mods.omni.omni_sbs_freshness import child_source
 from wepppy.nodb.core import Watershed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -42,6 +46,14 @@ from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_
 from wepppy.rq.wepp_rq_stage_helpers import recover_mixed_nodir_roots as _recover_mixed_nodir_roots
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.microservices.upload_boundary import RasterUploadIdentity
+from wepppy.microservices.vector_upload_normalization import (
+    PreparedVectorUpload,
+    RetentionActor,
+    VectorUploadError,
+    prepare_vector_upload,
+    validate_feature_collection_geometries,
+)
+from wepppy.rq.auth_actor import current_auth_actor
 
 from .feature_access import require_feature_access
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -66,7 +78,7 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 SBS_MAX_BYTES = 100 * 1024 * 1024
-GEOJSON_ALLOWED_EXTENSIONS = ("geojson", "json")
+GEOJSON_ALLOWED_EXTENSIONS = ("geojson", "json", "zip", "parquet", "geoparquet")
 GEOJSON_MAX_BYTES = 100 * 1024 * 1024
 CONTRAST_SELECTION_MODE_DEFAULT = "cumulative"
 SCENARIO_FILTER_MIN_SLOPE_FIELD = "filter_hill_min_slope_pct"
@@ -192,6 +204,32 @@ def _upload_status(exc: UploadError | ValueError) -> int:
     if isinstance(exc, UploadError):
         return int(getattr(exc, "status_code", 400))
     return 400
+
+
+def _retention_actor() -> RetentionActor:
+    actor = current_auth_actor() or {}
+    token_class = str(actor.get("token_class") or "").strip().lower()
+    if token_class == "user":
+        try:
+            user_id = int(actor.get("user_id"))
+        except (TypeError, ValueError):
+            user_id = 0
+        if user_id > 0:
+            return RetentionActor("human", user_id)
+    if token_class in {"service", "mcp"}:
+        subject = str(actor.get("sub") or "").strip()
+        if subject:
+            return RetentionActor(token_class, subject)
+    return RetentionActor("unattributed", None)
+
+
+def _run_evidence_roots(wd: str) -> tuple[Path, ...]:
+    root = Path(wd)
+    return (
+        root / "roads" / "vector_upload_attempts",
+        root / "ag_fields" / "vector_upload_attempts",
+        root / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
+    )
 
 
 def _normalize_contrast_selection_mode(value: Any) -> str:
@@ -572,6 +610,7 @@ def _prepare_omni_contrasts(
     runid: str,
     config: str,
     wd: str,
+    prepared_uploads: list[tuple[PreparedVectorUpload, Path]] | None = None,
 ) -> dict[str, Any]:
     selection_mode = _normalize_contrast_selection_mode(payload.get("omni_contrast_selection_mode"))
     contrast_pairs = _coerce_contrast_pairs(payload, raw_json)
@@ -657,38 +696,61 @@ def _prepare_omni_contrasts(
 
     geojson_name_key = payload.get("omni_contrast_geojson_name_key")
     geojson_path = payload.get("omni_contrast_geojson_path")
+    prepared: PreparedVectorUpload | None = None
     upload = _extract_upload(form, "omni_contrast_geojson")
     if upload and upload.filename:
-        uploads_dir = Path(wd) / "_pups" / "omni" / "contrasts" / "_uploads" / uuid4().hex
-        try:
-            geojson_path = str(
-                save_upload_file(
-                    upload,
-                    allowed_extensions=GEOJSON_ALLOWED_EXTENSIONS,
-                    dest_dir=uploads_dir,
-                    max_bytes=GEOJSON_MAX_BYTES,
-                    overwrite=True,
-                )
+        contrasts_root = Path(wd) / "_pups" / "omni" / "contrasts"
+        contrasts_root.mkdir(parents=True, exist_ok=True)
+        attempt_root = contrasts_root / "vector_upload_attempts"
+        accepted_dir = contrasts_root / "_uploads" / uuid4().hex
+        accepted_name = f"{Path(secure_filename(upload.filename)).stem}.geojson"
+        accepted_path = accepted_dir / accepted_name
+
+        def validate_candidate(path: Path, candidate: dict[str, object]) -> dict[str, object]:
+            result = validate_feature_collection_geometries(
+                candidate,
+                ("Polygon", "MultiPolygon"),
             )
-        except UploadError as exc:
-            raise UploadError(
-                f"Invalid GeoJSON upload: {exc}",
-                status_code=exc.status_code,
-            ) from exc
+            OmniContrastBuildService.prevalidate_user_defined_geojson(str(path))
+            return result
+
+        prepared = prepare_vector_upload(
+            raw_filename=upload.filename,
+            stream=upload.file,
+            endpoint_max_bytes=GEOJSON_MAX_BYTES,
+            attempt_root=attempt_root,
+            evidence_roots=_run_evidence_roots(wd),
+            filesystem_root=Path(wd),
+            project_key=f"run:{runid}",
+            workflow="omni_contrasts",
+            project_identity=runid,
+            actor=_retention_actor(),
+            validator=validate_candidate,
+        )
+        if prepared_uploads is None:
+            prepared.reject("workflow_integration_missing")
+            raise RuntimeError("Omni upload preparation requires a publication owner.")
+        prepared_uploads.append((prepared, accepted_path))
+        geojson_path = str(prepared.candidate_path)
     if selection_mode == "user_defined_areas" and not geojson_path:
         raise ValueError("GeoJSON upload or path is required for user-defined contrasts.")
 
     output_options: dict[str, Any] = {}
-    for key in (
-        "omni_contrast_output_chan_out",
-        "omni_contrast_output_tcr_out",
-        "omni_contrast_output_chnwb",
-        "omni_contrast_output_soil_pw0",
-        "omni_contrast_output_plot_pw0",
-        "omni_contrast_output_ebe_pw0",
-    ):
-        if key in payload:
-            output_options[key] = _coerce_optional_bool(payload.get(key), key)
+    try:
+        for key in (
+            "omni_contrast_output_chan_out",
+            "omni_contrast_output_tcr_out",
+            "omni_contrast_output_chnwb",
+            "omni_contrast_output_soil_pw0",
+            "omni_contrast_output_plot_pw0",
+            "omni_contrast_output_ebe_pw0",
+        ):
+            if key in payload:
+                output_options[key] = _coerce_optional_bool(payload.get(key), key)
+    except (TypeError, ValueError):
+        if prepared is not None:
+            prepared.reject("invalid_contrast_output_option")
+        raise
 
     return {
         "omni_contrast_selection_mode": selection_mode,
@@ -708,6 +770,42 @@ def _prepare_omni_contrasts(
         "order_reduction_passes": order_reduction_passes,
         **output_options,
     }
+
+
+def _parse_inputs_with_prepared_upload(
+    *,
+    omni: Omni,
+    parsed_inputs: dict[str, Any],
+    wd: str,
+    prepared_upload: tuple[PreparedVectorUpload, Path] | None,
+) -> None:
+    if prepared_upload is None:
+        omni.parse_inputs(parsed_inputs)
+        return
+    prepared, accepted_path = prepared_upload
+
+    def publish_candidate(candidate_path: Path) -> None:
+        accepted_path.parent.mkdir(parents=True, exist_ok=False)
+        published = False
+        try:
+            shutil.copy2(candidate_path, accepted_path)
+            OmniContrastBuildService.prevalidate_user_defined_geojson(str(accepted_path))
+            parsed_inputs["omni_contrast_geojson_path"] = str(accepted_path)
+            omni.parse_inputs(parsed_inputs)
+            published = True
+        finally:
+            if not published:
+                accepted_path.unlink(missing_ok=True)
+                try:
+                    accepted_path.parent.rmdir()
+                except OSError:
+                    pass
+
+    prepared.publish(
+        mutation=publish_candidate,
+        canonical_path=accepted_path,
+        canonical_relative_path=os.path.relpath(accepted_path, wd),
+    )
 
 
 async def _run_omni(
@@ -832,15 +930,20 @@ async def _run_omni_contrasts(
     raw_json = getattr(request, "_json", None)
     form = await request_form(request)
 
+    prepared_uploads: list[tuple[PreparedVectorUpload, Path]] = []
     try:
-        parsed_inputs = _prepare_omni_contrasts(
+        parsed_inputs = await run_in_threadpool(
+            _prepare_omni_contrasts,
             payload,
             raw_json,
             form,
             runid=runid,
             config=config,
             wd=wd,
+            prepared_uploads=prepared_uploads,
         )
+    except VectorUploadError as exc:
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
     except UploadError as exc:
         return error_response(str(exc), status_code=_upload_status(exc))
     except ValueError as exc:
@@ -860,13 +963,20 @@ async def _run_omni_contrasts(
         "user_defined_hillslope_groups",
         "stream_order",
     }:
+        if prepared_uploads:
+            prepared_uploads[0][0].reject("unsupported_contrast_selection_mode")
         return error_response(
             f'Contrast selection mode "{selection_mode}" is not implemented yet.',
             status_code=400,
         )
 
     try:
-        omni.parse_inputs(parsed_inputs)
+        _parse_inputs_with_prepared_upload(
+            omni=omni,
+            parsed_inputs=parsed_inputs,
+            wd=wd,
+            prepared_upload=prepared_uploads[0] if prepared_uploads else None,
+        )
         if getattr(omni, "run_group", "") == "batch" or _is_base_project_context(
             runid,
             config,
@@ -971,15 +1081,20 @@ async def _dry_run_omni_contrasts(
     raw_json = getattr(request, "_json", None)
     form = await request_form(request)
 
+    prepared_uploads: list[tuple[PreparedVectorUpload, Path]] = []
     try:
-        parsed_inputs = _prepare_omni_contrasts(
+        parsed_inputs = await run_in_threadpool(
+            _prepare_omni_contrasts,
             payload,
             raw_json,
             form,
             runid=runid,
             config=config,
             wd=wd,
+            prepared_uploads=prepared_uploads,
         )
+    except VectorUploadError as exc:
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
     except UploadError as exc:
         return error_response(str(exc), status_code=_upload_status(exc))
     except ValueError as exc:
@@ -996,13 +1111,20 @@ async def _dry_run_omni_contrasts(
         "user_defined_hillslope_groups",
         "stream_order",
     }:
+        if prepared_uploads:
+            prepared_uploads[0][0].reject("unsupported_contrast_selection_mode")
         return error_response(
             f'Contrast selection mode "{selection_mode}" is not implemented yet.',
             status_code=400,
         )
 
     try:
-        omni.parse_inputs(parsed_inputs)
+        _parse_inputs_with_prepared_upload(
+            omni=omni,
+            parsed_inputs=parsed_inputs,
+            wd=wd,
+            prepared_upload=prepared_uploads[0] if prepared_uploads else None,
+        )
         if selection_mode == "cumulative":
             threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
             if threshold_fraction is None:

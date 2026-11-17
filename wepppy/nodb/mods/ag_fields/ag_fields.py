@@ -240,6 +240,12 @@ class AgFields(NoDbBase):
         if source_path is None:
             raise FileNotFoundError(f'Field boundary geojson file not found: {search_paths[0]}')
 
+        try:
+            source_payload = json.loads(source_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            raise ValueError("Field boundary upload must be valid GeoJSON.") from exc
+        self._validate_field_boundary_geometries(source_payload)
+
         source_basename = PurePosixPath(str(source_filename or '').replace('\\', '/')).name.strip()
         if not source_basename:
             source_basename = source_path.name
@@ -303,6 +309,29 @@ class AgFields(NoDbBase):
         request_catalog_refresh(self.wd, relative_path)
 
         return dict(field_id_duplicates=sorted(duplicates))
+
+    @staticmethod
+    def _validate_field_boundary_geometries(payload: Any) -> None:
+        def has_coordinate_pair(value: Any) -> bool:
+            if not isinstance(value, list):
+                return False
+            if len(value) >= 2 and all(isinstance(item, (int, float)) for item in value[:2]):
+                return True
+            return any(has_coordinate_pair(item) for item in value)
+
+        if not isinstance(payload, dict) or payload.get("type") != "FeatureCollection":
+            raise ValueError("Field boundary GeoJSON must be a FeatureCollection.")
+        features = payload.get("features")
+        if not isinstance(features, list) or not features:
+            raise ValueError("Field boundary GeoJSON must contain at least one polygon feature.")
+        for index, feature in enumerate(features):
+            geometry = feature.get("geometry") if isinstance(feature, dict) else None
+            geometry_type = geometry.get("type") if isinstance(geometry, dict) else None
+            coordinates = geometry.get("coordinates") if isinstance(geometry, dict) else None
+            if geometry_type not in {"Polygon", "MultiPolygon"} or not has_coordinate_pair(coordinates):
+                raise ValueError(
+                    f"Field boundary feature {index} must have a nonempty Polygon or MultiPolygon geometry."
+                )
 
     def get_unique_crops(self) -> Set[str]:
         """Return the distinct crop names referenced by the rotation schedule."""

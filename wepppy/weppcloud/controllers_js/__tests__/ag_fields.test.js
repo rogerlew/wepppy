@@ -7,7 +7,7 @@ const createControlBaseStub = require("./helpers/control_base_stub");
 function buildHtml() {
     return `
         <form id="ag_fields_form">
-            <input type="file" data-role="geojson-input">
+            <input type="file" data-role="geojson-input" accept=".geojson,.json,.zip,.parquet,.geoparquet">
             <button type="button" data-action="upload-boundaries" data-role="upload-button">Upload Field Boundaries</button>
             <div data-role="upload-status"></div>
             <div data-role="boundary-file-display" hidden><code data-role="boundary-filename"></code></div>
@@ -557,7 +557,7 @@ describe("AgFields controller", () => {
         const boundaryInput = document.querySelector('[data-role="geojson-input"]');
         Object.defineProperty(boundaryInput, "files", {
             configurable: true,
-            value: [new File(["{}"], "fields.geojson", { type: "application/geo+json" })],
+            value: [new File(["PAR1"], "fields.parquet", { type: "application/vnd.apache.parquet" })],
         });
         document.querySelector('[data-action="upload-boundaries"]').dispatchEvent(
             new MouseEvent("click", { bubbles: true }),
@@ -662,7 +662,7 @@ describe("AgFields controller", () => {
         const input = document.querySelector('[data-role="geojson-input"]');
         Object.defineProperty(input, "files", {
             configurable: true,
-            value: [new File(["{}"], "fields.geojson", { type: "application/geo+json" })],
+            value: [new File(["PAR1"], "fields.parquet", { type: "application/vnd.apache.parquet" })],
         });
         const error = Object.assign(new Error("Bad Request"), {
             name: "HttpError",
@@ -679,6 +679,9 @@ describe("AgFields controller", () => {
         expect(document.querySelector('[data-role="upload-status"]').textContent).toContain(
             "Missing literal field_id column.",
         );
+        const uploadCall = httpMock.requestWithSessionToken.mock.calls.find((call) => call[1] && call[1].body instanceof FormData);
+        const requestOptions = uploadCall[1];
+        expect(requestOptions.body.get("field_boundaries").name).toBe("fields.parquet");
         expect(button.disabled).toBe(false);
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
     });
