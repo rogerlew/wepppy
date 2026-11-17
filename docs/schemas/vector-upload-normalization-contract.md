@@ -259,7 +259,9 @@ scope lock in ADR-0145. One run-scope lock covers all three run workflows; Batch
 uses its project scope. Quota accounting includes working reservations, originals,
 receipts, candidates and private sensitive archives. Exhaustion returns
 `507 vector_retention_quota_exceeded` before converter work and preserves older
-evidence and accepted state. No automatic expiry or eviction is allowed. A root
+evidence and accepted state. No automatic expiry or eviction is allowed. Omni contrast clear/rebuild/stale-run
+cleanup preserves both `_uploads` and `vector_upload_attempts` byte-for-byte;
+retained attempts are project records, never generated contrast workspaces. A root
 operator may export then remove only an entire terminal attempt/private archive
 under the same lock; deletion is explicitly audited and partial provenance
 deletion is forbidden.

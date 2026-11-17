@@ -516,7 +516,7 @@ class OmniStateContrastMixin:
             contrasts_dir = None
         if contrasts_dir:
             for entry in os.listdir(contrasts_dir):
-                if entry == '_uploads':
+                if entry in {'_uploads', 'vector_upload_attempts'}:
                     continue
                 path = _join(contrasts_dir, entry)
                 if os.path.isdir(path):
@@ -540,7 +540,7 @@ class OmniStateContrastMixin:
         active = {str(contrast_id) for contrast_id in active_ids}
         if contrasts_dir:
             for entry in os.listdir(contrasts_dir):
-                if entry == '_uploads':
+                if entry in {'_uploads', 'vector_upload_attempts'}:
                     continue
                 path = _join(contrasts_dir, entry)
                 if os.path.isdir(path) and entry not in active:

@@ -83,7 +83,14 @@ def _prepare(
     workflow: str,
     allowed: tuple[str, ...],
 ):
-    attempts = project / "vector_upload_attempts"
+    relative = {
+        "roads": "roads/vector_upload_attempts",
+        "ag_fields": "ag_fields/vector_upload_attempts",
+        "batch_runner": "resources/vector_upload_attempts",
+        "omni_run": "_pups/omni/contrasts/vector_upload_attempts",
+        "omni_dry_run": "_pups/omni/contrasts/vector_upload_attempts",
+    }[workflow]
+    attempts = project / relative
     source = _source(fixture_root, geometry, suffix)
     with source.open("rb") as stream:
         return prepare_vector_upload(
@@ -387,5 +394,6 @@ def test_final5_omni_detached_reload_and_generated_build_report(
     sidecar = Path(detached._contrast_sidecar_path(1)).read_text().strip().split("\t")
     assert sidecar == ["21", str(project / "_pups/omni/scenarios/mulch/wepp/output/H1")]
     overlay = json.loads(Path(detached._contrast_ids_geojson_path()).read_text())
+    assert_receipt(prepared, _source(fixture_root, "polygon", suffix), canonical)
     assert len(overlay["features"]) == 1
     assert shape(overlay["features"][0]["geometry"]).equals(shape(expected["features"][0]["geometry"]))
