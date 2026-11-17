@@ -53,6 +53,16 @@ from . import _slope_inputs
 
 from . import _spatial
 
+from . import _queries
+
+from . import _parameterization_support
+
+from . import _pass_routing
+
+from . import _reporting
+
+from . import _native_runner
+
 __all__ = ["Roads"]
 
 
@@ -855,43 +865,10 @@ class Roads(NoDbBase):
         }
 
     def _load_segment_features(self) -> List[Dict[str, Any]]:
-        segment_path = Path(self.roads_monotonic_geojson_path)
-        if not segment_path.exists():
-            raise FileNotFoundError(
-                "Prepared roads segments not found. Run prepare_segments before run_roads_wepp."
-            )
-
-        payload = json.loads(segment_path.read_text(encoding="utf-8"))
-        features = payload.get("features")
-        if not isinstance(features, list):
-            raise ValueError("Prepared roads segment GeoJSON is malformed.")
-        roads_lifecycle.segment_ids(features)
-        self._append_roads_log(
-            "run",
-            "loaded_prepared_segments",
-            {
-                "segment_feature_count": len(features),
-                "roads_monotonic_geojson_relpath": os.path.relpath(segment_path, self.wd),
-            },
-        )
-        return features
+        return _queries._load_segment_features(self)
 
     def _load_prepared_segments_geojson(self) -> Dict[str, Any]:
-        segment_path = Path(self.roads_monotonic_geojson_path)
-        if not segment_path.exists():
-            raise FileNotFoundError(
-                "Prepared roads segments not found. Run prepare_segments first."
-            )
-
-        payload = json.loads(segment_path.read_text(encoding="utf-8"))
-        if not isinstance(payload, Mapping):
-            raise ValueError("Prepared roads segment GeoJSON is malformed.")
-        if payload.get("type") != "FeatureCollection":
-            raise ValueError("Prepared roads segment payload must be a FeatureCollection.")
-        features = payload.get("features")
-        if not isinstance(features, list):
-            raise ValueError("Prepared roads segment payload is missing features.")
-        return dict(payload)
+        return _queries._load_prepared_segments_geojson(self)
 
     @staticmethod
     def _find_segment_feature(
@@ -911,26 +888,7 @@ class Roads(NoDbBase):
         return None
 
     def _load_segment_execution_manifest(self) -> Dict[str, Dict[str, Any]]:
-        manifest_path = Path(self.roads_segment_pass_manifest_path)
-        if not manifest_path.exists():
-            return {}
-        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-        if not isinstance(payload, list):
-            raise ValueError("Roads segment pass manifest is malformed.")
-        records: Dict[str, Dict[str, Any]] = {}
-        for row in payload:
-            if not isinstance(row, Mapping):
-                continue
-            segment_id = str(row.get("segment_id") or "").strip()
-            if not segment_id:
-                continue
-            members = row.get("source_segment_ids", [segment_id])
-            if not isinstance(members, list) or not members or any(not isinstance(key, str) or not key for key in members):
-                raise ValueError("Roads profile source membership is malformed.")
-            for member in members:
-                records[member] = dict(row)
-
-        return records
+        return _queries._load_segment_execution_manifest(self)
 
     def _build_segment_profile_for_query(
         self,
@@ -938,260 +896,19 @@ class Roads(NoDbBase):
         feature: Mapping[str, Any],
         params: Mapping[str, Any],
     ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
-        input_crs_raw = str(params.get("input_crs") or "EPSG:4326")
-        try:
-            input_crs = CRS.from_user_input(input_crs_raw)
-        except Exception as exc:
-            return None, safe_text(f"Unable to parse Roads input CRS {input_crs_raw!r}: {exc}", source_profile=current_profile(WORKER))
-
-        try:
-            raster_paths = self._resolve_prepare_raster_paths()
-        except Exception as exc:
-            return None, safe_text(f"Unable to resolve Roads DEM path: {exc}", source_profile=current_profile(WORKER))
-
-        try:
-            with rasterio.open(raster_paths["dem_path"]) as dem_dataset:
-                if dem_dataset.crs is None:
-                    return None, "Roads DEM is missing CRS metadata."
-                dem_crs = CRS.from_user_input(dem_dataset.crs)
-                input_to_wgs84 = Transformer.from_crs(input_crs, CRS.from_epsg(4326), always_xy=True)
-                input_to_dem = Transformer.from_crs(input_crs, dem_crs, always_xy=True)
-                geod = Geod(ellps="WGS84")
-                profile = self._build_segment_profile(
-                    feature=feature,
-                    input_crs=input_crs,
-                    dem_dataset=dem_dataset,
-                    input_to_wgs84=input_to_wgs84,
-                    input_to_dem=input_to_dem,
-                    geod=geod,
-                )
-        except (RasterioIOError, ValueError) as exc:
-            return None, safe_text(str(exc), source_profile=current_profile(WORKER))
-
-        return profile, None
+        return _queries._build_segment_profile_for_query(self, feature=feature, params=params)
 
     @staticmethod
     def _derive_routing_mode_hint(properties: Mapping[str, Any]) -> str:
-        routing_eligibility = str(properties.get("_roads_routing_eligibility") or "").strip()
-        chn_lowpoint = properties.get("topaz_id_chn_lowpoint")
-        hill_lowpoint = properties.get("topaz_id_hill_lowpoint")
-        if chn_lowpoint is not None and hill_lowpoint is not None:
-            return "channel_associated"
-        if routing_eligibility == "non_channel_routable":
-            return "non_channel_routed"
-        if routing_eligibility:
-            return routing_eligibility
-        return "unknown"
+        return _queries._derive_routing_mode_hint(properties)
 
     @roads_lifecycle.inspection
     def query_map_segments_geojson(self) -> Dict[str, Any]:
-        payload = self._load_prepared_segments_geojson()
-        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
-        attribute_field_map = self._normalize_attribute_field_map(
-            params.get("attribute_field_map"),
-            known_fields=None,
-        )
-
-        features_raw = payload.get("features", [])
-        features_out: List[Dict[str, Any]] = []
-        for feature_index, feature in enumerate(features_raw):
-            if not isinstance(feature, Mapping):
-                continue
-            geometry = feature.get("geometry")
-            properties_raw = feature.get("properties")
-            properties: Dict[str, Any] = dict(properties_raw) if isinstance(properties_raw, Mapping) else {}
-            segment_id = self._segment_key(feature, fallback_index=feature_index)
-            properties["segment_id"] = segment_id
-            design, _ = self._resolve_design_for_feature(
-                properties=properties,
-                attribute_field_map=attribute_field_map,
-            )
-            if isinstance(design, str) and design:
-                properties["design"] = design
-            properties["routing_mode_hint"] = self._derive_routing_mode_hint(properties)
-            properties["non_channel_routable"] = self._is_truthy_property(properties.get("_roads_non_channel_routable"))
-            features_out.append(
-                {
-                    "type": "Feature",
-                    "geometry": geometry,
-                    "properties": properties,
-                }
-            )
-
-        response_payload: Dict[str, Any] = {
-            "type": "FeatureCollection",
-            "features": features_out,
-        }
-        if isinstance(payload.get("name"), str) and payload.get("name"):
-            response_payload["name"] = payload["name"]
-        self._append_roads_log(
-            "query",
-            "query_map_segments_geojson",
-            {
-                "feature_count": len(features_out),
-                "roads_monotonic_geojson_relpath": os.path.relpath(self.roads_monotonic_geojson_path, self.wd),
-            },
-        )
-        return response_payload
+        return _queries.query_map_segments_geojson(self)
 
     @roads_lifecycle.inspection
     def query_segment_detail(self, segment_id: str) -> Dict[str, Any]:
-        segment_key = str(segment_id or "").strip()
-        if not segment_key:
-            raise ValueError("segment_id is required.")
-
-        payload = self._load_prepared_segments_geojson()
-        feature = self._find_segment_feature(payload, segment_id=segment_key)
-        if feature is None:
-            raise KeyError(f"Road segment {segment_key!r} was not found in prepared roads artifacts.")
-
-        properties_raw = feature.get("properties")
-        properties: Dict[str, Any] = dict(properties_raw) if isinstance(properties_raw, Mapping) else {}
-        properties["segment_id"] = segment_key
-
-        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
-        attribute_field_map = self._normalize_attribute_field_map(
-            params.get("attribute_field_map"),
-            known_fields=None,
-        )
-
-        warning_counts: Counter[str] = Counter()
-        warning_examples: List[Dict[str, Any]] = []
-        design, design_source_key = self._resolve_design_for_feature(
-            properties=properties,
-            attribute_field_map=attribute_field_map,
-            warning_counts=warning_counts,
-            warning_examples=warning_examples,
-            warning_limit=DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT,
-            segment_id=segment_key,
-        )
-
-        resolved_inputs: Optional[Dict[str, Any]] = None
-        if design is not None:
-            resolved_inputs = self._resolve_segment_run_inputs(
-                properties=properties,
-                params=params,
-                segment_id=segment_key,
-                design=design,
-                warning_counts=warning_counts,
-                warning_examples=warning_examples,
-                warning_limit=DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT,
-            )
-            resolved_inputs["resolution_sources"]["design"] = (
-                "mapped_primary" if design_source_key == attribute_field_map.get("design") else "segment_property"
-            )
-
-        execution_records = (self._load_segment_execution_manifest()
-                             if roads_lifecycle.available(self.wd) else {})
-        execution_record = execution_records.get(segment_key)
-        if not isinstance(execution_record, Mapping):
-            execution_record = {}
-
-        profile_values: Dict[str, Optional[float]] = {
-            "segment_length_m": self._as_float_or_none(execution_record.get("segment_length_m")),
-            "slope_pct_raw": self._as_float_or_none(execution_record.get("slope_pct_raw")),
-            "slope_pct_clamped": self._as_float_or_none(execution_record.get("slope_pct_clamped")),
-            "elevation_high_m": self._as_float_or_none(execution_record.get("elevation_high_m")),
-            "elevation_low_m": self._as_float_or_none(execution_record.get("elevation_low_m")),
-        }
-        profile_error: Optional[str] = None
-        if all(value is None for value in profile_values.values()) and design is not None:
-            computed_profile, profile_error = self._build_segment_profile_for_query(
-                feature=feature,
-                params=params,
-            )
-            if computed_profile is not None:
-                profile_values = {
-                    "segment_length_m": self._as_float_or_none(computed_profile.get("segment_length_m")),
-                    "slope_pct_raw": self._as_float_or_none(computed_profile.get("raw_slope_pct")),
-                    "slope_pct_clamped": self._as_float_or_none(computed_profile.get("slope_pct")),
-                    "elevation_high_m": self._as_float_or_none(computed_profile.get("elevation_high_m")),
-                    "elevation_low_m": self._as_float_or_none(computed_profile.get("elevation_low_m")),
-                }
-
-        topaz_id_chn_lowpoint = self._as_int_or_none(
-            execution_record.get("topaz_id_chn_lowpoint", properties.get("topaz_id_chn_lowpoint"))
-        )
-        topaz_id_hill_lowpoint = self._as_int_or_none(
-            execution_record.get("topaz_id_hill_lowpoint", properties.get("topaz_id_hill_lowpoint"))
-        )
-        routing_eligibility = str(
-            execution_record.get("routing_eligibility")
-            or properties.get("_roads_routing_eligibility")
-            or ""
-        )
-        routing_mode = str(execution_record.get("routing_mode") or self._derive_routing_mode_hint(properties))
-        non_channel_routable = self._is_truthy_property(properties.get("_roads_non_channel_routable"))
-        if routing_mode == "non_channel_routed":
-            non_channel_routable = True
-
-        result: Dict[str, Any] = {
-            "segment_id": segment_key,
-            "design": str(execution_record.get("design") or (resolved_inputs or {}).get("design") or design or ""),
-            "surface": str(execution_record.get("surface") or (resolved_inputs or {}).get("surface") or ""),
-            "traffic": str(execution_record.get("traffic") or (resolved_inputs or {}).get("traffic") or ""),
-            "soil_texture": str(
-                execution_record.get("soil_texture") or (resolved_inputs or {}).get("soil_texture") or ""
-            ),
-            "rfg_pct": self._as_float_or_none(execution_record.get("rfg_pct", (resolved_inputs or {}).get("rfg_pct"))),
-            "road_width_m": self._as_float_or_none(
-                execution_record.get("road_width_m", (resolved_inputs or {}).get("road_width_m"))
-            ),
-            "segment_length_m": profile_values["segment_length_m"],
-            "slope_pct_raw": profile_values["slope_pct_raw"],
-            "slope_pct_clamped": profile_values["slope_pct_clamped"],
-            "elevation_high_m": profile_values["elevation_high_m"],
-            "elevation_low_m": profile_values["elevation_low_m"],
-            "topaz_id_chn_lowpoint": topaz_id_chn_lowpoint,
-            "topaz_id_hill_lowpoint": topaz_id_hill_lowpoint,
-            "routing_eligibility": routing_eligibility,
-            "routing_mode": routing_mode,
-            "channel_associated": routing_mode == "channel_associated",
-            "non_channel_routable": bool(non_channel_routable),
-            "target_hillslope_wepp_id": self._as_int_or_none(execution_record.get("target_hillslope_wepp_id")),
-            "segment_run_id": self._as_int_or_none(execution_record.get("segment_run_id")),
-            "execution_status": str(execution_record.get("status") or ""),
-            "buffer_length_m": self._as_float_or_none(
-                execution_record.get("buffer_length_m", properties.get("buffer_length_m"))
-            ),
-            "buffer_slope_pct": self._as_float_or_none(
-                execution_record.get("buffer_slope_pct", properties.get("buffer_slope_pct"))
-            ),
-            "fill_length_m": self._as_float_or_none(
-                execution_record.get("fill_length_m", (resolved_inputs or {}).get("fill_length_m", properties.get("fill_length_m")))
-            ),
-            "fill_slope_pct": self._as_float_or_none(
-                execution_record.get("fill_slope_pct", (resolved_inputs or {}).get("fill_slope_pct", properties.get("fill_slope_pct")))
-            ),
-            "trace_path_length_m": self._as_float_or_none(execution_record.get("trace_path_length_m")),
-            "trace_mean_slope": self._as_float_or_none(execution_record.get("trace_mean_slope")),
-            "trace_drop_m": self._as_float_or_none(execution_record.get("trace_drop_m")),
-            "trace_termination_reason": str(execution_record.get("trace_termination_reason") or ""),
-            "resolution_sources": dict((resolved_inputs or {}).get("resolution_sources", {})),
-            "mapping_warning_counts": dict(sorted(warning_counts.items())),
-            "mapping_warning_examples": warning_examples,
-            "design_source_key": design_source_key,
-            "roads_params_signature": self._params_signature(params),
-            "profile_error": profile_error,
-            "placement": {key: execution_record.get(key) for key in (
-                "placement_policy", "placement_adjustment", "placement_adjustment_reason",
-                "placement_source", "original_top_landuse_length_m", "hillslope_length_m",
-                "top_landuse_length_m", "bottom_landuse_length_m", "discha_median_m",
-                "upslope_runon_assumed_zero", "top_ofe_compensation_m", "bottom_ofe_compensation_m",
-            )} if design == "outslope_unrutted" else None,
-            "feature_properties": properties,
-        }
-        self._append_roads_log(
-            "query",
-            "query_segment_detail",
-            {
-                "segment_id": segment_key,
-                "routing_mode": result["routing_mode"],
-                "execution_status": result["execution_status"] or "not_run",
-                "profile_error": profile_error,
-            },
-        )
-        return result
+        return _queries.query_segment_detail(self, segment_id)
 
     @roads_lifecycle.mutation
     def prepare_segments(self) -> Dict[str, Any]:
@@ -1316,19 +1033,7 @@ class Roads(NoDbBase):
 
     @staticmethod
     def _safe_link_or_copy(src: str, dst: str) -> str:
-        src_path = Path(src)
-        dst_path = Path(dst)
-        dst_path.parent.mkdir(parents=True, exist_ok=True)
-
-        if dst_path.exists() or dst_path.is_symlink():
-            dst_path.unlink()
-
-        try:
-            os.symlink(src_path, dst_path)
-            return "symlink"
-        except OSError:
-            shutil.copy2(src_path, dst_path)
-            return "copy"
+        return _pass_routing._safe_link_or_copy(src, dst)
 
     @staticmethod
     def _segment_key(feature: Mapping[str, Any], *, fallback_index: Optional[int] = None) -> str:
@@ -1888,366 +1593,72 @@ class Roads(NoDbBase):
 
     def _saved_parameterization_state(self):
         # A persisted null is malformed, distinct from an absent legacy key.
-        state = getattr(self, "_parameterization", None)
-        return {} if state is None and "_parameterization" in self.__dict__ else state
+        return _parameterization_support._saved_parameterization_state(self)
 
     def _parameterization_template_path(self, directory: str, name: str) -> Path:
-        state = self._saved_parameterization_state()
-        if state is None:
-            return Path(self.roads_legacy_templates_dir) / directory / name
-        root = getattr(self, "_parameterization_runtime_templates", None)
-        if root is None:
-            self._ensure_roads_dirs()
-            root = roads_parameterization.materialize_baseline(state, Path(self.roads_runs_dir))
-            self._parameterization_runtime_templates = root
-        return Path(root) / directory / name
+        return _parameterization_support._parameterization_template_path(self, directory, name)
 
     def _apply_parameterization_to_soil(self, path, template_path, traffic, ofe_order):
-        state = self._saved_parameterization_state()
-        if state is None:
-            return
-        record = roads_parameterization.apply_soil_overrides(
-            path, state, ofe_order, template_name=Path(template_path).name, traffic=traffic
+        return _parameterization_support._apply_parameterization_to_soil(
+            self,
+            path,
+            template_path,
+            traffic,
+            ofe_order,
         )
-        cache = getattr(self, "_parameterization_runtime_readbacks", None)
-        if cache is None:
-            cache = self._parameterization_runtime_readbacks = {}
-        cache[str(Path(path))] = record
 
     def _record_parameterization_inputs(self, soil_path, slope_path, management_path):
-        readbacks = getattr(self, "_parameterization_runtime_readbacks", {})
-        provenance = readbacks.get(str(Path(soil_path)))
-        if provenance is None:
-            raise ValueError("Roads native soil has no parameterization readback.")
-        files = []
-        for path in (soil_path, slope_path, management_path):
-            path = Path(path)
-            if not path.is_file() or not path.resolve().is_relative_to(Path(self.wd).resolve()):
-                raise ValueError(f"Roads parameterization input is missing or outside the run: {path.name}")
-            files.append({"relpath": os.path.relpath(path, self.wd),
-                          "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
-        provenance["input_files"] = files
-        # Visible even if native execution fails before the manifest is written.
-        Path(soil_path).with_suffix(".parameterization.json").write_text(
-            json.dumps(provenance, indent=2, sort_keys=True), encoding="utf-8"
+        return _parameterization_support._record_parameterization_inputs(
+            self,
+            soil_path,
+            slope_path,
+            management_path,
         )
 
     def _attach_parameterization_records(self, records):
-        state = roads_parameterization.validate_state(self._saved_parameterization_state())
-        signature = roads_parameterization.configuration_hash(state)
-        readbacks = getattr(self, "_parameterization_runtime_readbacks", {})
-        for record in records:
-            run_id = record.get("segment_run_id")
-            matched = [(path, value) for path, value in readbacks.items()
-                       if Path(path).name.startswith(f"p{run_id}.")]
-            if matched:
-                _, provenance = matched[0]
-                provenance = json.loads(json.dumps(provenance))
-                if record.get("status") == "completed":
-                    files = provenance.get("input_files", [])
-                    if not provenance.get("ofes") or {Path(row["relpath"]).suffix for row in files} != {".sol", ".slp", ".man"}:
-                        raise ValueError("Completed Roads profile lacks complete native parameterization inputs.")
-                    for row in files:
-                        path = Path(self.wd) / row["relpath"]
-                        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != row["sha256"]:
-                            raise ValueError("Completed Roads parameterization inputs changed after readback.")
-                record["parameterization"] = provenance
-            else:
-                if record.get("status") == "completed":
-                    raise ValueError("Completed Roads profile lacks native parameterization readback.")
-                record["parameterization"] = {
-                    "baseline_id": state["baseline"]["id"],
-                    "configuration_hash": signature,
-                    "ofes": [], "input_files": [],
-                    "reason": record.get("reason") or "native_inputs_not_assembled",
-                }
+        return _parameterization_support._attach_parameterization_records(self, records)
 
     @staticmethod
     def _parameterization_group(state, design, surface, traffic, texture, routing,
                                 segment_ids, index, source_kind):
-        selection_design = "outslope_rutted" if design == "outslope_unrutted" else design
-        name = roads_parameterization.soil_template_name(selection_design, surface, texture)
-        details = roads_parameterization.resolve_groups(state, name, traffic)
-        roles = {}
-        for detail in details:
-            role = detail["role"]
-            roles[role] = {}
-            for parameter in roads_parameterization.PARAMETERS:
-                source_value = detail["baseline"][parameter]
-                adjusted_value = detail["adjusted"][parameter]
-                roles[role][parameter] = {
-                    "source": source_value, "adjusted": adjusted_value,
-                    "resolved": detail["resolved"][parameter],
-                    "adjustment": ("Divide by 4 for low/no road traffic"
-                                   if role == "road" and parameter in ("ki_kg_s_m4", "kr_s_m") and traffic != "high"
-                                   else "Native input formatting" if adjusted_value != source_value else "Unchanged"),
-                    "source_asset": f"soils/{name}",
-                    "source_sha256": detail["source_sha256"],
-                }
-        # Inslope profiles can route through a buffer; actual membership is
-        # established only by execution, never guessed from a fallback.
-        applicable = ["road", "fill", "buffer"] if design.startswith("outslope") else ["road"]
-        if not design.startswith("outslope") and routing != "channel_associated":
-            applicable.append("buffer")
-        return {
-            "id": f"group-{index + 1}", "label": f"{design} / {surface} / {texture} / {traffic}",
-            "design": design, "surface": surface, "traffic": traffic, "soil_texture": texture,
-            "segment_ids": segment_ids, "segment_count": len(segment_ids),
-            "source_asset": f"soils/{name}", "roles": roles,
-            "applicable_roles": applicable, "source_kind": source_kind,
-            "routing_mode": routing,
-            "applicability": "preview",
-            "management_asset": "managements/" + roads_parameterization.management_template_name(traffic),
-            "management_note": "No traffic changes road/fill plants and initial conditions; yearly operations remain." if traffic == "none" else "High/low traffic share the ordinary management template.",
-        }
+        return _queries._parameterization_group(
+            state,
+            design,
+            surface,
+            traffic,
+            texture,
+            routing,
+            segment_ids,
+            index,
+            source_kind,
+        )
 
     @classmethod
     def initial_parameterization_preview(cls):
         """Return a default preview for enabled first use without creating Roads."""
-        state = roads_parameterization.new_state(Path(__file__).resolve().parent / "legacy_templates")
-        params = cls._default_params()
-        group = cls._parameterization_group(
-            state, "inslope_bd", params["surface_default"], params["traffic_default"],
-            params["soil_texture_default"], "unknown", [], 0, "defaults_preview",
-        )
-        return {"status": "unbound", "baseline_id": state["baseline"]["id"],
-                "configuration_hash": None, "overrides": state["overrides"],
-                "diagnostics": [], "groups": [group], "last_completed_run": None,
-                "comparisons": {"available": False, "reason": "No completed Roads execution exists."}}
+        return _queries.initial_parameterization_preview(cls)
 
     def _parameterization_groups(self, state, params):
         """Resolve displayed groups through the same feature/default selector as Run."""
-        prepared = Path(self.roads_monotonic_geojson_path)
-        staged = self.roads_staged_geojson_path
-        source = prepared if prepared.exists() else (Path(staged) if staged else None)
-        features = []
-        source_kind = "defaults_preview"
-        if source is not None and source.exists():
-            payload = json.loads(source.read_text(encoding="utf-8"))
-            features = payload.get("features", [])
-            source_kind = "prepared_segments" if source == prepared else "uploaded_features_preview"
-        mapping = self._normalize_attribute_field_map(params.get("attribute_field_map"), known_fields=None)
-        groups = {}
-        diagnostics = []
-        for index, feature in enumerate(features):
-            properties = feature.get("properties") or {}
-            segment_id = self._segment_key(feature, fallback_index=index)
-            warnings, examples = Counter(), []
-            design, _ = self._resolve_design_for_feature(
-                properties=properties, attribute_field_map=mapping,
-                warning_counts=warnings, warning_examples=examples,
-                warning_limit=DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT, segment_id=segment_id,
-            )
-            if design is None:
-                continue
-            try:
-                resolved = self._resolve_segment_run_inputs(
-                    properties=properties, params=params, segment_id=segment_id, design=design,
-                    warning_counts=warnings, warning_examples=examples,
-                    warning_limit=DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT,
-                )
-            except ValueError as exc:
-                diagnostics.append(safe_text(f"{segment_id}: {exc}", source_profile=current_profile(WORKER)))
-                continue
-            routing = self._derive_routing_mode_hint(properties)
-            key = (design, resolved["surface"], resolved["traffic"], resolved["soil_texture"], routing)
-            groups.setdefault(key, []).append(segment_id)
-        if not features:
-            groups[("inslope_bd", params["surface_default"], params["traffic_default"],
-                    params["soil_texture_default"], "unknown")] = []
-        result = []
-        for index, ((design, surface, traffic, texture, routing), segment_ids) in enumerate(groups.items()):
-            result.append(self._parameterization_group(
-                state, design, surface, traffic, texture, routing, segment_ids, index, source_kind,
-            ))
-        return result, diagnostics
+        return _queries._parameterization_groups(self, state, params)
 
     def _last_parameterization_readback(self, diagnostics):
-        last_run = getattr(self, "_last_run_summary", None)
-        if isinstance(last_run, Mapping) and last_run.get("status") == "completed":
-            records = [dict(row["parameterization"], segment_id=row.get("segment_id"),
-                            segment_run_id=row.get("segment_run_id"))
-                       for row in last_run.get("segment_execution_records", [])
-                       if isinstance(row, Mapping) and row.get("status") == "completed"
-                       and isinstance(row.get("parameterization"), Mapping)]
-            current = roads_lifecycle.available(self.wd)
-            if records and current:
-                return {"configuration_hash": last_run.get("parameterization_hash"),
-                        "baseline_id": records[0].get("baseline_id"), "records": records,
-                        "completed_at": last_run.get("completed_at"),
-                        "current": current, "historical": not current}
-        project = Path(self.wd).resolve()
-
-        def contained(root, relative):
-            relative = Path(relative)
-            path = root / relative
-            if relative.is_absolute() or ".." in relative.parts or path.resolve() != root / relative:
-                raise ValueError("Historical parameterization path must not be aliased or escape its snapshot.")
-            return path
-
-        try:
-            history = contained(project, "wepp/roads/history")
-            snapshots = [] if not history.is_dir() else sorted(history.iterdir(), reverse=True)
-        except (OSError, ValueError) as exc:
-            diagnostics.append(safe_text(f"Historical readback unavailable: {exc}", source_profile=current_profile(WORKER)))
-            return None
-        candidates = []
-        for snapshot in snapshots:
-            try:
-                snapshot = contained(project, snapshot.relative_to(project))
-                if not snapshot.is_dir():
-                    continue
-                receipt_path = contained(snapshot, "wepp/roads/output/roads.current.json")
-                if receipt_path.is_file():
-                    candidates.append((receipt_path.stat().st_mtime_ns, snapshot, receipt_path))
-            except (OSError, ValueError) as exc:
-                diagnostics.append(safe_text(f"Historical readback unavailable at {snapshot.name}: {exc}", source_profile=current_profile(WORKER)))
-        for _, snapshot, receipt_path in sorted(candidates, reverse=True):
-            try:
-                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-                required_keys = {"policy", "is_single_storm", "required_relpaths",
-                                 "parameterization_hash", "parameterization_snapshot_sha256"}
-                if (not isinstance(receipt, dict) or set(receipt) != required_keys
-                        or receipt.get("policy") != roads_lifecycle.POLICY
-                        or type(receipt.get("is_single_storm")) is not bool):
-                    raise ValueError("Retained completed-result receipt is invalid.")
-                signature = receipt["parameterization_hash"]
-                if not isinstance(signature, str) or not re.fullmatch(r"[0-9a-f]{64}", signature):
-                    raise ValueError("Retained parameterization identity is invalid.")
-                required = receipt["required_relpaths"]
-                if (not isinstance(required, list) or any(not isinstance(name, str) for name in required)
-                        or len(set(required)) != len(required)
-                        or not roads_lifecycle.mandatory_paths(receipt["is_single_storm"]).issubset(required)
-                        or "wepp/roads/output/roads.parameterization.comparison.json" not in required):
-                    raise ValueError("Retained completed-result receipt has incomplete resources.")
-                optional = ["wepp/roads/output/interchange/chnwb.parquet"]
-                if contained(snapshot, "wepp/roads/segments/roads.accounting.json").exists():
-                    optional.append("wepp/roads/segments/roads.accounting.json")
-                    if not receipt["is_single_storm"]:
-                        optional.append("wepp/roads/output/interchange/H.accounting.wat.parquet")
-                if any(name not in required for name in optional
-                       if name != "wepp/roads/output/interchange/chnwb.parquet"
-                       or contained(snapshot, name).exists()):
-                    raise ValueError("Retained receipt omits produced report resources.")
-                for name in required:
-                    if not contained(snapshot, name).is_file():
-                        raise ValueError("Retained completed-result resource is missing.")
-                comparison_path = contained(snapshot, "wepp/roads/output/roads.parameterization.comparison.json")
-                if hashlib.sha256(comparison_path.read_bytes()).hexdigest() != receipt["parameterization_snapshot_sha256"]:
-                    raise ValueError("Retained parameterization snapshot hash changed.")
-                comparison = json.loads(comparison_path.read_text(encoding="utf-8"))
-                if not isinstance(comparison, dict) or comparison.get("configuration_hash") != signature:
-                    raise ValueError("Retained parameterization snapshot identity changed.")
-                manifest_name = "wepp/roads/segments/roads.segment.pass.manifest.json"
-                manifest = contained(snapshot, manifest_name)
-                sources = comparison.get("sources")
-                if not isinstance(sources, dict):
-                    raise ValueError("Retained parameterization source bindings are invalid.")
-                manifest_hash = sources.get(manifest_name)
-                if not manifest_hash or hashlib.sha256(manifest.read_bytes()).hexdigest() != manifest_hash:
-                    raise ValueError("Retained native manifest hash changed.")
-                rows = json.loads(manifest.read_text(encoding="utf-8"))
-                if not isinstance(rows, list):
-                    raise ValueError("Retained execution manifest is not a list.")
-                records = []
-                for row in rows:
-                    if not isinstance(row, Mapping) or row.get("status") != "completed":
-                        continue
-                    record = row.get("parameterization")
-                    if (not isinstance(record, dict) or record.get("configuration_hash") != signature
-                            or record.get("baseline_id") != comparison.get("baseline_id")
-                            or not isinstance(record.get("ofes"), list) or not record["ofes"]):
-                        raise ValueError("Retained native readback does not match its execution.")
-                    files = record.get("input_files")
-                    if not isinstance(files, list) or len(files) != 3:
-                        raise ValueError("Retained native input bindings are incomplete.")
-                    suffixes = set()
-                    for file_record in files:
-                        if not isinstance(file_record, dict) or not isinstance(file_record.get("relpath"), str):
-                            raise ValueError("Retained native input binding is invalid.")
-                        path = contained(snapshot, file_record["relpath"])
-                        suffixes.add(path.suffix)
-                        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != file_record.get("sha256"):
-                            raise ValueError("Retained native input hash changed.")
-                    if suffixes != {".sol", ".slp", ".man"}:
-                        raise ValueError("Retained native input bindings are incomplete.")
-                    records.append(dict(record, segment_id=row.get("segment_id"),
-                                        segment_run_id=row.get("segment_run_id")))
-                if not records:
-                    raise ValueError("Retained completed native readbacks are missing.")
-                return {"configuration_hash": signature, "baseline_id": records[0]["baseline_id"],
-                        "records": records, "completed_at": comparison.get("completed_at"),
-                        "current": False, "historical": True,
-                        "history_relpath": os.path.relpath(snapshot, self.wd)}
-            except (OSError, ValueError, TypeError, KeyError) as exc:
-                diagnostics.append(safe_text(f"Historical readback unavailable at {snapshot.name}: {exc}", source_profile=current_profile(WORKER)))
-        return None
+        return _queries._last_parameterization_readback(self, diagnostics)
 
     def query_parameterization(self):
         """Inspect saved authority without enrolling or repairing legacy state."""
-        raw_state = self._saved_parameterization_state()
-        try:
-            state = (roads_parameterization.new_state(Path(self.roads_legacy_templates_dir))
-                     if raw_state is None else roads_parameterization.validate_state(raw_state))
-        except (ValueError, TypeError, KeyError) as exc:
-            return {"status": "invalid", "baseline_id": None, "configuration_hash": None,
-                    "overrides": None, "diagnostics": [safe_text(str(exc), source_profile=current_profile(WORKER))], "groups": [],
-                    "last_completed_run": None,
-                    "comparisons": {"available": False, "reason": "Repair parameterization before a new execution."}}
-        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
-        groups, diagnostics = self._parameterization_groups(state, params)
-        try:
-            repository_baseline = (state["baseline"] if raw_state is None else
-                                   roads_parameterization.bind_baseline(Path(self.roads_legacy_templates_dir)))
-            repository = {"status": "matching" if repository_baseline["id"] == state["baseline"]["id"] else "different",
-                          "baseline_id": repository_baseline["id"]}
-        except (OSError, ValueError, TypeError, KeyError) as exc:
-            # Repository inspection is diagnostic; retained valid state remains authoritative.
-            repository = {"status": "unavailable", "baseline_id": None, "reason": safe_text(str(exc), source_profile=current_profile(WORKER))}
-        last_completed = self._last_parameterization_readback(diagnostics)
-        if last_completed and last_completed["current"]:
-            for group in groups:
-                members = set(group["segment_ids"])
-                actual = {ofe["role"] for row in last_completed["records"]
-                          if row.get("segment_id") in members for ofe in row.get("ofes", [])}
-                group["applicable_roles"] = [role for role in roads_parameterization.ROLES if role in actual]
-                group["applicability"] = "last_completed_run"
-        return {
-            "status": "unbound" if raw_state is None else "bound",
-            "baseline_id": state["baseline"]["id"],
-            "repository_baseline": repository,
-            "configuration_hash": None if raw_state is None else roads_parameterization.configuration_hash(state),
-            "overrides": state["overrides"], "diagnostics": diagnostics, "groups": groups,
-            "last_completed_run": last_completed,
-            "comparisons": _parameterization_comparisons.query_comparisons(self.wd),
-        }
+        return _queries.query_parameterization(self)
 
     def _resolve_legacy_soil_template_path(self, *, design: str, surface: str, soil_texture: str) -> Path:
-        if design == "inslope_rd":
-            tau_value = "10"
-        elif design in {"inslope_bd", "outslope_rutted"} and surface == "paved":
-            tau_value = "1"
-        else:
-            tau_value = "2"
-
-        surface_prefix = "p" if surface == "paved" else "g"
-        template_name = f"3{surface_prefix}{soil_texture}{tau_value}.sol"
-        template_path = self._parameterization_template_path("soils", template_name)
-        if not template_path.exists():
-            raise FileNotFoundError(
-                f"Roads soil template is missing: {template_path} "
-                f"(design={design}, surface={surface}, soil_texture={soil_texture})."
-            )
-        return template_path
+        return _parameterization_support._resolve_legacy_soil_template_path(
+            self,
+            design=design,
+            surface=surface,
+            soil_texture=soil_texture,
+        )
 
     def _resolve_legacy_management_template_path(self, *, traffic: str) -> Path:
-        template_name = "3inslopen.man" if traffic == "none" else "3inslope.man"
-        template_path = self._parameterization_template_path("managements", template_name)
-        if not template_path.exists():
-            raise FileNotFoundError(
-                f"Roads management template is missing: {template_path} (traffic={traffic})."
-            )
-        return template_path
+        return _parameterization_support._resolve_legacy_management_template_path(self, traffic=traffic)
 
     @staticmethod
     def _replace_leading_int(line: str, replacement: int) -> str:
@@ -2283,49 +1694,15 @@ class Roads(NoDbBase):
 
     @staticmethod
     def _read_pass_header_climate_line(pass_path: Path) -> str:
-        from wepppy.wepp.interchange.pass_metadata import pass_metadata_offset
-
-        with pass_path.open("r", encoding="utf-8") as handle:
-            first_line = handle.readline()
-            if pass_metadata_offset(first_line):
-                first_line = handle.readline()
-        if not first_line:
-            raise ValueError(f"{pass_path}: PASS file missing climate-file token on line 1")
-        return first_line.rstrip("\r\n")
+        return _pass_routing._read_pass_header_climate_line(pass_path)
 
     @staticmethod
     def _rewrite_pass_header_climate_line(pass_path: Path, climate_line: str) -> None:
-        from wepppy.wepp.interchange.pass_metadata import pass_metadata_offset
-
-        with pass_path.open(encoding="utf-8", newline="") as stream:
-            lines = stream.readlines()
-        if not lines:
-            raise ValueError(f"{pass_path}: PASS file missing climate-file token on line 1")
-        offset = pass_metadata_offset(lines[0])
-        if len(lines) <= offset:
-            raise ValueError(f"{pass_path}: PASS file missing climate-file token")
-        newline = "\n"
-        if lines[offset].endswith("\r\n"):
-            newline = "\r\n"
-        elif lines[offset].endswith("\n"):
-            newline = "\n"
-        lines[offset] = f"{climate_line}{newline}"
-        with pass_path.open("w", encoding="utf-8", newline="") as stream:
-            stream.writelines(lines)
+        return _pass_routing._rewrite_pass_header_climate_line(pass_path, climate_line)
 
     @staticmethod
     def _resolve_pass_header_climate_path(pass_path: Path, climate_token: str) -> Optional[Path]:
-        token = climate_token.strip()
-        if not token:
-            return None
-        runs_dir = pass_path.parent.parent / "runs"
-        climate_path = runs_dir / token
-        if not climate_path.exists():
-            return None
-        try:
-            return climate_path.resolve(strict=True)
-        except (FileNotFoundError, OSError):
-            return None
+        return _pass_routing._resolve_pass_header_climate_path(pass_path, climate_token)
 
     def _normalize_road_pass_header_climate_tokens(
         self,
@@ -2333,46 +1710,11 @@ class Roads(NoDbBase):
         base_pass_path: Path,
         road_pass_paths: Iterable[Path],
     ) -> None:
-        base_climate_line = self._read_pass_header_climate_line(base_pass_path)
-        base_climate_token = base_climate_line.strip()
-        if not base_climate_token:
-            raise ValueError(
-                f"{base_pass_path}: PASS header climate-file token is empty; cannot combine roads PASS data"
-            )
-
-        base_climate_path = self._resolve_pass_header_climate_path(base_pass_path, base_climate_token)
-        if base_climate_path is None:
-            raise ValueError(
-                f"{base_pass_path}: PASS header climate-file token '{base_climate_token}' does not resolve under runs/"
-            )
-
-        for road_pass_path in road_pass_paths:
-            source_climate_line = self._read_pass_header_climate_line(road_pass_path)
-            source_climate_token = source_climate_line.strip()
-            if source_climate_token == base_climate_token:
-                continue
-
-            source_climate_path = self._resolve_pass_header_climate_path(
-                road_pass_path, source_climate_token
-            )
-            if source_climate_path is None or source_climate_path != base_climate_path:
-                raise ValueError(
-                    f"{road_pass_path}: PASS header climate-file token mismatch could not be normalized "
-                    f"(base={base_climate_token} source={source_climate_token} "
-                    f"base_cli={base_climate_path} source_cli={source_climate_path})"
-                )
-
-            self._rewrite_pass_header_climate_line(road_pass_path, base_climate_line)
-            self._append_roads_log(
-                "run",
-                "normalized_road_pass_climate_token",
-                {
-                    "base_pass_relpath": os.path.relpath(base_pass_path, self.wd),
-                    "road_pass_relpath": os.path.relpath(road_pass_path, self.wd),
-                    "base_climate_token": base_climate_token,
-                    "source_climate_token": source_climate_token,
-                },
-            )
+        return _pass_routing._normalize_road_pass_header_climate_tokens(
+            self,
+            base_pass_path=base_pass_path,
+            road_pass_paths=road_pass_paths,
+        )
 
     def _combine_target_hillslope_pass(
         self,
@@ -2382,48 +1724,19 @@ class Roads(NoDbBase):
         output_pass_path: str,
         strategy: str = "phase1",
     ) -> None:
-        from wepppyo3.wepp_interchange import combine_hillslope_pass_files
-
-        base_path = Path(base_pass_path)
-        road_paths = [Path(path) for path in road_pass_paths]
-        if road_paths:
-            self._normalize_road_pass_header_climate_tokens(
-                base_pass_path=base_path,
-                road_pass_paths=road_paths,
-            )
-
-        combine_hillslope_pass_files(
-            base_pass=str(base_path),
-            road_passes=[str(path) for path in road_paths],
-            out_pass=str(output_pass_path),
-            strategy=str(strategy),
+        return _pass_routing._combine_target_hillslope_pass(
+            self,
+            base_pass_path=base_pass_path,
+            road_pass_paths=road_pass_paths,
+            output_pass_path=output_pass_path,
+            strategy=strategy,
         )
 
     def _prepare_roads_runs_workspace(self) -> None:
-        baseline_runs_dir = Path(self.wepp_instance.runs_dir)
-        if not baseline_runs_dir.exists():
-            raise FileNotFoundError(f"Missing baseline WEPP runs directory: {baseline_runs_dir}")
-
-        runs_dir = Path(self.roads_runs_dir)
-        if runs_dir.exists():
-            shutil.rmtree(runs_dir)
-        runs_dir.mkdir(parents=True, exist_ok=True)
-
-        for entry in baseline_runs_dir.iterdir():
-            # Native watershed rewrites tc_out.txt; never link baseline diagnostics.
-            if entry.name in {"pw0.run", "pw0.err", "tc_out.txt"}:
-                continue
-            dst = runs_dir / entry.name
-            if entry.is_dir():
-                shutil.copytree(entry, dst)
-            else:
-                self._safe_link_or_copy(str(entry), str(dst))
+        return _pass_routing._prepare_roads_runs_workspace(self)
 
     def _prepare_roads_output_workspace(self) -> None:
-        output_dir = Path(self.roads_output_dir)
-        if output_dir.exists():
-            shutil.rmtree(output_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
+        return _pass_routing._prepare_roads_output_workspace(self)
 
     def _run_segment_hillslope(
         self,
@@ -2436,55 +1749,23 @@ class Roads(NoDbBase):
         single_ofe_soil_path: Path,
         single_ofe_slope_path: Path,
     ) -> None:
-        baseline_runs_dir = Path(self.wepp_instance.runs_dir)
-        climate_source = baseline_runs_dir / f"p{int(climate_wepp_id)}.cli"
-        if not climate_source.exists():
-            raise FileNotFoundError(
-                f"Roads segment run requires baseline climate file: {climate_source}"
-            )
-
-        runs_dir = Path(self.roads_runs_dir)
-        segment_cli_path = runs_dir / f"p{segment_run_id}.cli"
-        segment_man_path = runs_dir / f"p{segment_run_id}.man"
-        segment_sol_path = runs_dir / f"p{segment_run_id}.sol"
-        segment_slp_path = runs_dir / f"p{segment_run_id}.slp"
-
-        self._safe_link_or_copy(str(climate_source), str(segment_cli_path))
-
-        if single_ofe_management_path.resolve() != segment_man_path.resolve():
-            shutil.copy2(single_ofe_management_path, segment_man_path)
-        if single_ofe_soil_path.resolve() != segment_sol_path.resolve():
-            shutil.copy2(single_ofe_soil_path, segment_sol_path)
-        if single_ofe_slope_path.resolve() != segment_slp_path.resolve():
-            shutil.copy2(single_ofe_slope_path, segment_slp_path)
-
-        if self._saved_parameterization_state() is not None:
-            readbacks = getattr(self, "_parameterization_runtime_readbacks", {})
-            source_record = readbacks.get(str(single_ofe_soil_path))
-            if source_record is None:
-                raise ValueError("Roads native soil has no parameterization readback.")
-            readbacks[str(segment_sol_path)] = source_record
-            self._record_parameterization_inputs(segment_sol_path, segment_slp_path, segment_man_path)
-
-        make_hillslope_run(
-            segment_run_id,
-            sim_years,
-            str(runs_dir),
-            reveg=False,
-            pass_family=self.wepp_instance.pass_family,
+        return _native_runner._run_segment_hillslope(
+            self,
+            segment_run_id=segment_run_id,
+            climate_wepp_id=climate_wepp_id,
+            sim_years=sim_years,
             wepp_bin=wepp_bin,
+            single_ofe_management_path=single_ofe_management_path,
+            single_ofe_soil_path=single_ofe_soil_path,
+            single_ofe_slope_path=single_ofe_slope_path,
+            make_hillslope_run=make_hillslope_run,
+            run_hillslope=run_hillslope,
         )
-        run_hillslope(segment_run_id, str(runs_dir), wepp_bin=wepp_bin)
 
     def _build_roads_segment_loss_summary_parquet(self, *, interchange_dir: Path) -> str:
-        from ._segment_loss_summary import build_segment_loss_summary
-
-        def execution_calendar():
-            climate = self.wepp_instance.climate_instance
-            return climate.input_years, climate.calendar_start_year
-
-        return build_segment_loss_summary(
-            Path(self.wd), interchange_dir, execution_calendar=execution_calendar,
+        return _reporting._build_roads_segment_loss_summary_parquet(
+            self,
+            interchange_dir=interchange_dir,
         )
 
     def _required_roads_report_resource_relpaths(
@@ -2494,211 +1775,18 @@ class Roads(NoDbBase):
         include_chnwb: bool,
         include_segment_loss_summary: bool,
     ) -> List[str]:
-        base = os.path.join("wepp", "roads", "output", "interchange")
-        required = [
-            os.path.join(base, "H.pass.parquet"),
-            os.path.join(base, "ebe_pw0.parquet"),
-            os.path.join(base, "README.md"),
-        ]
-        if not is_single_storm:
-            required.extend(
-                [
-                    os.path.join(base, "H.wat.parquet"),
-                    os.path.join(base, "loss_pw0.out.parquet"),
-                    os.path.join(base, "loss_pw0.hill.parquet"),
-                    os.path.join(base, "loss_pw0.chn.parquet"),
-                    os.path.join(base, "totalwatsed3.parquet"),
-                ]
-            )
-            if include_segment_loss_summary:
-                required.append(os.path.join(base, "roads_segment_loss_summary.parquet"))
-            if include_chnwb:
-                required.append(os.path.join(base, "chnwb.parquet"))
-        return required
+        return _reporting._required_roads_report_resource_relpaths(
+            self,
+            is_single_storm=is_single_storm,
+            include_chnwb=include_chnwb,
+            include_segment_loss_summary=include_segment_loss_summary,
+        )
 
     def _regenerate_roads_report_resources(self) -> Dict[str, Any]:
-        from wepppy.nodb.wepp_nodb_post_utils import activate_query_engine_for_run
-        from wepppy.wepp.interchange import (
-            generate_interchange_documentation,
-            run_totalwatsed3,
-            run_wepp_hillslope_interchange,
-            run_wepp_watershed_interchange,
-        )
-
-        from wepppy.wepp.interchange.roads_accounting import LEDGER, has_accounting, load, regenerate, validate_destinations
-
-        validate_destinations(Path(self.wd))
-        corrected = has_accounting(Path(self.wd))
-        if corrected:
-            load(Path(self.wd))
-        climate = self.wepp_instance.climate_instance
-        is_single_storm = bool(getattr(climate, "is_single_storm", False))
-        start_year_raw = getattr(climate, "calendar_start_year", None)
-        start_year = int(start_year_raw) if start_year_raw not in (None, "") else None
-        output_dir = Path(self.roads_output_dir)
-        interchange_dir = output_dir / "interchange"
-        hillslope_soil_available = any(output_dir.glob("H*.soil.dat"))
-        watershed_soil_available = (output_dir / "soil_pw0.txt").exists()
-        chan_out_available = (output_dir / "chan.out").exists() or (output_dir / "chan.out.gz").exists()
-        chnwb_available = (output_dir / "chnwb.txt").exists() or (output_dir / "chnwb.txt.gz").exists()
-        run_hillslope_soil_interchange = not is_single_storm and hillslope_soil_available
-        run_watershed_soil_interchange = not is_single_storm and watershed_soil_available
-        run_chan_out_interchange = not is_single_storm and chan_out_available
-        run_chnwb_interchange = not is_single_storm and chnwb_available
-
-        self._append_roads_log(
-            "run",
-            "roads_report_resources_regen_started",
-            {
-                "roads_output_relpath": os.path.relpath(output_dir, self.wd),
-                "is_single_storm": is_single_storm,
-                "start_year": start_year,
-                "run_hillslope_soil_interchange": run_hillslope_soil_interchange,
-                "run_watershed_soil_interchange": run_watershed_soil_interchange,
-                "run_chan_out_interchange": run_chan_out_interchange,
-                "run_chnwb_interchange": run_chnwb_interchange,
-            },
-        )
-
-        if corrected and not is_single_storm:
-            # Source WAT/SOIL/ELEMENT were converted before allocation. Rewriting
-            # them here would invalidate the ledger even for equal numeric rows.
-            from wepppy.wepp.interchange import run_wepp_hillslope_pass_interchange
-
-            run_wepp_hillslope_pass_interchange(output_dir, pass_family=self.wepp_instance.pass_family)
-        else:
-            run_wepp_hillslope_interchange(
-                output_dir,
-                pass_family=self.wepp_instance.pass_family,
-                start_year=start_year,
-                run_loss_interchange=not is_single_storm,
-                run_soil_interchange=run_hillslope_soil_interchange and not corrected,
-                run_wat_interchange=not is_single_storm and not corrected,
-                delete_after_interchange=False,
-            )
-        self._append_roads_log(
-            "run",
-            "roads_hillslope_interchange_completed",
-            {"interchange_relpath": os.path.relpath(interchange_dir, self.wd)},
-        )
-
-        if not is_single_storm:
-            baseflow_opts = getattr(self.wepp_instance, "baseflow_opts", None)
-            if baseflow_opts is None:
-                from wepppy.nodb.core.wepp import BaseflowOpts
-
-                baseflow_opts = BaseflowOpts()
-            if corrected:
-                regenerate(Path(self.wd), baseflow_opts)
-            else:
-                run_totalwatsed3(interchange_dir, baseflow_opts=baseflow_opts)
-            self._append_roads_log(
-                "run",
-                "roads_totalwatsed3_completed",
-                {"totalwatsed3_relpath": os.path.relpath(interchange_dir / "totalwatsed3.parquet", self.wd)},
-            )
-
-        run_wepp_watershed_interchange(
-            output_dir,
-            pass_family=self.wepp_instance.pass_family,
-            start_year=start_year,
-            run_chan_out_interchange=run_chan_out_interchange,
-            run_soil_interchange=run_watershed_soil_interchange,
-            run_chnwb_interchange=run_chnwb_interchange,
-            delete_after_interchange=False,
-        )
-        self._append_roads_log(
-            "run",
-            "roads_watershed_interchange_completed",
-            {"interchange_relpath": os.path.relpath(interchange_dir, self.wd)},
-        )
-
-        roads_segment_loss_summary_relpath = None
-        if not is_single_storm:
-            roads_segment_loss_summary_relpath = self._build_roads_segment_loss_summary_parquet(
-                interchange_dir=interchange_dir
-            )
-            self._append_roads_log(
-                "run",
-                "roads_segment_loss_summary_parquet_completed",
-                {"roads_segment_loss_summary_relpath": roads_segment_loss_summary_relpath},
-            )
-
-        generate_interchange_documentation(interchange_dir)
-        self._append_roads_log(
-            "run",
-            "roads_interchange_readme_completed",
-            {"readme_relpath": os.path.relpath(interchange_dir / "README.md", self.wd)},
-        )
-
-        activate_query_engine_for_run(self.wepp_instance)
-        self._append_roads_log("run", "roads_query_engine_catalog_refreshed")
-
-        required_relpaths = self._required_roads_report_resource_relpaths(
-            is_single_storm=is_single_storm,
-            include_chnwb=run_chnwb_interchange,
-            include_segment_loss_summary=not is_single_storm,
-        )
-        if corrected and not is_single_storm:
-            from wepppy.wepp.interchange.roads_accounting import accounting_source
-
-            accounting_source(Path(self.wd))
-            required_relpaths.append("wepp/roads/output/interchange/H.accounting.wat.parquet")
-        if corrected:
-            required_relpaths.append(str(LEDGER))
-        missing_relpaths = [relpath for relpath in required_relpaths if not Path(self.wd, relpath).exists()]
-        if missing_relpaths:
-            self._append_roads_log(
-                "run",
-                "roads_report_resources_missing",
-                {"missing_relpaths": missing_relpaths},
-            )
-            missing = ", ".join(missing_relpaths)
-            raise FileNotFoundError(
-                f"Roads report resource regeneration incomplete; missing required resources: {missing}"
-            )
-
-        resources = {
-            "is_single_storm": is_single_storm,
-            "status": "ready",
-            "output_scope": "roads",
-            "accounting_policy": "roads_modeled_area_v1" if corrected else "historical_unverified",
-            "roads_output_relpath": os.path.relpath(output_dir, self.wd),
-            "interchange_relpath": os.path.relpath(interchange_dir, self.wd),
-            "required_relpaths": required_relpaths,
-            "missing_relpaths": [],
-            "roads_segment_loss_summary_relpath": roads_segment_loss_summary_relpath,
-            "generated_at": int(time.time()),
-        }
-        self._append_roads_log(
-            "run",
-            "roads_report_resources_regen_completed",
-            {
-                "required_resource_count": len(required_relpaths),
-                "interchange_relpath": resources["interchange_relpath"],
-            },
-        )
-        return resources
+        return _reporting._regenerate_roads_report_resources(self)
 
     def _prepare_modeled_area_accounting(self, canonical_ids, records):
-        from wepppy.wepp.interchange import run_wepp_hillslope_interchange
-        from wepppy.wepp.interchange.roads_accounting import compose, validate_destinations
-
-        validate_destinations(Path(self.wd))
-        climate = self.wepp_instance.climate_instance
-        is_single_storm = bool(getattr(climate, "is_single_storm", False))
-        if not is_single_storm:
-            start_year_raw = getattr(climate, "calendar_start_year", None)
-            run_wepp_hillslope_interchange(
-                Path(self.roads_output_dir),
-                pass_family=self.wepp_instance.pass_family,
-                start_year=int(start_year_raw) if start_year_raw not in (None, "") else None,
-                run_loss_interchange=True,
-                run_soil_interchange=any(Path(self.roads_output_dir).glob("H*.soil.dat")),
-                run_wat_interchange=True,
-                delete_after_interchange=False,
-            )
-        return compose(Path(self.wd), canonical_ids, records, single_storm=is_single_storm)
+        return _reporting._prepare_modeled_area_accounting(self, canonical_ids, records)
 
     @roads_lifecycle.mutation
     def run_roads_wepp(self) -> Dict[str, Any]:

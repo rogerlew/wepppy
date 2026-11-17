@@ -94,6 +94,9 @@ pointer encoding. See the [flow-direction contract](../../../../docs/schemas/roa
 | [_prepare.py](_prepare.py) | Preparation arguments, candidate summary construction and summary logging |
 | [_soil_inputs.py](_soil_inputs.py), [_management_inputs.py](_management_inputs.py), [_slope_inputs.py](_slope_inputs.py) | Native input writers with unchanged scientific transformations |
 | [_spatial.py](_spatial.py) | Terrain sampling and hillslope/road geometry selection |
+| [_queries.py](_queries.py), [_parameterization_support.py](_parameterization_support.py) | Inspection views, retained templates and execution provenance |
+| [_pass_routing.py](_pass_routing.py), [_native_runner.py](_native_runner.py) | PASS climate identity, workspace staging and facade-injected native runners |
+| [_reporting.py](_reporting.py) | Modeled-area accounting and report resource regeneration |
 | [monotonic_segments.py](monotonic_segments.py) | Line segmentation and low-point attribution |
 | [parameterization.py](parameterization.py) | Retained baseline, validated role overrides and resolution |
 | [_parameterization_comparisons.py](_parameterization_comparisons.py) | Execution input evidence and compatible retained-run comparisons |

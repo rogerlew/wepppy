@@ -13,7 +13,7 @@ Make the Roads controller easier to change and review without changing the scien
 - [ ] M1: Characterization and 527-test native baseline complete; immutable full-project controls running.
 - [x] (2026-11-17 UTC) M2: Input extraction validated (305 passed, one skipped); preparation extraction validated (31 passed).
 - [ ] M3: Native writers/spatial extraction validated (251 passed); execution-stage decomposition pending.
-- [ ] M4: Extract routing/publication and query presentation.
+- [x] (2026-11-17 UTC) M4: Routing/reporting/query extraction wired; 390 focused tests passed, one skipped.
 - [ ] M5: Complete final validation, reviews, documentation, and quality assessment.
 
 ## Surprises & Discoveries

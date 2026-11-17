@@ -52,3 +52,8 @@ M3 writers/spatial checkpoint: 251 focused tests passed. AST body comparison
 against the original commit confirms identical bodies for 55 extracted methods
 (including M2 input helpers); runtime parity remains the acceptance authority.
 Execution decomposition is being prepared separately for integration.
+
+M4 checkpoint: queries, retained parameterization support, PASS/workspace staging,
+native runner and report/accounting helpers extracted. Expanded controller, RQ,
+route and lifecycle selection: 390 passed, one skipped. Native/project parity
+and final reviews remain mandatory after execution decomposition.
