@@ -17,7 +17,7 @@ The [account contract](../../schemas/weppcloud-account-email-verification-contra
 
 ## Registration decisions
 
-Provider `cilogon`, display name `CILogon`, confidential client, `openid email profile`, and production callback `https://wepp.cloud/weppcloud/oauth/cilogon/callback`. No extra institutional scope or refresh tokens are required for independent identities. Registration approval/scopes/callback and a permitted nonproduction callback still need verification. Production credentials are staged, inactive, on wepp1; see [receipt](artifacts/20261117_secret_staging.md).
+Provider `cilogon`, display name `CILogon`, confidential client, `openid email profile`, and production callback `https://wepp.cloud/weppcloud/oauth/cilogon/callback`. No extra institutional scope or refresh tokens are required for independent identities. The operator confirmed on 2026-11-17 that CILogon registration has not yet been approved. Provider approval is an explicit activation gate; scopes/callback and a permitted nonproduction callback still need verification. Production credentials are staged, inactive, on wepp1; see [receipt](artifacts/20261117_secret_staging.md).
 
 ## Complexity budget
 
@@ -27,7 +27,7 @@ Reuse Authlib, Flask-Security signing/mail/recovery primitives, SQLAlchemy/Alemb
 
 Security impact: **high**. Independent security and correctness review are mandatory. Review durable identity separation, shared verified-email matching, new-local pre-registration attacks, verification provenance, framework HTML/JSON paths, last-sign-in protection, migration compatibility, and session/token noninterference. Historical research and rejected trust policies remain evidence only.
 
-The remaining product decision is whether new-local signup selects the password after mailbox proof (recommended) or retains a password entered at registration. Existing local users must not be silently reset or revoked. See the account contract’s Open product decision section.
+Email-first signup with password selection after mailbox proof is approved and implemented. Existing local users must not be silently reset or revoked. No product decision remains open; provider registration approval and deployment remain on hold.
 
 ## Acceptance and evidence
 

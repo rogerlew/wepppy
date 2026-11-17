@@ -3,6 +3,7 @@
 **Updated**: 2026-11-17 (UTC).
 **Phase**: implementation and local review; environment acceptance pending.
 **Security impact**: high.
+**Provider approval**: CILogon registration is not yet approved (operator confirmation, 2026-11-17).
 **Production**: deployment/migration/credential activation deferred.
 
 ## Task board
@@ -14,6 +15,7 @@
 - [x] Implement additive migration, provider flow, mailbox lifecycle, responsive account pages, and consumer repairs.
 - [x] Dispatch independent implementation reviews and disposition source findings.
 - [x] Retain local signed-token/ORM/mail-sink/browser/frontend evidence and user/operator documentation.
+- [ ] Obtain CILogon registration approval before activation.
 - [ ] Complete PostgreSQL/live-provider/SMTP/production-mount acceptance and broader environment-dependent tests before release.
 
 ## Current authority and decisions
@@ -31,3 +33,7 @@ Final focused Python batch: **429 passed**; diagnostic/asset checks: **36 passed
 ## Handoff boundary
 
 Implementation commit `679dc65d4` is on `work/cilogon-oidc-scaffold` in `/home/workdir/wepppy-cilogon-oidc`; original checkout WIP is preserved. The operator-approved isolated test container had no published ports or production credentials and was stopped after validation. Staged wepp1 secrets have not been activated. Future rollout must use the canonical deployment entry point with a coordinated schema/code plan and compatible rollback. No user decision is needed for the dispositioned findings; remaining gates require the appropriate nonproduction environment.
+
+## Master integration authorization
+
+The operator authorized merging to master while holding for CILogon approval and deployment. Integration is local only: local master already contains unpublished work, and pushing master triggers image publication. No push, image publication, live migration, restart, or activation is included. The local merge receipt records ancestry and preservation of shared-checkout WIP; it is not a remote integration receipt.
