@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import errno
+import io
 from configparser import RawConfigParser
 from datetime import datetime, timezone
 import json
@@ -27,6 +28,64 @@ from wepppy.project_config_sanitization import scan_archive
 from wepppy.project_config_serialization import parse_config_text, serialize_config
 
 pytestmark = pytest.mark.unit
+
+
+def test_private_zip_cap_allows_header_rewrites_at_exact_final_size(tmp_path):
+    from wepppy.rq.project_rq_archive import _BoundedPrivateArchiveFile
+
+    payload = b'archive source bytes' * 100
+    baseline = io.BytesIO()
+    with zipfile.ZipFile(baseline, 'w', compression=zipfile.ZIP_DEFLATED) as zipped:
+        zipped.writestr('payload.bin', payload)
+    limit = len(baseline.getvalue())
+    offsets = []
+
+    class ObservedArchiveFile(_BoundedPrivateArchiveFile):
+        def write(self, data):
+            offsets.append(self.tell())
+            return super().write(data)
+
+    target = tmp_path / 'bounded.zip'
+    with ObservedArchiveFile(str(target), limit) as output:
+        with zipfile.ZipFile(output, 'w', compression=zipfile.ZIP_DEFLATED) as zipped:
+            zipped.writestr('payload.bin', payload)
+    assert any(right < left for left, right in zip(offsets, offsets[1:]))
+    assert target.stat().st_size == limit
+    with zipfile.ZipFile(target) as zipped:
+        assert zipped.read('payload.bin') == payload
+
+
+def test_private_zip_cap_rejects_central_directory_before_growth(tmp_path):
+    from wepppy.rq.project_rq_archive import _BoundedPrivateArchiveFile
+
+    baseline = io.BytesIO()
+    with zipfile.ZipFile(baseline, 'w', compression=zipfile.ZIP_STORED) as zipped:
+        zipped.writestr('payload.bin', b'complete source')
+        member_end = baseline.tell()
+    assert len(baseline.getvalue()) > member_end
+    target = tmp_path / 'bounded.zip'
+    with _BoundedPrivateArchiveFile(str(target), member_end) as output:
+        zipped = zipfile.ZipFile(output, 'w', compression=zipfile.ZIP_STORED)
+        zipped.writestr('payload.bin', b'complete source')
+        with pytest.raises(VectorUploadError, match='reserved size'):
+            zipped.close()
+        output.flush()
+        assert target.stat().st_size == member_end
+
+
+def test_private_zip_cap_limits_file_extent_after_seeks(tmp_path):
+    from wepppy.rq.project_rq_archive import _BoundedPrivateArchiveFile
+
+    target = tmp_path / 'bounded.zip'
+    with _BoundedPrivateArchiveFile(str(target), 8) as output:
+        output.write(b'12345678')
+        output.seek(1)
+        output.write(b'XX')
+        for offset in (7, 8, 1024):
+            output.seek(offset)
+            with pytest.raises(VectorUploadError, match='reserved size'):
+                output.write(b'zz')
+    assert target.read_bytes() == b'1XX45678'
 
 
 class _PrepStub:

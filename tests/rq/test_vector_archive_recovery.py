@@ -440,6 +440,60 @@ def test_parent_archive_classifies_nested_private_archive_without_attempt_roots(
     assert private_archive.with_suffix('.zip.sensitive.json').is_file()
 
 
+def test_private_archive_rejects_late_growth_within_existing_reservation(
+    archive_rq_environment, real_archive_retention, monkeypatch,
+):
+    project, root, _published, _prep = archive_rq_environment
+    env = real_archive_retention
+    runid = f'private-growth-{uuid.uuid4().hex}'
+    run = root / runid
+    first = _evidence(run)
+    first_bytes = (first / 'payload.upload').read_bytes()
+    retention.reconcile_retention(root, connection=env.connection, apply=True, rebuild_ledger=True)
+    # Preserve production arithmetic while scaling only test headroom so a
+    # 3 MiB incompressible late child reproduces the reviewed overcommit.
+    monkeypatch.setattr(archive, '_ARCHIVE_MIN_HEADROOM_BYTES', 0)
+    monkeypatch.setattr(archive, '_ARCHIVE_DISK_HEADROOM_RATIO', 0)
+    classify = archive._contains_vector_upload_attempts
+    late_payload = os.urandom(3 * 1024 * 1024)
+    late = None
+    source_total = None
+    measured_extents = []
+
+    def classify_then_grow(path):
+        nonlocal late, source_total
+        classified = classify(path)
+        assert classified
+        late = _evidence(run / '_pups/omni/contrasts/1', late_payload)
+        retention.reconcile_retention(root, connection=env.connection, apply=True, rebuild_ledger=True)
+        source_total = int(env.connection.hget(f'{env.prefix}:totals', 'committed'))
+        monkeypatch.setattr(retention, '_GLOBAL_LIMIT', source_total + 2 * 1024 * 1024)
+        return classified
+
+    class ObservedArchiveFile(archive._BoundedPrivateArchiveFile):
+        def write(self, data):
+            try:
+                return super().write(data)
+            finally:
+                self.flush()
+                measured_extents.append((os.fstat(self.fileno()).st_size, self._limit))
+
+    monkeypatch.setattr(archive, '_contains_vector_upload_attempts', classify_then_grow)
+    monkeypatch.setattr(archive, '_BoundedPrivateArchiveFile', ObservedArchiveFile)
+    with pytest.raises(retention.VectorUploadError, match='reserved size'):
+        project.archive_rq(runid)
+    assert measured_extents and all(size <= limit for size, limit in measured_extents)
+    assert (first / 'payload.upload').read_bytes() == first_bytes
+    assert (late / 'payload.upload').read_bytes() == late_payload
+    assert not list((run / 'archives').rglob('*.zip*'))
+    assert not list(env.connection.scan_iter(match=f'{env.prefix}:reservation:*'))
+    totals = env.connection.hgetall(f'{env.prefix}:totals')
+    assert int(totals['committed']) == source_total
+    assert int(totals['committed']) <= retention._GLOBAL_LIMIT
+    assert int(totals['reserved']) == 0
+    assert int(totals['inflight']) == 0
+
+
 @pytest.mark.parametrize("configuration", ["missing_id", "missing_root", "wrong_root"])
 def test_private_delete_identity_failure_does_not_mutate_evidence(
     monkeypatch, tmp_path, real_archive_retention, configuration,

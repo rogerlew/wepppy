@@ -12,6 +12,7 @@ from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 
 import errno
 import hashlib
+import io
 import json
 import logging
 import os
@@ -49,6 +50,23 @@ _PROJECT_CONFIG_TRANSACTION_FILES = frozenset({
     "roads.lifecycle.lock",
     ".config-amendment.pending.json",
 })
+
+
+class _BoundedPrivateArchiveFile(io.BufferedRandom):
+    """Bound ZIP writes by final file offset, including header rewrites."""
+
+    def __init__(self, path: str, limit: int) -> None:
+        self._limit = limit
+        super().__init__(io.FileIO(path, "w+"))
+
+    def write(self, data: bytes) -> int:
+        if self.tell() + memoryview(data).nbytes > self._limit:
+            raise VectorUploadError(
+                "vector_retention_quota_exceeded",
+                "Private archive exceeded its reserved size; retry the archive.",
+                status_code=507,
+            )
+        return super().write(data)
 
 
 @dataclass(frozen=True)
@@ -471,7 +489,15 @@ def archive_rq(
 
             comment_bytes = (comment or "").encode("utf-8")
 
-            with runtime.zip_file_cls(archive_path_tmp, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
+            with ExitStack() as archive_streams:
+                archive_target = archive_path_tmp
+                if contains_sensitive:
+                    archive_target = archive_streams.enter_context(
+                        _BoundedPrivateArchiveFile(archive_path_tmp, required_bytes)
+                    )
+                zf = archive_streams.enter_context(runtime.zip_file_cls(
+                    archive_target, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=6,
+                ))
                 for root, dirs, files in os.walk(wd):
                     if retention_lease is not None:
                         retention_lease.assert_owned()

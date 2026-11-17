@@ -476,6 +476,12 @@ removes the incomplete archive; the original upload remains intact and a retry
 classifies the archive as private. Nested private archive bundles participate
 in the same sensitivity check. This preserves direct-download restrictions
 without changing authorized public/team fork inheritance.
+
+Private archive output is capped at its existing admitted ZIP-byte allowance
+before each destination write, including header rewrites and the central
+directory. A child project can grow after size estimation; that growth must
+fail archive creation rather than commit more retained bytes than reserved.
+The existing additional receipt allowance and all quota defaults are unchanged.
 ## Specification references
 
 Format details are checked against the [GeoParquet 1.1 specification](https://geoparquet.org/releases/v1.1.0/)
