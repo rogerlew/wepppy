@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from wepppy.nodb.culvert_stream_selection import POLICY, write_json as write_stream_policy
+from wepppy.nodb.culvert_stream_selection import ORIGINAL_OUTLETS, ORIGINAL_OUTLET_BASIS, POLICY, write_json as write_stream_policy
 
 import hashlib
 import json
@@ -421,14 +421,14 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
             shutil.rmtree(batch_root, ignore_errors=True)
             return validation_error_response(format_validation_errors(payload_issues))
 
-        reserved = [batch_root / POLICY, batch_root / "stream_candidates.json",
+        reserved = [batch_root / ORIGINAL_OUTLETS, batch_root / POLICY, batch_root / "stream_candidates.json",
                     batch_root / "topo/stream_candidates", batch_root / "_base/stream_selection.json"]
         if any(path.exists() for path in reserved) or any((batch_root / "runs").glob("*/stream_selection.json")):
             shutil.rmtree(batch_root, ignore_errors=True)
             return validation_error_response(format_validation_errors([
                 ValidationIssue(code="reserved_artifact", message="Payload contains reserved stream selection artifacts.", path="payload.zip")
             ]))
-        write_stream_policy(batch_root / POLICY, {"version": 1})
+        write_stream_policy(batch_root / POLICY, {"version": 1, "selection_basis": ORIGINAL_OUTLET_BASIS})
 
         topo_dir = batch_root / "topo"
         topo_dir.mkdir(parents=True, exist_ok=True)

@@ -152,3 +152,132 @@ def test_four_to_three_preserves_trunk_and_matches_wbt(tmp_path):
         with rasterio.open(output) as a, rasterio.open(tmp_path/f'topo/stream_candidates/pass_{step}/streams.tif') as b:
             assert np.array_equal(np.ma.filled(a.read(1,masked=True)>0,False),b.read(1)>0)
         current=output
+
+
+@pytest.fixture
+def original_outlets(tmp_path):
+    """Actual native FindOutlet on the original network; the road point is off-stream."""
+    from wepppy.nodb.culverts_runner import CulvertsRunner
+    from shapely.geometry import box, mapping
+    root = tmp_path
+    pointer = np.full((9, 9), 8.0); streams = np.zeros((9, 9))
+    for row in range(1, 9):
+        pointer[row, 4] = 8
+        streams[row, 4] = 1
+    raster(root/'topo/pointer.tif', pointer)
+    raster(root/'topo/streams.tif', streams)
+    raster(root/'topo/dem.tif', np.ones((9, 9)))
+    raster(root/'mask.tif', np.ones((9, 9)))
+    crs = {'type': 'name', 'properties': {'name': 'EPSG:32617'}}
+    for name, geometry in [('points', {'type': 'Point', 'coordinates': [3.5, 1.5]}),
+                           ('watersheds', mapping(box(0, 0, 9, 9)))]:
+        selection.write_json(root/f'{name}.geojson', {'type': 'FeatureCollection', 'crs': crs,
+            'features': [{'type': 'Feature', 'properties': {'Point_ID': 'a'}, 'geometry': geometry}]})
+    selection.write_json(root/selection.POLICY,
+                         {'version': 1, 'selection_basis': selection.ORIGINAL_OUTLET_BASIS})
+    runner = object.__new__(CulvertsRunner)
+    selection.prepare_original_outlets(root, root/'topo/pointer.tif', root/'topo/streams.tif',
+        root/'topo/dem.tif', root/'points.geojson', root/'watersheds.geojson', runner)
+    return root, runner
+
+
+def _prepare_original_candidates(root):
+    selection.prepare(root, root/'topo/pointer.tif', root/'topo/streams.tif',
+                      root/'topo/streams.tif', 1, dem=root/'topo/dem.tif')
+
+
+def test_off_stream_road_point_resolves_before_pruning_and_is_fixed(original_outlets):
+    root, _ = original_outlets
+    outlet = selection.original_outlet(root, 'a')
+    assert outlet['coordinates'] == [4.5, 0.5]
+    assert outlet['supplied_point'] == [3.5, 1.5]
+    assert not (root/selection.MANIFEST).exists()
+    _prepare_original_candidates(root)
+    chosen = selection.select(root, root/'runs/a', 'a', (3.5, 1.5), 'EPSG:32617', root/'mask.tif')
+    receipt = selection.read_json(root/'runs/a'/selection.RECEIPT)
+    assert receipt['selected_passes'] == 0
+    assert receipt['attempted'][0]['reason'] == 'outlet_not_retained'
+    assert receipt['point'] == [3.5, 1.5]
+    assert receipt['cell'] == [7, 3]
+    # Crop translation is coordinate-based, not a reuse of original row/column.
+    with rasterio.open(chosen[0]) as src:
+        window = rasterio.windows.Window(2, 3, 5, 6)
+        profile = src.profile.copy()
+        profile.update(width=5, height=6, transform=src.window_transform(window))
+        cropped = root/'cropped.tif'
+        with rasterio.open(cropped, 'w', **profile) as dst:
+            dst.write(src.read(1, window=window), 1)
+    output = root/'run-outlet.geojson'
+    selection.install_original_outlet(root, 'a', cropped, output)
+    feature = json.loads(output.read_text())['features'][0]
+    assert feature['geometry']['coordinates'] == outlet['coordinates']
+    assert feature['properties']['row'] == 5
+    assert feature['properties']['column'] == 2
+    assert selection.select(root, root/'runs/a', 'a', (3.5, 1.5), 'EPSG:32617', root/'mask.tif') == chosen
+
+
+def test_original_outlet_identity_and_source_changes(original_outlets):
+    root, runner = original_outlets
+    _prepare_original_candidates(root)
+    record = selection.read_json(root/selection.ORIGINAL_OUTLETS)
+    record['outlets']['a']['coordinates'][0] += 1
+    selection.write_json(root/selection.ORIGINAL_OUTLETS, record)
+    with pytest.raises(ValueError, match='identity changed'):
+        selection.select(root, root/'runs/a', 'a', (3.5, 1.5), 'EPSG:32617', root/'mask.tif')
+    with (root/'points.geojson').open('a') as handle: handle.write(' ')
+    with pytest.raises(ValueError, match='inputs changed'):
+        selection.prepare_original_outlets(root, root/'topo/pointer.tif', root/'topo/streams.tif',
+            root/'topo/dem.tif', root/'points.geojson', root/'watersheds.geojson', runner)
+
+
+def test_original_outlet_archive_restore(original_outlets, tmp_path):
+    from wepppy.rq.culvert_rq_manifest import _write_run_skeletons_zip
+    root, _ = original_outlets
+    _prepare_original_candidates(root)
+    selection.select(root, root/'runs/a', 'a', (3.5, 1.5), 'EPSG:32617', root/'mask.tif')
+    archive = _write_run_skeletons_zip(root)
+    restored = tmp_path/'restored'
+    with zipfile.ZipFile(archive) as z: z.extractall(restored)
+    assert selection.reuse_ready(restored)
+    shutil.copyfile(root/'mask.tif', restored/'mask.tif')
+    selection.select(restored, restored/'runs/a', 'a', (3.5, 1.5), 'EPSG:32617', restored/'mask.tif')
+    (restored/selection.ORIGINAL_OUTLETS).unlink()
+    with pytest.raises(FileNotFoundError): selection.reuse_ready(restored)
+
+
+def test_unresolved_original_outlet_is_explicit(original_outlets):
+    root, runner = original_outlets
+    (root/selection.ORIGINAL_OUTLETS).unlink()
+    raster(root/'topo/streams.tif', np.zeros((9, 9)))
+    selection.prepare_original_outlets(root, root/'topo/pointer.tif', root/'topo/streams.tif',
+        root/'topo/dem.tif', root/'points.geojson', root/'watersheds.geojson', runner)
+    record = selection.read_json(root/selection.ORIGINAL_OUTLETS)
+    assert record['state'] == 'ready'
+    assert record['outlets']['a']['state'] == 'failed'
+    with pytest.raises(ValueError, match='No original stream outlet'):
+        selection.original_outlet(root, 'a')
+
+
+def test_unknown_selection_basis_rejected(tmp_path):
+    selection.write_json(tmp_path/selection.POLICY, {'version': 1, 'selection_basis': 'unknown'})
+    with pytest.raises(ValueError, match='Unknown stream selection basis'):
+        selection.has_policy(tmp_path)
+
+
+def test_original_outlet_policy_cannot_be_downgraded(original_outlets):
+    root, _ = original_outlets
+    _prepare_original_candidates(root)
+    selection.select(root, root/'runs/a', 'a', (3.5, 1.5), 'EPSG:32617', root/'mask.tif')
+    selection.write_json(root/selection.POLICY, {'version': 1})
+    with pytest.raises(ValueError, match='selection basis'): selection.has_policy(root)
+    (root/selection.ORIGINAL_OUTLETS).unlink()
+    with pytest.raises(ValueError, match='selection basis'): selection.has_policy(root)
+    (root/selection.MANIFEST).unlink()
+    with pytest.raises(ValueError, match='selection basis'): selection.has_policy(root)
+    (root/selection.POLICY).unlink()
+    with pytest.raises(ValueError, match='without policy'): selection.has_policy(root)
+
+
+def test_orphan_original_outlet_record_is_not_legacy(tmp_path):
+    selection.write_json(tmp_path/selection.ORIGINAL_OUTLETS, {'version': 1, 'state': 'preparing'})
+    with pytest.raises(ValueError, match='without policy'): selection.has_policy(tmp_path)

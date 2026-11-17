@@ -124,7 +124,7 @@ This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The s
 - Run CPU/IO-heavy work (topo generation, pruning, WEPP runs) inside RQ workers to avoid request timeouts and keep interactive workers responsive.
 - Prefer idempotent batch steps in RQ so retries can resume without re-uploading payloads.
 
-## Live code path (current)
+## Live code path (retained policies; before original-outlet amendment) (current)
 This is the concrete request-to-run flow in the current codebase (paths shown for clarity):
 1. **API ingest + enqueue:** `wepppy/microservices/rq_engine/culvert_routes.py::culverts_wepp_batch`
    - validates payload, extracts ZIP, writes `batch_metadata.json`
@@ -255,9 +255,14 @@ Notes:
 New batches start with four passes through effective resolution 1.5 m, three
 through 3 m, two through 6 m, and one above 6 m. Effective resolution is
 `cellsize_m * sqrt(flow_accum_threshold / 100)` (threshold defaults to100).
-Each culvert tries successively finer candidates until its supplied point
-intersects a channel and its watershed contains stream coverage. Zero uses the
-original supplied streams. If none qualifies, that run fails explicitly.
+Before pruning, resolve the modeled outlet with native FindOutlet on the original
+supplied stream network and watershed mask. Keep the supplied road-constrained
+culvert point unchanged; it need not occupy a stream cell. Each culvert tries
+successively finer candidates until its resolved original outlet is retained and
+its watershed contains stream coverage. Use that same outlet for delineation.
+Zero uses original supplied streams; unresolved outlets fail individually.
+New admissions record selection_basis=original_outlet_v1 and original_outlets.json;
+retained policies keep their prior semantics. See the canonical selection contract.
 
 Explicit `order_reduction_passes` sets the starting maximum; it does not disable
 connection-preserving fallback. An explicit zero selects original streams.
@@ -311,7 +316,13 @@ Example feature:
 
 **Important:** The watershed geometry is used by `Watershed.find_outlet()` to locate the outlet pixel on the DEM (see Per-culvert processing below).
 
-## wepp.cloud job behavior (proposed)
+## wepp.cloud job behavior
+
+For new original_outlet_v1 admissions, resolve and persist outlets on original
+streams before pruning as specified in Per-run pruning candidates. Retain supplied
+road points separately. The older initialization/processing sequence below applies
+to retained policies; new-basis runs install the frozen original outlet and do not
+seed streams or rerun FindOutlet after selection. Implemented locally; production deployment pending.
 
 ### Batch initialization
 Payload validation/extraction happens in the rq-engine API handler; batch topo generation and run orchestration happen inside the RQ job (`run_culvert_batch_rq`).
@@ -340,7 +351,7 @@ scope validation remains strict. A batch that already failed with
 `Catalog identity belongs to another project scope` needs explicit recovery or a
 fresh submission after the fix; retrying its unchanged copied tree is insufficient.
 
-### Per-culvert processing
+### Per-culvert processing (retained policies)
 For each culvert (identified by `Point_ID`):
 
 1. **Link DEM and topo rasters:** Use `Ron.symlink_dem()` to reference the shared hydro-enforced DEM. When VRT cropping is enabled (culvert has watershed geometry), compute a crop window from the watershed polygon (pad px from `culvert.cfg`) and pass it to `Ron.symlink_dem(as_cropped_vrt=True, crop_window=...)` so downstream VRT symlinks can reuse the same window. Similarly link or VRT-crop the shared `flovec.tif`/`netful.tif` into each run.
@@ -363,7 +374,7 @@ For each culvert (identified by `Point_ID`):
    ```
    The `find_outlet()` method analyzes the watershed polygon against the DEM and stream network raster to determine the pour point pixel coordinates. This is more robust than using the culvert point directly, as it ensures the outlet is on the actual flow path.
 
-   **Edge-case fallback (NoOutletFoundError):**
+   **Edge-case fallback (NoOutletFoundError; retained policies only):**
    - Parse candidate row/col from the `find_outlet` error message (all candidates must converge).
    - Ensure `dem/target_watershed.tif` exists (rebuild from the watershed polygon if missing).
    - If `culvert_runner.minimum_watershed_area_m2` is set and `area_sqm` is available, reject below-threshold watersheds before mask extension.
@@ -420,7 +431,7 @@ Notes:
 - Validation errors return HTTP 400 with structured error list.
 - Per-run validation errors (e.g., culvert point outside watershed polygon) are treated as failed runs with `CulvertPointOutsideWatershedError` in `run_metadata.json`, and are merged into `culverts_runner.nodb` + `runs_manifest.md`.
 - Runs below `culvert_runner.minimum_watershed_area_m2` (when `area_sqm` is present) fail with `WatershedAreaBelowMinimumError`.
-- `NoOutletFoundError` triggers the mask-extension + outlet seeding fallback; if it still fails, the run is marked failed with the error payload.
+- For retained policies only, `NoOutletFoundError` triggers the mask-extension + outlet seeding fallback; if it still fails, the run is marked failed with the error payload.
 - Execution failures return job status `failed` in `GET /rq-engine/api/jobstatus/{job_id}`. Use `jobinfo` and batch artifacts (`runs_manifest.md`, per-run `run_metadata.json`) for error details.
 - Artifacts access relies on the browse service; missing outputs should be surfaced there.
 

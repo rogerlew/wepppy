@@ -1,0 +1,128 @@
+[
+  {
+    "point_id": "252",
+    "state": "topology_generated",
+    "outlet": [
+      613505.5939240988,
+      3668580.682008873
+    ],
+    "cropped_cell": [
+      82,
+      64
+    ],
+    "outlet_object_pixel_coords": [
+      64,
+      82
+    ],
+    "subcatchments": 25,
+    "channels": 7
+  },
+  {
+    "point_id": "587",
+    "state": "topology_generated",
+    "outlet": [
+      611024.9386095003,
+      3668077.0903284657
+    ],
+    "cropped_cell": [
+      13,
+      53
+    ],
+    "outlet_object_pixel_coords": [
+      53,
+      13
+    ],
+    "subcatchments": 4,
+    "channels": 1
+  },
+  {
+    "point_id": "755",
+    "state": "topology_generated",
+    "outlet": [
+      613347.0558024892,
+      3666221.2617284465
+    ],
+    "cropped_cell": [
+      8,
+      14
+    ],
+    "outlet_object_pixel_coords": [
+      14,
+      8
+    ],
+    "subcatchments": 4,
+    "channels": 1
+  },
+  {
+    "point_id": "791",
+    "state": "topology_generated",
+    "outlet": [
+      613440.3135210831,
+      3666501.0348842284
+    ],
+    "cropped_cell": [
+      88,
+      13
+    ],
+    "outlet_object_pixel_coords": [
+      13,
+      88
+    ],
+    "subcatchments": 98,
+    "channels": 29
+  },
+  {
+    "point_id": "1751",
+    "state": "topology_generated",
+    "outlet": [
+      611771.0003582517,
+      3666706.201865135
+    ],
+    "cropped_cell": [
+      26,
+      8
+    ],
+    "outlet_object_pixel_coords": [
+      8,
+      26
+    ],
+    "subcatchments": 4,
+    "channels": 1
+  },
+  {
+    "point_id": "2905",
+    "state": "topology_generated",
+    "outlet": [
+      610745.1654537185,
+      3670203.3663124074
+    ],
+    "cropped_cell": [
+      76,
+      68
+    ],
+    "outlet_object_pixel_coords": [
+      68,
+      76
+    ],
+    "subcatchments": 18,
+    "channels": 5
+  },
+  {
+    "point_id": "2915",
+    "state": "topology_generated",
+    "outlet": [
+      610885.0520316095,
+      3667815.968716403
+    ],
+    "cropped_cell": [
+      7,
+      28
+    ],
+    "outlet_object_pixel_coords": [
+      28,
+      7
+    ],
+    "subcatchments": 4,
+    "channels": 1
+  }
+]
