@@ -302,7 +302,7 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         result = mint_bootstrap_token_operation(
             runid,
             user_email=str(claims.get("email") or "").strip(),
-            user_id=str(claims.get("sub") or "").strip(),
+            user_id=claims["user_id"] if "user_id" in claims else claims.get("sub"),
         )
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:

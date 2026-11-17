@@ -68,7 +68,7 @@ def collect(query, map_only=False):
                 owner_ids.add(int(row["owner_id"]))
             except (TypeError, ValueError):
                 continue
-        owners = {str(identifier): email for identifier, email in
+        owners = {str(identifier): email or f"User {identifier}" for identifier, email in
                   db.session.query(User.id, User.email).filter(User.id.in_(owner_ids)).all()} if owner_ids and not map_only else {}
         counts = dict(mode="postgres", pending=0, stale=0, unavailable=0)
         values = []

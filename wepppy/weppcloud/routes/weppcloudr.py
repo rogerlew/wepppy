@@ -834,7 +834,7 @@ def weppcloudr_proxy(routine):
 
     from wepppy.weppcloud.app import user_datastore
     if not current_user.roles:
-        user_datastore.add_role_to_user(current_user.email, 'User')
+        user_datastore.add_role_to_user(current_user, 'User')
 
     user = request.args.get('user', None)
 

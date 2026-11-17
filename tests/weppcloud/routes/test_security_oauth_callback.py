@@ -14,6 +14,9 @@ def test_google_callback_access_denied_redirects_without_server_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     app = Flask(__name__)
+    from flask_login import LoginManager
+    manager = LoginManager(app)
+    manager.user_loader(lambda user_id: None)
     app.config.update(
         TESTING=True,
         SECRET_KEY="test-secret",

@@ -360,3 +360,20 @@ def test_compose_lazy_flask_consumers_share_valid_profile(monkeypatch, compose_n
         app = _build_configured_app(monkeypatch)
         assert app.config['WEPPCLOUD_DEPLOYMENT_PROFILE'] == ('development' if compose_name == 'dev' else 'production'), name
         assert app.config['TEST_SUPPORT_ENABLED'] is (compose_name == 'dev'), name
+
+
+def test_cilogon_optional_config_and_file_secret(monkeypatch,tmp_path):
+    from wepppy.config.secrets import SecretConfigurationError
+    for key in ('OAUTH_CILOGON_CLIENT_ID','OAUTH_CILOGON_CLIENT_SECRET','OAUTH_CILOGON_CLIENT_SECRET_FILE'):
+        monkeypatch.delenv(key,raising=False)
+    assert not configuration._load_oauth_providers('https','wepp.cloud','/weppcloud')['cilogon']['enabled']
+    secret=tmp_path/'synthetic-secret'
+    secret.write_text('synthetic-value\n')
+    monkeypatch.setenv('OAUTH_CILOGON_CLIENT_ID','test-client')
+    monkeypatch.setenv('OAUTH_CILOGON_CLIENT_SECRET_FILE',str(secret))
+    config=configuration._load_oauth_providers('https','wepp.cloud','/weppcloud')['cilogon']
+    assert config['enabled'] and config['client_secret']=='synthetic-value'
+    assert config['redirect_uri']=='https://wepp.cloud/weppcloud/oauth/cilogon/callback'
+    assert config['scope']==['openid','email','profile']
+    secret.unlink()
+    with pytest.raises(SecretConfigurationError): configuration._load_oauth_providers('https','wepp.cloud','/weppcloud')

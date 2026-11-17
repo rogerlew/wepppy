@@ -11,6 +11,7 @@ from requests.exceptions import RequestException
 from werkzeug.exceptions import Forbidden, NotFound
 
 from wepppy.weppcloud.routes._security import oauth as oauth_module
+from wepppy.weppcloud import account_security
 
 pytestmark = pytest.mark.routes
 
@@ -60,6 +61,7 @@ def _set_current_user(
         id=user_id,
         is_authenticated=is_authenticated,
         password=password,
+        local_credential_state="enabled",
         oauth_accounts=SimpleNamespace(count=lambda: oauth_count),
     )
     monkeypatch.setattr(oauth_module, "current_user", current_user, raising=False)
@@ -75,6 +77,7 @@ def _set_callback_session(
 ) -> None:
     with client.session_transaction() as session_state:
         session_state[oauth_module._SESSION_PKCE_KEY] = {provider: code_verifier}
+        session_state[oauth_module._SESSION_NONCE_KEY] = {provider: "nonce"}
         if next_url is not None:
             session_state[oauth_module._SESSION_NEXT_KEY] = {provider: next_url}
 
@@ -99,7 +102,11 @@ def _configure_callback_client(
             calls["code_verifier"] = kwargs.get("code_verifier")
             if token_exc is not None:
                 raise token_exc
-            return token if token is not None else {"access_token": "token", "token_type": "Bearer"}
+            return token if token is not None else {"access_token": "token", "token_type": "Bearer", "id_token": "test-id-token"}
+
+        def parse_id_token(self, token, nonce, claims_options):
+            profile = userinfo_response._payload if userinfo_response and isinstance(userinfo_response._payload, dict) else {"sub":"provider-user-123", "email":"person@example.com", "email_verified":True}
+            return {"sub":"provider-user-123", **profile, "nonce":nonce}
 
         def get(self, endpoint, headers=None):
             calls["userinfo_endpoint"] = endpoint
@@ -159,6 +166,13 @@ def oauth_app(monkeypatch: pytest.MonkeyPatch):
     app.register_blueprint(oauth_module.security_oauth_bp)
 
     _set_current_user(monkeypatch, is_authenticated=False)
+    monkeypatch.setattr(oauth_module, "_get_user_datastore", lambda: None)
+    monkeypatch.setattr(oauth_module, "_lock_account_for_disconnect", lambda ds: oauth_module.current_user)
+    def resolve(_ds, provider, subject, email, owned, profile, token):
+        if not email or not owned:
+            raise ValueError("Verified email required")
+        return SimpleNamespace(id=99, local_credential_state="none")
+    monkeypatch.setattr(account_security, "resolve_federated_account", resolve)
     return app
 
 
@@ -233,6 +247,7 @@ def test_oauth_login_stores_pkce_and_next_before_redirect(
         assert response.status_code == 302
         assert response.headers["Location"].endswith("/provider-auth")
         assert str(calls["redirect_uri"]).endswith("/oauth/google/callback")
+        assert calls["kwargs"].pop("nonce")
         assert calls["kwargs"] == {
             "code_challenge": "challenge-456",
             "code_challenge_method": "S256",
@@ -401,7 +416,7 @@ def test_oauth_callback_requires_provider_uid(
 
         assert response.status_code == 302
         assert response.headers["Location"].endswith("/login")
-        assert ("error", "The identity provider did not return a stable identifier.") in _get_flashes(client)
+        assert ("error", "The identity provider returned inconsistent account information.") in _get_flashes(client)
 
 
 def test_oauth_callback_requires_verified_email(
@@ -420,7 +435,7 @@ def test_oauth_callback_requires_verified_email(
         assert response.headers["Location"].endswith("/login")
         assert (
             "error",
-            "We could not determine your verified email address from the identity provider.",
+            "Unable to sign in. Check that your provider has a verified email, or contact support if the problem continues.",
         ) in _get_flashes(client)
 
 
@@ -446,7 +461,7 @@ def test_oauth_callback_blocks_unverified_email(
         assert response.headers["Location"].endswith("/login")
         assert (
             "error",
-            "Please verify your email address with the identity provider before continuing.",
+            "Unable to sign in. Check that your provider has a verified email, or contact support if the problem continues.",
         ) in _get_flashes(client)
 
 
@@ -458,7 +473,7 @@ def test_oauth_callback_handles_identity_link_conflict(
     def _raise_conflict(*_args, **_kwargs):
         raise ValueError("identity already linked")
 
-    monkeypatch.setattr(oauth_module, "_link_identity", _raise_conflict)
+    monkeypatch.setattr(account_security, "resolve_federated_account", _raise_conflict)
 
     with oauth_app.test_client() as client:
         _set_callback_session(client)
@@ -466,7 +481,7 @@ def test_oauth_callback_handles_identity_link_conflict(
 
         assert response.status_code == 302
         assert response.headers["Location"].endswith("/login")
-        assert ("error", "This identity is already linked to a different WEPPcloud account.") in _get_flashes(
+        assert ("error", "Unable to sign in. Check that your provider has a verified email, or contact support if the problem continues.") in _get_flashes(
             client
         )
 
@@ -475,10 +490,10 @@ def test_oauth_callback_success_redirects_to_session_next_and_logs_user_in(
     oauth_app: Flask, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     calls = _configure_callback_client(monkeypatch)
-    linked_user = SimpleNamespace(id=91)
+    linked_user = SimpleNamespace(id=91, local_credential_state="none")
     login_calls = []
 
-    monkeypatch.setattr(oauth_module, "_link_identity", lambda *_args, **_kwargs: linked_user)
+    monkeypatch.setattr(account_security, "resolve_federated_account", lambda *_args, **_kwargs: linked_user)
     monkeypatch.setattr(
         oauth_module,
         "login_user",
@@ -502,7 +517,7 @@ def test_oauth_callback_success_uses_query_next_fallback(
     oauth_app: Flask, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _configure_callback_client(monkeypatch)
-    monkeypatch.setattr(oauth_module, "_link_identity", lambda *_args, **_kwargs: SimpleNamespace(id=92))
+    monkeypatch.setattr(account_security, "resolve_federated_account", lambda *_args, **_kwargs: SimpleNamespace(id=92, local_credential_state="none"))
     monkeypatch.setattr(oauth_module, "login_user", lambda *_args, **_kwargs: None)
 
     with oauth_app.test_client() as client:
@@ -517,7 +532,7 @@ def test_oauth_callback_success_redirects_to_post_login_view(
     oauth_app: Flask, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _configure_callback_client(monkeypatch)
-    monkeypatch.setattr(oauth_module, "_link_identity", lambda *_args, **_kwargs: SimpleNamespace(id=93))
+    monkeypatch.setattr(account_security, "resolve_federated_account", lambda *_args, **_kwargs: SimpleNamespace(id=93, local_credential_state="none"))
     monkeypatch.setattr(oauth_module, "login_user", lambda *_args, **_kwargs: None)
 
     with oauth_app.test_client() as client:
@@ -599,3 +614,63 @@ def test_oauth_disconnect_unlinks_account_and_redirects_to_profile(
         assert response.headers["Location"].endswith("/profile")
         assert unlink_calls == [(current_user, "google")]
         assert ("success", "Google account disconnected.") in _get_flashes(client)
+
+
+@pytest.mark.parametrize('provider', ['cilogon', 'google'])
+@pytest.mark.parametrize('defect', [None, 'issuer', 'audience', 'expired', 'nonce', 'signature', 'missing', 'userinfo'])
+def test_oidc_signed_claims_before_identity_write(oauth_app, monkeypatch, provider, defect):
+    import time
+    from authlib.jose import JsonWebKey, jwt
+    from wepppy.weppcloud.utils.oauth import ensure_oauth_client
+    issuer = 'https://cilogon.org' if provider == 'cilogon' else 'https://accounts.google.com'
+    settings = dict(enabled=True, name=provider, client_id='test-client', client_secret='synthetic-secret',
+        userinfo_url=issuer+'/userinfo', scope=['openid','email','profile'])
+    oauth_app.config['OAUTH_PROVIDERS'][provider] = settings
+    with oauth_app.app_context():
+        remote = ensure_oauth_client(provider, settings)
+    key = JsonWebKey.generate_key('RSA', 2048, is_private=True, options={'kid':'test'})
+    public = key.as_dict(is_private=False)
+    monkeypatch.setattr(remote, 'load_server_metadata', lambda: {'issuer':issuer, 'id_token_signing_alg_values_supported':['RS256']})
+    monkeypatch.setattr(remote, 'fetch_jwk_set', lambda **kw: {'keys':[public]})
+    now = int(time.time())
+    claims = dict(iss=issuer, sub='subject', aud='test-client', exp=now+300, iat=now,
+                  nonce='nonce', email='person@example.com', email_verified=True)
+    if defect == 'issuer': claims['iss']='https://attacker.invalid'
+    if defect == 'audience': claims['aud']='different-client'
+    if defect == 'expired': claims['exp']=now-600
+    if defect == 'nonce': claims['nonce']='different-nonce'
+    signing_key = JsonWebKey.generate_key('RSA',2048,is_private=True,options={'kid':'test'}) if defect == 'signature' else key
+    token = {'access_token':'synthetic-access', 'id_token':jwt.encode({'alg':'RS256','kid':'test'},claims,signing_key).decode()}
+    if defect == 'missing': token.pop('id_token')
+    monkeypatch.setattr(remote,'authorize_access_token',lambda **kw:token)
+    monkeypatch.setattr(remote,'get',lambda *a,**kw:DummyResponse(payload={'sub':'different-subject' if defect=='userinfo' else 'subject'}))
+    monkeypatch.setattr(oauth_module,'ensure_oauth_client',lambda *a:remote)
+    writes=[]
+    monkeypatch.setattr(account_security,'resolve_federated_account',lambda *a: writes.append(a) or SimpleNamespace(local_credential_state='none'))
+    monkeypatch.setattr(oauth_module,'login_user',lambda *a,**kw:None)
+    client=oauth_app.test_client()
+    _set_callback_session(client,provider=provider)
+    response=client.get(f'/oauth/{provider}/callback')
+    assert response.status_code==302
+    assert bool(writes) == (defect is None)
+    if defect is None:
+        assert writes[0][2]=='subject'
+        if provider=='google': assert writes[0][3:5]==('person@example.com',True)
+
+
+def test_cilogon_authlib_rejects_unknown_state(oauth_app, monkeypatch):
+    from wepppy.weppcloud.utils.oauth import ensure_oauth_client
+    settings=dict(enabled=True,name='CILogon',client_id='test',client_secret='test',scope=['openid'])
+    oauth_app.config['OAUTH_PROVIDERS']['cilogon']=settings
+    with oauth_app.app_context(): remote=ensure_oauth_client('cilogon',settings)
+    monkeypatch.setattr(oauth_module,'ensure_oauth_client',lambda *a:remote)
+    monkeypatch.setattr(account_security,'resolve_federated_account',lambda *a:pytest.fail('invalid state reached datastore'))
+    client=oauth_app.test_client()
+    _set_callback_session(client,provider='cilogon')
+    assert client.get('/oauth/cilogon/callback?state=unrecognized&code=test').headers['Location'].endswith('/login')
+
+
+def test_provider_error_description_not_logged(oauth_app, caplog):
+    client=oauth_app.test_client()
+    client.get('/oauth/google/callback?error=unexpected&error_description=private-canary')
+    assert 'private-canary' not in caplog.text

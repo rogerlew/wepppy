@@ -256,6 +256,24 @@ def _load_oauth_providers(
         ),
     }
 
+    cilogon_id = _get_env_any(["OAUTH_CILOGON_CLIENT_ID"])
+    cilogon_secret = get_secret("OAUTH_CILOGON_CLIENT_SECRET")
+    cilogon_redirect = _build_oauth_redirect_uri(
+        redirect_scheme, redirect_host, site_prefix, "cilogon",
+        _get_env_any(["OAUTH_CILOGON_REDIRECT_URI"]),
+    )
+    providers["cilogon"] = {
+        "name": "CILogon", "client_id": cilogon_id, "client_secret": cilogon_secret,
+        "redirect_uri": cilogon_redirect,
+        "server_metadata_url": "https://cilogon.org/.well-known/openid-configuration",
+        "authorize_url": "https://cilogon.org/authorize",
+        "token_url": "https://cilogon.org/oauth2/token",
+        "userinfo_url": "https://cilogon.org/oauth2/userinfo",
+        "scope": ["openid", "email", "profile"],
+        "client_kwargs": {"token_endpoint_auth_method": "client_secret_basic"},
+        "enabled": bool(cilogon_id and cilogon_secret and cilogon_redirect),
+    }
+
     return providers
 
 

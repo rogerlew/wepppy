@@ -1,5 +1,10 @@
 {% extends "base_pure.htm" %}
 
+{% block head_extras %}
+{{ super() }}
+<link rel="stylesheet" href="{{ static_url('css/account.css') }}">
+{% endblock %}
+
 {% block title %}{% endblock %}
 
 {% block body %}

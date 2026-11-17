@@ -1,9 +1,15 @@
-{% extends "security/_layout.html"%}
+{% extends "base_pure.htm" %}
 {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+{% block head_extras %}
+{{ super() }}
+<link rel="stylesheet" href="{{ static_url('css/account.css') }}">
+{% endblock %}
 {% block title %}
 User Profile
 {% endblock %}
-{% block content %}
+{% block body %}
+  <h1>User Profile</h1>
+  {% include "security/_messages.html" %}
   {% set linked_accounts = user.oauth_accounts.all() %}
   {% set oauth_config = oauth_providers or {} %}
   <section class="wc-profile">
@@ -17,7 +23,7 @@ User Profile
       </div>
       <div class="wc-profile-details__row">
         <dt class="wc-profile-details__label">Email</dt>
-        <dd class="wc-profile-details__value">{{ user.email }}</dd>
+        <dd class="wc-profile-details__value">{{ account_display_email(user) or "Not supplied" }}</dd>
       </div>
       <div class="wc-profile-details__row">
         <dt class="wc-profile-details__label">Roles</dt>
@@ -35,10 +41,40 @@ User Profile
     <div class="wc-profile__actions">
       <a class="wc-profile__action" href="{{ url_for('user.preferences') }}">User Preferences</a>
       <br>
+      {% if user.account_kind != 'cilogon' and user.local_credential_state not in ['none', 'pending'] %}
       <a class="wc-profile__action" href="{{ url_for('security.change_password') }}">Change Password</a>
+      {% endif %}
       <br>
       <a class="wc-profile__action" href="{{ url_for('security.logout') }}">Logout</a>
     </div>
+
+    <section class="wc-panel" aria-labelledby="email-verification-heading">
+      <h2 id="email-verification-heading">Email Verification</h2>
+      {% if account_mailbox_verified(user) %}
+      <p>Verified — {{ user.mailbox_verified_at.strftime('%Y-%m-%d') }}</p>
+      {% else %}
+      <p>Email verification not recorded</p>
+      {% if account_display_email(user) %}
+      <form action="{{ url_for('account_security.send') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="pure-button pure-button-primary">Send verification email</button>
+      </form>
+      {% else %}<p>There is no email address available to verify.</p>{% endif %}
+      {% endif %}
+      {% if user.account_kind == 'cilogon' %}
+      <p>Verifying this email does not connect your other WEPPcloud accounts.</p>
+      {% elif user.local_credential_state in ['none', 'pending'] %}
+      <p>To sign in with email and password, first open a password setup link sent to your email.</p>
+      <form action="{{ url_for('account_security.send') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="purpose" value="setup">
+        <button type="submit" class="pure-button">Send password setup email</button>
+      </form>
+      {% elif not account_mailbox_verified(user) %}
+      <p>Verifying your email does not replace your current password. If you did not choose it, reset your password to secure local sign-in.</p>
+      <a href="{{ url_for('security.forgot_password') }}">Reset password</a>
+      {% endif %}
+    </section>
 
     <h3 class="wc-profile__subheading">Linked Providers</h3>
     {% if linked_accounts %}
@@ -94,6 +130,10 @@ User Profile
                   action="{{ url_for('security_oauth.disconnect', provider=account.provider) }}"
                   class="wc-profile-providers__form">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {% if user.local_credential_state == 'legacy' and linked_accounts|length == 1 %}
+              <label for="disconnect-password-{{ account.id }}">Current password to keep local sign-in</label>
+              <input id="disconnect-password-{{ account.id }}" type="password" name="password" autocomplete="current-password">
+              {% endif %}
               <button type="submit" class="pure-button wc-profile-providers__button">
                 Disconnect
               </button>
