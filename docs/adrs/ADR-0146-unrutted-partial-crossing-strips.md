@@ -1,6 +1,6 @@
 # ADR-0146: Simplified unrutted partial-crossing strips
 
-Status: Accepted; implemented and scoped forest validation complete
+Status: RUPC-01 accepted and locally validated; RUPC-02 amendment accepted/reviewed, implementation pending
 Date: 2026-11-17
 
 ## Context
@@ -62,3 +62,29 @@ Failing area closure, non-positive inputs, baseline double counting or stale res
 publication blocks release. Retain original inputs/results and validate disposable
 forest runs. Revert using commit-preserving integration; reprepare under the active
 policy before execution. No production deployment follows automatically.
+
+## RUPC-02 amendment — 2026-11-17
+
+Roger Lew asked whether the eight rejected crossings should be modeled at the
+hillslope top, then directed: “let's add to the current work-package / branch.
+update the work-package and proceed with the contract ammendments”. Venue and
+participants remain the Codex conversation with Roger and Codex. This authorizes
+the top-placement contract amendment; implementation and native validation remain
+pending and are not covered by the original 191-test receipt.
+
+Adopt the RUPC-02 section of the strip contract. Omit upstream landuse when the
+ordinary placement is non-positive; preserve road/fill dimensions and hillslope
+area using downhill landuse, including positive lengths below 10 m. Exact fit uses
+a road/fill profile. Reject road plus fill longer than the representative hill.
+Place remainder absorption downhill for these strips. Record the original position
+and adjustment, and disclose zero modeled runoff from land above the road.
+
+Reject silent distance clamping with a fabricated upstream OFE and silent fill
+shortening. Relative terrain-position mapping needs a separate scientific choice
+and is outside this amendment. The top placement is an explicit abstraction,
+not evidence of physical ridge location or resolved switchback connectivity.
+Preserve geometry preparation compatibility; invalidate current execution results
+by the new placement policy marker and require rerun. Revert through normal
+commit-preserving history and rerun under the selected policy; never relabel old
+outputs. Scoped native profile/PASS/watershed evidence is required before claiming
+conformance or that any of the eight crossings is repaired.

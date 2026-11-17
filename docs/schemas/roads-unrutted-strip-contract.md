@@ -1,6 +1,9 @@
 # Unrutted partial-crossing strip contract
 
-Status: accepted 2026-11-17 by Roger Lew; both independent contract reviews pass.
+Status: RUPC-01 accepted 2026-11-17 by Roger Lew; both original contract reviews pass.
+RUPC-02 top-placement amendment authorized 2026-11-17; both independent reviews
+pass. Implementation conformance
+is pending. Prior validation below covers RUPC-01 only.
 Implementation and scoped forest conformance validated 2026-11-17; no production
 deployment or full-site repair claimed. RUPC-01 supersedes conflicting unrutted geometry
 and eligibility provisions in the Roads specification after this standalone
@@ -65,19 +68,21 @@ When f = 1, road area must match its target to rounding precision.
 Use the existing distance-to-channel median placement and supplied fill dimensions.
 Downstream landuse length is max(0, D_med - fill_length); collapse it to zero when
 below the existing 10 m threshold. Upslope length is H minus road, fill and downstream
-lengths. All present OFEs must have positive lengths; fail the affected replacement
-explicitly if there is no positive upslope length. Preserve existing required
+lengths. If the computed upslope length is non-positive, apply RUPC-02 below
+instead of `failed_non_positive_top_ofe`. All emitted OFEs must have positive
+lengths; an omitted upstream OFE is not a zero-length native OFE. Preserve existing required
 fill/buffer validation; no new missing-input defaults. Existing missing-distance
 fallback must be identified in provenance if used, not described as measured position.
 
 Unaffected remainder width is W-sum(w_i), with original H. Initially every affected strip has total length H. Preserve the existing small
 remainder rule: if remainder width is positive but below 0.3 m, transfer its area
-to the first deterministically ordered strip by extending only upstream landuse
-length by remainder_area / strip_width; set remainder width to zero. This explicit
+to the first deterministically ordered strip by extending upstream landuse
+length by remainder_area / strip_width; for a top-placed strip, extend or create
+downstream landuse instead. Set remainder width to zero. This explicit
 exception preserves total area without creating a tiny native remainder profile.
 Thus sum(strip areas)+remainder area = W*H by construction.
-Retain existing residual compensation on upstream landuse for floating-point error
-only; numerical acceptance is absolute area error <= 1e-6 square meters in planned
+Retain existing residual compensation on upstream landuse (downstream landuse
+for a top-placed strip) for floating-point error only; numerical acceptance is absolute area error <= 1e-6 square meters in planned
 geometry. No relative tolerance. Reject non-finite values and non-positive
 compensated lengths. For unrutted slope files, serialize dimensions with 12 decimal places and parse
 back the emitted dimensions before execution; enforce the same 1e-6 square meter
@@ -87,6 +92,84 @@ rounding remains governed by the existing modeled-area accounting contract: reta
 full source areas and report serialized reconciliation rather than silently
 rescaling responses to force equality. The exact area invariant is for planned
 and emitted geometry; native output serialization differences must be visible.
+
+## RUPC-02: top-of-hillslope placement
+
+This amendment changes intended behavior; implementation is pending. Terrain
+channel distance and representative WEPP hillslope length are different measures.
+When the ordinary placement above computes upslope length <= 0, place the road
+at the top of the abstract strip. This is not a claim that the real road is on a
+ridge. Do not apply this adjustment to otherwise positive upstream profiles.
+
+Keep H, strip width, physical road length r and supplied fill length F. Require
+r + F <= H before remainder absorption. If r + F > H, fail with
+`failed_road_fill_exceeds_hillslope`, retaining H, r and F and actionable guidance
+to verify supplied dimensions and representative hillslope geometry. Do not
+shorten fill, road or enlarge H to make this fit. Invalid/missing/non-finite
+parameters remain errors and must not activate top placement.
+
+For adjusted strips, upstream length is zero and the upstream OFE is omitted.
+Downstream length is H - r - F. If positive, emit `road -> fill -> landuse`;
+if exactly zero, emit `road -> fill`. Do not invent a tiny upstream OFE. For this
+layout only, retain every positive downstream length even below the existing
+10 m landuse threshold: discarding it would lose area or change road/fill geometry.
+Native soil, management, slope, run and comparison role order must agree with
+these two/three-OFE layouts; never reuse a two-OFE road/buffer template as road/fill.
+Use existing road, fill and downstream landuse parameterization without new defaults.
+
+Small-remainder absorption and floating-point compensation must not reintroduce
+upstream landuse in an adjusted strip. Apply them to downstream landuse, creating
+that OFE when a positive adjustment requires it. A zero downstream length means
+omission; a negative corrected length or a non-positive emitted dimension fails.
+The 1e-6 m² planned/emitted area bound and native serialization checks still apply.
+Road area and width-compression deficit are unchanged by placement adjustment.
+Keep `top_ofe_compensation_m` upstream-only. Add `bottom_ofe_compensation_m` for
+signed downstream length adjustment, covering remainder absorption and floating
+residual compensation; zero means no adjustment. Retain both per crossing and
+as sums in hillslope records, using null when unavailable on a failed record.
+Never record downhill transfer as top compensation. The legacy
+`failed_non_positive_top_ofe` code remains available for invalid upstream
+compensation, not for the ordinary placement trigger that RUPC-02 resolves.
+
+Retain existing `placement_source` as the anchor source, including missing-distance
+fallback provenance. Append crossing fields `placement_policy` =
+`unrutted_top_placement_v1`, `placement_adjustment` = `none` or `top_of_hillslope`,
+`placement_adjustment_reason` = null or `non_positive_upstream_length`,
+`original_top_landuse_length_m`, `hillslope_length_m`, and
+`upslope_runon_assumed_zero` (true only for adjusted strips). Retain original
+`discha_median_m` and final top/bottom lengths. Numbers are finite, or null on
+failure when unavailable; preserve existing source membership and accounting keys.
+Copy provenance to summary, execution manifest and retained inspection artifacts.
+Adjusted profiles receive no modeled runoff from land above the road; disclose
+this limitation in user help and result inspection. Geometry conservation alone
+does not prove hydrologic equivalence.
+
+Preparation geometry is unchanged: keep `unrutted_geometry_policy: unrutted_strips_v1`
+and permit valid RUPC-01 prepared candidates to run. The authoritative execution
+marker is the top-level run-summary field `unrutted_placement_policy`, with value
+`unrutted_top_placement_v1`. Write it for every new attempt whose prepared set
+contains an unrutted design, including mixed and zero-contributor attempts where
+all unrutted crossings are excluded. Per-crossing `placement_policy` is diagnostic
+provenance in the existing list-shaped manifest; do not change its envelope or
+add a second authoritative marker there.
+
+Current-result admission requires this run-summary marker whenever the current
+prepared set contains any unrutted design, not merely when a contributor executed.
+Pure non-unrutted projects do not require the marker. The marker is necessary but
+not sufficient: existing preparation identity, completion, artifact and freshness
+checks still apply, and a failed attempt cannot become current by carrying it.
+Historical results without the required marker remain inspectable as historical;
+require Run again, not an unnecessary Prepare. Check before consuming/publishing
+cached results. Archive/restore preserves the summary marker and usual evidence;
+old affected archives must restore successfully as historical, non-current data,
+without rewriting provenance. Unaffected-design archive admission stays unchanged.
+Missing, malformed or unknown required summary markers cannot certify current
+output. Completed unrutted manifest rows must have matching `placement_policy`
+values; missing or mismatched row values also prevent current admission. An empty
+contributor list requires no invented row, but still requires the summary marker
+when the prepared set contains unrutted roads. Restore must distinguish historical
+eligibility from current-result admission rather than fail solely on an old policy.
+Other road designs and valid zero-contributor behavior are unchanged.
 
 ## PASS replacement and results
 

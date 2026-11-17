@@ -79,3 +79,10 @@ physical road width as OFE length at 4% slope, overlap-based strip widths with
 proportional compression and visible road-area loss, conserved total hillslope
 area, and retained 10 m minimum/three-crossing cap. Both independent reviews pass.
 This supersedes the pending-approval status above; checkpoint commit is next.
+
+## RUPC-02 follow-up checkpoint
+
+The operator authorized a top-placement amendment on 2026-11-17, after RUPC-01
+implementation. See [the incremental decision and review record](20261117_top_placement_contract.md).
+It supersedes only the identified placement/area-adjustment/lifecycle rules;
+original reviews and implementation receipts do not validate the new behavior.

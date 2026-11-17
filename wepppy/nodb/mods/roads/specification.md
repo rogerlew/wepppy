@@ -963,8 +963,9 @@ Transverse strip geometry (RUPC-01, superseding the legacy parity transform):
 - Unscaled strip width equals measured in-hillslope road overlap length.
 - Multiply widths by `min(1, W_h / sum(overlap_lengths))`; record resulting road-area
   deficits, never silently extend the road OFE or expand hillslope area.
-- Preserve existing placement, short downstream landuse and small-remainder
-  compensation rules. Reject non-positive native geometry explicitly.
+- Use RUPC-02 top placement for non-positive ordinary upstream length; omit that
+  OFE, retain positive short downhill landuse and place area compensation downhill.
+  Implementation conformance for this amendment is pending. Other placement stays unchanged.
 - Serialize unrutted slope dimensions to 12 decimals and read back positive
   dimensions and absolute hillslope-area closure within `1e-6 m²` before execution.
 - Native WAT/PASS area reconciliation retains the modeled-area accounting contract.
@@ -973,7 +974,8 @@ Area-conservation closure contract:
 
 - Use absolute area closure by construction.
 - After contributor assembly for each targeted hillslope, compute residual area error and compensate using the top (upslope) landuse OFE length.
-- If compensation would create a non-positive top landuse OFE length, fail the replacement for that hillslope explicitly.
+- RUPC-02 top-placed strips compensate downhill, omitting zero-length landuse;
+  reject negative corrected lengths and any non-positive emitted dimension.
 - Relative tolerance terms are not used.
 
 Routing and replacement contract:
@@ -1023,7 +1025,8 @@ Each record in `outslope_unrutted_hillslope_records` must include:
 - `segment_ids_excluded`
 - `segment_ids_capped`
 - `inclusion_ratio_by_segment`
-- `top_ofe_compensation_m`
+- `top_ofe_compensation_m` (upstream only)
+- `bottom_ofe_compensation_m` (RUPC-02 downstream adjustment; implementation pending)
 - `area_error_before_compensation_m2`
 - `area_error_after_compensation_m2`
 
@@ -1034,7 +1037,8 @@ Per-segment replacement status codes are limited to:
 - `excluded_overlap_length_min`
 - `excluded_cap_limit`
 - `failed_missing_parameter`
-- `failed_non_positive_top_ofe`
+- `failed_non_positive_top_ofe` (invalid upstream compensation; ordinary non-positive placement uses RUPC-02)
+- `failed_road_fill_exceeds_hillslope` (RUPC-02; implementation pending)
 
 ### Remaining Deferred Details
 
@@ -1134,3 +1138,15 @@ The accepted [unrutted strip contract](../../../../docs/schemas/roads-unrutted-s
 geometry, accounting and lifecycle delta. Implementation conformance is pending. RUPC-01 supersedes conflicting unrutted
 geometry, eligibility and preparation provisions above. Unrelated road
 designs, parameterization ownership and lifecycle safeguards remain unchanged.
+
+## RUPC-02 top-placement amendment
+
+Implementation pending. The canonical
+[top-placement rule](../../../../docs/schemas/roads-unrutted-strip-contract.md#rupc-02-top-of-hillslope-placement)
+supersedes the ordinary non-positive-top failure and upstream-only compensation
+rules above. Top placement emits road/fill/downhill landuse, or road/fill for exact
+fit; it has no modeled upstream runon. Keep positive downhill lengths below 10 m.
+Fail explicitly if road plus fill exceeds H; preserve dimensions and area rather
+than fabricating upstream landuse or shortening fill. Native role selection and
+execution-policy admission must follow the canonical amendment. Original RUPC-01
+receipts do not validate these new layouts.

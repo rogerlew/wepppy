@@ -1,6 +1,6 @@
 # Scoped acceptance and evidence matrix
 
-**Status:** Planned; no implementation tests executed.
+**Status:** RUPC-01 validated (191 scoped tests and native slices); RUPC-02 cases below pending.
 **Operator direction:** 2026-11-17, “scope tests to the implementation changes.”
 Do not run the full repository suite or unrelated frontend/stub gates. Select
 specific tests for changed functions and confirmed consumers; add adjacent tests
@@ -69,3 +69,29 @@ Before closeout: independent correctness review from the repository template,
 dedicated security review for native/file boundaries, and no unresolved medium/high
 findings. Reviews must cite executed scoped evidence and name uncovered limits.
 Scaffolding is not a passing review or a completed implementation.
+
+## RUPC-02 incremental acceptance (pending)
+
+| Case | Required evidence |
+| --- | --- |
+| Ordinary upstream > 0 | Existing placement, area and role behavior unchanged. |
+| Upstream zero/negative; road + fill < H | No upstream OFE; road/fill/downhill landuse; original and adjusted position retained; zero upstream runon disclosed. |
+| 0 < downhill < 10 m | Keep positive section; native parse and run succeed without area loss. |
+| Road + fill = H | Native road/fill layout and parameter roles correct; no zero-length landuse. |
+| Road + fill > H | Explicit fit failure with dimensions and recovery guidance; no fill shortening. |
+| Tiny remainder and floating correction | Downhill adjustment, never upstream creation; parsed area closure <= 1e-6 m². |
+| Missing/invalid fields | Existing validation errors; top placement cannot hide missing inputs. |
+| RUPC-01 prepared candidates | Reuse preparation; old execution remains historical; Run required for current RUPC-02 output. |
+| Absent/empty/malformed/restored/failed state | Existing valid outcomes and retention preserved; marker absent cannot imply current RUPC-02 execution. |
+| Full copied upload | Retain prior failure evidence and per-crossing new dispositions for all eight; real PASS and watershed/report checks for successful execution. |
+
+Scope new tests to changed implementation and confirmed consumers. Prior reviews
+and successful 141/42 slices do not establish RUPC-02 conformance.
+
+RUPC-02 lifecycle cases must distinguish pure non-unrutted (marker exempt), mixed,
+and all-unrutted-but-excluded (marker required) attempts. Test missing, malformed,
+unknown and summary/row-mismatched markers, with no fabricated row for empty runs.
+Old affected archives restore successfully as historical without provenance edits;
+unaffected archives keep existing admission. Failed attempts never become current
+merely by having a marker. Read back upstream/downstream compensation fields
+separately so area transfer is not mislabeled.

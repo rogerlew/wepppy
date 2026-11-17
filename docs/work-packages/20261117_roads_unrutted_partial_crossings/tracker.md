@@ -1,7 +1,7 @@
 # Unrutted partial-crossing tracker
 
 **Updated:** 2026-11-17 UTC
-**Status:** Implemented and validated locally on forest; no deployment or full-site repair.
+**Status:** Active RUPC-02 contract amendment; RUPC-01 locally complete. No deployment or full-site repair.
 **Branch:** `work/roads-unrutted-strip-contract`
 **Worktree:** `/tmp/wepppy-roads-unrutted-strip-contract`
 **Contract ancestor:** `8e87b236301364c4b743fd7bec87b7640b35cd46`
@@ -72,3 +72,20 @@ an explicit decision about infeasible profile placement; do not silently clamp i
 
 Documentation tooling note: installed wctl doc wrappers use the shared checkout;
 validate this worktree via explicit `--project-dir` or direct `markdown-doc`.
+
+## RUPC-02 amendment tracking
+
+Starting implementation: `e6989a622f7aea86126d098f48e2e57c15f35b61` on the same branch.
+The operator requested top placement and authorized contract amendments. This
+supersedes the earlier requirement to reject every non-positive upstream profile;
+it does not erase the retained eight-failure evidence.
+
+- [x] Draft canonical placement, role ordering, area and lifecycle amendments; update ADR.
+- [x] Complete two independent contract reviews; standalone checkpoint prepared.
+- [ ] Implement adjusted layouts, provenance and execution-policy admission.
+- [ ] Run scoped regressions and native full-upload retry with per-crossing disposition.
+- [ ] Complete fresh correctness/security reviews and user/operator documentation.
+
+The current requested delivery is the contract amendment. No RUPC-02 runtime
+changes or new model tests have been performed. Native acceptance must retain
+unresolved crossings honestly; synthetic fill/buffer values are not site calibration.

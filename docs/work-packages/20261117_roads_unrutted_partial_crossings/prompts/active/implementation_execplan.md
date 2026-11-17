@@ -34,6 +34,10 @@ does not establish correct physical allocation of contributing area.
 - [x] (2026-11-17 UTC) M3 native execution, replacement PASS, provenance and shared-source presentation wired.
 - [x] (2026-11-17 UTC) M4: 191 scoped tests; fresh native forest slices/control; correctness/security reviews pass.
 
+- [x] (2026-11-17 UTC) RUPC-02 top-placement amendment drafted at operator direction.
+- [x] RUPC-02 independent contract reviews pass; standalone checkpoint prepared.
+- [ ] RUPC-02 implementation, scoped native evidence and final reviews.
+
 ## Surprises & Discoveries
 
 
@@ -47,6 +51,10 @@ Marta's rerun has nine prepared segments rather than 38. One crossing of hillslo
 alone cannot resolve that missing-parameter failure. Details are retained in
 `artifacts/20261117_incident_evidence.md` relative to this package.
 
+The retained full upload has eight non-positive upstream profiles: terrain
+distance anchors can exceed the representative WEPP profile length. This is an
+abstraction mismatch, not proof of physically impossible roads.
+
 ## Decision Log
 
 
@@ -58,6 +66,11 @@ allocation and infeasibility policy still require the contract checkpoint.
 2026-11-17, Roger Lew: scope tests to implementation changes. Do not run the full
 repository suite. Run targeted affected-path regression and native artifact checks;
 add UI, RQ, stub or Rust checks only where implementation changes affect them.
+
+2026-11-17, Roger Lew with Codex: amend this package to allow explicit top
+placement when ordinary upstream length is non-positive. Preserve road/fill
+dimensions, omit upstream OFE, conserve area downhill and disclose absent
+upstream runon. Code conformance remains pending.
 
 ## Outcomes & Retrospective
 
@@ -74,6 +87,9 @@ calibration is claimed. Review caught costly linework grouping and secondary-sou
 result joins; endpoint traversal/spatial indexing and membership-aware readers fix
 these with regressions. Both reviewers pass, 191 scoped tests pass. Deployment,
 integration and publication remain separate. See tracker and retained artifacts.
+
+RUPC-02 reopens implementation work; prior completion and tests describe RUPC-01
+only. Current delivery is contract amendments, not a new execution claim.
 
 ## Context and Orientation
 
@@ -243,3 +259,39 @@ an explicit pre-implementation decision rather than an invented approved formula
 
 Revision note: 2026-11-17 execution completed locally with scoped evidence and
 explicit full-upload limitation; no relaxation of the approved placement failure policy.
+
+## M5 — RUPC-02 contract checkpoint and implementation follow-up
+
+
+Start from implementation `e6989a622f7aea86126d098f48e2e57c15f35b61` in the same
+worktree/branch. Amend the canonical strip contract and ADR-0146, update the Roads
+specification and affected lifecycle/settings/accounting cross-references. Record
+approval and two independent read-only reviews in `artifacts/20261117_top_placement_contract.md`.
+Commit a standalone checkpoint before code. This turn delivers contracts only.
+
+For later implementation, edit the placement branch in `Roads.run_roads_wepp`
+in `wepppy/nodb/mods/roads/roads.py`: ordinary upstream <= 0 selects top placement;
+require road + fill <= H, omit upstream, use downhill H-road-fill. Positive short
+downhill landuse stays; exact fit emits road/fill. Adjust native role builders and
+comparison consumers to use the actual OFE roles. Preserve area with any tiny
+remainder transferred downhill for top-placed strips. Never emit zero lengths.
+Append original/final placement provenance and execution policy markers from the
+canonical contract. Preserve prepared geometry and use existing result admission
+to require rerunning old execution outputs, retaining them as historical.
+
+Scope tests to the placement, writers, comparison and lifecycle paths actually
+changed. Start with `wctl run-pytest tests/nodb/mods/test_roads_controller.py
+tests/nodb/mods/test_roads_unrutted_strips.py`; add specific affected comparison,
+accounting/lifecycle tests as the diff requires. Run through a container verified
+to mount this worktree. No full repository suite. Exercise exact fit, short downhill,
+road/fill overflow, rounding, remainder absorption, unchanged positive upstream,
+missing inputs and old prepared/current/archived states. Parse native soil,
+management and slope roles, run real two/three-OFE contributors, combine PASS and
+read the actual watershed inputs and fresh reports. Retry the retained full upload
+on a disposable copy, preserving old evidence and recording all eight crossings'
+new dispositions. Keep synthetic validation dimensions explicit; do not promise
+all eight succeed before testing. Obtain fresh correctness/security reviews and
+update user/operator help before claiming completion. New deployment is outside scope.
+
+Revision note: 2026-11-17 RUPC-02 adds operator-requested top placement as a
+contract-only amendment; implementation/native conformance remain pending.

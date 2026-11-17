@@ -182,3 +182,13 @@ pre-execution geometry allocation under RUPC-01; scoped forest conformance was v
 full native source-area accounting, zero-contributor baseline equivalence,
 replacement precedence and WAT/PASS serialization reconciliation. Geometry area
 closure does not authorize post-execution rescaling to hide native discrepancies.
+
+### RUPC-02 top-placement amendment (implementation pending)
+
+The [RUPC-02 placement contract](roads-unrutted-strip-contract.md#rupc-02-top-of-hillslope-placement)
+supersedes rejection solely for non-positive upstream length. Its native role order,
+additive provenance, downstream area compensation and execution-policy admission
+are authoritative. Preparation geometry stays compatible; old executions require
+Run again to become current under RUPC-02. Existing parameter defaults, PASS
+accounting, history retention and other designs remain unchanged. Prior RUPC-01
+validation does not establish this amendment's conformance.

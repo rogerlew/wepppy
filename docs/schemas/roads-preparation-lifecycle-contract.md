@@ -250,3 +250,13 @@ The accepted [unrutted strip contract](roads-unrutted-strip-contract.md) defines
 geometry, accounting and lifecycle delta. Scoped forest conformance was validated on 2026-11-17; production rollout remains pending. RUPC-01 supersedes conflicting unrutted
 geometry, eligibility and preparation provisions above. Unrelated road
 designs, parameterization ownership and lifecycle safeguards remain unchanged.
+
+### RUPC-02 top-placement amendment (implementation pending)
+
+The [RUPC-02 placement contract](roads-unrutted-strip-contract.md#rupc-02-top-of-hillslope-placement)
+supersedes rejection solely for non-positive upstream length. Its native role order,
+additive provenance, downstream area compensation and execution-policy admission
+are authoritative. Preparation geometry stays compatible; old executions require
+Run again to become current under RUPC-02. Existing parameter defaults, PASS
+accounting, history retention and other designs remain unchanged. Prior RUPC-01
+validation does not establish this amendment's conformance.
