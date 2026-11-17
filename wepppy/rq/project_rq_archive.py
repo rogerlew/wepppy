@@ -18,6 +18,7 @@ import os
 import shutil
 import stat
 import zipfile
+from contextlib import ExitStack
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -593,11 +594,11 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
     prep = None
     restore_started = False
     restore_completed = False
+    retention_identity_failed = False
     retention_lease = None
     maintenance_lease = None
     rebuild_obligation = None
     try:
-        prep = runtime.get_prep_from_runid(runid)
         notification_wd = runtime.get_wd(runid)
         wd = Path(notification_wd).resolve()
         retention_configured = bool(
@@ -607,9 +608,24 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         private_archive = str(archive_name).replace("\\", "/").startswith("private/")
         live_sensitive = _contains_vector_upload_attempts(wd)
         if (private_archive or live_sensitive) and not retention_configured:
+            retention_identity_failed = True
             raise RuntimeError("Vector evidence retention identity is not configured")
+        filesystem_root = None
+        if retention_configured:
+            try:
+                filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"]).resolve(strict=True)
+                wd.relative_to(filesystem_root)
+            except (OSError, ValueError):
+                retention_identity_failed = True
+                raise
         archives_dir = wd / "archives"
-        archive_path = (archives_dir / archive_name).resolve()
+        archive_entry = archives_dir / archive_name
+        # A queued archive identity must still name the admitted regular path.
+        if archive_entry.is_symlink() or any(
+            parent.is_symlink() for parent in archive_entry.parents if parent != wd and wd in parent.parents
+        ):
+            raise ValueError("Invalid archive path")
+        archive_path = archive_entry.resolve()
 
         if not archive_path.exists() or not archive_path.is_file():
             raise FileNotFoundError(f"Archive not found: {archive_name}")
@@ -622,7 +638,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         runtime.publish_status(status_channel, f"Preparing to restore from {archive_name}")
 
         authority_wd = runtime.project_config_authority_wd(runid)
-        with catalog_lifecycle_guard(wd), runtime.project_config_lifecycle_guard(authority_wd), runtime.zip_file_cls(archive_path, mode="r") as zf:
+        with runtime.zip_file_cls(archive_path, mode="r") as zf, ExitStack() as restore_guards:
             failed_member = zf.testzip()
             if failed_member:
                 raise zipfile.BadZipFile(
@@ -635,7 +651,11 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 for _member, _target, relative in restore_members
             )
             if incoming_sensitive and not retention_configured:
+                retention_identity_failed = True
                 raise RuntimeError("Vector evidence retention identity is not configured")
+            prep = runtime.get_prep_from_runid(runid)
+            restore_guards.enter_context(catalog_lifecycle_guard(wd))
+            restore_guards.enter_context(runtime.project_config_lifecycle_guard(authority_wd))
             if retention_configured and (private_archive or live_sensitive or incoming_sensitive):
                 maintenance_lease = acquire_retention_maintenance_lease()
             if retention_configured:
@@ -686,9 +706,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
 
             roads_guard = roads_lifecycle.restore_operation(wd)
             with roads_guard:
-                filesystem_root = None
                 if maintenance_lease is not None:
-                    filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"]).resolve(strict=True)
                     rebuild_obligation = begin_retention_rebuild_obligation(
                         filesystem_root,
                         operation="private_archive_restore",
@@ -801,7 +819,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                     from wepppy.declarative.records import verify_protected
                     verify_protected(wd)
 
-        if filesystem_root is not None:
+        if rebuild_obligation is not None:
             retention_lease.assert_owned()
             reconcile_retention(
                 filesystem_root,
@@ -812,8 +830,9 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 maintenance_lease=maintenance_lease,
                 required_scope_leases=(retention_lease,),
             )
-            if rebuild_obligation is not None:
-                complete_retention_rebuild_obligation(rebuild_obligation)
+            maintenance_lease.assert_owned()
+            retention_lease.assert_owned()
+            complete_retention_rebuild_obligation(rebuild_obligation)
 
         from wepppy.nodb.persistence_events import notify_committed
         notify_committed(str(notification_wd), runid, "lifecycle")
@@ -853,9 +872,9 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 logging.getLogger(__name__).warning(
                     "Restore vector maintenance lock release deferred", exc_info=True,
                 )
-        if not restore_started or restore_completed:
+        if not retention_identity_failed and (not restore_started or restore_completed):
             _clear_archive_job_id(runtime, prep, runid)
-        else:
+        elif restore_started:
             # Old live metadata is not reconciled with committed incoming bytes.
             # Receipt cleanup must not publish that old hash over recovery evidence.
             logging.getLogger(__name__).warning(

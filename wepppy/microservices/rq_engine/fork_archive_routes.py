@@ -94,7 +94,15 @@ def _repair_private_archive_deletion(
     remove_bundle: bool,
 ) -> None:
     """Delete/reconcile private evidence without blocking the ASGI event loop."""
-    filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"])
+    filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    configured_root = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+    if not filesystem_id or not configured_root:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence retention is not configured.",
+            status_code=507,
+        )
+    filesystem_root = Path(configured_root).resolve(strict=True)
     target = (
         Path(wd).resolve().relative_to(filesystem_root.resolve())
         / relative_archive.parent
@@ -117,11 +125,12 @@ def _repair_private_archive_deletion(
         )
         if not remove_bundle and not pending_repair:
             return
-        if remove_bundle and not pending_repair:
-            _resolve_run_archive_path(
-                wd,
-                Path(archive_path).relative_to(Path(wd) / "archives").as_posix(),
-            )
+        # Pending repair relaxes missing provenance, never path containment.
+        _resolve_run_archive_path(
+            wd,
+            Path(archive_path).relative_to(Path(wd) / "archives").as_posix(),
+            verify_private=remove_bundle and not pending_repair,
+        )
         obligation = begin_retention_rebuild_obligation(
             filesystem_root,
             operation="private_archive_delete",
@@ -129,14 +138,15 @@ def _repair_private_archive_deletion(
         )
         bundle = Path(archive_path).parent
         if remove_bundle or bundle.exists():
-            parent = bundle.parent
             shutil.rmtree(bundle)
-            descriptor = os.open(parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
-            try:
-                os.fsync(descriptor)
-            finally:
-                os.close(descriptor)
-            vector_lease.assert_owned()
+        # An absent bundle may be the result of an interrupted, unflushed unlink.
+        # Retry must prove durability too before releasing the rebuild obligation.
+        descriptor = os.open(bundle.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        vector_lease.assert_owned()
         reconcile_retention(
             filesystem_root,
             apply=True,
@@ -146,6 +156,8 @@ def _repair_private_archive_deletion(
             maintenance_lease=maintenance_lease,
             required_scope_leases=(vector_lease,),
         )
+        maintenance_lease.assert_owned()
+        vector_lease.assert_owned()
         complete_retention_rebuild_obligation(obligation)
     finally:
         if vector_lease is not None:

@@ -4,7 +4,7 @@
 
 **Timezone**: UTC  
 **Last updated**: 2026-11-17
-**Current phase**: M5 exact-candidate successor review
+**Current phase**: M5 resumed final QA remediation and frozen-candidate validation
 **Security impact**: high  
 **Starting revision**: `05e3450fa7d3b24572e65161100670ae542a6ea8`  
 **M0 contract ancestor**: `1aebebfe0`  
@@ -53,7 +53,7 @@
 - Binary inputs preserve each endpoint source limit and add the independent
   ADR-0145 decoded/canonical-output ceilings.
 - Batch Runner geometry resolved: Polygon/MultiPolygon-only new uploads;
-  implementation and regression evidence pending.
+  implementation and regression evidence retained.
 - The supported GeoParquet metadata/version/codec subset and error translation
   are ratified in the normalization contract and ADR-0145.
 - Existing offline PyProj performs CRS transformation; missing best grids and
@@ -270,3 +270,22 @@ hostile uploads retained only the verified numeric human ID, and the hostile
 event omitted session, email, roles, claims, and client IP. Final five-lane
 reviews remain required against the committed successor. Publication, remote
 integration, and deployment remain outside authorization.
+
+
+## Resumption checkpoint - 2026-11-17
+
+Recovered original execution session `01a1e6c3-7cf1-77c3-9cec-7050642a46ef`.
+The task branch at `0e861887e` contains M0-M4 and local final5 qualification;
+the shared checkout contains a stale scaffold and is not the working source.
+The retained frozen QA review has six Medium findings. Dedicated review lanes
+are closing real downstream artifact evidence, reproducible fixture/provenance
+binding, destructive recovery faults, all five signed-session boundaries,
+thread-failure-sensitive Batch concurrency, and whole-Batch deletion accounting.
+Initial run/Batch recovery and concurrency selection passes 50 tests. Final
+combined revision binding, full sanity gate and independent review remain open.
+
+Canonical conformance detail is in the normalization contract, "Retention and
+provenance" destructive-operation paragraphs: whole-Batch deletion shares the
+existing durable accounting lifecycle, including child-run upload scopes.
+Sanitized submitted filenames remain required in private receipts; only security
+events exclude filenames. The QA wording did not authorize removing that record.

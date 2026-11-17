@@ -292,14 +292,22 @@ unverifiable active state, symlinks, corrupt or nonterminal receipts, and
 over-bound inventories. Only the exact configured filesystem root may rebuild
 the global ledger.
 
-Before project deletion, private-archive deletion, or destructive private
-archive restoration, persist a deterministic mode-private rebuild obligation
+Before run or whole-Batch project deletion, private-archive deletion, or
+destructive private archive restoration, validate the configured identity and
+exact filesystem root before changing project state. Reject symlink deletion
+targets and obligation directories. Acquire global maintenance before project
+scopes; whole-Batch deletion also fences its generated child-run upload scopes.
+Persist a deterministic mode-private rebuild obligation
 under the configured filesystem root and mirror its identity in the existing
 Redis ledger. New reservations and activation readiness fail closed while any
 obligation is pending. Perform deletion/restoration and the exact-root rebuild
 under the project scope, verify ledger readback, then fsync removal of the file
 marker before clearing the Redis marker. Retry uses the identical operation and
 globally qualified target identity even when the target is already absent.
+An absent retry still fsyncs the target parent before accounting repair. Recheck
+all owned leases after reconciliation and before clearing obligations; failures
+retain repair authority. A failed obligation write may have already replaced its
+file, so it never rolls back the Redis obligation on a persistence error.
 Operators must never edit Redis counters or remove only part of an
 attempt/private archive.
 

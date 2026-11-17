@@ -80,6 +80,11 @@ GeoParquet.
 
 ## Surprises & Discoveries
 
+- Resumption found the shared checkout scaffold stale; the task branch contains
+  the implemented successor and final5 image qualification. Frozen QA found
+  whole-Batch deletion omitted from retained-evidence accounting and synthetic
+  downstream artifacts that cannot establish acceptance.
+
 - The required dependency/security agent was terminated by an external account-
   security gate (Daybreak Blue eligibility/hardware-key sign-in). Its preliminary
   findings and evaluation lock are retained, but it supplied no acceptance verdict.
@@ -136,6 +141,12 @@ GeoParquet.
   revision-pure focused archive suite passes.
 
 ## Decision Log
+
+- **2026-11-17, resumed QA closure** - Extend the existing destructive retention
+  procedure to whole-Batch deletion and fence child-run scopes. Preserve
+  sanctioned private receipt filenames while excluding them from security logs.
+  Replace synthetic downstream test outputs with actual production generators;
+  bind final validation to a committed source snapshot and retained fixture hashes.
 
 - **2026-11-16, review interruption** - Do not bypass the account-security gate
   or substitute author review for the required independent security lane. Retain
@@ -194,6 +205,11 @@ GeoParquet.
   raw claims, and client IP.
 
 ## Outcomes & Retrospective
+
+Current resumption: M0-M4 implementation is retained in the task worktree. M5
+remains open while six frozen QA findings are remediated and independently
+reviewed. Initial real-Redis deletion/recovery and Batch concurrency validation
+passes 50 tests. Earlier milestone statements below are historical checkpoints.
 
 M0 dependency security review resumed under Daybreak and conditionally accepted
 the exact graph behind the owned same-descriptor preflight. The canonical
@@ -536,3 +552,7 @@ hashes are unchanged; regenerated manifest SHA-256 is
 The earlier hash records the independently reviewed corpus before this expectation
 clarification. Regeneration/readback and QA Markdown lint pass; no runtime test
 is implied.
+
+
+2026-11-17 resumption revision: recovered the correct execution session and
+continued the six frozen QA findings; no shared checkout or deployment changes.

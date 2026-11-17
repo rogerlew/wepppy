@@ -97,9 +97,31 @@ def _delete_db_record(runid: str) -> None:
         user_datastore.delete_run(run)
 
 
+def _retention_delete_root(target: Path, *, has_evidence: bool) -> Path | None:
+    """Validate destructive retention configuration before workflow mutation."""
+    if target.is_symlink():
+        raise RuntimeError("Vector evidence deletion target must not be a symlink")
+    identity = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    if not identity:
+        if has_evidence:
+            raise RuntimeError("Vector evidence retention identity is not configured")
+        return None
+    configured = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+    if not configured:
+        raise RuntimeError("Vector evidence filesystem root is not configured")
+    root = Path(configured).resolve(strict=True)
+    relative = target.resolve().relative_to(root)
+    if not relative.parts:
+        raise RuntimeError("Cannot delete the vector evidence filesystem root")
+    return root
+
+
 def delete_run_rq(runid: str, wd: str | None = None, *, delete_files: bool = False, runtime: DeleteRuntime) -> None:
     """Serialize deletion against catalog publishers without recreating a missing run."""
-    target = Path(wd or runtime.get_wd(runid)).resolve()
+    target = Path(wd or runtime.get_wd(runid))
+    if delete_files:
+        _retention_delete_root(target, has_evidence=_has_retained_vector_evidence(target))
+    target = target.resolve()
     with catalog_lifecycle_guard(target, allow_missing=True):
         _delete_run_guarded(runid, str(target), delete_files=delete_files, runtime=runtime)
 
@@ -120,15 +142,6 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
     delete_error: Exception | None = None
     deferred_errnos = {errno.ENOTEMPTY, errno.EACCES, errno.EBUSY}
 
-    mark_failed = not _try_mark_delete_state(
-        wd=str(target),
-        state="queued",
-        touched_by="delete_rq",
-        status_channel=status_channel,
-        job_id=str(job_id),
-        runtime=runtime,
-        failure_label="TTL delete mark failed",
-    )
 
     retention_lease = None
     maintenance_lease = None
@@ -147,14 +160,25 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
             maintenance_lease = acquire_retention_maintenance_lease()
             retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
             retention_lease.assert_owned()
+            maintenance_lease.assert_owned()
             rebuild_obligation = begin_retention_rebuild_obligation(
                 retention_root,
                 operation="project_delete",
                 target=target.relative_to(retention_root).as_posix(),
             )
+        mark_failed = not _try_mark_delete_state(
+            wd=str(target),
+            state="queued",
+            touched_by="delete_rq",
+            status_channel=status_channel,
+            job_id=str(job_id),
+            runtime=runtime,
+            failure_label="TTL delete mark failed",
+        )
         if delete_files and target.exists():
             for attempt in range(1, attempts + 1):
                 if retention_lease is not None:
+                    maintenance_lease.assert_owned()
                     retention_lease.assert_owned()
                 try:
                     runtime.rmtree(target)
@@ -216,6 +240,8 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
                 required_scope_leases=(retention_lease,),
             )
             if rebuild_obligation is not None:
+                maintenance_lease.assert_owned()
+                retention_lease.assert_owned()
                 complete_retention_rebuild_obligation(rebuild_obligation)
     finally:
         if retention_lease is not None:

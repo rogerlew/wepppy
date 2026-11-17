@@ -961,7 +961,7 @@ def _atomic_json(path: Path, payload: Mapping[str, object]) -> None:
 
 def _filesystem_rebuild_obligation_ids(root: Path) -> set[str]:
     obligations = root / ".vector-upload-rebuild-pending"
-    if not obligations.exists():
+    if not os.path.lexists(obligations):
         return set()
     if obligations.is_symlink() or not obligations.is_dir():
         raise VectorUploadError(
@@ -1013,11 +1013,6 @@ def begin_retention_rebuild_obligation(
             "Vector evidence filesystem identity cannot be verified.",
             status_code=507,
         ) from exc
-    obligations = root / ".vector-upload-rebuild-pending"
-    obligations.mkdir(mode=0o700, exist_ok=True)
-    os.chmod(obligations, 0o700)
-    identity = _retention_rebuild_obligation_identity(operation, target)
-    path = obligations / f"{identity}.json"
     filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
     if not filesystem_id:
         raise VectorUploadError(
@@ -1025,6 +1020,13 @@ def begin_retention_rebuild_obligation(
             "Vector evidence filesystem identity cannot be verified.",
             status_code=507,
         )
+    _filesystem_rebuild_obligation_ids(root)
+    obligations = root / ".vector-upload-rebuild-pending"
+    obligations.mkdir(mode=0o700, exist_ok=True)
+    os.chmod(obligations, 0o700)
+    _fsync_directory(root)
+    identity = _retention_rebuild_obligation_identity(operation, target)
+    path = obligations / f"{identity}.json"
     client = connection or redis.Redis(
         **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
     )
@@ -1039,7 +1041,8 @@ def begin_retention_rebuild_obligation(
                 "created_utc": _utc_now(),
             })
         except (OSError, TypeError, ValueError):
-            client.srem(pending_key, identity)
+            # Persistence may have replaced the marker before fsync failed.
+            # Keep the Redis obligation conservatively until explicit repair.
             raise
     except redis.RedisError as exc:
         raise VectorUploadError(
@@ -1074,6 +1077,7 @@ def retention_rebuild_obligation_pending(
             "Vector evidence filesystem identity cannot be verified.",
             status_code=507,
         ) from exc
+    _filesystem_rebuild_obligation_ids(root)
     identity = _retention_rebuild_obligation_identity(operation, target)
     path = root / ".vector-upload-rebuild-pending" / f"{identity}.json"
     if path.is_symlink():
@@ -1102,16 +1106,21 @@ def complete_retention_rebuild_obligation(
     connection: Any | None = None,
 ) -> None:
     """Clear one rebuild obligation only after exact ledger readback succeeds."""
-    path.unlink(missing_ok=True)
-    if path.parent.exists():
-        _fsync_directory(path.parent)
     filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
-    if not filesystem_id:
+    configured = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+    if not filesystem_id or not configured:
         raise VectorUploadError(
             "vector_retention_quota_exceeded",
             "Vector evidence filesystem identity cannot be verified.",
             status_code=507,
         )
+    root = Path(configured).resolve(strict=True)
+    if path.parent != root / ".vector-upload-rebuild-pending":
+        raise VectorUploadError("vector_retention_quota_exceeded", "Invalid rebuild marker root.", status_code=507)
+    _filesystem_rebuild_obligation_ids(root)
+    path.unlink(missing_ok=True)
+    if path.parent.exists():
+        _fsync_directory(path.parent)
     pending_key = f"vector-upload-retention:{filesystem_id}:rebuild-pending"
     try:
         client = connection or redis.Redis(

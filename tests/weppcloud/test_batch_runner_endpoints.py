@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import json
 import threading
-import time
 from pathlib import Path
 
 import importlib
@@ -94,21 +93,34 @@ def test_transactional_registration_does_not_clobber_concurrent_template_update(
         destination.write_text('{"marker":"old"}', encoding="ascii")
         candidate = DATA_DIR / "simple.geojson"
         attempted = threading.Event()
+        blocked = threading.Event()
+        retry = threading.Event()
+        completed = threading.Event()
+        errors: list[BaseException] = []
+        observed: list[object] = []
 
         def update_template() -> None:
-            while True:
+            try:
                 attempted.set()
                 try:
                     with runner.locked():
-                        observed = json.loads(destination.read_text())["marker"]
-                        runner._runid_template_state = {
-                            "template": observed,
-                            "status": "valid",
-                            "summary": {"is_valid": True},
-                        }
-                    return
-                except (NoDbAlreadyLockedError, RuntimeError):
-                    time.sleep(0.01)
+                        observed.append(json.loads(destination.read_text()))
+                except NoDbAlreadyLockedError:
+                    blocked.set()
+                else:
+                    raise AssertionError("concurrent mutation entered publication transaction")
+                assert retry.wait(timeout=2.0)
+                with runner.locked():
+                    observed.append(json.loads(destination.read_text()))
+                    runner._runid_template_state = {
+                        "template": "concurrent-update-after-rollback",
+                        "status": "valid",
+                        "summary": {"is_valid": True},
+                    }
+                completed.set()
+            except BaseException as exc:
+                errors.append(exc)
+                blocked.set()
 
         worker: threading.Thread | None = None
 
@@ -117,21 +129,30 @@ def test_transactional_registration_does_not_clobber_concurrent_template_update(
             worker = threading.Thread(target=update_template)
             worker.start()
             assert attempted.wait(timeout=1.0)
-            time.sleep(0.05)
+            assert blocked.wait(timeout=1.0)
+            assert not errors
+            assert not observed
+            assert not completed.is_set()
             raise OSError("receipt fsync failed")
 
-        with pytest.raises(OSError, match="receipt fsync failed"):
-            runner.publish_geojson_transactional(
-                candidate,
-                destination,
-                publication_commit=fail_receipt,
-            )
-        assert worker is not None
-        worker.join(timeout=2.0)
-        assert not worker.is_alive()
+        try:
+            with pytest.raises(OSError, match="receipt fsync failed"):
+                runner.publish_geojson_transactional(
+                    candidate,
+                    destination,
+                    publication_commit=fail_receipt,
+                )
+        finally:
+            retry.set()
+            if worker is not None:
+                worker.join(timeout=3.0)
+        assert worker is not None and not worker.is_alive()
+        assert not errors
+        assert completed.is_set()
+        assert observed == [{"marker": "old"}]
         reloaded = BatchRunner.load_detached(str(root / "demo"))
         assert json.loads(destination.read_text())["marker"] == "old"
-        assert reloaded.runid_template_state["template"] == "old"
+        assert reloaded.runid_template_state["template"] == "concurrent-update-after-rollback"
 
 
 def test_validate_template_requires_resource(client, app):
