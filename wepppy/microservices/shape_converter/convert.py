@@ -42,6 +42,7 @@ from .crs import (
 )
 from .errors import ShapeConverterError
 from .parser_ipc import read_payload
+from .parser_provenance import read_parser_provenance
 from .inspect import read_dbf_metadata, read_projection_metadata, select_single_shapefile_dataset
 from .serialization import (
     _MAX_GEOJSON_OUTPUT_BYTES,
@@ -549,6 +550,20 @@ def _finish_conversion(
         canonical_size=len(serialized.content),
         canonical_sha256=hashlib.sha256(serialized.content).hexdigest(),
     )
+    parser_path = (
+        _geoparquet_parser_cli_path()
+        if prepared.source_format == "geoparquet"
+        else _parser_cli_path()
+    )
+    try:
+        metadata["parser_provenance"] = read_parser_provenance(parser_path)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="Vector normalization provenance is unavailable.",
+            details="The parser binary binding could not be revalidated.",
+            status_code=503,
+        ) from exc
 
     prefix_name = prepared.prefix_path.name
     filename = f"{prefix_name}_{target_crs}.{serialized.extension}"
@@ -1029,20 +1044,26 @@ def _finite_coordinate_number(value: object) -> bool:
         return False
 
 
-def _coordinate_tree_is_finite(value: object) -> bool:
+def _coordinate_tree_is_finite(value: object, *, depth: int = 0) -> bool:
+    if depth > 16:
+        return False
     if isinstance(value, (list, tuple)):
-        return bool(value) and all(_coordinate_tree_is_finite(item) for item in value)
+        return bool(value) and all(
+            _coordinate_tree_is_finite(item, depth=depth + 1) for item in value
+        )
     return _finite_coordinate_number(value)
 
 
-def _geometry_coordinates_are_finite(value: object) -> bool:
+def _geometry_coordinates_are_finite(value: object, *, depth: int = 0) -> bool:
+    if depth > 16:
+        return False
     if not isinstance(value, cabc.Mapping):
         return False
     if "coordinates" in value:
         return _coordinate_tree_is_finite(value["coordinates"])
     geometries = value.get("geometries")
     return isinstance(geometries, list) and bool(geometries) and all(
-        _geometry_coordinates_are_finite(item) for item in geometries
+        _geometry_coordinates_are_finite(item, depth=depth + 1) for item in geometries
     )
 
 

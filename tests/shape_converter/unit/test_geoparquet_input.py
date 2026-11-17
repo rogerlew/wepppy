@@ -56,6 +56,17 @@ def direct_blocking_phase(monkeypatch: pytest.MonkeyPatch) -> None:
         return function(*args, **kwargs)
 
     monkeypatch.setattr(convert_module, "_run_blocking_phase", run)
+    monkeypatch.setattr(
+        convert_module,
+        "read_parser_provenance",
+        lambda _path: {
+            "binary_name": "geoparquet_parser_cli",
+            "binary_version": "geoparquet_parser_cli 0.0.0",
+            "binary_sha256": "1" * 64,
+            "cargo_lock_sha256": "2" * 64,
+            "source_revision": "3" * 40,
+        },
+    )
 
 
 def test_geoparquet_normalizes_with_source_and_canonical_provenance(
@@ -80,6 +91,7 @@ def test_geoparquet_normalizes_with_source_and_canonical_provenance(
     assert converted.metadata["canonical_size"] == len(converted.content)
     assert converted.metadata["canonical_sha256"] == hashlib.sha256(converted.content).hexdigest()
     assert converted.metadata["source_format"] == "geoparquet"
+    assert converted.metadata["parser_provenance"]["binary_name"] == "geoparquet_parser_cli"
 
 
 def test_hostile_geoparquet_rejects_without_published_output(
@@ -258,6 +270,18 @@ def test_geoparquet_ipc_rejects_exponent_overflow(tmp_path: Path) -> None:
 def test_geoparquet_ipc_rejects_nonfinite_or_nonnumeric_coordinate(coordinate: object) -> None:
     payload = _parser_payload(coordinates=[1.0, 2.0], bounds=[1.0, 2.0, 1.0, 2.0])
     payload["geometries"][0]["coordinates"][0] = coordinate  # type: ignore[index]
+    with pytest.raises(ShapeConverterError) as captured:
+        convert_module._loaded_geoparquet_from_payload(payload)
+    assert captured.value.code == "vector_converter_unavailable"
+    assert captured.value.status_code == 503
+
+
+def test_geoparquet_ipc_rejects_deep_coordinate_tree() -> None:
+    payload = _parser_payload(coordinates=[1.0, 2.0], bounds=[1.0, 2.0, 1.0, 2.0])
+    coordinates: object = [1.0, 2.0]
+    for _ in range(18):
+        coordinates = [coordinates]
+    payload["geometries"][0]["coordinates"] = coordinates  # type: ignore[index]
     with pytest.raises(ShapeConverterError) as captured:
         convert_module._loaded_geoparquet_from_payload(payload)
     assert captured.value.code == "vector_converter_unavailable"

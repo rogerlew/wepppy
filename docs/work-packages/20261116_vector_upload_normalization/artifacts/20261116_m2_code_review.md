@@ -105,3 +105,23 @@ conversion exception at this boundary) to `vector_converter_unavailable`, add a
 focused huge-integer-coordinate regression, and rerun this review. For strict
 schema validation, boolean coordinate/bounds values should also be rejected
 rather than accepted through Python's `bool`-is-`int` relationship.
+
+## Re-review 2
+
+Focused suite: **18 passed**. Direct adversarial calls now map both a `10**400`
+coordinate and a boolean coordinate to HTTP 503
+`vector_converter_unavailable`. The numeric portion of M2-CR-01/02 is closed.
+
+**Verdict remains CHANGES REQUIRED (one Medium strict-IPC depth path).** The new
+coordinate validation recursively descends lists and geometry collections
+without enforcing the canonical JSON-depth ceiling
+(`convert.py:1032-1046`). A malformed parser envelope containing 2,000 nested
+coordinate lists raises raw `RecursionError: maximum recursion depth exceeded`
+instead of a bounded 503 response. This is the same malformed-converter-output
+contract covered by M2-CR-02, and the owned parser already treats depth 16 as
+the accepted maximum.
+
+Required closure: enforce the canonical coordinate/geometry tree depth at the
+Python IPC readback boundary (preferably without unbounded recursion), translate
+over-depth input to `vector_converter_unavailable`, add a focused nested-
+coordinate regression, and rerun the final review.
