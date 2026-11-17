@@ -1,6 +1,6 @@
 # Vector upload normalization
 
-**Status**: Scaffolded; contract, dependency, and security gates block implementation
+**Status**: Implemented locally; M5 held for operator clone-retention disposition and remediation
 
 **Started**: 2026-11-16 23:22 UTC
 
@@ -28,7 +28,7 @@ runtime readiness checks.
 | Roads | `roads_pure.htm`, `controllers_js/roads.js`, `routes/nodb_api/roads_bp.py`, `nodb/mods/roads/roads.py` | GeoJSON, 10 MiB | LineString or MultiLineString |
 | AgFields | `ag_fields_pure.htm`, `controllers_js/ag_fields.js`, `rq_engine/ag_fields_routes.py`, `nodb/mods/ag_fields/ag_fields.py` | GeoJSON/JSON, 10 MiB | Polygonal features with `field_id` |
 | Omni contrasts | Omni control/template, `controllers_js/omni.js`, `rq_engine/omni_routes.py`, `omni_contrast_build_service.py` | GeoJSON/JSON, 100 MiB | User-defined polygons |
-| Batch Runner | Batch control/template, controller, `upload_batch_runner_routes.py`, `WatershedCollection`, `BatchRunner` | GeoJSON/JSON, 30 MiB | Polygon/MultiPolygon only (operator approved 2026-11-16; implementation pending) |
+| Batch Runner | Batch control/template, controller, `upload_batch_runner_routes.py`, `WatershedCollection`, `BatchRunner` | GeoJSON/JSON, 30 MiB | Polygon/MultiPolygon only (operator approved 2026-11-16; implemented) |
 
 The canonical endpoint inventory remains
 [`docs/schemas/upload-endpoint-contract.md`](../../schemas/upload-endpoint-contract.md).

@@ -1,5 +1,22 @@
 # M3-M5 workflow validation and rollout preparation
 
+## Resumption evidence supersedes earlier aggregate claims
+
+The authoritative resumed per-case record is `20261117_resumed_validation.json`,
+with exact source revisions, final5 identity/readiness, fixture hashes, commands,
+individual outcomes/skips and final source-file readback. At `ee26389f0`, 452
+focused tests pass and four exact-route selections skip for missing fixture-root
+configuration. At `1bb088da5`, an overlapping 206-test selection passes with zero
+skips, including those configured route cases and actual downstream roots.
+Frontend lint, 126 Jest suites/1,091 tests and nine Node tests pass. The broad
+sanity attempt stopped at 475 passed/28 skipped while copy-policy approval is
+pending; it is not a complete gate.
+
+Overall M5 is HOLD for independently reproduced fork/clone privacy and copy/reset
+accounting findings. See the resumed correctness/security reviews and
+`20261117_vector_retention_copy_reset_inventory.md`. The earlier aggregates below
+are historical checkpoints, not current package acceptance.
+
 ## Candidate and exact image
 
 - Workflow ancestor: `9ac7cb8f6`; the exact tested successor is named by the

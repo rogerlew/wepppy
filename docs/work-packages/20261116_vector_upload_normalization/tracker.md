@@ -4,7 +4,7 @@
 
 **Timezone**: UTC  
 **Last updated**: 2026-11-17
-**Current phase**: M5 resumed final QA remediation and frozen-candidate validation
+**Current phase**: M5 HOLD — operator clone-retention decision and copy/reset remediation
 **Security impact**: high  
 **Starting revision**: `05e3450fa7d3b24572e65161100670ae542a6ea8`  
 **M0 contract ancestor**: `1aebebfe0`  
@@ -289,3 +289,45 @@ provenance" destructive-operation paragraphs: whole-Batch deletion shares the
 existing durable accounting lifecycle, including child-run upload scopes.
 Sanitized submitted filenames remain required in private receipts; only security
 events exclude filenames. The QA wording did not authorize removing that record.
+
+
+## Retained resumption outcome - 2026-11-17
+
+Current implementation commit: `1bb088da5eb3aed6a2d591333ad7931644a21329` on
+`codex/vector-upload-normalization`. Commits `de15403aa`, `ee26389f0`,
+`860ba6760`, and `1bb088da5` close the original six frozen QA findings, parent
+repair dependency, and Omni contrast cleanup deleting retained attempts.
+
+Canonical per-case receipt: `artifacts/20261117_resumed_validation.json`.
+It retains source revisions, complete qualified fixture hashes, exact final5
+readiness/image identity, commands, individual outcomes and skip reasons.
+Focused validation at `ee26389f0`: 452 passed, four skipped. The successor
+selection at `1bb088da5`: 206 passed, zero skipped, including those four exact
+receiving boundaries with the retained fixture directory configured. These
+selections overlap and are not additive. All 95 changed source/test/tool files
+match the final container snapshot. Frontend lint, 126 Jest suites/1,091 tests
+and nine Node tests pass. Stub completeness and changed broad-catch checks pass.
+The full sanity run was interrupted after 475 passed/28 skipped when the
+operator decision reopened scope; this is explicitly not a full-suite pass.
+
+Independent correctness/security review reproduced a High privacy defect:
+ordinary public-run forks copy source-private upload evidence and archives to a
+new owner. A Medium failure class also affects copy/reset accounting. The bounded
+inventory is `artifacts/20261117_vector_retention_copy_reset_inventory.md`;
+review findings are in `20261117_resumed_correctness_review.md` and
+`20261117_resumed_security_review.md`. Direct Omni cleanup was repaired within
+the existing retention contract; cloning disposition is not inferred.
+
+The operator question is pending: keep private evidence only in its source with
+a provenance reference in copied projects (recommended), or copy it only for
+authorized owners with full quota accounting and omit it from non-owner forks.
+Artifact-observability requires an explicit disposition before excluding these
+project records. No dependent copy-policy change has been made.
+
+Next: ratify the chosen copy/derivative semantics in the canonical normalization
+contract and a standalone checkpoint; remediate every confirmed copy/reset
+consumer in the inventory, including existing destination evidence; prove real
+copy/privacy/accounting/provenance and reset behavior; then freeze one final
+candidate and rerun affected/full gates and all five independent reviews. M5 is
+not complete. Remote integration, publication and production deployment have
+not occurred. The shared master and its unrelated changes remain untouched.

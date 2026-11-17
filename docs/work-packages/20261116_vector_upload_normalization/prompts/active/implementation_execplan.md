@@ -68,10 +68,12 @@ GeoParquet.
       SHA-256 receipts, receiving validation, reversible replacement and reload.
 - [x] (2026-11-17) M4: integrate Omni run/dry-run and Batch Runner with the same
       boundary, polygon-only Batch admission and rollback safety.
-- [ ] M5: implementation, focused validation, corrected exact final5
-      qualification and rollout/recovery documentation are complete; final
-      independent successor re-reviews of the exact committed candidate remain
-      active.
+- [ ] M5: original six frozen QA findings and Omni evidence cleanup are
+      remediated; operator fork/clone retention disposition, copy/reset
+      remediation, final combined validation and all-lane acceptance remain.
+- [x] (2026-11-17, resumed) Commit recovery/artifact/provenance fixes through
+      `1bb088da5`; retain machine-readable per-case validation and the confirmed
+      copy/reset failure-class inventory.
 - [x] (2026-11-17) Freeze-preparation validation: 384 focused tests pass with
       four skips, and 16 real-controller/exact-final5 downstream cases pass for
       Roads, AgFields, Omni, and Batch across all four admitted formats. Signed
@@ -79,6 +81,15 @@ GeoParquet.
       cleanup, restore lock ordering, and concurrent rollback regressions pass.
 
 ## Surprises & Discoveries
+
+- Real fork rsync copies private evidence under ordinary public-run access;
+  destination ownership then authorizes its download. Copy/reset consumers also
+  bypass retention accounting. The independently retained inventory names each
+  confirmed consumer; clone policy requires operator disposition before repair.
+- Omni cleanup deleted the production retained-attempt directory. Earlier
+  downstream fixtures used a generic attempt root and missed it. Fixtures now
+  use the exact workflow roots and re-read receipts after real report generation;
+  both cleanup loops preserve retained evidence.
 
 - Resumption found the shared checkout scaffold stale; the task branch contains
   the implemented successor and final5 image qualification. Frozen QA found
@@ -141,6 +152,11 @@ GeoParquet.
   revision-pure focused archive suite passes.
 
 ## Decision Log
+
+- **2026-11-17, clone-policy checkpoint** - Do not infer permission to exclude
+  private originals from project copies. Ask the operator for source-only
+  evidence/provenance references versus authorized quota-accounted copies, while
+  repairing independently authorized evidence-preservation defects. Keep M5 held.
 
 - **2026-11-17, resumed QA closure** - Extend the existing destructive retention
   procedure to whole-Batch deletion and fence child-run scopes. Preserve
@@ -205,6 +221,16 @@ GeoParquet.
   raw claims, and client IP.
 
 ## Outcomes & Retrospective
+
+Current disposition: implementation through `1bb088da5` is committed locally.
+The original QA findings and Omni cleanup defect are repaired. Exact source/image
+and per-test evidence is in `artifacts/20261117_resumed_validation.json` (452/4
+focused predecessor; overlapping 206/0 successor; frontend gates pass). Full
+sanity was interrupted at the newly required operator contract decision and is
+not accepted. One High fork privacy and one Medium copy/reset accounting class
+remain. The operator clone-retention question is pending; M5 cannot close until
+its chosen policy covers the retained consumer inventory and final gates pass.
+No remote integration, publication or deployment occurred.
 
 Current resumption: M0-M4 implementation is retained in the task worktree. M5
 remains open while six frozen QA findings are remediated and independently
@@ -556,3 +582,9 @@ is implied.
 
 2026-11-17 resumption revision: recovered the correct execution session and
 continued the six frozen QA findings; no shared checkout or deployment changes.
+
+
+2026-11-17 resumption handoff: retained exact revision/test evidence, fixed the
+confirmed Omni cleanup defect, and recorded the independently reproduced copy
+privacy/accounting blocker. Continue from the operator clone-policy decision;
+do not restart M0 or interpret prior PASS artifacts as package acceptance.
