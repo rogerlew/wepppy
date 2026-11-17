@@ -10,8 +10,8 @@ Make the Roads controller easier to change and review without changing the scien
 
 - [x] (2026-11-17 22:37 UTC) Inspected source, dependencies, test anchors, and canonical guidance.
 - [x] (2026-11-17 22:37 UTC) Measured baseline and prepared package/extraction map.
-- [ ] M1: Establish characterization tests and baseline native/project evidence.
-- [ ] M2: Extract input parsing and preparation orchestration.
+- [ ] M1: Characterization and 527-test native baseline complete; immutable full-project controls running.
+- [x] (2026-11-17 UTC) M2: Input extraction validated (305 passed, one skipped); preparation extraction validated (31 passed).
 - [ ] M3: Extract native input writers and mode-specific execution stages.
 - [ ] M4: Extract routing/publication and query presentation.
 - [ ] M5: Complete final validation, reviews, documentation, and quality assessment.
@@ -120,3 +120,5 @@ Retain compact baseline/final metrics, characterization matrix, candidate/source
 `wepppy.nodb.mods.roads.Roads` and `wepppy.nodb.mods.roads.roads.Roads` remain the public class. Preserve `set_enabled`, `validate_initial_params`, `set_params`, `set_uploaded_geojson`, `prepare_segments`, `run_roads_wepp`, `query_status`, `query_inputs`, `query_summary`, `query_map_segments_geojson`, `query_segment_detail`, `query_parameterization`, and `initial_parameterization_preview` signatures and behavior. Preserve any additional inventoried caller-facing helpers/properties. Collaborators do not acquire new locks or own serialized state. Keep dependencies on existing owned native/geospatial and NoDb mechanisms; add no runtime dependencies.
 
 Revision note (2026-11-17): Initial plan, based on measured source and current contracts, prepared for staged implementation.
+
+Revision note (2026-11-17): Execution started; preserved immutable baseline, approved contract reconciliation at `efc0f642b`, and recorded initial extraction evidence.

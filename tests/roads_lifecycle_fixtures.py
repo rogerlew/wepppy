@@ -14,6 +14,12 @@ from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
 
 def write_current_roads_fixture(root):
     root = Path(root)
+    # Current-result admission also reads prepared geometry, even for a fixture
+    # with no modeled contributors. Preserve populated test-owned geometry.
+    geometry = root / lifecycle.SEGMENTS / 'roads.inslope.monotonic.geojson'
+    if not geometry.exists():
+        geometry.parent.mkdir(parents=True, exist_ok=True)
+        geometry.write_text(json.dumps({'type': 'FeatureCollection', 'features': []}))
     paths = sorted(lifecycle.mandatory_paths(False))
     for relative in paths:
         path = root / relative

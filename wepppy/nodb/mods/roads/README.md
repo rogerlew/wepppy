@@ -88,7 +88,10 @@ pointer encoding. See the [flow-direction contract](../../../../docs/schemas/roa
 
 | Component | Responsibility |
 | --- | --- |
-| [roads.py](roads.py) | NoDb state, upload/mapping, preparation, contributor assembly, execution and queries |
+| [roads.py](roads.py) | Stable NoDb facade, lifecycle/lock boundaries, upload, execution and compatibility adapters |
+| [_constants.py](_constants.py) | Shared design vocabulary and unchanged parameter bounds, re-exported by the facade |
+| [_inputs.py](_inputs.py) | Input normalization, validation and attribute mapping |
+| [_prepare.py](_prepare.py) | Preparation arguments, candidate summary construction and summary logging |
 | [monotonic_segments.py](monotonic_segments.py) | Line segmentation and low-point attribution |
 | [parameterization.py](parameterization.py) | Retained baseline, validated role overrides and resolution |
 | [_parameterization_comparisons.py](_parameterization_comparisons.py) | Execution input evidence and compatible retained-run comparisons |

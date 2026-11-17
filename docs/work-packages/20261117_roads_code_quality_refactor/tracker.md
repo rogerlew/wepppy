@@ -35,3 +35,15 @@ Execute M1 in the [active plan](prompts/active/roads_code_quality_refactor_execp
 ## Completion states
 
 Package scaffold: prepared. Refactor local acceptance: pending. Remote integration: not attempted. Publication/deployment: not included.
+
+## M1 / M2 checkpoint - 2026-11-17 UTC
+
+Contract reconciliation checkpoint: `efc0f642b`. Two independent reviews accepted
+RUPC-02 as existing authority before source edits. Baseline matrix: 527 tests
+passed, including 516 native profiles. Focused immutable baseline: 407 passed,
+one skipped, two existing fixture admission failures. The stale consumer fixture
+now creates missing prepared GeoJSON as a valid empty FeatureCollection; populated
+files remain untouched. M2 input extraction with repaired fixture: 305 passed,
+one skipped. Preparation extraction: 31 passed (61 unrelated tests deselected). Immutable
+full-project baseline controls remain in progress. Complexity remains unavailable in both host
+and existing container; no dependency installed.
