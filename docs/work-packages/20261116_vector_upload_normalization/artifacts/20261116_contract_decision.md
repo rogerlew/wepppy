@@ -1,6 +1,6 @@
 # VUN-01 contract checkpoint
 
-Status: ratified M0 checkpoint; standalone implementation-ancestor commit pending.
+Status: ratified M0 checkpoint; standalone implementation ancestor `1aebebfe0`.
 Starting revision: `05e3450fa7d3b24572e65161100670ae542a6ea8`.
 Task branch: `codex/vector-upload-normalization`.
 Task checkout: `/tmp/wepppy-vector-upload-normalization`.

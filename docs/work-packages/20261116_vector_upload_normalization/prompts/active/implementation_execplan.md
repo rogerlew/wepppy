@@ -55,9 +55,9 @@ GeoParquet.
 - [x] (2026-11-16, focused security re-review) Close retained-evidence owner/
       group authorization and shared-filesystem admission findings; no unresolved
       High/Medium M0 security or correctness finding remains.
-- [ ] M0: commit the ratified contracts, ADR, exact dependency decision, source/
-      threat/state matrices, and reproducible 46-file red corpus as the standalone
-      implementation ancestor; record its exact revision immediately afterward.
+- [x] (2026-11-16) Commit the ratified contracts, ADR, exact dependency decision,
+      source/threat/state matrices, and reproducible 46-file red corpus as the
+      standalone implementation ancestor `1aebebfe0`.
 - [ ] M1: implement and directly test the bounded `geoparquet_parser_cli`.
 - [ ] M2: integrate the CLI with shape-converter and qualify the exact image.
 - [ ] M3: integrate Roads and AgFields browser-to-persistence paths.
@@ -132,8 +132,8 @@ GeoParquet.
 M0 dependency security review resumed under Daybreak and conditionally accepted
 the exact graph behind the owned same-descriptor preflight. The canonical
 re-review and focused retention correctness/security reviews pass with no
-unresolved High/Medium finding. The standalone ancestor commit and exact revision
-record are the remaining M0 actions. No runtime implementation, production
+unresolved High/Medium finding. Standalone ancestor `1aebebfe0` completes M0.
+No runtime implementation, production
 dependency, candidate image, workflow acceptance, remote integration, publication
 or deployment is complete.
 

@@ -4,9 +4,10 @@
 
 **Timezone**: UTC  
 **Last updated**: 2026-11-16  
-**Current phase**: M0 ratified; standalone ancestor commit pending  
+**Current phase**: M1 bounded GeoParquet CLI implementation  
 **Security impact**: high  
 **Starting revision**: `05e3450fa7d3b24572e65161100670ae542a6ea8`  
+**M0 contract ancestor**: `1aebebfe0`  
 **Architecture**: separate bounded `geoparquet_parser_cli` sibling to the existing
 `shape_parser_cli`; both normalize through shape-converter to canonical GeoJSON
 
@@ -187,7 +188,7 @@ second canonical re-review closed the lock-hash authority finding. Focused
 retention correctness and security reviews pass after closing the explicit
 authorization and shared-filesystem admission findings. No unresolved High or
 Medium M0 finding remains. The standalone checkpoint commit and revision record
-remain; runtime implementation has not begun.
+are `1aebebfe0`; runtime implementation may now begin.
 
 ## Original and hostile upload retention decision
 
