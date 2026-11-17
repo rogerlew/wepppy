@@ -249,7 +249,7 @@ def test_overlapping_atomic_generations_have_matching_source_proof(tmp_path, mon
     assert len(list(root.glob('climate_artifacts/cli_parquet/attempts/*/status.json'))) == 2
 
 
-def test_cleanup_skeleton_archive_restore_keep_history(owner_project):
+def test_cleanup_skeleton_archive_restore_keep_history(owner_project, monkeypatch):
     import shutil
     import zipfile
     from types import SimpleNamespace
@@ -257,6 +257,10 @@ def test_cleanup_skeleton_archive_restore_keep_history(owner_project):
     from wepppy.nodb.skeletonize import skeletonize_run
     from wepppy.rq.project_rq_archive import ArchiveRuntime, archive_rq, restore_archive_rq
     from wepppy.nodb.project_config_update import project_config_lifecycle_guard
+
+    # This provenance fixture has no vector-retention filesystem or ledger.
+    monkeypatch.delenv('VECTOR_UPLOAD_RUN_FILESYSTEM_ID', raising=False)
+    monkeypatch.delenv('VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT', raising=False)
 
     root, _ = owner_project
     owner, source = selected(root)
