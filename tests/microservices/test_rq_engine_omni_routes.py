@@ -1288,6 +1288,57 @@ def test_omni_contrast_routes_normalize_before_persisting_geojson_upload(
     assert receipt["canonical_path"].startswith("_pups/omni/contrasts/_uploads/")
 
 
+def test_omni_upload_rolls_back_staged_file_when_build_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    wd = tmp_path / "run"
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: str(wd))
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            self.accepted_path = Path(payload["omni_contrast_geojson_path"])
+
+        def build_contrasts(self, *args, **kwargs) -> None:
+            assert self.accepted_path.exists()
+            raise ValueError("simulated build failure")
+
+    omni = DummyOmni()
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: omni)
+    monkeypatch.setattr(
+        omni_routes.OmniContrastBuildService,
+        "prevalidate_user_defined_geojson",
+        lambda path: None,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            data={
+                "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_contrast_pairs": '[{"control_scenario":"uniform_low","contrast_scenario":"mulch"}]',
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+            },
+            files={
+                "omni_contrast_geojson": (
+                    "areas.geojson",
+                    _contrast_polygon_bytes(),
+                    "application/geo+json",
+                )
+            },
+        )
+
+    assert response.status_code == 400
+    assert not omni.accepted_path.exists()
+    attempt = next((wd / "_pups" / "omni" / "contrasts" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    assert receipt["status"] == "rejected"
+    assert receipt["error_code"] == "omni_build_failed"
+
+
 def test_run_omni_contrasts_rejects_oversize_geojson_upload_with_413(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -2057,3 +2108,12 @@ def test_saved_sbs_real_nodb_commit_rechecks_association(tmp_path, monkeypatch, 
     assert staged.exists()
     if drift:
         assert "changed" in response.json()["error"]["message"]
+
+
+def test_session_human_is_used_for_omni_retention(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        omni_routes,
+        "current_auth_actor",
+        lambda: {"token_class": "session", "user_id": 78, "session_id": "not-persisted"},
+    )
+    assert omni_routes._retention_actor().receipt_value() == {"kind": "human", "user_id": 78}

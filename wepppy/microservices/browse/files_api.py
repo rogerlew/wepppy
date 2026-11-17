@@ -34,6 +34,7 @@ from wepppy.microservices.browse.security import (
 )
 from wepppy.microservices.browse.sensitive_vectors import (
     can_access_run_sensitive_vector,
+    is_sensitive_vector_path,
     sensitive_child_names,
 )
 from wepppy.runtime_paths import (
@@ -599,7 +600,15 @@ async def _files_list_response(
     page = (offset // limit) + 1
     page_offset = offset % limit
 
-    sensitive_children = sensitive_child_names(rel_path)
+    sensitive_children = set(sensitive_child_names(rel_path))
+    try:
+        for entry in os.scandir(abs_path):
+            resolved_relpath = os.path.relpath(os.path.realpath(entry.path), wd)
+            if is_sensitive_vector_path(resolved_relpath):
+                sensitive_children.add(entry.name.casefold())
+    except OSError:
+        pass
+    sensitive_children = frozenset(sensitive_children)
     excluded_names = sensitive_children
     if sensitive_children and can_access_run_sensitive_vector(auth_context, runid):
         excluded_names = frozenset()
@@ -1065,6 +1074,13 @@ async def _handle_files_request(
         _raise_forbidden_path(resolved_violation)
     if resolved_violation is not None:
         _raise_outside_or_invalid_path()
+
+    resolved_relpath = os.path.relpath(os.path.realpath(abs_path), wd)
+    if (
+        (is_sensitive_vector_path(rel_path) or is_sensitive_vector_path(resolved_relpath))
+        and not can_access_run_sensitive_vector(auth_context, runid)
+    ):
+        _raise_forbidden_path("sensitive_vector_artifact")
 
     using_manifest = os.path.exists(deps.manifest_path(wd))
 

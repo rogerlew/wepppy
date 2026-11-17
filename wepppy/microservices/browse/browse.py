@@ -1048,6 +1048,7 @@ async def browse_response(
     page_entries_override: list[tuple] | None = None,
     total_items_override: int | None = None,
     using_manifest_override: bool | None = None,
+    excluded_names: frozenset[str] = frozenset(),
 ):
     return await _flow_browse_response(
         sys.modules[__name__],
@@ -1062,6 +1063,7 @@ async def browse_response(
         page_entries_override=page_entries_override,
         total_items_override=total_items_override,
         using_manifest_override=using_manifest_override,
+        excluded_names=excluded_names,
     )
 
 

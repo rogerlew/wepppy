@@ -1,6 +1,8 @@
 {# Doc: controllers_js/README.md — Batch Runner Controller Reference (Pure UI variant) #}
 {% import "controls/_pure_macros.html" as ui %}
 {% from "shared/console_macros.htm" import button_row %}
+{% set batch_vector_binary_enabled = config is mapping and config.get('VECTOR_UPLOAD_BINARY_ENABLED', false) %}
+{% set batch_vector_accept = '.geojson,.json,.zip,.parquet,.geoparquet' if batch_vector_binary_enabled else '.geojson,.json' %}
 
 {% set base_runid = batch_base_runid if batch_base_runid is defined else ('batch;;' ~ batch_name ~ ';;_base') %}
 
@@ -170,7 +172,7 @@
     <header class="wc-panel__header">
       <div class="wc-stack">
         <h3 class="wc-panel__title wc-heading__subtitle">Resource Intake</h3>
-        <p class="wc-text-muted">Upload watershed GeoJSON, Shapefile ZIP, or GeoParquet driving batch expansion. Maximum size {{ geojson_limit_mb }}&nbsp;MB.</p>
+        <p class="wc-text-muted">Upload watershed GeoJSON{% if batch_vector_binary_enabled %}, Shapefile ZIP, or GeoParquet{% endif %} driving batch expansion. Maximum size {{ geojson_limit_mb }}&nbsp;MB.</p>
       </div>
     </header>
 
@@ -178,7 +180,7 @@
       {{ ui.file_upload(
         'geojson_file',
         'Watershed vector file',
-        accept='.geojson,.json,.zip,.parquet,.geoparquet',
+        accept=batch_vector_accept,
         help='Choose a FeatureCollection to enable template validation.',
         attrs=upload_attrs,
         max_width='100%'

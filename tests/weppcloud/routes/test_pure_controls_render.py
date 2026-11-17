@@ -1767,7 +1767,7 @@ def test_roads_template_uses_standard_control_shell_layout(jinja_env: Environmen
     assert 'id="roads_upload_message"' in rendered
     assert 'id="roads_prepare_segments"' in rendered
     assert 'id="run_roads_wepp"' in rendered
-    assert "Upload Roads GeoJSON" in rendered
+    assert "Upload roads vector file" in rendered
     assert "Prepare Segment Candidates" in rendered
     assert "lowpoint decisions" in rendered
     assert 'id="roads-results"' in rendered
@@ -4383,6 +4383,13 @@ def test_ag_fields_control_renders_boundary_schema_and_subfield_contract(
     assert 'id="agfields_geojson"' in rendered
     assert 'name="field_boundaries"' in rendered
     assert 'accept=".geojson,.json"' in rendered
+    binary_rendered = template.render(
+        ron=SimpleNamespace(mods={"ag_fields"}),
+        feature_maturity_labels={"ag_fields": "Experimental"},
+        wepp_bin_options=[],
+        config={"VECTOR_UPLOAD_BINARY_ENABLED": True},
+    )
+    assert 'accept=".geojson,.json,.zip,.parquet,.geoparquet"' in binary_rendered
     assert 'data-action="upload-boundaries"' in rendered
     assert 'id="agfields_field_id_key"' in rendered
     assert 'name="field_id_key"' in rendered

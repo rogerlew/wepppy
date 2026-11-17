@@ -149,6 +149,11 @@ def _sanitize_auth_actor(claims: Mapping[str, Any]) -> dict[str, Any] | None:
         if not session_id:
             return None
         actor["session_id"] = str(session_id)
+        principal = claims.get("feature_access_principal")
+        if isinstance(principal, Mapping) and principal.get("kind") == "human":
+            user_id = _parse_user_id(principal.get("id"))
+            if user_id is not None and user_id > 0:
+                actor["user_id"] = user_id
         return actor
 
     if token_class == "service":

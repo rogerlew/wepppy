@@ -131,6 +131,7 @@ def _run_vector_evidence_roots(wd: str) -> tuple[Path, ...]:
         root / "roads" / "vector_upload_attempts",
         root / "ag_fields" / "vector_upload_attempts",
         root / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
+        root / "archives" / "private",
     )
 
 

@@ -299,9 +299,10 @@ def test_boundary_geoparquet_retains_source_and_publishes_canonical_candidate(
 
     class Response:
         status_code = 200
+        headers = {}
 
-        def json(self):
-            return {
+        def iter_content(self, **_kwargs):
+            yield json.dumps({
                 "request_id": "ag-fields-converter-request",
                 "geojson": geojson,
                 "metadata": {
@@ -317,7 +318,10 @@ def test_boundary_geoparquet_retains_source_and_publishes_canonical_candidate(
                         "source_revision": "3" * 40,
                     },
                 },
-            }
+            }).encode()
+
+        def close(self):
+            pass
 
     monkeypatch.setattr(
         "wepppy.microservices.vector_upload_normalization.requests.post",
@@ -1418,3 +1422,15 @@ def test_leaf_job_status_uses_enum_value(monkeypatch, status):
         get_status=lambda refresh=False: getattr(JobStatus, status.upper())
     ))
     assert ag_fields_routes._rq_job_status("agfields_run_wepp", "leaf", object()) == status
+
+
+def test_session_human_is_used_for_ag_fields_retention(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "current_auth_actor",
+        lambda: {"token_class": "session", "user_id": 77, "session_id": "not-persisted"},
+    )
+    assert ag_fields_routes._retention_actor_from_request().receipt_value() == {
+        "kind": "human",
+        "user_id": 77,
+    }

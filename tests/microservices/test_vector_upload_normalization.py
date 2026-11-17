@@ -9,12 +9,15 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import redis
 
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.microservices.vector_upload_normalization import (
     RedisRetentionLedger,
     RetentionActor,
     VectorUploadError,
     prepare_vector_upload,
+    reconcile_retention,
     validate_feature_collection_geometries,
 )
 
@@ -26,6 +29,10 @@ class _Reservation:
     reservation_id: str = "reservation-test"
     committed: int | None = None
     released: bool = False
+    attempt_dir: Path | None = None
+
+    def bind_attempt(self, attempt_dir: Path) -> None:
+        self.attempt_dir = attempt_dir
 
     def commit(self, exact_bytes: int) -> None:
         self.committed = exact_bytes
@@ -42,6 +49,15 @@ class _Ledger:
     def reserve(self, **kwargs: Any) -> _Reservation:
         self.calls.append(kwargs)
         return self.reservation
+
+
+class _CommitFailureReservation(_Reservation):
+    def commit(self, exact_bytes: int) -> None:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "simulated accounting failure",
+            status_code=507,
+        )
 
 
 class _Lease:
@@ -123,6 +139,53 @@ def test_direct_geojson_retains_original_and_accepts_readback(tmp_path: Path) ->
     )
 
 
+def test_accounting_failure_never_downgrades_accepted_workflow(tmp_path: Path) -> None:
+    original = json.dumps(_polygon_payload(), separators=(",", ":")).encode()
+    ledger = _Ledger()
+    ledger.reservation = _CommitFailureReservation()
+    prepared = prepare_vector_upload(
+        raw_filename="accepted.geojson",
+        stream=io.BytesIO(original),
+        **_prepare_kwargs(tmp_path, ledger),
+    )
+    canonical = tmp_path / "project" / "accepted.geojson"
+
+    with pytest.raises(VectorUploadError, match="accounting failure"):
+        prepared.publish(
+            mutation=lambda candidate: shutil.copy2(candidate, canonical),
+            canonical_path=canonical,
+            canonical_relative_path="accepted.geojson",
+        )
+
+    receipt = json.loads((prepared.attempt_dir / "normalization.json").read_text())
+    assert canonical.read_bytes() == original
+    assert receipt["status"] == "accepted"
+    assert receipt["accounting_status"] == "pending"
+    assert prepared.is_terminal
+
+
+def test_partial_mutation_is_recorded_incomplete_not_rejected(tmp_path: Path) -> None:
+    original = json.dumps(_polygon_payload(), separators=(",", ":")).encode()
+    ledger = _Ledger()
+    prepared = prepare_vector_upload(
+        raw_filename="uncertain.geojson",
+        stream=io.BytesIO(original),
+        **_prepare_kwargs(tmp_path, ledger),
+    )
+    canonical = tmp_path / "project" / "accepted.geojson"
+
+    def partial_mutation(candidate: Path) -> None:
+        shutil.copy2(candidate, canonical)
+        raise RuntimeError("simulated post-replacement failure")
+
+    with pytest.raises(RuntimeError, match="post-replacement"):
+        prepared.publish(mutation=partial_mutation, canonical_path=canonical)
+
+    receipt = json.loads((prepared.attempt_dir / "normalization.json").read_text())
+    assert receipt["status"] == "incomplete"
+    assert receipt["outcome"] == "quarantined"
+
+
 def test_failed_workflow_validation_quarantines_complete_original_and_candidate(tmp_path: Path) -> None:
     payload = _polygon_payload()
     payload["features"][0]["geometry"] = {"type": "Point", "coordinates": [0.0, 0.0]}  # type: ignore[index]
@@ -142,6 +205,145 @@ def test_failed_workflow_validation_quarantines_complete_original_and_candidate(
     assert receipt["source_sha256"] == sha256(original)
     assert (attempt / "candidate.geojson").read_bytes() == original
     assert ledger.reservation.committed is not None
+
+
+def test_deep_geometry_is_stably_rejected_and_quarantined(tmp_path: Path) -> None:
+    payload = _polygon_payload()
+    coordinates: object = [0.0, 0.0]
+    for _ in range(20):
+        coordinates = [coordinates]
+    payload["features"][0]["geometry"] = {  # type: ignore[index]
+        "type": "Polygon",
+        "coordinates": coordinates,
+    }
+    original = json.dumps(payload).encode()
+    ledger = _Ledger()
+
+    with pytest.raises(VectorUploadError, match="nesting exceeds") as raised:
+        prepare_vector_upload(
+            raw_filename="deep.geojson",
+            stream=io.BytesIO(original),
+            **_prepare_kwargs(tmp_path, ledger),
+        )
+
+    attempt = next((tmp_path / "project" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    assert raised.value.code == "invalid_vector"
+    assert receipt["status"] == "rejected"
+    assert receipt["source_sha256"] == sha256(original)
+    assert ledger.reservation.committed is not None
+
+
+def test_json_parser_recursion_is_stably_rejected_and_quarantined(tmp_path: Path) -> None:
+    nested = ("[" * 1200) + "0" + ("]" * 1200)
+    original = (
+        '{"type":"FeatureCollection","features":[{"type":"Feature",'
+        f'"properties":{{"nested":{nested}}},'
+        '"geometry":{"type":"Polygon","coordinates":[[[0,0],[1,0],[0,0]]]}}]}'
+    ).encode()
+    ledger = _Ledger()
+
+    with pytest.raises(VectorUploadError) as raised:
+        prepare_vector_upload(
+            raw_filename="recursive.geojson",
+            stream=io.BytesIO(original),
+            **_prepare_kwargs(tmp_path, ledger),
+        )
+
+    attempt = next((tmp_path / "project" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    assert raised.value.code == "invalid_vector"
+    assert receipt["status"] == "rejected"
+    assert receipt["source_sha256"] == sha256(original)
+    assert ledger.reservation.committed is not None
+
+
+def test_real_redis_reconciliation_releases_eight_abandoned_prewrite_reservations(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    filesystem_id = f"pytest-{tmp_path.name}"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", filesystem_id)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(tmp_path))
+    connection_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path("/run/secrets/redis_password")
+    if not password_path.exists():
+        password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/nonexistent"))
+    if password_path.exists():
+        connection_kwargs["password"] = password_path.read_text().strip()
+    connection = redis.client.Redis(**connection_kwargs)
+    prefix = f"vector-upload-retention:{filesystem_id}"
+    try:
+        existing = list(connection.scan_iter(match=f"{prefix}:*"))
+        if existing:
+            connection.delete(*existing)
+        ledger = RedisRetentionLedger(connection)
+        connection.set(f"{prefix}:reconcile", "operator", ex=30)
+        with pytest.raises(VectorUploadError):
+            ledger.reserve(
+                project_key="run:blocked-by-rebuild",
+                actor=RetentionActor("human", 1),
+                worst_case_bytes=1,
+                filesystem_root=tmp_path,
+            )
+        connection.delete(f"{prefix}:reconcile")
+        for index in range(8):
+            ledger.reserve(
+                project_key=f"run:abandoned-{index}",
+                actor=RetentionActor("human", index + 1),
+                worst_case_bytes=1,
+                filesystem_root=tmp_path,
+            )
+        with pytest.raises(VectorUploadError):
+            ledger.reserve(
+                project_key="run:blocked",
+                actor=RetentionActor("human", 99),
+                worst_case_bytes=1,
+                filesystem_root=tmp_path,
+            )
+
+        report = reconcile_retention(
+            tmp_path,
+            apply=True,
+            connection=connection,
+            now=int(__import__("time").time()) + 601,
+        )
+        assert len(report["actions"]) == 8
+        assert {action["action"] for action in report["actions"]} == {"release_prewrite"}
+        recovered = ledger.reserve(
+            project_key="run:recovered",
+            actor=RetentionActor("human", 99),
+            worst_case_bytes=1,
+            filesystem_root=tmp_path,
+        )
+        recovered.release_prewrite()
+        totals = connection.hgetall(f"{prefix}:totals")
+        assert int(totals.get("inflight", 0)) == 0
+        assert int(totals.get("reserved", 0)) == 0
+
+        retained = tmp_path / "run" / "vector_upload_attempts" / "attempt-1"
+        retained.mkdir(parents=True)
+        (retained / "original.upload").write_bytes(b"retained evidence")
+        (retained / "normalization.json").write_text(json.dumps({
+            "schema": "vector-normalization-v1",
+            "status": "rejected",
+            "actor": {"kind": "human", "user_id": 42},
+        }))
+        connection.hset(f"{prefix}:totals", mapping={"committed": 1})
+        rebuilt = reconcile_retention(
+            tmp_path,
+            apply=True,
+            connection=connection,
+            rebuild_ledger=True,
+        )
+        expected = sum(item.stat().st_size for item in retained.iterdir())
+        assert rebuilt["ledger_audit"]["computed_committed"] == expected
+        assert rebuilt["ledger_audit"]["rebuilt"] is True
+        totals = connection.hgetall(f"{prefix}:totals")
+        assert int(totals["committed"]) == expected
+    finally:
+        keys = list(connection.scan_iter(match=f"{prefix}:*"))
+        if keys:
+            connection.delete(*keys)
 
 
 def test_oversize_records_no_original_hash_or_partial(tmp_path: Path) -> None:
@@ -164,14 +366,16 @@ def test_oversize_records_no_original_hash_or_partial(tmp_path: Path) -> None:
 
 
 def test_binary_converter_digest_is_reconciled(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
     source = b"PAR1bounded-fixturePAR1"
     canonical = json.dumps(_polygon_payload(), separators=(",", ":")).encode()
 
     class Response:
         status_code = 200
+        headers: dict[str, str] = {}
 
-        def json(self) -> dict[str, object]:
-            return {
+        def iter_content(self, **_kwargs: Any):
+            yield json.dumps({
                 "request_id": "converter-request",
                 "geojson": _polygon_payload(),
                 "metadata": {
@@ -187,7 +391,10 @@ def test_binary_converter_digest_is_reconciled(monkeypatch: pytest.MonkeyPatch, 
                         "source_revision": "3" * 40,
                     },
                 },
-            }
+            }).encode()
+
+        def close(self) -> None:
+            pass
 
     monkeypatch.setattr(
         "wepppy.microservices.vector_upload_normalization.requests.post",
@@ -208,13 +415,15 @@ def test_binary_converter_digest_is_reconciled(monkeypatch: pytest.MonkeyPatch, 
 
 
 def test_converter_source_digest_mismatch_is_quarantined(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
     source = b"PAR1bounded-fixturePAR1"
 
     class Response:
         status_code = 200
+        headers: dict[str, str] = {}
 
-        def json(self) -> dict[str, object]:
-            return {
+        def iter_content(self, **_kwargs: Any):
+            yield json.dumps({
                 "request_id": "converter-request",
                 "geojson": _polygon_payload(),
                 "metadata": {
@@ -223,7 +432,10 @@ def test_converter_source_digest_mismatch_is_quarantined(monkeypatch: pytest.Mon
                     "canonical_size": 1,
                     "canonical_sha256": "0" * 64,
                 },
-            }
+            }).encode()
+
+        def close(self) -> None:
+            pass
 
     monkeypatch.setattr(
         "wepppy.microservices.vector_upload_normalization.requests.post",

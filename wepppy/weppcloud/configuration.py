@@ -285,6 +285,9 @@ def config_app(app: Any):
     app.config["GL_DASHBOARD_BATCH_ENABLED"] = _get_env_bool(
         "GL_DASHBOARD_BATCH_ENABLED", False
     )
+    app.config["VECTOR_UPLOAD_BINARY_ENABLED"] = _get_env_bool(
+        "VECTOR_UPLOAD_BINARY_ENABLED", False
+    )
 
 
     # Flask-Security configuration

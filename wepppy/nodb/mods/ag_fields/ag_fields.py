@@ -265,6 +265,11 @@ class AgFields(NoDbBase):
         )
         os.close(geojson_fd)
         os.close(parquet_fd)
+        canonical_backup = canonical_path.with_name(f'.{canonical_path.name}.backup')
+        parquet_path = Path(self.rotation_schedule_parquet)
+        parquet_backup = parquet_path.with_name(f'.{parquet_path.name}.backup')
+        had_canonical = canonical_path.exists()
+        had_parquet = parquet_path.exists()
 
         try:
             try:
@@ -288,20 +293,36 @@ class AgFields(NoDbBase):
             df.to_parquet(staged_parquet, index=False)
             geojson_hash = self._file_sha1(staged_geojson)
 
-            with self.locked():
-                os.replace(staged_geojson, canonical_path)
-                os.replace(staged_parquet, self.rotation_schedule_parquet)
-                self._field_boundaries_geojson = canonical_name
-                self._field_boundaries_source_filename = source_basename
-                self._field_n = len(df)
-                self._geojson_hash = geojson_hash
-                self._geojson_timestamp = int(time.time())
-                self._geojson_is_valid = True
-                self._field_columns = [str(col) for col in df.columns]
-                self._field_id_key = None
-                self._rotation_accessor = None
+            if had_canonical:
+                shutil.copy2(canonical_path, canonical_backup)
+            if had_parquet:
+                shutil.copy2(parquet_path, parquet_backup)
+
+            try:
+                with self.locked():
+                    os.replace(staged_geojson, canonical_path)
+                    os.replace(staged_parquet, self.rotation_schedule_parquet)
+                    self._field_boundaries_geojson = canonical_name
+                    self._field_boundaries_source_filename = source_basename
+                    self._field_n = len(df)
+                    self._geojson_hash = geojson_hash
+                    self._geojson_timestamp = int(time.time())
+                    self._geojson_is_valid = True
+                    self._field_columns = [str(col) for col in df.columns]
+                    self._field_id_key = None
+                    self._rotation_accessor = None
+            except BaseException:  # transaction cleanup boundary, including cancellation
+                if had_canonical:
+                    os.replace(canonical_backup, canonical_path)
+                else:
+                    canonical_path.unlink(missing_ok=True)
+                if had_parquet:
+                    os.replace(parquet_backup, parquet_path)
+                else:
+                    parquet_path.unlink(missing_ok=True)
+                raise
         finally:
-            for staged_path in (staged_geojson, staged_parquet):
+            for staged_path in (staged_geojson, staged_parquet, canonical_backup, parquet_backup):
                 if os.path.exists(staged_path):
                     os.unlink(staged_path)
 

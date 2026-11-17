@@ -421,9 +421,10 @@ def test_upload_geoparquet_retains_source_and_publishes_wgs84_candidate(
 
     class Response:
         status_code = 200
+        headers = {}
 
-        def json(self):
-            return {
+        def iter_content(self, **_kwargs):
+            yield json.dumps({
                 "request_id": "roads-converter-request",
                 "geojson": geojson,
                 "metadata": {
@@ -439,7 +440,10 @@ def test_upload_geoparquet_retains_source_and_publishes_wgs84_candidate(
                         "source_revision": "3" * 40,
                     },
                 },
-            }
+            }).encode()
+
+        def close(self):
+            pass
 
     monkeypatch.setattr(
         "wepppy.microservices.vector_upload_normalization.requests.post",

@@ -33,6 +33,7 @@ _ORIGINAL_BYTES_LIMIT = 1024 * 1024 * 1024
 _LIVE_TREE_LIMIT = 1280 * 1024 * 1024
 _TOTAL_EVIDENCE_LIMIT = 2560 * 1024 * 1024
 _CANDIDATE_LIMIT = 32 * 1024 * 1024
+_CONVERTER_RESPONSE_LIMIT = _CANDIDATE_LIMIT + 2 * 1024 * 1024
 _RECEIPT_ALLOWANCE = 1024 * 1024
 _GLOBAL_LIMIT = 100 * 1024 * 1024 * 1024
 _PRINCIPAL_LIMIT = 10 * 1024 * 1024 * 1024
@@ -46,12 +47,22 @@ _RECEIPT_SCHEMA = "vector-normalization-v1"
 _BINARY_SUFFIXES = {".zip": "shapefile", ".parquet": "geoparquet", ".geoparquet": "geoparquet"}
 _GEOJSON_SUFFIXES = {".geojson": "geojson", ".json": "geojson"}
 _CONVERTER_CODES = {
+    "invalid_archive": (400, "Uploaded vector archive is invalid."),
+    "archive_path_traversal": (400, "Uploaded vector archive is invalid."),
+    "missing_required_sidecar": (400, "Uploaded Shapefile is incomplete."),
+    "invalid_shapefile": (400, "Uploaded Shapefile is invalid."),
     "invalid_vector": (400, "Uploaded vector content is invalid."),
     "unsupported_vector": (400, "Uploaded vector uses an unsupported format feature."),
+    "invalid_source_crs": (400, "Uploaded vector CRS is invalid."),
+    "unknown_source_crs": (400, "Uploaded vector CRS is missing or unknown."),
+    "reprojection_failed": (400, "Uploaded vector cannot be transformed safely."),
     "vector_limit_exceeded": (413, "Uploaded vector exceeds a normalization limit."),
+    "archive_quota_exceeded": (413, "Uploaded vector archive exceeds a normalization limit."),
     "vector_crs_invalid": (400, "Uploaded vector CRS cannot be transformed safely."),
     "vector_source_integrity_error": (502, "Vector source integrity verification failed."),
     "request_timeout": (408, "Vector conversion timed out."),
+    "service_saturated": (503, "Vector converter is temporarily saturated."),
+    "unavailable": (503, "Vector converter is unavailable."),
 }
 _LOGGER = logging.getLogger(__name__)
 
@@ -93,6 +104,8 @@ class RetentionActor:
 class Reservation(Protocol):
     reservation_id: str
 
+    def bind_attempt(self, attempt_dir: Path) -> None: ...
+
     def commit(self, exact_bytes: int) -> None: ...
 
     def release_prewrite(self) -> None: ...
@@ -113,6 +126,7 @@ class ScopeLeaseFactory(Protocol):
 
 
 _RESERVE_LUA = """
+if redis.call('EXISTS', KEYS[4]) ~= 0 then return {-5, 0} end
 local total_committed = tonumber(redis.call('HGET', KEYS[1], 'committed') or '0')
 local total_reserved = tonumber(redis.call('HGET', KEYS[1], 'reserved') or '0')
 local inflight = tonumber(redis.call('HGET', KEYS[1], 'inflight') or '0')
@@ -126,13 +140,13 @@ if redis.call('EXISTS', KEYS[3]) ~= 0 then return {-4, total_reserved} end
 redis.call('HINCRBY', KEYS[1], 'reserved', amount)
 redis.call('HINCRBY', KEYS[1], 'inflight', 1)
 redis.call('HINCRBY', KEYS[2], 'reserved', amount)
-redis.call('HSET', KEYS[3], 'owner', ARGV[1], 'amount', amount, 'principal', KEYS[2], 'project', ARGV[3])
-redis.call('EXPIRE', KEYS[3], tonumber(ARGV[7]))
+redis.call('HSET', KEYS[3], 'owner', ARGV[1], 'amount', amount, 'principal', KEYS[2], 'project', ARGV[3], 'created_unix', ARGV[7], 'state', 'reserved')
 return {1, total_reserved + amount}
 """
 
 _COMMIT_LUA = """
 if redis.call('HGET', KEYS[3], 'owner') ~= ARGV[1] then return 0 end
+if redis.call('HGET', KEYS[3], 'state') == 'committed' then return 2 end
 local amount = tonumber(redis.call('HGET', KEYS[3], 'amount') or '-1')
 if amount < 0 then return 0 end
 local exact = tonumber(ARGV[2])
@@ -141,7 +155,7 @@ redis.call('HINCRBY', KEYS[1], 'inflight', -1)
 redis.call('HINCRBY', KEYS[1], 'committed', exact)
 redis.call('HINCRBY', KEYS[2], 'reserved', -amount)
 redis.call('HINCRBY', KEYS[2], 'committed', exact)
-redis.call('DEL', KEYS[3])
+redis.call('HSET', KEYS[3], 'state', 'committed', 'exact', exact)
 return 1
 """
 
@@ -156,6 +170,31 @@ redis.call('DEL', KEYS[3])
 return 1
 """
 
+_RECONCILE_LUA = """
+local state = redis.call('HGET', KEYS[2], 'state')
+if not state then state = 'reserved' end
+if state == 'committed' then return 2 end
+local amount = tonumber(redis.call('HGET', KEYS[2], 'amount') or '-1')
+local principal = redis.call('HGET', KEYS[2], 'principal')
+local reserved = tonumber(redis.call('HGET', KEYS[1], 'reserved') or '0')
+local inflight = tonumber(redis.call('HGET', KEYS[1], 'inflight') or '0')
+if amount < 0 or not principal or reserved < amount or inflight < 1 then return -1 end
+local principal_reserved = tonumber(redis.call('HGET', principal, 'reserved') or '0')
+if principal_reserved < amount then return -1 end
+redis.call('HINCRBY', KEYS[1], 'reserved', -amount)
+redis.call('HINCRBY', KEYS[1], 'inflight', -1)
+redis.call('HINCRBY', principal, 'reserved', -amount)
+if ARGV[1] == 'commit' then
+  local exact = tonumber(ARGV[2])
+  redis.call('HINCRBY', KEYS[1], 'committed', exact)
+  redis.call('HINCRBY', principal, 'committed', exact)
+  redis.call('HSET', KEYS[2], 'state', 'committed', 'exact', exact)
+else
+  redis.call('DEL', KEYS[2])
+end
+return 1
+"""
+
 
 @dataclass(slots=True)
 class _RedisReservation:
@@ -165,7 +204,31 @@ class _RedisReservation:
     reservation_key: str
     owner_token: str
     reservation_id: str
+    filesystem_root: Path
     _finished: bool = False
+
+    def bind_attempt(self, attempt_dir: Path) -> None:
+        if self._finished:
+            raise RuntimeError("retention reservation is already finalized")
+        try:
+            relative = attempt_dir.resolve(strict=True).relative_to(self.filesystem_root).as_posix()
+            result = self.connection.eval(
+                "if redis.call('HGET',KEYS[1],'owner') == ARGV[1] then "
+                "redis.call('HSET',KEYS[1],'attempt_relpath',ARGV[2]); return 1 end return 0",
+                1, self.reservation_key, self.owner_token, relative,
+            )
+        except (OSError, ValueError, redis.RedisError) as exc:
+            raise VectorUploadError(
+                "vector_retention_quota_exceeded",
+                "Vector evidence reservation could not be bound safely.",
+                status_code=507,
+            ) from exc
+        if int(result or 0) not in {1, 2}:
+            raise VectorUploadError(
+                "vector_retention_quota_exceeded",
+                "Vector evidence reservation ownership was lost.",
+                status_code=507,
+            )
 
     def commit(self, exact_bytes: int) -> None:
         if self._finished:
@@ -250,12 +313,13 @@ class RedisRetentionLedger:
         totals_key = f"{prefix}:totals"
         principal_key = f"{prefix}:principal:{hashlib.sha256(principal.encode()).hexdigest()}"
         reservation_key = f"{prefix}:reservation:{reservation_id}"
+        reconcile_key = f"{prefix}:reconcile"
         try:
             result = self._client().eval(
-                _RESERVE_LUA, 3, totals_key, principal_key, reservation_key,
+                _RESERVE_LUA, 4, totals_key, principal_key, reservation_key, reconcile_key,
                 owner, int(worst_case_bytes), project_key,
                 _GLOBAL_INFLIGHT_LIMIT, _GLOBAL_LIMIT, principal_limit,
-                _LEASE_SECONDS,
+                int(time.time()),
             )
             outcome, outstanding = int(result[0]), int(result[1])
             if outcome != 1:
@@ -267,7 +331,7 @@ class RedisRetentionLedger:
             if shutil.disk_usage(actual_root).free - outstanding < _FREE_SPACE_RESERVE:
                 reservation = _RedisReservation(
                     self._client(), totals_key, principal_key, reservation_key,
-                    owner, reservation_id,
+                    owner, reservation_id, actual_root,
                 )
                 reservation.release_prewrite()
                 raise VectorUploadError(
@@ -285,8 +349,217 @@ class RedisRetentionLedger:
             ) from exc
         return _RedisReservation(
             self._client(), totals_key, principal_key, reservation_key,
-            owner, reservation_id,
+            owner, reservation_id, actual_root,
         )
+
+
+def reconcile_retention(
+    filesystem_root: Path,
+    *,
+    apply: bool = False,
+    connection: Any | None = None,
+    now: int | None = None,
+    stale_seconds: int = _LEASE_SECONDS,
+    rebuild_ledger: bool = False,
+) -> dict[str, object]:
+    """Audit/recover reservations and optionally rebuild accounting from receipts."""
+    filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    configured_root = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+    if not filesystem_id or not configured_root:
+        raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence retention is not configured.", status_code=507)
+    try:
+        root = filesystem_root.resolve(strict=True)
+        root.relative_to(Path(configured_root).resolve(strict=True))
+    except (OSError, ValueError) as exc:
+        raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence filesystem identity cannot be verified.", status_code=507) from exc
+    client = connection or redis.Redis(**redis_connection_kwargs(RedisDB.LOCK, decode_responses=True))
+    prefix = f"vector-upload-retention:{filesystem_id}"
+    totals_key = f"{prefix}:totals"
+    lock_key = f"{prefix}:reconcile"
+    lock_token = uuid.uuid4().hex
+    try:
+        if not client.set(lock_key, lock_token, nx=True, ex=300):
+            raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reconciliation is already active.", status_code=507)
+        keys = list(client.scan_iter(match=f"{prefix}:reservation:*", count=100))
+        if len(keys) > 10_000:
+            raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reservation inventory exceeds the recovery bound.", status_code=507)
+        actions: list[dict[str, object]] = []
+        current = int(time.time()) if now is None else int(now)
+        for key in sorted(keys):
+            metadata = client.hgetall(key)
+            created = int(metadata.get("created_unix") or 0)
+            if current - created < stale_seconds:
+                continue
+            relative = str(metadata.get("attempt_relpath") or "")
+            state = str(metadata.get("state") or "reserved")
+            if not relative:
+                action = {"reservation": key.rsplit(":", 1)[-1], "action": "release_prewrite"}
+                actions.append(action)
+                if apply and state != "committed":
+                    result = int(client.eval(_RECONCILE_LUA, 2, totals_key, key, "release", 0) or 0)
+                    if result != 1:
+                        raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence ledger drift requires operator repair.", status_code=507)
+                elif apply:
+                    client.delete(key)
+                continue
+            attempt = (root / relative).resolve(strict=False)
+            try:
+                attempt.relative_to(root)
+            except ValueError as exc:
+                raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reservation path escapes its filesystem.", status_code=507) from exc
+            if not attempt.exists() or attempt.is_symlink() or not attempt.is_dir():
+                actions.append({"reservation": key.rsplit(":", 1)[-1], "action": "blocked_missing_attempt"})
+                continue
+            receipt_path = attempt / _RECEIPT_NAME
+            try:
+                receipt = _strict_json(receipt_path.read_bytes())
+            except (OSError, UnicodeError, ValueError):
+                actions.append({"reservation": key.rsplit(":", 1)[-1], "action": "corrupt_attempt"})
+                if not apply:
+                    continue
+                corrupt_bytes = receipt_path.read_bytes() if receipt_path.exists() else b""
+                if corrupt_bytes:
+                    corrupt_path = attempt / f"normalization.corrupt.{hashlib.sha256(corrupt_bytes).hexdigest()}.json"
+                    os.replace(receipt_path, corrupt_path)
+                receipt = {
+                    "schema": _RECEIPT_SCHEMA,
+                    "attempt_id": attempt.name,
+                    "status": "corrupt_attempt",
+                    "outcome": "quarantined",
+                    "enforcement_stage": "reconciliation",
+                    "error_code": "invalid_receipt",
+                    "updated_utc": _utc_now(),
+                    "reservation_id": key.rsplit(":", 1)[-1],
+                }
+                _atomic_json(receipt_path, receipt)
+            status = str(receipt.get("status") or "")
+            recovered_status = status
+            if status == "accepted":
+                project_rel = receipt.get("project_root")
+                canonical_rel = receipt.get("canonical_path")
+                recovered_status = "incomplete"
+                if isinstance(project_rel, str) and isinstance(canonical_rel, str):
+                    canonical = (root / project_rel / canonical_rel).resolve(strict=False)
+                    try:
+                        canonical.relative_to(root)
+                        size, digest = _hash_regular(canonical)
+                        if size == receipt.get("canonical_size") and digest == receipt.get("canonical_sha256"):
+                            recovered_status = "accepted_recovered"
+                    except (OSError, ValueError, VectorUploadError):
+                        pass
+            elif status not in {"rejected", "accepted_recovered", "corrupt_attempt", "incomplete"}:
+                recovered_status = "incomplete"
+            actions.append({"reservation": key.rsplit(":", 1)[-1], "action": recovered_status})
+            if not apply:
+                continue
+            receipt.update(
+                status=recovered_status,
+                outcome="retained" if recovered_status == "accepted_recovered" else "quarantined",
+                enforcement_stage="reconciliation",
+                accounting_status="committed",
+                updated_utc=_utc_now(),
+            )
+            _atomic_json(receipt_path, receipt)
+            exact = _regular_tree_size(attempt)
+            result = int(client.eval(_RECONCILE_LUA, 2, totals_key, key, "commit", exact) or 0)
+            if result not in {1, 2}:
+                raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence ledger drift requires operator repair.", status_code=507)
+            client.delete(key)
+        ledger_audit: dict[str, object] | None = None
+        if rebuild_ledger:
+            receipt_count = 0
+            committed_bytes = 0
+            principal_bytes: dict[str, int] = {}
+            for walk_root, directories, filenames in os.walk(root, followlinks=False):
+                directories[:] = [
+                    name for name in directories
+                    if not (Path(walk_root) / name).is_symlink()
+                ]
+                if _RECEIPT_NAME not in filenames:
+                    continue
+                if receipt_count >= 10_000:
+                    raise VectorUploadError(
+                        "vector_retention_quota_exceeded",
+                        "Vector evidence receipt inventory exceeds the recovery bound.",
+                        status_code=507,
+                    )
+                receipt_path = Path(walk_root) / _RECEIPT_NAME
+                try:
+                    receipt = _strict_json(receipt_path.read_bytes())
+                except (OSError, UnicodeError, ValueError):
+                    actions.append({
+                        "path": os.fspath(receipt_path.relative_to(root)),
+                        "action": "blocked_corrupt_receipt",
+                    })
+                    continue
+                if receipt.get("schema") != _RECEIPT_SCHEMA:
+                    continue
+                status = str(receipt.get("status") or "")
+                if status not in {"accepted", "accepted_recovered", "rejected", "incomplete", "corrupt_attempt"}:
+                    actions.append({
+                        "path": os.fspath(receipt_path.relative_to(root)),
+                        "action": "blocked_nonterminal_receipt",
+                    })
+                    continue
+                attempt_bytes = _regular_tree_size(receipt_path.parent)
+                actor = receipt.get("actor")
+                bucket = "unattributed"
+                if isinstance(actor, dict):
+                    kind = actor.get("kind")
+                    if kind == "human" and isinstance(actor.get("user_id"), int) and actor["user_id"] > 0:
+                        bucket = f"human:{actor['user_id']}"
+                    elif kind in {"service", "mcp"} and isinstance(actor.get("subject"), str) and actor["subject"]:
+                        bucket = f"{kind}:{actor['subject'][:160]}"
+                receipt_count += 1
+                committed_bytes += attempt_bytes
+                principal_bytes[bucket] = principal_bytes.get(bucket, 0) + attempt_bytes
+
+            current_totals = client.hgetall(totals_key)
+            ledger_audit = {
+                "receipt_count": receipt_count,
+                "computed_committed": committed_bytes,
+                "recorded_committed": int(current_totals.get("committed") or 0),
+                "principal_count": len(principal_bytes),
+            }
+            blocked = [item for item in actions if str(item.get("action", "")).startswith("blocked_")]
+            if apply:
+                remaining_reservations = list(client.scan_iter(match=f"{prefix}:reservation:*", count=100))
+                if blocked or remaining_reservations:
+                    raise VectorUploadError(
+                        "vector_retention_quota_exceeded",
+                        "Vector evidence ledger rebuild is blocked by active or unverifiable evidence.",
+                        status_code=507,
+                    )
+                principal_keys = list(client.scan_iter(match=f"{prefix}:principal:*", count=100))
+                pipeline = client.pipeline(transaction=True)
+                pipeline.delete(totals_key)
+                if principal_keys:
+                    pipeline.delete(*principal_keys)
+                pipeline.hset(totals_key, mapping={
+                    "committed": committed_bytes,
+                    "reserved": 0,
+                    "inflight": 0,
+                })
+                for bucket, amount in principal_bytes.items():
+                    principal_key = f"{prefix}:principal:{hashlib.sha256(bucket.encode()).hexdigest()}"
+                    pipeline.hset(principal_key, mapping={"committed": amount, "reserved": 0})
+                pipeline.execute()
+                ledger_audit["rebuilt"] = True
+        return {
+            "filesystem_id": filesystem_id,
+            "apply": apply,
+            "actions": actions,
+            "ledger_audit": ledger_audit,
+        }
+    except VectorUploadError:
+        raise
+    except (OSError, TypeError, ValueError, redis.RedisError) as exc:
+        raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reconciliation failed closed.", status_code=507) from exc
+    finally:
+        try:
+            client.eval(_LOCK_RELEASE_LUA, 1, lock_key, lock_token)
+        except redis.RedisError:
+            _LOGGER.warning("Vector retention reconciliation lock release deferred to TTL", exc_info=True)
 
 
 _LOCK_RELEASE_LUA = "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('DEL',KEYS[1]) end return 0"
@@ -491,6 +764,29 @@ def _regular_tree_size(root: Path) -> int:
 
 
 def _strict_json(data: bytes) -> dict[str, object]:
+    depth = 0
+    in_string = False
+    escaped = False
+    for byte in data:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif byte == 0x5C:
+                escaped = True
+            elif byte == 0x22:
+                in_string = False
+            continue
+        if byte == 0x22:
+            in_string = True
+        elif byte in {0x5B, 0x7B}:
+            depth += 1
+            if depth > 64:
+                raise ValueError("JSON nesting limit exceeded")
+        elif byte in {0x5D, 0x7D}:
+            depth -= 1
+            if depth < 0:
+                raise ValueError("malformed JSON nesting")
+
     def pairs(values: list[tuple[str, object]]) -> dict[str, object]:
         result: dict[str, object] = {}
         for key, value in values:
@@ -505,11 +801,14 @@ def _strict_json(data: bytes) -> dict[str, object]:
             raise ValueError("nonfinite number")
         return parsed
 
-    value = json.loads(
-        data.decode("utf-8"), object_pairs_hook=pairs,
-        parse_constant=lambda _value: (_ for _ in ()).throw(ValueError("nonfinite number")),
-        parse_float=finite_float,
-    )
+    try:
+        value = json.loads(
+            data.decode("utf-8"), object_pairs_hook=pairs,
+            parse_constant=lambda _value: (_ for _ in ()).throw(ValueError("nonfinite number")),
+            parse_float=finite_float,
+        )
+    except RecursionError as exc:
+        raise ValueError("JSON nesting limit exceeded") from exc
     if not isinstance(value, dict):
         raise ValueError("root must be an object")
     return value
@@ -523,15 +822,27 @@ def validate_feature_collection_geometries(payload: Mapping[str, object], allowe
         raise VectorUploadError("invalid_vector", "Uploaded vector must be a nonempty FeatureCollection.", status_code=400)
 
     def coordinates(value: object) -> int:
-        if not isinstance(value, list) or not value:
-            raise VectorUploadError("invalid_vector", "Uploaded vector contains empty geometry coordinates.", status_code=400)
-        if all(isinstance(item, (int, float)) and not isinstance(item, bool) for item in value):
-            if len(value) < 2 or not all(math.isfinite(float(item)) for item in value):
-                raise VectorUploadError("invalid_vector", "Uploaded vector contains invalid coordinates.", status_code=400)
-            return 1
-        if any(not isinstance(item, list) for item in value):
-            raise VectorUploadError("invalid_vector", "Uploaded vector contains malformed coordinates.", status_code=400)
-        return sum(coordinates(item) for item in value)
+        count = 0
+        stack: list[tuple[object, int]] = [(value, 0)]
+        while stack:
+            current, depth = stack.pop()
+            if depth > 16:
+                raise VectorUploadError(
+                    "invalid_vector",
+                    "Uploaded vector geometry nesting exceeds the receiving limit.",
+                    status_code=400,
+                )
+            if not isinstance(current, list) or not current:
+                raise VectorUploadError("invalid_vector", "Uploaded vector contains empty geometry coordinates.", status_code=400)
+            if all(isinstance(item, (int, float)) and not isinstance(item, bool) for item in current):
+                if len(current) < 2 or not all(math.isfinite(float(item)) for item in current):
+                    raise VectorUploadError("invalid_vector", "Uploaded vector contains invalid coordinates.", status_code=400)
+                count += 1
+                continue
+            if any(not isinstance(item, list) for item in current):
+                raise VectorUploadError("invalid_vector", "Uploaded vector contains malformed coordinates.", status_code=400)
+            stack.extend((item, depth + 1) for item in current)
+        return count
 
     geometry_types: set[str] = set()
     vertex_count = 0
@@ -616,6 +927,7 @@ def _converter_payload(*, source_path: Path, submitted_name: str, source_size: i
                 data={"output_format": "geojson", "target_crs": "wgs84", "response_mode": "json_body"},
                 timeout=(5.0, timeout_seconds),
                 allow_redirects=False,
+                stream=True,
             )
             stream.seek(0)
             digest = hashlib.sha256()
@@ -635,9 +947,21 @@ def _converter_payload(*, source_path: Path, submitted_name: str, source_size: i
     ):
         raise VectorUploadError("vector_source_integrity_error", "Retained source changed during conversion.", status_code=502)
     try:
-        body = response.json()
-    except (ValueError, UnicodeError) as exc:
+        declared_length = int(response.headers.get("Content-Length", "0"))
+        if declared_length > _CONVERTER_RESPONSE_LIMIT:
+            raise VectorUploadError("vector_limit_exceeded", "Vector converter response exceeds the receiving limit.", status_code=413)
+        response_bytes = bytearray()
+        for chunk in response.iter_content(chunk_size=_CHUNK_BYTES):
+            response_bytes.extend(chunk)
+            if len(response_bytes) > _CONVERTER_RESPONSE_LIMIT:
+                raise VectorUploadError("vector_limit_exceeded", "Vector converter response exceeds the receiving limit.", status_code=413)
+        body = json.loads(bytes(response_bytes))
+    except VectorUploadError:
+        raise
+    except (TypeError, ValueError, UnicodeError) as exc:
         raise VectorUploadError("vector_converter_unavailable", "Vector converter returned an invalid response.", status_code=503) from exc
+    finally:
+        response.close()
     if response.status_code != 200:
         error = body.get("error") if isinstance(body, dict) else None
         code = error.get("code") if isinstance(error, dict) else None
@@ -684,6 +1008,10 @@ class PreparedVectorUpload:
     evidence_roots: tuple[Path, ...]
     _finished: bool = False
 
+    @property
+    def is_terminal(self) -> bool:
+        return self._finished
+
     def _persist(self) -> None:
         self.lease.assert_owned()
         self.receipt["updated_utc"] = _utc_now()
@@ -692,12 +1020,56 @@ class PreparedVectorUpload:
     def reject(self, code: str, *, stage: str = "workflow_publication") -> None:
         if self._finished:
             return
-        self.receipt.update(status="rejected", outcome="quarantined", enforcement_stage=stage, error_code=code)
+        self.receipt.update(
+            status="rejected", outcome="quarantined", enforcement_stage=stage,
+            error_code=code, accounting_status="pending",
+        )
         self._persist()
         _log_quarantine(self.receipt)
+        self.receipt["accounting_status"] = "committed"
+        self._persist()
         exact = _regular_tree_size(self.attempt_dir)
-        self.reservation.commit(exact)
-        self.lease.release()
+        try:
+            self.reservation.commit(exact)
+        except VectorUploadError:
+            self.receipt["accounting_status"] = "pending"
+            self._persist()
+            self._finished = True
+            try:
+                self.lease.release()
+            except VectorUploadError:
+                _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
+            raise
+        try:
+            self.lease.release()
+        except VectorUploadError:
+            _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
+        self._finished = True
+
+    def _incomplete_after_mutation(self, code: str) -> None:
+        self.receipt.update(
+            status="incomplete", outcome="quarantined", enforcement_stage="workflow_publication_uncertain",
+            error_code=code, accounting_status="pending",
+        )
+        self._persist()
+        self.receipt["accounting_status"] = "committed"
+        self._persist()
+        exact = _regular_tree_size(self.attempt_dir)
+        try:
+            self.reservation.commit(exact)
+        except VectorUploadError:
+            self.receipt["accounting_status"] = "pending"
+            self._persist()
+            self._finished = True
+            try:
+                self.lease.release()
+            except VectorUploadError:
+                _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
+            raise
+        try:
+            self.lease.release()
+        except VectorUploadError:
+            _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
         self._finished = True
 
     def publish(
@@ -711,9 +1083,22 @@ class PreparedVectorUpload:
         if self._finished:
             raise RuntimeError("vector upload attempt is already terminal")
         self.lease.assert_owned()
-        published = False
         try:
             result = mutation(self.candidate_path)
+        except Exception:
+            # A workflow callback is required to roll back its own authoritative
+            # state. If the candidate nevertheless became canonical, preserve an
+            # explicit recovery state instead of falsely recording rejection.
+            try:
+                canonical_size, canonical_sha256 = _hash_regular(canonical_path)
+            except (OSError, ValueError):
+                canonical_size, canonical_sha256 = -1, ""
+            if canonical_size == self.candidate_size and canonical_sha256 == self.candidate_sha256:
+                self._incomplete_after_mutation("workflow_publication_uncertain")
+            else:
+                self.reject("workflow_publication_failed")
+            raise
+        try:
             canonical_size, canonical_sha256 = _hash_regular(canonical_path)
             if canonical_size != self.candidate_size or canonical_sha256 != self.candidate_sha256:
                 raise VectorUploadError(
@@ -727,20 +1112,41 @@ class PreparedVectorUpload:
                 canonical_path=canonical_relative_path or canonical_path.name,
                 canonical_size=canonical_size,
                 canonical_sha256=canonical_sha256,
+                accounting_status="pending",
             )
-            self.candidate_path.unlink(missing_ok=True)
+            try:
+                self.candidate_path.unlink(missing_ok=True)
+            except OSError:
+                _LOGGER.warning("Accepted vector candidate cleanup deferred", exc_info=True)
+            self.receipt["accounting_status"] = "committed"
             self._persist()
             exact = _regular_tree_size(self.attempt_dir)
-            self.reservation.commit(exact)
-            self.lease.release()
+            try:
+                self.reservation.commit(exact)
+            except VectorUploadError:
+                # The accepted workflow and receipt are monotonic. A durable
+                # reservation record lets the reconciliation command finish
+                # accounting without rewriting this attempt as rejected.
+                self.receipt["accounting_status"] = "pending"
+                try:
+                    self._persist()
+                finally:
+                    self._finished = True
+                try:
+                    self.lease.release()
+                except VectorUploadError:
+                    _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
+                raise
             self._finished = True
-            published = True
+            try:
+                self.lease.release()
+            except VectorUploadError:
+                _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
             return result
-        finally:
-            # This is a cleanup boundary, not exception translation: preserve the
-            # workflow exception while making every failed publication terminal.
-            if not published and not self._finished:
-                self.reject("workflow_publication_failed")
+        except Exception:
+            if not self._finished:
+                self._incomplete_after_mutation("workflow_readback_failed")
+            raise
 
     def __enter__(self) -> "PreparedVectorUpload":
         return self
@@ -771,7 +1177,8 @@ def prepare_vector_upload(
     """Retain, normalize, validate, and durably prepare one vector upload."""
     safe_name = _safe_submitted_name(raw_filename)
     detected_format = _format_for_name(safe_name)
-    worst_case = endpoint_max_bytes + _CANDIDATE_LIMIT + _RECEIPT_ALLOWANCE
+    candidate_allowance = endpoint_max_bytes if detected_format == "geojson" else min(endpoint_max_bytes, _CANDIDATE_LIMIT)
+    worst_case = endpoint_max_bytes + candidate_allowance + _RECEIPT_ALLOWANCE
     ledger = ledger or RedisRetentionLedger()
     reservation = ledger.reserve(
         project_key=project_key, actor=actor, worst_case_bytes=worst_case,
@@ -793,6 +1200,9 @@ def prepare_vector_upload(
         attempt_dir = attempt_root / attempt_id
         attempt_dir.mkdir(mode=0o700)
         os.chmod(attempt_dir, 0o700)
+        bind_attempt = getattr(reservation, "bind_attempt", None)
+        if callable(bind_attempt):
+            bind_attempt(attempt_dir)
         original_dir = attempt_dir / "original"
         original_dir.mkdir(mode=0o700)
         os.chmod(original_dir, 0o700)
@@ -802,6 +1212,9 @@ def prepare_vector_upload(
             "status": "receiving", "outcome": "working",
             "enforcement_stage": "receiving", "workflow": workflow[:64],
             "project_identity": project_identity[:160], "actor": actor.receipt_value(),
+            "project_root": filesystem_root.resolve(strict=True).relative_to(
+                Path(os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", os.fspath(filesystem_root))).resolve(strict=True)
+            ).as_posix(),
             "reservation_id": reservation.reservation_id,
             "submitted_name": safe_name, "detected_format": detected_format,
             "source_complete": False,
@@ -862,6 +1275,13 @@ def prepare_vector_upload(
             content = terminal.read_bytes()
             candidate_limit = endpoint_max_bytes
         else:
+            if os.getenv("VECTOR_UPLOAD_BINARY_ENABLED", "false").strip().lower() not in {"1", "true", "yes", "on"}:
+                raise VectorUploadError(
+                    "vector_converter_unavailable",
+                    "Binary vector uploads are not enabled on this service.",
+                    status_code=503,
+                    attempt_id=attempt_id,
+                )
             url = (converter_url or os.getenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", "")).strip()
             if not url:
                 raise VectorUploadError("vector_converter_unavailable", "Vector converter is unavailable.", status_code=503, attempt_id=attempt_id)
@@ -873,7 +1293,15 @@ def prepare_vector_upload(
             # The internal receiving handoff is deliberately explicit so Roads
             # cannot reinterpret longitude/latitude through its project-CRS
             # inference. Direct GeoJSON remains byte-for-byte unchanged.
-            converted_payload = _strict_json(content)
+            try:
+                converted_payload = _strict_json(content)
+            except (UnicodeError, ValueError) as exc:
+                raise VectorUploadError(
+                    "vector_converter_unavailable",
+                    "Vector converter returned invalid normalized GeoJSON.",
+                    status_code=503,
+                    attempt_id=attempt_id,
+                ) from exc
             converted_payload["crs"] = {
                 "type": "name",
                 "properties": {"name": "EPSG:4326"},
@@ -887,6 +1315,19 @@ def prepare_vector_upload(
             candidate_limit = min(endpoint_max_bytes, _CANDIDATE_LIMIT)
         candidate_path = attempt_dir / "candidate.geojson"
         candidate_size, candidate_sha256 = _write_candidate(candidate_path, content, candidate_limit)
+        receipt.update(
+            status="candidate_stored", outcome="working", enforcement_stage="normalized_candidate",
+            candidate_path="candidate.geojson", candidate_size=candidate_size,
+            candidate_sha256=candidate_sha256,
+        )
+        if converter_metadata:
+            receipt["converter_request_id"] = converter_metadata.get("request_id")
+            receipt["converter_canonical_size"] = converter_metadata.get("canonical_size")
+            receipt["converter_canonical_sha256"] = converter_metadata.get("canonical_sha256")
+            provenance = _sanitize_parser_provenance(converter_metadata.get("parser_provenance"))
+            if provenance is not None:
+                receipt["parser_provenance"] = provenance
+        _atomic_json(attempt_dir / _RECEIPT_NAME, receipt)
         try:
             payload = _strict_json(content)
             validation = validator(candidate_path, payload)
@@ -899,13 +1340,6 @@ def prepare_vector_upload(
             candidate_path="candidate.geojson", candidate_size=candidate_size,
             candidate_sha256=candidate_sha256,
         )
-        if converter_metadata:
-            receipt["converter_request_id"] = converter_metadata.get("request_id")
-            receipt["converter_canonical_size"] = converter_metadata.get("canonical_size")
-            receipt["converter_canonical_sha256"] = converter_metadata.get("canonical_sha256")
-            provenance = _sanitize_parser_provenance(converter_metadata.get("parser_provenance"))
-            if provenance is not None:
-                receipt["parser_provenance"] = provenance
         if isinstance(validation, Mapping):
             receipt["validation"] = {str(key)[:64]: value for key, value in validation.items() if isinstance(value, (str, int, float, bool, type(None), list))}
         _atomic_json(attempt_dir / _RECEIPT_NAME, receipt)
@@ -960,5 +1394,6 @@ __all__ = [
     "RetentionActor",
     "VectorUploadError",
     "prepare_vector_upload",
+    "reconcile_retention",
     "validate_feature_collection_geometries",
 ]

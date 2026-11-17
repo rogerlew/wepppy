@@ -16,6 +16,7 @@ import shlex
 import shutil
 import time
 import tempfile
+import uuid
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
@@ -1154,11 +1155,16 @@ class Roads(NoDbBase):
         input_crs_source = crs_inference.source
 
         self._ensure_roads_dirs()
-        roads_lifecycle.retain(self.wd, replace_segments=True)
         target_path = Path(self.roads_upload_dir) / "roads.uploaded.geojson"
-        shutil.copy2(source_path, target_path)
+        backup_path = target_path.with_name(f".{target_path.name}.{uuid.uuid4().hex}.backup")
+        staged_path = target_path.with_name(f".{target_path.name}.{uuid.uuid4().hex}.tmp")
+        had_target = target_path.exists()
+        if had_target:
+            shutil.copy2(target_path, backup_path)
+        shutil.copy2(source_path, staged_path)
+        retained_snapshot = None
 
-        digest = hashlib.sha256(target_path.read_bytes()).hexdigest()
+        digest = hashlib.sha256(staged_path.read_bytes()).hexdigest()
         relpath = str(target_path.relative_to(self.wd))
         now = int(time.time())
         attribute_catalog = self._build_attribute_catalog(payload=payload, params=params)
@@ -1169,14 +1175,28 @@ class Roads(NoDbBase):
         )
         params["attribute_field_map"] = discovered_map
 
-        with self.locked():
-            self._uploaded_geojson_relpath = relpath
-            self._uploaded_geojson_sha256 = digest
-            self._uploaded_attribute_catalog = attribute_catalog
-            self._roads_params = params
-            self._timestamps["upload_geojson"] = now
-            self._clear_stale_run_state_locked()
-            status = str(self._status)
+        try:
+            retained_snapshot = roads_lifecycle.retain(self.wd, replace_segments=True)
+            with self.locked():
+                os.replace(staged_path, target_path)
+                self._uploaded_geojson_relpath = relpath
+                self._uploaded_geojson_sha256 = digest
+                self._uploaded_attribute_catalog = attribute_catalog
+                self._roads_params = params
+                self._timestamps["upload_geojson"] = now
+                self._clear_stale_run_state_locked()
+                status = str(self._status)
+        except BaseException:  # transaction cleanup boundary, including cancellation
+            staged_path.unlink(missing_ok=True)
+            if had_target:
+                os.replace(backup_path, target_path)
+            else:
+                target_path.unlink(missing_ok=True)
+            roads_lifecycle.restore_retained(self.wd, retained_snapshot)
+            raise
+        finally:
+            staged_path.unlink(missing_ok=True)
+            backup_path.unlink(missing_ok=True)
 
         self._append_roads_log(
             "upload",

@@ -274,6 +274,25 @@ until receipt/file recovery reconciles them. The ledger stores only bounded
 aggregate counters, opaque reservation UUIDs and verified account/service IDs;
 the unattributed bucket is shared and creates no anonymous identity record.
 
+Reservation records do not expire while their aggregate charge remains active.
+The operator reconciliation command takes a filesystem-wide owner lock that
+blocks new reservations, bounds reservation and receipt scans to 10,000 entries,
+and never parses retained payloads. Stale pre-write reservations are released
+only when no attempt was bound. Bound attempts are terminalized from receipt and
+descriptor/hash readback as `accepted_recovered`, `incomplete`, or
+`corrupt_attempt`, then charged by measured regular-file bytes. Audit is the
+default; mutation requires `--apply`. The same command can rebuild committed
+totals from terminal `vector-normalization-v1` receipts after Redis loss or
+project deletion. Rebuild refuses active reservations, symlinks, corrupt or
+nonterminal receipts, and over-bound inventories. Operators must never edit
+Redis counters or remove only part of an attempt/private archive.
+
+Binary activation is independent of direct GeoJSON admission.
+`VECTOR_UPLOAD_BINARY_ENABLED` defaults false; when false the server rejects
+ZIP/Parquet before converter work and browser file pickers advertise only
+GeoJSON. Disabling this flag is the immediate binary rollback and leaves direct
+GeoJSON receiving, provenance, and validation intact.
+
 ## Hostile-file quarantine and abuse review
 
 Every rejected complete original is classified `quarantined` in its receipt.

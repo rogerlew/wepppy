@@ -349,7 +349,6 @@ async def browse_tree_helper(
         env,
         subpath,
         filter_pattern_default=filter_pattern_default,
-        excluded_names=excluded_names,
     )
     logical_rel_path, nodir_view = _parse_external_nodir_subpath(
         env,
@@ -383,6 +382,7 @@ async def browse_tree_helper(
         allow_recorder=allow_recorder,
         is_admin=is_admin,
         filter_pattern_default=filter_pattern_default,
+        excluded_names=excluded_names,
     )
 
 

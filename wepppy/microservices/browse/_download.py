@@ -502,11 +502,6 @@ async def download_culvert_with_subpath(request: Request) -> Response:
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
     _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
-    resolved_relpath = os.path.relpath(os.path.realpath(dir_path), wd)
-    if is_sensitive_vector_path(resolved_relpath) and not can_access_batch_sensitive_vector(
-        auth_context, batch_name
-    ):
-        raise HTTPException(status_code=403, detail="Access denied.")
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
@@ -545,6 +540,11 @@ async def download_batch_with_subpath(request: Request) -> Response:
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
     _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
+    resolved_relpath = os.path.relpath(os.path.realpath(dir_path), wd)
+    if is_sensitive_vector_path(resolved_relpath) and not can_access_batch_sensitive_vector(
+        auth_context, batch_name
+    ):
+        raise HTTPException(status_code=403, detail="Access denied.")
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 

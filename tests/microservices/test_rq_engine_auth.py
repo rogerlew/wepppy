@@ -403,6 +403,14 @@ def test_authorize_user_claims_allows_public_batch_run_without_owners(
             {"token_class": "session", "session_id": "sid-1"},
         ),
         (
+            {
+                "token_class": "session",
+                "session_id": "sid-2",
+                "feature_access_principal": {"version": 1, "kind": "human", "id": 44},
+            },
+            {"token_class": "session", "session_id": "sid-2", "user_id": 44},
+        ),
+        (
             {"token_class": "service", "sub": "svc-1", "service_groups": ["alpha", "beta"]},
             {"token_class": "service", "sub": "svc-1", "service_groups": ["alpha", "beta"]},
         ),

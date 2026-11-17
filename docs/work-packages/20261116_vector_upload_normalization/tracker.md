@@ -4,7 +4,7 @@
 
 **Timezone**: UTC  
 **Last updated**: 2026-11-16  
-**Current phase**: M2 exact-image review and M3 workflow integration
+**Current phase**: M5 final successor review
 **Security impact**: high  
 **Starting revision**: `05e3450fa7d3b24572e65161100670ae542a6ea8`  
 **M0 contract ancestor**: `1aebebfe0`  
@@ -24,14 +24,13 @@
 - [x] M0: conditionally accept the exact Rust dependency graph behind owned preflight.
 - [x] M0: retain red tests and hostile fixtures for every accepted/rejected state.
 - [x] M1: implement and directly test `geoparquet_parser_cli` at `eb6b0d3fb`.
-- [ ] M2: integrate the CLI into shape-converter and qualify the exact image.
-      Commit `0e58feced` and image `sha256:d131f3df…` pass preliminary local
-      qualification; independent review is active.
-- [ ] M3-M4: integrate the four browser/workflow upload paths without bypassing
-      receiving endpoint validation.
-- [ ] M5: run semantic artifact readback, scoped regression, accessibility, and
-      independent correctness/code/QA/security/operations reviews.
-- [ ] M5: prepare rollout and recovery evidence without publishing or deploying.
+- [x] M2: exact final3 image `sha256:ed4d93692add…c62386` qualified with SBOM,
+      resource/cancellation/recovery evidence and independent reviews.
+- [x] M3-M4: integrate all four browser/workflow upload paths without bypassing
+      receiving validation; preserve originals, provenance and failed replacement.
+- [ ] M5: final correctness/code/QA/security/operations successor re-reviews.
+- [x] M5: prepare local validation and rollout/recovery evidence without
+      publishing or deploying.
 
 ## Decisions
 
@@ -218,3 +217,15 @@ passed readiness/provenance, valid/projected conversion, inspect, unavailable-
 grid rejection, hostile-limit rejection, containment and scratch readback.
 See `artifacts/20261116_m2_validation.md`. Publication and deployment did not
 occur. Independent M2 review remains open while M3 source integration begins.
+
+## M3-M5 closure candidate - 2026-11-17
+
+M2 review passed for exact final3. Workflow integration was committed at
+`9ac7cb8f6`; the successor closure candidate adds reversible mutation, monotonic
+terminal receipts, durable Redis reconciliation/rebuild, private sensitive
+archives, resolved-alias protection, verified session-human provenance, bounded
+converter responses/error mapping, and independent binary UI/server activation.
+Focused disposable-container validation passes 455 tests. Exact final3 passes
+five workflow receiving profiles for GeoJSON, Shapefile ZIP, `.parquet`, and
+`.geoparquet`. Final five-lane re-review is required before M5 acceptance.
+Publication, production deploy, and remote-host proof remain outside authority.

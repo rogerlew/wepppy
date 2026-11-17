@@ -167,13 +167,14 @@ def _run_vector_evidence_roots(wd: str) -> tuple[Path, ...]:
         root / "roads" / "vector_upload_attempts",
         root / "ag_fields" / "vector_upload_attempts",
         root / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
+        root / "archives" / "private",
     )
 
 
 def _retention_actor_from_request() -> RetentionActor:
     actor = current_auth_actor() or {}
     token_class = str(actor.get("token_class") or "").strip().lower()
-    if token_class == "user":
+    if token_class in {"user", "session"}:
         try:
             user_id = int(actor.get("user_id") or 0)
         except (TypeError, ValueError):

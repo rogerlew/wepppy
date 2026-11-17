@@ -61,13 +61,15 @@ GeoParquet.
 - [x] (2026-11-17) M1: implement and directly test the bounded
       `geoparquet_parser_cli`; commit `eb6b0d3fb`, 30 locked/offline tests and
       final independent correctness/security review pass.
-- [ ] M2: integrate the CLI with shape-converter and qualify the exact image.
-      Implementation commit `0e58feced`; exact local image `sha256:d131f3df…`
-      passes preliminary qualification, with independent review pending.
-- [ ] M3: integrate Roads and AgFields browser-to-persistence paths.
-- [ ] M4: integrate Omni and Batch Runner browser-to-persistence paths.
-- [ ] M5: complete artifact readback, scoped validation, independent reviews,
-      documentation, and separately authorized rollout preparation.
+- [x] (2026-11-17) M2: qualify exact local image
+      `sha256:ed4d93692add…c62386`; focused Python/Rust, exact-image resource,
+      cancellation, recovery, SBOM and independent M2 reviews pass.
+- [x] (2026-11-17) M3: integrate Roads and AgFields with retained originals,
+      SHA-256 receipts, receiving validation, reversible replacement and reload.
+- [x] (2026-11-17) M4: integrate Omni run/dry-run and Batch Runner with the same
+      boundary, polygon-only Batch admission and rollback safety.
+- [ ] M5: implementation, focused validation and rollout/recovery documentation
+      are complete; final independent successor re-reviews are active.
 
 ## Surprises & Discoveries
 
@@ -102,6 +104,12 @@ GeoParquet.
 - The installed Docker CLI has no SBOM plugin and Syft/Grype/Trivy are absent.
   M2 retained exact Debian, Python and Rust package inventories plus a fresh
   RustSec audit; publication-pipeline image scanning remains a rollout gate.
+- Ordinary archive creation is a sensitive evidence boundary. It must acquire
+  the upload scope before scanning and publish attempt-bearing archives only
+  below `archives/private` with a receipt and digest.
+- Redis TTLs cannot be the only recovery authority for charged reservations.
+  Durable reservation records plus receipt reconciliation and a bounded
+  filesystem rebuild recover crashes, Redis loss, and project deletion.
 
 ## Decision Log
 
@@ -133,6 +141,12 @@ GeoParquet.
   and remote semantics until separately authorized.
 - **2026-11-16 23:22 UTC** - D-Tale and culvert API surfaces are not closure
   consumers. Their omission must remain explicit in tests, reviews, and claims.
+- **2026-11-17, activation** - Binary admission defaults off and has one shared
+  UI/server flag. Direct GeoJSON remains available during disable/rollback.
+- **2026-11-17, recovery** - Preserve charged reservation metadata until an
+  idempotent commit or operator reconciliation. Rebuild committed bytes only
+  from terminal verified receipts while the filesystem reconciliation lock
+  blocks new reservations.
 
 ## Outcomes & Retrospective
 
@@ -151,7 +165,11 @@ strict clippy/formatting, a 53-file deterministic corpus, and independent
 correctness/security reviews pass. M2 implementation is committed at
 `0e58feced`; its exact local image passes preliminary API/provenance/containment
 qualification recorded in `artifacts/20261116_m2_validation.md`. M2 independent
-review and M3-M5 remain open.
+review passed. M3/M4 are implemented at `9ac7cb8f6` plus the current closure
+candidate. Focused candidate tests pass 455/455; exact final3 passes all five
+workflow receiving profiles across four supported suffixes. Final M5 re-review
+remains open. No image was published and no production deployment or remote-host
+acceptance was performed.
 
 Resumed M0 review is active in independent correctness, security/dependency, QA
 and operations lanes. Proposed resource ADR and threat matrix now exist; neither

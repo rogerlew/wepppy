@@ -647,3 +647,12 @@ def test_invalid_geojson_replacement_preserves_existing_source(monkeypatch, tmp_
         assert response.status_code == 200, response.text
         assert source.read_bytes() == raw
         assert batch.geojson_state['_geojson_filepath'] == str(source)
+
+
+def test_session_human_is_used_for_batch_retention() -> None:
+    actor = upload_batch_runner_routes._retention_actor({
+        "token_class": "session",
+        "feature_access_principal": {"version": 1, "kind": "human", "id": 79},
+        "session_id": "not-persisted",
+    })
+    assert actor.receipt_value() == {"kind": "human", "user_id": 79}

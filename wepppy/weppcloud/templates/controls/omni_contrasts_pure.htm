@@ -6,6 +6,8 @@
 {# Doc: controllers_js/README.md — Omni Controller Reference (2024 helper migration) #}
 {% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
+{% set omni_binary_enabled = config is mapping and config.get('VECTOR_UPLOAD_BINARY_ENABLED', false) %}
+{% set omni_vector_accept = ".geojson,.json,.zip,.parquet,.geoparquet,application/geo+json,application/json,application/zip,application/vnd.apache.parquet" if omni_binary_enabled else ".geojson,.json,application/geo+json,application/json" %}
 
 {% set description %}
   <p class="wc-text-muted">
@@ -211,8 +213,8 @@
     {{ ui.file_upload(
          "omni_contrast_geojson",
          "Contrast areas vector file",
-         accept=".geojson,.json,.zip,.parquet,.geoparquet,application/geo+json,application/json,application/zip,application/vnd.apache.parquet",
-         help="Upload polygon GeoJSON, Shapefile ZIP, or GeoParquet; each feature becomes a contrast area (file order defines contrast IDs).",
+         accept=omni_vector_accept,
+         help="Upload polygon GeoJSON{% if omni_binary_enabled %}, Shapefile ZIP, or GeoParquet{% endif %}; each feature becomes a contrast area (file order defines contrast IDs).",
          extra_control_class="disable-readonly"
        ) }}
 

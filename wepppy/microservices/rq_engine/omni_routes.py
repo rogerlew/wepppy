@@ -209,7 +209,7 @@ def _upload_status(exc: UploadError | ValueError) -> int:
 def _retention_actor() -> RetentionActor:
     actor = current_auth_actor() or {}
     token_class = str(actor.get("token_class") or "").strip().lower()
-    if token_class == "user":
+    if token_class in {"user", "session"}:
         try:
             user_id = int(actor.get("user_id"))
         except (TypeError, ValueError):
@@ -229,6 +229,7 @@ def _run_evidence_roots(wd: str) -> tuple[Path, ...]:
         root / "roads" / "vector_upload_attempts",
         root / "ag_fields" / "vector_upload_attempts",
         root / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
+        root / "archives" / "private",
     )
 
 
@@ -447,7 +448,6 @@ def _prepare_omni_scenarios(
         raise ValueError("Scenarios data must be a list")
 
     limbo_dir = Path(wd) / "omni" / "_limbo"
-    _contained_omni_path(limbo_dir, limbo_dir, wd)
 
     parsed_inputs: list[tuple[OmniScenario, dict[str, Any]]] = []
     for idx, scenario in enumerate(scenarios_payload):
@@ -508,6 +508,7 @@ def _prepare_omni_scenarios(
             scenario_params.pop(SCENARIO_FILTER_BURN_FIELD, None)
 
         if scenario_enum == OmniScenario.SBSmap:
+            _contained_omni_path(limbo_dir, limbo_dir, wd)
             file_key = f"scenarios[{idx}][sbs_file]"
             upload = _extract_upload(form, file_key)
             if upload and upload.filename:
@@ -801,11 +802,61 @@ def _parse_inputs_with_prepared_upload(
                 except OSError:
                     pass
 
+    publish_candidate(prepared.candidate_path)
+
+
+def _snapshot_omni_nodb(omni: Omni, prepared_upload: tuple[PreparedVectorUpload, Path] | None) -> Path | None:
+    if prepared_upload is None:
+        return None
+    nodb_value = getattr(omni, "_nodb", None)
+    if not nodb_value:
+        return None
+    nodb_path = Path(nodb_value)
+    if not nodb_path.exists():
+        return None
+    backup = nodb_path.with_name(f".{nodb_path.name}.{uuid4().hex}.vector-backup")
+    shutil.copy2(nodb_path, backup)
+    return backup
+
+
+def _finalize_prepared_omni_upload(
+    prepared_upload: tuple[PreparedVectorUpload, Path] | None,
+    *,
+    wd: str,
+) -> None:
+    if prepared_upload is None:
+        return
+    prepared, accepted_path = prepared_upload
     prepared.publish(
-        mutation=publish_candidate,
+        mutation=lambda _candidate: None,
         canonical_path=accepted_path,
         canonical_relative_path=os.path.relpath(accepted_path, wd),
     )
+
+
+def _rollback_prepared_omni_upload(
+    prepared_upload: tuple[PreparedVectorUpload, Path] | None,
+    *,
+    omni: Omni,
+    wd: str,
+    nodb_backup: Path | None,
+    code: str,
+) -> None:
+    if prepared_upload is None:
+        return
+    prepared, accepted_path = prepared_upload
+    if prepared.receipt.get("status") == "accepted":
+        return
+    accepted_path.unlink(missing_ok=True)
+    try:
+        accepted_path.parent.rmdir()
+    except OSError:
+        pass
+    if nodb_backup is not None:
+        os.replace(nodb_backup, omni._nodb)
+        Omni.cleanup_run_instances(wd)
+    if not prepared.is_terminal:
+        prepared.reject(code)
 
 
 async def _run_omni(
@@ -970,17 +1021,22 @@ async def _run_omni_contrasts(
             status_code=400,
         )
 
+    prepared_upload = prepared_uploads[0] if prepared_uploads else None
+    nodb_backup = _snapshot_omni_nodb(omni, prepared_upload)
     try:
         _parse_inputs_with_prepared_upload(
             omni=omni,
             parsed_inputs=parsed_inputs,
             wd=wd,
-            prepared_upload=prepared_uploads[0] if prepared_uploads else None,
+            prepared_upload=prepared_upload,
         )
         if getattr(omni, "run_group", "") == "batch" or _is_base_project_context(
             runid,
             config,
         ):
+            _finalize_prepared_omni_upload(prepared_upload, wd=wd)
+            if nodb_backup is not None:
+                nodb_backup.unlink(missing_ok=True)
             return JSONResponse({"message": "Set omni inputs for batch processing"})
         if selection_mode == "cumulative":
             threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
@@ -1023,9 +1079,20 @@ async def _run_omni_contrasts(
             select_topaz_ids=topaz_ids,
             contrast_pairs=contrast_pairs,
         )
+        _finalize_prepared_omni_upload(prepared_upload, wd=wd)
+        if nodb_backup is not None:
+            nodb_backup.unlink(missing_ok=True)
     except ValueError as exc:
+        _rollback_prepared_omni_upload(
+            prepared_upload, omni=omni, wd=wd, nodb_backup=nodb_backup,
+            code="omni_build_failed",
+        )
         return error_response(str(exc), status_code=400)
     except Exception as exc:  # broad-except: boundary contract
+        _rollback_prepared_omni_upload(
+            prepared_upload, omni=omni, wd=wd, nodb_backup=nodb_backup,
+            code="omni_build_failed",
+        )
         # API boundary: translate unexpected build failures into canonical error payload.
         logger.exception("rq-engine run-omni-contrasts build failed", extra={"runid": runid, "config": config})
         return error_response("Error building omni contrasts", status_code=500)
@@ -1118,12 +1185,14 @@ async def _dry_run_omni_contrasts(
             status_code=400,
         )
 
+    prepared_upload = prepared_uploads[0] if prepared_uploads else None
+    nodb_backup = _snapshot_omni_nodb(omni, prepared_upload)
     try:
         _parse_inputs_with_prepared_upload(
             omni=omni,
             parsed_inputs=parsed_inputs,
             wd=wd,
-            prepared_upload=prepared_uploads[0] if prepared_uploads else None,
+            prepared_upload=prepared_upload,
         )
         if selection_mode == "cumulative":
             threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
@@ -1166,9 +1235,20 @@ async def _dry_run_omni_contrasts(
             select_topaz_ids=topaz_ids,
             contrast_pairs=contrast_pairs,
         )
+        _finalize_prepared_omni_upload(prepared_upload, wd=wd)
+        if nodb_backup is not None:
+            nodb_backup.unlink(missing_ok=True)
     except ValueError as exc:
+        _rollback_prepared_omni_upload(
+            prepared_upload, omni=omni, wd=wd, nodb_backup=nodb_backup,
+            code="omni_dry_run_failed",
+        )
         return error_response(str(exc), status_code=400)
     except Exception as exc:  # broad-except: boundary contract
+        _rollback_prepared_omni_upload(
+            prepared_upload, omni=omni, wd=wd, nodb_backup=nodb_backup,
+            code="omni_dry_run_failed",
+        )
         # API boundary: translate unexpected build failures into canonical error payload.
         logger.exception(
             "rq-engine dry-run-omni-contrasts report build failed",

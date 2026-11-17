@@ -19,6 +19,8 @@
 {% set roads_field_options = roads_field_options_ns.values %}
 {% set roads_surface_default_options = [("gravel", "gravel"), ("paved", "paved")] %}
 {% set roads_traffic_default_options = [("high", "high"), ("low", "low"), ("none", "none")] %}
+{% set vector_binary_enabled = config is mapping and config.get('VECTOR_UPLOAD_BINARY_ENABLED', false) %}
+{% set roads_vector_accept = ".geojson,.json,.zip,.parquet,.geoparquet,application/geo+json,application/json,application/zip,application/vnd.apache.parquet" if vector_binary_enabled else ".geojson,.json,application/geo+json,application/json" %}
 
 {% set description %}
   <p class="wc-text-muted">
@@ -29,7 +31,7 @@
     {{ usersum_doc_link('src', 'wepppy/nodb/mods/roads/ENDUSER.md', 'Roads user guide') }}.
   </p>
   <ol class="wc-list">
-    <li><strong>Upload roads</strong>: GeoJSON, Shapefile ZIP, or GeoParquet with LineString or MultiLineString roads.</li>
+    <li><strong>Upload roads</strong>: GeoJSON{% if vector_binary_enabled %}, Shapefile ZIP, or GeoParquet{% endif %} with LineString or MultiLineString roads.</li>
     <li><strong>Prepare Segment Candidates</strong>: builds monotonic segments and writes decision diagnostics.</li>
     <li><strong>Run WEPPcloud Roads</strong>: runs mapped segments and watershed pass integration.</li>
   </ol>
@@ -52,7 +54,7 @@
     {{ ui.file_upload(
          "roads_geojson_file",
          "Upload roads vector file",
-         accept=".geojson,.json,.zip,.parquet,.geoparquet,application/geo+json,application/json,application/zip,application/vnd.apache.parquet",
+         accept=roads_vector_accept,
          help="Maximum file size: " ~ roads_max_upload_mb ~ " MB. Upload a FeatureCollection with LineString or MultiLineString geometries.",
          current_filename=roads_upload_relpath,
          extra_control_class="disable-readonly",

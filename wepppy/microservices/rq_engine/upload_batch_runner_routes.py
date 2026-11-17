@@ -130,9 +130,11 @@ def _resolve_uploader(claims: dict[str, Any]) -> Optional[str]:
 
 def _retention_actor(claims: dict[str, Any]) -> RetentionActor:
     token_class = str(claims.get("token_class") or "").strip().lower()
-    if token_class == "user":
+    if token_class in {"user", "session"}:
         try:
-            user_id = int(claims.get("user_id") or claims.get("sub"))
+            principal = claims.get("feature_access_principal")
+            principal_id = principal.get("id") if isinstance(principal, dict) and principal.get("kind") == "human" else None
+            user_id = int(claims.get("user_id") or principal_id or (claims.get("sub") if token_class == "user" else 0))
         except (TypeError, ValueError):
             user_id = 0
         if user_id > 0:
@@ -228,7 +230,7 @@ async def upload_geojson(batch_name: str, request: Request) -> JSONResponse:
                 stream=upload.file,
                 endpoint_max_bytes=_geojson_max_bytes(),
                 attempt_root=attempt_root,
-                evidence_roots=(attempt_root,),
+                evidence_roots=(attempt_root, Path(batch_runner.wd) / "archives" / "private"),
                 filesystem_root=Path(batch_runner.wd),
                 project_key=f"batch:{batch_name}",
                 workflow="batch_runner",
