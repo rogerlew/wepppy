@@ -362,14 +362,29 @@ still preserve the owning project's retained-attempt roots.
 The ledger governs only its exact configured run-filesystem root. Operator-owned
 profile data-repository promotion and offline exports outside that root remain
 ordinary byte-preserving exports governed by their storage owner; they are not
-charged as bytes on the run filesystem. Copying those records back into a managed
-run/sandbox is a managed admission and must pass the same accounting boundary.
+charged as bytes on the run filesystem. Established profile execution/fork roots outside the configured ledger root
+likewise remain on their existing storage. Both configured root and identity
+must be present to establish that boundary; missing settings are not evidence
+of external storage. Copying records back into a run/sandbox within the ledger
+root is a managed admission and must pass the same accounting boundary.
 This distinction does not change mounts, roots, service identities, or profile
 execution configuration. The known offline-export call sites explicitly identify
 their export boundary; missing retention configuration must never silently
 classify a managed destination as an export. Legacy projects with no retained
 evidence remain valid.
 
+Replacement admission includes all currently committed and reserved bytes plus
+the incoming copy, without speculative credit for destination deletion. Deferred
+cleanup can retain the old workspace, so peak retained storage must fit the same
+existing ceilings. The exact retry carries known tombstone/stale paths into
+configuration checks even when the original destination is absent. Ordinary
+model symlinks may remain links, but copies cannot materialize retained evidence
+through a symlink ancestor. Missing copied receipts leave a repair obligation.
+
+An Omni workflow that already owns its renewable project scope may lend that
+scope to the helper. Global maintenance acquisition is nonblocking; contention
+fails before filesystem work, avoiding a lock-order wait cycle. Borrowed scopes
+remain owned by their original workflow and active reservations survive rebuild.
 ## Hostile-file quarantine and abuse review
 
 Every rejected complete original is classified `quarantined` in its receipt.

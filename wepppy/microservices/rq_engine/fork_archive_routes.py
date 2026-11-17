@@ -61,6 +61,7 @@ from wepppy.rq.wepp_rq import (
     reconcile_deferred_wepp_jobs,
 )
 from wepppy.microservices.vector_upload_normalization import (
+    RetentionActor,
     RedisScopeLeaseFactory,
     VectorUploadError,
     acquire_retention_maintenance_lease,
@@ -69,6 +70,7 @@ from wepppy.microservices.vector_upload_normalization import (
     reconcile_retention,
     retention_rebuild_obligation_pending,
 )
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
 from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
 
@@ -812,6 +814,49 @@ def _archive_retention_actor(claims: Mapping[str, Any]) -> dict[str, object]:
     return {"kind": "unattributed", "identifier": None}
 
 
+def _fork_retention_actor(
+    claims: Mapping[str, Any] | None, resolved_user: Any | None,
+) -> RetentionActor:
+    """Charge the verified copier while preserving the source upload actor."""
+    token_class = _token_class_from_claims(claims)
+    if token_class in {"service", "mcp"}:
+        return RetentionActor(token_class, str(claims.get("sub") or ""))
+    user_id = getattr(resolved_user, "id", None)
+    if token_class in {"user", "session"} and isinstance(user_id, int) and user_id > 0:
+        return RetentionActor("human", user_id)
+    return RetentionActor("unattributed", None)
+
+
+def _delete_fork_replacement_tree(
+    new_wd: str,
+    new_runid: str,
+    checkpoint: Callable[[], None],
+) -> None:
+    """Keep deletion repair tied to the destination, including absent retries."""
+    target = Path(new_wd)
+    # Admission creates a new job id on each retry. A stable tombstone keeps
+    # repeated absent-target retries from orphaning a previous partial removal.
+    tombstone = target.with_name(f".{target.name}.replacing-retained")
+    with retained_tree_operation(
+        target=target,
+        project_keys=(f"run:{new_runid}",),
+        operation="fork_target_replace",
+        recovery_paths=(tombstone,),
+    ) as retention:
+        checkpoint()
+        retention.checkpoint()
+        if tombstone.exists():
+            shutil.rmtree(tombstone)
+            retention.checkpoint()
+        if target.exists():
+            os.replace(target, tombstone)
+            # The original path is detached before recursive cleanup begins.
+            retention.checkpoint()
+            shutil.rmtree(tombstone)
+        retention.checkpoint()
+        checkpoint()
+
+
 def _ensure_anonymous_access(runid: str, wd: str) -> None:
     owners = list(get_run_owners_lazy(runid) or [])
     if not owners:
@@ -946,6 +991,7 @@ def _verify_cap_token(request: Request, token: str) -> None:
         success_description="Fork job accepted and fork target metadata returned.",
         extra={
             404: "Source run was not found or not anonymously accessible. Returns the canonical error payload.",
+            507: "Retained evidence accounting could not authorize target replacement. Returns the canonical error payload.",
         },
     ),
 )
@@ -991,6 +1037,7 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             ) = _resolve_user_from_claims(claims)
 
         is_anonymous_session = token_class == "session" and resolved_user is None
+        retention_actor = _fork_retention_actor(claims, resolved_user)
 
         if claims is None or is_anonymous_session:
             _ensure_anonymous_access(runid, wd)
@@ -1419,15 +1466,12 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                     raise RqSubmissionConflict(
                         "Target ownership changed during fork recovery."
                     )
-                tombstone_wd = os.path.join(
-                    os.path.dirname(new_wd.rstrip("/")),
-                    f".{os.path.basename(new_wd.rstrip('/'))}.replacing-{fork_job_id}",
-                )
-                os.replace(new_wd, tombstone_wd)
-                # Once renamed, new target-path mutations cannot overlap the
-                # old tree even if recursive cleanup is slow.
-                shutil.rmtree(tombstone_wd)
-                replacement_lease.checkpoint()
+            await run_in_threadpool(
+                _delete_fork_replacement_tree,
+                new_wd,
+                new_runid,
+                replacement_lease.checkpoint if replacement_lease is not None else lease.checkpoint,
+            )
             lease.checkpoint()
             if replacement_lease is not None:
                 replacement_lease.checkpoint()
@@ -1566,12 +1610,20 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             ),
             timeout=RQ_TIMEOUT,
             job_id=fork_job_id,
+            meta={"vector_retention_actor": {
+                "kind": retention_actor.kind,
+                "identifier": retention_actor.identifier,
+            }},
         )
         profile_claim_handed_off = profile_claimed
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except (RqSubmissionConflict, WeppSingleFlightConflict) as exc:
         return error_response(str(exc), status_code=409, code="conflict")
+    except VectorUploadError as exc:
+        if profile_claimed and not profile_claim_handed_off:
+            _release_profile_fork_claim(new_wd, fork_job_id)
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
     except RqEnqueueVerificationError:
         logger.exception("rq-engine fork enqueue commit could not be verified")
         return error_response_with_traceback(

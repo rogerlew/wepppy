@@ -355,6 +355,7 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
                 "undisturbify": "true",
                 "skip_wepp_runs_output": "true",
                 "skip_omni_scenarios_contrasts": "true",
+                "vector_retention_actor": '{"kind":"human","identifier":999}',
             },
         )
 
@@ -372,6 +373,21 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     assert enqueue_args[1] == ("run-1", "new-run", True, True, True)
     assert "timeout" in enqueue_kwargs
     assert enqueue_kwargs["job_id"] == payload["job_id"]
+    assert enqueue_kwargs["meta"]["vector_retention_actor"] == {
+        "kind": "human", "identifier": 10,
+    }
+
+
+@pytest.mark.parametrize(("claims", "user", "expected"), [
+    ({"token_class": "session", "user_id": 999}, SimpleNamespace(id=17), {"kind": "human", "user_id": 17}),
+    ({"token_class": "user", "user_id": 999}, None, {"kind": "unattributed"}),
+    ({"token_class": "session", "sub": "session-secret"}, None, {"kind": "unattributed"}),
+    ({"token_class": "service", "sub": "automation", "user_id": 999}, None, {"kind": "service", "subject": "automation"}),
+    ({"token_class": "mcp", "sub": "client"}, None, {"kind": "mcp", "subject": "client"}),
+    (None, None, {"kind": "unattributed"}),
+])
+def test_fork_storage_actor_uses_verified_copier(claims, user, expected):
+    assert fork_archive_routes._fork_retention_actor(claims, user).receipt_value() == expected
 
 
 def test_target_association_treats_metadata_as_authoritative() -> None:
@@ -1727,10 +1743,12 @@ def test_delete_archive_reconciles_before_destructive_mutation(
         assert events == ["reconcile"]
 
 
-@pytest.mark.parametrize('incoming_mode', [True, False, None])
+@pytest.mark.parametrize(('incoming_mode', 'retention_denied'), [
+    (True, False), (False, False), (None, False), (True, True),
+])
 def test_fork_existing_target_reconciles_and_records_before_replacement(
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path, incoming_mode,
+    tmp_path, incoming_mode, retention_denied,
 ) -> None:
     source_dir = tmp_path / "source"
     target_dir = tmp_path / "target"
@@ -1854,6 +1872,11 @@ def test_fork_existing_target_reconciles_and_records_before_replacement(
             return SimpleNamespace(id=kwargs["job_id"])
 
     monkeypatch.setattr(fork_archive_routes, "Queue", Queue)
+    if retention_denied:
+        def deny_replacement(*_args):
+            raise VectorUploadError("vector_retention_quota_exceeded", "Retention unavailable", status_code=507)
+
+        monkeypatch.setattr(fork_archive_routes, "_delete_fork_replacement_tree", deny_replacement)
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -1862,6 +1885,12 @@ def test_fork_existing_target_reconciles_and_records_before_replacement(
             json={"target_runid": "target-run", "undisturbify": False},
         )
 
+    if retention_denied:
+        assert response.status_code == 507
+        assert response.json()["error"]["code"] == "vector_retention_quota_exceeded"
+        assert (target_dir / "old.txt").read_text() == "old"
+        assert "replace" not in events and "enqueue" not in events
+        return
     assert response.status_code == 200
     assert response.json()["job_id"] == "replacement-fork"
     assert events.index("reconcile") < events.index("planned")

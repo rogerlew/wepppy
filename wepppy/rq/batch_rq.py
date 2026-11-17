@@ -21,7 +21,7 @@ import shutil
 import socket
 import time
 import tempfile
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Tuple, List, Optional
@@ -41,6 +41,7 @@ from wepppy.rq import batch_outcome
 from wepppy.rq.submission_recovery import rq_submission_lock
 
 from wepppy.weppcloud.utils.helpers import get_wd, get_batch_root_dir
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
 from wepppy.rq.project_rq_delete import _has_retained_vector_evidence, _retention_delete_root
 from wepppy.microservices.vector_upload_normalization import (
     RedisScopeLeaseFactory, VectorUploadError, acquire_retention_maintenance_lease,
@@ -158,27 +159,37 @@ def _reset_omni_nodb_from_base(base_wd: Path, runid_wd: Path, runid: str) -> Non
     else:
         state["wd"] = str(runid_wd)
 
-    runid_wd.mkdir(parents=True, exist_ok=True)
-    target = runid_wd / "omni.nodb"
-    with target.open("w", encoding="utf-8") as fp:
-        json.dump(state, fp)
-        fp.flush()
-        os.fsync(fp.fileno())
-
-    try:
-        clear_nodb_file_cache(runid)
-    except Exception as exc:
-        logger.warning("batch_rq: failed to clear NoDb cache for %s - %s", runid, exc)
-
     base_omni_dir = base_wd / "_pups" / "omni"
-    if not base_omni_dir.exists():
-        logger.info("batch_rq: omni dir missing in base_wd=%s; skipping sync", base_omni_dir)
-        return
-
     target_omni_dir = runid_wd / "_pups" / "omni"
-    if target_omni_dir.exists():
-        shutil.rmtree(target_omni_dir)
-    shutil.copytree(base_omni_dir, target_omni_dir)
+    with ExitStack() as retention_guards:
+        if base_omni_dir.exists():
+            retention_operation = retention_guards.enter_context(retained_tree_operation(
+                target_omni_dir,
+                source=base_omni_dir,
+                project_keys=(f"run:batch;;{base_wd.parent.name};;_base", f"run:{runid}"),
+                operation="batch_omni_reset",
+            ))
+            retention_operation.checkpoint()
+
+        runid_wd.mkdir(parents=True, exist_ok=True)
+        target = runid_wd / "omni.nodb"
+        with target.open("w", encoding="utf-8") as fp:
+            json.dump(state, fp)
+            fp.flush()
+            os.fsync(fp.fileno())
+
+        try:
+            clear_nodb_file_cache(runid)
+        except Exception as exc:
+            logger.warning("batch_rq: failed to clear NoDb cache for %s - %s", runid, exc)
+
+        if not base_omni_dir.exists():
+            logger.info("batch_rq: omni dir missing in base_wd=%s; skipping sync", base_omni_dir)
+            return
+        retention_operation.checkpoint()
+        if target_omni_dir.exists():
+            shutil.rmtree(target_omni_dir)
+        shutil.copytree(base_omni_dir, target_omni_dir)
 
 
 def _collect_batch_runids(batch_wd: Path, batch_name: str) -> list[str]:

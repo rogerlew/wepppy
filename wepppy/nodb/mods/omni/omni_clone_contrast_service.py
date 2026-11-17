@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import errno
+from glob import escape as glob_escape
 import json
 import os
 import shutil
@@ -11,6 +12,8 @@ from os.path import join as _join
 from os.path import split as _split
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation, retained_tree_repair_pending
 
 
 def _symlink_relative_to_destination(src: str, dst: str) -> None:
@@ -38,32 +41,42 @@ def _rmtree_with_retry(
             time.sleep(delay_seconds * attempt)
 
 
-def _reset_workspace(path: str | Path, *, logger: Any) -> None:
+def _reset_workspace(path: str | Path, *, logger: Any, project_key: str) -> None:
     target = Path(path)
-    if not target.exists():
+    stale_workspaces = tuple(target.parent.glob(f"{glob_escape(target.name)}.stale.*"))
+    if not target.exists() and not retained_tree_repair_pending(
+        target, "omni_workspace_reset", recovery_paths=stale_workspaces,
+    ):
         return
 
-    stale_dir = target.with_name(
-        f"{target.name}.stale.{int(time.time() * 1000)}.{os.getpid()}"
-    )
-    try:
-        os.replace(target, stale_dir)
-    except FileNotFoundError:
-        return
-    except OSError as exc:
-        raise RuntimeError(
-            f"omni clone workspace reset rename failed for {target}: {exc}"
-        ) from exc
-
-    try:
-        _rmtree_with_retry(stale_dir)
-    except OSError as exc:
-        # Boundary catch: stale workspace cleanup should not fail clone startup.
-        logger.warning(
-            "omni clone workspace reset: deferred cleanup failed for %s (%s); leaving stale dir in place",
-            stale_dir,
-            exc,
+    with retained_tree_operation(
+        target,
+        project_keys=(project_key,),
+        operation="omni_workspace_reset",
+        recovery_paths=stale_workspaces,
+    ) as retention_operation:
+        retention_operation.checkpoint()
+        stale_dir = target.with_name(
+            f"{target.name}.stale.{int(time.time() * 1000)}.{os.getpid()}"
         )
+        try:
+            os.replace(target, stale_dir)
+        except FileNotFoundError:
+            return
+        except OSError as exc:
+            raise RuntimeError(
+                f"omni clone workspace reset rename failed for {target}: {exc}"
+            ) from exc
+
+        try:
+            _rmtree_with_retry(stale_dir)
+        except OSError as exc:
+            # Boundary catch: stale workspace cleanup should not fail clone startup.
+            logger.warning(
+                "omni clone workspace reset: deferred cleanup failed for %s (%s); leaving stale dir in place",
+                stale_dir,
+                exc,
+            )
 
 
 class OmniCloneContrastService:
@@ -136,8 +149,11 @@ class OmniCloneContrastService:
         new_wd = _join(wd, omni_rel_dir, "contrasts", contrast_id)
         pup_relpath = os.path.relpath(new_wd, wd)
 
-        if _exists(new_wd):
-            _reset_workspace(new_wd, logger=logger)
+        if _exists(new_wd) or retained_tree_repair_pending(
+            Path(new_wd), "omni_workspace_reset",
+            recovery_paths=tuple(Path(new_wd).parent.glob(f"{glob_escape(Path(new_wd).name)}.stale.*")),
+        ):
+            _reset_workspace(new_wd, logger=logger, project_key=f"run:{runid}")
             clear_nodb_cache_and_locks(runid, pup_relpath)
 
         os.makedirs(new_wd)
@@ -345,8 +361,11 @@ class OmniCloneContrastService:
         if before_reset is not None:
             before_reset()
 
-        if _exists(new_wd):
-            _reset_workspace(new_wd, logger=logger)
+        if _exists(new_wd) or retained_tree_repair_pending(
+            Path(new_wd), "omni_workspace_reset",
+            recovery_paths=tuple(Path(new_wd).parent.glob(f"{glob_escape(Path(new_wd).name)}.stale.*")),
+        ):
+            _reset_workspace(new_wd, logger=logger, project_key=f"run:{runid}")
             clear_nodb_cache_and_locks(runid, pup_relpath)
 
         os.makedirs(new_wd)

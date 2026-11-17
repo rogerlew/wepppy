@@ -48,6 +48,7 @@ from glob import glob
 import json
 import shutil
 
+from wepppy.microservices.vector_retention_lifecycle import borrow_retention_scope
 from wepppy.microservices.vector_upload_normalization import (
     RedisScopeLeaseFactory,
     VectorUploadError,
@@ -78,7 +79,8 @@ def _omni_workflow_operation(root_value: str, runid: str, existing_lease=None):
                 "Omni is busy; wait for the active workflow mutation to finish."
             ) from exc
         token = _OMNI_WORKFLOW_ROOTS.set(_OMNI_WORKFLOW_ROOTS.get() | {root})
-        yield
+        with borrow_retention_scope(f"run:{runid}", lease):
+            yield
     finally:
         if token is not None:
             _OMNI_WORKFLOW_ROOTS.reset(token)

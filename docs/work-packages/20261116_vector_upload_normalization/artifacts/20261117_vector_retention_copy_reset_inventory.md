@@ -1,94 +1,112 @@
 # Retained vector evidence: copy and reset consumer inventory
 
-Date: 2026-11-17 UTC. Reviewer: independent `code_review` agent. Inventory source:
-`ee26389f099e9e950b5920d53790f8661548a5e3`; Omni cleaner closure inspected at
-`860ba6760074d7db018c1b1b5a7d6f633d580b3d`.
+Updated: 2026-11-17 UTC. Original inventory: independent `code_review` at
+`ee26389f099e9e950b5920d53790f8661548a5e3`. Original Omni cleaner fix:
+`860ba6760074d7db018c1b1b5a7d6f633d580b3d`. Sharing checkpoint:
+`bbb216c0bc48674f8b24f5e69f20ec58e57b795a`.
 
 ## Boundary and current disposition
 
-This is the failure-class inventory for the four exact retained-upload roots
+This inventory covers the four retained-upload roots
 (`roads/vector_upload_attempts`, `ag_fields/vector_upload_attempts`,
 `_pups/omni/contrasts/vector_upload_attempts`, `resources/vector_upload_attempts`)
-and `archives/private`. It covers project fork, Batch generation/reset, Omni
-clone/cleanup and profile copy/reset consumers. It does not authorize a new clone
-retention policy or broaden the package into arbitrary storage cleanup.
+and `archives/private`, including nested project copies. It maps project forks,
+Batch generation/reset, Omni cleanup, and profile copy/reset consumers. It is not
+an exhaustive audit of arbitrary filesystem operations.
 
-**HOLD for clone/reset acceptance pending the operator's retention disposition.**
-Public fork can copy sensitive bytes into a destination owned by a source
-non-owner. Whole-tree copies duplicate charged originals/receipts without fresh
-admission, and whole-tree resets remove them without the retention lifecycle.
-The independent, immediate Omni cleaner data-loss defect is closed separately.
+**The sharing decision is resolved; lifecycle implementation and regression
+coverage are mapped below. Final frozen-revision validation and independent
+acceptance reviews remain pending.** The test references identify coverage in the
+candidate; this inventory does not independently certify those tests as passed.
 
-## Confirmed consumers
+The operator explicitly permits users admitted by existing public/team copy
+workflows to inherit originals, rejected attempts, receipts, and private archives.
+Do not filter those records or require separate source-owner approval. Direct
+sensitive-download restrictions remain unchanged. The authority and rationale are
+in [the canonical contract, “Sharing, copies, and existing workspace resets”](../../../schemas/vector-upload-normalization-contract.md#sharing-copies-and-existing-workspace-resets)
+and [the sharing decision](20261117_sharing_contract_decision.md).
 
-| Consumer and source seam | Exact effect on these roots | Smallest control seam / required proof |
+Managed copies preserve source upload provenance and charge new physical bytes
+to the verified copier, or the existing unattributed bucket for automated/legacy
+callers. `retention_actor` records that charge separately from immutable upload
+`actor`; `copied_from` and `copy-source-receipt.json` record inheritance. Existing
+replacement/reset semantics remain authorized. Explicit offline profile exports
+retain bytes under their storage owner's authority; managed reentry is charged.
+
+## Discovery history - 2026-11-17
+
+The original review found that whole-tree copies duplicated retained bytes without
+new admission, while reset/removal paths could delete them without ledger repair.
+It also observed that ordinary public-fork admission could make a source non-owner
+the destination owner. The proposed source-only evidence/filter policy and its
+operator-decision HOLD are superseded by `bbb216c0b`: the public/team inheritance
+is intended behavior, while physical-byte accounting remains required.
+
+The separate Omni cleaner defect was reproduced using actual cleaner functions:
+both removed the owning project's `vector_upload_attempts`. Commit `860ba6760`
+preserved that directory alongside `_uploads`; current wrappers additionally
+account for independently retained evidence inside removed child workspaces.
+
+## Shared implementation and regression boundary
+
+`wepppy/microservices/vector_retention_lifecycle.py::retained_tree_operation`
+wraps the existing copy/reset operation. It checks the exact configured root,
+acquires global maintenance and project scopes, admits incoming bytes without
+speculative deletion credit, persists a deterministic repair obligation, verifies
+copied bytes/provenance, syncs evidence, rebuilds exact totals, and clears repair
+markers only after successful readback. Stale/tombstone paths remain part of
+configuration checks. Ordinary model symlinks may remain links; linked retained
+evidence cannot be materialized as an uncharged copy. Omni can lend an already
+owned scope; nonblocking maintenance acquisition avoids a lock-order wait cycle.
+
+`tests/microservices/test_vector_retention_lifecycle.py` covers accepted/rejected/
+incomplete copies, repeated-copy provenance, copier charges, quota rejection,
+partial-copy retry, missing receipts, symlink rejection, borrowed scopes, active
+reservation preservation, release failure, and replacement headroom. Consumer
+coverage below supplements those common helper tests.
+
+For compact references, **Fork** means `tests/rq/test_vector_fork_retention.py`,
+**Routes** means `tests/microservices/test_rq_engine_fork_archive_routes.py`,
+**Consumers** means `tests/nodb/test_vector_retention_copy_consumers.py`, and
+**Profile** means `tests/profile_recorder/test_retained_profile_lifecycle.py`.
+All test identifiers below are in those files unless explicitly qualified.
+
+## Confirmed consumer mapping
+
+| Consumer | Candidate implementation / operator disposition | Regression coverage |
 | --- | --- | --- |
-| `project_rq_fork._build_fork_rsync_cmd()` and `prepare_fork_run()` (`wepppy/rq/project_rq_fork.py:580`, `:1349`) | `rsync -a` copies the complete project, except existing model-output/Omni exclusions. All retained roots and private archives are otherwise included; nested Omni children are included too. Source run authorization is broader than sensitive-evidence authorization. | One rsync filter policy at command construction, enforced again at the actual worker boundary if the injectable command builder remains. Prove every retained root/nested root disposition, canonical accepted-input preservation and source-byte preservation. |
-| Fork admission and destination ownership (`wepppy/microservices/rq_engine/fork_archive_routes.py:950`, `:1462`) | Ordinary public-run access/anonymous CAPTCHA admits a fork; an authenticated requester is added to destination ownership (`:1542`). Therefore source non-owner access plus a full copy grants sensitive evidence access at the destination. | Keep public forking behavior while applying the ratified evidence-copy policy. Test source non-owner → destination owner and sensitive file readback/absence, rather than checking only rsync arguments. |
-| Fork target replacement (`fork_archive_routes.py:1413-1429`) | Existing destination is renamed to a tombstone and recursively deleted. Any already retained destination evidence disappears, independently of whether new source copies exclude it. | Before rename, classify/fence the destination and implement the operator-selected preservation or refusal policy. Source exclusions alone do not close this consumer. |
-| Batch leaf creation (`wepppy/nodb/batch_runner.py:563-593`) | `shutil.copytree(base_wd, runid_wd)` includes all retained roots and private archives from `_base`, with original receipt identities and no new charge. | One copytree ignore/filter seam for leaf creation; retain accepted canonical inputs and detached NoDb behavior. Prove the destination evidence disposition and unchanged source hashes. |
-| Batch leaf rerun (`batch_runner.py:_reset_run_workspace`, `:580-582`) | Moves the whole existing leaf to `.stale.*`, then removes it; cleanup failure leaves the old evidence under the renamed tree. Neither success nor deferred cleanup updates accounting. | Classify before rename. Preserve or refuse evidence-bearing reset according to the ratified policy; test both successful removal and deferred cleanup, with accounting and original-byte readback. |
-| Batch Omni reset (`wepppy/rq/batch_rq.py:_reset_omni_nodb_from_base`, `:147-181`, caller `:975`) | Removes destination `_pups/omni`, then copies source `_pups/omni`. This directly deletes and recopies Omni attempts even if whole-project copytree is fixed. | Apply the same copy policy to this subtree and a separate destination-preservation guard before removal. Cover existing leaf evidence and base evidence independently. |
-| Batch base initialization (`batch_runner.py:_init_base_project`, `:1105-1110`) | Constructor calls this helper; it deletes an already existing `_base` before creating Ron. A repeated initialization can remove base-run evidence. | Classify before destructive initialization. The normal fresh-base path is unaffected; test repeated initialization with retained evidence. |
-| Omni cleanup (`wepppy/nodb/mods/omni/omni_state_contrast_mixin.py:_clean_contrast_runs`, `_clean_stale_contrast_runs`) | Previously treated `vector_upload_attempts` as a generated contrast directory and removed it. Called by clear/reset/build or orchestration cleanup. | **Closed at `860ba6760`:** both cleaners preserve the exact retained directory alongside `_uploads`; regression tests cover clean/stale/reset/clear entrypoints. |
-| Omni scenario/contrast workspace reset (`omni_clone_contrast_service.py:_reset_workspace`, callers `:142`, `:349`) and `_remove_scenario_artifacts()` / `_clean_contrast_run()` (`omni_state_contrast_mixin.py:173`, `:567`) | Removes a complete existing child project. If that child contains independently retained evidence, it is removed without accounting. The ordinary clone code does not itself seed those bytes (see negative inventory below). | Guard the same workspace deletion seam against evidence-bearing descendants. Distinguish a normal generated child with no evidence from a child with independently retained uploads; do not claim actual admission into a child was runtime-tested in this inventory. |
-| Profile promotion (`wepppy/profile_recorder/assembler.py:156`) | Copies full `run_src` to `<profile>/run` with `dirs_exist_ok=True`, including retained evidence/private archives. Copying into the data repo can cross the configured retention filesystem. | Filter at the whole-run snapshot copy. Prove retained evidence disposition and ordinary replay assets; separately retain the configured profile authority boundary. |
-| Profile sandbox cloning (`services/profile_playback/app.py:_prepare_sandbox_clone`, `:590`) and snapshot fallback (`_prepare_sandbox_run`, `:568-569`) | Copies the entire promoted snapshot into a fresh sandbox, carrying any evidence copied by old/current promotion. | Apply the copy policy when consuming snapshots too; filtering only future promotion leaves existing snapshots affected. |
-| Profile archive export (`services/profile_playback/app.py:764-770`) | Removes an existing output and copies all of sandbox `archives`, including `private`. | Apply the ratified private-archive policy at archive export; a whole-project filter alone misses this subtree copy. |
-| Profile playback cleanup (`wepppy/profile_recorder/playback.py:_prepare_run_directory`, `:121`) | Removes the previous deterministic playback workspace. The service also has several UUID sandbox cleanup calls before initialization. Retained uploads made during an earlier playback can be removed without accounting. | Classify existing workspace before cleanup. Fresh UUID cleanup is normally empty; deterministic reuse is the confirmed retained-workspace risk. |
-| Developer smoke clone (`wepppy/rq/project_rq.py:test_run_rq`, `:912-962`) | Removes `<runid>-latest` and copies the complete source. Same copy/reset semantics, although no in-repository enqueue caller was found. | Treat the callable as an operator/developer consumer; apply the common policy if it remains supported, or explicitly exclude it from closure with documented enforcement. Do not label it an ordinary browser path. |
+| Project fork copy | `project_rq_fork.prepare_fork_run()` wraps actual rsync in `fork_copy`, with source/destination scopes and verified copy actor. Existing copy options remain; no new sensitive-root filter. | **Fork**: `test_fork_copies_originals_and_private_archives_with_copy_charge`, `test_fork_copy_rejects_recipient_quota_before_copy`; source receipts/bytes, copied inheritance and exact principal/global totals. |
+| Public/team fork admission and destination ownership | Resolved by the sharing decision. `fork_archive_routes._fork_retention_actor()` derives the copier from verified claims/user; admission stores actor metadata and `project_rq.fork_rq()` forwards it. Ownership/authentication behavior is preserved. | **Routes**: `test_fork_storage_actor_uses_verified_copier` and fork enqueue test rejecting client actor substitution; **Fork**: `test_worker_passes_admission_actor_to_fork_copy`. These are actor-boundary tests, not a claim of a deployed public-fork canary. |
+| Fork target replacement | `fork_archive_routes._delete_fork_replacement_tree()` wraps rename/removal in `fork_target_replace`; a stable `.replacing-retained` tombstone supports absent-target retries. | **Fork**: `test_fork_replacement_repairs_absent_target_and_previous_tombstone`, `test_absent_fork_target_preserves_retained_tombstone_without_configuration`; partial removal/rebuild failure, either marker authority, exact totals and unchanged retained bytes on configuration failure. |
+| Batch leaf creation | `BatchRunner._run_batch_hillslopes_owned()` wraps complete `_base` copy in `batch_leaf_copy` before controller rebinding. Copies inherit all five roots and use the unattributed copy-charge bucket. | **Consumers**: `test_batch_leaf_copy_preserves_all_retained_roots_and_charges_copy`; all five roots, source hashes, receipt inheritance, ordinary rerun and ledger readback. |
+| Batch leaf replacement/rerun | The same `batch_leaf_copy` boundary surrounds `_reset_run_workspace()` and replacement copy; pending repair forces completion even when the ordinary reset option is disabled, and stale siblings remain charged. | **Consumers**: `test_partial_batch_copy_retry_recopies_when_reset_option_disabled`, `test_workspace_retry_requires_identity_for_retained_stale_sibling[batch]`; common helper replacement-headroom regression. |
+| Batch Omni subtree reset | `batch_rq._reset_omni_nodb_from_base()` wraps source/destination Omni subtree copy/removal in `batch_omni_reset`; no whole-project-only shortcut. | **Consumers**: `test_batch_omni_subtree_reset_accounts_removed_and_copied_attempts`; source and old destination evidence, rebound controller path and exact ledger. |
+| Batch base initialization | `BatchRunner._init_base_project()` wraps removal/recreation in `batch_base_reset`. Fresh initialization stays valid; retained old-base bytes are reconciled. | **Consumers**: `test_batch_base_reinitialization_reconciles_removed_evidence`. |
+| Omni bulk/stale cleanup | `_clean_contrast_runs()` and `_clean_stale_contrast_runs()` retain owning `_uploads`/`vector_upload_attempts`, and use `omni_contrast_cleanup` for removable children. | `tests/nodb/mods/test_omni_state_contrast_mixin.py::test_contrast_cleanup_preserves_retained_upload_bytes` covers clean/stale/reset/clear; **Consumers**: `test_omni_bulk_cleanup_retry_preserves_owner_evidence_and_repairs_absent_children`, `test_omni_cleanup_borrows_live_upload_scope_and_preserves_reservation`. |
+| Omni scenario/contrast workspace reset and individual child deletion | `omni_clone_contrast_service._reset_workspace()` uses `omni_workspace_reset`; `_remove_scenario_artifacts()` / `_clean_contrast_run()` use their individual delete identities. Absent-child retry and deferred stale bytes remain observable/accounted. | **Consumers**: `test_omni_workspace_reset_counts_deferred_stale_evidence`, `test_workspace_retry_requires_identity_for_retained_stale_sibling[omni]`, `test_omni_single_child_delete_repairs_after_child_is_absent`. |
+| Profile promotion | `ProfileAssembler.promote_draft()` marks capture and whole-run promotion as explicit exports (`profile_promote_capture`, `profile_promote_run`). Outside the managed root, original bytes/modes remain intact without run-filesystem charge. | **Profile**: `test_offline_promotion_preserves_complete_retained_records_without_runfs_configuration`; common helper `test_explicit_export_inside_root_requires_identity` prevents an export flag from bypassing a managed destination. |
+| Profile sandbox clone / snapshot fallback | `services/profile_playback/app.py::_prepare_sandbox_clone()` and `_prepare_sandbox_run()` use `profile_sandbox_clone` / `profile_sandbox_reset`. Existing snapshots receive the same managed reentry accounting as new exports. | **Profile**: `test_managed_profile_reentry_preserves_provenance_and_charges_copy`, `test_evidence_reentry_does_not_classify_missing_configuration_as_offline_export`, `test_interrupted_profile_clone_retains_repair_and_retry_converges`. |
+| Profile archive export | `archive_profile()` wraps output replacement/copy in explicit `profile_archive_export`; private archives remain included. Outside-root exports are not additional run-filesystem bytes. | **Profile**: `test_archive_export_copies_all_records_outside_runfs_without_charging_export`; compares complete exported/sandbox records and managed totals. |
+| Profile deterministic playback and sandbox cleanup | `PlaybackSession._prepare_run_directory()` uses `profile_playback_reset`; service sandbox removal is inside the copy/reset boundaries above. | **Profile**: `test_deterministic_playback_reset_releases_old_retained_charge`, `test_deterministic_playback_reset_without_identity_preserves_existing_evidence`; interrupted clone/retry tests exercise reused sandbox destinations. |
+| Developer smoke clone | `project_rq.test_run_rq()` wraps existing target removal/full source copy in `test_run_copy`, before the model pipeline. It remains a callable developer consumer, not a newly exposed browser workflow. | **Fork**: `test_developer_test_run_replaces_and_accounts_before_pipeline`, with absent and existing destination states, originals, unattributed charge and exact totals. |
 
 ## Verified negative and excluded paths
 
-- Ordinary `OmniCloneContrastService.omni_clone()` copies only `disturbed`, `rap`,
-  `landuse`, `soils` and root NoDb files. Its final traversal creates empty
-  directory structure for other roots, without copying their files. It does not
-  copy the retained payloads or receipts. `run_contrast()` likewise copies only
-  selected model roots and NoDb state. `_omni_clone_sibling()` replaces only
-  disturbed/landuse/soils. Their destination resets remain listed above.
-- Roads `_prepare_roads_runs_workspace()` copies only baseline `wepp/runs` into
-  Roads model runs; Roads output cleanup and AgFields WEPP/watershed cleanup
-  operate below generated-artifact directories, outside the retained roots.
-- Omni report-sidecar cleanup targets `<run>/omni/contrasts`, distinct from the
-  retained root under `<run>/_pups/omni/contrasts`; it is not the confirmed loss.
-- Profile config-seed initialization copies the selected configuration directory,
-  not an entire project. The snapshot fallback and explicit sandbox clone are
-  the affected branches. Profile fork output uses the ordinary fork worker and
-  therefore inherits its copy policy.
-- Culvert clone/reset code contains whole-tree operations, but culvert API paths
-  are explicitly excluded by the work package and were not promoted to closure
-  consumers. Their presence is not a claim that current culvert inputs contain
-  any of these retained roots.
-- The bearer-protected test-support delete endpoint also removes whole test run
-  trees (`wepppy/weppcloud/routes/test_bp.py:67`, `:169`). It is outside the four
-  product workflows but can delete runs created for end-to-end testing. Record
-  its fixture-cleanup disposition; do not count it as a normal user delete path.
+| Path | Retained-root disposition and evidence boundary |
+| --- | --- |
+| Ordinary `OmniCloneContrastService.omni_clone()`, `run_contrast()`, `_omni_clone_sibling()` copy bodies | Copy selected model roots/root NoDb files; other traversal creates empty directories rather than retained payloads. No new evidence-copy filter is needed. Destination resets are covered separately above. |
+| Roads `_prepare_roads_runs_workspace()` and model-output cleanup; AgFields WEPP/watershed cleanup | Operate below generated-artifact roots, outside retained attempts. Existing canonical model inputs remain within normal workflows; the exact downstream suite exercises real Roads/AgFields artifacts. |
+| Omni report-sidecar cleanup | Targets `<run>/omni/contrasts`, distinct from owning retained attempts under `<run>/_pups/omni/contrasts`. This is not the reproduced cleaner loss. |
+| Profile config-seed initialization | Copies selected configuration rather than the full recorded project. **Profile**: `test_config_seed_playback_does_not_expand_into_full_snapshot_copy`. Profile fork output uses the ordinary fork worker and inherits its managed copy boundary. |
+| Culvert clone/reset and D-Tale | Explicit package scope exclusions remain. No claim that current culvert inputs contain retained vector evidence or that these paths were qualified. |
+| Bearer-protected test-support deletion (`wepppy/weppcloud/routes/test_bp.py::_cleanup_run_directory`, `delete_run_endpoint`) | Fixture-only exclusion, not a product delete consumer or retention-safe cleanup claim. The endpoint still removes whole test trees directly. Retention lifecycle tests use disposable roots and explicit accounting teardown; they do not establish safe ledger repair through this endpoint. |
 
-## Evidence and closure requirements
+## Remaining acceptance evidence
 
-The inventory used source traces of `copytree`, rsync command construction,
-recursive removal and rename-before-remove paths in the named subsystems.
-There is no claimed exhaustive arbitrary-filesystem audit.
-
-The Omni defect was independently reproduced with the actual frozen cleaner
-functions and a temporary production-shaped retained root. Both returned
-`original_survives: false`. Review of `860ba6760` confirms both exact exclusions
-and four cleanup-entrypoint regressions; downstream tests now use the actual
-workflow directories and read the receipt after real Omni build/report work.
-
-The smallest shared copy seam is a pure relative-path policy derived from the
-existing five sensitive-root definitions, reused by rsync filters and copytree
-ignore callbacks. It should not parse retained bytes or grant access. The
-smallest reset seam is an evidence-presence preflight before each whole-workspace
-rename/removal, followed by the operator-selected preservation/refusal lifecycle.
-The existing global-maintenance/project-scope/obligation/rebuild mechanism remains
-the accounting authority for any authorized deletion; a new queue or datastore
-is unnecessary.
-
-Before closing this failure class, retain one table mapping every confirmed row
-to its implementation/test or explicit operator disposition. Tests must place
-sentinels in all five roots, retain original/receipt hashes, check canonical model
-input survival, exercise destination replacement as well as initial copy, and
-read exact ledger totals where bytes are duplicated or removed. A blanket
-"fork fixed" claim is insufficient for Batch subtree reset and old profile
-snapshot consumption.
+The mapping replaces the obsolete HOLD/filter recommendation with the ratified
+byte-preserving policy and candidate implementation. It does not close M5 on its
+own. Freeze the integrated revision, retain exact commands/results/skips and
+ledger/artifact readback, and complete independent correctness, code, QA,
+security and operations reviews. Preserve the explicit exclusions above and
+resolve any confirmed remaining consumer defect before claiming closure.
+Publication, production deployment and remote-host parity remain separate gates.

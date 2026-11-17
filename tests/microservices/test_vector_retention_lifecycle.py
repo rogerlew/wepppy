@@ -1,0 +1,257 @@
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import uuid
+from types import SimpleNamespace
+
+import pytest
+import redis
+
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.microservices import vector_upload_normalization as n
+from wepppy.microservices import vector_retention_lifecycle as lifecycle
+
+pytestmark = pytest.mark.integration
+
+
+@pytest.fixture
+def environment(tmp_path, monkeypatch):
+    identity = f"copy-lifecycle-{uuid.uuid4().hex}"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", identity)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
+    kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    secret = Path(os.getenv("REDIS_PASSWORD_FILE", "/run/secrets/redis_password"))
+    if secret.exists():
+        kwargs["password"] = secret.read_text().strip()
+    conn = redis.client.Redis(**kwargs)
+    monkeypatch.setattr(n.redis, "Redis", lambda **_kw: conn)
+    prefix = f"vector-upload-retention:{identity}"
+    conn.hset(prefix + ":totals", mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0})
+    env = SimpleNamespace(root=tmp_path, conn=conn, prefix=prefix)
+    yield env
+    keys = list(conn.scan_iter(match=prefix + ":*"))
+    if keys:
+        conn.delete(*keys)
+
+
+def evidence(project, relative="roads/vector_upload_attempts", status="accepted"):
+    attempt = project / relative / "fixed-id"
+    attempt.mkdir(parents=True)
+    original = b"opaque complete original"
+    (attempt / "original.upload").write_bytes(original)
+    (attempt / "normalization.json").write_text(json.dumps({
+        "schema": "vector-normalization-v1", "status": status,
+        "actor": {"kind": "human", "user_id": 7}, "attempt_id": "fixed-id",
+        "project_identity": "source", "source_sha256": hashlib.sha256(original).hexdigest(),
+    }))
+    return attempt
+
+
+def total(env):
+    return int(env.conn.hget(env.prefix + ":totals", "committed"))
+
+
+def principal(env, user):
+    key = hashlib.sha256(f"human:{user}".encode()).hexdigest()
+    return int(env.conn.hget(env.prefix + ":principal:" + key, "committed") or 0)
+
+
+def operation(env, source, destination, **kw):
+    return lifecycle.retained_tree_operation(
+        destination, source=source,
+        project_keys=[f"run:copy-source-{env.root.name}", f"run:{destination.name}-{env.root.name}"],
+        actor=n.RetentionActor("human", 8), operation="test_copy", **kw,
+    )
+
+
+@pytest.mark.parametrize("status", ["accepted", "rejected", "incomplete"])
+def test_copy_keeps_source_provenance_and_charges_copying_actor(environment, status):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    original = evidence(source, status=status)
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    initial = total(env)
+    original_receipt = (original / "normalization.json").read_bytes()
+    with operation(env, source, target):
+        shutil.copytree(source, target)
+    copied = target / original.relative_to(source)
+    receipt = json.loads((copied / "normalization.json").read_text())
+    assert receipt["actor"] == {"kind": "human", "user_id": 7}
+    assert receipt["retention_actor"] == {"kind": "human", "user_id": 8}
+    assert receipt["copied_from"]["receipt_sha256"] == hashlib.sha256(original_receipt).hexdigest()
+    assert (copied / "copy-source-receipt.json").read_bytes() == original_receipt
+    assert (copied / "original.upload").read_bytes() == (original / "original.upload").read_bytes()
+    assert (original / "normalization.json").read_bytes() == original_receipt
+    copied_size = n._regular_tree_size(copied)
+    assert principal(env, 7) == initial
+    assert principal(env, 8) == copied_size
+    assert total(env) == initial + copied_size
+    second = env.root / "second"
+    with operation(env, target, second):
+        shutil.copytree(target, second)
+    second_receipt = json.loads((second / original.relative_to(source) / "normalization.json").read_text())
+    assert second_receipt["actor"] == receipt["actor"]
+    assert set(second_receipt["copied_from"]) == {"receipt_sha256", "project_identity", "attempt_id"}
+    assert total(env) == sum(n._regular_tree_size(p) for p in [original, copied, second / original.relative_to(source)])
+
+
+def test_copy_quota_rejects_before_destination_mutation(environment, monkeypatch):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    evidence(source)
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    monkeypatch.setattr(n, "_PRINCIPAL_LIMIT", 1)
+    with pytest.raises(n.VectorUploadError, match="retention quota"):
+        with operation(env, source, target):
+            pytest.fail("copy was admitted")
+    assert not target.exists()
+    assert not env.conn.smembers(env.prefix + ":rebuild-pending")
+
+
+def test_partial_copy_retry_and_ordinary_model_symlink(environment):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    original = evidence(source)
+    (source / "climate-link").symlink_to(env.root / "unrelated", target_is_directory=True)
+    (env.root / "unrelated").mkdir()
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    with pytest.raises(OSError, match="injected"):
+        with operation(env, source, target):
+            partial = target / original.relative_to(source)
+            partial.mkdir(parents=True)
+            (partial / "original.upload").write_bytes(b"partial")
+            raise OSError("injected interrupted copy")
+    assert lifecycle.retained_tree_repair_pending(target, "test_copy")
+    with operation(env, source, target) as state:
+        assert state.repair_pending
+        shutil.rmtree(target)
+        shutil.copytree(source, target, symlinks=True)
+    assert not lifecycle.retained_tree_repair_pending(target, "test_copy")
+    assert (target / "climate-link").is_symlink()
+
+
+def test_copy_rejects_evidence_symlink(environment):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    source.mkdir()
+    (source / "roads").mkdir()
+    (source / "roads/vector_upload_attempts").symlink_to(env.root / "outside", target_is_directory=True)
+    with pytest.raises(n.VectorUploadError, match="symbolic"):
+        with operation(env, source, target):
+            pytest.fail("symlink admitted")
+    assert not target.exists()
+
+
+def test_borrowed_scope_and_active_reservation_survive_cleanup(environment):
+    env = environment
+    source = env.root / "parent"
+    evidence(source)
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    reservation = n.RedisRetentionLedger(env.conn).reserve(
+        project_key="run:unrelated", actor=n.RetentionActor("human", 9),
+        worst_case_bytes=20, filesystem_root=env.root,
+    )
+    key = f"run:parent-{env.root.name}"
+    lease = n.RedisScopeLeaseFactory()(key)
+    try:
+        with lifecycle.borrow_retention_scope(key, lease):
+            with lifecycle.retained_tree_operation(source, project_keys=[key], operation="test_cleanup"):
+                shutil.rmtree(source)
+        lease.assert_owned()
+        assert total(env) == 0
+        assert int(env.conn.hget(env.prefix + ":totals", "reserved")) == 20
+    finally:
+        lease.release()
+        reservation.release_prewrite()
+
+
+def test_linked_model_subtree_cannot_materialize_uncharged_evidence(environment):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    source.mkdir()
+    other = env.root / "other"
+    evidence(other)
+    (source / "model-alias").symlink_to(other, target_is_directory=True)
+    with pytest.raises(n.VectorUploadError, match="symbolic"):
+        with operation(env, source, target):
+            shutil.copytree(source, target)
+    assert not target.exists()
+
+
+def test_explicit_export_inside_root_requires_identity(environment, monkeypatch):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    evidence(source)
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID")
+    with pytest.raises(n.VectorUploadError, match="identity"):
+        with operation(env, source, target, managed_export=True):
+            pytest.fail("in-root export admitted without identity")
+
+
+def test_successful_callback_with_missing_receipt_leaves_repair_obligation(environment):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    original = evidence(source)
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    with pytest.raises(n.VectorUploadError, match="missing its receipt"):
+        with operation(env, source, target):
+            partial = target / original.relative_to(source)
+            partial.mkdir(parents=True)
+            (partial / "original.upload").write_bytes(b"copied but no receipt")
+    assert lifecycle.retained_tree_repair_pending(target, "test_copy")
+
+
+def test_release_failure_still_releases_all_owned_leases(environment, monkeypatch):
+    env = environment
+    released = []
+    class Lease:
+        def __init__(self, key):
+            self.key = key
+            self.connection = env.conn
+        def assert_owned(self):
+            pass
+        def release(self):
+            released.append(self.key)
+            if self.key == "run:b":
+                raise OSError("injected release failure")
+    monkeypatch.setattr(n, "acquire_retention_maintenance_lease", lambda: Lease("global"))
+    monkeypatch.setattr(n, "RedisScopeLeaseFactory", lambda: lambda key: Lease(key))
+    with pytest.raises(OSError, match="release failure"):
+        with lifecycle.retained_tree_operation(env.root / "empty", project_keys=["run:a", "run:b"]):
+            pass
+    assert released == ["run:b", "run:a", "global"]
+
+
+def test_replacement_requires_headroom_for_old_bytes_and_reservations(environment, monkeypatch):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    evidence(source)
+    evidence(target)
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    monkeypatch.setattr(n, "_GLOBAL_LIMIT", total(env) + 1)
+    with pytest.raises(n.VectorUploadError, match="retention quota"):
+        with operation(env, source, target):
+            pytest.fail("invalid reclaim admitted")
+    assert (target / "roads/vector_upload_attempts/fixed-id/original.upload").exists()
+
+
+def test_retry_cannot_clear_marker_with_receipts_removed_from_source(environment):
+    env = environment
+    source, target = env.root / "source", env.root / "copy"
+    original = evidence(source)
+    extra = evidence(source, "ag_fields/vector_upload_attempts")
+    n.reconcile_retention(env.root, apply=True, rebuild_ledger=True)
+    with pytest.raises(OSError):
+        with operation(env, source, target):
+            shutil.copytree(source, target)
+            raise OSError("interrupted after copying")
+    shutil.rmtree(extra.parent)
+    with pytest.raises(n.VectorUploadError, match="absent from its source"):
+        with operation(env, source, target):
+            shutil.copytree(source, target, dirs_exist_ok=True)
+    assert lifecycle.retained_tree_repair_pending(target, "test_copy")
+    assert (target / original.relative_to(source) / "original.upload").exists()

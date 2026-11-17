@@ -582,7 +582,15 @@ def reconcile_retention(
             for walk_root, directories, filenames in os.walk(root, followlinks=False):
                 assert_reconcile_owned()
                 symlink_dirs = [name for name in directories if (Path(walk_root) / name).is_symlink()]
-                if symlink_dirs:
+                evidence_links = []
+                for name in symlink_dirs:
+                    parts = (Path(walk_root) / name).parts
+                    if "vector_upload_attempts" in parts or any(
+                        parts[index:index + 2] == ("archives", "private")
+                        for index in range(len(parts) - 1)
+                    ):
+                        evidence_links.append(name)
+                if evidence_links:
                     actions.append({
                         "path": os.fspath(Path(walk_root).relative_to(root)),
                         "action": "blocked_symlink_evidence",
@@ -621,7 +629,7 @@ def reconcile_retention(
                     })
                     continue
                 attempt_bytes = _regular_tree_size(receipt_path.parent)
-                actor = receipt.get("actor")
+                actor = receipt.get("retention_actor", receipt.get("actor"))
                 bucket = "unattributed"
                 if isinstance(actor, dict):
                     kind = actor.get("kind")

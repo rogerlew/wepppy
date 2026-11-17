@@ -4,7 +4,7 @@
 
 **Timezone**: UTC  
 **Last updated**: 2026-11-17
-**Current phase**: M5 HOLD — operator clone-retention decision and copy/reset remediation
+**Current phase**: M5 — copy/reset remediation and final validation
 **Security impact**: high  
 **Starting revision**: `05e3450fa7d3b24572e65161100670ae542a6ea8`  
 **M0 contract ancestor**: `1aebebfe0`  
@@ -48,6 +48,12 @@
 - **2026-11-16 23:22 UTC** - No PyArrow hostile-input parser and no new service,
   queue, datastore, daemon, protocol, or deployment topology are authorized.
 
+- **2026-11-17** — Operator confirmed public/team project sharing includes
+  retained originals and private archives. Contract checkpoint `bbb216c0b`
+  preserves this behavior and charges physical copies to the verified copying
+  principal. No additional owner approval or evidence exclusion is required.
+- **2026-11-17** — Replacement admission grants no speculative deletion credit:
+  deferred stale-workspace cleanup can retain the old physical bytes.
 ## Resolved Contract Decisions
 
 - Binary inputs preserve each endpoint source limit and add the independent

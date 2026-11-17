@@ -173,7 +173,17 @@ def test_reset_contrast_build_state_removes_contrast_id_definitions_psv(
 
 
 @pytest.mark.parametrize("operation", ["clean", "stale", "clear", "reset"])
-def test_contrast_cleanup_preserves_retained_upload_bytes(tmp_path, omni_module_stub, operation):
+def test_contrast_cleanup_preserves_retained_upload_bytes(tmp_path, omni_module_stub, operation, monkeypatch):
+    # This unit case exercises cleanup selection; real ledger/lease accounting
+    # is covered by test_vector_retention_copy_consumers.py.
+    @contextmanager
+    def retention_boundary(*_args, **_kwargs):
+        yield types.SimpleNamespace(checkpoint=lambda: None)
+
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.omni.omni_state_contrast_mixin.retained_tree_operation",
+        retention_boundary,
+    )
     omni = _OmniContrastDummy(tmp_path, logger_name="tests.omni.retained_cleanup")
     omni._fail_first_lock = False
     root = tmp_path / "_pups/omni/contrasts"

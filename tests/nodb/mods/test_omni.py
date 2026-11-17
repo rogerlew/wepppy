@@ -52,6 +52,8 @@ def test_reset_for_fork_restores_complete_fresh_omni_state(omni_module, monkeypa
 
 
 class Rect:
+    geom_type = "Polygon"
+
     def __init__(self, xmin, ymin, xmax, ymax):
         self.xmin = xmin
         self.ymin = ymin

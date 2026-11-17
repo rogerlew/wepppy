@@ -69,8 +69,8 @@ GeoParquet.
 - [x] (2026-11-17) M4: integrate Omni run/dry-run and Batch Runner with the same
       boundary, polygon-only Batch admission and rollback safety.
 - [ ] M5: original six frozen QA findings and Omni evidence cleanup are
-      remediated; operator fork/clone retention disposition, copy/reset
-      remediation, final combined validation and all-lane acceptance remain.
+      remediated and sharing disposition ratified; copy/reset remediation,
+      final combined validation and all-lane acceptance remain.
 - [x] (2026-11-17, resumed) Commit recovery/artifact/provenance fixes through
       `1bb088da5`; retain machine-readable per-case validation and the confirmed
       copy/reset failure-class inventory.
@@ -80,12 +80,18 @@ GeoParquet.
       browser-session provenance, hostile-event minimization, renewable-lease
       cleanup, restore lock ordering, and concurrent rollback regressions pass.
 
+- [x] (2026-11-17) Ratify public/team evidence inheritance and separate copying
+      principal accounting at standalone contract ancestor `bbb216c0b`; both
+      independent contract checkpoints pass. No operator decision remains open.
+- [ ] Complete copy/reset integration and final frozen validation. Real Redis
+      tests now cover fork, profile, Batch and Omni consumers; final combined
+      gates and independent acceptance remain pending.
 ## Surprises & Discoveries
 
 - Real fork rsync copies private evidence under ordinary public-run access;
   destination ownership then authorizes its download. Copy/reset consumers also
   bypass retention accounting. The independently retained inventory names each
-  confirmed consumer; clone policy requires operator disposition before repair.
+  confirmed consumer; operator sharing disposition was ratified at `bbb216c0b`.
 - Omni cleanup deleted the production retained-attempt directory. Earlier
   downstream fixtures used a generic attempt root and missed it. Fixtures now
   use the exact workflow roots and re-read receipts after real report generation;
