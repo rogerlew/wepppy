@@ -34,7 +34,7 @@
     },
     "wepppy/nodb/mods/roads/_constants.py": {
       "recorded": null,
-      "current": "a44595427152e3ab93d80f4d9cefe940430d7f7b732ab596ace9fd2c53f10561"
+      "current": "545dc010950acea4dda274fc7cf2f81e78c3fb43f84c34dafda2da9eb7b2ecde"
     },
     "wepppy/nodb/mods/roads/_execution.py": {
       "recorded": null,
@@ -412,6 +412,14 @@
       "evidence": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/provenance_review.md",
       "source_review": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/qa_review.md",
       "outcome_evidence": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_validation.md"
+    },
+    {
+      "date": "2026-11-17",
+      "path": "wepppy/nodb/mods/roads/_constants.py",
+      "previous_reviewed_sha256": "a44595427152e3ab93d80f4d9cefe940430d7f7b732ab596ace9fd2c53f10561",
+      "current_sha256": "545dc010950acea4dda274fc7cf2f81e78c3fb43f84c34dafda2da9eb7b2ecde",
+      "scope": "Remove two empty trailing lines only; AST identical. Native/project receipts retain the exact pre-formatting source identity. No executable token, model input or behavior changed.",
+      "evidence": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/final_source_disposition.md"
     }
   ]
 }

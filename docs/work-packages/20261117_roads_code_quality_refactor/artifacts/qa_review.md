@@ -195,3 +195,32 @@ retention behavior. The scoped module run
 `/tmp/roads-refactor-validation/fork-fixture-isolation.log` completed with
 **65 passed**, six warnings, in 5.24 seconds. The broad v3 rerun remains pending.
 The 37-file Roads execution receipt and production-source review remain valid.
+
+## Final formatting disposition
+
+Independent comparison of all 37 Roads production/harness files against both
+`d6ecf9a2a` and the immutable candidate execution receipt finds exactly one delta:
+`wepppy/nodb/mods/roads/_constants.py` lost two trailing newline bytes. The previous
+bytes equal the final bytes plus `b"\n\n"`. AST comparison, including node location
+attributes, is identical. The tested SHA-256
+`a44595427152e3ab93d80f4d9cefe940430d7f7b732ab596ace9fd2c53f10561`
+becomes
+`545dc010950acea4dda274fc7cf2f81e78c3fb43f84c34dafda2da9eb7b2ecde`.
+This formatting delta is accepted without changing the prior native/project
+assessment or its historical source identity. No executable token changed.
+
+The staleness ledger at SHA-256
+`336aa0a5c43c21d0fb2154b54e4e0a469b9c8fda1a79ef7fdec663d03acee7a6`
+differs from the previously accepted ledger only in that module's current hash
+and one appended formatting review. All earlier entries and original recorded
+hashes remain intact. Original source, matrix, parsed-analysis and project
+comparison receipts are unchanged; this addendum does not relabel the files
+actually used for native execution.
+
+All nine retained console-log pairs independently match the original and retained
+hashes in [candidate_logs/receipt.json](candidate_logs/receipt.json). Normalization
+removes trailing line/end-of-file whitespace only; original runtime logs remain
+intact. The scoped diff whitespace check passes. See
+[final_source_disposition.md](final_source_disposition.md) for the integrator's
+receipt. Final-format focused tests and the broad rerun were still in progress
+when this source addendum was written; their runtime results remain separate gates.

@@ -141,5 +141,3 @@ ATTRIBUTE_DISCOVERY_VALUE_PREVIEW_LIMIT_KEY = "attribute_discovery_value_preview
 ATTRIBUTE_DISCOVERY_VALUE_MAX_CHARS_KEY = "attribute_discovery_value_max_chars"
 
 DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT = 10
-
-

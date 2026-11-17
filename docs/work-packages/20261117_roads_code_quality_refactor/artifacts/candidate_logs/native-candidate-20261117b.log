@@ -11,8 +11,8 @@ if not matches:
     raise SystemExit(2)
 '"'"' .wctl-checkout-spy1m3o6 400566931ff5689389c04b8a6ebb907da5647db60f44c57d208963635ae710b2 && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy:/tmp/roads-refactor-validation MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/roads/test_roads_contracts.py tests/roads/test_roads_matrix.py --basetemp=/tmp/roads-refactor-validation/native-candidate-20261117b --maxfail=1 -q'
 time="2026-11-17T15:08:18-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
- Container docker-weppcloud-run-3143f66fd20d Creating 
- Container docker-weppcloud-run-3143f66fd20d Created 
+ Container docker-weppcloud-run-3143f66fd20d Creating
+ Container docker-weppcloud-run-3143f66fd20d Created
 ........................................................................ [ 13%]
 ........................................................................ [ 27%]
 ........................................................................ [ 40%]

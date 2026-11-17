@@ -11,6 +11,6 @@ if not matches:
     raise SystemExit(2)
 '"'"' .wctl-checkout-5h1koz7m 32f1564c6fab298cded08705fd9e8c488bb682c4dfc6e65033378fed79395897 && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python /tmp/roads-refactor-validation/check_project_field_metadata.py'
 time="2026-11-17T15:15:25-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
- Container docker-weppcloud-run-d41a0c24a23d Creating 
- Container docker-weppcloud-run-d41a0c24a23d Created 
+ Container docker-weppcloud-run-d41a0c24a23d Creating
+ Container docker-weppcloud-run-d41a0c24a23d Created
 PASS 92 parquet schemas including field metadata

@@ -11,7 +11,7 @@ if not matches:
     raise SystemExit(2)
 '"'"' .wctl-checkout-f71xwfui 86640f8841e5fa4ff55bab46b0e39cd933a739d855d82e8bb871683a2d435acf && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python /tmp/roads-refactor-validation/candidate_project_parity.py candidate-20261117b --design unrutted-positive'
 time="2026-11-17T15:07:57-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
- Container docker-weppcloud-run-4fef457d98be Creating 
- Container docker-weppcloud-run-4fef457d98be Created 
+ Container docker-weppcloud-run-4fef457d98be Creating
+ Container docker-weppcloud-run-4fef457d98be Created
 SOURCE_IMPORTED /workdir/wepppy/wepppy/nodb/mods/roads/roads.py
 PROJECT_DONE unrutted-positive /wc1/runs/rq/roads-quality-candidate-20261117b-unrutted-positive
