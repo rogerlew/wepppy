@@ -3,6 +3,8 @@
 Implementation contract: [catalog/retrieval](../schemas/wmesque-catalog-contract.md).
 Ownership: [catalog governance](wmesque-catalog-governance.md).
 
+For downloading rasters, start with the [WMesque user guide](../user-guide/wmesque.md).
+
 ## Retrieval Configuration
 
 Without configuration, v2 uses `https://wepp.cloud/webservices/wmesque2/`.
