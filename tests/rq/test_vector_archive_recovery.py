@@ -440,8 +440,9 @@ def test_parent_archive_classifies_nested_private_archive_without_attempt_roots(
     assert private_archive.with_suffix('.zip.sensitive.json').is_file()
 
 
+@pytest.mark.parametrize('cleanup_fault', [None, 'unlink', 'fsync', 'receipt'])
 def test_private_archive_rejects_late_growth_within_existing_reservation(
-    archive_rq_environment, real_archive_retention, monkeypatch,
+    archive_rq_environment, real_archive_retention, monkeypatch, cleanup_fault, caplog,
 ):
     project, root, _published, _prep = archive_rq_environment
     env = real_archive_retention
@@ -480,18 +481,84 @@ def test_private_archive_rejects_late_growth_within_existing_reservation(
 
     monkeypatch.setattr(archive, '_contains_vector_upload_attempts', classify_then_grow)
     monkeypatch.setattr(archive, '_BoundedPrivateArchiveFile', ObservedArchiveFile)
-    with pytest.raises(retention.VectorUploadError, match='reserved size'):
-        project.archive_rq(runid)
+    real_remove = os.remove
+    real_fsync = os.fsync
+    real_receipt = archive._write_private_archive_sidecar
+
+    def fail_remove(path, *args, **kwargs):
+        if str(path).endswith('.zip.tmp'):
+            raise OSError('injected archive temporary unlink failure')
+        return real_remove(path, *args, **kwargs)
+
+    def fail_directory_sync(descriptor):
+        path = Path(os.readlink(f'/proc/self/fd/{descriptor}'))
+        if path.parent.name == 'private' and path.is_dir():
+            raise OSError('injected archive cleanup directory fsync failure')
+        return real_fsync(descriptor)
+
+    def fail_receipt(path, payload):
+        if path.name == 'normalization.json':
+            raise OSError('injected incomplete receipt failure')
+        return real_receipt(path, payload)
+
+    with monkeypatch.context() as fault:
+        if cleanup_fault in {'unlink', 'receipt'}:
+            fault.setattr(archive.os, 'remove', fail_remove)
+        elif cleanup_fault == 'fsync':
+            fault.setattr(archive.os, 'fsync', fail_directory_sync)
+        if cleanup_fault == 'receipt':
+            fault.setattr(archive, '_write_private_archive_sidecar', fail_receipt)
+        with pytest.raises(retention.VectorUploadError, match='reserved size'):
+            project.archive_rq(runid, retention_actor={'kind': 'human', 'identifier': 9})
     assert measured_extents and all(size <= limit for size, limit in measured_extents)
     assert (first / 'payload.upload').read_bytes() == first_bytes
     assert (late / 'payload.upload').read_bytes() == late_payload
-    assert not list((run / 'archives').rglob('*.zip*'))
-    assert not list(env.connection.scan_iter(match=f'{env.prefix}:reservation:*'))
     totals = env.connection.hgetall(f'{env.prefix}:totals')
     assert int(totals['committed']) == source_total
     assert int(totals['committed']) <= retention._GLOBAL_LIMIT
+    reservations = list(env.connection.scan_iter(match=f'{env.prefix}:reservation:*'))
+    temporary = list((run / 'archives').rglob('*.zip.tmp'))
+    assert not list((run / 'archives').rglob('*.zip'))
+    if cleanup_fault is None:
+        assert not temporary
+        assert not reservations
+        assert int(totals['reserved']) == 0
+        assert int(totals['inflight']) == 0
+        return
+    assert len(reservations) == 1
+    metadata = env.connection.hgetall(reservations[0])
+    bundle = root / metadata['attempt_relpath']
+    assert int(totals['reserved']) == int(metadata['amount']) >= _tree_bytes(bundle)
+    assert int(totals['inflight']) == 1
+    assert bool(temporary) == (cleanup_fault != 'fsync')
+    receipt_path = bundle / 'normalization.json'
+    if cleanup_fault == 'receipt':
+        assert not receipt_path.exists()
+        assert 'incomplete receipt persistence failed' in caplog.text
+        # Keep the reservation for the existing corrupt-receipt recovery path.
+        return
+    receipt = json.loads(receipt_path.read_bytes())
+    assert receipt['status'] == 'incomplete'
+    assert receipt['accounting_status'] == 'pending'
+    assert receipt['actor'] == {'kind': 'human', 'user_id': 9}
+    assert receipt['project_identity'] == runid
+    assert receipt['reservation_id'] == reservations[0].rsplit(':', 1)[-1]
+    assert receipt_path.stat().st_size <= retention._RECEIPT_ALLOWANCE
+    assert ('temporary-file cleanup failed' if cleanup_fault == 'unlink'
+            else 'cleanup directory sync failed') in caplog.text
+    retention.reconcile_retention(root, connection=env.connection, apply=True,
+                                  rebuild_ledger=True, stale_seconds=0)
+    exact_partial = _tree_bytes(bundle)
+    totals = env.connection.hgetall(f'{env.prefix}:totals')
+    assert int(totals['committed']) == source_total + exact_partial
     assert int(totals['reserved']) == 0
     assert int(totals['inflight']) == 0
+    actor_bucket = hashlib.sha256(b'human:9').hexdigest()
+    source_bucket = hashlib.sha256(b'human:42').hexdigest()
+    assert int(env.connection.hget(f'{env.prefix}:principal:{actor_bucket}', 'committed')) == exact_partial
+    assert int(env.connection.hget(f'{env.prefix}:principal:{source_bucket}', 'committed')) == source_total
+    assert (first / 'payload.upload').read_bytes() == first_bytes
+    assert (late / 'payload.upload').read_bytes() == late_payload
 
 
 @pytest.mark.parametrize("configuration", ["missing_id", "missing_root", "wrong_root"])

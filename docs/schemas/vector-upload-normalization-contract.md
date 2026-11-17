@@ -482,6 +482,13 @@ before each destination write, including header rewrites and the central
 directory. A child project can grow after size estimation; that growth must
 fail archive creation rather than commit more retained bytes than reserved.
 The existing additional receipt allowance and all quota defaults are unchanged.
+
+Failed private archive cleanup releases its reservation only after temporary
+bytes are removed and their containing directory is synced. Failed unlink or
+sync keeps the reservation and records a bounded incomplete receipt with the
+verified actor for existing reconciliation. Receipt persistence failure is
+logged and also keeps the reservation; it never turns surviving bytes into
+uncharged storage.
 ## Specification references
 
 Format details are checked against the [GeoParquet 1.1 specification](https://geoparquet.org/releases/v1.1.0/)

@@ -207,6 +207,14 @@ def _write_private_archive_sidecar(path: Path, payload: Mapping[str, Any]) -> No
         temp.unlink(missing_ok=True)
 
 
+def _fsync_archive_directory(path: Path) -> None:
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def _verify_private_archive(archive_path: Path, wd: Path) -> None:
     try:
         relative = archive_path.relative_to(wd)
@@ -592,14 +600,49 @@ def archive_rq(
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive ARCHIVE_FAILED")
         raise
     finally:
+        cleanup_complete = True
         if archive_path_tmp and os.path.exists(archive_path_tmp):
             try:
                 os.remove(archive_path_tmp)
             except OSError:
-                pass
+                cleanup_complete = False
+                logging.getLogger(__name__).warning(
+                    "Archive temporary-file cleanup failed for %s", archive_path_tmp, exc_info=True,
+                )
 
         if retention_reservation is not None and (archive_path is None or not os.path.exists(archive_path)):
-            retention_reservation.release_prewrite()
+            if cleanup_complete:
+                try:
+                    _fsync_archive_directory(bundle_dir)
+                except OSError:
+                    cleanup_complete = False
+                    logging.getLogger(__name__).warning(
+                        "Private archive cleanup directory sync failed for %s", bundle_dir, exc_info=True,
+                    )
+            if cleanup_complete:
+                retention_reservation.release_prewrite()
+            else:
+                # This bounded failure receipt lets existing reconciliation
+                # retain exact remaining bytes under the verified archive actor.
+                try:
+                    _write_private_archive_sidecar(bundle_dir / "normalization.json", {
+                        "schema": "vector-normalization-v1",
+                        "attempt_id": bundle_dir.name,
+                        "status": "incomplete",
+                        "outcome": "quarantined",
+                        "enforcement_stage": "private_archive_cleanup",
+                        "accounting_status": "pending",
+                        "error_code": "archive_cleanup_incomplete",
+                        "actor": actor.receipt_value(),
+                        "project_identity": runid,
+                        "reservation_id": retention_reservation.reservation_id,
+                    })
+                    _fsync_archive_directory(bundle_dir)
+                except OSError:
+                    logging.getLogger(__name__).warning(
+                        "Private archive incomplete receipt persistence failed for %s; reservation retained",
+                        bundle_dir, exc_info=True,
+                    )
         if retention_lease is not None:
             try:
                 retention_lease.release()
