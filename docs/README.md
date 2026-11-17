@@ -2,6 +2,7 @@
 
 This directory holds top-level documentation that supports the codebase. Use these guides to locate the right place for architectural notes, UI references, and multi-step initiatives.
 
+- [Download raster data with WMesque](user-guide/wmesque.md) — Find datasets, choose an area and resolution, and download a raster for GIS analysis.
 - [WEPPcloud stack](weppcloud-stack.md) — Repository roles, service topology, model data flow, and integration boundaries across the sibling repositories.
 
 ## Directory Guide
