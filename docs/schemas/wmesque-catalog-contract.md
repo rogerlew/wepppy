@@ -59,6 +59,13 @@ is outside this contract. Original legacy directories remain untouched, allowing
 local extensions and code rollback. Master adoption changes the managed catalog
 mapping through the ordinary sync path, without renaming the logical resource.
 
+The legacy text inventory (`wepppy/webservices/catalog`, or v2 `CATALOG_PATH`)
+contains one absolute logical `/geodata/<dataset>/.vrt` path per line, never bare
+dataset IDs. Both v1 and v2 filter this inventory by the configured geodata root;
+relative IDs are not supported. Deployments using a different root must provide
+an inventory with that root. It is a curated inventory, not a recursive scan or
+a guarantee that every underlying source tile is readable.
+
 Keep `/catalog` list compatibility, adding logical `/geodata/<dataset>/.vrt`
 entries (not physical release paths), deduplicated against legacy entries.
 Add `/catalog/manifest` for the versioned managed mapping. Retrieval

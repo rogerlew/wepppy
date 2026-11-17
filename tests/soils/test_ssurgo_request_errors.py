@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 from requests.exceptions import SSLError, Timeout
 
@@ -31,3 +33,32 @@ def test_make_sda_post_request_timeout_retries_raise_user_message(monkeypatch) -
         ssurgo._make_sda_post_request("select 1")
 
     assert str(excinfo.value) == ssurgo._SSURGO_UNAVAILABLE_MESSAGE
+
+
+@pytest.mark.parametrize("status", [500, 502, 503, 504])
+def test_make_sda_post_request_server_error_raises_user_message(monkeypatch, caplog, status):
+    response = SimpleNamespace(status_code=status, content=b"<html>Bad Gateway</html>")
+    monkeypatch.setattr(ssurgo.requests, "post", lambda *args, **kwargs: response)
+
+    with pytest.raises(ssurgo.SsurgoRequestError) as excinfo:
+        ssurgo._make_sda_post_request("select 1")
+
+    assert str(excinfo.value) == ssurgo._SSURGO_UNAVAILABLE_MESSAGE
+    assert f"HTTP {status}" in caplog.text
+
+
+def test_make_sda_post_request_client_error_preserves_diagnostics(monkeypatch):
+    response = SimpleNamespace(status_code=400, content=b"Invalid query")
+    monkeypatch.setattr(ssurgo.requests, "post", lambda *args, **kwargs: response)
+
+    with pytest.raises(ssurgo.SsurgoRequestError) as excinfo:
+        ssurgo._make_sda_post_request("invalid sql")
+
+    assert excinfo.value.args == ((b"Invalid query", "invalid sql"),)
+
+
+def test_make_sda_post_request_success_preserves_response(monkeypatch):
+    response = SimpleNamespace(status_code=200, content=b"<Table />")
+    monkeypatch.setattr(ssurgo.requests, "post", lambda *args, **kwargs: response)
+
+    assert ssurgo._make_sda_post_request("select 1") == response.content
