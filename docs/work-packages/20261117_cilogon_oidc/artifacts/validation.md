@@ -2,7 +2,7 @@
 
 ## Source and environment
 
-Task worktree `/home/workdir/wepppy-cilogon-oidc`, branch `work/cilogon-oidc-scaffold`; contract checkpoints `9eb2dfcf0` and `874de621c`. Implementation remains separate from production. Original checkout WIP was not modified.
+Task worktree `/home/workdir/wepppy-cilogon-oidc`, branch `work/cilogon-oidc-scaffold`; contract checkpoints `9eb2dfcf0` and `874de621c`. Implementation source commit: `679dc65d4`. These source bytes passed the final focused tests; subsequent evidence commits change documentation only. Implementation remains separate from production. Original checkout WIP was not modified.
 
 The operator approved `/tmp/cilogon-test-compose.yml`: existing `wepppy-dev` image, exact task-worktree bind mount, no published ports or production secrets, no shared-container remount. All Python/frontend commands use `wctl --project-dir /home/workdir/wepppy-cilogon-oidc --compose-file /tmp/cilogon-test-compose.yml`. Disposable `/wc1` paths were created inside that container for existing test fixtures. Locked frontend dependencies were installed and the canonical controller builder generated ignored test assets in the task worktree.
 
@@ -36,4 +36,10 @@ Production is held: no deployment, restart, live migration, credential activatio
 
 ## Handoff checks
 
-Individual absolute-path Markdown lint passed for 29 changed/current package documents; final edited receipts are rechecked at handoff. Spelling preview differences were confined to preexisting vocabulary in PROJECT_TRACKER, the broad-exception allowlist, and tests/AGENTS; left unchanged. `git diff --check` passes. `wctl check-test-stubs` passed. No tests introduced collection-time module stubs. Existing dependency precedent: `email-validator==2.1.1` was already pinned in `docker/requirements-uv.txt`; no dependency addition.
+Individual absolute-path Markdown lint passed for 29 changed/current package documents; the final staged set of 22 Markdown documents also passed. Spelling preview differences were confined to preexisting vocabulary in PROJECT_TRACKER, the broad-exception allowlist, and tests/AGENTS; left unchanged. `git diff --check` passes. `wctl check-test-stubs` passed. No tests introduced collection-time module stubs. Existing dependency precedent: `email-validator==2.1.1` was already pinned in `docker/requirements-uv.txt`; no dependency addition.
+
+## Final cleanup and code-quality observation
+
+The isolated test container was stopped after checks. Temporary synthetic HTML previews were removed; retained screenshots and rendering/check scripts remain reproducible. Shared development containers and production were untouched.
+
+Observe-only metrics were regenerated against checkpoint `874de621c` after the implementation commit. The existing OAuth callback grew from 116 to 154 logical lines because protocol validation, independent identity selection, and legacy-provider compatibility remain in one orchestration path. Identity persistence and mailbox logic are in the bounded new account module (301 logical lines, longest function 54). Retaining that layout avoided an unrelated provider refactor during the security change; the callback length is retained telemetry, not a hidden gate waiver. Python cyclomatic complexity was unavailable because the host lacks radon.
