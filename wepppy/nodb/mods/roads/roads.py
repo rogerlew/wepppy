@@ -45,6 +45,14 @@ from . import _inputs
 
 from . import _prepare
 
+from . import _soil_inputs
+
+from . import _management_inputs
+
+from . import _slope_inputs
+
+from . import _spatial
+
 __all__ = ["Roads"]
 
 
@@ -1439,39 +1447,11 @@ class Roads(NoDbBase):
 
     @staticmethod
     def _extract_segment_coordinates(feature: Mapping[str, Any]) -> List[List[float]]:
-        geometry = feature.get("geometry") if isinstance(feature, Mapping) else None
-        if not isinstance(geometry, Mapping):
-            raise ValueError("Road segment feature is missing geometry.")
-
-        geometry_type = geometry.get("type")
-        coordinates = geometry.get("coordinates")
-        if geometry_type == "LineString":
-            if not isinstance(coordinates, list) or len(coordinates) < 2:
-                raise ValueError("Road segment LineString must include at least two coordinates.")
-            return coordinates
-
-        if geometry_type == "MultiLineString":
-            if not isinstance(coordinates, list) or not coordinates:
-                raise ValueError("Road segment MultiLineString must include at least one linestring.")
-            candidates = [line for line in coordinates if isinstance(line, list) and len(line) >= 2]
-            if not candidates:
-                raise ValueError("Road segment MultiLineString has no valid linestring members.")
-            candidates.sort(key=len, reverse=True)
-            return candidates[0]
-
-        raise ValueError(f"Unsupported segment geometry type for Roads WEPP run assembly: {geometry_type!r}")
+        return _spatial._extract_segment_coordinates(feature)
 
     @staticmethod
     def _line_length_m(coords: List[List[float]], transformer: Transformer, geod: Geod) -> float:
-        lons: List[float] = []
-        lats: List[float] = []
-        for point in coords:
-            x = float(point[0])
-            y = float(point[1])
-            lon, lat = transformer.transform(x, y)
-            lons.append(lon)
-            lats.append(lat)
-        return float(geod.line_length(lons, lats))
+        return _spatial._line_length_m(coords, transformer, geod)
 
 
     @staticmethod
@@ -1520,50 +1500,7 @@ class Roads(NoDbBase):
         return f"{segment_id}::h{int(topaz_id_hill)}"
 
     def _load_hillslope_geometries_wgs84(self) -> List[Dict[str, Any]]:
-        hillslope_geojson_path = self._normalize_existing_path(getattr(self.watershed_instance, "subwta_shp", None))
-        if hillslope_geojson_path is None:
-            raise FileNotFoundError("Roads outslope_unrutted replacement requires watershed subcatchments WGS GeoJSON.")
-
-        payload = json.loads(Path(hillslope_geojson_path).read_text(encoding="utf-8"))
-        if not isinstance(payload, Mapping) or payload.get("type") != "FeatureCollection":
-            raise ValueError("Watershed subcatchments payload is malformed; expected FeatureCollection.")
-
-        features = payload.get("features")
-        if not isinstance(features, list):
-            raise ValueError("Watershed subcatchments payload is missing a features array.")
-
-        hillslopes: List[Dict[str, Any]] = []
-        for feature in features:
-            if not isinstance(feature, Mapping):
-                continue
-            properties = feature.get("properties")
-            geometry_payload = feature.get("geometry")
-            if not isinstance(properties, Mapping) or not isinstance(geometry_payload, Mapping):
-                continue
-
-            topaz_id_hill = self._resolve_topaz_id_from_properties(properties)
-            if topaz_id_hill is None or not _is_hillslope_topaz_id(topaz_id_hill):
-                continue
-
-            geometry = shape(geometry_payload)
-            if geometry.is_empty:
-                continue
-
-            hillslopes.append(
-                {
-                    "topaz_id_hill": int(topaz_id_hill),
-                    "geometry_wgs84": geometry,
-                }
-            )
-
-        if not hillslopes:
-            raise ValueError("No hillslope geometries were resolved from watershed subcatchments.")
-
-        grouped = defaultdict(list)
-        for row in hillslopes:
-            grouped[row["topaz_id_hill"]].append(row["geometry_wgs84"])
-        return [{"topaz_id_hill": key, "geometry_wgs84": unary_union(parts)}
-                for key, parts in sorted(grouped.items())]
+        return _spatial._load_hillslope_geometries_wgs84(self)
 
     def _select_outslope_unrutted_hillslope_segments(
         self,
@@ -1573,101 +1510,13 @@ class Roads(NoDbBase):
         geod: Geod,
         top2wepp: Mapping[int, Any],
     ) -> Tuple[Dict[int, List[Dict[str, Any]]], Dict[str, Any], Dict[str, Dict[str, Any]]]:
-        input_to_wgs84 = Transformer.from_crs(input_crs, CRS.from_epsg(4326), always_xy=True)
-        params = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))
-        sources = {}
-        for pending in pending_segments:
-            inputs = self._resolve_segment_run_inputs(
-                properties=pending["properties"], params=params, segment_id=pending["segment_id"],
-                design="outslope_unrutted", warning_counts=Counter(), warning_examples=[], warning_limit=0,
-            )
-            effective = {key: value for key, value in inputs.items() if key != "resolution_sources"}
-            # Include required raw-invalid values: missing inputs must remain failures,
-            # never get merged with a neighbor whose valid inputs would hide them.
-            for key, aliases in OUTSLOPE_UNRUTTED_REQUIRED_FIELD_KEYS.items():
-                raw = self._first_non_empty_property(pending["properties"], aliases)
-                parsed = self._coerce_float(raw)
-                effective[key] = parsed if parsed is not None and np.isfinite(parsed) else raw
-            sources[str(pending["segment_id"])] = {
-                **pending, "inputs": inputs,
-                "signature": json.dumps(effective, sort_keys=True, allow_nan=False),
-                "geometry": shapely_transform(input_to_wgs84.transform, shape(pending["feature"]["geometry"])),
-            }
-        selected_by_wepp = defaultdict(list)
-        statuses = {}
-        records = []
-        for hillslope in self._load_hillslope_geometries_wgs84():
-            topaz = int(hillslope["topaz_id_hill"])
-            wepp_id = self._as_int_or_none(top2wepp.get(topaz))
-            width = float(self.watershed_instance.hillslope_width(topaz))
-            if not np.isfinite(width) or width <= 0:
-                raise ValueError(f"Unrutted hillslope {topaz} width must be finite and positive.")
-            rows = []
-            for source, pending in sources.items():
-                geometry = pending["geometry"].intersection(hillslope["geometry_wgs84"])
-                parts = list(_unrutted.line_parts(geometry))
-                if parts:
-                    rows.append({"geometry": unary_union(parts), "source": source,
-                                 "signature": pending["signature"]})
-            if not rows:
-                continue
-            components = _unrutted.crossings(rows)
-            membership = Counter(source for row in components for source in row["sources"])
-            candidates = []
-            record = {"topaz_id_hill": topaz, "wepp_id_hill": wepp_id,
-                      "segment_ids_included": [], "segment_ids_excluded": [], "segment_ids_capped": [],
-                      "inclusion_ratio_by_segment": {}, "top_ofe_compensation_m": 0.0,
-                      "area_error_before_compensation_m2": 0.0, "area_error_after_compensation_m2": 0.0,
-                      "geometry_policy": _unrutted.POLICY, "connectivity_limitation": _unrutted.LIMITATION,
-                      "excluded_road_target_area_m2": 0.0, "excluded_road_area_unknown_count": 0,
-                      "area_accounting_status": "unavailable", "area_accounting_reason": "not_executed",
-                      **{key: None for key in ("reference_area_m2", "affected_area_m2", "remainder_area_m2",
-                         "area_residual_m2", "road_target_area_m2", "road_modeled_area_m2", "road_area_deficit_m2", "strip_width_factor")}}
-            for component in components:
-                source = component["sources"][0]
-                pending = sources[source]
-                suffix = "::" + component["key"][:12] if membership[source] > 1 else ""
-                identity = self._build_segment_hillslope_id(source + suffix, topaz)
-                length = self._geometry_line_length_m_wgs84(component["geometry"], geod=geod)
-                if not np.isfinite(length) or length <= 0:
-                    raise ValueError("Unrutted crossing length must be finite and positive.")
-                candidate = {"segment_hillslope_id": identity, "source_segment_id": source,
-                             "source_segment_ids": component["sources"], "geometry_key": component["key"],
-                             "topaz_id_hill": topaz, "hillslope_wepp_id": wepp_id,
-                             "overlap_length_m": length, "hillslope_width_m": width,
-                             "inclusion_ratio": length / width, "overlap_geometry_wgs84": component["geometry"],
-                             "feature": pending["feature"], "properties": pending["properties"],
-                             "road_target_area_m2": length * pending["inputs"]["road_width_m"]}
-                candidates.append(candidate)
-                record["inclusion_ratio_by_segment"][identity] = length / width
-            eligible = 0
-            for candidate in sorted(candidates, key=lambda row: (-row["overlap_length_m"], row["geometry_key"])):
-                identity = candidate["segment_hillslope_id"]
-                status = "included"
-                if candidate["overlap_length_m"] < 10.0:
-                    status = "excluded_overlap_length_min"
-                elif wepp_id is None:
-                    raise ValueError(f"Unrutted hillslope {topaz} is missing its WEPP mapping.")
-                elif eligible >= 3:
-                    status = "excluded_cap_limit"
-                if status == "included":
-                    eligible += 1
-                    selected_by_wepp[wepp_id].append(candidate)
-                    record["segment_ids_included"].append(identity)
-                else:
-                    record["segment_ids_excluded"].append(identity)
-                    record["excluded_road_target_area_m2"] += candidate["road_target_area_m2"]
-                    if status == "excluded_cap_limit":
-                        record["segment_ids_capped"].append(identity)
-                statuses[identity] = {**candidate, "status": status}
-            records.append(record)
-        counts = Counter(row["status"] for row in statuses.values())
-        diagnostics = {"outslope_unrutted_targeted_hillslope_count": len(selected_by_wepp),
-                       "outslope_unrutted_included_segment_count": counts["included"],
-                       "outslope_unrutted_excluded_segment_count": counts["excluded_overlap_length_min"],
-                       "outslope_unrutted_capped_segment_count": counts["excluded_cap_limit"],
-                       "outslope_unrutted_hillslope_records": records}
-        return dict(selected_by_wepp), diagnostics, statuses
+        return _spatial._select_outslope_unrutted_hillslope_segments(
+            self,
+            pending_segments=pending_segments,
+            input_crs=input_crs,
+            geod=geod,
+            top2wepp=top2wepp,
+        )
 
     @staticmethod
     def _sample_dem_elevation(
@@ -1676,24 +1525,19 @@ class Roads(NoDbBase):
         x: float,
         y: float,
     ) -> float:
-        dx, dy = transformer.transform(float(x), float(y))
-        sample = next(dataset.sample([(dx, dy)]))
-        value = float(sample[0])
-        if dataset.nodata is not None and abs(value - float(dataset.nodata)) < 1e-12:
-            raise ValueError("Segment endpoint sampled nodata elevation from DEM.")
-        return value
+        return _spatial._sample_dem_elevation(dataset, transformer, x, y)
 
     @staticmethod
     def _clamp_percent_slope(value: float) -> float:
-        return max(0.1, min(40.0, float(value)))
+        return _slope_inputs._clamp_percent_slope(value)
 
     @staticmethod
     def _clamp_fill_slope_pct(value: float) -> float:
-        return max(0.1, min(150.0, float(value)))
+        return _slope_inputs._clamp_fill_slope_pct(value)
 
     @staticmethod
     def _clamp_buffer_slope_pct(value: float) -> float:
-        return max(0.1, min(100.0, float(value)))
+        return _slope_inputs._clamp_buffer_slope_pct(value)
 
     def _build_segment_profile(
         self,
@@ -1705,70 +1549,18 @@ class Roads(NoDbBase):
         input_to_dem: Transformer,
         geod: Geod,
     ) -> Dict[str, Any]:
-        coords = self._extract_segment_coordinates(feature)
-        segment_length_m = self._line_length_m(coords, input_to_wgs84, geod)
-        if segment_length_m <= 0:
-            raise ValueError("Segment geometry length is zero; cannot build Roads slope profile.")
-
-        start = coords[0]
-        end = coords[-1]
-        start_elevation = self._sample_dem_elevation(dem_dataset, input_to_dem, start[0], start[1])
-        end_elevation = self._sample_dem_elevation(dem_dataset, input_to_dem, end[0], end[1])
-
-        if start_elevation >= end_elevation:
-            high_point = start
-            low_point = end
-            elevation_high = start_elevation
-            elevation_low = end_elevation
-        else:
-            high_point = end
-            low_point = start
-            elevation_high = end_elevation
-            elevation_low = start_elevation
-
-        raw_slope_pct = ((elevation_high - elevation_low) / segment_length_m) * 100.0
-        clamped_slope_pct = self._clamp_percent_slope(raw_slope_pct)
-
-        return {
-            "segment_length_m": float(segment_length_m),
-            "elevation_high_m": float(elevation_high),
-            "elevation_low_m": float(elevation_low),
-            "raw_slope_pct": float(raw_slope_pct),
-            "slope_pct": float(clamped_slope_pct),
-            "high_point": [float(high_point[0]), float(high_point[1])],
-            "low_point": [float(low_point[0]), float(low_point[1])],
-        }
+        return _spatial._build_segment_profile(
+            self,
+            feature=feature,
+            input_crs=input_crs,
+            dem_dataset=dem_dataset,
+            input_to_wgs84=input_to_wgs84,
+            input_to_dem=input_to_dem,
+            geod=geod,
+        )
 
     def _derive_buffer_profile_from_trace(self, trace_result: Mapping[str, Any]) -> Dict[str, float]:
-        path_length_m = self._as_float_or_none(trace_result.get("path_length_m"))
-        if path_length_m is None or path_length_m <= 0:
-            raise ValueError("Trace result is missing a positive path_length_m for routed contributor assembly.")
-
-        slope_candidates: List[float] = []
-        mean_slope = self._as_float_or_none(trace_result.get("mean_slope"))
-        if mean_slope is not None and np.isfinite(mean_slope):
-            slope_candidates.append(float(mean_slope))
-
-        drop_m = self._as_float_or_none(trace_result.get("drop_m"))
-        if drop_m is not None and np.isfinite(drop_m) and path_length_m > 0:
-            slope_candidates.append(float(drop_m) / float(path_length_m))
-
-        segment_slope = trace_result.get("segment_slope")
-        if isinstance(segment_slope, list):
-            for raw in segment_slope:
-                value = self._as_float_or_none(raw)
-                if value is None or not np.isfinite(value):
-                    continue
-                slope_candidates.append(float(value))
-
-        positive_candidates = [value for value in slope_candidates if value > 0.0]
-        slope_fraction = max(positive_candidates) if positive_candidates else 0.001
-        slope_pct = self._clamp_percent_slope(slope_fraction * 100.0)
-        return {
-            "buffer_length_m": max(0.3, float(path_length_m)),
-            "buffer_slope_pct": float(slope_pct),
-            "buffer_slope_fraction": float(slope_pct / 100.0),
-        }
+        return _slope_inputs._derive_buffer_profile_from_trace(self, trace_result)
 
     def _derive_buffer_profile_from_feature_or_defaults(
         self,
@@ -1776,43 +1568,11 @@ class Roads(NoDbBase):
         properties: Mapping[str, Any],
         road_profile: Mapping[str, Any],
     ) -> Dict[str, Any]:
-        buffer_length_raw = self._first_non_empty_property(
-            properties,
-            ("BUFFER_LENGTH_M", "buffer_length_m", "BUFFER_LEN_M", "buffer_len_m"),
+        return _slope_inputs._derive_buffer_profile_from_feature_or_defaults(
+            self,
+            properties=properties,
+            road_profile=road_profile,
         )
-        buffer_slope_raw = self._first_non_empty_property(
-            properties,
-            ("BUFFER_SLOPE_PCT", "buffer_slope_pct", "BUFFER_SLOPE", "buffer_slope"),
-        )
-
-        buffer_length_source = "segment_property"
-        buffer_length_m = self._coerce_float(buffer_length_raw)
-        if buffer_length_m is None or not np.isfinite(buffer_length_m) or buffer_length_m <= 0:
-            segment_length_m = self._as_float_or_none(road_profile.get("segment_length_m"))
-            if segment_length_m is None or segment_length_m <= 0:
-                buffer_length_m = 30.0
-            else:
-                buffer_length_m = max(0.3, min(float(segment_length_m), 30.0))
-            buffer_length_source = "derived_default"
-
-        buffer_slope_source = "segment_property"
-        buffer_slope_pct = self._coerce_float(buffer_slope_raw)
-        if buffer_slope_pct is None or not np.isfinite(buffer_slope_pct) or buffer_slope_pct <= 0:
-            road_slope_pct = self._as_float_or_none(road_profile.get("slope_pct"))
-            if road_slope_pct is None or road_slope_pct <= 0:
-                buffer_slope_pct = 6.0
-            else:
-                buffer_slope_pct = float(road_slope_pct) * 0.5
-            buffer_slope_source = "derived_default"
-
-        buffer_slope_pct = self._clamp_buffer_slope_pct(float(buffer_slope_pct))
-        return {
-            "buffer_length_m": max(0.3, min(300.0, float(buffer_length_m))),
-            "buffer_slope_pct": float(buffer_slope_pct),
-            "buffer_slope_fraction": float(buffer_slope_pct / 100.0),
-            "buffer_length_source": buffer_length_source,
-            "buffer_slope_source": buffer_slope_source,
-        }
 
     @staticmethod
     def _derive_fill_profile_from_inputs(*, fill_length_m: float, fill_slope_pct: float) -> Dict[str, float]:
@@ -1832,21 +1592,11 @@ class Roads(NoDbBase):
         road_width_m: float,
         road_slope_pct: float,
     ) -> Dict[str, float]:
-        outslope_fraction = 0.04
-        longitudinal_fraction = max(0.001, float(road_slope_pct) / 100.0)
-        road_slope_fraction = (outslope_fraction**2.0) + (longitudinal_fraction**2.0)
-        scale = max(road_slope_fraction / outslope_fraction, 1e-6)
-
-        sim_length_m = max(1.0, min(300.0, float(road_length_m) * scale))
-        sim_width_m = max(0.3, min(100.0, float(road_width_m) / scale))
-
-        return {
-            "sim_length_m": float(sim_length_m),
-            "sim_width_m": float(sim_width_m),
-            "road_slope_fraction": float(road_slope_fraction),
-            "road_slope_pct": float(road_slope_fraction * 100.0),
-            "geometry_scale": float(scale),
-        }
+        return _slope_inputs._apply_outslope_unrutted_geometry_parity(
+            road_length_m=road_length_m,
+            road_width_m=road_width_m,
+            road_slope_pct=road_slope_pct,
+        )
 
     @staticmethod
     def _write_routed_two_ofe_slope_file(
@@ -1858,18 +1608,14 @@ class Roads(NoDbBase):
         buffer_length_m: float,
         buffer_slope_pct: float,
     ) -> None:
-        road_slope_fraction = float(road_slope_pct) / 100.0
-        buffer_slope_fraction = float(buffer_slope_pct) / 100.0
-        content = [
-            "97.3",
-            "2",
-            f"180.0 {float(width_m):.3f}",
-            f"2 {float(road_length_m):.3f}",
-            f"0.00, {road_slope_fraction:.6f} 1.00, {road_slope_fraction:.6f}",
-            f"3 {float(buffer_length_m):.3f}",
-            f"0.00, {road_slope_fraction:.6f} 0.05, {buffer_slope_fraction:.6f} 1.00, {buffer_slope_fraction:.6f}",
-        ]
-        path.write_text("\n".join(content) + "\n", encoding="utf-8")
+        return _slope_inputs._write_routed_two_ofe_slope_file(
+            path,
+            width_m=width_m,
+            road_length_m=road_length_m,
+            road_slope_pct=road_slope_pct,
+            buffer_length_m=buffer_length_m,
+            buffer_slope_pct=buffer_slope_pct,
+        )
 
     @staticmethod
     def _write_routed_three_ofe_slope_file(
@@ -1883,21 +1629,16 @@ class Roads(NoDbBase):
         buffer_length_m: float,
         buffer_slope_pct: float,
     ) -> None:
-        road_slope_fraction = float(road_slope_pct) / 100.0
-        fill_slope_fraction = float(fill_slope_pct) / 100.0
-        buffer_slope_fraction = float(buffer_slope_pct) / 100.0
-        content = [
-            "97.3",
-            "3",
-            f"180.0 {float(width_m):.3f}",
-            f"2 {float(road_length_m):.3f}",
-            f"0.00, {road_slope_fraction:.6f} 1.00, {road_slope_fraction:.6f}",
-            f"3 {float(fill_length_m):.3f}",
-            f"0.00, {road_slope_fraction:.6f} 0.05, {fill_slope_fraction:.6f} 1.00, {fill_slope_fraction:.6f}",
-            f"3 {float(buffer_length_m):.3f}",
-            f"0.00, {fill_slope_fraction:.6f} 0.05, {buffer_slope_fraction:.6f} 1.00, {buffer_slope_fraction:.6f}",
-        ]
-        path.write_text("\n".join(content) + "\n", encoding="utf-8")
+        return _slope_inputs._write_routed_three_ofe_slope_file(
+            path,
+            width_m=width_m,
+            road_length_m=road_length_m,
+            road_slope_pct=road_slope_pct,
+            fill_length_m=fill_length_m,
+            fill_slope_pct=fill_slope_pct,
+            buffer_length_m=buffer_length_m,
+            buffer_slope_pct=buffer_slope_pct,
+        )
 
     @staticmethod
     def _write_routed_three_ofe_landuse_road_fill_slope_file(
@@ -1911,21 +1652,16 @@ class Roads(NoDbBase):
         fill_length_m: float,
         fill_slope_pct: float,
     ) -> None:
-        top_landuse_slope_fraction = float(top_landuse_slope_pct) / 100.0
-        road_slope_fraction = float(road_slope_pct) / 100.0
-        fill_slope_fraction = float(fill_slope_pct) / 100.0
-        content = [
-            "97.3",
-            "3",
-            f"180.0 {float(width_m):.3f}",
-            f"2 {float(top_landuse_length_m):.3f}",
-            f"0.00, {top_landuse_slope_fraction:.6f} 1.00, {top_landuse_slope_fraction:.6f}",
-            f"3 {float(road_length_m):.3f}",
-            f"0.00, {top_landuse_slope_fraction:.6f} 0.05, {road_slope_fraction:.6f} 1.00, {road_slope_fraction:.6f}",
-            f"3 {float(fill_length_m):.3f}",
-            f"0.00, {road_slope_fraction:.6f} 0.05, {fill_slope_fraction:.6f} 1.00, {fill_slope_fraction:.6f}",
-        ]
-        path.write_text("\n".join(content) + "\n", encoding="utf-8")
+        return _slope_inputs._write_routed_three_ofe_landuse_road_fill_slope_file(
+            path,
+            width_m=width_m,
+            top_landuse_length_m=top_landuse_length_m,
+            top_landuse_slope_pct=top_landuse_slope_pct,
+            road_length_m=road_length_m,
+            road_slope_pct=road_slope_pct,
+            fill_length_m=fill_length_m,
+            fill_slope_pct=fill_slope_pct,
+        )
 
     @staticmethod
     def _write_routed_four_ofe_landuse_road_fill_hill_slope_file(
@@ -1941,34 +1677,22 @@ class Roads(NoDbBase):
         bottom_landuse_length_m: float,
         bottom_landuse_slope_pct: float,
     ) -> None:
-        top_landuse_slope_fraction = float(top_landuse_slope_pct) / 100.0
-        road_slope_fraction = float(road_slope_pct) / 100.0
-        fill_slope_fraction = float(fill_slope_pct) / 100.0
-        bottom_landuse_slope_fraction = float(bottom_landuse_slope_pct) / 100.0
-        content = [
-            "97.3",
-            "4",
-            f"180.0 {float(width_m):.3f}",
-            f"2 {float(top_landuse_length_m):.3f}",
-            f"0.00, {top_landuse_slope_fraction:.6f} 1.00, {top_landuse_slope_fraction:.6f}",
-            f"3 {float(road_length_m):.3f}",
-            f"0.00, {top_landuse_slope_fraction:.6f} 0.05, {road_slope_fraction:.6f} 1.00, {road_slope_fraction:.6f}",
-            f"3 {float(fill_length_m):.3f}",
-            f"0.00, {road_slope_fraction:.6f} 0.05, {fill_slope_fraction:.6f} 1.00, {fill_slope_fraction:.6f}",
-            f"3 {float(bottom_landuse_length_m):.3f}",
-            f"0.00, {fill_slope_fraction:.6f} 0.05, {bottom_landuse_slope_fraction:.6f} 1.00, {bottom_landuse_slope_fraction:.6f}",
-        ]
-        path.write_text("\n".join(content) + "\n", encoding="utf-8")
+        return _slope_inputs._write_routed_four_ofe_landuse_road_fill_hill_slope_file(
+            path,
+            width_m=width_m,
+            top_landuse_length_m=top_landuse_length_m,
+            top_landuse_slope_pct=top_landuse_slope_pct,
+            road_length_m=road_length_m,
+            road_slope_pct=road_slope_pct,
+            fill_length_m=fill_length_m,
+            fill_slope_pct=fill_slope_pct,
+            bottom_landuse_length_m=bottom_landuse_length_m,
+            bottom_landuse_slope_pct=bottom_landuse_slope_pct,
+        )
 
     @staticmethod
     def _extract_ofe_from_nycrop_comment(line: str) -> Optional[int]:
-        match = re.search(r"OFE\s*:\s*(\d+)", line)
-        if not match:
-            return None
-        try:
-            return int(match.group(1))
-        except ValueError:
-            return None
+        return _management_inputs._extract_ofe_from_nycrop_comment(line)
 
     @staticmethod
     def _sample_discha_median_from_wgs84_geometry(
@@ -2005,78 +1729,12 @@ class Roads(NoDbBase):
         output_path: Path,
         ofe_order: Sequence[int],
     ) -> None:
-        if not ofe_order:
-            raise ValueError("ofe_order must not be empty")
-        if any(index not in {1, 2, 3} for index in ofe_order):
-            raise ValueError("ofe_order entries must be one of 1 (road), 2 (fill), or 3 (hill/forest).")
-
-        nofe = len(ofe_order)
-        lines = template_path.read_text(encoding="utf-8").splitlines()
-        out: List[str] = []
-        i = 0
-        initial_indices_rewritten = False
-
-        while i < len(lines):
-            line = lines[i]
-
-            if "# number of OFEs" in line:
-                out.append(self._replace_leading_int(line, nofe))
-                i += 1
-                continue
-
-            if "# `nofe'" in line:
-                out.append(self._replace_leading_int(line, nofe))
-                i += 1
-                continue
-
-            if "# `Initial Conditions indx'" in line and not initial_indices_rewritten:
-                original_index_lines: List[str] = []
-                while i < len(lines) and "# `Initial Conditions indx'" in lines[i]:
-                    original_index_lines.append(lines[i])
-                    i += 1
-
-                if not original_index_lines:
-                    continue
-
-                for scenario_idx in ofe_order:
-                    template_line = original_index_lines[min(len(original_index_lines) - 1, scenario_idx - 1)]
-                    out.append(self._replace_leading_int(template_line, int(scenario_idx)))
-
-                initial_indices_rewritten = True
-                continue
-
-            ofe_from_comment = self._extract_ofe_from_nycrop_comment(line)
-            if ofe_from_comment is not None and (i + 1) < len(lines) and "# `YEAR indx'" in lines[i + 1]:
-                original_pairs: List[Tuple[int, str, str]] = []
-                while i < len(lines):
-                    nycrop_line = lines[i]
-                    parsed_ofe = self._extract_ofe_from_nycrop_comment(nycrop_line)
-                    if parsed_ofe is None:
-                        break
-                    if (i + 1) >= len(lines) or "# `YEAR indx'" not in lines[i + 1]:
-                        break
-                    year_line = lines[i + 1]
-                    original_pairs.append((int(parsed_ofe), nycrop_line, year_line))
-                    i += 2
-
-                if not original_pairs:
-                    continue
-
-                pair_map = {ofe_idx: (nycrop_line, year_line) for ofe_idx, nycrop_line, year_line in original_pairs}
-                fallback_pair = pair_map.get(3) or pair_map.get(1) or original_pairs[-1][1:]
-
-                for new_ofe_pos, scenario_idx in enumerate(ofe_order, start=1):
-                    nycrop_line, year_line = pair_map.get(int(scenario_idx), fallback_pair)
-                    nycrop_line = re.sub(r"(OFE\s*:\s*)\d+", rf"\g<1>{int(new_ofe_pos)}", nycrop_line)
-                    year_line = self._replace_leading_int(year_line, int(scenario_idx))
-                    out.append(nycrop_line)
-                    out.append(year_line)
-                continue
-
-            out.append(line)
-            i += 1
-
-        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+        return _management_inputs._build_routed_mofe_management_file(
+            self,
+            template_path=template_path,
+            output_path=output_path,
+            ofe_order=ofe_order,
+        )
 
     def _build_routed_mofe_soil_file(
         self,
@@ -2088,93 +1746,15 @@ class Roads(NoDbBase):
         rfg_pct: float,
         ofe_order: Sequence[int],
     ) -> None:
-        if not ofe_order:
-            raise ValueError("ofe_order must not be empty")
-        if any(index not in {1, 2, 3} for index in ofe_order):
-            raise ValueError("ofe_order entries must be one of 1 (road), 2 (fill), or 3 (hill/forest).")
-
-        lines = template_path.read_text(encoding="utf-8").splitlines()
-        if len(lines) < 10:
-            raise ValueError(f"Roads soil template is malformed: {template_path}")
-
-        out: List[str] = []
-        i = 0
-        out.append(lines[i])
-        i += 1
-
-        while i < len(lines) and lines[i].startswith("#"):
-            out.append(lines[i])
-            i += 1
-
-        if i >= len(lines):
-            raise ValueError(f"Roads soil template is malformed (missing soil comment): {template_path}")
-        out.append(lines[i])
-        i += 1
-
-        while i < len(lines) and not lines[i].strip():
-            out.append(lines[i])
-            i += 1
-
-        if i >= len(lines):
-            raise ValueError(f"Roads soil template is malformed (missing ntemp line): {template_path}")
-        ntemp_tokens = lines[i].split()
-        ksflag = ntemp_tokens[1] if len(ntemp_tokens) > 1 else "0"
-        out.append(f"{len(ofe_order)} {ksflag}")
-        i += 1
-
-        while i < len(lines) and not lines[i].strip():
-            i += 1
-
-        ofe_pairs: List[Tuple[str, str]] = []
-        while i < len(lines):
-            if not lines[i].strip():
-                i += 1
-                continue
-            if i + 1 >= len(lines):
-                raise ValueError(f"Roads soil template has incomplete OFE pair: {template_path}")
-            ofe_pairs.append((lines[i], lines[i + 1]))
-            i += 2
-
-        if len(ofe_pairs) < 3:
-            raise ValueError(f"Roads soil template must include at least three OFEs: {template_path}")
-
-        urr_ref = 95.0 if surface == "paved" else 65.0
-        ufr_ref = (float(rfg_pct) + 65.0) / 2.0
-
-        for scenario_idx in ofe_order:
-            header, horizon = ofe_pairs[int(scenario_idx) - 1]
-            if int(scenario_idx) == 1:
-                road_tokens = shlex.split(header)
-                if len(road_tokens) < 8:
-                    raise ValueError(f"Roads soil template has malformed road OFE header: {template_path}")
-                slid, texid = road_tokens[0], road_tokens[1]
-                nsl, salb, sat, ki, kr, shcrit = road_tokens[2:8]
-                avke = road_tokens[8] if len(road_tokens) > 8 else None
-
-                ki_value = float(ki)
-                kr_value = float(kr)
-                if traffic != "high":
-                    ki_value /= 4.0
-                    kr_value /= 4.0
-
-                header_line = f"'{slid}' '{texid}' {nsl} {salb} {sat} {ki_value:.6g} {kr_value:.6g} {shcrit}"
-                if avke is not None:
-                    header_line += f" {avke}"
-            else:
-                header_line = header
-
-            horizon_line = self._replace_soil_marker(
-                horizon,
-                urr_ref=urr_ref,
-                ufr_ref=ufr_ref,
-                ubr_value=float(rfg_pct),
-            )
-
-            out.append(header_line)
-            out.append(horizon_line)
-
-        output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
-        self._apply_parameterization_to_soil(output_path, template_path, traffic, ofe_order)
+        return _soil_inputs._build_routed_mofe_soil_file(
+            self,
+            template_path=template_path,
+            output_path=output_path,
+            traffic=traffic,
+            surface=surface,
+            rfg_pct=rfg_pct,
+            ofe_order=ofe_order,
+        )
 
     
     
@@ -2187,17 +1767,12 @@ class Roads(NoDbBase):
         ufr_ref: float,
         ubr_value: float,
     ) -> str:
-        tokens = horizon_line.split()
-        if not tokens:
-            return horizon_line
-        marker = tokens[-1].lower()
-        if marker == "urr":
-            tokens[-1] = f"{float(urr_ref):.6g}"
-        elif marker == "ufr":
-            tokens[-1] = f"{float(ufr_ref):.6g}"
-        elif marker == "ubr":
-            tokens[-1] = f"{float(ubr_value):.6g}"
-        return " ".join(tokens)
+        return _soil_inputs._replace_soil_marker(
+            horizon_line,
+            urr_ref=urr_ref,
+            ufr_ref=ufr_ref,
+            ubr_value=ubr_value,
+        )
 
     def _build_routed_two_ofe_soil_file(
         self,
@@ -2208,93 +1783,14 @@ class Roads(NoDbBase):
         surface: str,
         rfg_pct: float,
     ) -> None:
-        lines = template_path.read_text(encoding="utf-8").splitlines()
-        if len(lines) < 8:
-            raise ValueError(f"Roads soil template is malformed: {template_path}")
-
-        out: List[str] = []
-        i = 0
-        out.append(lines[i])
-        i += 1
-
-        while i < len(lines) and lines[i].startswith("#"):
-            out.append(lines[i])
-            i += 1
-
-        if i >= len(lines):
-            raise ValueError(f"Roads soil template is malformed (missing soil comment): {template_path}")
-        out.append(lines[i])
-        i += 1
-
-        while i < len(lines) and not lines[i].strip():
-            out.append(lines[i])
-            i += 1
-
-        if i >= len(lines):
-            raise ValueError(f"Roads soil template is malformed (missing ntemp line): {template_path}")
-        ntemp_tokens = lines[i].split()
-        ksflag = ntemp_tokens[1] if len(ntemp_tokens) > 1 else "0"
-        out.append(f"2 {ksflag}")
-        i += 1
-
-        while i < len(lines) and not lines[i].strip():
-            i += 1
-
-        ofe_pairs: List[Tuple[str, str]] = []
-        while i < len(lines):
-            if not lines[i].strip():
-                i += 1
-                continue
-            if i + 1 >= len(lines):
-                raise ValueError(f"Roads soil template has incomplete OFE pair: {template_path}")
-            ofe_pairs.append((lines[i], lines[i + 1]))
-            i += 2
-
-        if len(ofe_pairs) < 3:
-            raise ValueError(f"Roads soil template must include at least three OFEs: {template_path}")
-
-        road_header, road_horizon = ofe_pairs[0]
-        buffer_header, buffer_horizon = ofe_pairs[2]
-        road_tokens = shlex.split(road_header)
-        if len(road_tokens) < 8:
-            raise ValueError(f"Roads soil template has malformed road OFE header: {template_path}")
-        slid, texid = road_tokens[0], road_tokens[1]
-        nsl, salb, sat, ki, kr, shcrit = road_tokens[2:8]
-        avke = road_tokens[8] if len(road_tokens) > 8 else None
-
-        ki_value = float(ki)
-        kr_value = float(kr)
-        if traffic != "high":
-            ki_value /= 4.0
-            kr_value /= 4.0
-
-        road_header_line = (
-            f"'{slid}' '{texid}' {nsl} {salb} {sat} {ki_value:.6g} {kr_value:.6g} {shcrit}"
+        return _soil_inputs._build_routed_two_ofe_soil_file(
+            self,
+            template_path=template_path,
+            output_path=output_path,
+            traffic=traffic,
+            surface=surface,
+            rfg_pct=rfg_pct,
         )
-        if avke is not None:
-            road_header_line += f" {avke}"
-
-        urr_ref = 95.0 if surface == "paved" else 65.0
-        ufr_ref = (float(rfg_pct) + 65.0) / 2.0
-        road_horizon_line = self._replace_soil_marker(
-            road_horizon,
-            urr_ref=urr_ref,
-            ufr_ref=ufr_ref,
-            ubr_value=float(rfg_pct),
-        )
-        buffer_horizon_line = self._replace_soil_marker(
-            buffer_horizon,
-            urr_ref=urr_ref,
-            ufr_ref=ufr_ref,
-            ubr_value=float(rfg_pct),
-        )
-
-        out.append(road_header_line)
-        out.append(road_horizon_line)
-        out.append(buffer_header)
-        out.append(buffer_horizon_line)
-        output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
-        self._apply_parameterization_to_soil(output_path, template_path, traffic, (1, 3))
 
     def _build_routed_three_ofe_soil_file(
         self,
@@ -2305,192 +1801,40 @@ class Roads(NoDbBase):
         surface: str,
         rfg_pct: float,
     ) -> None:
-        lines = template_path.read_text(encoding="utf-8").splitlines()
-        if len(lines) < 10:
-            raise ValueError(f"Roads soil template is malformed: {template_path}")
-
-        out: List[str] = []
-        i = 0
-        out.append(lines[i])
-        i += 1
-
-        while i < len(lines) and lines[i].startswith("#"):
-            out.append(lines[i])
-            i += 1
-
-        if i >= len(lines):
-            raise ValueError(f"Roads soil template is malformed (missing soil comment): {template_path}")
-        out.append(lines[i])
-        i += 1
-
-        while i < len(lines) and not lines[i].strip():
-            out.append(lines[i])
-            i += 1
-
-        if i >= len(lines):
-            raise ValueError(f"Roads soil template is malformed (missing ntemp line): {template_path}")
-        ntemp_tokens = lines[i].split()
-        ksflag = ntemp_tokens[1] if len(ntemp_tokens) > 1 else "0"
-        out.append(f"3 {ksflag}")
-        i += 1
-
-        while i < len(lines) and not lines[i].strip():
-            i += 1
-
-        ofe_pairs: List[Tuple[str, str]] = []
-        while i < len(lines):
-            if not lines[i].strip():
-                i += 1
-                continue
-            if i + 1 >= len(lines):
-                raise ValueError(f"Roads soil template has incomplete OFE pair: {template_path}")
-            ofe_pairs.append((lines[i], lines[i + 1]))
-            i += 2
-
-        if len(ofe_pairs) < 3:
-            raise ValueError(f"Roads soil template must include at least three OFEs: {template_path}")
-
-        road_header, road_horizon = ofe_pairs[0]
-        fill_header, fill_horizon = ofe_pairs[1]
-        buffer_header, buffer_horizon = ofe_pairs[2]
-
-        road_tokens = shlex.split(road_header)
-        if len(road_tokens) < 8:
-            raise ValueError(f"Roads soil template has malformed road OFE header: {template_path}")
-        slid, texid = road_tokens[0], road_tokens[1]
-        nsl, salb, sat, ki, kr, shcrit = road_tokens[2:8]
-        avke = road_tokens[8] if len(road_tokens) > 8 else None
-
-        ki_value = float(ki)
-        kr_value = float(kr)
-        if traffic != "high":
-            ki_value /= 4.0
-            kr_value /= 4.0
-
-        road_header_line = (
-            f"'{slid}' '{texid}' {nsl} {salb} {sat} {ki_value:.6g} {kr_value:.6g} {shcrit}"
+        return _soil_inputs._build_routed_three_ofe_soil_file(
+            self,
+            template_path=template_path,
+            output_path=output_path,
+            traffic=traffic,
+            surface=surface,
+            rfg_pct=rfg_pct,
         )
-        if avke is not None:
-            road_header_line += f" {avke}"
-
-        urr_ref = 95.0 if surface == "paved" else 65.0
-        ufr_ref = (float(rfg_pct) + 65.0) / 2.0
-        road_horizon_line = self._replace_soil_marker(
-            road_horizon,
-            urr_ref=urr_ref,
-            ufr_ref=ufr_ref,
-            ubr_value=float(rfg_pct),
-        )
-        fill_horizon_line = self._replace_soil_marker(
-            fill_horizon,
-            urr_ref=urr_ref,
-            ufr_ref=ufr_ref,
-            ubr_value=float(rfg_pct),
-        )
-        buffer_horizon_line = self._replace_soil_marker(
-            buffer_horizon,
-            urr_ref=urr_ref,
-            ufr_ref=ufr_ref,
-            ubr_value=float(rfg_pct),
-        )
-
-        out.append(road_header_line)
-        out.append(road_horizon_line)
-        out.append(fill_header)
-        out.append(fill_horizon_line)
-        out.append(buffer_header)
-        out.append(buffer_horizon_line)
-        output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
-        self._apply_parameterization_to_soil(output_path, template_path, traffic, (1, 2, 3))
 
     @staticmethod
     def _strip_management_scenario_block(
         lines: List[str], *, start_marker: str, end_marker: str
     ) -> List[str]:
-        out: List[str] = []
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            if start_marker in line:
-                while i < len(lines) and end_marker not in lines[i]:
-                    i += 1
-                continue
-            out.append(line)
-            i += 1
-        return out
+        return _management_inputs._strip_management_scenario_block(
+            lines,
+            start_marker=start_marker,
+            end_marker=end_marker,
+        )
 
     def _build_routed_two_ofe_management_file(self, *, template_path: Path, output_path: Path) -> None:
-        lines = template_path.read_text(encoding="utf-8").splitlines()
-        # Keep all plant definitions and their iresd/itype references intact.
-        lines = self._strip_management_scenario_block(
-            lines,
-            start_marker="Initial Conditions scenario 2 of 3",
-            end_marker="Initial Conditions scenario 3 of 3",
+        return _management_inputs._build_routed_two_ofe_management_file(
+            self,
+            template_path=template_path,
+            output_path=output_path,
         )
-        lines = self._strip_management_scenario_block(
-            lines,
-            start_marker="Yearly scenario 2 of 3",
-            end_marker="Yearly scenario 3 of 3",
-        )
-
-        out: List[str] = []
-        initial_condition_index_counter = 0
-        skip_next_year_index = False
-        remap_next_year_index = False
-
-        for line in lines:
-            if "Initial Conditions scenario 3 of 3" in line:
-                line = line.replace("Initial Conditions scenario 3 of 3", "Initial Conditions scenario 2 of 2")
-            elif "Yearly scenario 3 of 3" in line:
-                line = line.replace("Yearly scenario 3 of 3", "Yearly scenario 2 of 2")
-
-            if (
-                "# number of OFEs" in line
-                or "# looper; number of Initial Conditions scenarios" in line
-                or "# looper; number of Yearly scenarios" in line
-                or "# `nofe'" in line
-            ):
-                line = self._replace_leading_int(line, 2)
-
-            if "# `Initial Conditions indx'" in line:
-                initial_condition_index_counter += 1
-                if initial_condition_index_counter == 2:
-                    continue
-                if initial_condition_index_counter == 3:
-                    line = self._replace_leading_int(line, 2)
-
-            if "# `nycrop'" in line and "OFE :" in line:
-                if "OFE : 2" in line:
-                    skip_next_year_index = True
-                    continue
-                if "OFE : 3" in line:
-                    line = line.replace("OFE : 3", "OFE : 2")
-                    remap_next_year_index = True
-
-            if skip_next_year_index:
-                skip_next_year_index = False
-                continue
-
-            if remap_next_year_index and "# `YEAR indx'" in line:
-                line = self._replace_leading_int(line, 2)
-                remap_next_year_index = False
-
-            out.append(line)
-
-        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
 
     def _materialize_routed_two_ofe_management_template(self, *, traffic: str) -> Path:
-        source_path = self._resolve_legacy_management_template_path(traffic=traffic)
-        output_path = Path(self.roads_runs_dir) / f"{source_path.stem}.routed_two_ofe.man"
-        self._build_routed_two_ofe_management_file(template_path=source_path, output_path=output_path)
-        return output_path
+        return _management_inputs._materialize_routed_two_ofe_management_template(self, traffic=traffic)
 
     def _materialize_routed_three_ofe_management_template(self, *, traffic: str) -> Path:
-        source_path = self._resolve_legacy_management_template_path(traffic=traffic)
-        output_path = Path(self.roads_runs_dir) / f"{source_path.stem}.routed_three_ofe.man"
-        if source_path.resolve() != output_path.resolve():
-            shutil.copy2(source_path, output_path)
-        return output_path
+        return _management_inputs._materialize_routed_three_ofe_management_template(
+            self,
+            traffic=traffic,
+        )
 
     def _resolve_trace_receiving_hillslope_topaz(
         self,
@@ -2535,15 +1879,12 @@ class Roads(NoDbBase):
 
     @staticmethod
     def _write_single_ofe_slope_file(path: Path, *, width_m: float, length_m: float, slope_pct: float) -> None:
-        slope_fraction = float(slope_pct) / 100.0
-        content = [
-            "97.3",
-            "1",
-            f"180.0 {float(width_m):.3f}",
-            f"2 {float(length_m):.3f}",
-            f"0.00, {slope_fraction:.6f} 1.00, {slope_fraction:.6f}",
-        ]
-        path.write_text("\n".join(content) + "\n", encoding="utf-8")
+        return _slope_inputs._write_single_ofe_slope_file(
+            path,
+            width_m=width_m,
+            length_m=length_m,
+            slope_pct=slope_pct,
+        )
 
     def _saved_parameterization_state(self):
         # A persisted null is malformed, distinct from an absent legacy key.
@@ -2910,104 +2251,14 @@ class Roads(NoDbBase):
 
     @staticmethod
     def _replace_leading_int(line: str, replacement: int) -> str:
-        return re.sub(r"^\s*\d+", str(int(replacement)), line, count=1)
+        return _management_inputs._replace_leading_int(line, replacement)
 
     def _build_single_ofe_management_file(self, *, template_path: Path, output_path: Path) -> None:
-        lines = template_path.read_text(encoding="utf-8").splitlines()
-        out: List[str] = []
-        i = 0
-        replaced_top_nofe = False
-
-        while i < len(lines):
-            line = lines[i]
-            if "# number of OFEs" in line and not replaced_top_nofe:
-                out.append(self._replace_leading_int(line, 1))
-                replaced_top_nofe = True
-                i += 1
-                break
-            out.append(line)
-            i += 1
-
-        # Plant definitions are referenced by residue and yearly scenarios;
-        # their count is independent of the selected OFE count.
-        while i < len(lines):
-            line = lines[i]
-            if "# looper; number of Initial Conditions scenarios" in line:
-                out.append(self._replace_leading_int(line, 1))
-                i += 1
-                break
-            out.append(line)
-            i += 1
-
-        while i < len(lines):
-            if "#\tInitial Conditions scenario 2" in lines[i]:
-                break
-            out.append(lines[i])
-            i += 1
-
-        while i < len(lines) and "###########################" not in lines[i]:
-            i += 1
-
-        while i < len(lines):
-            line = lines[i]
-            out.append(line)
-            i += 1
-            if "# looper; number of Yearly scenarios" in line:
-                out[-1] = self._replace_leading_int(line, 1)
-                break
-
-        while i < len(lines):
-            if "#\tYearly scenario 2" in lines[i]:
-                break
-            out.append(lines[i])
-            i += 1
-
-        while i < len(lines) and "######################" not in lines[i]:
-            i += 1
-
-        while i < len(lines):
-            line = lines[i]
-            out.append(line)
-            i += 1
-            if "# `nofe'" in line:
-                out[-1] = self._replace_leading_int(line, 1)
-                break
-
-        initial_condition_index_count = 0
-        while i < len(lines):
-            line = lines[i]
-            if "# `Initial Conditions indx'" in line:
-                initial_condition_index_count += 1
-                if initial_condition_index_count == 1:
-                    out.append(line)
-                i += 1
-                continue
-            out.append(line)
-            i += 1
-            if "# `nyears'" in line:
-                break
-
-        skip_next_year_index = False
-        while i < len(lines):
-            line = lines[i]
-            if "# `nycrop'" in line and "OFE :" in line:
-                if "OFE : 1" in line:
-                    out.append(line)
-                    skip_next_year_index = False
-                else:
-                    skip_next_year_index = True
-                i += 1
-                continue
-
-            if skip_next_year_index:
-                skip_next_year_index = False
-                i += 1
-                continue
-
-            out.append(line)
-            i += 1
-
-        output_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+        return _management_inputs._build_single_ofe_management_file(
+            self,
+            template_path=template_path,
+            output_path=output_path,
+        )
 
     def _build_single_ofe_soil_file(
         self,
@@ -3018,87 +2269,17 @@ class Roads(NoDbBase):
         surface: str,
         rfg_pct: float,
     ) -> None:
-        lines = template_path.read_text(encoding="utf-8").splitlines()
-        if len(lines) < 6:
-            raise ValueError(f"Roads soil template is malformed: {template_path}")
-
-        out: List[str] = []
-        i = 0
-        out.append(lines[i])
-        i += 1
-
-        while i < len(lines) and lines[i].startswith("#"):
-            out.append(lines[i])
-            i += 1
-
-        if i >= len(lines):
-            raise ValueError(f"Roads soil template is malformed (missing soil comment): {template_path}")
-        out.append(lines[i])
-        i += 1
-
-        while i < len(lines) and not lines[i].strip():
-            out.append(lines[i])
-            i += 1
-
-        if i >= len(lines):
-            raise ValueError(f"Roads soil template is malformed (missing ntemp line): {template_path}")
-        ntemp_tokens = lines[i].split()
-        ksflag = ntemp_tokens[1] if len(ntemp_tokens) > 1 else "0"
-        out.append(f"1 {ksflag}")
-        i += 1
-
-        while i < len(lines) and not lines[i].strip():
-            i += 1
-
-        if i + 1 >= len(lines):
-            raise ValueError(f"Roads soil template is malformed (missing first OFE lines): {template_path}")
-
-        first_ofe_header = lines[i]
-        first_ofe_horizon = lines[i + 1]
-
-        header_tokens = shlex.split(first_ofe_header)
-        if len(header_tokens) < 8:
-            raise ValueError(f"Roads soil template has malformed first OFE header: {template_path}")
-
-        slid, texid = header_tokens[0], header_tokens[1]
-        nsl, salb, sat, ki, kr, shcrit = header_tokens[2:8]
-        avke = header_tokens[8] if len(header_tokens) > 8 else None
-
-        ki_value = float(ki)
-        kr_value = float(kr)
-        if traffic != "high":
-            ki_value /= 4.0
-            kr_value /= 4.0
-
-        header_line = (
-            f"'{slid}' '{texid}' {nsl} {salb} {sat} {ki_value:.6g} {kr_value:.6g} {shcrit}"
+        return _soil_inputs._build_single_ofe_soil_file(
+            self,
+            template_path=template_path,
+            output_path=output_path,
+            traffic=traffic,
+            surface=surface,
+            rfg_pct=rfg_pct,
         )
-        if avke is not None:
-            header_line += f" {avke}"
-        out.append(header_line)
-
-        horizon_tokens = first_ofe_horizon.split()
-        if len(horizon_tokens) < 6:
-            raise ValueError(f"Roads soil template has malformed first OFE horizon: {template_path}")
-
-        urr_ref = 95.0 if surface == "paved" else 65.0
-        marker = horizon_tokens[-1].lower()
-        if marker == "urr":
-            horizon_tokens[-1] = f"{urr_ref:.6g}"
-        elif marker == "ufr":
-            horizon_tokens[-1] = f"{((float(rfg_pct) + 65.0) / 2.0):.6g}"
-        elif marker == "ubr":
-            horizon_tokens[-1] = f"{float(rfg_pct):.6g}"
-        out.append(" ".join(horizon_tokens))
-
-        output_path.write_text(ensure_200mm_boundary("\n".join(out) + "\n"), encoding="utf-8")
-        self._apply_parameterization_to_soil(output_path, template_path, traffic, (1,))
 
     def _materialize_single_ofe_management_template(self, *, traffic: str) -> Path:
-        source_path = self._resolve_legacy_management_template_path(traffic=traffic)
-        output_path = Path(self.roads_runs_dir) / f"{source_path.stem}.single_ofe.man"
-        self._build_single_ofe_management_file(template_path=source_path, output_path=output_path)
-        return output_path
+        return _management_inputs._materialize_single_ofe_management_template(self, traffic=traffic)
 
     @staticmethod
     def _read_pass_header_climate_line(pass_path: Path) -> str:

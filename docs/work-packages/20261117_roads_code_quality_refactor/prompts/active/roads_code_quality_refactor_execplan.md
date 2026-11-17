@@ -12,7 +12,7 @@ Make the Roads controller easier to change and review without changing the scien
 - [x] (2026-11-17 22:37 UTC) Measured baseline and prepared package/extraction map.
 - [ ] M1: Characterization and 527-test native baseline complete; immutable full-project controls running.
 - [x] (2026-11-17 UTC) M2: Input extraction validated (305 passed, one skipped); preparation extraction validated (31 passed).
-- [ ] M3: Extract native input writers and mode-specific execution stages.
+- [ ] M3: Native writers/spatial extraction validated (251 passed); execution-stage decomposition pending.
 - [ ] M4: Extract routing/publication and query presentation.
 - [ ] M5: Complete final validation, reviews, documentation, and quality assessment.
 

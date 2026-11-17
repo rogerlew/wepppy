@@ -1,0 +1,70 @@
+{
+  "baseline": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "body_ast_identical": {
+    "_inputs": {
+      "_default_params": true,
+      "_empty_attribute_field_map": true,
+      "_normalize_attribute_field_map": true,
+      "_normalize_params_with_defaults": true,
+      "_dedupe_keys": true,
+      "_first_non_empty_property_with_key": true,
+      "_stringify_attribute_sample": true,
+      "_discovered_attribute_field_names": true,
+      "_build_attribute_catalog": true,
+      "_collect_warning": true,
+      "_auto_discover_attribute_field_map": true,
+      "_resolve_design_for_feature": true,
+      "_validated_params_payload": true,
+      "_first_non_empty_property": true,
+      "_missing_outslope_unrutted_required_fields": true,
+      "_coerce_float": true,
+      "_resolve_outslope_unrutted_required_profiles": true,
+      "_normalize_surface": true,
+      "_normalize_traffic_value": true,
+      "_normalize_traffic": true,
+      "_normalize_soil_texture": true,
+      "_resolve_surface_for_feature": true,
+      "_resolve_traffic_for_feature": true,
+      "_resolve_segment_run_inputs": true
+    },
+    "_soil_inputs": {
+      "_build_routed_mofe_soil_file": true,
+      "_replace_soil_marker": true,
+      "_build_routed_two_ofe_soil_file": true,
+      "_build_routed_three_ofe_soil_file": true,
+      "_build_single_ofe_soil_file": true
+    },
+    "_management_inputs": {
+      "_extract_ofe_from_nycrop_comment": true,
+      "_build_routed_mofe_management_file": true,
+      "_strip_management_scenario_block": true,
+      "_build_routed_two_ofe_management_file": true,
+      "_materialize_routed_two_ofe_management_template": true,
+      "_materialize_routed_three_ofe_management_template": true,
+      "_replace_leading_int": true,
+      "_build_single_ofe_management_file": true,
+      "_materialize_single_ofe_management_template": true
+    },
+    "_slope_inputs": {
+      "_clamp_percent_slope": true,
+      "_clamp_fill_slope_pct": true,
+      "_clamp_buffer_slope_pct": true,
+      "_derive_buffer_profile_from_trace": true,
+      "_derive_buffer_profile_from_feature_or_defaults": true,
+      "_apply_outslope_unrutted_geometry_parity": true,
+      "_write_routed_two_ofe_slope_file": true,
+      "_write_routed_three_ofe_slope_file": true,
+      "_write_routed_three_ofe_landuse_road_fill_slope_file": true,
+      "_write_routed_four_ofe_landuse_road_fill_hill_slope_file": true,
+      "_write_single_ofe_slope_file": true
+    },
+    "_spatial": {
+      "_extract_segment_coordinates": true,
+      "_line_length_m": true,
+      "_load_hillslope_geometries_wgs84": true,
+      "_select_outslope_unrutted_hillslope_segments": true,
+      "_sample_dem_elevation": true,
+      "_build_segment_profile": true
+    }
+  }
+}

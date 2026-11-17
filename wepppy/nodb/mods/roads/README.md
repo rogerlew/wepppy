@@ -92,6 +92,8 @@ pointer encoding. See the [flow-direction contract](../../../../docs/schemas/roa
 | [_constants.py](_constants.py) | Shared design vocabulary and unchanged parameter bounds, re-exported by the facade |
 | [_inputs.py](_inputs.py) | Input normalization, validation and attribute mapping |
 | [_prepare.py](_prepare.py) | Preparation arguments, candidate summary construction and summary logging |
+| [_soil_inputs.py](_soil_inputs.py), [_management_inputs.py](_management_inputs.py), [_slope_inputs.py](_slope_inputs.py) | Native input writers with unchanged scientific transformations |
+| [_spatial.py](_spatial.py) | Terrain sampling and hillslope/road geometry selection |
 | [monotonic_segments.py](monotonic_segments.py) | Line segmentation and low-point attribution |
 | [parameterization.py](parameterization.py) | Retained baseline, validated role overrides and resolution |
 | [_parameterization_comparisons.py](_parameterization_comparisons.py) | Execution input evidence and compatible retained-run comparisons |

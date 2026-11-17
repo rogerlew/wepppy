@@ -47,3 +47,8 @@ files remain untouched. M2 input extraction with repaired fixture: 305 passed,
 one skipped. Preparation extraction: 31 passed (61 unrelated tests deselected). Immutable
 full-project baseline controls remain in progress. Complexity remains unavailable in both host
 and existing container; no dependency installed.
+
+M3 writers/spatial checkpoint: 251 focused tests passed. AST body comparison
+against the original commit confirms identical bodies for 55 extracted methods
+(including M2 input helpers); runtime parity remains the acceptance authority.
+Execution decomposition is being prepared separately for integration.
