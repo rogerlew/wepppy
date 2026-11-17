@@ -243,3 +243,10 @@ without changing the prior coherent result set; that untouched set may remain
 current. Once invalidation succeeds, any preparation/run failure stays non-current.
 This distinction prevents a rejected request from being treated as a completed
 replacement, and does not permit restoring old readiness after partial mutation.
+
+## RUPC-01 partial-crossing amendment
+
+The accepted [unrutted strip contract](roads-unrutted-strip-contract.md) defines the bounded
+geometry, accounting and lifecycle delta. Implementation conformance is pending. RUPC-01 supersedes conflicting unrutted
+geometry, eligibility and preparation provisions above. Unrelated road
+designs, parameterization ownership and lifecycle safeguards remain unchanged.

@@ -196,3 +196,10 @@ For behavior-changing overrides, verify saved project state -> reload -> prepara
 comparisons. Preserve source and baseline-WEPP artifacts. Unit tests alone cannot
 establish runtime consumer behavior or lifecycle correctness. Native-source readback
 in this inventory establishes mechanisms; it is not a new native execution result.
+
+## RUPC-01 partial-crossing amendment
+
+The accepted [unrutted strip contract](roads-unrutted-strip-contract.md) defines the bounded
+geometry, accounting and lifecycle delta. Implementation conformance is pending. RUPC-01 supersedes conflicting unrutted
+geometry, eligibility and preparation provisions above. Unrelated road
+designs, parameterization ownership and lifecycle safeguards remain unchanged.

@@ -1117,3 +1117,10 @@ wiring. Independent scientific/technical review does not substitute for that
 approval. Before approval, permitted work includes disposable generated-input
 experiments and static specification/layout proposals. Preserve existing project
 behavior, explicit version adoption and the standard contract-first checkpoint.
+
+## RUPC-01 partial-crossing amendment
+
+The accepted [unrutted strip contract](../../../../docs/schemas/roads-unrutted-strip-contract.md) defines the bounded
+geometry, accounting and lifecycle delta. Implementation conformance is pending. RUPC-01 supersedes conflicting unrutted
+geometry, eligibility and preparation provisions above. Unrelated road
+designs, parameterization ownership and lifecycle safeguards remain unchanged.

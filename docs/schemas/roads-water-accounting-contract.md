@@ -174,3 +174,11 @@ not independently make old beta files current. Historical compatibility descript
 in this contract apply to explicit diagnostic reads only. Direct Roads-scoped
 reports require current admission before accounting validation. Retained historical
 snapshots include the accounting ledger and original prepared/manifest context.
+
+## RUPC-01 geometry boundary
+
+The accepted [unrutted strip amendment](roads-unrutted-strip-contract.md) changes
+pre-execution geometry allocation under RUPC-01; implementation conformance is pending. Keep this contract's
+full native source-area accounting, zero-contributor baseline equivalence,
+replacement precedence and WAT/PASS serialization reconciliation. Geometry area
+closure does not authorize post-execution rescaling to hide native discrepancies.

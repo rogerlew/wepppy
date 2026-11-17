@@ -358,3 +358,10 @@ identity, groups, mounts, umask and orchestration. Use canonical wctl focused,
 frontend and substantive full-suite gates and independent correctness, scientific,
 security and UX reviews. Preapproval studies and static layout reviews cannot
 certify that future workflow. No deployment is authorized.
+
+## RUPC-01 partial-crossing amendment
+
+The accepted [unrutted strip contract](roads-unrutted-strip-contract.md) defines the bounded
+geometry, accounting and lifecycle delta. Implementation conformance is pending. RUPC-01 supersedes conflicting unrutted
+geometry, eligibility and preparation provisions above. Unrelated road
+designs, parameterization ownership and lifecycle safeguards remain unchanged.
