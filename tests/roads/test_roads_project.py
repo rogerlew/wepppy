@@ -3,7 +3,8 @@ import os
 from pathlib import Path
 import pytest
 
-from tests.roads.roads_project import DESIGNS, validate_project, verify_negative
+from tests.roads.roads_project import validate_project
+from tests.roads.unrutted_project import validate_unrutted_project
 
 pytestmark = [pytest.mark.integration, pytest.mark.slow]
 
@@ -16,14 +17,24 @@ def source_site():
     return Path(source).resolve(strict=True)
 
 
-@pytest.mark.parametrize("design", DESIGNS)
+@pytest.mark.parametrize("design", ("inslope_bd", "inslope_rd", "outslope_rutted"))
 def test_design_project(source_site, tmp_path, design):
-    validate_project(source_site, tmp_path / design, design,
-                     exclude_infeasible_unrutted=design == "outslope_unrutted")
+    validate_project(source_site, tmp_path / design, design)
 
 
-def test_full_upload_unrutted_rejection(source_site, tmp_path):
-    root = tmp_path / "unrutted_negative"
-    with pytest.raises(RuntimeError, match="segment execution failed for 2 segment"):
-        validate_project(source_site, root, "outslope_unrutted")
-    verify_negative(source_site, root)
+@pytest.fixture
+def unrutted_source_site():
+    source = os.environ.get("ROADS_UNRUTTED_VALIDATION_SOURCE")
+    if not source:
+        pytest.skip("Set ROADS_UNRUTTED_VALIDATION_SOURCE to the pinned misty-eyed-divorcee fixture")
+    return Path(source).resolve(strict=True)
+
+
+def test_full_upload_unrutted_top_placement(unrutted_source_site, tmp_path):
+    result = validate_unrutted_project(unrutted_source_site, tmp_path / "unrutted_positive", fill_length_m=5.)
+    assert result["status"] == "completed"
+
+
+def test_full_upload_unrutted_oversized_geometry(unrutted_source_site, tmp_path):
+    result = validate_unrutted_project(unrutted_source_site, tmp_path / "unrutted_negative", fill_length_m=30.)
+    assert result["status"] == "failed" and result["readback"]["current_receipt_absent"]

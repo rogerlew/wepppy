@@ -22,29 +22,37 @@ Native PASS/WAT readers and the production segment summary calculate the metrics
 there is no second Python model. The committed report and machine-readable
 summary are publication artifacts; raw inputs/outputs remain under basetemp.
 
-Full-project checks require the local site and fresh destinations. They are also
-available as opt-in pytest cases via `ROADS_VALIDATION_SOURCE=/wc1/runs/cl/clogging-starch`
-and `wctl run-pytest tests/roads/test_roads_project.py`; default suite runs skip them. Each uses the
-actual controller upload/prepare/run lifecycle, explicit feature design values,
-and independent daily area/water reconciliation. For each of `inslope_bd`,
-`inslope_rd`, `outslope_rutted`, and `outslope_unrutted`, run:
+Full-project checks require local sites and fresh destinations. The opt-in
+`test_roads_project.py` suite uses two settings **inside the test container**:
+`ROADS_VALIDATION_SOURCE=/wc1/runs/cl/clogging-starch` for `inslope_bd`,
+`inslope_rd`, and `outslope_rutted`; and
+`ROADS_UNRUTTED_VALIDATION_SOURCE=/wc1/runs/mi/misty-eyed-divorcee` for the two
+current unrutted controls. Host-only environment assignments are not automatically
+forwarded by `wctl run-pytest`. With these container settings, run
+`wctl run-pytest tests/roads/test_roads_project.py`; otherwise those cases skip.
+Each uses the actual controller upload/prepare/run lifecycle and checks original
+source and copied baseline hashes. The additive designs also support:
 
 ```bash
 wctl exec weppcloud python -m tests.roads.roads_project \
   /wc1/runs/cl/clogging-starch /wc1/runs/ro/roads-validation-UNIQUE DESIGN
 ```
 
-Full-upload unrutted acceptance follows the current RUPC-02 top-placement
-contract. Non-positive ordinary upstream length alone is no longer a negative
-control; road plus fill exceeding hillslope length remains an explicit failure.
-The opt-in `test_roads_project.py` suite and the existing `--verify-negative` and
-`--exclude-infeasible-unrutted` helpers encode
-historical two-failure/OSUNUM6 expectations and require reconciliation before
-current-policy acceptance. Do not use those historical expectations as the oracle
-for a fresh refactor comparison. Preserve earlier reports as historical evidence.
-See the [current validation contract](../../docs/schemas/roads-validation-suite-contract.md#full-upload-unrutted-acceptance-after-rupc-02).
-`--verify-existing` rechecks a completed run's artifacts and recorded source
-hashes without repeating the model execution, subject to the recorded policy.
+Current unrutted tests use `unrutted_project.validate_unrutted_project`, pin the
+55-feature source upload, and exclude no features. The synthetic 5 m-fill control
+must complete with current-result admission, native OFE role/area readback and
+independent daily water reconciliation. The separate 30 m-fill control must retain
+five explicit `failed_road_fill_exceeds_hillslope` failures and no current receipt.
+Both prescribe fill slope 10%, buffer length 30 m and buffer slope 10%; these are
+acceptance geometry inputs, not measured-site predictions or new defaults.
+
+The historical `--verify-negative`, `--exclude-infeasible-unrutted`, and unrutted
+`--verify-existing` helper paths in `roads_project.py` retain their earlier
+OSUNUM6/two-failure/three-or-four-OFE assumptions for historical verification.
+Do not use them to judge fresh RUPC-02 results or regenerate an earlier report.
+Non-positive ordinary upstream length alone is no longer a rejection; road plus
+fill exceeding hillslope length remains an explicit failure. See the
+[current validation contract](../../docs/schemas/roads-validation-suite-contract.md#full-upload-unrutted-acceptance-after-rupc-02).
 
 Never point the destination at the original site or an existing project. The
 runner refuses existing destinations and verifies source and copied baseline

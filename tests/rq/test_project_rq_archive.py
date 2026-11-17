@@ -126,6 +126,11 @@ def archive_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     import wepppy.rq.project_rq as project
     from wepppy.rq import project_rq_archive as archive_module
 
+    # Ordinary archive fixtures have no vector-retention filesystem. Tests that
+    # exercise that boundary explicitly supply their identity and real ledger.
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", raising=False)
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", raising=False)
+
     published: list[tuple[str, str]] = []
     prep_by_run: dict[str, _PrepStub] = {}
 
