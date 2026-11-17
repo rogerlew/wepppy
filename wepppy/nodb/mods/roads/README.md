@@ -46,9 +46,18 @@ road width as road OFE length. Strips and remainder conserve original hillslope
 area. Width compression reports modeled road-area loss explicitly.
 
 This is a simplified parallel-profile abstraction: switchbacks and shared upslope
-contributing areas are not resolved. Missing fill/buffer inputs and non-positive
-upslope lengths still fail explicitly. Reprepare existing unrutted candidates
-before running the new policy. See the
+contributing areas are not resolved. Missing fill/buffer inputs still fail explicitly. RUPC-02 places a road at the
+profile top when ordinary upstream length is non-positive, omitting that OFE.
+The road receives no modeled upstream runon. Road/fill dimensions stay fixed;
+positive downhill landuse (even below 10 m) preserves area, and exact fit uses
+road/fill only. A road plus fill longer than the hill fails with dimensions to
+inspect. Area compensation stays downhill for top-placed strips.
+
+Existing strip preparation remains reusable; Run again is required for current
+`unrutted_top_placement_v1` results. Earlier preparation still requires Prepare.
+The summary holds the authoritative placement marker; per-crossing provenance
+records original/final lengths and separate top/bottom compensation. Old archives
+restore as historical only after their ordinary artifact checks pass. See the
 [strip contract](../../../../docs/schemas/roads-unrutted-strip-contract.md) and
 [implementation specification](specification.md#settled-step-4-contract-details-implemented-2026-04-08).
 

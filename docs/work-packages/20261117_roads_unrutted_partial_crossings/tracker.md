@@ -1,7 +1,7 @@
 # Unrutted partial-crossing tracker
 
 **Updated:** 2026-11-17 UTC
-**Status:** Active RUPC-02 contract amendment; RUPC-01 locally complete. No deployment or full-site repair.
+**Status:** RUPC-01/RUPC-02 locally implemented and validated. No deployment or site calibration.
 **Branch:** `work/roads-unrutted-strip-contract`
 **Worktree:** `/tmp/wepppy-roads-unrutted-strip-contract`
 **Contract ancestor:** `8e87b236301364c4b743fd7bec87b7640b35cd46`
@@ -82,13 +82,37 @@ it does not erase the retained eight-failure evidence.
 
 - [x] Draft canonical placement, role ordering, area and lifecycle amendments; update ADR.
 - [x] Complete two independent contract reviews; standalone checkpoint committed.
-- [ ] Implement adjusted layouts, provenance and execution-policy admission.
-- [ ] Run scoped regressions and native full-upload retry with per-crossing disposition.
-- [ ] Complete fresh correctness/security reviews and user/operator documentation.
+- [x] Implement adjusted layouts, provenance and execution-policy admission.
+- [x] Run 199 scoped tests and native full-upload retries with all eight prior failures dispositioned.
+- [x] Complete fresh correctness/security reviews and user/operator documentation.
 
-The current requested delivery is the contract amendment. No RUPC-02 runtime
-changes or new model tests have been performed. Native acceptance must retain
-unresolved crossings honestly; synthetic fill/buffer values are not site calibration.
+The operator subsequently approved implementation. RUPC-02 is now locally
+complete; synthetic fill/buffer values remain validation fixtures, not site calibration.
 
 RUPC-02 standalone contract checkpoint: `f46d59422009d5adb8641b1d2b7494cd5f9b788a`.
 Both reviews pass; no RUPC-02 implementation edits precede this ancestor.
+
+### RUPC-02 validation and remaining limits
+
+- `artifacts/20261117_top_placement_scoped_tests.log`: 199 passed, two existing
+  dependency deprecation warnings; six affected modules, no full repository suite.
+- `artifacts/20261117_top_placement_native_evidence.json`: exact native input hashes,
+  area readback, 24-profile full-upload run with synthetic 5 m fill, replacement
+  receipts and watershed consumer inputs, 5,844 daily report rows, inspection
+  disclosure, unchanged original source, and all eight prior failures dispositioned.
+- Native exact fit (24.3 m hill, 4.1 m road, 20.2 m fill) emits road/fill only;
+  25.3 m hill adds 1 m downhill landuse. Each produces 5,844 parsed daily PASS rows.
+- Original synthetic 30 m fill run: crossings on 42, 82 and 141 now execute with
+  top placement. Hills 43, 62, 63 and two crossings on 143 still fail because
+  4 m road + 30 m fill exceeds their approximately 25–30 m hillslope lengths.
+- Correctness review closed decimal exact-fit and failure-provenance findings.
+  Security review closed historical-restore validation and marker/design bypasses.
+  See `artifacts/20261117_top_placement_reviews.md`; no medium/high findings remain.
+- Broad-exception enforcement passes, net zero new catches. Documentation and ADR
+  checks pass. Code-quality telemetry is observe-only; radon was unavailable.
+
+Retained copies: `/wc1/runs/ru/rupc2-misty-validation` (30 m fill, five expected
+failures), `/wc1/runs/ru/rupc2-misty-shortfill` (5 m fill, completed watershed), and
+`/wc1/runs/ru/rupc2-native-shapes-accepted` (native exact/short shapes). No source
+project mutation, production deployment, or claim that the 5 m fill is correct
+for Marta's roads. Top placement explicitly assumes no runoff from land above.

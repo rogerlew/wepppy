@@ -83,10 +83,20 @@ whether multiple road portions intercept the same upstream area. Shared crossing
 profiles are shown on each contributing road feature; do not sum their totals
 across those features. Canonical profile summaries count each profile once.
 
-After upgrading, **Prepare Segment Candidates** again before running unrutted
-roads. If a road, fill and downstream section leave no positive upslope length,
-execution fails explicitly. Check the supplied dimensions and recorded placement;
-do not assume a longer road or a smaller eligibility threshold resolves that case.
+If the terrain-based road position leaves no room uphill in the modeled profile,
+the road is placed at the profile top. The model includes no runoff from land
+above that road; this does not mean the actual road is on a ridge. Road and fill
+dimensions stay unchanged, and the remaining area goes downhill. The result
+inspection identifies adjusted profiles.
+
+If road width plus fill length exceeds the modeled hillslope length, the run
+still fails. Check the supplied fill dimensions and hillslope geometry; the model
+does not silently shorten the fill. Required fill/buffer fields must be supplied.
+
+After the top-placement upgrade, run Roads again to generate current results.
+Candidates already prepared with the strip model can be reused. Older candidates
+from before that model still require **Prepare Segment Candidates**. Previous
+outputs remain historical, including after archive restore.
 
 
 ## Prepare a GeoJSON road file

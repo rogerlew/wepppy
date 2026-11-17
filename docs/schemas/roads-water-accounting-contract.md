@@ -183,12 +183,12 @@ full native source-area accounting, zero-contributor baseline equivalence,
 replacement precedence and WAT/PASS serialization reconciliation. Geometry area
 closure does not authorize post-execution rescaling to hide native discrepancies.
 
-### RUPC-02 top-placement amendment (implementation pending)
+### RUPC-02 top-placement amendment (locally validated 2026-11-17)
 
 The [RUPC-02 placement contract](roads-unrutted-strip-contract.md#rupc-02-top-of-hillslope-placement)
 supersedes rejection solely for non-positive upstream length. Its native role order,
 additive provenance, downstream area compensation and execution-policy admission
 are authoritative. Preparation geometry stays compatible; old executions require
 Run again to become current under RUPC-02. Existing parameter defaults, PASS
-accounting, history retention and other designs remain unchanged. Prior RUPC-01
-validation does not establish this amendment's conformance.
+accounting, history retention and other designs remain unchanged. RUPC-02 conformance has separate scoped/native evidence in the work package;
+production rollout remains separate.

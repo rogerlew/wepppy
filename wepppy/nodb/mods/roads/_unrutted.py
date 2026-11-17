@@ -7,6 +7,7 @@ from __future__ import annotations
 import hashlib
 import math
 from collections import defaultdict
+from decimal import Decimal
 from pathlib import Path
 
 from shapely.geometry import LineString, MultiLineString
@@ -14,6 +15,7 @@ from shapely.ops import linemerge, unary_union
 from shapely.strtree import STRtree
 
 POLICY = "unrutted_strips_v1"
+PLACEMENT_POLICY = "unrutted_top_placement_v1"
 LIMITATION = "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved."
 AREA_EPSILON_M2 = 1e-6
 
@@ -126,3 +128,62 @@ def slope_area(path):
     if not math.isfinite(area) or area <= 0:
         raise ValueError("Emitted unrutted profile area must be finite and positive.")
     return area
+
+
+def placement(hillslope_length, road_length, fill_length, distance, landuse_min):
+    """RUPC-02: omit upstream landuse if the terrain anchor exceeds the profile."""
+    if not all(math.isfinite(v) and v > 0 for v in (hillslope_length, road_length, fill_length, landuse_min)):
+        raise ValueError("Unrutted profile lengths must be finite and positive.")
+    if not math.isfinite(distance) or distance < 0:
+        raise ValueError("Unrutted distance to channel must be finite and nonnegative.")
+    bottom = max(0.0, distance - fill_length)
+    if bottom < landuse_min:
+        bottom = 0.0
+    # Compare the supplied decimal dimensions, avoiding a spurious sub-native
+    # landuse OFE from binary cancellation (e.g. 24.3 - 4.1 - 20.2).
+    remaining = float(Decimal(str(hillslope_length)) - Decimal(str(road_length)) - Decimal(str(fill_length)))
+    original_top = remaining - bottom
+    adjusted = original_top <= 0
+    fits = remaining >= 0
+    if adjusted and fits:
+        bottom = remaining
+    return {
+        "fits": fits,
+        "placement_policy": PLACEMENT_POLICY,
+        "placement_adjustment": "top_of_hillslope" if adjusted else "none",
+        "placement_adjustment_reason": "non_positive_upstream_length" if adjusted else None,
+        "original_top_landuse_length_m": original_top,
+        "hillslope_length_m": hillslope_length,
+        "upslope_runon_assumed_zero": adjusted,
+        "top_landuse_length_m": 0.0 if adjusted else original_top,
+        "bottom_landuse_length_m": bottom,
+    }
+
+
+def compensate(plan, length):
+    """Put area corrections downhill for top placement, never on the road/fill."""
+    side = "bottom" if plan["placement_adjustment"] == "top_of_hillslope" else "top"
+    key = f"{side}_landuse_length_m"
+    adjusted = plan[key] + length
+    if not math.isfinite(adjusted) or adjusted < 0 or (side == "top" and adjusted == 0):
+        return False
+    plan[key] = adjusted
+    plan[f"{side}_ofe_compensation_m"] += length
+    plan["has_downslope_landuse"] = plan["bottom_landuse_length_m"] > 0
+    return True
+
+
+def profile_parts(plan):
+    """Return aligned native lengths/slopes/template roles, omitting absent landuse."""
+    lengths = [plan["parity_profile"]["sim_length_m"], plan["fill_profile"]["fill_length_m"]]
+    slopes = [0.04, plan["fill_profile"]["fill_slope_pct"] / 100]
+    roles = [1, 2]
+    if plan["top_landuse_length_m"] > 0:
+        lengths.insert(0, plan["top_landuse_length_m"])
+        slopes.insert(0, plan["top_landuse_slope_pct"] / 100)
+        roles.insert(0, 3)
+    if plan["bottom_landuse_length_m"] > 0:
+        lengths.append(plan["bottom_landuse_length_m"])
+        slopes.append(plan["bottom_landuse_slope_pct"] / 100)
+        roles.append(3)
+    return lengths, slopes, tuple(roles)

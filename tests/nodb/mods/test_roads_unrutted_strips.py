@@ -105,3 +105,37 @@ def test_manifest_detail_associates_shared_sources(tmp_path):
                                 'segment_run_id': 900001, 'status': 'completed'}]))
     records = Roads._load_segment_execution_manifest(SimpleNamespace(roads_segment_pass_manifest_path=str(path)))
     assert records['a']['segment_run_id'] == records['b']['segment_run_id'] == 900001
+
+
+@pytest.mark.parametrize("hill,road,fill,distance", [(float("inf"),4,20,100), (30,4,0,100), (30,4,20,float("nan")), (30,4,20,-1)])
+def test_placement_rejects_invalid_dimensions(hill, road, fill, distance):
+    with pytest.raises(ValueError):
+        _unrutted.placement(hill, road, fill, distance, 10)
+
+
+def test_top_placement_remainder_stays_downhill(tmp_path):
+    plan = _unrutted.placement(24., 4., 20., 100., 10.)
+    plan.update(parity_profile={"sim_length_m": 4.}, fill_profile={"fill_length_m":20., "fill_slope_pct":10.},
+                top_landuse_slope_pct=10., bottom_landuse_slope_pct=10.,
+                top_ofe_compensation_m=0., bottom_ofe_compensation_m=0.)
+    assert _unrutted.profile_parts(plan)[2] == (1, 2)
+    # A 0.2m remainder is absorbed by the 99.8m strip, conserving 100*24m².
+    assert _unrutted.compensate(plan, .2 * 24 / 99.8)
+    assert plan["top_landuse_length_m"] == plan["top_ofe_compensation_m"] == 0
+    assert plan["bottom_ofe_compensation_m"] > 0
+    lengths, slopes, roles = _unrutted.profile_parts(plan)
+    assert roles == (1, 2, 3)
+    assert _unrutted.write_slope(tmp_path/'top.slp',99.8,lengths,slopes) == pytest.approx(2400., abs=1e-6)
+    assert not _unrutted.compensate(plan, -1.)
+
+
+
+@pytest.mark.parametrize("distance", [1., 100.])
+def test_decimal_exact_fit_emits_only_road_and_fill(tmp_path, distance):
+    plan = _unrutted.placement(24.3, 4.1, 20.2, distance, 10.)
+    assert plan["fits"]
+    assert plan["bottom_landuse_length_m"] == 0.
+    plan.update(parity_profile={"sim_length_m":4.1}, fill_profile={"fill_length_m":20.2,"fill_slope_pct":10.})
+    lengths, slopes, roles = _unrutted.profile_parts(plan)
+    assert roles == (1, 2)
+    assert _unrutted.write_slope(tmp_path/'exact.slp',100.,lengths,slopes) == pytest.approx(2430.)

@@ -1,6 +1,6 @@
 # ADR-0146: Simplified unrutted partial-crossing strips
 
-Status: RUPC-01 accepted and locally validated; RUPC-02 amendment accepted/reviewed, implementation pending
+Status: RUPC-01 accepted and locally validated; RUPC-02 accepted, implemented and locally validated
 Date: 2026-11-17
 
 ## Context
@@ -88,3 +88,17 @@ by the new placement policy marker and require rerun. Revert through normal
 commit-preserving history and rerun under the selected policy; never relabel old
 outputs. Scoped native profile/PASS/watershed evidence is required before claiming
 conformance or that any of the eight crossings is repaired.
+
+### RUPC-02 implementation evidence
+
+199 scoped tests pass and both independent implementation reviews pass. Native
+exact-fit road/fill and 1 m downstream profiles each produce 5,844 daily PASS rows.
+Use decimal input-dimension subtraction for the exact-fit boundary to avoid
+binary cancellation creating a positive section that serializes to zero; this
+adds no physical length tolerance and does not drop meaningful short landuse.
+
+With the original synthetic 30 m fills, three of the eight old failures now execute;
+five explicitly exceed hillslope length. A separate synthetic 5 m-fill full-upload
+experiment completes 24 contributors/remainders and the watershed/report chain.
+These inputs are validation fixtures, not measured site dimensions. See
+`20261117_top_placement_native_evidence.json` in the active package. No deployment.

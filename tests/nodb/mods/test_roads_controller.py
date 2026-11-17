@@ -2881,10 +2881,14 @@ def test_select_outslope_unrutted_hillslope_segments_applies_minimum_and_cap_wit
 
 @pytest.mark.usefixtures("modeled_accounting_stub")
 @pytest.mark.parametrize("legacy_prepare", [False, True])
+@pytest.mark.parametrize("hill_length,expected_roles,native_failure", [(300., (3, 1, 2, 3), False), (25., (1, 2, 3), False), (24., (1, 2), False), (23., None, False), (25., (1, 2, 3), True)])
 def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     legacy_prepare: bool,
+    hill_length: float,
+    expected_roles,
+    native_failure,
 ) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
 
@@ -2930,7 +2934,7 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     watershed_instance = SimpleNamespace(
         delineation_backend_is_wbt=True,
         translator_factory=lambda: translator,
-        hillslope_length=lambda _topaz_id: 300.0,
+        hillslope_length=lambda _topaz_id: hill_length,
         hillslope_width=lambda _topaz_id: 100.0,
         discha=str(discha_path),
     )
@@ -3056,10 +3060,11 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
         "_resolve_legacy_soil_template_path",
         lambda self, **_kwargs: soil_template_path,
     )
+    emitted_roles = []
     monkeypatch.setattr(
         Roads,
         "_build_routed_mofe_management_file",
-        lambda self, *, output_path, **_kwargs: Path(output_path).write_text("management", encoding="utf-8"),
+        lambda self, *, output_path, ofe_order, **_kwargs: (emitted_roles.append(ofe_order), Path(output_path).write_text("management", encoding="utf-8")),
     )
     monkeypatch.setattr(
         Roads,
@@ -3107,15 +3112,48 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
         with pytest.raises(ValueError, match="Prepare and run Roads again"):
             controller.run_roads_wepp()
         return
+    if expected_roles is None:
+        with pytest.raises(RuntimeError, match="1 segment"):
+            controller.run_roads_wepp()
+        failure = controller._last_run_summary["segment_execution_records"][0]
+        assert failure["reason"] == "failed_road_fill_exceeds_hillslope"
+        assert failure["hillslope_length_m"] == hill_length
+        assert failure["fill_length_m"] == 20.
+        assert failure["road_width_m"] == 4.
+        assert not emitted_roles
+        return
+    if native_failure:
+        def fail_native(*_args, **_kwargs):
+            raise RuntimeError("native probe failed")
+        monkeypatch.setattr(Roads, "_run_segment_hillslope", fail_native)
+        with pytest.raises(RuntimeError, match="1 segment"):
+            controller.run_roads_wepp()
+        failure = controller._last_run_summary["segment_execution_records"][0]
+        assert failure["reason"] == "segment_run_failed"
+        assert failure["placement_adjustment"] == "top_of_hillslope"
+        assert failure["placement_source"] == "distance_to_channel_median"
+        assert failure["discha_median_m"] == 100.
+        assert failure["top_landuse_length_m"] == 0.
+        assert failure["bottom_landuse_length_m"] == 1.
+        assert failure["original_top_landuse_length_m"] == -79.
+        return
     summary = controller.run_roads_wepp()
     record = summary["segment_execution_records"][0]
+    assert emitted_roles == [expected_roles]
+    assert record["contributor_ofe_count"] == len(expected_roles)
+    assert record["placement_policy"] == "unrutted_top_placement_v1"
+    assert summary["unrutted_placement_policy"] == "unrutted_top_placement_v1"
+    assert record["upslope_runon_assumed_zero"] == (hill_length < 300)
+    assert record["top_landuse_length_m"] == (196. if hill_length == 300 else 0.)
+    slope_lines = (Path(controller.roads_runs_dir) / "p900001.slp").read_text().splitlines()
+    assert int(slope_lines[1]) == len(expected_roles)
     assert record["sim_length_m"] == 4.0
     assert record["road_target_area_m2"] == pytest.approx(444.0)
     assert record["road_modeled_area_m2"] == pytest.approx(400.0)
     assert record["road_area_deficit_m2"] == pytest.approx(44.0)
     assert record["strip_width_factor"] == pytest.approx(100.0 / 111.0)
     hill = summary["outslope_unrutted_hillslope_records"][0]
-    assert hill["reference_area_m2"] == pytest.approx(30000.0)
+    assert hill["reference_area_m2"] == pytest.approx(100. * hill_length)
     assert abs(hill["emitted_area_residual_m2"]) <= 1e-6
 
 

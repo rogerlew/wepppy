@@ -36,7 +36,7 @@ does not establish correct physical allocation of contributing area.
 
 - [x] (2026-11-17 UTC) RUPC-02 top-placement amendment drafted at operator direction.
 - [x] RUPC-02 independent contract reviews pass; checkpoint `f46d59422` committed.
-- [ ] RUPC-02 implementation, scoped native evidence and final reviews.
+- [x] (2026-11-17 UTC) RUPC-02 implemented; 199 scoped tests, fresh native full-upload/shape evidence and both reviews pass.
 
 ## Surprises & Discoveries
 
@@ -88,8 +88,8 @@ result joins; endpoint traversal/spatial indexing and membership-aware readers f
 these with regressions. Both reviewers pass, 191 scoped tests pass. Deployment,
 integration and publication remain separate. See tracker and retained artifacts.
 
-RUPC-02 reopens implementation work; prior completion and tests describe RUPC-01
-only. Current delivery is contract amendments, not a new execution claim.
+RUPC-02 follow-up is now implemented and locally validated. Original RUPC-01
+receipts remain historical; the separate RUPC-02 receipts establish new conformance.
 
 ## Context and Orientation
 
@@ -267,7 +267,8 @@ Start from implementation `e6989a622f7aea86126d098f48e2e57c15f35b61` in the same
 worktree/branch. Amend the canonical strip contract and ADR-0146, update the Roads
 specification and affected lifecycle/settings/accounting cross-references. Record
 approval and two independent read-only reviews in `artifacts/20261117_top_placement_contract.md`.
-Commit a standalone checkpoint before code. This turn delivers contracts only.
+Standalone checkpoint `f46d59422` was committed before code; the operator then
+approved implementation, now locally complete.
 
 For later implementation, edit the placement branch in `Roads.run_roads_wepp`
 in `wepppy/nodb/mods/roads/roads.py`: ordinary upstream <= 0 selects top placement;
@@ -295,3 +296,24 @@ update user/operator help before claiming completion. New deployment is outside 
 
 Revision note: 2026-11-17 RUPC-02 adds operator-requested top placement as a
 contract-only amendment; implementation/native conformance remain pending.
+
+## RUPC-02 execution retrospective
+
+
+The top-placement branch is wired through native role selection, PASS aggregation,
+inspection and current-result admission. Decimal exact-fit arithmetic prevents a
+false tiny OFE; failure records preserve known placement and null unavailable
+values. Historical archive policy downgrade follows ordinary corruption checks;
+prepared-source design, not a mutable manifest label alone, determines provenance
+requirements. These were independent-review findings, all closed with regressions.
+
+199 scoped tests pass. Native exact-fit road/fill and road/fill/1 m landuse produce
+5,844 daily rows each. Full copied upload with 30 m synthetic fills resolves three
+of eight old failures, retaining five real dimension-fit failures. A separately
+labeled 5 m-fill experiment completes 24 profiles and watershed/report generation.
+Area/PASS/consumer readback and unchanged source inventories are retained. Tests
+remain limited to changed paths and affected consumers. No deployment or site
+calibration is claimed. This completes M5 implementation and local conformance.
+
+Revision note: 2026-11-17 operator approved implementation after checkpoint;
+progress, discoveries, outcomes and evidence now distinguish both native experiments.

@@ -1,6 +1,6 @@
 # Scoped acceptance and evidence matrix
 
-**Status:** RUPC-01 validated (191 scoped tests and native slices); RUPC-02 cases below pending.
+**Status:** RUPC-01 validated (191 scoped tests and native slices); RUPC-02 validated with 199 scoped tests and separate native receipts.
 **Operator direction:** 2026-11-17, “scope tests to the implementation changes.”
 Do not run the full repository suite or unrelated frontend/stub gates. Select
 specific tests for changed functions and confirmed consumers; add adjacent tests
@@ -70,7 +70,7 @@ dedicated security review for native/file boundaries, and no unresolved medium/h
 findings. Reviews must cite executed scoped evidence and name uncovered limits.
 Scaffolding is not a passing review or a completed implementation.
 
-## RUPC-02 incremental acceptance (pending)
+## RUPC-02 incremental acceptance (validated locally)
 
 | Case | Required evidence |
 | --- | --- |
@@ -95,3 +95,9 @@ Old affected archives restore successfully as historical without provenance edit
 unaffected archives keep existing admission. Failed attempts never become current
 merely by having a marker. Read back upstream/downstream compensation fields
 separately so area transfer is not mislabeled.
+
+RUPC-02 receipts: `20261117_top_placement_scoped_tests.log`,
+`20261117_top_placement_native_evidence.json`, and
+`20261117_top_placement_reviews.md`. Original 30 m-fill inputs deliberately retain
+five fit failures; the 5 m-fill full run is separately labeled synthetic acceptance.
+No deployment or scientific site calibration is implied.

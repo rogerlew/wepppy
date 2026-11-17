@@ -1,6 +1,6 @@
 # Unrutted Roads partial-crossing strips
 
-**Status:** Active: RUPC-01 implemented locally; RUPC-02 top-placement contract amendment reviewed, implementation pending.
+**Status:** RUPC-01 and RUPC-02 implemented and validated locally; deployment and site calibration not claimed.
 Operator authorized plan execution and forest run mutation/forking on 2026-11-17.
 **Created:** 2026-11-17 17:45 UTC
 **Owner:** Roger Lew; implementer: Codex. Scaffold author: Codex.
@@ -120,8 +120,16 @@ See tracker and native evidence for exact limits. No wepp1 deployment.
 Extend this package on the same branch from `e6989a622f7aea86126d098f48e2e57c15f35b61`.
 The operator authorized top-placement contract amendments on 2026-11-17. Follow
 [the canonical RUPC-02 rule](../../schemas/roads-unrutted-strip-contract.md#rupc-02-top-of-hillslope-placement).
-Amendment acceptance is pending: omitted upstream OFE, native road/fill and
+Amendment acceptance is complete locally: omitted upstream OFE, native road/fill and
 road/fill/landuse layouts, preserved area, visible adjustment and zero upstream
 runon assumption, explicit oversize road/fill failure, and execution-policy
 invalidation without forced reprepare. Existing scope exclusions and scoped-test
 direction remain. Prior completed checkboxes and receipts cover RUPC-01 only.
+
+## RUPC-02 local outcome
+
+Reviewed checkpoint `f46d59422` precedes runtime edits. 199 scoped tests and both
+independent implementation reviews pass. Native exact-fit and short-downstream
+profiles pass; original synthetic 30 m fill resolves three old failures and leaves
+five honest road/fill fit errors. Separate 5 m-fill experiment completes the full
+watershed chain. Evidence and caveats are in the tracker; no deployment occurred.

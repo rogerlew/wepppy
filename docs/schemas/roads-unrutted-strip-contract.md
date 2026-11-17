@@ -2,8 +2,8 @@
 
 Status: RUPC-01 accepted 2026-11-17 by Roger Lew; both original contract reviews pass.
 RUPC-02 top-placement amendment authorized 2026-11-17; both independent reviews
-pass. Implementation conformance
-is pending. Prior validation below covers RUPC-01 only.
+pass. RUPC-02 implementation and scoped native forest conformance were validated
+2026-11-17 (199 scoped tests). No deployment is claimed.
 Implementation and scoped forest conformance validated 2026-11-17; no production
 deployment or full-site repair claimed. RUPC-01 supersedes conflicting unrutted geometry
 and eligibility provisions in the Roads specification after this standalone
@@ -95,7 +95,7 @@ and emitted geometry; native output serialization differences must be visible.
 
 ## RUPC-02: top-of-hillslope placement
 
-This amendment changes intended behavior; implementation is pending. Terrain
+This amendment is implemented and locally validated. Terrain
 channel distance and representative WEPP hillslope length are different measures.
 When the ordinary placement above computes upslope length <= 0, place the road
 at the top of the abstract strip. This is not a claim that the real road is on a

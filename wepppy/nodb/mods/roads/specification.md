@@ -965,7 +965,7 @@ Transverse strip geometry (RUPC-01, superseding the legacy parity transform):
   deficits, never silently extend the road OFE or expand hillslope area.
 - Use RUPC-02 top placement for non-positive ordinary upstream length; omit that
   OFE, retain positive short downhill landuse and place area compensation downhill.
-  Implementation conformance for this amendment is pending. Other placement stays unchanged.
+  Scoped native conformance is validated. Other placement stays unchanged.
 - Serialize unrutted slope dimensions to 12 decimals and read back positive
   dimensions and absolute hillslope-area closure within `1e-6 m²` before execution.
 - Native WAT/PASS area reconciliation retains the modeled-area accounting contract.
@@ -1026,7 +1026,7 @@ Each record in `outslope_unrutted_hillslope_records` must include:
 - `segment_ids_capped`
 - `inclusion_ratio_by_segment`
 - `top_ofe_compensation_m` (upstream only)
-- `bottom_ofe_compensation_m` (RUPC-02 downstream adjustment; implementation pending)
+- `bottom_ofe_compensation_m` (RUPC-02 downstream adjustment)
 - `area_error_before_compensation_m2`
 - `area_error_after_compensation_m2`
 
@@ -1038,7 +1038,7 @@ Per-segment replacement status codes are limited to:
 - `excluded_cap_limit`
 - `failed_missing_parameter`
 - `failed_non_positive_top_ofe` (invalid upstream compensation; ordinary non-positive placement uses RUPC-02)
-- `failed_road_fill_exceeds_hillslope` (RUPC-02; implementation pending)
+- `failed_road_fill_exceeds_hillslope` (RUPC-02)
 
 ### Remaining Deferred Details
 
@@ -1135,13 +1135,13 @@ behavior, explicit version adoption and the standard contract-first checkpoint.
 ## RUPC-01 partial-crossing amendment
 
 The accepted [unrutted strip contract](../../../../docs/schemas/roads-unrutted-strip-contract.md) defines the bounded
-geometry, accounting and lifecycle delta. Implementation conformance is pending. RUPC-01 supersedes conflicting unrutted
+geometry, accounting and lifecycle delta. Scoped RUPC-01/RUPC-02 conformance is validated locally; deployment remains separate. RUPC-01 supersedes conflicting unrutted
 geometry, eligibility and preparation provisions above. Unrelated road
 designs, parameterization ownership and lifecycle safeguards remain unchanged.
 
 ## RUPC-02 top-placement amendment
 
-Implementation pending. The canonical
+Implemented and locally validated 2026-11-17. The canonical
 [top-placement rule](../../../../docs/schemas/roads-unrutted-strip-contract.md#rupc-02-top-of-hillslope-placement)
 supersedes the ordinary non-positive-top failure and upstream-only compensation
 rules above. Top placement emits road/fill/downhill landuse, or road/fill for exact

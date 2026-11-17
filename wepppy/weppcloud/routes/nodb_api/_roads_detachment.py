@@ -166,7 +166,8 @@ def _materialize(root):
             raise ValueError('Roads profile has invalid prepared source membership.')
         for member in members:
             groups[member].append({**{field: row.get(field) for field in PROFILE_FIELDS},
-                                   'shared_crossing_profile': len(members) > 1})
+                                   'shared_crossing_profile': len(members) > 1,
+                                   'upslope_runon_assumed_zero': completed[key].get('upslope_runon_assumed_zero') is True})
     if len(durations) > 1:
         raise ValueError('Roads profiles have inconsistent simulation duration.')
     if not unavailable and summary_ids != set(completed):
@@ -186,6 +187,8 @@ def _materialize(root):
         properties = dict(feature['properties'])
         shared = any(row.get('shared_crossing_profile') for row in profiles)
         reasons = list(incomplete.get(key, []))
+        if any(row.get('upslope_runon_assumed_zero') for row in profiles):
+            reasons.append('Road placed at the top of the modeled hillslope; no runoff from land above the road is included.')
         if shared:
             reasons.append('Shared crossing profile; do not sum its totals across source road features.')
         properties['roads_detachment'] = dict(state=state, reason='; '.join(reasons) or None,

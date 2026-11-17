@@ -1589,6 +1589,12 @@ class Roads(NoDbBase):
             "design_source_key": design_source_key,
             "roads_params_signature": self._params_signature(params),
             "profile_error": profile_error,
+            "placement": {key: execution_record.get(key) for key in (
+                "placement_policy", "placement_adjustment", "placement_adjustment_reason",
+                "placement_source", "original_top_landuse_length_m", "hillslope_length_m",
+                "top_landuse_length_m", "bottom_landuse_length_m", "discha_median_m",
+                "upslope_runon_assumed_zero", "top_ofe_compensation_m", "bottom_ofe_compensation_m",
+            )} if design == "outslope_unrutted" else None,
             "feature_properties": properties,
         }
         self._append_roads_log(
@@ -4311,6 +4317,7 @@ class Roads(NoDbBase):
         failed_run_summary: Optional[Dict[str, Any]] = None
         run_summary_base: Optional[Dict[str, Any]] = None
         current_stage = "startup"
+        placement_marker = {}
         try:
             if not self.enabled:
                 raise ValueError("Roads must be enabled before run_roads_wepp.")
@@ -4318,6 +4325,10 @@ class Roads(NoDbBase):
             self._require_prepare_state_current()
             current_stage = "load_prepared_segments"
             features = self._load_segment_features()
+            field_map = self._normalize_params_with_defaults(getattr(self, "_roads_params", {}))["attribute_field_map"]
+            if any(self._resolve_design_for_feature(properties=f.get("properties", {}),
+                    attribute_field_map=field_map)[0] == "outslope_unrutted" for f in features):
+                placement_marker = {"unrutted_placement_policy": _unrutted.PLACEMENT_POLICY}
             translator = self.watershed_instance.translator_factory()
             top2wepp = dict(getattr(translator, "top2wepp", {}))
             self._append_roads_log(
@@ -5382,25 +5393,21 @@ class Roads(NoDbBase):
                                     discha_median_m = hillslope_length_m * 0.5
                                     placement_source = "mid_hillslope_fallback"
 
-                                downslope_landuse_length_m = max(0.0, float(discha_median_m) - float(fill_profile["fill_length_m"]))
-                                has_downslope_landuse = downslope_landuse_length_m >= OUTSLOPE_UNRUTTED_LANDUSE_MIN_LENGTH_M
-                                if not has_downslope_landuse:
-                                    downslope_landuse_length_m = 0.0
-
-                                top_landuse_length_m = (
-                                    hillslope_length_m
-                                    - float(parity_profile["sim_length_m"])
-                                    - float(fill_profile["fill_length_m"])
-                                    - float(downslope_landuse_length_m)
+                                placement = _unrutted.placement(
+                                    hillslope_length_m, float(parity_profile["sim_length_m"]),
+                                    float(fill_profile["fill_length_m"]), float(discha_median_m),
+                                    OUTSLOPE_UNRUTTED_LANDUSE_MIN_LENGTH_M,
                                 )
-
-                                if top_landuse_length_m <= 0.0:
-                                    _move_outslope_candidate_to_status(candidate, "failed_non_positive_top_ofe")
+                                top_landuse_length_m = placement["top_landuse_length_m"]
+                                downslope_landuse_length_m = placement["bottom_landuse_length_m"]
+                                has_downslope_landuse = downslope_landuse_length_m > 0
+                                if not placement.pop("fits"):
+                                    _move_outslope_candidate_to_status(candidate, "failed_road_fill_exceeds_hillslope")
                                     skipped_segments.append(
                                         {
                                             "segment_id": source_segment_id,
                                             "segment_hillslope_id": segment_hillslope_id,
-                                            "reason": "failed_non_positive_top_ofe",
+                                            "reason": "failed_road_fill_exceeds_hillslope",
                                         }
                                     )
                                     segment_execution_records.append(
@@ -5411,8 +5418,14 @@ class Roads(NoDbBase):
                                             "target_hillslope_topaz_id": int(topaz_id_hill),
                                             "status": "failed",
                                             "routing_mode": "outslope_unrutted_replacement",
-                                            "reason": "failed_non_positive_top_ofe",
+                                            "reason": "failed_road_fill_exceeds_hillslope",
                                             "design": "outslope_unrutted",
+                                            **placement,
+                                            "placement_source": placement_source,
+                                            "discha_median_m": float(discha_median_m),
+                                            "road_width_m": float(parity_profile["sim_length_m"]),
+                                            "fill_length_m": float(fill_profile["fill_length_m"]),
+                                            "error": "Road plus fill exceeds hillslope length; verify supplied dimensions and representative hillslope geometry.",
                                             "overlap_length_m": overlap_length_m,
                                             "inclusion_ratio": inclusion_ratio,
                                         }
@@ -5423,7 +5436,7 @@ class Roads(NoDbBase):
                                             "segment_hillslope_id": segment_hillslope_id,
                                             "target_hillslope_wepp_id": int(wepp_id_int),
                                             "routing_mode": "outslope_unrutted_replacement",
-                                            "reason": "failed_non_positive_top_ofe",
+                                            "reason": "failed_road_fill_exceeds_hillslope",
                                         }
                                     )
                                     self._append_roads_log(
@@ -5432,7 +5445,7 @@ class Roads(NoDbBase):
                                         {
                                             "segment_id": source_segment_id,
                                             "segment_hillslope_id": segment_hillslope_id,
-                                            "reason": "failed_non_positive_top_ofe",
+                                            "reason": "failed_road_fill_exceeds_hillslope",
                                         },
                                     )
                                     strip_failure = True
@@ -5454,6 +5467,8 @@ class Roads(NoDbBase):
                                         "inclusion_ratio": inclusion_ratio,
                                         "discha_median_m": float(discha_median_m),
                                         "placement_source": placement_source,
+                                        **placement,
+                                        "bottom_ofe_compensation_m": 0.0,
                                         "top_landuse_length_m": float(top_landuse_length_m),
                                         "bottom_landuse_length_m": float(downslope_landuse_length_m),
                                         "has_downslope_landuse": bool(has_downslope_landuse),
@@ -5538,12 +5553,8 @@ class Roads(NoDbBase):
                                 comp_width = float(strip_plans[0]["strip_width_m"])
                                 if comp_width > 0.0:
                                     compensation_m = area_to_compensate_m2 / comp_width
-                                    strip_plans[0]["top_landuse_length_m"] = (
-                                        float(strip_plans[0]["top_landuse_length_m"]) + float(compensation_m)
-                                    )
-                                    strip_plans[0]["top_ofe_compensation_m"] = (
-                                        float(strip_plans[0]["top_ofe_compensation_m"]) + float(compensation_m)
-                                    )
+                                    if not _unrutted.compensate(strip_plans[0], compensation_m):
+                                        raise ValueError("Unrutted remainder compensation produces invalid landuse length.")
                                     remainder_width_m = 0.0
 
                             def _plan_total_length_m(plan_row: Mapping[str, Any]) -> float:
@@ -5572,8 +5583,7 @@ class Roads(NoDbBase):
                                     comp_width = 0.0
                                 if comp_width > 0.0:
                                     compensation_m = float(area_error_before_m2 / comp_width)
-                                    adjusted_top_length_m = float(strip_plans[0]["top_landuse_length_m"]) + compensation_m
-                                    if adjusted_top_length_m <= 0.0:
+                                    if not _unrutted.compensate(strip_plans[0], compensation_m):
                                         for plan in strip_plans:
                                             candidate = plan["candidate"]
                                             source_segment_id = str(plan["source_segment_id"])
@@ -5621,11 +5631,6 @@ class Roads(NoDbBase):
                                                 },
                                             )
                                         strip_plans = []
-                                    else:
-                                        strip_plans[0]["top_landuse_length_m"] = adjusted_top_length_m
-                                        strip_plans[0]["top_ofe_compensation_m"] = (
-                                            float(strip_plans[0]["top_ofe_compensation_m"]) + compensation_m
-                                        )
 
                             if not strip_plans:
                                 continue
@@ -5643,16 +5648,15 @@ class Roads(NoDbBase):
                                 hillslope_record["top_ofe_compensation_m"] = float(
                                     sum(float(plan["top_ofe_compensation_m"]) for plan in strip_plans)
                                 )
+                                hillslope_record["bottom_ofe_compensation_m"] = sum(
+                                    plan["bottom_ofe_compensation_m"] for plan in strip_plans
+                                )
                                 hillslope_record["area_error_before_compensation_m2"] = float(area_error_before_m2)
                                 hillslope_record["area_error_after_compensation_m2"] = float(area_error_after_m2)
 
                             emitted_area = 0.0
                             for index, plan in enumerate(strip_plans):
-                                lengths = [plan["top_landuse_length_m"], plan["parity_profile"]["sim_length_m"], plan["fill_profile"]["fill_length_m"]]
-                                slopes = [plan["top_landuse_slope_pct"] / 100, 0.04, plan["fill_profile"]["fill_slope_pct"] / 100]
-                                if plan["has_downslope_landuse"]:
-                                    lengths.append(plan["bottom_landuse_length_m"])
-                                    slopes.append(plan["bottom_landuse_slope_pct"] / 100)
+                                lengths, slopes, plan["ofe_order"] = _unrutted.profile_parts(plan)
                                 plan["slope_path"] = Path(self.roads_runs_dir) / f"unrutted-h{topaz_id_hill}-{index}.slp"
                                 emitted_area += _unrutted.write_slope(plan["slope_path"], plan["strip_width_m"], lengths, slopes)
                                 target = plan["parity_profile"]["road_target_area_m2"]
@@ -5661,6 +5665,12 @@ class Roads(NoDbBase):
                                     "geometry_policy": _unrutted.POLICY, "connectivity_limitation": _unrutted.LIMITATION,
                                     "source_segment_ids": plan["candidate"]["source_segment_ids"],
                                     "placement_source": plan["placement_source"],
+                                    **{key: plan[key] for key in (
+                                        "placement_policy", "placement_adjustment", "placement_adjustment_reason",
+                                        "original_top_landuse_length_m", "hillslope_length_m",
+                                        "upslope_runon_assumed_zero", "top_ofe_compensation_m", "bottom_ofe_compensation_m",
+                                        "top_landuse_length_m", "bottom_landuse_length_m", "discha_median_m",
+                                    )},
                                     "road_target_area_m2": target, "road_modeled_area_m2": modeled,
                                     "road_area_deficit_m2": max(0.0, target - modeled),
                                     "strip_width_factor": min(1.0, hillslope_width_m / width_sum_before_scaling),
@@ -5711,7 +5721,7 @@ class Roads(NoDbBase):
                                     soil_texture=segment_inputs["soil_texture"],
                                 )
 
-                                ofe_order: Tuple[int, ...] = (3, 1, 2, 3) if has_downslope_landuse else (3, 1, 2)
+                                ofe_order = plan["ofe_order"]
                                 management_cache_key = (str(segment_inputs["traffic"]), tuple(ofe_order))
                                 management_path = routed_mofe_management_cache_by_traffic_and_order.get(management_cache_key)
                                 if management_path is None:
@@ -5779,6 +5789,7 @@ class Roads(NoDbBase):
                                             "reason": "segment_run_failed",
                                             "error": safe_text(str(exc), source_profile=current_profile(WORKER)),
                                             "design": "outslope_unrutted",
+                                            **plan["accounting"],
                                             "overlap_length_m": overlap_length_m,
                                             "inclusion_ratio": inclusion_ratio,
                                         }
@@ -5828,6 +5839,7 @@ class Roads(NoDbBase):
                                             "routing_mode": "outslope_unrutted_replacement",
                                             "reason": "segment_pass_missing",
                                             "design": "outslope_unrutted",
+                                            **plan["accounting"],
                                             "overlap_length_m": overlap_length_m,
                                             "inclusion_ratio": inclusion_ratio,
                                         }
@@ -5887,7 +5899,7 @@ class Roads(NoDbBase):
                                     "overlap_length_m": overlap_length_m,
                                     "inclusion_ratio": inclusion_ratio,
                                     "segment_pass_relpath": os.path.relpath(segment_pass_path, self.wd),
-                                    "contributor_ofe_count": 4 if has_downslope_landuse else 3,
+                                    "contributor_ofe_count": len(ofe_order),
                                     "top_landuse_length_m": top_landuse_length_m,
                                     "bottom_landuse_length_m": bottom_landuse_length_m,
                                     "discha_median_m": discha_median_m,
@@ -6083,17 +6095,26 @@ class Roads(NoDbBase):
                         )
                     )
 
+            for hill in outslope_unrutted_diagnostics.get("outslope_unrutted_hillslope_records", []):
+                if hill.get("area_accounting_status") != "complete":
+                    hill["top_ofe_compensation_m"] = None
+                    hill["bottom_ofe_compensation_m"] = None
             for record in segment_execution_records:
                 if record.get("design") != "outslope_unrutted":
                     continue
                 candidate = outslope_unrutted_candidate_status.get(record.get("segment_hillslope_id"), {})
                 record.setdefault("source_segment_ids", candidate.get("source_segment_ids", [record["segment_id"]]))
+                for key in ("placement_source", "placement_adjustment", "placement_adjustment_reason",
+                            "original_top_landuse_length_m", "hillslope_length_m", "discha_median_m",
+                            "top_landuse_length_m", "bottom_landuse_length_m", "upslope_runon_assumed_zero"):
+                    record.setdefault(key, None)
+                record.setdefault("placement_policy", _unrutted.PLACEMENT_POLICY)
                 record.setdefault("geometry_policy", _unrutted.POLICY)
                 record.setdefault("connectivity_limitation", _unrutted.LIMITATION)
                 if record.get("status") != "completed":
                     record.update(area_accounting_status="unavailable",
                                   area_accounting_reason=record.get("reason", "execution_failed"))
-                    for key in ("road_target_area_m2", "road_modeled_area_m2", "road_area_deficit_m2", "strip_width_factor"):
+                    for key in ("road_target_area_m2", "road_modeled_area_m2", "road_area_deficit_m2", "strip_width_factor", "top_ofe_compensation_m", "bottom_ofe_compensation_m"):
                         record.setdefault(key, None)
             self._attach_parameterization_records(segment_execution_records)
             Path(self.roads_segment_pass_manifest_path).write_text(
@@ -6171,6 +6192,7 @@ class Roads(NoDbBase):
                     "mapping_warning_examples": mapping_warning_examples,
                     "attribute_field_map": dict(attribute_field_map),
                     **outslope_unrutted_diagnostics,
+                    **placement_marker,
                     "status": "failed",
                     "failed_stage": "segment_runs",
                     "failed_segment_count": len(failed_segment_records),
@@ -6255,6 +6277,7 @@ class Roads(NoDbBase):
                 "mapping_warning_examples": mapping_warning_examples,
                 "attribute_field_map": dict(attribute_field_map),
                 **outslope_unrutted_diagnostics,
+                **placement_marker,
                 "watershed_run_relpath": os.path.relpath(
                     os.path.join(self.roads_runs_dir, "pw0.run"),
                     self.wd,
@@ -6352,6 +6375,7 @@ class Roads(NoDbBase):
                     }
                 )
             with self.locked():
+                failed_run_summary.update(placement_marker)
                 self._last_run_summary = failed_run_summary
             self._record_error_and_raise(exc)
 

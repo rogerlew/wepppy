@@ -106,7 +106,8 @@ def test_integrity_errors_are_explicit(tmp_path, change):
     pq.write_table(pa.Table.from_pylist(rows, schema=SCHEMA), tmp_path / view.SUMMARY)
     if change == 'alias':
         moved = folder / 'elsewhere.json'; geometry_path.rename(moved); geometry_path.symlink_to(moved)
-    with pytest.raises(ValueError): view.read_detachment_view(tmp_path)
+    with pytest.raises(lifecycle.RoadsResultsUnavailable if change == "alias" else ValueError):
+        view.read_detachment_view(tmp_path)
 
 
 def test_guard_held_through_materialization_blocks_reprepare(tmp_path, monkeypatch):
@@ -164,3 +165,16 @@ def test_coalesced_crossing_is_visible_on_all_source_features(tmp_path):
         assert 'Shared crossing profile' in values['reason']
     # The canonical source table remains one row per native profile, not feature.
     assert pq.read_table(tmp_path / view.SUMMARY).num_rows == 2
+
+
+
+def test_top_placement_discloses_zero_upstream_runoff(tmp_path):
+    folder = sources(tmp_path)
+    path = folder / 'roads.segment.pass.manifest.json'
+    records = json.loads(path.read_text())
+    records[0]['upslope_runon_assumed_zero'] = True
+    path.write_text(json.dumps(records))
+    result = view.read_detachment_view(tmp_path)
+    detail = result['features'][0]['properties']['roads_detachment']
+    assert 'no runoff from land above the road' in detail['reason']
+    assert detail['profiles'][0]['upslope_runon_assumed_zero'] is True
