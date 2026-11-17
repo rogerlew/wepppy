@@ -1,6 +1,6 @@
 # CILogon accounts, local email verification, and responsive profile
 
-**Status**: Implemented; local validation and independent review; rollout gates pending; deployment deferred.
+**Status**: Merged to local master; CILogon registration approval and rollout gates pending; deployment deferred.
 **Started**: 2026-11-17 19:13 UTC
 **Updated**: 2026-11-17 19:50 UTC
 **Owner**: WEPPcloud operator; Codex implementation support.

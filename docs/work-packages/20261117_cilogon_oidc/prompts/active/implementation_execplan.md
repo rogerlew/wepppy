@@ -126,3 +126,5 @@ Implementation discoveries: role/token/Bootstrap consumers assumed a nonempty lo
 Final source checkpoint: `679dc65d4`; 429 focused Python checks and 36 diagnostic/generated-asset checks passed. Independent source findings closed. The isolated container was stopped after validation; Redis/PostgreSQL/live-provider/mail/mount acceptance remains open as recorded in the validation receipt.
 
 Operator update (2026-11-17): CILogon registration has not yet been approved. Merge to local master is authorized; keep provider approval and deployment/activation on hold. Do not push the unpublished master history or trigger its image-publication workflow. Retain a local-only merge receipt and preserve unrelated checkout WIP.
+
+Local merge outcome (2026-11-17): merge `d43e4b3e9803d2c49c588dbf781102b49f0e23fc` preserves both prior master and accepted source; its committed tree equals the source tree. Unrelated shared-checkout WIP was preserved with a retained recovery backup. The subsequent local receipt records this observation. Remote integration/publication and provider activation/deployment remain held.
