@@ -48,6 +48,10 @@ def _private_archive_fixture(run_dir: Path) -> tuple[str, Path]:
 @pytest.fixture(autouse=True)
 def legacy_project_policy(monkeypatch):
     from types import SimpleNamespace
+    # Ordinary fake-Redis fixtures do not declare a retention filesystem.
+    # Boundary tests below explicitly provide their own identity and root.
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", raising=False)
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", raising=False)
     monkeypatch.setattr(fork_archive_routes.Ron, "getInstance", lambda wd: SimpleNamespace(
         config_get_str=lambda section, key, default=None: default))
 
