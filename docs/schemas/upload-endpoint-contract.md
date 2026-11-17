@@ -96,12 +96,12 @@ composite-operation rules in
 | `/api/runs/{runid}/{config}/tasks/upload-cover-transform` | `wepppy/microservices/rq_engine/upload_disturbed_routes.py` | `input_upload_cover_transform` | `.csv` | `10 * 1024 * 1024` (10 MB) | `Revegetation.validate_user_defined_cover_transform(...)` |
 | `/api/runs/{runid}/{config}/tasks/upload-dem/` | `wepppy/microservices/rq_engine/watershed_routes.py` | `input_upload_dem` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation before DEM install/metadata validation in `_install_uploaded_dem(...)` |
 | `/api/huc-fire/tasks/upload-sbs/` | `wepppy/microservices/rq_engine/upload_huc_fire_routes.py` | `input_upload_sbs` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation, then `Disturbed.validate(...)` |
-| `/api/batch/_/{batch_name}/upload-geojson` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `geojson_file` or `file` | `.geojson`, `.json` | default `30 * 1024 * 1024` (30 MiB); override via Flask `BATCH_GEOJSON_MAX_MB` | `WatershedCollection(...)` parse + feature-count checks |
+| `/api/batch/_/{batch_name}/upload-geojson` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `geojson_file` or `file` | `.geojson`, `.json`, single-dataset Shapefile `.zip`, `.parquet`, `.geoparquet` | default `30 * 1024 * 1024` (30 MiB); override via Flask `BATCH_GEOJSON_MAX_MB` | Binary formats normalize through shape-converter; receiving validation requires only Polygon/MultiPolygon before replacement/registration; existing saved projects are not migrated |
 | `/api/batch/_/{batch_name}/upload-sbs-map` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `sbs_map` or `file` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation, then `sbs_map_sanity_check(...)`; optional burn-class summary |
-| `/api/runs/{runid}/{config}/agfields/boundaries` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `field_boundaries` | `.geojson`, `.json` | `10 * 1024 * 1024` (10 MB) | `save_upload_file(...)`; controller validation stages GeoJSON + Parquet before canonical replacement |
+| `/api/runs/{runid}/{config}/agfields/boundaries` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `field_boundaries` | `.geojson`, `.json`, single-dataset Shapefile `.zip`, `.parquet`, `.geoparquet` | `10 * 1024 * 1024` (10 MB) | Binary formats normalize through shape-converter; receiving validation requires Polygon/MultiPolygon and literal `field_id` before canonical GeoJSON/attribute replacement |
 | `/api/runs/{runid}/{config}/agfields/plant-database` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `plant_database` | ZIP containing `.man` members only | compressed `100 * 1024 * 1024` (100 MB); uncompressed 600 MB; 200 members | `read_upload_bytes_with_limit(...)` + `validate_and_extract_zip_archive(...)`; unique server filename; RQ processing removes the staged archive |
 | `/api/culverts-wepp-batch/` | `wepppy/microservices/rq_engine/culvert_routes.py` | `payload.zip` or `payload` or `file` | ZIP archive | compressed payload cap `2 * 1024 * 1024 * 1024` (2 GiB) | **Must** use `read_upload_bytes_with_limit(...)` + `validate_and_extract_zip_archive(...)`; `ArchiveLimits(max_compressed_bytes=2 GiB, max_uncompressed_bytes=6 GiB, max_member_count=1200)`; semantic checks via `validate_payload_root(...)` |
-| `/runs/<string:runid>/<config>/tasks/roads/upload_geojson` (and trailing slash variant) | `wepppy/weppcloud/routes/nodb_api/roads_bp.py` | `file` | `.geojson` | `10 * 1024 * 1024` (10 MB) | Controller validation via `Roads.set_uploaded_geojson(...)` |
+| `/runs/<string:runid>/<config>/tasks/roads/upload_geojson` (and trailing slash variant) | `wepppy/weppcloud/routes/nodb_api/roads_bp.py` | `file` | `.geojson`, single-dataset Shapefile `.zip`, `.parquet`, `.geoparquet` | `10 * 1024 * 1024` (10 MB) | Binary formats normalize through shape-converter; controller revalidates canonical LineString/MultiLineString via `Roads.set_uploaded_geojson(...)` |
 
 ## Mixed-Payload Endpoints With Upload Fields
 
@@ -113,8 +113,28 @@ These routes combine non-file params with optional/conditional upload parts.
 | `/api/runs/{runid}/{config}/build-treatments` | `wepppy/microservices/rq_engine/treatments_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img` | `500 * 1024 * 1024` (500 MB) | Restricted format/driver validation; used when `treatments.mode == UserDefinedMap` |
 | `/api/runs/{runid}/{config}/run-ash` | `wepppy/microservices/rq_engine/ash_routes.py` | `input_upload_ash_load` (required), `input_upload_ash_type_map` (optional) | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation; used when `ash_depth_mode == 2` |
 | `/api/runs/{runid}/{config}/run-omni` | `wepppy/microservices/rq_engine/omni_routes.py` | `scenarios[{idx}][sbs_file]` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation per uploaded SBS scenario |
-| `/api/runs/{runid}/{config}/run-omni-contrasts` | `wepppy/microservices/rq_engine/omni_routes.py` | `omni_contrast_geojson` (optional/required by mode) | `.geojson`, `.json` | `100 * 1024 * 1024` (100 MB) | Required for `user_defined_areas` when no path provided |
-| `/api/runs/{runid}/{config}/run-omni-contrasts-dry-run` | `wepppy/microservices/rq_engine/omni_routes.py` | `omni_contrast_geojson` (optional/required by mode) | `.geojson`, `.json` | `100 * 1024 * 1024` (100 MB) | Same upload rules as `run-omni-contrasts` |
+| `/api/runs/{runid}/{config}/run-omni-contrasts` | `wepppy/microservices/rq_engine/omni_routes.py` | `omni_contrast_geojson` (optional/required by mode) | `.geojson`, `.json`, single-dataset Shapefile `.zip`, `.parquet`, `.geoparquet` | `100 * 1024 * 1024` (100 MB) | Binary formats normalize through shape-converter; user-defined areas require Polygon/MultiPolygon validation before saved input mutation/build |
+| `/api/runs/{runid}/{config}/run-omni-contrasts-dry-run` | `wepppy/microservices/rq_engine/omni_routes.py` | `omni_contrast_geojson` (optional/required by mode) | `.geojson`, `.json`, single-dataset Shapefile `.zip`, `.parquet`, `.geoparquet` | `100 * 1024 * 1024` (100 MB) | Same normalization and pre-mutation receiving validation as `run-omni-contrasts`; no run enqueue |
+
+## Vector normalization amendment (VUN-01)
+
+Accepted contract intent 2026-11-16; implementation conformance pending. The
+four rows above compose with the canonical
+[vector-upload normalization contract](vector-upload-normalization-contract.md)
+and [GeoParquet resource ADR](../adrs/ADR-0145-geoparquet-upload-resource-bounds.md).
+Extensions and MIME are hints; content identity, hostile-input structural limits,
+canonical WGS84 output, receiving semantic validation, failed-replacement safety,
+stable error translation and observable normalization receipts are mandatory.
+The converter cannot authorize persistence, mutate workflow state or bypass
+authentication, CSRF, run scope, locks, existing byte policies or response
+envelopes. Each complete within-limit original is retained under the owning
+project attempt tree with SHA-256 provenance. Rejected originals use the
+download-only quarantine contract; public-run access does not expose attempt
+artifacts. A generic authenticated public-run reader is not the owner: retained
+evidence requires explicit run owner/root or existing Batch project/group
+authority. Filesystem-wide atomic admission composes the ADR aggregate,
+principal, in-flight and free-space limits before source bytes. Culvert and
+D-Tale paths are excluded. No queue edge is added.
 
 RQ-WH-01 accepted amendment (2026-10-28 19:56 UTC; implementation pending):
 `/api/culverts-wepp-batch/` accepts an optional multipart `webhook_url` text field

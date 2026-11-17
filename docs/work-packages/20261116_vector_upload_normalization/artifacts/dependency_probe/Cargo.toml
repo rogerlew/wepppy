@@ -1,0 +1,10 @@
+[package]
+name = "vector-upload-dependency-probe"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+# Evaluation only. This does not authorize production adoption.
+[dependencies]
+parquet = { version = "=60.1.0", default-features = false, features = ["snap"] }
+serde_json = "=1.0.145"
