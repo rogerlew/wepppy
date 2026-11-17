@@ -156,7 +156,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "archive_run",
-    "source_lineno": 1588,
+    "source_lineno": 1671,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -166,7 +166,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "fork_project",
-    "source_lineno": 1463,
+    "source_lineno": 1546,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -176,7 +176,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "restore_archive",
-    "source_lineno": 1696,
+    "source_lineno": 1779,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -270,7 +270,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_delete_omni_contrasts",
-    "source_lineno": 1286,
+    "source_lineno": 1323,
     "source_module": "wepppy/microservices/rq_engine/omni_routes.py"
   },
   {
@@ -280,7 +280,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_run_omni",
-    "source_lineno": 938,
+    "source_lineno": 969,
     "source_module": "wepppy/microservices/rq_engine/omni_routes.py"
   },
   {
@@ -290,7 +290,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_run_omni_contrasts",
-    "source_lineno": 1107,
+    "source_lineno": 1141,
     "source_module": "wepppy/microservices/rq_engine/omni_routes.py"
   },
   {

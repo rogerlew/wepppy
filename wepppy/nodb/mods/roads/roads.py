@@ -1180,36 +1180,45 @@ class Roads(NoDbBase):
             previous_map=previous_map,
         )
         params["attribute_field_map"] = discovered_map
-        prior_state = {
-            name: deepcopy(getattr(self, name, None))
-            for name in (
-                "_uploaded_geojson_relpath",
-                "_uploaded_geojson_sha256",
-                "_uploaded_attribute_catalog",
-                "_roads_params",
-                "_timestamps",
-                "_last_prepare_summary",
-                "_last_run_summary",
-                "_status",
-                "_errors",
-            )
-        }
-
         publication_committed = False
         try:
             retained_snapshot = roads_lifecycle.retain(self.wd, replace_segments=True)
             with self.locked():
-                os.replace(staged_path, target_path)
-                self._uploaded_geojson_relpath = relpath
-                self._uploaded_geojson_sha256 = digest
-                self._uploaded_attribute_catalog = attribute_catalog
-                self._roads_params = params
-                self._timestamps["upload_geojson"] = now
-                self._clear_stale_run_state_locked()
-                status = str(self._status)
-            if publication_commit is not None:
-                publication_commit()
-                publication_committed = True
+                prior_state = {
+                    name: deepcopy(getattr(self, name, None))
+                    for name in (
+                        "_uploaded_geojson_relpath",
+                        "_uploaded_geojson_sha256",
+                        "_uploaded_attribute_catalog",
+                        "_roads_params",
+                        "_timestamps",
+                        "_last_prepare_summary",
+                        "_last_run_summary",
+                        "_status",
+                        "_errors",
+                    )
+                }
+                try:
+                    os.replace(staged_path, target_path)
+                    self._uploaded_geojson_relpath = relpath
+                    self._uploaded_geojson_sha256 = digest
+                    self._uploaded_attribute_catalog = attribute_catalog
+                    self._roads_params = params
+                    self._timestamps["upload_geojson"] = now
+                    self._clear_stale_run_state_locked()
+                    status = str(self._status)
+                    if publication_commit is not None:
+                        publication_commit()
+                    publication_committed = True
+                except BaseException:  # broad-except: transaction rollback includes cancellation
+                    if had_target:
+                        os.replace(backup_path, target_path)
+                    else:
+                        target_path.unlink(missing_ok=True)
+                    roads_lifecycle.restore_retained(self.wd, retained_snapshot)
+                    for name, value in prior_state.items():
+                        setattr(self, name, value)
+                    raise
             try:
                 self._append_roads_log(
                     "upload",
@@ -1234,14 +1243,6 @@ class Roads(NoDbBase):
             if publication_committed:
                 raise
             staged_path.unlink(missing_ok=True)
-            if had_target:
-                os.replace(backup_path, target_path)
-            else:
-                target_path.unlink(missing_ok=True)
-            roads_lifecycle.restore_retained(self.wd, retained_snapshot)
-            with self.locked():
-                for name, value in prior_state.items():
-                    setattr(self, name, value)
             raise
         finally:
             staged_path.unlink(missing_ok=True)

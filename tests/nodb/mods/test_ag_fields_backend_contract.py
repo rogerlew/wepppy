@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -270,6 +271,74 @@ def test_boundary_reupload_does_not_rollback_after_publication_commit(
     reloaded = type(controller).load_detached(str(tmp_path))
     assert reloaded.field_boundaries_source_filename == source.name
     assert Path(reloaded.rotation_schedule_parquet).read_bytes() == b"new-parquet"
+
+
+def test_failed_boundary_upload_restores_latest_committed_file_state(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _controller(tmp_path)
+
+    def source(path: Path, field_id: int) -> None:
+        path.write_text(json.dumps({
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": {"field_id": field_id},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 0]]],
+                },
+            }],
+        }), encoding="utf-8")
+
+    old = tmp_path / "old.geojson"
+    upload_a = tmp_path / "upload-a.geojson"
+    upload_b = tmp_path / "upload-b.geojson"
+    source(old, 1)
+    source(upload_a, 2)
+    source(upload_b, 3)
+    controller.validate_field_boundary_geojson(old, source_filename=old.name)
+
+    staged = threading.Event()
+    allow_a = threading.Event()
+    original_to_parquet = pd.DataFrame.to_parquet
+
+    def synchronized_to_parquet(frame, path, *args, **kwargs):
+        result = original_to_parquet(frame, path, *args, **kwargs)
+        if threading.current_thread().name == "ag-upload-a":
+            staged.set()
+            assert allow_a.wait(timeout=2.0)
+        return result
+
+    monkeypatch.setattr(pd.DataFrame, "to_parquet", synchronized_to_parquet)
+    failures: list[BaseException] = []
+
+    def run_a() -> None:
+        try:
+            controller.validate_field_boundary_geojson(
+                upload_a,
+                source_filename=upload_a.name,
+                publication_commit=lambda: (_ for _ in ()).throw(OSError("receipt fsync failed")),
+            )
+        except BaseException as exc:
+            failures.append(exc)
+
+    worker = threading.Thread(target=run_a, name="ag-upload-a")
+    worker.start()
+    assert staged.wait(timeout=2.0)
+    controller.validate_field_boundary_geojson(upload_b, source_filename=upload_b.name)
+    allow_a.set()
+    worker.join(timeout=3.0)
+    assert not worker.is_alive()
+    assert len(failures) == 1 and isinstance(failures[0], OSError)
+
+    reloaded = type(controller).load_detached(str(tmp_path))
+    canonical = json.loads((Path(reloaded.ag_fields_dir) / "fields.WGS.geojson").read_text())
+    table = pd.read_parquet(reloaded.rotation_schedule_parquet)
+    assert canonical["features"][0]["properties"]["field_id"] == 3
+    assert table["field_id"].tolist() == [3]
+    assert reloaded.field_boundaries_source_filename == upload_b.name
 
 
 @pytest.mark.parametrize(

@@ -14,10 +14,11 @@ import math
 import os
 import shutil
 import stat
+import threading
 import time
 import unicodedata
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, BinaryIO, Callable, Iterable, Mapping, Protocol, Sequence
@@ -318,6 +319,14 @@ class RedisRetentionLedger:
         reconcile_key = f"{prefix}:reconcile"
         rebuild_pending_key = f"{prefix}:rebuild-pending"
         try:
+            filesystem_pending = _filesystem_rebuild_obligation_ids(expected_root)
+            if filesystem_pending:
+                self._client().sadd(rebuild_pending_key, *filesystem_pending)
+                raise VectorUploadError(
+                    "vector_retention_quota_exceeded",
+                    "Vector evidence retention requires operator reconciliation.",
+                    status_code=507,
+                )
             result = self._client().eval(
                 _RESERVE_LUA, 5, totals_key, principal_key, reservation_key, reconcile_key,
                 rebuild_pending_key,
@@ -366,6 +375,8 @@ def reconcile_retention(
     stale_seconds: int = _LEASE_SECONDS,
     rebuild_ledger: bool = False,
     committed_only: bool = False,
+    maintenance_lease: _RedisScopeLease | None = None,
+    required_scope_leases: Sequence[ScopeLease] = (),
 ) -> dict[str, object]:
     """Audit/recover reservations and optionally rebuild accounting from receipts."""
     filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
@@ -379,26 +390,35 @@ def reconcile_retention(
             raise ValueError("reconciliation requires the exact configured root")
     except (OSError, ValueError) as exc:
         raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence filesystem identity cannot be verified.", status_code=507) from exc
-    client = connection or redis.Redis(**redis_connection_kwargs(RedisDB.LOCK, decode_responses=True))
+    client = (
+        maintenance_lease.connection
+        if maintenance_lease is not None
+        else connection or redis.Redis(**redis_connection_kwargs(RedisDB.LOCK, decode_responses=True))
+    )
     prefix = f"vector-upload-retention:{filesystem_id}"
     totals_key = f"{prefix}:totals"
     lock_key = f"{prefix}:reconcile"
-    lock_token = uuid.uuid4().hex
+    lock_token = maintenance_lease.token if maintenance_lease is not None else uuid.uuid4().hex
+    owns_maintenance_lease = maintenance_lease is None
     held_scope_leases: list[ScopeLease] = []
+    held_scope_by_key: dict[str, ScopeLease] = {}
     try:
-        if not client.set(lock_key, lock_token, nx=True, ex=_LEASE_SECONDS):
-            raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reconciliation is already active.", status_code=507)
+        if maintenance_lease is None:
+            if not client.set(lock_key, lock_token, nx=True, ex=_LEASE_SECONDS):
+                raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence reconciliation is already active.", status_code=507)
+        elif maintenance_lease.key != lock_key:
+            raise VectorUploadError("vector_retention_quota_exceeded", "Vector evidence maintenance authority is invalid.", status_code=507)
+        maintenance = maintenance_lease or _RedisScopeLease(client, lock_key, lock_token)
+        maintenance.assert_owned()
+        pending_key = f"{prefix}:rebuild-pending"
+        filesystem_pending = _filesystem_rebuild_obligation_ids(root)
+        if apply and filesystem_pending:
+            client.sadd(pending_key, *filesystem_pending)
 
         def assert_reconcile_owned() -> None:
-            renewed = client.eval(
-                _LOCK_RENEW_LUA, 1, lock_key, lock_token, _LEASE_SECONDS,
-            )
-            if int(renewed or 0) != 1:
-                raise VectorUploadError(
-                    "vector_retention_quota_exceeded",
-                    "Vector evidence reconciliation lock ownership was lost.",
-                    status_code=507,
-                )
+            maintenance.assert_owned()
+            for required_lease in required_scope_leases:
+                required_lease.assert_owned()
             for held_lease in held_scope_leases:
                 held_lease.assert_owned()
 
@@ -425,14 +445,17 @@ def reconcile_retention(
                         "action": "blocked_missing_project_scope",
                     })
                     continue
-                scope_lease = _try_acquire_scope_lease(client, project_scope)
+                scope_lease = held_scope_by_key.get(project_scope)
                 if scope_lease is None:
-                    actions.append({
-                        "reservation": key.rsplit(":", 1)[-1],
-                        "action": "active_scope_skipped",
-                    })
-                    continue
-                held_scope_leases.append(scope_lease)
+                    scope_lease = _try_acquire_scope_lease(client, project_scope)
+                    if scope_lease is None:
+                        actions.append({
+                            "reservation": key.rsplit(":", 1)[-1],
+                            "action": "active_scope_skipped",
+                        })
+                        continue
+                    held_scope_leases.append(scope_lease)
+                    held_scope_by_key[project_scope] = scope_lease
                 scope_lease.assert_owned()
             if not relative:
                 action = {"reservation": key.rsplit(":", 1)[-1], "action": "release_prewrite"}
@@ -714,10 +737,11 @@ def reconcile_retention(
                     "Vector retention reconciliation scope release deferred to TTL",
                     exc_info=True,
                 )
-        try:
-            client.eval(_LOCK_RELEASE_LUA, 1, lock_key, lock_token)
-        except redis.RedisError:
-            _LOGGER.warning("Vector retention reconciliation lock release deferred to TTL", exc_info=True)
+        if owns_maintenance_lease:
+            try:
+                maintenance.release()
+            except (UnboundLocalError, VectorUploadError):
+                _LOGGER.warning("Vector retention reconciliation lock release deferred to TTL", exc_info=True)
 
 
 _LOCK_RELEASE_LUA = "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('DEL',KEYS[1]) end return 0"
@@ -730,8 +754,42 @@ class _RedisScopeLease:
     key: str
     token: str
     _released: bool = False
+    _renewal_stop: threading.Event = field(default_factory=threading.Event, init=False, repr=False)
+    _renewal_error: BaseException | None = field(default=None, init=False, repr=False)
+    _renewal_thread: threading.Thread = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._renewal_thread = threading.Thread(
+            target=self._renew_until_released,
+            name="vector-retention-lease-renewal",
+            daemon=True,
+        )
+        self._renewal_thread.start()
+
+    def _renew_until_released(self) -> None:
+        while not self._renewal_stop.wait(min(30.0, _LEASE_SECONDS / 3)):
+            try:
+                renewed = int(self.connection.eval(
+                    _LOCK_RENEW_LUA, 1, self.key, self.token, _LEASE_SECONDS,
+                ) or 0) == 1
+                if not renewed:
+                    raise VectorUploadError(
+                        "vector_retention_quota_exceeded",
+                        "Vector upload retention lock ownership was lost.",
+                        status_code=507,
+                    )
+            except BaseException as exc:  # broad-except: renewal thread reports failure to its owner
+                self._renewal_error = exc
+                self._renewal_stop.set()
+                return
 
     def assert_owned(self) -> None:
+        if self._renewal_error is not None:
+            raise VectorUploadError(
+                "vector_retention_quota_exceeded",
+                "Vector upload retention lock ownership was lost.",
+                status_code=507,
+            ) from self._renewal_error
         try:
             owned = not self._released and int(self.connection.eval(
                 _LOCK_RENEW_LUA, 1, self.key, self.token, _LEASE_SECONDS,
@@ -752,6 +810,9 @@ class _RedisScopeLease:
     def release(self) -> None:
         if self._released:
             return
+        self._renewal_stop.set()
+        if self._renewal_thread is not threading.current_thread():
+            self._renewal_thread.join(timeout=5.0)
         try:
             self.connection.eval(_LOCK_RELEASE_LUA, 1, self.key, self.token)
         except redis.RedisError as exc:
@@ -761,6 +822,39 @@ class _RedisScopeLease:
                 status_code=507,
             ) from exc
         self._released = True
+
+
+def acquire_retention_maintenance_lease(
+    connection: Any | None = None,
+) -> _RedisScopeLease:
+    """Acquire the filesystem-wide fence before destructive retention mutation."""
+    filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    if not filesystem_id:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence retention is not configured.",
+            status_code=507,
+        )
+    client = connection or redis.Redis(
+        **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    )
+    key = f"vector-upload-retention:{filesystem_id}:reconcile"
+    token = uuid.uuid4().hex
+    try:
+        acquired = client.set(key, token, nx=True, ex=_LEASE_SECONDS)
+    except redis.RedisError as exc:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence maintenance authority is unavailable.",
+            status_code=507,
+        ) from exc
+    if not acquired:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence reconciliation is already active.",
+            status_code=507,
+        )
+    return _RedisScopeLease(client, key, token)
 
 
 class RedisScopeLeaseFactory:
@@ -865,6 +959,41 @@ def _atomic_json(path: Path, payload: Mapping[str, object]) -> None:
         temp.unlink(missing_ok=True)
 
 
+def _filesystem_rebuild_obligation_ids(root: Path) -> set[str]:
+    obligations = root / ".vector-upload-rebuild-pending"
+    if not obligations.exists():
+        return set()
+    if obligations.is_symlink() or not obligations.is_dir():
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence retention rebuild marker path is invalid.",
+            status_code=507,
+        )
+    identities: set[str] = set()
+    for index, path in enumerate(obligations.iterdir()):
+        if index >= 10_000:
+            raise VectorUploadError(
+                "vector_retention_quota_exceeded",
+                "Vector evidence rebuild obligation inventory exceeds the recovery bound.",
+                status_code=507,
+            )
+        if path.is_symlink() or not path.is_file() or path.suffix != ".json":
+            raise VectorUploadError(
+                "vector_retention_quota_exceeded",
+                "Vector evidence retention rebuild marker is invalid.",
+                status_code=507,
+            )
+        identity = path.stem
+        if len(identity) != 64 or any(character not in "0123456789abcdef" for character in identity):
+            raise VectorUploadError(
+                "vector_retention_quota_exceeded",
+                "Vector evidence retention rebuild marker identity is invalid.",
+                status_code=507,
+            )
+        identities.add(identity)
+    return identities
+
+
 def begin_retention_rebuild_obligation(
     filesystem_root: Path,
     *,
@@ -887,7 +1016,7 @@ def begin_retention_rebuild_obligation(
     obligations = root / ".vector-upload-rebuild-pending"
     obligations.mkdir(mode=0o700, exist_ok=True)
     os.chmod(obligations, 0o700)
-    identity = hashlib.sha256(f"{operation}\0{target}".encode()).hexdigest()
+    identity = _retention_rebuild_obligation_identity(operation, target)
     path = obligations / f"{identity}.json"
     filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
     if not filesystem_id:
@@ -919,6 +1048,52 @@ def begin_retention_rebuild_obligation(
             status_code=507,
         ) from exc
     return path
+
+
+def _retention_rebuild_obligation_identity(operation: str, target: str) -> str:
+    return hashlib.sha256(f"{operation}\0{target}".encode()).hexdigest()
+
+
+def retention_rebuild_obligation_pending(
+    filesystem_root: Path,
+    *,
+    operation: str,
+    target: str,
+    connection: Any | None = None,
+) -> bool:
+    """Return whether an exact destructive-operation repair is already pending."""
+    configured = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+    filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    try:
+        root = filesystem_root.resolve(strict=True)
+        if not configured or root != Path(configured).resolve(strict=True) or not filesystem_id:
+            raise ValueError("obligation identity mismatch")
+    except (OSError, ValueError) as exc:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence filesystem identity cannot be verified.",
+            status_code=507,
+        ) from exc
+    identity = _retention_rebuild_obligation_identity(operation, target)
+    path = root / ".vector-upload-rebuild-pending" / f"{identity}.json"
+    if path.is_symlink():
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence retention rebuild marker is invalid.",
+            status_code=507,
+        )
+    client = connection or redis.Redis(
+        **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    )
+    pending_key = f"vector-upload-retention:{filesystem_id}:rebuild-pending"
+    try:
+        return path.is_file() or bool(client.sismember(pending_key, identity))
+    except (OSError, redis.RedisError) as exc:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence retention rebuild state is unavailable.",
+            status_code=507,
+        ) from exc
 
 
 def complete_retention_rebuild_obligation(
@@ -1302,9 +1477,20 @@ class PreparedVectorUpload:
         return self._finished
 
     def _persist(self) -> None:
-        self.lease.assert_owned()
-        self.receipt["updated_utc"] = _utc_now()
-        _atomic_json(self.attempt_dir / _RECEIPT_NAME, self.receipt)
+        try:
+            self.lease.assert_owned()
+            self.receipt["updated_utc"] = _utc_now()
+            _atomic_json(self.attempt_dir / _RECEIPT_NAME, self.receipt)
+        except BaseException:  # broad-except: failed terminal writes must not renew forever
+            self._release_after_terminal_failure()
+            raise
+
+    def _release_after_terminal_failure(self) -> None:
+        self._finished = True
+        try:
+            self.lease.release()
+        except VectorUploadError:
+            _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
 
     def reject(self, code: str, *, stage: str = "workflow_publication") -> None:
         if self._finished:
@@ -1317,7 +1503,11 @@ class PreparedVectorUpload:
         _log_quarantine(self.receipt)
         self.receipt["accounting_status"] = "committed"
         self._persist()
-        exact = _regular_tree_size(self.attempt_dir)
+        try:
+            exact = _regular_tree_size(self.attempt_dir)
+        except BaseException:  # broad-except: terminal accounting includes cancellation
+            self._release_after_terminal_failure()
+            raise
         try:
             self.reservation.commit(exact)
         except VectorUploadError:
@@ -1328,6 +1518,9 @@ class PreparedVectorUpload:
                 self.lease.release()
             except VectorUploadError:
                 _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
+            raise
+        except BaseException:  # broad-except: unknown ledger failure must stop renewal
+            self._release_after_terminal_failure()
             raise
         try:
             self.lease.release()
@@ -1343,7 +1536,11 @@ class PreparedVectorUpload:
         self._persist()
         self.receipt["accounting_status"] = "committed"
         self._persist()
-        exact = _regular_tree_size(self.attempt_dir)
+        try:
+            exact = _regular_tree_size(self.attempt_dir)
+        except BaseException:  # broad-except: terminal accounting includes cancellation
+            self._release_after_terminal_failure()
+            raise
         try:
             self.reservation.commit(exact)
         except VectorUploadError:
@@ -1355,11 +1552,20 @@ class PreparedVectorUpload:
             except VectorUploadError:
                 _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
             raise
+        except BaseException:  # broad-except: unknown ledger failure must stop renewal
+            self._release_after_terminal_failure()
+            raise
         try:
             self.lease.release()
         except VectorUploadError:
             _LOGGER.warning("Vector upload scope lease release deferred to TTL", exc_info=True)
         self._finished = True
+
+    def mark_incomplete_after_mutation(self, code: str) -> None:
+        """Retain an uncertain post-mutation attempt without claiming rollback."""
+        if self._finished:
+            return
+        self._incomplete_after_mutation(code)
 
     def _complete_publication(
         self,
@@ -1389,7 +1595,11 @@ class PreparedVectorUpload:
             _LOGGER.warning("Accepted vector candidate cleanup deferred", exc_info=True)
         self.receipt["accounting_status"] = "committed"
         self._persist()
-        exact = _regular_tree_size(self.attempt_dir)
+        try:
+            exact = _regular_tree_size(self.attempt_dir)
+        except BaseException:  # broad-except: terminal accounting includes cancellation
+            self._release_after_terminal_failure()
+            raise
         try:
             self.reservation.commit(exact)
         except VectorUploadError:
@@ -1405,6 +1615,9 @@ class PreparedVectorUpload:
             if not suppress_accounting_error:
                 raise
             return
+        except BaseException:  # broad-except: unknown ledger failure must stop renewal
+            self._release_after_terminal_failure()
+            raise
         self._finished = True
         try:
             self.lease.release()
@@ -1712,7 +1925,8 @@ def prepare_vector_upload(
             if lease is not None:
                 lease.release()
         elif receipt is not None and receipt.get("status") == "rejected":
-            pass
+            if lease is not None:
+                lease.release()
         else:
             # Ambiguous published evidence remains conservatively reserved.
             if lease is not None:
@@ -1735,9 +1949,11 @@ __all__ = [
     "PreparedVectorUpload",
     "RedisRetentionLedger",
     "RedisScopeLeaseFactory",
+    "acquire_retention_maintenance_lease",
     "assert_project_retention_capacity",
     "begin_retention_rebuild_obligation",
     "complete_retention_rebuild_obligation",
+    "retention_rebuild_obligation_pending",
     "RetentionActor",
     "VectorUploadError",
     "prepare_vector_upload",

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from contextlib import nullcontext
 from dataclasses import dataclass
 import json
 import logging
@@ -23,6 +24,7 @@ from starlette.concurrency import run_in_threadpool
 from werkzeug.utils import secure_filename
 
 from wepppy.nodb.single_input_policy import single_input_uploads_enabled
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core import Ron
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.omni import Omni, OmniScenario
@@ -805,18 +807,39 @@ def _parse_inputs_with_prepared_upload(
     publish_candidate(prepared.candidate_path)
 
 
-def _snapshot_omni_nodb(omni: Omni, prepared_upload: tuple[PreparedVectorUpload, Path] | None) -> Path | None:
+@dataclass
+class _OmniUploadTransaction:
+    guard: Any
+    prior_state: dict[str, Any]
+    closed: bool = False
+
+    def close(self, exc_type=None, exc=None, traceback=None) -> None:
+        if self.closed:
+            return
+        self.closed = True
+        self.guard.__exit__(exc_type, exc, traceback)
+
+
+def _snapshot_omni_nodb(
+    omni: Omni,
+    prepared_upload: tuple[PreparedVectorUpload, Path] | None,
+) -> _OmniUploadTransaction | None:
     if prepared_upload is None:
         return None
-    nodb_value = getattr(omni, "_nodb", None)
-    if not nodb_value:
-        return None
-    nodb_path = Path(nodb_value)
-    if not nodb_path.exists():
-        return None
-    backup = nodb_path.with_name(f".{nodb_path.name}.{uuid4().hex}.vector-backup")
-    shutil.copy2(nodb_path, backup)
-    return backup
+    prepared, _accepted_path = prepared_upload
+    guard_factory = getattr(omni, "workflow_transaction", None)
+    guard = guard_factory(prepared.lease) if callable(guard_factory) else nullcontext()
+    guard.__enter__()
+    try:
+        prior_state = copy.deepcopy({
+            key: value
+            for key, value in omni.__dict__.items()
+            if key.startswith("_contrast") or key == "_control_scenario"
+        })
+    except BaseException:  # broad-except: release workflow fence on cancellation too
+        guard.__exit__(*__import__("sys").exc_info())
+        raise
+    return _OmniUploadTransaction(guard=guard, prior_state=prior_state)
 
 
 def _finalize_prepared_omni_upload(
@@ -839,24 +862,32 @@ def _rollback_prepared_omni_upload(
     *,
     omni: Omni,
     wd: str,
-    nodb_backup: Path | None,
+    nodb_backup: _OmniUploadTransaction | None,
     code: str,
 ) -> None:
     if prepared_upload is None:
         return
     prepared, accepted_path = prepared_upload
-    if prepared.receipt.get("status") == "accepted":
-        return
-    accepted_path.unlink(missing_ok=True)
     try:
-        accepted_path.parent.rmdir()
-    except OSError:
-        pass
-    if nodb_backup is not None:
-        os.replace(nodb_backup, omni._nodb)
-        Omni.cleanup_run_instances(wd)
-    if not prepared.is_terminal:
-        prepared.reject(code)
+        if prepared.receipt.get("status") in {"accepted", "incomplete"}:
+            return
+        if nodb_backup is not None:
+            lock_factory = getattr(omni, "locked", nullcontext)
+            with lock_factory():
+                for key in tuple(omni.__dict__):
+                    if key.startswith("_contrast") or key == "_control_scenario":
+                        omni.__dict__.pop(key, None)
+                omni.__dict__.update(copy.deepcopy(nodb_backup.prior_state))
+        accepted_path.unlink(missing_ok=True)
+        try:
+            accepted_path.parent.rmdir()
+        except OSError:
+            pass
+        if not prepared.is_terminal:
+            prepared.reject(code)
+    finally:
+        if nodb_backup is not None:
+            nodb_backup.close()
 
 
 async def _run_omni(
@@ -1022,7 +1053,10 @@ async def _run_omni_contrasts(
         )
 
     prepared_upload = prepared_uploads[0] if prepared_uploads else None
-    nodb_backup = _snapshot_omni_nodb(omni, prepared_upload)
+    try:
+        nodb_backup = _snapshot_omni_nodb(omni, prepared_upload)
+    except NoDbAlreadyLockedError as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
     try:
         _parse_inputs_with_prepared_upload(
             omni=omni,
@@ -1036,7 +1070,7 @@ async def _run_omni_contrasts(
         ):
             _finalize_prepared_omni_upload(prepared_upload, wd=wd)
             if nodb_backup is not None:
-                nodb_backup.unlink(missing_ok=True)
+                nodb_backup.close()
             return JSONResponse({"message": "Set omni inputs for batch processing"})
         if selection_mode == "cumulative":
             threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
@@ -1081,7 +1115,7 @@ async def _run_omni_contrasts(
         )
         _finalize_prepared_omni_upload(prepared_upload, wd=wd)
         if nodb_backup is not None:
-            nodb_backup.unlink(missing_ok=True)
+            nodb_backup.close()
     except ValueError as exc:
         _rollback_prepared_omni_upload(
             prepared_upload, omni=omni, wd=wd, nodb_backup=nodb_backup,
@@ -1186,7 +1220,10 @@ async def _dry_run_omni_contrasts(
         )
 
     prepared_upload = prepared_uploads[0] if prepared_uploads else None
-    nodb_backup = _snapshot_omni_nodb(omni, prepared_upload)
+    try:
+        nodb_backup = _snapshot_omni_nodb(omni, prepared_upload)
+    except NoDbAlreadyLockedError as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
     try:
         _parse_inputs_with_prepared_upload(
             omni=omni,
@@ -1237,7 +1274,7 @@ async def _dry_run_omni_contrasts(
         )
         _finalize_prepared_omni_upload(prepared_upload, wd=wd)
         if nodb_backup is not None:
-            nodb_backup.unlink(missing_ok=True)
+            nodb_backup.close()
     except ValueError as exc:
         _rollback_prepared_omni_upload(
             prepared_upload, omni=omni, wd=wd, nodb_backup=nodb_backup,

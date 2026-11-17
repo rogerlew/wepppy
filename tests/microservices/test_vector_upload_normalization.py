@@ -17,10 +17,12 @@ from wepppy.microservices.vector_upload_normalization import (
     RedisRetentionLedger,
     RetentionActor,
     VectorUploadError,
+    acquire_retention_maintenance_lease,
     begin_retention_rebuild_obligation,
     complete_retention_rebuild_obligation,
     prepare_vector_upload,
     reconcile_retention,
+    retention_rebuild_obligation_pending,
     validate_feature_collection_geometries,
 )
 
@@ -61,6 +63,11 @@ class _CommitFailureReservation(_Reservation):
             "simulated accounting failure",
             status_code=507,
         )
+
+
+class _UnexpectedCommitFailureReservation(_Reservation):
+    def commit(self, exact_bytes: int) -> None:
+        raise RuntimeError("unexpected accounting failure")
 
 
 class _Lease:
@@ -165,6 +172,60 @@ def test_accounting_failure_never_downgrades_accepted_workflow(tmp_path: Path) -
     assert receipt["status"] == "accepted"
     assert receipt["accounting_status"] == "pending"
     assert prepared.is_terminal
+
+
+@pytest.mark.parametrize("terminal", ["reject", "incomplete"])
+def test_unexpected_terminal_accounting_failure_releases_scope_lease(
+    tmp_path: Path,
+    terminal: str,
+) -> None:
+    ledger = _Ledger()
+    ledger.reservation = _UnexpectedCommitFailureReservation()
+    lease = _Lease()
+    kwargs = _prepare_kwargs(tmp_path, ledger)
+    kwargs["scope_lease_factory"] = lambda _key: lease
+    prepared = prepare_vector_upload(
+        raw_filename="failure.geojson",
+        stream=io.BytesIO(json.dumps(_polygon_payload()).encode()),
+        **kwargs,
+    )
+
+    with pytest.raises(RuntimeError, match="unexpected accounting failure"):
+        if terminal == "reject":
+            prepared.reject("test_failure")
+        else:
+            prepared.mark_incomplete_after_mutation("test_failure")
+
+    assert prepared.is_terminal
+    assert lease.owned is False
+
+
+def test_terminal_receipt_write_failure_releases_scope_lease(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wepppy.microservices import vector_upload_normalization as normalization
+
+    ledger = _Ledger()
+    lease = _Lease()
+    kwargs = _prepare_kwargs(tmp_path, ledger)
+    kwargs["scope_lease_factory"] = lambda _key: lease
+    prepared = prepare_vector_upload(
+        raw_filename="failure.geojson",
+        stream=io.BytesIO(json.dumps(_polygon_payload()).encode()),
+        **kwargs,
+    )
+    monkeypatch.setattr(
+        normalization,
+        "_atomic_json",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("receipt write failed")),
+    )
+
+    with pytest.raises(OSError, match="receipt write failed"):
+        prepared.reject("test_failure")
+
+    assert prepared.is_terminal
+    assert lease.owned is False
 
 
 def test_partial_mutation_is_recorded_incomplete_not_rejected(tmp_path: Path) -> None:
@@ -292,7 +353,7 @@ def test_real_redis_reconciliation_releases_eight_abandoned_prewrite_reservation
         connection.delete(f"{prefix}:reconcile")
         for index in range(8):
             ledger.reserve(
-                project_key=f"run:abandoned-{index}",
+                project_key="run:abandoned",
                 actor=RetentionActor("human", index + 1),
                 worst_case_bytes=1,
                 filesystem_root=tmp_path,
@@ -407,6 +468,15 @@ def test_rebuild_obligation_blocks_new_reservations_until_durably_cleared(
             f"{prefix}:totals",
             mapping={"initialized": 1, "committed": 0, "reserved": 0, "inflight": 0},
         )
+        for index in range(16):
+            assert not retention_rebuild_obligation_pending(
+                tmp_path,
+                operation="private_archive_delete",
+                target=f"run/archives/private/missing-{index}",
+                connection=connection,
+            )
+        assert connection.scard(f"{prefix}:rebuild-pending") == 0
+        assert not (tmp_path / ".vector-upload-rebuild-pending").exists()
         obligation = begin_retention_rebuild_obligation(
             tmp_path,
             operation="delete-project",
@@ -414,10 +484,46 @@ def test_rebuild_obligation_blocks_new_reservations_until_durably_cleared(
             connection=connection,
         )
         pending_key = f"{prefix}:rebuild-pending"
+        assert retention_rebuild_obligation_pending(
+            tmp_path,
+            operation="delete-project",
+            target="run:test",
+            connection=connection,
+        )
         assert connection.smembers(pending_key) == {obligation.stem}
         assert obligation.is_file()
-
+        project_root = tmp_path / "runs" / "project-1"
+        project_root.mkdir(parents=True)
+        connection.delete(pending_key)
+        assert connection.scard(pending_key) == 0
         ledger = RedisRetentionLedger(connection)
+        with pytest.raises(VectorUploadError) as lost_namespace:
+            ledger.reserve(
+                project_key="run:blocked-by-filesystem-marker",
+                actor=RetentionActor("human", 7),
+                worst_case_bytes=1,
+                filesystem_root=project_root,
+            )
+        assert lost_namespace.value.code == "vector_retention_quota_exceeded"
+        assert connection.smembers(pending_key) == {obligation.stem}
+        connection.delete(pending_key)
+        reconcile_retention(
+            tmp_path,
+            apply=True,
+            connection=connection,
+            rebuild_ledger=True,
+            stale_seconds=0,
+            committed_only=True,
+        )
+        assert connection.smembers(pending_key) == {obligation.stem}
+
+        maintenance = acquire_retention_maintenance_lease(connection)
+        try:
+            with pytest.raises(VectorUploadError):
+                acquire_retention_maintenance_lease(connection)
+        finally:
+            maintenance.release()
+
         with pytest.raises(VectorUploadError) as raised:
             ledger.reserve(
                 project_key="run:blocked-pending-rebuild",
@@ -430,6 +536,12 @@ def test_rebuild_obligation_blocks_new_reservations_until_durably_cleared(
         complete_retention_rebuild_obligation(obligation, connection=connection)
         assert not obligation.exists()
         assert connection.scard(pending_key) == 0
+        assert not retention_rebuild_obligation_pending(
+            tmp_path,
+            operation="delete-project",
+            target="run:test",
+            connection=connection,
+        )
         reservation = ledger.reserve(
             project_key="run:unblocked-after-rebuild",
             actor=RetentionActor("human", 7),

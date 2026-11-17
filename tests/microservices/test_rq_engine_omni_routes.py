@@ -1,6 +1,7 @@
 import io
 import json
 import os
+import threading
 from pathlib import Path
 from typing import Any
 import pytest
@@ -10,9 +11,11 @@ FormData = pytest.importorskip("starlette.datastructures").FormData
 UploadFile = pytest.importorskip("starlette.datastructures").UploadFile
 
 import wepppy.microservices.rq_engine as rq_engine
+import wepppy.nodb.mods.omni.omni as omni_module
 from wepppy.microservices.rq_engine import omni_routes
 from wepppy.microservices import vector_upload_normalization
 from wepppy.runtime_paths.errors import NoDirError
+from wepppy.nodb.base import NoDbAlreadyLockedError
 
 
 pytestmark = pytest.mark.microservice
@@ -69,6 +72,11 @@ def bounded_vector_normalizer(monkeypatch: pytest.MonkeyPatch) -> None:
         )
 
     monkeypatch.setattr(omni_routes, "prepare_vector_upload", prepare)
+    monkeypatch.setattr(
+        omni_module,
+        "RedisScopeLeaseFactory",
+        lambda: lambda _scope: _VectorLease(),
+    )
 
 
 def _contrast_polygon_bytes(*, label: str = "Area one") -> bytes:
@@ -1405,6 +1413,111 @@ def test_omni_upload_rolls_back_staged_file_when_build_fails(
     receipt = json.loads((attempt / "normalization.json").read_text())
     assert receipt["status"] == "rejected"
     assert receipt["error_code"] == "omni_build_failed"
+
+
+def test_real_omni_workflow_failure_restores_prior_state_before_concurrent_mutation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow_active = {"value": False}
+
+    class Lease:
+        def assert_owned(self) -> None:
+            return None
+
+        def release(self) -> None:
+            return None
+
+    def lease_factory():
+        def acquire(_scope):
+            if workflow_active["value"]:
+                raise vector_upload_normalization.VectorUploadError(
+                    "vector_retention_quota_exceeded", "workflow active", status_code=507
+                )
+            return Lease()
+        return acquire
+
+    monkeypatch.setattr(omni_module, "RedisScopeLeaseFactory", lease_factory)
+    controller = omni_routes.Omni(str(tmp_path), "0.cfg")
+    prior = tmp_path / "_pups/omni/contrasts/_uploads/prior/areas.geojson"
+    prior.parent.mkdir(parents=True)
+    prior_bytes = _contrast_polygon_bytes(label="prior")
+    prior.write_bytes(prior_bytes)
+    with controller.locked():
+        controller._contrast_selection_mode = "user_defined_areas"
+        controller._contrast_geojson_path = str(prior)
+        controller._contrast_geojson_name_key = "name"
+        controller._contrast_object_param = "prior-objective"
+
+    candidate = tmp_path / "candidate.geojson"
+    candidate.write_bytes(_contrast_polygon_bytes(label="replacement"))
+    accepted = tmp_path / "_pups/omni/contrasts/_uploads/current/areas.geojson"
+
+    class Prepared:
+        candidate_path = candidate
+        receipt = {"status": "prepared"}
+        is_terminal = False
+        rejected: str | None = None
+        lease = type("Lease", (), {"assert_owned": lambda self: None})()
+
+        def reject(self, code: str) -> None:
+            self.rejected = code
+            self.receipt["status"] = "rejected"
+            self.is_terminal = True
+
+    prepared = Prepared()
+    prepared_upload = (prepared, accepted)
+    transaction = omni_routes._snapshot_omni_nodb(controller, prepared_upload)
+    assert transaction is not None
+    workflow_active["value"] = True
+    omni_routes._parse_inputs_with_prepared_upload(
+        omni=controller,
+        parsed_inputs={
+            "omni_contrast_selection_mode": "user_defined_areas",
+            "omni_contrast_geojson_name_key": "name",
+        },
+        wd=str(tmp_path),
+        prepared_upload=prepared_upload,
+    )
+    # Model a build-owned persistence point before the injected failure.
+    with controller.locked():
+        controller._contrast_names = ["partial-build"]
+
+    blocked = threading.Event()
+    release = threading.Event()
+
+    def concurrent_mutation() -> None:
+        try:
+            with controller.locked():
+                raise AssertionError("concurrent mutation entered the active workflow transaction")
+        except NoDbAlreadyLockedError:
+            blocked.set()
+        release.wait(timeout=2.0)
+        with controller.locked():
+            controller._contrast_object_param = "concurrent-objective"
+
+    worker = threading.Thread(target=concurrent_mutation)
+    worker.start()
+    assert blocked.wait(timeout=1.0)
+    omni_routes._rollback_prepared_omni_upload(
+        prepared_upload,
+        omni=controller,
+        wd=str(tmp_path),
+        nodb_backup=transaction,
+        code="omni_build_failed",
+    )
+    workflow_active["value"] = False
+    release.set()
+    worker.join(timeout=2.0)
+    assert not worker.is_alive()
+
+    reloaded = omni_routes.Omni.load_detached(str(tmp_path))
+    assert reloaded._contrast_geojson_path == str(prior)
+    assert reloaded._contrast_object_param == "concurrent-objective"
+    assert reloaded._contrast_names is None
+    assert prior.read_bytes() == prior_bytes
+    assert not accepted.exists()
+    assert prepared.rejected == "omni_build_failed"
 
 
 def test_run_omni_contrasts_rejects_oversize_geojson_upload_with_413(

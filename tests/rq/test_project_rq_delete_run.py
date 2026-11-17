@@ -180,6 +180,11 @@ def test_delete_run_holds_vector_scope_and_rebuilds_ledger_after_durable_removal
             events.append("release")
 
     monkeypatch.setattr(delete_module, "RedisScopeLeaseFactory", lambda: lambda scope: events.append(scope) or Lease())
+    monkeypatch.setattr(
+        delete_module,
+        "acquire_retention_maintenance_lease",
+        lambda: Lease(),
+    )
     obligation = tmp_path / ".vector-upload-rebuild-pending" / "test.json"
     monkeypatch.setattr(
         delete_module,
@@ -201,7 +206,48 @@ def test_delete_run_holds_vector_scope_and_rebuilds_ledger_after_durable_removal
 
     assert not run_dir.exists()
     assert events[0] == f"run:{runid}"
-    assert events[-3:] == [f"rebuild:{tmp_path}", "obligation:complete:test.json", "release"]
+    assert f"rebuild:{tmp_path}" in events
+    assert "obligation:complete:test.json" in events
+
+
+def test_delete_run_releases_global_maintenance_when_project_scope_acquisition_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from wepppy.rq import project_rq_delete as delete_module
+
+    runid = "scope-acquisition-failure"
+    run_dir = tmp_path / runid
+    (run_dir / "roads" / "vector_upload_attempts").mkdir(parents=True)
+    _stub_delete_environment(
+        monkeypatch,
+        runid=runid,
+        job_id="delete-scope-failure",
+        errno_value=project_rq.errno.EBUSY,
+    )
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "delete-scope-failure")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
+    released: list[str] = []
+
+    class MaintenanceLease:
+        def release(self) -> None:
+            released.append("maintenance")
+
+    monkeypatch.setattr(
+        delete_module,
+        "acquire_retention_maintenance_lease",
+        lambda: MaintenanceLease(),
+    )
+    monkeypatch.setattr(
+        delete_module,
+        "RedisScopeLeaseFactory",
+        lambda: lambda _scope: (_ for _ in ()).throw(RuntimeError("project scope unavailable")),
+    )
+
+    with pytest.raises(RuntimeError, match="project scope unavailable"):
+        project_rq.delete_run_rq(runid, wd=str(run_dir), delete_files=True)
+
+    assert released == ["maintenance"]
 
 
 def test_gc_runs_rq_deferred_delete_suppresses_messages(

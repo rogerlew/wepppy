@@ -23,6 +23,7 @@ from wepppy.request_payload import RequestPayloadError
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from rq import Queue
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
@@ -61,9 +62,12 @@ from wepppy.rq.wepp_rq import (
 )
 from wepppy.microservices.vector_upload_normalization import (
     RedisScopeLeaseFactory,
+    VectorUploadError,
+    acquire_retention_maintenance_lease,
     begin_retention_rebuild_obligation,
     complete_retention_rebuild_obligation,
     reconcile_retention,
+    retention_rebuild_obligation_pending,
 )
 from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
@@ -79,6 +83,80 @@ logger = logging.getLogger(__name__)
 
 class ArchiveAdmissionUnavailable(RuntimeError):
     """Archive receipt reconciliation or enqueue storage is unavailable."""
+
+
+def _repair_private_archive_deletion(
+    *,
+    wd: str,
+    runid: str,
+    archive_path: str,
+    relative_archive: Path,
+    remove_bundle: bool,
+) -> None:
+    """Delete/reconcile private evidence without blocking the ASGI event loop."""
+    filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"])
+    target = (
+        Path(wd).resolve().relative_to(filesystem_root.resolve())
+        / relative_archive.parent
+    ).as_posix()
+    if not remove_bundle and not retention_rebuild_obligation_pending(
+        filesystem_root,
+        operation="private_archive_delete",
+        target=target,
+    ):
+        return
+    maintenance_lease = acquire_retention_maintenance_lease()
+    vector_lease = None
+    try:
+        vector_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+        vector_lease.assert_owned()
+        pending_repair = retention_rebuild_obligation_pending(
+            filesystem_root,
+            operation="private_archive_delete",
+            target=target,
+        )
+        if not remove_bundle and not pending_repair:
+            return
+        if remove_bundle and not pending_repair:
+            _resolve_run_archive_path(
+                wd,
+                Path(archive_path).relative_to(Path(wd) / "archives").as_posix(),
+            )
+        obligation = begin_retention_rebuild_obligation(
+            filesystem_root,
+            operation="private_archive_delete",
+            target=target,
+        )
+        bundle = Path(archive_path).parent
+        if remove_bundle or bundle.exists():
+            parent = bundle.parent
+            shutil.rmtree(bundle)
+            descriptor = os.open(parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+            try:
+                os.fsync(descriptor)
+            finally:
+                os.close(descriptor)
+            vector_lease.assert_owned()
+        reconcile_retention(
+            filesystem_root,
+            apply=True,
+            rebuild_ledger=True,
+            stale_seconds=0,
+            committed_only=True,
+            maintenance_lease=maintenance_lease,
+            required_scope_leases=(vector_lease,),
+        )
+        complete_retention_rebuild_obligation(obligation)
+    finally:
+        if vector_lease is not None:
+            try:
+                vector_lease.release()
+            except VectorUploadError:
+                logger.warning("Private archive retention scope release deferred to TTL", exc_info=True)
+        try:
+            maintenance_lease.release()
+        except VectorUploadError:
+            logger.warning("Private archive maintenance release deferred to TTL", exc_info=True)
 
 
 @contextmanager
@@ -566,7 +644,7 @@ def _archive_job_status(job_id: str) -> str | None:
             return job.get_status(refresh=True)
     except NoSuchJobError:
         return None
-    except Exception:
+    except Exception:  # broad-except: HTTP boundary preserves canonical error response
         # API boundary: treat status lookup failures as "in progress" to avoid double-enqueue.
         logger.exception("rq-engine archive job status lookup failed", extra={"job_id": job_id})
         return _ARCHIVE_JOB_STATUS_ERROR
@@ -622,7 +700,12 @@ def _reconcile_archive_receipt(
     return result.state
 
 
-def _resolve_run_archive_path(wd: str, archive_name: str) -> str:
+def _resolve_run_archive_path(
+    wd: str,
+    archive_name: str,
+    *,
+    verify_private: bool = True,
+) -> str:
     """Resolve an ordinary basename or one validated private archive identity."""
     name = str(archive_name).strip()
     normalized = name.replace("\\", "/")
@@ -648,7 +731,7 @@ def _resolve_run_archive_path(wd: str, archive_name: str) -> str:
     expected_parent = archives_root if ordinary else os.path.join(archives_root, parts[0], parts[1])
     if os.path.dirname(resolved) != expected_parent:
         raise ValueError("Invalid archive_name")
-    if private and os.path.exists(resolved):
+    if private and verify_private and os.path.exists(resolved):
         bundle = Path(expected_parent)
         if bundle.is_symlink() or bundle.parent.is_symlink():
             raise ValueError("Invalid archive_name")
@@ -1771,35 +1854,25 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
             )
 
         try:
-            archive_path = _resolve_run_archive_path(wd, str(archive_name))
+            archive_path = _resolve_run_archive_path(
+                wd,
+                str(archive_name),
+                verify_private=False,
+            )
         except ValueError as exc:
             return error_response(str(exc), status_code=400, code="validation_error")
         relative_archive = Path(archive_path).relative_to(Path(wd).resolve())
         is_private = relative_archive.parts[:2] == ("archives", "private")
         if not os.path.exists(archive_path):
             if is_private:
-                filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"])
-                vector_lease = RedisScopeLeaseFactory()(f"run:{runid}")
-                try:
-                    vector_lease.assert_owned()
-                    obligation = begin_retention_rebuild_obligation(
-                        filesystem_root,
-                        operation="private_archive_delete",
-                        target=(
-                            Path(wd).resolve().relative_to(filesystem_root.resolve())
-                            / relative_archive.parent
-                        ).as_posix(),
-                    )
-                    reconcile_retention(
-                        filesystem_root,
-                        apply=True,
-                        rebuild_ledger=True,
-                        stale_seconds=0,
-                        committed_only=True,
-                    )
-                    complete_retention_rebuild_obligation(obligation)
-                finally:
-                    vector_lease.release()
+                await run_in_threadpool(
+                    _repair_private_archive_deletion,
+                    wd=wd,
+                    runid=runid,
+                    archive_path=archive_path,
+                    relative_archive=relative_archive,
+                    remove_bundle=False,
+                )
             return error_response(f"Archive {archive_name} not found", status_code=404)
 
         prep = RedisPrep.getInstance(wd)
@@ -1823,30 +1896,14 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
                 )
             lease.checkpoint()
             if is_private:
-                vector_lease = RedisScopeLeaseFactory()(f"run:{runid}")
-                filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"])
-                try:
-                    vector_lease.assert_owned()
-                    obligation = begin_retention_rebuild_obligation(
-                        filesystem_root,
-                        operation="private_archive_delete",
-                        target=(
-                            Path(wd).resolve().relative_to(filesystem_root.resolve())
-                            / relative_archive.parent
-                        ).as_posix(),
-                    )
-                    shutil.rmtree(Path(archive_path).parent)
-                    vector_lease.assert_owned()
-                    reconcile_retention(
-                        filesystem_root,
-                        apply=True,
-                        rebuild_ledger=True,
-                        stale_seconds=0,
-                        committed_only=True,
-                    )
-                    complete_retention_rebuild_obligation(obligation)
-                finally:
-                    vector_lease.release()
+                await run_in_threadpool(
+                    _repair_private_archive_deletion,
+                    wd=wd,
+                    runid=runid,
+                    archive_path=archive_path,
+                    relative_archive=relative_archive,
+                    remove_bundle=True,
+                )
             else:
                 os.remove(archive_path)
             prep.clear_archive_job_id()

@@ -251,3 +251,22 @@ across all four supported suffixes. Fresh final5 SPDX/Grype evidence and the
 tar-to-image-ID/source-manifest proof are retained in the package artifacts.
 Final independent successor reviews remain required; no image publication,
 remote integration or deployment occurred.
+
+## Freeze-preparation successor evidence - 2026-11-17
+
+The next successor closes the remaining moving-review findings: renewable scope
+leases stop on unexpected receipt/accounting failures; project deletion releases
+the global lease if project-scope acquisition fails; private restore acquires
+global-before-project for incoming sensitive evidence; Omni holds one distributed
+workflow fence and reports competing admission as a conflict; Batch and AgFields
+hold file/state/receipt rollback inside their controller lock.
+
+Revision-pure focused validation is 384 passed, four skipped. A separate 16-case
+suite used the exact final5 HTTP converter and real detached controllers to read
+back Roads segments, AgFields rotation Parquet, Batch target watershed input,
+and Omni status-report artifacts for GeoJSON, Shapefile ZIP, Parquet, and
+GeoParquet. Signed Flask session cookies minted real session JWTs; accepted and
+hostile uploads retained only the verified numeric human ID, and the hostile
+event omitted session, email, roles, claims, and client IP. Final five-lane
+reviews remain required against the committed successor. Publication, remote
+integration, and deployment remain outside authorization.

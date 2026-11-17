@@ -838,6 +838,11 @@ def test_vector_attempts_archive_privately_with_hash_sidecar_and_restore(
     monkeypatch.setattr(archive_module, "RedisScopeLeaseFactory", lambda: RedisScopeLeaseFactory(connection))
     monkeypatch.setattr(
         archive_module,
+        "acquire_retention_maintenance_lease",
+        lambda: normalization_module.acquire_retention_maintenance_lease(connection),
+    )
+    monkeypatch.setattr(
+        archive_module,
         "begin_retention_rebuild_obligation",
         lambda root, **kwargs: normalization_module.begin_retention_rebuild_obligation(
             root, connection=connection, **kwargs
@@ -895,6 +900,52 @@ def test_vector_attempts_archive_privately_with_hash_sidecar_and_restore(
         keys = list(connection.scan_iter(match=f"{prefix}:*"))
         if keys:
             connection.delete(*keys)
+
+
+def test_restore_acquires_global_maintenance_before_project_scope_for_incoming_evidence(
+    archive_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wepppy.rq import project_rq_archive as archive_module
+
+    project, tmp_path, _published, _prep = archive_rq_environment
+    run = tmp_path / "demo"
+    archives = run / "archives"
+    archives.mkdir(parents=True)
+    archive = archives / "incoming-sensitive.zip"
+    with zipfile.ZipFile(archive, "w") as zipped:
+        zipped.writestr("roads/vector_upload_attempts/attempt/normalization.json", "{}")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "restore-lock-order")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
+    monkeypatch.setattr(project, "lock_statuses", lambda _runid: {"ron.nodb": True})
+    events: list[str] = []
+
+    class Lease:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+        def assert_owned(self) -> None:
+            events.append(f"assert:{self.name}")
+
+        def release(self) -> None:
+            events.append(f"release:{self.name}")
+
+    monkeypatch.setattr(
+        archive_module,
+        "acquire_retention_maintenance_lease",
+        lambda: events.append("acquire:maintenance") or Lease("maintenance"),
+    )
+    monkeypatch.setattr(
+        archive_module,
+        "RedisScopeLeaseFactory",
+        lambda: lambda scope: events.append(f"acquire:{scope}") or Lease(scope),
+    )
+
+    with pytest.raises(RuntimeError, match="Cannot restore while NoDb files are locked"):
+        project.restore_archive_rq("demo", archive.name)
+
+    assert events.index("acquire:maintenance") < events.index("acquire:run:demo")
+    assert events[-2:] == ["release:run:demo", "release:maintenance"]
 
 
 def test_restore_stages_private_ancestry_before_payload_and_restores_zero_mode(

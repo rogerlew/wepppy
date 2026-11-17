@@ -25,6 +25,9 @@ unambiguous.
   D-Tale redirect assertion failed and is not counted green.
 - Structural accessibility suite: 286 passed.
 - Frontend Jest: 74 passed; ESLint passed.
+- Freeze-preparation focused successor suite: 384 passed, 4 skipped. It includes
+  renewable-lease fault injection, destructive global/project lock ordering,
+  Omni/Batch/AgFields concurrency rollback, and signed-session provenance.
 
 The exact final5 image ran on the isolated converter network. The common-helper
 integration module passed 5 tests and read back source SHA-256, terminal receipt,
@@ -33,6 +36,9 @@ then exercised Roads, AgFields, Omni run, Omni dry-run and Batch for semanticall
 equivalent GeoJSON, Shapefile ZIP, `.parquet`, and `.geoparquet` input. Those
 five boundaries parsed their canonical workflow resource and compared property
 equality plus Shapely geometry equality; the boundary selection passed 5 tests.
+An additional real-controller suite passed 16 cases: four formats each for
+Roads segment preparation, AgFields rotation-Parquet reload, Batch target
+watershed artifact readback, and Omni status-report generation.
 The shape-converter suite passed 315 tests while bound to the parser binaries
 and sidecars copied from this exact image. The corrected final5 qualification,
 fresh SBOM/scan and source-manifest proof are retained in
@@ -67,6 +73,13 @@ fresh SBOM/scan and source-manifest proof are retained in
   the ledger only after durable directory removal.
 - Raw and resolved sensitive aliases are hidden and denied by browse and Files
   API paths.
+- Signed Flask session cookies mint session-scoped JWTs through the actual auth
+  decoder and run binding. Accepted and hostile receipts retain only the verified
+  numeric human identity; quarantine events omit session IDs, email, roles, raw
+  claims, and client IP. A signed non-owner session is denied token issuance.
+- Unexpected terminal receipt/accounting failures stop renewable scope leases.
+  Project deletion releases global maintenance if project-scope acquisition
+  fails, and incoming-sensitive restore proves global-before-project ordering.
 
 ## Activation and recovery
 

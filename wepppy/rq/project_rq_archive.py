@@ -26,7 +26,9 @@ from typing import Any, Callable, ContextManager, Mapping, Sequence
 from wepppy.microservices.vector_upload_normalization import (
     RedisRetentionLedger,
     RedisScopeLeaseFactory,
+    acquire_retention_maintenance_lease,
     RetentionActor,
+    VectorUploadError,
     assert_project_retention_capacity,
     begin_retention_rebuild_obligation,
     complete_retention_rebuild_obligation,
@@ -371,6 +373,7 @@ def archive_rq(
     archive_path_tmp: str | None = None
     retention_reservation = None
     retention_lease = None
+    maintenance_lease = None
     try:
         prep = runtime.get_prep_from_runid(runid)
         wd = runtime.get_wd(runid)
@@ -557,7 +560,7 @@ def archive_rq(
         if retention_lease is not None:
             try:
                 retention_lease.release()
-            except ValueError:
+            except VectorUploadError:
                 logging.getLogger(__name__).warning("Private archive retention lock release deferred", exc_info=True)
 
         _clear_archive_job_id(runtime, prep, runid)
@@ -591,14 +594,20 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
     restore_started = False
     restore_completed = False
     retention_lease = None
+    maintenance_lease = None
     rebuild_obligation = None
     try:
         prep = runtime.get_prep_from_runid(runid)
         notification_wd = runtime.get_wd(runid)
         wd = Path(notification_wd).resolve()
-        retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
-        retention_lease.assert_owned()
-
+        retention_configured = bool(
+            os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+            and os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+        )
+        private_archive = str(archive_name).replace("\\", "/").startswith("private/")
+        live_sensitive = _contains_vector_upload_attempts(wd)
+        if (private_archive or live_sensitive) and not retention_configured:
+            raise RuntimeError("Vector evidence retention identity is not configured")
         archives_dir = wd / "archives"
         archive_path = (archives_dir / archive_name).resolve()
 
@@ -621,7 +630,24 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 )
 
             restore_members, restore_bytes, restore_file_count = _collect_restore_members(zf, wd)
-            retention_lease.assert_owned()
+            incoming_sensitive = any(
+                "vector_upload_attempts" in relative.parts
+                for _member, _target, relative in restore_members
+            )
+            if incoming_sensitive and not retention_configured:
+                raise RuntimeError("Vector evidence retention identity is not configured")
+            if retention_configured and (private_archive or live_sensitive or incoming_sensitive):
+                maintenance_lease = acquire_retention_maintenance_lease()
+            if retention_configured:
+                retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+                retention_lease.assert_owned()
+            # The project scope now prevents a new upload from racing this
+            # classification. If evidence appeared before the scope was held,
+            # fail without mutation instead of inverting project -> global.
+            if _contains_vector_upload_attempts(wd) and maintenance_lease is None:
+                raise RuntimeError("Vector evidence appeared during restore admission; retry the restore")
+            if retention_lease is not None:
+                retention_lease.assert_owned()
             from wepppy.declarative.archive import validate_restore
             preserve_declarative = validate_restore(wd, zf, restore_members)
             directory_modes = _restore_directory_modes(restore_members, wd)
@@ -661,7 +687,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
             roads_guard = roads_lifecycle.restore_operation(wd)
             with roads_guard:
                 filesystem_root = None
-                if os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip():
+                if maintenance_lease is not None:
                     filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"]).resolve(strict=True)
                     rebuild_obligation = begin_retention_rebuild_obligation(
                         filesystem_root,
@@ -674,7 +700,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 restore_started = True
                 try:
                     for entry in sorted(wd.iterdir()):
-                        retention_lease.assert_owned()
+                        if retention_lease is not None:
+                            retention_lease.assert_owned()
                         if preserve_declarative and entry.name in {"provenance", "READONLY"}:
                             continue
                         if entry.name in {"archives", ".config-amendment.lock", "roads.lifecycle.lock", "redisprep.dump"}:
@@ -696,12 +723,14 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                     # ZIP ordering cannot expose a private payload before its ancestry
                     # is restricted. Owner access is temporary for readonly directories.
                     for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts)):
-                        retention_lease.assert_owned()
+                        if retention_lease is not None:
+                            retention_lease.assert_owned()
                         directory.mkdir(mode=mode | 0o700, parents=True, exist_ok=True)
                         os.chmod(directory, mode | 0o700)
 
                     for member, target_path, relative_target in restore_members:
-                        retention_lease.assert_owned()
+                        if retention_lease is not None:
+                            retention_lease.assert_owned()
                         if preserve_declarative and relative_target.parts[0] in {"provenance", "READONLY"}:
                             continue
                         if member.is_dir():
@@ -727,6 +756,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                         else:
                             with zf.open(member, "r") as src, open(target_path, "wb") as dst:
                                 shutil.copyfileobj(src, dst)
+                                dst.flush()
+                                os.fsync(dst.fileno())
 
                         perm = member.external_attr >> 16
                         if perm and target_path.name != 'redisprep.dump':
@@ -755,7 +786,17 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 restore_completed = True
 
                 for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts), reverse=True):
-                    os.chmod(directory, mode)
+                    descriptor = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+                    try:
+                        os.chmod(directory, mode)
+                        os.fsync(descriptor)
+                    finally:
+                        os.close(descriptor)
+                root_descriptor = os.open(wd, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+                try:
+                    os.fsync(root_descriptor)
+                finally:
+                    os.close(root_descriptor)
                 if preserve_declarative:
                     from wepppy.declarative.records import verify_protected
                     verify_protected(wd)
@@ -768,6 +809,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 rebuild_ledger=True,
                 stale_seconds=0,
                 committed_only=True,
+                maintenance_lease=maintenance_lease,
+                required_scope_leases=(retention_lease,),
             )
             if rebuild_obligation is not None:
                 complete_retention_rebuild_obligation(rebuild_obligation)
@@ -799,9 +842,16 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         if retention_lease is not None:
             try:
                 retention_lease.release()
-            except ValueError:
+            except VectorUploadError:
                 logging.getLogger(__name__).warning(
                     "Restore vector retention lock release deferred", exc_info=True,
+                )
+        if maintenance_lease is not None:
+            try:
+                maintenance_lease.release()
+            except VectorUploadError:
+                logging.getLogger(__name__).warning(
+                    "Restore vector maintenance lock release deferred", exc_info=True,
                 )
         if not restore_started or restore_completed:
             _clear_archive_job_id(runtime, prep, runid)

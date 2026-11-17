@@ -17,6 +17,8 @@ from typing import Any, Callable, Mapping
 
 from wepppy.microservices.vector_upload_normalization import (
     RedisScopeLeaseFactory,
+    VectorUploadError,
+    acquire_retention_maintenance_lease,
     begin_retention_rebuild_obligation,
     complete_retention_rebuild_obligation,
     reconcile_retention,
@@ -39,6 +41,19 @@ def _publish(runtime: DeleteRuntime, channel: str, message: str) -> None:
     if sys.exception() is not None:
         message = safe_text(message, source_profile=current_profile(WORKER))
     runtime.publish_status(channel, message)
+
+
+def _has_retained_vector_evidence(target: Path) -> bool:
+    return any(
+        os.path.lexists(path)
+        for path in (
+            target / "roads" / "vector_upload_attempts",
+            target / "ag_fields" / "vector_upload_attempts",
+            target / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
+            target / "resources" / "vector_upload_attempts",
+            target / "archives" / "private",
+        )
+    )
 
 
 def _try_mark_delete_state(
@@ -116,23 +131,27 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
     )
 
     retention_lease = None
+    maintenance_lease = None
     retention_root = None
     rebuild_obligation = None
-    if delete_files and os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip():
-        configured_root = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
-        if not configured_root:
-            raise RuntimeError("Vector evidence filesystem root is not configured")
-        retention_root = Path(configured_root).resolve(strict=True)
-        target.relative_to(retention_root)
-        retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
-        retention_lease.assert_owned()
-        rebuild_obligation = begin_retention_rebuild_obligation(
-            retention_root,
-            operation="project_delete",
-            target=target.relative_to(retention_root).as_posix(),
-        )
-
+    retention_identity = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
     try:
+        if delete_files and not retention_identity and target.exists() and _has_retained_vector_evidence(target):
+            raise RuntimeError("Vector evidence retention identity is not configured")
+        if delete_files and retention_identity:
+            configured_root = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+            if not configured_root:
+                raise RuntimeError("Vector evidence filesystem root is not configured")
+            retention_root = Path(configured_root).resolve(strict=True)
+            target.relative_to(retention_root)
+            maintenance_lease = acquire_retention_maintenance_lease()
+            retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+            retention_lease.assert_owned()
+            rebuild_obligation = begin_retention_rebuild_obligation(
+                retention_root,
+                operation="project_delete",
+                target=target.relative_to(retention_root).as_posix(),
+            )
         if delete_files and target.exists():
             for attempt in range(1, attempts + 1):
                 if retention_lease is not None:
@@ -163,6 +182,11 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
                     break
                 else:
                     if not target.exists():
+                        descriptor = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+                        try:
+                            os.fsync(descriptor)
+                        finally:
+                            os.close(descriptor)
                         break
             if target.exists():
                 if delete_error is None:
@@ -177,18 +201,33 @@ def _delete_run_guarded(runid: str, wd: str, *, delete_files: bool, runtime: Del
                     _publish(runtime, status_channel, f"rq:{job_id} STATUS delete deferred (directory still present)")
         if delete_files and not target.exists() and retention_lease is not None and retention_root is not None:
             retention_lease.assert_owned()
+            descriptor = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+            try:
+                os.fsync(descriptor)
+            finally:
+                os.close(descriptor)
             reconcile_retention(
                 retention_root,
                 apply=True,
                 rebuild_ledger=True,
                 stale_seconds=0,
                 committed_only=True,
+                maintenance_lease=maintenance_lease,
+                required_scope_leases=(retention_lease,),
             )
             if rebuild_obligation is not None:
                 complete_retention_rebuild_obligation(rebuild_obligation)
     finally:
         if retention_lease is not None:
-            retention_lease.release()
+            try:
+                retention_lease.release()
+            except VectorUploadError:
+                runtime.logger.warning("Project retention scope release deferred to TTL", exc_info=True)
+        if maintenance_lease is not None:
+            try:
+                maintenance_lease.release()
+            except VectorUploadError:
+                runtime.logger.warning("Vector maintenance release deferred to TTL", exc_info=True)
 
     if target.exists() and (delete_failed or delete_deferred or mark_failed):
         _try_mark_delete_state(

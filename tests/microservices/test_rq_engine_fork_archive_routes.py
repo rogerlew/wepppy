@@ -15,6 +15,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import fork_archive_routes
+from wepppy.microservices.vector_upload_normalization import VectorUploadError
 from wepppy.weppcloud.utils import helpers as helpers_utils
 from wepppy.weppcloud.utils import runid as runid_utils
 
@@ -1517,6 +1518,12 @@ def test_private_archive_delete_route_removes_bundle_then_rebuilds_ledger(
             return None
 
     monkeypatch.setattr(fork_archive_routes, "RedisScopeLeaseFactory", lambda: lambda _scope: Lease())
+    monkeypatch.setattr(fork_archive_routes, "acquire_retention_maintenance_lease", lambda: Lease())
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "retention_rebuild_obligation_pending",
+        lambda *_args, **_kwargs: False,
+    )
     obligation = tmp_path / ".vector-upload-rebuild-pending" / "test.json"
     obligation_calls: list[dict[str, object]] = []
     monkeypatch.setattr(
@@ -1551,12 +1558,109 @@ def test_private_archive_delete_route_removes_bundle_then_rebuilds_ledger(
     assert not archive.parent.exists()
     assert obligation_calls == [
         {"operation": "private_archive_delete", "target": archive.parent.relative_to(tmp_path).as_posix()},
-        {"operation": "private_archive_delete", "target": archive.parent.relative_to(tmp_path).as_posix()},
     ]
-    assert rebuilds == [
-        {"apply": True, "rebuild_ledger": True, "stale_seconds": 0, "committed_only": True},
-        {"apply": True, "rebuild_ledger": True, "stale_seconds": 0, "committed_only": True},
-    ]
+    assert len(rebuilds) == 1
+    assert {
+        key: rebuilds[0][key]
+        for key in ("apply", "rebuild_ledger", "stale_seconds", "committed_only")
+    } == {"apply": True, "rebuild_ledger": True, "stale_seconds": 0, "committed_only": True}
+
+
+def test_private_archive_delete_repairs_partial_bundle_from_exact_pending_marker(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    bundle = run_dir / "archives" / "private" / "attempt-1"
+    bundle.mkdir(parents=True)
+    (bundle / "provenance.json").write_text("{}", encoding="utf-8")
+    archive_path = bundle / "snapshot.zip"
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "test-private-retry")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
+
+    class Lease:
+        def assert_owned(self) -> None:
+            return None
+
+        def release(self) -> None:
+            return None
+
+    monkeypatch.setattr(fork_archive_routes, "RedisScopeLeaseFactory", lambda: lambda _scope: Lease())
+    monkeypatch.setattr(fork_archive_routes, "acquire_retention_maintenance_lease", lambda: Lease())
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "retention_rebuild_obligation_pending",
+        lambda *_args, **_kwargs: True,
+    )
+    obligation = tmp_path / ".vector-upload-rebuild-pending" / "test.json"
+    completed: list[Path] = []
+    rebuilds: list[dict[str, object]] = []
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "begin_retention_rebuild_obligation",
+        lambda *_args, **_kwargs: obligation,
+    )
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "complete_retention_rebuild_obligation",
+        lambda path: completed.append(path),
+    )
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "reconcile_retention",
+        lambda *_args, **kwargs: rebuilds.append(kwargs) or {},
+    )
+
+    fork_archive_routes._repair_private_archive_deletion(
+        wd=str(run_dir),
+        runid="run-1",
+        archive_path=str(archive_path),
+        relative_archive=archive_path.relative_to(run_dir),
+        remove_bundle=False,
+    )
+
+    assert not bundle.exists()
+    assert completed == [obligation]
+    assert len(rebuilds) == 1
+
+
+def test_private_archive_delete_cannot_mutate_while_global_maintenance_is_held(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    _archive_name, archive = _private_archive_fixture(run_dir)
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", f"test-private-fence-{tmp_path.name}")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
+
+    import redis as redis_module
+    from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+    from wepppy.microservices.vector_upload_normalization import acquire_retention_maintenance_lease
+
+    connection_kwargs = redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    password_path = Path(os.getenv("REDIS_PASSWORD_FILE", "/run/secrets/redis_password"))
+    if password_path.exists():
+        connection_kwargs["password"] = password_path.read_text().strip()
+    connection = redis_module.client.Redis(**connection_kwargs)
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "acquire_retention_maintenance_lease",
+        lambda: acquire_retention_maintenance_lease(connection),
+    )
+    maintenance = acquire_retention_maintenance_lease(connection)
+    try:
+        with pytest.raises(VectorUploadError, match="already active"):
+            fork_archive_routes._repair_private_archive_deletion(
+                wd=str(run_dir),
+                runid="run-1",
+                archive_path=str(archive),
+                relative_archive=archive.relative_to(run_dir),
+                remove_bundle=True,
+            )
+        assert archive.is_file()
+        assert archive.parent.is_dir()
+    finally:
+        maintenance.release()
 
 
 @pytest.mark.parametrize(

@@ -1,6 +1,7 @@
 import json
 import os
 from contextlib import contextmanager
+from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -102,7 +103,38 @@ class DummyBatchRunner:
         return self._sbs_resource
 
     def register_geojson(self, collection, metadata=None) -> None:
-        self.geojson_state = collection.analysis_results
+        self.geojson_state = collection.update_analysis_results(metadata or {})
+
+    def register_geojson_transactional(self, collection, *, metadata=None, publication_commit) -> None:
+        prior_geojson = deepcopy(self._geojson_state)
+        prior_template = deepcopy(self._runid_template_state)
+        with self.locked():
+            try:
+                self.register_geojson(collection, metadata=metadata)
+                publication_commit()
+            except BaseException:
+                self._geojson_state = prior_geojson
+                self._runid_template_state = prior_template
+                raise
+
+    def publish_geojson_transactional(self, candidate_path, destination_path, *, metadata=None, publication_commit) -> None:
+        destination_path = Path(destination_path)
+        prior_bytes = destination_path.read_bytes() if destination_path.exists() else None
+        prior_geojson = deepcopy(self._geojson_state)
+        prior_template = deepcopy(self._runid_template_state)
+        with self.locked():
+            try:
+                destination_path.write_bytes(Path(candidate_path).read_bytes())
+                self.register_geojson(DummyCollection(destination_path), metadata=metadata)
+                publication_commit()
+            except BaseException:
+                if prior_bytes is None:
+                    destination_path.unlink(missing_ok=True)
+                else:
+                    destination_path.write_bytes(prior_bytes)
+                self._geojson_state = prior_geojson
+                self._runid_template_state = prior_template
+                raise
 
     @contextmanager
     def locked(self):
@@ -151,7 +183,7 @@ class DummyBatchRunner:
 class DummyCollection:
     def __init__(self, path: str) -> None:
         self._analysis = True
-        self._analysis_results = {"feature_count": 1}
+        self._analysis_results = {"feature_count": 1, "_geojson_filepath": str(path)}
 
     @property
     def analysis_results(self) -> dict:
@@ -408,10 +440,10 @@ def test_upload_geojson_registration_failure_restores_previous_bytes(
     monkeypatch.setattr(upload_batch_runner_routes, "WatershedCollection", DummyCollection)
     monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
 
-    def fail_registration(collection, metadata=None) -> None:
+    def fail_registration(candidate_path, destination_path, *, metadata=None, publication_commit=None) -> None:
         raise RuntimeError("registration failed")
 
-    monkeypatch.setattr(batch_runner, "register_geojson", fail_registration)
+    monkeypatch.setattr(batch_runner, "publish_geojson_transactional", fail_registration)
 
     with TestClient(rq_engine.app) as client:
         response = client.post(

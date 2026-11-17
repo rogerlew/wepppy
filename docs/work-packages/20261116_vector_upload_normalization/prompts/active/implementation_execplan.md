@@ -72,6 +72,11 @@ GeoParquet.
       qualification and rollout/recovery documentation are complete; final
       independent successor re-reviews of the exact committed candidate remain
       active.
+- [x] (2026-11-17) Freeze-preparation validation: 384 focused tests pass with
+      four skips, and 16 real-controller/exact-final5 downstream cases pass for
+      Roads, AgFields, Omni, and Batch across all four admitted formats. Signed
+      browser-session provenance, hostile-event minimization, renewable-lease
+      cleanup, restore lock ordering, and concurrent rollback regressions pass.
 
 ## Surprises & Discoveries
 
@@ -124,6 +129,11 @@ GeoParquet.
 - The first final5 equivalence rerun selected stale first-generation Parquet
   fixtures and correctly failed them. The retained final3-qualified fixture
   generation passed all exact-image selections; the failed run is not counted.
+- A long full-suite run observed source while `/tmp/vun-candidate` was being
+  updated and therefore is not revision-pure acceptance evidence. Its one
+  restore failure exposed an unconditional vector Redis lease for projects with
+  retention disabled; the candidate now avoids that new dependency, and the
+  revision-pure focused archive suite passes.
 
 ## Decision Log
 
@@ -173,6 +183,15 @@ GeoParquet.
   in both the private filesystem and Redis before deletion/restore. Block new
   reservations and readiness until an exact-root rebuild is read back and both
   markers are cleared. Retry uses the same globally qualified identity.
+- **2026-11-17, workflow concurrency** - Hold one renewable run-scope fence
+  across the complete Omni parse/build/receipt transaction, and one NoDb lock
+  across Batch and AgFields file/state/receipt publication. Competing admission
+  receives a bounded conflict; failure restores the latest committed bytes and
+  state rather than a stale pre-lock snapshot.
+- **2026-11-17, signed-session evidence** - Prove the signed-cookie to JWT to
+  upload-auth path while isolating entitlement storage. Receipts retain only
+  `{kind: human, user_id}` and security events omit session IDs, email, roles,
+  raw claims, and client IP.
 
 ## Outcomes & Retrospective
 
@@ -196,6 +215,13 @@ candidate. Exact final5 passes the common helper plus actual Roads, AgFields,
 Omni run/dry-run and Batch HTTP boundaries across four supported suffixes. Final
 M5 re-review remains open. No image was published and no production deployment
 or remote-host acceptance was performed.
+
+The freeze-preparation successor passes 384 focused tests (four skipped) and 16
+exact-final5 downstream artifact/readback cases. These results include renewable
+lease fault injection, global-before-project destructive lock order,
+transactional concurrency rollback, real signed browser-session provenance, and
+minimized hostile-upload events. Final five-lane review must bind the next
+committed successor before M5 can be marked complete.
 
 Resumed M0 review is active in independent correctness, security/dependency, QA
 and operations lanes. Proposed resource ADR and threat matrix now exist; neither

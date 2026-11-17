@@ -22,10 +22,11 @@ from copy import deepcopy
 from contextlib import ExitStack
 from pathlib import Path
 import shutil
+import tempfile
 import time
 
 import jsonpickle
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar, Sequence, Literal
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar, Sequence, Literal
 
 from wepppy.all_your_base.geo import raster_stacker
 from wepppy.topo.watershed_collection import WatershedCollection, WatershedFeature
@@ -1151,6 +1152,107 @@ class BatchRunner(NoDbBase):
                 summary["is_valid"] = False
                 stale_state["summary"] = summary
                 self._runid_template_state = stale_state
+
+    def register_geojson_transactional(
+        self,
+        watershed_collection: WatershedCollection,
+        *,
+        metadata: Optional[Dict[str, Any]] = None,
+        publication_commit: Callable[[], None],
+    ) -> None:
+        """Register a watershed and its publication receipt under one NoDb lock."""
+        analysis_results = watershed_collection.analysis_results
+        if analysis_results["feature_count"] == 0:
+            os.remove(watershed_collection.geojson_filepath)
+            raise ValueError("GeoJSON contains no features.")
+        enriched_results = deepcopy(analysis_results)
+        if metadata:
+            enriched_results.update(metadata)
+
+        with self.locked():
+            prior_geojson_state = deepcopy(self._geojson_state)
+            prior_template_state = deepcopy(self._runid_template_state)
+            try:
+                self._geojson_state = enriched_results
+                if self._runid_template_state:
+                    stale_state = deepcopy(self._runid_template_state)
+                    stale_state["status"] = "stale"
+                    summary = stale_state.get("summary") or {}
+                    summary["is_valid"] = False
+                    stale_state["summary"] = summary
+                    self._runid_template_state = stale_state
+                publication_commit()
+            except BaseException:  # broad-except: transaction rollback includes cancellation
+                self._geojson_state = prior_geojson_state
+                self._runid_template_state = prior_template_state
+                raise
+
+    def publish_geojson_transactional(
+        self,
+        candidate_path: Path,
+        destination_path: Path,
+        *,
+        metadata: Optional[Dict[str, Any]] = None,
+        publication_commit: Callable[[], None],
+    ) -> None:
+        """Publish watershed bytes, state and receipt under one NoDb lock."""
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        backup_path: Path | None = None
+        staged_path: Path | None = None
+        with self.locked():
+            prior_geojson_state = deepcopy(self._geojson_state)
+            prior_template_state = deepcopy(self._runid_template_state)
+            try:
+                if destination_path.exists():
+                    descriptor, backup_name = tempfile.mkstemp(
+                        prefix=f".{destination_path.name}.",
+                        suffix=".backup",
+                        dir=destination_path.parent,
+                    )
+                    os.close(descriptor)
+                    backup_path = Path(backup_name)
+                    shutil.copy2(destination_path, backup_path)
+                descriptor, staged_name = tempfile.mkstemp(
+                    prefix=f".{destination_path.name}.",
+                    suffix=".tmp",
+                    dir=destination_path.parent,
+                )
+                os.close(descriptor)
+                staged_path = Path(staged_name)
+                shutil.copy2(candidate_path, staged_path)
+                os.replace(staged_path, destination_path)
+                staged_path = None
+
+                collection = WatershedCollection(str(destination_path))
+                analysis_results = collection.analysis_results
+                if analysis_results["feature_count"] == 0:
+                    raise ValueError("GeoJSON contains no features.")
+                enriched_results = deepcopy(analysis_results)
+                if metadata:
+                    enriched_results.update(metadata)
+                self._geojson_state = enriched_results
+                if self._runid_template_state:
+                    stale_state = deepcopy(self._runid_template_state)
+                    stale_state["status"] = "stale"
+                    summary = stale_state.get("summary") or {}
+                    summary["is_valid"] = False
+                    stale_state["summary"] = summary
+                    self._runid_template_state = stale_state
+                publication_commit()
+            except BaseException:  # broad-except: transaction rollback includes cancellation
+                if backup_path is not None:
+                    os.replace(backup_path, destination_path)
+                    backup_path = None
+                else:
+                    destination_path.unlink(missing_ok=True)
+                self._geojson_state = prior_geojson_state
+                self._runid_template_state = prior_template_state
+                raise
+            finally:
+                if staged_path is not None:
+                    staged_path.unlink(missing_ok=True)
+                if backup_path is not None:
+                    backup_path.unlink(missing_ok=True)
 
     def get_watershed_collection(self) -> WatershedCollection:
         """Get the registered watershed collection, if any."""

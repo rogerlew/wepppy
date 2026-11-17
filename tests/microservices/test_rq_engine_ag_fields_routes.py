@@ -4,17 +4,22 @@ import hashlib
 import io
 import json
 import os
+import pickle
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from itsdangerous import Signer
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import ag_fields_routes
+from wepppy.microservices.rq_engine import auth as rq_auth
+from wepppy.microservices.rq_engine import session_routes
 from wepppy.microservices.rq_engine.auth import AuthError
+from wepppy.weppcloud.utils import auth_tokens
 
 
 pytestmark = pytest.mark.microservice
@@ -296,6 +301,99 @@ def test_boundary_upload_returns_controller_summary(route_context) -> None:
     }
     assert controller.field_boundaries_source_filename == "fields.geojson"
     assert auth_calls[-1][1] == "demo"
+
+
+def test_signed_browser_session_provenance_and_hostile_quarantine_are_minimal(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    from wepppy.microservices.rq_engine import feature_access as feature_access_adapter
+
+    controller, _auth_calls = route_context
+    secret = "signed-session-provenance-secret"
+    sessions = {
+        "owner-session": pickle.dumps({"_user_id": "77", "email": "owner@example.test"}),
+        "other-session": pickle.dumps({"_user_id": "88", "email": "other@example.test"}),
+    }
+
+    class SessionRedis:
+        def get(self, key: str):
+            return sessions.get(key.removeprefix("session:"))
+
+        def exists(self, key: str) -> int:
+            return int(key.startswith("session:") and key.removeprefix("session:") in sessions)
+
+        def close(self) -> None:
+            return None
+
+    monkeypatch.setattr(session_routes.redis, "Redis", lambda **_kwargs: SessionRedis())
+    monkeypatch.setattr(session_routes, "_secret_key", lambda: secret)
+    monkeypatch.setattr(session_routes, "_resolve_roles_for_user_id", lambda _user_id: ["User"])
+    monkeypatch.setattr(
+        session_routes,
+        "_session_user_authorized_for_run",
+        lambda runid, user_id, _roles: runid == "demo" and user_id == 77,
+    )
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda _runid: False)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda _jti: None)
+    monkeypatch.setattr(rq_auth, "_check_session_revocation", lambda _sid: None)
+    monkeypatch.setattr(rq_auth, "_check_session_marker", lambda _sid, _runid: None)
+    monkeypatch.setattr(rq_auth, "_reject_fork_preparing_run", lambda _runid: None)
+    monkeypatch.setattr(ag_fields_routes, "require_jwt", rq_auth.require_jwt)
+    monkeypatch.setattr(ag_fields_routes, "authorize_run_access", rq_auth.authorize_run_access)
+    monkeypatch.setattr(ag_fields_routes, "require_feature_access", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(ag_fields_routes, "_invalidate_ag_fields_preflight", lambda _wd: None)
+    monkeypatch.setattr(feature_access_adapter, "require_workflow_access", lambda *_args, **_kwargs: None)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "signed-session-jwt-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+    signer = Signer(secret, salt="flask-session", key_derivation="hmac")
+
+    with TestClient(rq_engine.app) as client:
+        owner_cookie = signer.sign(b"owner-session").decode()
+        token_response = client.post(
+            "/api/runs/demo/cfg/session-token",
+            cookies={"session": owner_cookie},
+            headers={"Origin": "http://testserver"},
+        )
+        assert token_response.status_code == 200
+        token = token_response.json()["token"]
+        accepted = client.post(
+            "/api/runs/demo/cfg/agfields/boundaries",
+            headers={"Authorization": f"Bearer {token}"},
+            files={"field_boundaries": ("fields.geojson", _field_boundaries_bytes())},
+        )
+        assert accepted.status_code == 200
+
+        hostile = json.loads(_field_boundaries_bytes())
+        hostile["features"][0]["geometry"] = {"type": "Point", "coordinates": [0.0, 0.0]}
+        with caplog.at_level("WARNING", logger="wepppy.microservices.vector_upload_normalization"):
+            rejected = client.post(
+                "/api/runs/demo/cfg/agfields/boundaries",
+                headers={"Authorization": f"Bearer {token}"},
+                files={"field_boundaries": ("hostile.geojson", json.dumps(hostile).encode())},
+            )
+        assert rejected.status_code == 400
+
+        other_cookie = signer.sign(b"other-session").decode()
+        denied = client.post(
+            "/api/runs/demo/cfg/session-token",
+            cookies={"session": other_cookie},
+            headers={"Origin": "http://testserver"},
+        )
+        assert denied.status_code == 401
+
+    receipts = [
+        json.loads(path.read_text())
+        for path in (Path(controller.ag_fields_dir) / "vector_upload_attempts").glob("*/normalization.json")
+    ]
+    assert {receipt["status"] for receipt in receipts} == {"accepted", "rejected"}
+    assert all(receipt["actor"] == {"kind": "human", "user_id": 77} for receipt in receipts)
+    event = next(record.getMessage() for record in caplog.records if "vector_upload_security_event_v1" in record.getMessage())
+    assert '"actor":{"kind":"human","user_id":77}' in event
+    for forbidden in ("session", "email", "roles", "claims", "127.0.0.1"):
+        assert forbidden not in event
 
 
 def test_boundary_geoparquet_retains_source_and_publishes_canonical_candidate(
