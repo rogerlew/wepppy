@@ -1,7 +1,7 @@
 # Parquet CSV integration tracker
 
 **Started / updated**: 2026-11-18 UTC
-**Phase**: Scaffold complete; M0 pending
+**Phase**: M0 ratified; M1 implementation next
 **Branch**: `codex/parquet-csv-cli-package`
 **Security impact**: high; dedicated reviews required, not yet performed
 **Plan**: [implementation_execplan.md](prompts/active/implementation_execplan.md)
@@ -11,8 +11,8 @@
 - [x] Inspect accepted standalone evaluation and current download branches/contracts.
 - [x] Scaffold package, draft durable contract, checkpoint and active ExecPlan.
 - [x] Record immediate cutover, no environment-facing configuration and no Python fallback.
-- [ ] M0: Resolve compatibility, filter/environment contract changes, fixed settings and HTTP errors.
-- [ ] M0: Independent contract reviews and checkpoint ancestor commit.
+- [x] M0: Resolve compatibility, filter/environment contract changes, fixed settings and HTTP errors.
+- [x] M0: Independent contract reviews and checkpoint ancestor commit.
 - [ ] M1: Promote/package native CLI and harness; close required compatibility gaps.
 - [ ] M2: Wire all covered CSV routes, response ownership and shared admission; remove old path.
 - [ ] M3: Exact-image workflow/resource/security validation; broad tests after wiring.
@@ -49,3 +49,26 @@ Runtime tests, independent reviews, binary/image builds and deployment: not run.
 Next: execute M0 of the active plan when implementation is requested. Retain exact
 contract/binary/source identities, generated HTTP byte readback, no-fallback proof,
 shared-worker admission and crash/disconnect evidence before any cutover claim.
+
+## Execution updates
+
+2026-11-18 UTC: operator authorized execution. Retained an inventory of 156 real
+files, including climate timestamps, null columns, Zstandard and GeoParquet WKB.
+Independent read-only contract reviews are in progress. No implementation changes
+or broad tests yet.
+
+Operator approved temporary conversion storage, with original Parquet and
+correlated service diagnostics retained. Exact rationale: "the .csv could become
+stale but users wouldn't realize it". A CSV is generated freshly per request,
+never retained as a potentially misleading project output or reused as a cache.
+
+Additional operator rationale: retained CSVs suggest automatic model generation;
+users would interpret absence as missing output. Keep CSV explicitly on demand.
+
+Operator explicitly approved rejecting invalid UTF-8 metadata, preserving raw
+Parquet access. The canonical contract records the bounded exception. Security
+checkpoint approved; final correctness confirmation pending after dispositions.
+
+M0: both independent reviews approve the final contract; all medium/high findings
+closed. Documentation checks pass. The next commit is the required standalone
+checkpoint ancestor; its full SHA will be recorded before production edits.

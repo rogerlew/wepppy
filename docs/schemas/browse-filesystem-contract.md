@@ -149,3 +149,19 @@ took 2.679 seconds, while the new visibility helper alone took 1.514 seconds for
 1,000 files. The operator explicitly rejected both the semantic hiding and its
 cost. Filesystem access is for inspection and diagnosis, including failed or
 stale artifacts; it must not certify results on the user's behalf.
+
+## Native CSV representation amendment (2026-11-18)
+
+Status: intended behavior; integration conformance pending.
+Parquet CSV downloads follow the [integration contract](parquet-csv-integration-contract.md),
+including fixed configuration, no Python fallback, native schema/filter decoding,
+shared bounded admission, strict JSON IPC and correlated failures. Raw authorized
+files remain available after representation failure. Directory-backed runtime-path
+shims use the same path; retired archive traversal remains retired.
+
+CSV is an on-demand representation, not an automatically generated project output.
+The operator approved temporary input/CSV/IPC deletion after serving or safe
+failure/recovery, retaining original Parquet and correlated service diagnostics.
+Retained CSVs could silently become stale and imply automatic generation; missing
+ones would then be mistaken for failed outputs. The exact approved exception and
+retained evidence are in the integration contract's temporary retention section.

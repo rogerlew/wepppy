@@ -73,3 +73,27 @@ Numeric-only behavior:
 ## Compatibility
 - No-filter behavior remains unchanged for all routes.
 - Auth/path traversal/security contracts remain unchanged; `pqf` only affects row selection after existing path/auth checks pass.
+
+## CSV native cutover amendment (2026-11-18)
+
+Status: intended behavior; implementation pending integration checkpoint.
+CSV downloads use the [native integration contract](parquet-csv-integration-contract.md#integration-implementation-checkpoint).
+CSV filters are always available; no environment variable selects their backend,
+enablement or cap. The matched-row cap is fixed at 2,000,000 and applies only to
+nonempty filters, never unfiltered exports. Preview, filtered-Parquet downloads
+and D-Tale retain their separately defined environment configuration.
+
+All CSV routes, including ordinary directory paths handled by the NoDir shim,
+apply pqf. The current shim silently ignoring pqf is a discrepancy corrected by
+this cutover, not preserved as intended behavior. Filter original physical fields
+before dropping index columns or adding unit labels. Preserve double-cast numeric
+comparisons, finite-literal validation, null/NaN exclusion and DuckDB VARCHAR and
+simple-lowercase Contains semantics. Numeric data infinities remain comparable.
+
+Bound external encoded payload to 87384 bytes and decoded JSON to 65536 bytes;
+reject duplicate keys, nonfinite JSON values and invalid UTF-8/BOM. Existing tree
+limits count Unicode characters. Keep Python float literal grammar by normalizing
+finite numeric literals in the parent without reading a schema; the child decides
+whether the field/operator requires that literal. Strict IPC carries this optional
+numeric value explicitly. Empty unfiltered files return headers; an active filter
+with no matches returns 422. Filter row-cap failures retain 413.

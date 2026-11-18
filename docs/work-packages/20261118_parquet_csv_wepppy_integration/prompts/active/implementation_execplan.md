@@ -3,8 +3,8 @@
 
 This active ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep
 Progress, Surprises & Discoveries, Decision Log and Outcomes & Retrospective
-current together with the package tracker. The present request is to scaffold
-implementation, not execute runtime changes or deployment.
+current together with the package tracker. The operator authorized execution on
+2026-11-18. Production deployment remains outside this request.
 
 ## Purpose / Big Picture
 
@@ -22,8 +22,8 @@ negative security tests against the built service image.
 - [x] (2026-11-18 UTC) Inspect accepted standalone candidate and browse/download contracts.
 - [x] (2026-11-18 UTC) Scaffold integration policy, package, tracker and checkpoint draft.
 - [x] (2026-11-18 UTC) Validate six Markdown files, spelling previews and whitespace; no runtime tests.
-- [ ] M0: Inventory valid states/compatibility, resolve settings/errors and ratify contracts.
-- [ ] M0: Obtain independent contract reviews and commit checkpoint before code edits.
+- [x] M0: Inventory valid states/compatibility, resolve settings/errors and ratify contracts.
+- [x] M0: Obtain independent contract reviews and commit checkpoint before code edits.
 - [ ] M1: Package production CLI/harness and close native compatibility gaps.
 - [ ] M2: Wire all supported CSV paths; implement serving ownership and remove old conversion.
 - [ ] M3: Validate focused and exact-image workflows; then run the broad suite.
@@ -50,6 +50,15 @@ parent-crash recovery also require integration evidence.
 
 ## Decision Log
 
+2026-11-18, operator: approve temporary conversion storage. Delete staged input
+copies, completed/partial CSVs and IPC files after serving, failure or crash
+recovery; retain original Parquet and correlated service diagnostics. Rationale:
+"the .csv could become stale but users wouldn't realize it". Generate a fresh
+representation for each request rather than leaving a misleading project CSV.
+The operator further clarified that retained CSVs would imply automatic generation
+and cause users to ask why those outputs were absent. CSV remains an on-demand
+representation, not an expected project artifact.
+
 
 2026-11-18, operator: immediate native cutover, no environment-variable-facing
 configuration, no fallback to Python. Record these as mandatory release behavior
@@ -69,7 +78,7 @@ Immediate cutover does not waive contract, exact-image or deployment safety gate
 ## Outcomes & Retrospective
 
 
-Scaffold only. No production code, image, route or running service has changed.
+M0 execution in progress. No production code, image, route or running service has changed.
 The accepted standalone implementation is a starting asset, not completed HTTP
 integration. This package cannot close on an adapter stub or mocked route tests.
 

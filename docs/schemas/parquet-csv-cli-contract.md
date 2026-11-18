@@ -204,3 +204,20 @@ Repository-wide pytest is deferred until WEPPpy integration, per the operator's
 independent generated-artifact readback, resource/lifecycle probes and benchmarks.
 The successor must run the broad gate after integration; this exception does not
 change the repository-wide default for other work.
+
+## WEPPpy integration protocol v2 amendment
+
+Status: intended behavior; implementation pending integration checkpoint.
+The [integration checkpoint](parquet-csv-integration-contract.md#integration-implementation-checkpoint)
+supersedes v1 for the integrated converter: versioned request.json, response
+version 2, native filters, parent-death/wall supervision, inherited admission,
+and the observed null/timestamp/WKB/ZSTD compatibility additions. The remaining
+zero-trust preflight and byte-format obligations remain in force. The completed
+standalone package remains immutable evidence for v1, not current integration
+scope. Integration runtime limits are governed by ADR-0149.
+
+For v2, duplicate projected labels and all-index projection follow the integration
+contract's legacy representation semantics. The operator approved rejecting
+invalid UTF-8 metadata on 2026-11-18, resolving that v1 integration exclusion;
+a raw authorized download remains available. This does not authorize dropping
+metadata bytes, altering other valid labels or weakening preflight.

@@ -1,6 +1,6 @@
 # Integrate the native Parquet CSV exporter
 
-**Status**: Scaffolded 2026-11-18; implementation not started
+**Status**: Executing M0, 2026-11-18; implementation checkpoint pending
 **Timezone**: UTC
 **Owner**: Roger Lew; implementation integrator: Codex
 
@@ -9,13 +9,13 @@
 Replace browse/download's whole-output Python CSV conversion with the evaluated
 Rust CLI and asynchronous harness. The implementation target is faithful user-facing
 behavior through a single native path, with bounded resource use under crawling
-and concurrent downloads. This delivery scaffolds that work only.
+and concurrent downloads. The operator has authorized package execution.
 
 The operator requires immediate cutover, no environment-variable-facing CSV
 configuration and no fallback to the Python implementation. These decisions and
 their rationale are captured in the draft durable
 [integration contract](../../schemas/parquet-csv-integration-contract.md#authority-and-cutover-policy).
-No clarification is needed to scaffold these requirements. Remaining engineering
+Execution does not authorize production deployment. Remaining engineering
 choices are explicit M0 deliverables, not permission to change the cutover policy.
 
 ## Scope
