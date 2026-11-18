@@ -78,6 +78,10 @@ The legacy man page has been retired; Typer help (`wctl --help`) is now the cano
 - `rq-info` inspects the effective Compose service list: it prefers `rq-worker`
   and falls back to `rq-worker-fork-archive` for the dedicated wepp3 topology;
   an explicit `--service` always wins.
+- `run-pytest-worktree` is the supported isolated-checkout test path. Follow
+  [worktree prerequisites and receipts](../tools/wctl2/docs/worktree-tests.md);
+  use broad preflight before full suites, explicit read-only dependency reuse,
+  and never remount shared services or auto-migrate shared databases.
 - The generated shim preserves the invoking directory in `WCTL_CALLER_CWD`;
   pytest commands use it to verify the container sees the requested live checkout.
   Keep this export before the shim changes directory.

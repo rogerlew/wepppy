@@ -37,6 +37,10 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 
 ## Execution Strategy
 
+- **Isolated worktrees:** use `wctl run-pytest-worktree --preflight-only -- tests`
+  before a broad run, then the same command without `--preflight-only`. See
+  [worktree testing](../tools/wctl2/docs/worktree-tests.md) for explicit runtime
+  prerequisites and source receipts. Do not invent per-task mount wrappers.
 - **Always run through the Docker wrapper.** `wctl run-pytest …` guarantees Redis stubs, optional dependencies, and env variables match production images.
 - **Target first; use a full sweep only when proportionate.**
   - Example focused run: `wctl run-pytest tests/weppcloud/routes/test_climate_bp.py`

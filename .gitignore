@@ -75,3 +75,6 @@ tests/wepp/interchange/fixtures/*
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Isolated worktree test receipts and generated runtime evidence
+.wctl-test-runs/

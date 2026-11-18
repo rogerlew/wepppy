@@ -163,3 +163,13 @@ Support calls use the shared untraced HTTP helper; ordinary application calls
 receive no support header. A valid support token can delete any resolvable run
 in that non-production environment. See the [canonical contract](../docs/schemas/weppcloud-test-support-contract.md)
 for statuses, lifetime, CSRF exemption and validation requirements.
+
+## Isolated worktree tests
+
+Use `wctl run-pytest-worktree --preflight-only -- tests` before a broad run.
+The command creates a disposable container for the caller checkout, checks
+required assets and schema before collection, and retains source-integrity
+receipts. It does not remount shared services. For focused tooling tests use
+`wctl run-pytest-worktree --profile python -- tools/wctl2/tests`.
+See [worktree testing](../tools/wctl2/docs/worktree-tests.md) for explicit
+read-only runtime reuse, preparation and receipt interpretation.

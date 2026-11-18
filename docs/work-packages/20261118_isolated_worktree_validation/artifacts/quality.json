@@ -1,0 +1,18 @@
+[
+  {
+    "path": "tools/wctl2/commands/worktree_tests.py",
+    "sha256": "1eae45ec81cef9534938b33552290e0fdfe697b055b5da637232243b3027d3b8",
+    "sloc": 82,
+    "physical_lines": 97,
+    "max_function_span": 39,
+    "max_cc": 7
+  },
+  {
+    "path": "tools/wctl2/test_runtime.py",
+    "sha256": "4802d494a099ee0060f956503ff225be5af81abe4f00fd7361be0325cbcd47b1",
+    "sloc": 212,
+    "physical_lines": 247,
+    "max_function_span": 58,
+    "max_cc": 23
+  }
+]

@@ -101,3 +101,11 @@ as required by the integration governance contract. A killed wrapper may leave
 a harmless nonce file; remove only that invocation's `.wctl-checkout-*` file once
 its process is no longer running. Reinstall the shim after updating `install.sh`
 so alternate-worktree caller detection is active.
+
+## Isolated worktree validation
+
+`run-pytest-worktree` uses the existing CLIContext, Compose helper and checkout
+nonce in an opt-in disposable container. Its runtime profiles, readiness checks,
+explicit dependency reuse and source receipts are specified in
+[worktree-tests.md](worktree-tests.md). Existing shared-container commands remain
+unchanged; no shared-stack remount or schema migration is implicit.

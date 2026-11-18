@@ -1,0 +1,72 @@
+[
+  {
+    "path": "AGENTS.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "PROJECT_TRACKER.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_isolated_worktree_validation/artifacts/correctness_review.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_isolated_worktree_validation/artifacts/security_review.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_isolated_worktree_validation/artifacts/validation.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_isolated_worktree_validation/package.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_isolated_worktree_validation/prompts/completed/implementation_execplan.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_isolated_worktree_validation/tracker.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "tests/AGENTS.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "tools/wctl2/AGENTS.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "tools/wctl2/docs/SPEC.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "tools/wctl2/docs/worktree-tests.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "wctl/AGENTS.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "wctl/README.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  }
+]

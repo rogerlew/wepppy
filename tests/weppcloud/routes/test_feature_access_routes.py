@@ -11,6 +11,7 @@ from flask_security.utils import login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFError, CSRFProtect, generate_csrf
 
+from wepppy.weppcloud.account_security import account_email, mailbox_verified, account_security_bp
 from wepppy.weppcloud.configuration import _build_postgres_uri
 from wepppy.weppcloud.feature_registry import load_feature_registry
 from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal, FeatureResourceContext, evaluate_feature_access
@@ -48,7 +49,7 @@ def access_client(monkeypatch):
     app.config.update(TESTING=True, SECRET_KEY=uuid4().hex, SECURITY_PASSWORD_SALT=uuid4().hex,
                       SQLALCHEMY_DATABASE_URI=URI, SECURITY_TRACKABLE=False,
                       SQLALCHEMY_ENGINE_OPTIONS={'connect_args': {'options': '-csearch_path=' + schema}},
-                      SECURITY_UNAUTHORIZED_VIEW=None, SECURITY_CHANGEABLE=True, SECURITY_SEND_PASSWORD_CHANGE_EMAIL=False)
+                      SECURITY_UNAUTHORIZED_VIEW=None, SECURITY_CHANGEABLE=True, SECURITY_RECOVERABLE=True, SECURITY_SEND_PASSWORD_CHANGE_EMAIL=False)
     db = SQLAlchemy(app)
     association = db.Table('roles_users', db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
                            db.Column('role_id', db.Integer, db.ForeignKey('role.id')))
@@ -59,6 +60,12 @@ def access_client(monkeypatch):
         description = db.Column(db.String)
 
     class User(db.Model, UserMixin):
+        # This fixture represents ordinary legacy shared accounts. Supply the
+        # account fields consumed by the real profile context helpers.
+        account_kind = "shared"
+        local_credential_state = "legacy"
+        mailbox_verified_at = None
+        mailbox_verified_email = None
         id = db.Column(db.Integer, primary_key=True)
         email = db.Column(db.String, unique=True)
         active = db.Column(db.Boolean, default=True)
@@ -110,7 +117,10 @@ def access_client(monkeypatch):
     def csrf_error(exc):
         return jsonify(error={'code': 'csrf_failed', 'message': exc.description}), 400
 
-    app.jinja_env.globals.update(static_url=lambda path: '/static/' + path,
+    app.register_blueprint(account_security_bp)
+    app.jinja_env.globals.update(account_display_email=account_email,
+                                account_mailbox_verified=mailbox_verified,
+                                static_url=lambda path: '/static/' + path,
                                 usersum_doc_link=lambda *args: args[-1])
     module = importlib.import_module('wepppy.weppcloud.app')
     monkeypatch.setattr(module, 'User', User)
