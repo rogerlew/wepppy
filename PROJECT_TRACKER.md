@@ -1,3 +1,5 @@
+Scaffolded; contract-first evaluation: [Bounded Parquet CSV CLI and Python harness](docs/work-packages/20261118_parquet_csv_cli/package.md) - Standalone Rust converter and async harness must prove CSV parity, performance and resource bounds. WEPPpy integration is deferred to a separately authorized successor after success; no implementation or runtime change.
+
 Complete locally: [Default isolated tests](docs/work-packages/20261118_default_worktree_tests/package.md) - Promote run-pytest to isolated execution; native Disturbed matrix explicitly opt-in.
 
 Complete locally: [Durable isolated-worktree validation](docs/work-packages/20261118_isolated_worktree_validation/package.md) - Canonical disposable test runner, runtime preflight and source/runtime integrity receipts. Real browser/native/fixture/tooling tests pass; broad execution stops on the preexisting database-schema prerequisite.
