@@ -230,7 +230,9 @@ COPY tools/parquet_csv_cli/fixtures/readiness.parquet tools/parquet_csv_cli/fixt
 USER ${APP_USER}
 
 WORKDIR /workdir/wepppy
-RUN /opt/venv/bin/python -m wepppy.microservices.parquet_csv.preflight
+# Build-only scratch must not bind the runtime to the image build UID.
+RUN /opt/venv/bin/python -m wepppy.microservices.parquet_csv.preflight && \
+    rm -rf /tmp/wepppy-parquet-csv
 
 EXPOSE 8000
 
