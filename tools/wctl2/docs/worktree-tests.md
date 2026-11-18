@@ -1,6 +1,7 @@
 # Tests in isolated worktrees
 
-Use `wctl run-pytest-worktree` instead of ad hoc Compose mount commands. It uses
+Use `wctl run-pytest`: isolated candidate execution is now the default.
+`run-pytest-worktree` remains an equivalent alias. It uses
 an ephemeral `weppcloud` container with the installed preset's configuration,
 mounts the candidate source, verifies the existing checkout nonce, and does not
 start dependencies, publish ports, rebuild images or recreate shared services.
@@ -10,13 +11,13 @@ selects the Compose/environment project, not a substitute for `--checkout`.
 
 ```bash
 # Focused tooling tests: no browser/native/database prerequisites needed.
-wctl run-pytest-worktree --profile python -- tools/wctl2/tests -q
+wctl run-pytest --profile python -- tools/wctl2/tests -q
 
 # Default broad preflight; report all missing prerequisites before collection.
-wctl run-pytest-worktree --preflight-only -- tests
+wctl run-pytest --preflight-only -- tests
 
 # Reuse compatible installed assets explicitly; no dependency installation.
-wctl run-pytest-worktree --checkout /path/to/candidate \
+wctl run-pytest --checkout /path/to/candidate \
   --runtime-root /path/to/dependency-checkout \
   --shape-parser /path/to/shape_parser_cli \
   --geoparquet-parser /path/to/geoparquet_parser_cli \
@@ -92,6 +93,29 @@ identity simulation. Baseline test-fixture defects and load-sensitive performanc
 failures remain failures after prerequisites pass. Capture and investigate them;
 do not loosen thresholds, skip failures or claim a green suite from preflight.
 
-The existing `run-pytest` and sharded commands retain their shared-container
-behavior and fail on a checkout mismatch. Use this command when working in a
-linked checkout; do not remount another task's running stack.
+The previous shared-container behavior is explicitly available as
+`wctl run-pytest-shared`; its checkout-mismatch guard remains enforced.
+`run-pytest-sharded` remains an explicitly selected shared-container workflow.
+Do not remount another task's running stack.
+
+## Disturbed matrix selection
+
+Ordinary pytest discovery deselects the 96 native Disturbed simulation cases and
+their three dependent summaries. Lightweight Disturbed contracts remain selected.
+This operator-authorized policy avoids routine native simulation work on unrelated
+changes; it does not change scientific inputs, assertions or published provenance.
+Other matrices, including Roads, retain their existing selection policy.
+
+```bash
+# Ordinary regression: contracts run, native Disturbed matrix stays deselected.
+wctl run-pytest --profile python -- tests/disturbed
+
+# Explicit native matrix validation for relevant science/native changes.
+wctl run-pytest --profile python -- tests/disturbed --run-disturbed-matrix
+```
+
+The flag is a pytest option, so it also works through the explicit shared/sharded
+commands and direct pytest. Selecting the matrix file alone does not opt it in.
+For report regeneration requiring retained shared-container scratch and a custom
+basetemp, use `run-pytest-shared` with `--run-disturbed-matrix`; see the current
+Disturbed PLAN. Deselected cases are reported as deselected, never passed.

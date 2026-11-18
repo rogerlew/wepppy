@@ -17,8 +17,8 @@ tools/wctl2/
 │   ├── npm.py                 # run-npm wrapper
 │   ├── playback.py            # run-test/fork/archive profile commands
 │   ├── passthrough.py         # docker compose fallback
-│   ├── python_tasks.py        # run-pytest, run-stubtest, etc.
-│   ├── worktree_tests.py       # isolated source mounts and runtime preflight
+│   ├── python_tasks.py        # run-pytest-shared/sharded, run-stubtest, etc.
+│   ├── worktree_tests.py       # default run-pytest and worktree alias
 │   └── playwright.py          # run-playwright command
 ├── docs/                      # Specs, prompts, acceptance reports
 └── tests/                     # pytest coverage for CLI modules

@@ -48,7 +48,8 @@ All commands mirror the legacy behavior, but now live under the Typer dispatcher
 - `wctl build-static-assets` – calls `wepppy/weppcloud/static-src/build-static-assets.sh`, adding `--prod` automatically when the installer targets the production compose file.
 - `wctl restore-docker-data-permissions` – repairs ownership for `.docker-data/*` using the UID/GID from the active env file.
 - `wctl run-npm` – runs host-side npm/Yarn scripts with `--prefix wepppy/weppcloud/static-src` (plain npm commands like `install`, `test`, `lint`, etc.).
-- `wctl run-pytest` – executes pytest inside the running `weppcloud` container (`pytest tests` by default). It first verifies the container sees the caller’s live checkout (or explicit `--project-dir`); a mismatch stops before tests run. Reinstall the shim after updating wctl to enable caller-directory detection.
+- `wctl run-pytest` – default isolated candidate runner with prerequisite checks and source/runtime receipts (`pytest tests` by default). `--checkout` selects source; `--project-dir` selects Compose configuration. `run-pytest-worktree` is an alias.
+- `wctl run-pytest-shared` – explicitly use the running `weppcloud` container; the checkout nonce rejects mismatched source before pytest.
 - `wctl run-pytest-sharded` – executes module-level pytest shards in parallel subprocesses (no xdist), streams shard logs live, automatically reuses cached module timings for longest-first balancing when available, and prints an aggregate result summary. Start with `--workers 4` unless you have a known reason to tune higher/lower.
 - `wctl run-python` – opens the project virtualenv's Python inside the container, defaulting to an interactive REPL when no script/args are supplied.
 - `wctl issue-auth-token` / `revoke-auth-token` – mint or revoke WEPPcloud JWTs (e.g., `wctl issue-auth-token culvert-app --scope culvert:batch:submit --audience rq-engine --expires-in 7776000`).
@@ -93,7 +94,7 @@ Each passthrough call is logged (for example, `INFO:wctl2:docker compose ps`) so
 Use the Typer helpers instead of crafting long `docker compose exec` commands manually:
 
 ```bash
-wctl run-pytest tests/weppcloud/routes/test_climate_bp.py
+wctl run-pytest --profile python -- tests/weppcloud/routes/test_climate_bp.py
 wctl run-pytest tests --maxfail=1
 wctl run-pytest-sharded --workers 4 -- tests/microservices -k openapi
 wctl run-stubtest wepppy.nodb.core
@@ -166,10 +167,16 @@ for statuses, lifetime, CSRF exemption and validation requirements.
 
 ## Isolated worktree tests
 
-Use `wctl run-pytest-worktree --preflight-only -- tests` before a broad run.
+Use `wctl run-pytest --preflight-only -- tests` before a broad run.
 The command creates a disposable container for the caller checkout, checks
 required assets and schema before collection, and retains source-integrity
 receipts. It does not remount shared services. For focused tooling tests use
-`wctl run-pytest-worktree --profile python -- tools/wctl2/tests`.
+`wctl run-pytest --profile python -- tools/wctl2/tests`.
 See [worktree testing](../tools/wctl2/docs/worktree-tests.md) for explicit
 read-only runtime reuse, preparation and receipt interpretation.
+
+`run-pytest` now defaults to isolated execution; `run-pytest-worktree` remains an
+alias. Use `run-pytest-shared` only when intentionally targeting the existing
+shared container. The native Disturbed matrix is deselected by default; include
+it explicitly with `--run-disturbed-matrix` for relevant changes. Its lightweight
+contract tests remain selected.

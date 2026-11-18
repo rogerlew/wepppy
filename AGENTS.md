@@ -93,7 +93,7 @@
 - Before proposing or executing deployment/rollback mechanics, inspect the canonical deploy entry point and nearest docs; never invent parallel image, registry, or Compose workflows.
 
 ## Validation Entry Points
-- Iteration loop: `wctl run-pytest tests/<path or module>`; isolated worktrees use [run-pytest-worktree](tools/wctl2/docs/worktree-tests.md) with runtime preflight.
+- Iteration loop: `wctl run-pytest` defaults to [isolated execution with preflight](tools/wctl2/docs/worktree-tests.md); Disturbed native matrix requires `--run-disturbed-matrix`.
 - Pre-handoff sanity for substantive code changes: `wctl run-pytest tests --maxfail=1`; never use this for literal-only config edits unless the user explicitly requests it.
 - Frontend changes: `wctl run-npm lint` and `wctl run-npm test`
 - Stub/API surface changes: `wctl run-stubtest <module>` and `wctl check-test-stubs`

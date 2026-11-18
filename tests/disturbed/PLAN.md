@@ -24,7 +24,9 @@ The actual canonical slope is **87.9 m**, with length-weighted grade **38.56%**.
 The old 201.68 m interpretation below misread the aspect field as length.
 The RRINIT study retains this profile and separately generates a 20% profile.
 
-Run tests with wctl run-pytest tests/disturbed. analyze_matrix.py uses the
+Ordinary contract checks: `wctl run-pytest --profile python -- tests/disturbed`.
+The 96 native cases and three dependent summaries require explicit opt-in:
+`wctl run-pytest --profile python -- tests/disturbed --run-disturbed-matrix`. analyze_matrix.py uses the
 paired native legacy/v3 PASS reader, reports unpaired events and full-record
 totals, and writes analysis_results_current.md by default. Its rankings are
 descriptive; malformed records and duplicate dates fail rather than disappear.
@@ -51,7 +53,7 @@ be completed, explicitly mark the publication stale instead of calling it curren
 For a fresh full-matrix refresh, use an unused temporary root:
 
 ```bash
-wctl run-pytest tests/disturbed/test_disturbed_matrix.py --basetemp=/tmp/disturbed-report-YYYYMMDD
+wctl run-pytest-shared tests/disturbed/test_disturbed_matrix.py --run-disturbed-matrix --basetemp=/tmp/disturbed-report-YYYYMMDD
 python tests/disturbed/analyze_matrix.py --output-dir /tmp/disturbed-report-YYYYMMDD/disturbed_matrix0/output --context tests/disturbed/analysis_context.md --out tests/disturbed/analysis_results_current.md
 ```
 

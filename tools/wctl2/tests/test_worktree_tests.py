@@ -37,7 +37,8 @@ def test_mount_path_injection_rejected(tmp_path):
         command.bind(path, '/target')
 
 
-def test_worktree_cli_runs_oneoff_with_nonce_and_preserves_pytest_args(temp_project, monkeypatch):
+@pytest.mark.parametrize("command_name", ["run-pytest", "run-pytest-worktree"])
+def test_worktree_cli_runs_oneoff_with_nonce_and_preserves_pytest_args(temp_project, monkeypatch, command_name):
     git_repo(temp_project)
     calls = []
     monkeypatch.setenv("GIT_DIR", "/nonexistent/foreign-checkout")
@@ -48,7 +49,7 @@ def test_worktree_cli_runs_oneoff_with_nonce_and_preserves_pytest_args(temp_proj
         assert list(temp_project.glob('.wctl-checkout-*'))
         return SimpleNamespace(returncode=7)
     monkeypatch.setattr(command, 'run_compose', run)
-    result = CliRunner().invoke(app, ['--project-dir', str(temp_project), 'run-pytest-worktree',
+    result = CliRunner().invoke(app, ['--project-dir', str(temp_project), command_name,
         '--checkout', str(temp_project), '--profile', 'python', '--', 'tools/wctl2/tests', '-k', 'one or two'])
     assert result.exit_code == 7, result.output
     assert calls[0][:7] == ['run', '--rm', '--no-deps', '--pull', 'never', '-T', '--volume']

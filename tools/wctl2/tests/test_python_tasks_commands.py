@@ -189,3 +189,17 @@ def test_run_pytest_sharded_passes_workers_and_args(monkeypatch: pytest.MonkeyPa
             False,
         )
     ]
+
+
+def test_shared_pytest_is_explicit_and_keeps_checkout_guard(monkeypatch, temp_project):
+    calls = []
+    def run(context, service, command, check=False):
+        calls.append(command)
+        return DummyResult()
+    monkeypatch.setattr("tools.wctl2.commands.python_tasks.compose_exec", run)
+    result = CliRunner().invoke(app, ["--project-dir", str(temp_project),
+        "run-pytest-shared", "tests/example.py", "-q"])
+    assert result.exit_code == 0, result.output
+    assert len(calls) == 1
+    assert "WCTL_CHECKOUT_MISMATCH" in calls[0]
+    assert "/opt/venv/bin/pytest tests/example.py -q" in calls[0]

@@ -57,6 +57,7 @@ def mounts(checkout: Path, runtime_root: Optional[Path], parsers: dict[str, Opti
 
 
 def register(app: typer.Typer) -> None:
+    @app.command("run-pytest", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
     @app.command("run-pytest-worktree", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
     def run_tests(
         ctx: typer.Context,

@@ -35,8 +35,9 @@
 | `doc-lint`, `doc-*`       | `commands/doc.py`                | Wrap `markdown-doc` helpers. |
 | `build-static-assets`     | `commands/maintenance.py`        | Executes existing script with context flags. |
 | `restore-docker-data-permissions` | `commands/maintenance.py` | Moves current shell logic into Python. |
+| `run-pytest`, `run-pytest-worktree` | `commands/worktree_tests.py` | Isolated candidate, preflight and receipts. |
 | `run-npm`                 | `commands/npm.py`                | Validates `npm` availability, forwards args. |
-| `run-pytest`, `run-stubtest`, `run-stubgen`, `check-test-*` | `commands/python_tasks.py` | Compose exec wrappers with shared quoting helper. |
+| `run-pytest-shared`, `run-stubtest`, `run-stubgen`, `check-test-*` | `commands/python_tasks.py` | Compose exec wrappers with shared quoting helper. |
 | `run-test-profile`, `run-fork-profile`, `run-archive-profile` | `commands/playback.py` | Reuse logic from `tools/profile_playback_cli.py`; module becomes the new home. |
 | `rq-info`                 | `commands/rq.py`                  | Topology-aware Compose wrapper for default, batch, and fork-archive queues. |
 | `migrate-run`             | `commands/migrations.py`          | Run migrations for a run id or working directory. |
@@ -80,7 +81,7 @@
 
 ## Test checkout identity
 
-`run-pytest` and `run-pytest-sharded` verify that container `/workdir/wepppy`
+`run-pytest-shared` and `run-pytest-sharded` verify that container `/workdir/wepppy`
 sees the requested live host checkout before starting tests. `--project-dir`
 takes precedence; otherwise the shim preserves the caller's directory and finds
 its WEPPpy checkout. Commands invoked outside a checkout retain the installed
@@ -107,5 +108,14 @@ so alternate-worktree caller detection is active.
 `run-pytest-worktree` uses the existing CLIContext, Compose helper and checkout
 nonce in an opt-in disposable container. Its runtime profiles, readiness checks,
 explicit dependency reuse and source receipts are specified in
-[worktree-tests.md](worktree-tests.md). Existing shared-container commands remain
-unchanged; no shared-stack remount or schema migration is implicit.
+[worktree-tests.md](worktree-tests.md). The explicit shared-container commands preserve their original behavior; no shared-stack remount or schema migration is implicit.
+
+## Default pytest command and matrix policy
+
+Operator direction on 2026-11-18 promotes the isolated runner to `run-pytest`;
+`run-pytest-worktree` is its alias and `run-pytest-shared` retains the prior shared
+execution path. The opt-in sharded command is unchanged. Root pytest selection
+excludes only the native Disturbed matrix and dependent summaries unless
+`--run-disturbed-matrix` is supplied. See worktree-tests.md for exact usage.
+This reduces unrelated routine native work without changing scientific producers
+or discarding lightweight contract coverage.

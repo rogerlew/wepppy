@@ -78,7 +78,9 @@ The legacy man page has been retired; Typer help (`wctl --help`) is now the cano
 - `rq-info` inspects the effective Compose service list: it prefers `rq-worker`
   and falls back to `rq-worker-fork-archive` for the dedicated wepp3 topology;
   an explicit `--service` always wins.
-- `run-pytest-worktree` is the supported isolated-checkout test path. Follow
+- `run-pytest` defaults to isolated execution (`run-pytest-worktree` is an alias);
+  the previous shared path is `run-pytest-shared`. Disturbed native matrix
+  execution requires pytest flag `--run-disturbed-matrix`. Follow
   [worktree prerequisites and receipts](../tools/wctl2/docs/worktree-tests.md);
   use broad preflight before full suites, explicit read-only dependency reuse,
   and never remount shared services or auto-migrate shared databases.
