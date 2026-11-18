@@ -8,3 +8,4 @@
 - Service evidence: soil-data-access/artifacts/wepppy-parity/json-client; harness 60a699f, runtime 9dc2264.
 - Publication: task/ssurgo-json-provenance and task/wepppy-json-parity; service evidence commit 9227204. No master integration or deployment.
 - Integration candidate: task/ssurgo-json-merge, copied soil-only commits onto remote master; no inherited unrelated security changes. Exact soil sources match the validated branch; 75 focused tests pass again.
+- Remote integration verified: WEPPpy PR #674/master 2efc849f3 and service PR #1/main 37b1e92. Post-merge receipts retained on audit/ssurgo-json-integration-20261118; production unchanged.

@@ -98,3 +98,8 @@ Integration follow-up, 2026-11-18 UTC: PR #673 revealed inherited unmerged local
 master changes. Preserve that history and integrate only the four soil commits via
 task/ssurgo-json-merge from remote master. No protected policy paths change; all
 soil source files remain identical and 75 focused tests pass on the new checkout.
+
+Outcome, 2026-11-18 02:18 UTC: remote merge-preserving integration verified for
+WEPPpy master 2efc849f3 (PR #674) and service main 37b1e92 (PR #1). Required PR
+governance checks passed. Post-subject ancestry receipts and CI observation are
+retained on the audit branch; optional checks remained pending at observation.
