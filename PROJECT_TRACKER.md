@@ -1,4 +1,4 @@
-In progress: [SSURGO mirror-first and provenance](docs/work-packages/20261118_ssurgo_json_provenance/package.md) — forest API/PostGIS services healthy; regional official import and real queued SSURGO/STATSGO soil parity pass. Protected Compose integration approval precedes shared-client default activation.
+Completed forest phase: [SSURGO mirror-first and provenance](docs/work-packages/20261118_ssurgo_json_provenance/package.md) — PR #675 merged; regional API/PostGIS and shared forest client defaults active, with real queued SSURGO/STATSGO artifact parity. Broader rollout and live SDA validation remain follow-up scope.
 
 Implemented and enforced: [Integration and history preservation governance](docs/work-packages/20261116_integration_history_governance/package.md) — preserved history, live checkout identity, trusted required checks and exact-source release gates are active. Independent reviews, canaries, image readback and recovery pass; regression repairs and all four RQ fixture fixes pass scoped validation. Five-integration observation remains open.
 

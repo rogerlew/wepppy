@@ -14,5 +14,8 @@
 - Forest validation: 151 focused tests plus 24 review-closure tests and four cache-clear/persistence tests passed; two-module stubtest, stub hygiene, exception gate passed. Broad suite blocked by missing SECRET_KEY during collection.
 - Official import: forest-id-20261001-vi-20161013-v1; 31,841 components, 132,604 horizons; 100 SSURGO and all eight selected STATSGO2 map units pass exact raw projection comparison.
 - Queued acceptance: two unseen keys; primary cold/warm, direct-file reference, warm SDA-cache fallback and dual failure. Each successful case has 76 prepared soils; exact base/prepared parity and independent sidecar/artifact readback pass.
-- Deployment: new soil-api and soil-db healthy on forest's existing Compose network. Shared web/workers unchanged; client-default activation follows protected Compose integration approval. forest1/production remain later scope.
+- Deployment: soil-api and soil-db healthy on forest; shared web/RQ consumers now use the mirror-first default. Four normal-queue canary jobs pass, including 152 exact-reference prepared inputs. forest1/production remain later scope.
 - Evidence and limitations: [forest-validation.md](artifacts/forest-validation.md); service artifacts/forest. No national coverage or live SDA success claim.
+
+- Approved activation: PR #675 merged at 0ae17ad8a393a4fbe250241b2253b77cc475d06b; candidate/merge governance pass. All five shared forest consumers now select mirror-first and reach the pinned release. Unrelated local history/work preserved; source/configuration rollback copies retained.
+- Activation evidence: artifacts/forest-activation; real normal-queue build and soil-preparation canaries validate generated inputs and source sidecars.
