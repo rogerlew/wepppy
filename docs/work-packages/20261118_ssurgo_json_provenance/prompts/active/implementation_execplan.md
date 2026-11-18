@@ -8,6 +8,15 @@ which endpoint/profile/release supplied the cached data. Preserve XML by default
 and scientific soil outputs. Execute against the canonical soil-data-source-provenance
 contract; this is faithful integration, not a mocked transport demonstration.
 
+## Next phase: mirror-first rollout
+
+The operator's 2026-11-18 amendment to the canonical provenance contract directs
+mirror-first defaults and bounded, observable USDA SDA fallback. The original
+explicit-source integration is complete; the amendment is a new implementation
+phase. Execute the service plan at /workdir/soil-data-access/docs/mirror-first-rollout.md
+with the existing client/cache identity rules as the baseline. Comprehensive
+geographic/live parity is deferred until SDA recovery, not a prerequisite.
+
 ## Progress
 
 
@@ -18,6 +27,11 @@ contract; this is faithful integration, not a mocked transport demonstration.
 - [x] Run 75 focused tests, two-module stubtest, stub hygiene and broad-exception gate; broad suite attempted with unrelated environment blockers retained.
 - [x] Real PostgreSQL/API fresh-cache replay: 24,049 records, 499 valid soils, six unchanged non-valid outcomes, 501 canonical files and 499 verified sidecars.
 - [x] Retain review/evidence and update tracker; publish task branches task/ssurgo-json-provenance and task/wepppy-json-parity.
+
+- [x] Record the operator's mirror-first/SDA-fallback direction and revised parity scope.
+- [ ] Freeze selection-event schema, total timeout, default/migration behavior and transport ADR; complete contract reviews.
+- [ ] Implement collection-level source selection across all six consumers, retaining source-separated caches and failure evidence.
+- [ ] Integrate forest/forest1/production Compose and broader imported data; perform bounded worker/fallback acceptance.
 
 ## Context and plan
 
@@ -77,6 +91,13 @@ a matched-environment transport result, not proof of deployment-image equivalenc
 
 ## Decision Log
 
+2026-11-18 follow-up: accept retained SSURGO/STATSGO fixture evidence for broader
+query/builder behavior and move comprehensive geographic/live testing to recovery.
+The operator now prefers the mirror as default with SDA fallback. Keep actual data
+loading distinct from evidence generalization; preserve the real supplier in every
+cache/artifact record. These are prospective changes, not current runtime behavior.
+
+
 
 2026-11-18: the operator explicitly requested endpoint provenance with JSON integration.
 Use persisted per-project selection, SHA-256 cache namespaces, embedded identity,
@@ -98,3 +119,6 @@ Integration follow-up, 2026-11-18 UTC: PR #673 revealed inherited unmerged local
 master changes. Preserve that history and integrate only the four soil commits via
 task/ssurgo-json-merge from remote master. No protected policy paths change; all
 soil source files remain identical and 75 focused tests pass on the new checkout.
+
+Next-phase outcome: acceptance direction and pending contract recorded. No default,
+cache, project, or deployed service changed in this documentation checkpoint.

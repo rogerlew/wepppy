@@ -5,6 +5,37 @@ WEPPpy JSON integration and provenance identifying the queried soil-data server.
 This contract governs SurgoSoilCollection and all six Soils collection call sites.
 It is additive to NoDb persistence/concurrency and generated-soil artifact contracts.
 
+## Approved next revision: mirror-first with SDA fallback
+
+On 2026-11-18 the operator directed moving toward a mirror-first deployment default
+with USDA Soil Data Access (SDA, referred to conversationally as SDMS) as fallback.
+The retained SSURGO/STATSGO fixture parity is sufficient to proceed; comprehensive
+geographic/live SDA comparison is deferred until recovery. This supersedes the
+previous no-automatic-failover product direction. The remaining sections describe
+the implemented explicit-source mode until the next revision is implemented.
+
+Planned behavior: deployment defaults govern new/unconfigured projects; preserve
+explicit source overrides and existing artifacts. Persisted old XML settings cannot
+be assumed to be implicit defaults, so migration must be deliberate. Use bounded
+SDA fallback on primary connection/timeout, HTTP 429/5xx/not-ready, or missing required
+map-unit components/explicit coverage misses. Optional-table absence and numerical
+soil rejection do not indicate a source outage. Cache identity/corruption and
+response-contract violations remain explicit failures.
+
+Retry the whole requested collection using SDA's separate source cache before
+soil construction. Never combine primary components with fallback horizons or
+relabel SDA rows as mirror data. Record configured primary, attempted sources,
+fallback reason/time and actual supplier alongside existing retrieval evidence and
+base-soil sidecars. Return to mirror-first on the next construction without making
+an outage a permanent source switch. Preserve both errors when neither source works.
+
+Before code changes, freeze the total attempt deadline (including legacy XML),
+selection-event schema and configuration/migration rules, add the transport-policy
+ADR, and complete the normal independent contract reviews. Keep the five-query
+scientific builder unchanged. Validate fallback and dual failure through controlled
+HTTP endpoints now; live SDA recovery is not required for these tests. This is a
+pending behavior contract, not a claim that the deployed client already falls back.
+
 ## Selection and compatibility
 
 Default absent state remains the existing USDA XML endpoint and legacy filenames.
