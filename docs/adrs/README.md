@@ -42,7 +42,12 @@ records. See the [Usersum specification](../../wepppy/weppcloud/routes/usersum/s
 for publication and date-format details. Automatic discovery does not enroll
 records in full-text Help search.
 
-## Required Date Check
+## Required Metadata Check
+
+Use `# ADR-NNNN: Description` as the first-level title, with the four-digit
+number matching the filename and a nonempty description. The Help Decision
+column displays this title directly. Enforcing the source heading keeps the
+listing and full record consistent without display-only prefix repair.
 
 Every numbered ADR must include a real `Date: YYYY-MM-DD` before its first
 section heading. Use the original decision date in its recorded timezone;
@@ -55,8 +60,8 @@ Before committing an ADR, run from the repository root:
 python3 tools/check_adr_dates.py
 ```
 
-The Docs Quality CI job runs the same check and fails for missing or invalid
-dates. It uses the catalog's parser, preserving supported plain/bold Date labels.
+The Docs Quality CI job runs the same check and fails for inconsistent titles or missing
+or invalid dates. It uses the catalog's parser, preserving supported plain/bold Date labels.
 The template and README are excluded; every numbered ADR is checked. The check
 reports affected filenames and does not modify documents.
 

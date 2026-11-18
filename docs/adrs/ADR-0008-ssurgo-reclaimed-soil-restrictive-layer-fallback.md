@@ -1,4 +1,4 @@
-# ADR: SSURGO Reclaimed Soil Restrictive Layer Fallback
+# ADR-0008: SSURGO Reclaimed Soil Restrictive Layer Fallback
 
 Status: Accepted
 Date: 2026-06-22

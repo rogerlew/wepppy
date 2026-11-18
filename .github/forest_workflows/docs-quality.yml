@@ -40,7 +40,7 @@ jobs:
       MARKDOWN_DOC_WORKSPACE: ${{ secrets.MARKDOWN_DOC_WORKSPACE }}
     timeout-minutes: 20
     steps:
-    - name: Enforce ADR recorded dates
+    - name: Enforce ADR titles and recorded dates
       run: python3 tools/check_adr_dates.py
     - name: Verify markdown-doc tooling
       run: |

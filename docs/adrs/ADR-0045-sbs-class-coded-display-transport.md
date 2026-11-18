@@ -1,4 +1,4 @@
-# ADR: SBS Display Class Decoding and the Unassigned State
+# ADR-0045: SBS Display Class Decoding and the Unassigned State
 
 Status: Accepted (revision 3)  
 Date: 2026-08-24

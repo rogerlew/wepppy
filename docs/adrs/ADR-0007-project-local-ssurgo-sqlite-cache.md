@@ -1,4 +1,4 @@
-# ADR: Project-Local SSURGO SQLite Cache
+# ADR-0007: Project-Local SSURGO SQLite Cache
 
 Status: Accepted
 Date: 2026-06-19

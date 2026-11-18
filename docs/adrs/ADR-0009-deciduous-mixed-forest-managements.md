@@ -1,4 +1,4 @@
-# ADR: Deciduous and Mixed Forest Managements
+# ADR-0009: Deciduous and Mixed Forest Managements
 
 Status: Accepted
 Date: 2026-06-26

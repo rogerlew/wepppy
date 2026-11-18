@@ -1,4 +1,4 @@
-# ADR: Alex Static Ash-Transport Increment
+# ADR-0022: Alex Static Ash-Transport Increment
 
 Status: Accepted
 Date: 2026-07-18

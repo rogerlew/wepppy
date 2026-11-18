@@ -1,10 +1,11 @@
-# ADR: [Decision Title]
+# ADR-NNNN: [Decision Title]
 
 Status: Proposed | Accepted | Superseded  
 Date: YYYY-MM-DD  
 Review Date: YYYY-MM-DD (optional)
 
-<!-- Required: replace Date above with the original decision date before the
+<!-- Required: replace NNNN with the four-digit filename number and provide a
+descriptive title. Replace Date above with the original decision date before the
 first section heading. Preserve it when adding later amendments. Before commit,
 run: python3 tools/check_adr_dates.py -->
 

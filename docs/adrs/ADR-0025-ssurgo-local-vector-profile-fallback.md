@@ -1,4 +1,4 @@
-# ADR: SSURGO Recovery, Local Vector-Profile, and Global Fallback Order
+# ADR-0025: SSURGO Recovery, Local Vector-Profile, and Global Fallback Order
 
 Status: Accepted
 Date: 2026-07-22

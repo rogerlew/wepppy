@@ -1,4 +1,4 @@
-# ADR: RUSLE `scenario_sbs` Surface-Rock Partition for `C`
+# ADR-0004: RUSLE `scenario_sbs` Surface-Rock Partition for `C`
 
 Status: Accepted  
 Date: 2026-05-27  

@@ -1,4 +1,4 @@
-# ADR: Fork Console Status Backpressure Thresholds
+# ADR-0021: Fork Console Status Backpressure Thresholds
 
 Status: Accepted
 Date: 2026-07-15
