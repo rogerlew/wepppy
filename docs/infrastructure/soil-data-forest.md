@@ -6,9 +6,9 @@ no published port. The API uses its existing UID 10001, a read-only filesystem,
 dropped capabilities and bounded resources. No client startup dependency on API
 health is added: SDA fallback must work during mirror outages.
 
-The shared default requires nationwide SSURGO and STATSGO2. National recovery is
-in progress following a Colorado coverage failure; source loading and live SDA
-parity are distinct requirements. Full live SDA parity remains deferred.
+The shared default requires nationwide SSURGO and STATSGO2. The active release is
+forest-us-ssurgo-20261001-statsgo2-20161013-v1, containing national SSURGO October
+2026 and STATSGO2 October 2016. Full live SDA parity remains deferred.
 
 The historical initial release is forest-id-20261001-vi-20161013-v1: official Idaho SSURGO
 (October 2026) plus Virgin Islands STATSGO2 (2016). Its manifest carries source URLs,
@@ -104,3 +104,19 @@ pins, caches and database release for coordinated rollback; never relabel old
 rows or negative caches as national. Historical qualification runs remain
 unchanged as accepted evidence. The failed user project must pass real queued
 soil construction and prepared-artifact readback before recovery is declared.
+
+The cutover completed with no active jobs in the three queues. All five WEPPpy
+consumer images, users and mounts were preserved; the API credential mount now
+resolves to the shared checkout with identical credential bytes/mode. The API
+image/user stayed unchanged. The fence was released after readiness and the one
+user-project pin migration; 13 historical qualification runs were preserved.
+
+The national import contains 22,073,263 rows and the database occupies about
+5.2 GB including the retained regional release. Both source datasets passed all
+five independent query-family checks. cavernous-oxygen completed build job
+a334f0d2-6ab9-420f-b9d1-d4ed397bb07c and preparation job
+6b569d94-d1e9-473f-ab4a-0d42f74af2bf using the mirror alone: 21 base provenance
+hashes and all 32 prepared hillslope inputs verified. Both national-release
+canaries matched 152 prepared reference files; 80 HTTP benchmark requests had no
+errors and p95 below 47 ms. Authenticated homepage, profile and project requests
+returned 200. See the [activation receipt](../work-packages/20261118_ssurgo_json_provenance/artifacts/national-activation.json).
