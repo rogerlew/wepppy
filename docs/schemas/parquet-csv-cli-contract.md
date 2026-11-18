@@ -61,7 +61,10 @@ success; direct CLI callers discard the private root after nonzero exit.
 
 Success stdout is exactly one bounded JSON object with keys `version` (1),
 `status` (`ok`), `rows` (nonnegative integer), `bytes` (positive integer), and
-`input_sha256` (64 lowercase hex characters), followed by LF. No file contents
+`input_sha256` (64 lowercase hex characters), `peak_rss_kib` (positive integer
+from Linux getrusage(RUSAGE_SELF)), and `cpu_seconds` (finite nonnegative user
+plus system CPU seconds), measured after output finalization, followed by LF.
+RSS describes the CLI process; parent/aggregate evidence is separate. No file contents
 enter control output. Successful stderr is empty. Exit 2 denotes invalid arguments,
 3 rejected input/schema, 4 resource rejection, and 5 I/O failure. Handled failures
 emit one fixed-code JSON object on stderr with `version`, `status` (`error`) and

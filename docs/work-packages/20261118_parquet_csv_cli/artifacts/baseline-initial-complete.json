@@ -1,0 +1,44 @@
+[
+  {
+    "method": "python",
+    "file": "pass_pw0.events.parquet",
+    "seconds": 37.13071898417547,
+    "peak_rss_kib": 383608,
+    "output_bytes": 54683360
+  },
+  {
+    "method": "native",
+    "file": "pass_pw0.events.parquet",
+    "seconds": 0.715569328982383,
+    "peak_rss_kib": 188252,
+    "output_bytes": 39027061
+  },
+  {
+    "method": "python",
+    "file": "chnwb.parquet",
+    "seconds": 13.991299614310265,
+    "peak_rss_kib": 266924,
+    "output_bytes": 21514164
+  },
+  {
+    "method": "native",
+    "file": "chnwb.parquet",
+    "seconds": 0.31361918430775404,
+    "peak_rss_kib": 142464,
+    "output_bytes": 18309048
+  },
+  {
+    "method": "python",
+    "file": "H.wat.parquet",
+    "seconds": 287.79633968509734,
+    "peak_rss_kib": 1497992,
+    "output_bytes": 444752939
+  },
+  {
+    "method": "native",
+    "file": "H.wat.parquet",
+    "seconds": 6.678286223206669,
+    "peak_rss_kib": 205304,
+    "output_bytes": 375540649
+  }
+]

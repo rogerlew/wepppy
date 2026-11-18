@@ -38,3 +38,11 @@ not a production release. Ratification is under the user's explicit instruction
 to implement the package; no further runtime behavior or scope authorization is
 inferred. The checkpoint ancestor contains contract, ADR, these reviews and M0
 evidence. Final reviews must inspect actual code and artifacts independently.
+
+## Measurement amendment
+
+Both original independent reviewers approved adding strict `peak_rss_kib` and
+`cpu_seconds` success fields to retain actual per-child getrusage measurements.
+They require non-boolean finite numeric validation and separate parent/aggregate
+memory evidence. Security review also accepted removal of csv from the candidate
+graph, conditional on serializer byte-parity tests and updated lock/audit.
