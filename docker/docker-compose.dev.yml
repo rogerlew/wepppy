@@ -91,7 +91,7 @@ services:
       - ${SOIL_DATA_SOURCE_DIR:-../../soil-data-access}/migrations/001_replay.sql:/opt/soil/001_replay.sql:ro
     networks: [soil-database]
     healthcheck:
-      test: [CMD-SHELL, 'pg_isready -U soil_import -d soil']
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U soil_import -d soil']
       interval: 5s
       timeout: 3s
       retries: 30
