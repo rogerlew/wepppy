@@ -19,10 +19,15 @@ geographic/live parity is deferred until SDA recovery, not a prerequisite.
 
 ## Progress
 
-- [x] (2026-11-18) Implement and validate operator-directed deployment-script repair (118 tests; production integration pending): retain absence for first-install services, preserve existing rollback images, remove only newly created containers on failure, and preserve volumes. Reuse already built application images.
+- [x] (2026-11-18 06:24 UTC) All three host activations and eight consumer reachability checks passed. Four queued canary jobs produced 152 reference-matching prepared soils and verified base provenance. See artifacts/production-activation.json.
+
+- [x] (2026-11-18) Integrate approved deployment tooling as PR #679, merge 0f2ec047d9f323877e84e489d3f5006bf0b559d5. Load identical common image on all hosts and renderer on wepp2; preserve source-image receipt.
+- [x] (2026-11-18) Fresh production database backup and live upgrade f6b8d27a901c → a7c1106e42b9; 5,482 users retain legacy account defaults. CILogon remains inactive.
+
+- [x] (2026-11-18) Implement and validate operator-directed deployment-script repair (118 tests; integrated as PR #679): retain absence for first-install services, preserve existing rollback images, remove only newly created containers on failure, and preserve volumes. Reuse already built application images.
 
 - [x] (2026-11-18) Assemble combined committed release in isolated task worktree; preserve shared WIP. Back up production application database and successfully rehearse account migration on explicitly asserted disposable PostgreSQL database; all existing data hashes unchanged.
-- [ ] Finish production service preparation, exact-candidate integration gate, retained builds, live migration and full host rollout.
+- [x] Finish production service preparation, exact-candidate integration gate, retained builds, live migration and full host rollout.
 
 - [x] (2026-11-18) Recover nationwide SSURGO and STATSGO2 coverage, transition forest release pins, and verify cavernous-oxygen: 21 base provenance hashes, all 32 prepared inputs, and 152 reference-matching canary files. See service nationwide-recovery-plan.md.
 
@@ -40,7 +45,7 @@ geographic/live parity is deferred until SDA recovery, not a prerequisite.
 - [x] Implement collection-level source selection across all six consumers, retaining source-separated caches and failure evidence.
 - [x] Integrate forest dev Compose, import official regional data, and pass bounded queued soil/fallback acceptance.
 - [x] Integrate the protected Compose change after exact-SHA/digest owner approval, then activate the shared forest client default.
-- [ ] Deploy the full wepp.cloud release in host order wepp1, wepp2, wepp3, including required application database migrations and national soil service activation. Forest1 is explicitly deferred; comprehensive live SDA validation remains deferred.
+- [x] Deploy the full wepp.cloud release in host order wepp1, wepp2, wepp3, including required application database migrations and national soil service activation. Forest1 is explicitly deferred; comprehensive live SDA validation remains deferred.
 
 ## Context and plan
 
@@ -84,6 +89,10 @@ cover real filesystem/SQLite and local HTTP boundaries, plus real generated outp
 
 ## Surprises & Discoveries
 
+Production follow-up: image-ID Docker archives leave existing Compose tags unchanged; align verified imported IDs with those tags before resume. Wepp2 caught the mismatch before queue drain. Wepp1 UFW INPUT dropped local bridge connections to the shared Tailscale endpoint. A Compose-local endpoint candidate was prepared but never activated because saved projects move between hosts. Restore the original config and permit only the backend bridge/subnet to the existing Tailscale port. All eight consumers then passed; application privileges and public exposure are unchanged.
+
+Wepp1 retained activation uses raw Docker Compose, which did not inherit the soil-data profile from wctl’s temporary env file. The complete service check caught absent soil services; the operator-owned attempt was interrupted through its recovery trap, existing workloads restored, and queue dequeue resumed. The retry exports COMPOSE_PROFILES=soil-data explicitly; raw service-list readback includes both soil services. An earlier receipt-path typo was rejected before queue drain. Retain both failed logs with the successful attempt.
+
 The canonical script rejects first installation: capture_known_good_state requires a running container for every candidate service. National soil services have never existed on wepp1. The operator chose a script repair over a one-time manual bootstrap. Absence must be captured and checked, not treated as an existing known-good image.
 
 Production discovery: all three hosts are clean at 917708c90dce46bbab920ecf9ce5f315e8611290; wepp1 application database reports f6b8d27a901c. The account migration a7c1106e42b9 exists on committed local master, not remote master b301ff64c. Its precondition rejects duplicate normalized login emails. Release assembly must account for local-master changes rather than assume remote master contains the requested migrations. No production mutation has occurred.
@@ -106,6 +115,8 @@ a matched-environment transport result, not proof of deployment-image equivalenc
 
 ## Decision Log
 
+2026-11-18 production routing: retain one cross-host source endpoint; do not persist a wepp1-only DNS name in projects. The smallest fix for confirmed UFW INPUT drops is a persistent bridge/subnet/destination/port-specific allow rule. Document exact rollback and bridge-recreation caveat in docs/infrastructure/soil-data-production.md, Local firewall and shared source identity. Image import requires explicit Compose-tag alignment before activation; it neither rebuilds nor changes running containers.
+
 2026-11-18: Repair the existing canonical entry point for first-install services. A missing running container is accepted only if no stopped container exists and inventory succeeds. Record zero-count rows; verify absence until cutover; on failure remove newly introduced containers without deleting volumes, restore existing images, and retain the RQ fence if either operation fails. Use build-once direct transfer as the stated default: export/load exact image IDs, verify a checksum-pinned source receipt, and create separate host-local candidates without rebuilding. No registry is introduced. Keep application builds reusable across deployment-tool-only changes.
 
 2026-11-18: Operator prioritizes wepp.cloud over forest1 and explicitly requires a full deployment to include other changes and database migrations. Prepare a combined release in an isolated task worktree, preserve shared checkout WIP, and use scripts/deploy-production.sh with installed wctl in wepp1 → wepp2 → wepp3 order. Preserve the independent CILogon registration/credential activation hold. Back up and rehearse application migration against an explicitly asserted disposable database before live migration. Reuse national soil import/parity evidence; activate national SSURGO and STATSGO2 together, then verify generated soil artifacts from production workers.
@@ -127,6 +138,8 @@ files or silently relabel historical rows. Require an explicit expected release 
 warm-cache reuse needs no metadata request and cannot mix releases.
 
 ## Outcomes & Retrospective
+
+2026-11-18 production activation completed: canonical deployments succeeded on wepp1, wepp2, and wepp3 using the same built images. National SSURGO and STATSGO2 contain 22,073,263 rows; live account migration preserves 5,482 legacy defaults. Authenticated HTTPS home/profile return 200. Four real queued jobs verify both source sidecars and 152 exact reference inputs. Eight web/RQ consumers reach the shared pinned endpoint. Evidence: artifacts/production-activation.json. Forest1, CILogon activation, public API hosting, and comprehensive live SDA parity remain deferred. Earlier preparation statements below are historical checkpoints.
 
 2026-11-18 production preparation: PR #678 integrated, full wepp1 images built and retained, national SQL verified, and database rehearsal passed. The canonical first-install limitation required a bounded operator-directed script repair. Image reuse and first-install tests pass; actual-image read-only checks pass. Script integration, local release bindings, live migration, host activation, and generated-output checks remain pending.
 
