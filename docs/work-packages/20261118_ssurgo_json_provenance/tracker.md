@@ -11,3 +11,4 @@
 
 - Next direction (2026-11-18): mirror-first deployment default with observable SDA fallback; geographic/live parity deferred until SDA recovery.
 - Pending: attempt/error contract, provenance selection schema, transport ADR/reviews, fallback implementation, broader import and Compose wiring. Current runtime remains explicit-source/XML-default.
+- Forest scope authorized: contract/ADR-0145 drafted, independent reviews pending; broader Idaho SSURGO plus Virgin Islands STATSGO2 import, client fallback and real queued acceptance are active work.

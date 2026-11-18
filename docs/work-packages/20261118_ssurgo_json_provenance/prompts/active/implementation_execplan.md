@@ -122,3 +122,24 @@ soil source files remain identical and 75 focused tests pass on the new checkout
 
 Next-phase outcome: acceptance direction and pending contract recorded. No default,
 cache, project, or deployed service changed in this documentation checkpoint.
+
+## Authorized forest execution, 2026-11-18
+
+Implement the canonical Forest contract and ADR-0145 from task/mirror-first-contract.
+Use a bounded source-selection factory shared by six NoDb consumers. Extend HTTP
+acquisition for an absolute selection budget and bounded XML fallback, add typed
+availability errors and durable selection events, and preserve explicit-source code.
+Keep old saved identities explicit; environment defaults initialize only absent state.
+
+The service branch task/mirror-first-rollout owns an official-source importer and
+portable Compose integration. Import Idaho SSURGO and retained STATSGO2 Virgin
+Islands downloads as a scoped combined release, independently compare raw projections,
+and build keys outside the replay corpus. Do not claim nationwide data from this
+regional release. Use forest (verified local hostname) with isolated qualification
+worker/queue and the actual runtime image first; preserve shared dirty checkout and
+unrelated running services. Activate only the narrowly changed dev services after
+bounded tests. Production/test-production activation remains outside this phase.
+
+Progress: contract/ADR drafted; independent reviews pending; official Idaho archive
+acquired, extraction/import and actual worker acceptance pending. Keep tracker and
+implementation evidence current through each milestone.
