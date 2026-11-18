@@ -2,6 +2,8 @@ Closed locally; deployment pending: [Parquet CSV native integration](docs/work-p
 
 Closed locally; integrated by successor: [Bounded Parquet CSV CLI and Python harness](docs/work-packages/20261118_parquet_csv_cli/package.md) - Rust CLI and async harness implement zero-trust Parquet handling with retained parity, resource and benchmark evidence. See the package decision and validation for acceptance and repository-gate disposition; runtime integration is now validated in the successor above; no deployment.
 
+Completed forest phase: [SSURGO mirror-first and provenance](docs/work-packages/20261118_ssurgo_json_provenance/package.md) — PR #675 merged; regional API/PostGIS and shared forest client defaults active, with real queued SSURGO/STATSGO artifact parity. Broader rollout and live SDA validation remain follow-up scope.
+
 Complete locally: [Default isolated tests](docs/work-packages/20261118_default_worktree_tests/package.md) - Promote run-pytest to isolated execution; native Disturbed matrix explicitly opt-in.
 
 Complete locally: [Durable isolated-worktree validation](docs/work-packages/20261118_isolated_worktree_validation/package.md) - Canonical disposable test runner, runtime preflight and source/runtime integrity receipts. Real browser/native/fixture/tooling tests pass; broad execution stops on the preexisting database-schema prerequisite.

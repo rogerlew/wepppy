@@ -473,3 +473,46 @@ def test_record_activation_atomically_retains_known_good_files(
         "known-good-override.json",
         "known-good-images.tsv",
     }
+
+
+def test_prepare_images_reuses_ids_across_host_service_names(candidate_environment, capsys, monkeypatch):
+    project, deploy_script, _ = candidate_environment
+    receipt = _create(candidate_environment, capsys)
+    args = _args(project, deploy_script)
+    args.source_receipt = receipt
+    args.source_receipt_sha256 = candidate.sha256_file(receipt)
+    args.recreated_service = ['rq-worker-fork-archive']
+    monkeypatch.setattr(candidate, 'compose_config', lambda: {
+        'services': {'rq-worker-fork-archive': {'image': 'wepppy:test'}}})
+    assert candidate.prepare_images(args) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result['images'] == {'rq-worker-fork-archive': _IMAGE_ID}
+    assert result['source_receipt_sha256'] == args.source_receipt_sha256
+
+
+@pytest.mark.parametrize('failure', ['checksum', 'image', 'uncovered', 'dirty', 'conflicting', 'failed_source'])
+def test_prepare_images_rejects_unverified_inputs(candidate_environment, capsys, monkeypatch, failure):
+    project, deploy_script, state = candidate_environment
+    receipt = _create(candidate_environment, capsys)
+    args = _args(project, deploy_script)
+    args.source_receipt = receipt
+    if failure in ('conflicting', 'failed_source'):
+        data = json.loads(receipt.read_text())
+        if failure == 'conflicting':
+            data['images'][1]['image_id'] = 'sha256:' + '9' * 64
+        else:
+            data['exit_status'] = 1
+        receipt.write_text(json.dumps(data))
+    args.source_receipt_sha256 = candidate.sha256_file(receipt)
+    if failure == 'checksum':
+        args.source_receipt_sha256 = '0' * 64
+    elif failure == 'image':
+        state['image'] = 'sha256:' + '3' * 64
+    elif failure == 'uncovered':
+        config = _config()
+        config['services']['redis']['image'] = 'uncovered:test'
+        monkeypatch.setattr(candidate, 'compose_config', lambda: config)
+    elif failure == 'dirty':
+        state['dirty'] = ' M docker/Dockerfile'
+    with pytest.raises(candidate.CandidateError):
+        candidate.prepare_images(args)

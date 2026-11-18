@@ -1,0 +1,77 @@
+{
+  "backup_path": "/var/tmp/weppcloud-full-20261118/app-before.dump",
+  "candidate_merge": "693ab6f83",
+  "cilogon_activation_authorized": false,
+  "host": "wepp1",
+  "legacy_data_unchanged": true,
+  "live_schema_changed": false,
+  "observed_at": "2026-11-18T05:07:00Z",
+  "revision": "a7c1106e42b9",
+  "tables": {
+    "feature_access_event": {
+      "rows": 11,
+      "sha256": "1279b313dc873b81b55d5d2c6d761394f72c34f1614645fe303053ed0cb8a1eb"
+    },
+    "feature_access_group": {
+      "rows": 6,
+      "sha256": "b567996344905b29594c522f4bef905c8a5bd4113c26f0757da141098833d7d1"
+    },
+    "feature_access_membership": {
+      "rows": 11,
+      "sha256": "47d5c309583e1383086bc242622b2319e7712ceb8b1b7eb83177461bc98a4615"
+    },
+    "notification": {
+      "rows": 5137,
+      "sha256": "6c63dd527df66285c4e9124187efabdfb5a3fcdd65f8327602605ab98f6057ee"
+    },
+    "notification_recipient": {
+      "rows": 5456,
+      "sha256": "afddc35b1a48f2097a154c67854b631008d9400d9f88bbbbc2f423ba05fe607c"
+    },
+    "oauth_account": {
+      "rows": 240,
+      "sha256": "d0f73970407fc3ee13ad41202953ec8d13cf2fe7089d969c190c675a18ea8e9f"
+    },
+    "onboarding_acceptance": {
+      "rows": 9,
+      "sha256": "7098e8b9e7bbc2c48840299e4d2c0db3d6a6e488604fe9790422ecabb6ccf79e"
+    },
+    "role": {
+      "rows": 6,
+      "sha256": "9cb49351dec80ee80706db7bc9dbb0582af2050817e2bc851db001aa80146cf3"
+    },
+    "roles_users": {
+      "rows": 184,
+      "sha256": "9946276bf9f474ea30f06d1933196dd709799356a4ae150ffa67723c11269578"
+    },
+    "run": {
+      "rows": 33599,
+      "sha256": "3194000493b6709be858f15b551f909f89639efa81eaee4aff4b8316505bb60a"
+    },
+    "run_catalog": {
+      "rows": 33241,
+      "sha256": "0807f0354dbcfcb6507de5bd0cb140fa6063009a39bed9bd69171508102a6411"
+    },
+    "run_migrations": {
+      "rows": 1,
+      "sha256": "940fc685293f21a8c12f633a9080c494c4f83a28954814713accc97a25b06dd5"
+    },
+    "runs_users": {
+      "rows": 9606,
+      "sha256": "ed7f250d3ccc2fec4b2f5b12b7c7d2fdf41f8ee8c655c7d750c32098349d955d"
+    },
+    "user": {
+      "rows": 5482,
+      "sha256": "408cd2f1642c55f0f414d8e437158d2464df9b77d62fe3716c8cfd80ee794a42"
+    },
+    "user_preferences": {
+      "rows": 1,
+      "sha256": "0483754cc345164978754c127ac550115b7896638aa0531afe80881a70a0fe87"
+    },
+    "usersum_docs_search": {
+      "rows": 80,
+      "sha256": "10f8c63b4947e7541c273801ce1eb6a6013cc02c3116be11c9e16ae887d331e5"
+    }
+  },
+  "target": "soil_rollout_rehearsal_20261118"
+}

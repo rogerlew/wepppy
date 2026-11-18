@@ -1,6 +1,6 @@
 #!/bin/bash
 # Production Deployment Script for WEPPcloud
-# Usage: ./scripts/deploy-production.sh [--build-retained-candidate|--resume-retained-candidate RECEIPT] [--targeted-web|--targeted-cap|--targeted-batch] [--source-overlay-manifest PATH|--batch-rollback-image-id ID] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
+# Usage: ./scripts/deploy-production.sh [--build-retained-candidate|--retain-images-from RECEIPT --source-receipt-sha256 SHA256|--resume-retained-candidate RECEIPT] [--new-service NAME] [--targeted-web|--targeted-cap|--targeted-batch] [--source-overlay-manifest PATH|--batch-rollback-image-id ID] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
 # The installed wctl preset selects full production, worker-pool, or the
 # dedicated wepp3 fork/archive deployment automatically.
 
@@ -350,6 +350,9 @@ BATCH_ROLLBACK_IMAGE_ID=""
 PRINT_PLAN=false
 BUILD_RETAINED_CANDIDATE=false
 RESUME_RETAINED_CANDIDATE=""
+IMPORTED_CANDIDATE=""
+IMPORTED_CANDIDATE_SHA256=""
+NEW_SERVICES=()
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 RQ_ENGINE_HEALTHCHECK_URL="${RQ_ENGINE_HEALTHCHECK_URL:-}"
 CAP_HEALTHCHECK_URL="${CAP_HEALTHCHECK_URL:-}"
@@ -391,6 +394,19 @@ while [[ $# -gt 0 ]]; do
             BUILD_RETAINED_CANDIDATE=true
             shift
             ;;
+        --retain-images-from)
+            IMPORTED_CANDIDATE="${2:?--retain-images-from requires a receipt path}"
+            BUILD_RETAINED_CANDIDATE=true
+            shift 2
+            ;;
+        --source-receipt-sha256)
+            IMPORTED_CANDIDATE_SHA256="${2:?--source-receipt-sha256 requires a digest}"
+            shift 2
+            ;;
+        --new-service)
+            NEW_SERVICES+=("${2:?--new-service requires a service name}")
+            shift 2
+            ;;
         --resume-retained-candidate)
             RESUME_RETAINED_CANDIDATE="${2:?--resume-retained-candidate requires a receipt path}"
             shift 2
@@ -431,7 +447,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--build-retained-candidate|--resume-retained-candidate RECEIPT] [--targeted-web|--targeted-cap] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis] [--skip-docker-prune] [--docker-prune-volumes]"
+            echo "Usage: $0 [--build-retained-candidate|--retain-images-from RECEIPT --source-receipt-sha256 SHA256|--resume-retained-candidate RECEIPT] [--new-service NAME] [--targeted-web|--targeted-cap] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis] [--skip-docker-prune] [--docker-prune-volumes]"
             exit 1
             ;;
     esac
@@ -634,6 +650,18 @@ fi
 configure_deploy_topology
 
 validate_deploy_topology() {
+    if [ -n "${IMPORTED_CANDIDATE}${IMPORTED_CANDIDATE_SHA256}" ]; then
+        if [ -z "${IMPORTED_CANDIDATE}" ] || ! [[ "${IMPORTED_CANDIDATE_SHA256}" =~ ^[a-f0-9]{64}$ ]]; then
+            echo "✗ Image import requires a receipt and its exact SHA-256." >&2
+            exit 1
+        fi
+    fi
+    for service in "${NEW_SERVICES[@]}"; do
+        if ! printf '%s\n' "${RECREATED_SERVICES[@]}" | grep -Fxq -- "${service}"; then
+            echo "✗ New service is outside the deployment selection: ${service}" >&2
+            exit 1
+        fi
+    done
     if [ "${BUILD_RETAINED_CANDIDATE}" = true ] && [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
         echo "✗ Select build-only or retained resume, not both." >&2
         exit 1
@@ -849,6 +877,9 @@ retained_candidate_args() {
     done
     for service in "${RECREATED_SERVICES[@]}"; do
         RETAINED_ARGS+=(--recreated-service "${service}")
+    done
+    for service in "${NEW_SERVICES[@]}"; do
+        RETAINED_ARGS+=(--deploy-option "new_service=${service}")
     done
 }
 
@@ -1208,6 +1239,7 @@ KNOWN_GOOD_ROWS=""
 CUTOVER_STARTED=false
 
 capture_known_good_state() {
+    local container_ids all_container_ids
     KNOWN_GOOD_DIR="$(mktemp -d "${DEPLOY_STATE_DIR%/}/wepppy-known-good.XXXXXX")"
     chmod 0700 "${KNOWN_GOOD_DIR}"
     KNOWN_GOOD_CONFIG="${KNOWN_GOOD_DIR}/activation-compose.json"
@@ -1222,11 +1254,21 @@ capture_known_good_state() {
     : > "${KNOWN_GOOD_ROWS}"
     chmod 0600 "${KNOWN_GOOD_ROWS}"
     for service in "${RECREATED_SERVICES[@]}"; do
-        mapfile -t containers < <(wctl docker compose ps -q "${service}")
-        [ "${#containers[@]}" -gt 0 ] || {
-            echo "✗ Cannot retain known-good state: ${service} has no container." >&2
-            return 1
-        }
+        container_ids="$(wctl docker compose ps -q "${service}")" || return 1
+        if [ -z "${container_ids}" ]; then
+            if ! printf '%s\n' "${NEW_SERVICES[@]}" | grep -Fxq -- "${service}"; then
+                echo "✗ Cannot retain known-good state: ${service} has no container; declare first installation with --new-service." >&2
+                return 1
+            fi
+            all_container_ids="$(wctl docker compose ps --all -q "${service}")" || return 1
+            if [ -n "${all_container_ids}" ]; then
+                echo "✗ Cannot retain known-good state: ${service} has stopped containers." >&2
+                return 1
+            fi
+            printf '%s\t-\t0\n' "${service}" >> "${KNOWN_GOOD_ROWS}"
+            continue
+        fi
+        mapfile -t containers <<< "${container_ids}"
         expected_id=""
         for container in "${containers[@]}"; do
             image_id="$(docker inspect --format '{{.Image}}' "${container}")"
@@ -1246,7 +1288,9 @@ import sys
 
 rows = {}
 for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
-    service, image_id, _count = line.split("\t")
+    service, image_id, count = line.split("\t")
+    if count == "0":
+        continue
     rows[service] = {"image": image_id}
 json.dump({"services": rows}, sys.stdout, sort_keys=True, separators=(",", ":"))
 sys.stdout.write("\n")
@@ -1255,9 +1299,17 @@ PY
 }
 
 assert_known_good_state_unchanged() {
-    local service expected_id expected_count container current_id
+    local service expected_id expected_count container current_id container_ids
     while IFS=$'\t' read -r service expected_id expected_count; do
         [ -n "${service}" ] || continue
+        if [ "${expected_count}" -eq 0 ]; then
+            container_ids="$(wctl docker compose ps --all -q "${service}")" || return 1
+            if [ -n "${container_ids}" ]; then
+                echo "✗ ${service} appeared after absence was captured." >&2
+                return 1
+            fi
+            continue
+        fi
         mapfile -t containers < <(wctl docker compose ps -q "${service}")
         if [ "${#containers[@]}" -ne "${expected_count}" ]; then
             echo "✗ ${service} replica count changed after known-good capture." >&2
@@ -1283,8 +1335,14 @@ prepare_retained_cutover() {
 
 verify_known_good_state_once() {
     local expected_args=()
+    local container_ids
     while IFS=$'\t' read -r service expected_id expected_count; do
         [ -n "${service}" ] || continue
+        if [ "${expected_count}" -eq 0 ]; then
+            container_ids="$(wctl docker compose ps --all -q "${service}")" || return 1
+            [ -z "${container_ids}" ] || return 1
+            continue
+        fi
         # A failed shape release must remain stopped, even while the other
         # workloads recover their retained image map.
         if [ "${SHAPE_CONVERTER_FAIL_CLOSED}" = true ] && [ "${service}" = shape-converter ]; then
@@ -1355,6 +1413,7 @@ protect_known_good_images() {
     local service image_id expected_count retained_tag existing_id
     while IFS=$'\t' read -r service image_id expected_count; do
         [ -n "${service}" ] || continue
+        [ "${expected_count}" -gt 0 ] || continue
         retained_tag="wepppy-retained-rollback:${image_id#sha256:}"
         existing_id="$(docker image inspect --format '{{.Id}}' "${retained_tag}" 2>/dev/null || true)"
         if [ -n "${existing_id}" ]; then
@@ -1421,14 +1480,25 @@ recover_targeted_cap() {
     fi
     if [ "${CUTOVER_STARTED}" = true ] && [ -n "${KNOWN_GOOD_CONFIG}" ]; then
         local -a recovery_services=()
+        local -a introduced_services=()
         local service expected_id expected_count
         while IFS=$'\t' read -r service expected_id expected_count; do
             [ -n "${service}" ] || continue
+            if [ "${expected_count}" -eq 0 ]; then
+                introduced_services+=("${service}")
+                continue
+            fi
             if [ "${SHAPE_CONVERTER_FAIL_CLOSED}" = true ] && [ "${service}" = shape-converter ]; then
                 continue
             fi
             recovery_services+=("${service}")
         done < "${KNOWN_GOOD_ROWS}"
+        if [ "${#introduced_services[@]}" -gt 0 ]; then
+            # Restore pre-cutover absence, retaining volumes for diagnosis/retry.
+            if ! docker compose -f "${KNOWN_GOOD_CONFIG}" rm --stop --force "${introduced_services[@]}"; then
+                echo "✗ NEW_SERVICE_CLEANUP_FAILED: restoring existing workloads before verifying absence" >&2
+            fi
+        fi
         echo "✗ Cutover failed; restoring the retained workloads except any fail-closed shape-converter" >&2
         # Explicit services and --no-deps prevent Compose from reactivating the
         # stopped parser through the full retained config or dependency closure.
@@ -1581,6 +1651,14 @@ if [ "${TARGETED_BATCH}" = true ]; then
     fi
     wctl docker compose run --rm --no-deps --entrypoint /opt/venv/bin/python \
         rq-worker-batch -B -c 'from wepppy.rq import query_catalog_rq; import wepppyo3; print(query_catalog_rq.catalog_worker_configuration())'
+elif [ -n "${IMPORTED_CANDIDATE}" ]; then
+    echo ">>> Step 2: Verifying loaded images from the source receipt (no rebuild)"
+    retained_candidate_args
+    IMPORTED_IMAGE_MAP="$(wctl docker compose config --format json \
+        | python3 "${RETAINED_CANDIDATE_HELPER}" prepare-images \
+            "${RETAINED_ARGS[@]}" --source-receipt "${IMPORTED_CANDIDATE}" \
+            --source-receipt-sha256 "${IMPORTED_CANDIDATE_SHA256}")"
+    echo "${IMPORTED_IMAGE_MAP}"
 elif [ "${SKIP_BUILD}" = false ] && [ -z "${RESUME_RETAINED_CANDIDATE}" ]; then
     echo ">>> Step 2: Building Docker images..."
     BASE_BUILD_SERVICES=()
@@ -1615,7 +1693,11 @@ if [ "${BUILD_RETAINED_CANDIDATE}" = true ]; then
     RETAINED_CONFIG_JSON="$(wctl docker compose config --format json)"
     for service in "${RECREATED_SERVICES[@]}"; do
         source_image="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["services"][sys.argv[1]]["image"])' "${service}" <<< "${RETAINED_CONFIG_JSON}")"
-        image_id="$(docker image inspect --format '{{.Id}}' "${source_image}")"
+        if [ -n "${IMPORTED_CANDIDATE}" ]; then
+            image_id="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["images"][sys.argv[1]])' "${service}" <<< "${IMPORTED_IMAGE_MAP}")"
+        else
+            image_id="$(docker image inspect --format '{{.Id}}' "${source_image}")"
+        fi
         [[ "${image_id}" =~ ^sha256:[a-f0-9]{64}$ ]]
         RETAINED_RESOLVED_IMAGES["${service}"]="${image_id}"
         RETAINED_EXPECTED_IMAGE_ARGS+=(--expected-image "${service}=${image_id}")

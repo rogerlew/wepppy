@@ -1006,6 +1006,8 @@ def test_init_reads_depth_config_keys_with_expected_names(
         or float(default if default is not None else 0.0),
     )
 
+    monkeypatch.setattr(Soils, "config_get_str", lambda self, section, option, default=None: default)
+
     _ = Soils(str(wd), "dummy.cfg")
 
     assert ("soils", "clip_soils_depth", 1000) in float_calls

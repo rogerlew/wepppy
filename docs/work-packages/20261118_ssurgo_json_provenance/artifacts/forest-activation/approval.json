@@ -1,0 +1,9 @@
+{
+  "approved_candidate": "09f6633e660c73570cc3f181bef75c6b49853ef3",
+  "approved_digest": "af780106f077abb9cd1ace333aeec80cd04f2295ac94b0f96f354f9d15a08d12",
+  "authorization": "User: i aprove; approval of pending exact-revision prompt",
+  "merge_commit": "0ae17ad8a393a4fbe250241b2253b77cc475d06b",
+  "merge_tree_equals_approved_candidate": true,
+  "deployment_scope": "forest development only; seven owned runtime paths applied to existing mount; unrelated shared changes preserved",
+  "runtime_patch_sha256": "8704f8556ec4458f3867f28d22844abecfe10c7907281867a644ec8eda209b3d"
+}
