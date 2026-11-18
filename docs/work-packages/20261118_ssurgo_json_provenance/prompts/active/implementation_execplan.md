@@ -19,6 +19,8 @@ geographic/live parity is deferred until SDA recovery, not a prerequisite.
 
 ## Progress
 
+- [ ] (2026-11-18) Recover nationwide SSURGO and STATSGO2 coverage, transition forest release pins, and verify cavernous-oxygen generated soils; execute the service nationwide-recovery-plan.md.
+
 
 - [x] Inspect six collection consumers, legacy transport/cache and frozen service contracts.
 - [x] Author operator-authorized canonical contract and data compatibility plan.
@@ -92,6 +94,8 @@ mounts in the isolated client container restores all five exact artifacts; this 
 a matched-environment transport result, not proof of deployment-image equivalence.
 
 ## Decision Log
+
+2026-11-18: Nationwide SSURGO and STATSGO2 are required for the shared default. The regional rollout was insufficient during the SDA outage; loading national data is mandatory while full live parity remains deferred. Canonical scope is now in soil-data-source-provenance-contract.md, Shared default geographic coverage.
 
 2026-11-18 follow-up: accept retained SSURGO/STATSGO fixture evidence for broader
 query/builder behavior and move comprehensive geographic/live testing to recovery.

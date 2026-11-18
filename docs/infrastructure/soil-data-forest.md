@@ -6,7 +6,11 @@ no published port. The API uses its existing UID 10001, a read-only filesystem,
 dropped capabilities and bounded resources. No client startup dependency on API
 health is added: SDA fallback must work during mirror outages.
 
-The initial release is forest-id-20261001-vi-20161013-v1: official Idaho SSURGO
+The shared default requires nationwide SSURGO and STATSGO2. National recovery is
+in progress following a Colorado coverage failure; source loading and live SDA
+parity are distinct requirements. Full live SDA parity remains deferred.
+
+The historical initial release is forest-id-20261001-vi-20161013-v1: official Idaho SSURGO
 (October 2026) plus Virgin Islands STATSGO2 (2016). Its manifest carries source URLs,
 hashes and scope. It is regional coverage; missing mirror components permit SDA
 fallback. Comprehensive live SDA validation is deferred until upstream recovery.
@@ -83,3 +87,20 @@ and mounts are retained. Canonical deployment fence programs suspended dequeue;
 all three registries were empty before refresh, and the owned fence was released
 after web/API and consumer readiness checks. Secrets remain file-backed with their
 consumer ACLs. Existing explicit project selections remain authoritative.
+
+## Nationwide recovery, 2026-11-18 UTC
+
+The operator requires both national SSURGO and national STATSGO2 for the shared
+default. The regional default left all 22 Colorado keys in cavernous-oxygen
+unavailable while USDA returned HTTP 5xx. Regional-only coverage does not satisfy
+this outage-recovery requirement. Execution and evidence are tracked in
+/workdir/soil-data-access/docs/nationwide-recovery-plan.md.
+
+Prepare a new immutable release from both official national archives. Stage the
+validated import without activation, compare direct source projections, then
+coordinate the active pointer, SOIL_DATA_RELEASE and saved regional mirror pins.
+Use the existing locked Soils.configure_soil_data_source method. Retain prior
+pins, caches and database release for coordinated rollback; never relabel old
+rows or negative caches as national. Historical qualification runs remain
+unchanged as accepted evidence. The failed user project must pass real queued
+soil construction and prepared-artifact readback before recovery is declared.

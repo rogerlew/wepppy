@@ -19,3 +19,5 @@
 
 - Approved activation: PR #675 merged at 0ae17ad8a393a4fbe250241b2253b77cc475d06b; candidate/merge governance pass. All five shared forest consumers now select mirror-first and reach the pinned release. Unrelated local history/work preserved; source/configuration rollback copies retained.
 - Activation evidence: artifacts/forest-activation; real normal-queue build and soil-preparation canaries validate generated inputs and source sidecars.
+
+- National recovery in progress: official nationwide SSURGO and STATSGO2 acquired; all 22 cavernous-oxygen keys confirmed in SSURGO. Regional default remains active until staged import validation and coordinated release transition complete.
