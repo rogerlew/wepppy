@@ -1,3 +1,5 @@
+Scaffolded: [Parquet CSV native integration](docs/work-packages/20261118_parquet_csv_wepppy_integration/package.md) - Contract-first immediate cutover for all supported CSV exports; code-owned configuration, no environment knobs and no Python fallback. Compatibility, image/workflow validation and broad tests after wiring are implementation gates.
+
 Closed locally; integration deferred: [Bounded Parquet CSV CLI and Python harness](docs/work-packages/20261118_parquet_csv_cli/package.md) - Rust CLI and async harness implement zero-trust Parquet handling with retained parity, resource and benchmark evidence. See the package decision and validation for acceptance and repository-gate disposition; no runtime wiring or deployment.
 
 Complete locally: [Default isolated tests](docs/work-packages/20261118_default_worktree_tests/package.md) - Promote run-pytest to isolated execution; native Disturbed matrix explicitly opt-in.
