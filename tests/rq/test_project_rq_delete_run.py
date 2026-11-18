@@ -53,6 +53,9 @@ def _stub_delete_environment(
     job_id: str,
     errno_value: int,
 ) -> tuple[list[str], list[dict[str, object]], object]:
+    # Ordinary temporary workspaces do not belong to deployment retention storage.
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", raising=False)
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", raising=False)
     job = SimpleNamespace(id=job_id)
     monkeypatch.setattr(project_rq, "get_current_job", lambda: job)
 
