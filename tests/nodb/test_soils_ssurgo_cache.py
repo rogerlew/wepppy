@@ -111,3 +111,13 @@ def test_all_soils_surgo_collection_calls_pass_project_cache_path() -> None:
         any(keyword.arg == "cache_db_path" for keyword in call.keywords)
         for call in calls
     )
+
+
+
+    assert all(
+        any(keyword.arg is None and isinstance(keyword.value, ast.Call)
+            and isinstance(keyword.value.func, ast.Attribute)
+            and keyword.value.func.attr == "_soil_data_source_kwargs"
+            for keyword in call.keywords)
+        for call in calls
+    )

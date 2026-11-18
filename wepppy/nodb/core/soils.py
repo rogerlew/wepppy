@@ -81,6 +81,7 @@ from deprecated import deprecated
 import duckdb
 
 # wepppy
+from wepppy.soils.ssurgo.source import SoilDataSource, SoilDataSourceError
 from wepppy.soils.ssurgo import (
     SSURGO_PROJECT_CACHE_FILENAME,
     STATSGO_PROJECT_CACHE_FILENAME,
@@ -255,6 +256,15 @@ class Soils(NoDbBase):
             self._clip_soils_minimum = self.config_get_bool('soils', 'clip_soils_minimum', False)
             self._clip_soils_minimum_depth = self.config_get_float('soils', 'clip_soils_minimum_depth', 0)
             self._clear_ssurgo_cache_on_rebuild = False
+            source_endpoint = self.config_get_str('soils', 'soil_data_endpoint', None)
+            source_profile = self.config_get_str('soils', 'soil_data_profile', 'legacy-xml')
+            if source_profile != 'legacy-xml' and source_endpoint is None:
+                raise SoilDataSourceError('JSON soil source requires an explicit endpoint')
+            self._soil_data_source = SoilDataSource(
+                endpoint=SoilDataSource().endpoint if source_endpoint is None else source_endpoint,
+                profile=source_profile,
+                release=self.config_get_str('soils', 'soil_data_release', None),
+            ).identity()
             self._rosetta_wc_fc_from_disturbed_bd_override = self.config_get_bool(
                 'soils',
                 'rosetta_wc_fc_from_disturbed_bd_override',
@@ -556,12 +566,31 @@ class Soils(NoDbBase):
         return _join(self.wd, "soils")
 
     @property
+    def soil_data_source(self) -> dict:
+        """Validated configured identity; fetched-data evidence lives in each cache."""
+        values = getattr(self, '_soil_data_source', None)
+        return SoilDataSource(**values).identity() if values is not None else SoilDataSource().identity()
+
+    def _soil_data_source_kwargs(self) -> dict:
+        identity = self.soil_data_source
+        return identity if identity['profile'] != 'legacy-xml' else {}
+
+    def configure_soil_data_source(self, *, endpoint=None, profile='legacy-xml', release=None) -> None:
+        if profile != 'legacy-xml' and endpoint is None:
+            raise SoilDataSourceError('JSON soil source requires an explicit endpoint')
+        identity = SoilDataSource(
+            endpoint=SoilDataSource().endpoint if endpoint is None else endpoint, profile=profile, release=release,
+        ).identity()
+        with self.locked():
+            self._soil_data_source = identity
+
+    @property
     def ssurgo_cache_db_path(self) -> str:
-        return _join(self.soils_dir, SSURGO_PROJECT_CACHE_FILENAME)
+        return SoilDataSource(**self.soil_data_source).cache_path(_join(self.soils_dir, SSURGO_PROJECT_CACHE_FILENAME))
 
     @property
     def statsgo_cache_db_path(self) -> str:
-        return _join(self.soils_dir, STATSGO_PROJECT_CACHE_FILENAME)
+        return SoilDataSource(**self.soil_data_source).cache_path(_join(self.soils_dir, STATSGO_PROJECT_CACHE_FILENAME))
 
     def _project_surgo_cache_path(self, *, use_statsgo: bool = False) -> str:
         os.makedirs(self.soils_dir, exist_ok=True)
@@ -962,6 +991,7 @@ class Soils(NoDbBase):
                 mukeys,
                 use_statsgo=True,
                 cache_db_path=self._prepare_project_surgo_cache(use_statsgo=True),
+                **self._soil_data_source_kwargs(),
             )
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
             soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
@@ -1123,7 +1153,7 @@ class Soils(NoDbBase):
         with self.locked():
             self._soils_is_vrt = False
             ssurgo_cache_db_path = self._prepare_project_surgo_cache(use_statsgo=False)
-            surgo_c = SurgoSoilCollection(mukeys, cache_db_path=ssurgo_cache_db_path)
+            surgo_c = SurgoSoilCollection(mukeys, cache_db_path=ssurgo_cache_db_path, **self._soil_data_source_kwargs())
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
 
             soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
@@ -1147,6 +1177,7 @@ class Soils(NoDbBase):
                     mukeys,
                     use_statsgo=True,
                     cache_db_path=statsgo_cache_db_path,
+                    **self._soil_data_source_kwargs(),
                 )
                 surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
                 soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
@@ -1554,6 +1585,7 @@ class Soils(NoDbBase):
             surgo_c = SurgoSoilCollection(
                 [mukey],
                 cache_db_path=self._prepare_project_surgo_cache(use_statsgo=False),
+                **self._soil_data_source_kwargs(),
             )
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
             surgo_c.logInvalidSoils(wd=soils_dir)
@@ -1821,6 +1853,7 @@ class Soils(NoDbBase):
             candidate_collection = SurgoSoilCollection(
                 added_mukeys,
                 cache_db_path=self._prepare_project_surgo_cache(use_statsgo=False),
+                **self._soil_data_source_kwargs(),
             )
             candidate_collection.makeWeppSoils(
                 initial_sat=self.initial_sat,
@@ -2051,6 +2084,7 @@ class Soils(NoDbBase):
                 surgo_c = SurgoSoilCollection(
                     mukeys,
                     cache_db_path=self._prepare_project_surgo_cache(use_statsgo=False),
+                    **self._soil_data_source_kwargs(),
                 )
                 surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag, logger=self.logger,
                                       max_workers=max_workers)
