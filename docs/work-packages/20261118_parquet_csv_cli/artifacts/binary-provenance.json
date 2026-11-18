@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "binary_sha256": "2efd194f5842f668687b58659337598b5d3b868151fc12f0d3b837b9313a8b37",
+  "sources": {
+    "rust/Cargo.toml": "ff71fe74054de236604a4cea682d7bfea57e0c4f0de008668e7f9c2e8b3b4f3c",
+    "rust/Cargo.lock": "21f615ebc43c9d467cdbf84f3e21155e450fdda9ac6e506e42b0822e02e81800",
+    "rust/src/compact.rs": "a26c408f20dac36a23b794675261f1b7fedd1165893871afe531789f3dd406fd",
+    "rust/src/main.rs": "65d52bb659f8f06ce6dbeccd439b9d16704eca64f87abb8596c902472db53e78",
+    "rust/src/preflight.rs": "5767dcc11661d0592a7e2ef5c7a4355a9d9ec05e4d8eddae9107e2116a91ad64",
+    "rust/src/sha256.rs": "43d871e94e9332ee742c129e4ecd7d910cdcaced96e6e48904acb5ae991505bd"
+  }
+}

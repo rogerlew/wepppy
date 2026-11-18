@@ -1,54 +1,64 @@
 # Parquet CSV CLI tracker
 
-**Started / updated**: 2026-11-18 18:13 UTC
-**Phase**: M0 contract accepted; checkpoint commit next
-**Security impact**: high; dedicated review required during execution
-**Active plan**: [implementation_execplan.md](prompts/active/implementation_execplan.md)
+**Updated**: 2026-11-18 UTC
+**Phase**: Standalone implementation and evaluation complete; integration deferred
+**Security impact**: high; independent security review retained
+**Plan**: [implementation_execplan.md](prompts/active/implementation_execplan.md)
 
 ## Task board
 
-- [x] Scaffold brief, standalone contract draft, decision checkpoint and ExecPlan.
-- [x] Register package on PROJECT_TRACKER.md in the isolated task worktree.
-- [x] M0: Inventory compatibility and dependencies; ratify contract and ADR-0148.
-- [x] M0: Two independent contract reviews and dispositions; checkpoint SHA recorded after commit.
-- [ ] M1: Implement isolated Rust CLI and generated-output parity tests.
-- [ ] M2: Implement standalone async Python harness and bounded lifecycle tests.
-- [ ] M3: Run representative three-way performance and resource evaluation.
-- [ ] M4: Complete correctness/security reviews and go/no-go handoff.
+- [x] Commit scaffold (`11ace80c8`) and register isolated work package.
+- [x] M0: Ratify contract/ADR, dependency assessment and independent reviews.
+- [x] M1: Implement bounded Rust CLI and prove generated CSV byte parity.
+- [x] M2: Implement async Python harness, cross-process admission and lifecycle tests.
+- [x] M3: Compare Python, native PyArrow and Rust+harness on retained real inputs.
+- [x] M4: Close correctness/security findings and record standalone decision.
 
 ## Decisions
 
-- 2026-11-18: Contract-first and standalone-first per operator. Integration is
-  outside this package even after success; a successor requires separate authority.
-- 2026-11-18: Evaluate Rust; compare current exporter and native incremental
-  PyArrow. No claimed speedup, fixed resource defaults or dependency approval yet.
-- 2026-11-18: Worktree `/home/workdir/wepppy-parquet-csv-cli-package`, branch
-  `codex/parquet-csv-cli-package`; shared checkout has unrelated WIP and is untouched.
+- Contract-first checkpoint ancestor: `f38f8a4bd9d08b8582fbca8dcd7284a2eef87fb2`.
+  Metrics amendment: `23461db5698343605a135e88ca177edaf7fac50d`.
+  Metadata/oracle amendment: `bba939a47b499fd6b74327cd6817bdee741a13bb`.
+- All Parquet is untrusted even if WEPPpy generated it. The durable contract's
+  **Zero-trust input policy** records the operator decision and rationale. Hidden
+  index columns and empty files receive the same validation as exported columns.
+- One synchronous Rust executable and stdlib async harness; no new service.
+  Resource limits only tighten; completed artifacts retain their admission slot.
+- Native PyArrow is faster but differs in CSV bytes. Preserve contracted Python
+  3.12 formatting; do not trade compatibility for its measured speed.
+- WEPPpy integration requires a separately authorized successor even after success.
+  No routes, runtime configuration, production exporters or project data changed.
 
 ## Gate status and evidence
 
-Contract ratified under implementation instruction; independent reviews pass.
-Checkpoint ancestor: pending commit. Implementation: not started.
-Correctness/security review artifacts: not yet produced; use canonical templates.
-Performance and resource acceptance: not measured. WEPPpy integration: deferred.
-Publication/deployment: outside scope. Scaffold docs validation: passed (six files, zero errors/warnings); staged diff whitespace check passed. Spelling preview reviewed; retained the ordinary word "oversized".
+[Decision](artifacts/decision.md) records performance/resource acceptance, exact
+build identity and exclusions. [Validation](artifacts/validation.md) records focused
+checks and the separate broad-suite disposition. Independent
+[correctness](artifacts/20261118_correctness_review.md) and
+[security](artifacts/20261118_security_review.md) reviews have no unresolved
+medium/high source findings; integrator closeout attaches final evidence to their
+conditional source verdicts. No remote integration, publication or deployment claim.
 
-## Risks and next action
+- Operator decision, 2026-11-18: broad repository pytest is deferred until after
+  WEPPpy integration. The in-progress broad run was stopped; no full-suite pass
+  or standalone regression is inferred from its cancellation-induced failure.
 
-Resolve CSV serialization differences and codec coverage before selecting crates.
-Do not confuse row batching with bounded allocation, task cancellation with process
-termination, or per-worker admission with an aggregate service limit. Retain
-whole-tree resource evidence and ensure legitimate large exports remain supported.
+## Remaining integration work
 
-Next action on authorized execution: M0 of the active plan. Do not implement from
-this unratified draft. Review [checkpoint](artifacts/20261118_contract_decision.md)
-and [package scope](package.md#scope-and-integration-boundary) first.
+A successor must handle required unsupported types/codecs/metadata, filters and
+archive adapters, service-wide admission across workers, HTTP/auth contracts,
+artifact visibility and cleanup, production identity/mount/workflow tests and
+rollout/recovery. Parent SIGKILL recovery and per-root budgets remain explicit
+standalone limitations. The final audit retains the Chrono maintenance warning.
 
-## Validation note - 2026-11-18 18:18 UTC
+## Tooling feedback
 
-The installed wctl wrapper selects its installation checkout even when called
-from a task worktree. Initial relative-path lint calls validated zero new files;
-staging was not the cause. Explicit `wctl --project-dir
-/home/workdir/wepppy-parquet-csv-cli-package doc-lint --path ...` validated all
-six changed documents. Use this override for reproducible worktree doc checks.
-No runtime tests were run for this documentation-only scaffold.
+The installed wctl wrapper selects its installation checkout for documentation.
+Use `wctl --project-dir "$PWD" doc-lint --path ...`; initial calls without the
+override validated zero new files. Pytest uses `--checkout` and retained receipts.
+Rust sources and ignored binaries need explicit provenance beyond Python-oriented
+source fingerprints. The broad suite ran against frozen source; final isolated
+tooling fixes receive their own exact-binary focused validation.
+
+Task branch: `codex/parquet-csv-cli-package` in
+`/home/workdir/wepppy-parquet-csv-cli-package`. Shared-master WIP was untouched.

@@ -4,7 +4,7 @@
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
 current together with the package tracker. Execution was authorized by the operator after scaffold commit 11ace80c8.
-Implementation remains gated on the M0 ancestor and independent reviews.
+M0 ancestor and independent contract reviews were completed before implementation.
 
 ## Purpose / Big Picture
 
@@ -19,10 +19,10 @@ integration. Successful evaluation ends in a go/no-go handoff, not route wiring.
 
 - [x] (2026-11-18 18:13 UTC) Scaffold scope, draft contract, checkpoint and plan.
 - [x] (2026-11-18 UTC) M0: Ratified contract/ADR and conditionally accepted dependency selection; two independent reviews closed.
-- [ ] M1: Build standalone CLI and prove fresh generated-output parity.
-- [ ] M2: Build standalone harness and prove resource/lifecycle behavior.
-- [ ] M3: Benchmark current Python, native PyArrow and Rust plus harness.
-- [ ] M4: Independent reviews, decision and deferred-integration handoff.
+- [x] (2026-11-18 UTC) M1: Build standalone CLI and prove fresh generated-output parity.
+- [x] (2026-11-18 UTC) M2: Build standalone harness and prove resource/lifecycle behavior.
+- [x] (2026-11-18 UTC) M3: Benchmark current Python, native PyArrow and Rust plus harness.
+- [x] (2026-11-18 UTC) M4: Independent reviews, decision and deferred-integration handoff.
 
 ## Surprises & Discoveries
 
@@ -34,6 +34,19 @@ GeoParquet dependency approval is narrow and conditional; adding Arrow support
 or codecs is a new evaluated graph. Production browse has eight workers, so a
 per-worker limit is not a host-wide concurrency bound.
 
+Real legacy files contain dictionary-only empty columns and a data offset alias
+at the beginning of the dictionary. Support is narrowly validated against the
+complete page scan, totals and nonoverlapping ranges. Empty files still undergo
+schema/codec/external-reference checks. Rust metadata requires UTF-8; this and
+ambiguous duplicate output labels remain explicit compatibility exclusions.
+Native PyArrow is faster but writes different float/CSV bytes. A small owned CSV
+writer avoids an unnecessary csv crate and preserves the Python 3.12 oracle.
+
+Independent review caught unsupported types hidden in omitted index columns,
+FIFO provenance reads, incomplete process-group drainage and exceptional Python
+error paths. Direct regressions now cover these boundaries. WEPPpy-looking
+producer metadata does not exempt hostile fixtures from any check.
+
 ## Decision Log
 
 
@@ -43,12 +56,42 @@ to a separately authorized successor. This avoids committing runtime changes
 before the candidate proves useful. Use a synchronous CLI and asynchronous Python
 supervision; no Rust async runtime is needed for bounded local file conversion.
 
+2026-11-18, operator/Codex: all Parquet is untrusted even if WEPPpy generated it.
+No origin-based bypass is allowed; validate omitted columns too. Rationale and
+authoritative policy are in the contract's Zero-trust input policy section.
+
+2026-11-18, operator/Codex: defer broad repository pytest until after WEPPpy
+integration. Stop the in-progress broad run and retain its cancellation receipt;
+focused standalone checks remain required. This supersedes the generic broad
+pre-handoff rule for this package only.
+
+2026-11-18, operator question/Codex: strict JSON responses use UTF-8 without BOM,
+unique exact keys, finite numeric parsing and typed depth/encoding rejection.
+Requests remain fixed argv with closed stdin; no bidirectional JSON protocol is
+introduced. Added explicit malformed-wire and provenance-depth regressions.
+
+2026-11-18, independent reviewers/Codex: retain v1 exclusions for duplicate labels,
+non-UTF-8 metadata, unsupported types/codecs, filters and archive adapters. Do not
+silently rewrite metadata, drop unsupported values or add another decoder.
+
+2026-11-18, Codex: retain the synchronous CLI, stdlib asynchronous supervisor and
+cross-process two-slot admission. Hold capacity through artifact consumption;
+parent death still requires explicit operator reconciliation. No service is added.
+
 ## Outcomes & Retrospective
 
 
-M0 concrete contract, resource ADR, dependency probe and baseline measurements
-are in progress. No CLI/harness implementation or runtime integration exists yet.
-Scaffold completion must not be reported as implementation completion.
+The standalone CLI and Python harness are implemented and evaluated. See
+`artifacts/decision.md` and `artifacts/validation.md` for exact results, build
+identity, exclusions and broad-suite disposition. Three real files match oracle
+bytes and meet the predeclared latency/memory criteria. Source reviews have no
+unresolved medium/high findings. This is a standalone recommendation only;
+production integration and deployment remain outside scope.
+
+The owned scanner was reusable but empty/legacy states required direct artifact
+readback. Preflight is defense in depth under OS limits, not proof of decoder
+memory safety. The installed wctl wrapper needs explicit worktree selection for
+documentation and tests; Rust and binary hashes must supplement its fingerprints.
 
 ## Context and Orientation
 
@@ -63,12 +106,12 @@ The shape-converter lifecycle lives in
 minimal environment, bounded IPC, timeout, cancellation drainage and cleanup.
 Its resource assumptions are precedent, not transferable CSV defaults.
 
-Use `docs/schemas/parquet-csv-cli-contract.md` as the draft durable contract and
-this package's `artifacts/20261118_contract_decision.md` as the pending checkpoint.
+Use `docs/schemas/parquet-csv-cli-contract.md` as the ratified durable contract and
+this package's `artifacts/20261118_contract_decision.md` as the accepted checkpoint.
 Starting source revision is `dff2f29f74158857da3b0c313e7ec7194501ed76`.
-Read nearest AGENTS before future code edits. Proposed isolated evaluation root
+Read nearest AGENTS before future code edits. The isolated evaluation root
 is `tools/parquet_csv_cli/`, with `rust/`, `harness/`, `tests/` and benchmark
-support; M0 must finalize placement without importing it into production modules.
+support; no production modules import it.
 
 ## Plan of Work
 
@@ -174,13 +217,21 @@ and the package/contract reads; protect unrelated work. During scaffold validati
     wctl --project-dir "$PWD" doc-lint --path PROJECT_TRACKER.md
     git diff --check
 
-After M0 finalizes paths, add exact runnable CLI/harness/benchmark commands here
-before M1. Planned Rust checks use `cargo test --locked --manifest-path
- tools/parquet_csv_cli/rust/Cargo.toml` and a release build with the same manifest.
-Use canonical `wctl run-pytest` for Python tests and prove checkout identity. Run
-the required broad repository test gate before implementation handoff; no pytest
-is needed for this documentation-only scaffold. Do not fabricate executable
-commands or pass counts for files that have not been created.
+Build and validate from the task checkout:
+
+    cargo build --release --locked --manifest-path tools/parquet_csv_cli/rust/Cargo.toml
+    cargo test --locked --manifest-path tools/parquet_csv_cli/rust/Cargo.toml
+    python3 tools/parquet_csv_cli/harness/provenance.py tools/parquet_csv_cli/rust/target/release/parquet_csv_cli tools/parquet_csv_cli/rust/target/release/parquet_csv_cli.json
+    wctl run-pytest --checkout "$PWD" --profile python -- tools/parquet_csv_cli/tests -q
+    python3 tools/parquet_csv_cli/benchmark.py --corpus /tmp/parquet-csv-evaluation/corpus --output /tmp/csv-new-evidence --repetitions 3
+
+Expected focused checks: 13 Rust tests and 94 Python tests. The corpus path is a
+retained local read-only copy, not committed project data; verify its manifest
+before reuse. Use a fresh benchmark output directory for independent repetitions.
+The README demonstrates consuming and cleaning the actual artifact. The operator deferred repository-wide pytest until integration. The validation
+artifact records the stopped broad `wctl run-pytest ... -- tests --maxfail=1` command,
+borrowed runtime/parser identities and outcome. Do not equate a broad-suite
+failure outside this isolated tool with a passing repository gate.
 
 ## Validation and Acceptance
 
@@ -212,11 +263,11 @@ data. Record repository integration separately from runtime integration.
 ## Interfaces and Dependencies
 
 
-The draft contract defines proposed CLI input/output and harness result concepts;
-M0 must replace unresolved wire details with exact schemas before code exists.
-Candidate libraries are Apache Rust Parquet and Arrow CSV with minimum evaluated
-features. Reuse native PyArrow only as a comparator/oracle in the harness tests.
+The ratified contract defines exact CLI input/output and harness result schemas.
+The locked graph uses Apache Rust Parquet/Arrow 60.1.0 with Arrow and Snappy
+features, plus ryu, serde_json and libc. CSV serialization is owned code. Reuse native PyArrow only as a comparator/oracle in the harness tests.
 Do not add a query engine, network fetcher or runtime compatibility fallback.
 
-Revision note: 2026-11-18 scaffold created at the operator's request; implementation
-and integration gates intentionally remain closed.
+Revision note: 2026-11-18 execution closeout records standalone implementation,
+review findings, zero-trust operator steering and measured evidence. Integration
+remains separately gated; no production workflow completion is claimed.

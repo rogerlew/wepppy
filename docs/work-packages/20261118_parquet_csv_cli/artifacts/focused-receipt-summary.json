@@ -1,0 +1,25 @@
+{
+  "profile": "python",
+  "started_utc": "2026-11-18T19:38:52.028439+00:00",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "tests_started": true,
+  "pytest_args": [
+    "tools/parquet_csv_cli/tests",
+    "-q"
+  ],
+  "head": "bba939a47b499fd6b74327cd6817bdee741a13bb",
+  "checks": [],
+  "preflight_source_changes": [],
+  "status": "passed",
+  "basetemp": "/tmp/wt-fedcdkly",
+  "pytest_exitstatus": 0,
+  "runtime_changes": [],
+  "source_changes": [],
+  "exitstatus": 0,
+  "receipt_path": ".wctl-test-runs/f32a93cf14ef4442bac54f4021277570/receipt.json",
+  "receipt_sha256": "b8d57c269568009351e079186a665ed69f8556cff482595e51a1fb1cc166e142"
+}

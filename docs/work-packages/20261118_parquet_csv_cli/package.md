@@ -1,8 +1,8 @@
 # Bounded Parquet CSV CLI and Python harness
 
-**Status**: Scaffolded; contract checkpoint pending (2026-11-18)
+**Status**: Standalone implementation evaluated; see [decision](artifacts/decision.md) (2026-11-18)
 **Timezone**: UTC
-**Owner**: Roger Lew; implementation agent to be assigned
+**Owner**: Roger Lew; implementation: Codex
 
 ## Purpose
 
@@ -19,8 +19,8 @@ Included: contract discovery and ratification, dependency evaluation, a standalo
 Rust CLI, a standalone Python harness, real generated CSV readback, lifecycle and
 resource tests, representative benchmarks, and a documented go/no-go decision.
 The intended fidelity target is **faithful extraction** of contracted CSV semantics
-within an explicitly enumerated supported input set. This initial delivery is
-**scaffold only**, not implementation completion.
+within an explicitly enumerated supported input set. The CLI, harness and
+evaluation are implemented under `tools/parquet_csv_cli/`.
 
 WEPPpy integration is **deferred and outside this package**. Do not modify or wire
 browse/download routes, production Python exporters, image builds, Compose,
@@ -34,8 +34,9 @@ retain evidence without silently switching languages or redesigning services.
 
 ## Contract-first sequence
 
-The draft [standalone contract](../../schemas/parquet-csv-cli-contract.md) is the
-intended durable authority after ratification; it is not approved or implemented.
+The ratified [standalone contract](../../schemas/parquet-csv-cli-contract.md) is the
+durable authority. M0 ancestor `f38f8a4bd9d08b8582fbca8dcd7284a2eef87fb2`
+preceded implementation; reviewed metrics and compatibility amendments followed.
 The [checkpoint](artifacts/20261118_contract_decision.md) records scope and open
 choices. Complete input/valid-state inventories, exact interface/error semantics,
 compatibility rules, resource ADR, and dependency evaluation before implementation.
@@ -61,18 +62,18 @@ the smallest proposed addition, and its operational/recovery costs.
 
 ## Evidence and success criteria
 
-- [ ] Ratified contract, exact checkpoint revision, two independent reviews and dispositions.
-- [ ] Exact dependency graph evaluated for capability overlap, transitive cost,
+- [x] Ratified contract, exact checkpoint revision, two independent reviews and dispositions.
+- [x] Exact dependency graph evaluated for capability overlap, transitive cost,
   advisories, allocation behavior, codecs, maintenance and build reproducibility.
-- [ ] CLI and harness work independently of Flask, Redis, Postgres and live run services.
-- [ ] Fresh CSVs from the rebuilt binary pass independent semantic and required
+- [x] CLI and harness work independently of Flask, Redis, Postgres and live run services.
+- [x] Fresh CSVs from the rebuilt binary pass independent semantic and required
   byte-format readback against the contracted oracle for all supported states.
-- [ ] Real subprocess tests demonstrate resource enforcement, admission,
+- [x] Real subprocess tests demonstrate resource enforcement, admission,
   timeout/cancellation drainage, output cleanup and preserved valid large exports.
-- [ ] Reproducible comparison with current exporter and incremental native PyArrow
+- [x] Reproducible comparison with current exporter and incremental native PyArrow
   meets the numeric acceptance thresholds fixed before candidate benchmarking.
-- [ ] Dedicated correctness and security reviews have no unresolved medium/high findings.
-- [ ] Final decision states go/no-go and unresolved integration work explicitly.
+- [x] Dedicated correctness and security reviews have no unresolved medium/high findings.
+- [x] Final decision states go/no-go and unresolved integration work explicitly.
 
 For generated-artifact validation, retain request/config intent, immutable source
 manifest and digest, exact input descriptor/path consumed, binary/provenance and
@@ -80,13 +81,14 @@ harness revisions, fresh output digest, parsed headers/rows/cells and failure
 artifacts. No NoDb state is introduced. Use read-only copies of representative
 real project files under a production-equivalent test identity and resource
 envelope; run no stress benchmark on wepp1. Process success or file existence
-alone is not output correctness. Current claim: scaffolded, not implemented,
-validated, wired or deployed.
+alone is not output correctness. Current claim: standalone implementation and evaluation only; no runtime wiring
+or deployment. Detailed evidence and exclusions are in the final decision.
 
 ## Security and parameterization gates
 
-Security impact: **high** for the planned native decoder, file handling and
-subprocess resource boundary; the scaffold itself changes no runtime behavior.
+Security impact: **high** for native decoding, file handling and subprocess
+resource boundaries. Every Parquet file is treated as untrusted regardless of
+WEPPpy origin; the contract records the operator decision and rationale.
 Create `artifacts/<date>_security_review.md` and
 `artifacts/<date>_correctness_review.md` from the repository templates during
 execution. Review valid inputs alongside malformed files, allocation pressure,
@@ -125,3 +127,11 @@ Maintain the standalone contract outside the package after closure. Report local
 acceptance, repository integration, publication and deployment separately. This
 package can close as an evaluated standalone tool or documented no-go; it cannot
 claim the production export problem has been repaired.
+
+## Closeout evidence
+
+See [decision](artifacts/decision.md), [correctness review](artifacts/20261118_correctness_review.md),
+[security review](artifacts/20261118_security_review.md), and
+[validation](artifacts/validation.md). Source and binary digests accompany raw
+benchmark, lifecycle and independent CSV readback records. Broad-suite disposition
+is separate from standalone acceptance; no production repair is claimed.

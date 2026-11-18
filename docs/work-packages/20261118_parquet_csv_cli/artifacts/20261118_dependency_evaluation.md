@@ -66,3 +66,23 @@ peak RSS, three-way benchmark and output parity belong to M1-M3, not this source
 inspection. Native dependencies and licenses must be inventoried from the final
 resolved Cargo metadata at build; do not infer final binary composition from
 package names alone.
+
+## Final implementation disposition
+
+Standalone evaluation accepted after independent source reviews and direct
+preflight/lifecycle/parity checks. The final lock is
+`tools/parquet_csv_cli/rust/Cargo.lock`, SHA-256
+`21f615ebc43c9d467cdbf84f3e21155e450fdda9ac6e506e42b0822e02e81800`.
+It contains 81 third-party packages plus this crate. csv and csv-core were removed:
+a small owned writer is needed for exact Python 3.12 quoting. No new dependency
+replaces them. The original probe files above are historical, not the final graph.
+
+See `dependency-final-inventory.json` for resolved versions, source registries and
+license declarations; `dependency-final-audit.json` retains zero known
+vulnerabilities and the unsuppressed Chrono maintenance warning. Binary size,
+resource measurements and exact source/binary identity are recorded in the final
+decision and validation artifacts. Rust 1.92 builds the locked release on Linux
+x86-64 without adding a C++ toolchain or external service. Finite adversarial tests
+and OS limits do not prove upstream decoder memory safety. Approval is limited
+to this standalone evaluation; the maintenance warning and added Arrow metadata
+surface must be reconsidered before production integration.
