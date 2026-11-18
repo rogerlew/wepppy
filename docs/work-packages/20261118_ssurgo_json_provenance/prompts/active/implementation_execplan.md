@@ -19,6 +19,9 @@ geographic/live parity is deferred until SDA recovery, not a prerequisite.
 
 ## Progress
 
+- [x] (2026-11-18) Assemble combined committed release in isolated task worktree; preserve shared WIP. Back up production application database and successfully rehearse account migration on explicitly asserted disposable PostgreSQL database; all existing data hashes unchanged.
+- [ ] Finish production service preparation, exact-candidate integration gate, retained builds, live migration and full host rollout.
+
 - [x] (2026-11-18) Recover nationwide SSURGO and STATSGO2 coverage, transition forest release pins, and verify cavernous-oxygen: 21 base provenance hashes, all 32 prepared inputs, and 152 reference-matching canary files. See service nationwide-recovery-plan.md.
 
 

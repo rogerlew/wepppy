@@ -39,3 +39,13 @@ Implementation commit `679dc65d4` is on `work/cilogon-oidc-scaffold` in `/home/w
 The operator authorized merging to master while holding for CILogon approval and deployment. Integration is local only: local master already contains unpublished work, and pushing master triggers image publication. No push, image publication, live migration, restart, or activation is included. The local merge receipt records ancestry and preservation of shared-checkout WIP; it is not a remote integration receipt.
 
 Local merge completed at `d43e4b3e9803d2c49c588dbf781102b49f0e23fc` with accepted source `562fac84c27a8a7f9c70bddfa25a737efb2336b6`. Committed trees match exactly; unrelated WIP is preserved. See [local-only receipt](artifacts/20261117_local_master_merge.json). Freshly fetched remote master remains `069fb74cb77ba7e6f23bbfe999cf1d345c715b04`; this is not remote integration or deployment.
+
+## Production scope amendment, 2026-11-18
+
+The operator now authorizes the full wepp.cloud release and account-schema migration
+with other committed changes, explicitly excluding CILogon activation because app
+registration remains unapproved. Keep the provider disabled and staged credentials
+inactive. This supersedes the earlier deployment/migration hold only for the shared
+application release. Migration rehearsal on a restored production database passes
+with all legacy data unchanged; live migration is pending. Execution and evidence
+are tracked in the [production rollout](../../infrastructure/soil-data-production.md).
