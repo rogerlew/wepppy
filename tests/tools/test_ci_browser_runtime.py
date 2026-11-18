@@ -34,3 +34,40 @@ def test_authenticated_pages_must_be_scanned(tmp_path, validate):
 def test_missing_report_is_not_accepted(tmp_path, validate):
     with pytest.raises(FileNotFoundError):
         validate(tmp_path / "missing.json", tmp_path / "axe.json", "theme-metrics")
+
+
+@pytest.fixture
+def runtime_assets(tmp_path):
+    prepare = runpy.run_path(str(Path(__file__).parents[1] / "prepare_ci_runtime.py"))["prepare"]
+    source, installed = tmp_path / "candidate", tmp_path / "image"
+    for root in (source, installed):
+        root.mkdir()
+        for name in ("package.json", "package-lock.json"):
+            (root / name).write_text("{}")
+    for name in ("node_modules", "browsers"):
+        (installed / name).mkdir()
+    return prepare, source, installed
+
+
+def test_ci_assets_require_matching_manifests(runtime_assets):
+    prepare, source, installed = runtime_assets
+    (source / "package-lock.json").write_text('{"changed": true}')
+    with pytest.raises(RuntimeError, match="differs from candidate"):
+        prepare(source, installed)
+    assert not (source / "node_modules").exists()
+
+
+@pytest.mark.parametrize("name", ["node_modules", ".playwright-browsers"])
+def test_ci_assets_reject_foreign_directories(runtime_assets, name):
+    prepare, source, installed = runtime_assets
+    (source / name).mkdir()
+    with pytest.raises(RuntimeError, match="requires image-owned assets"):
+        prepare(source, installed)
+
+
+def test_ci_assets_prepare_idempotent_owned_links(runtime_assets):
+    prepare, source, installed = runtime_assets
+    prepare(source, installed)
+    prepare(source, installed)
+    assert (source / "node_modules").resolve() == installed / "node_modules"
+    assert (source / ".playwright-browsers").resolve() == installed / "browsers"

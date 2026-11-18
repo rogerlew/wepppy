@@ -35,6 +35,9 @@ jobs:
     - name: Start isolated test runtime
       run: wctl --compose-file docker/docker-compose.browser-test.yml up -d --build
         --wait
+    - name: Prepare locked CI browser assets
+      run: wctl --compose-file docker/docker-compose.browser-test.yml exec -T weppcloud
+        /opt/venv/bin/python tests/prepare_ci_runtime.py
     - name: Build controller assets
       run: wctl --compose-file docker/docker-compose.browser-test.yml exec -T weppcloud
         /opt/venv/bin/python wepppy/weppcloud/controllers_js/build_controllers_js.py

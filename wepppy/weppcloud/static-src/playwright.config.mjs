@@ -17,6 +17,8 @@ export default defineConfig({
   ],
   use: {
     baseURL: process.env.SMOKE_BASE_URL || 'http://localhost:8080',
+    // CI may supply a job-local authenticated session from the normal login flow.
+    storageState: process.env.SMOKE_STORAGE_STATE || undefined,
     headless,
     trace,
     screenshot,

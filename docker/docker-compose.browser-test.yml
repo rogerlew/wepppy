@@ -7,9 +7,35 @@ services:
     environment:
       WEPPCLOUD_DEPLOYMENT_PROFILE: test
       TEST_SUPPORT_ENABLED: "true"
+      CAP_BASE_URL: /cap
+      CAP_VERIFY_BASE_URL: http://cap:3000/cap
+      CAP_ASSET_BASE_URL: /cap/assets
+      CAP_SITE_KEY: ci-browser
+      CAP_SECRET: local-ci-cap-only
     tmpfs:
       - /wc1/runs:mode=1777
       - /wc1/logs:mode=1777
+      - /wc1/query-engine-coordination:mode=1777
+  cap:
+    build:
+      context: ..
+      dockerfile: services/cap/Dockerfile
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      CAP_SITE_KEY: ci-browser
+      CAP_SECRET: local-ci-cap-only
+      CAP_ASSET_ROOT: /opt/cap
+      CAP_DATA_DIR: /var/lib/cap
+      CAP_CHALLENGE_COUNT: "1"
+      CAP_CHALLENGE_DIFFICULTY: "1"
+    tmpfs:
+      - /var/lib/cap:uid=10001,gid=10001,mode=0700
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/cap/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
   postgres:
     extends:
       file: docker-compose.test.yml

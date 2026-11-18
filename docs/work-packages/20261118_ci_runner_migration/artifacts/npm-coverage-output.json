@@ -1,0 +1,8 @@
+{
+  "path": "coverage/npm/lcov.info",
+  "size_bytes": 1192166,
+  "sha256": "0c8118127c74e79143e43bf267500c8782f4a5126b570ed8d71126c5dafa4ed3",
+  "source_records": 104,
+  "log": "npm-coverage-final.log.gz",
+  "note": "Absolute output path verified. Earlier relative-path execution passed tests but failed artifact location assertion."
+}

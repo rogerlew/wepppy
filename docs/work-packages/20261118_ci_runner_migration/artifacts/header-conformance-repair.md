@@ -14,3 +14,25 @@ other developer-mode behavior changes. Theme Lab's sample view remains valid.
 Repair only that header expression to use current_ron. Add regression coverage
 with ron absent, and missing/false/true mode on current_ron. Retest actual Theme Lab
 HTTP/rendered browser output; a fixture-only template pass is insufficient.
+
+## Browser runtime escalation evidence
+
+The three-service CI runtime can render Theme Lab, but controller run pages require
+CAP verification or an authenticated session. The actual controller run returned
+CAP configuration errors and skipped all 18 controls; the new report guard rejected
+that false success. Authentication must remain enabled. Add the existing owned CAP
+service, built from its existing pinned production Dockerfile, to the isolated
+browser project. Use job-local fixture credentials and data only, no published ports.
+Proxy its existing /cap routes on the same loopback fixture origin. Provision a
+controller session through actual CSRF/password/CAP login, not an auth bypass.
+This is the smallest additional runtime component needed by the demonstrated path;
+cleanup remains the same project-wide down/volumes operation.
+
+Controller execution then reached real token requests at /rq-engine, which returned
+404 because the initial fixture served Flask alone. Run the existing RQ API in the
+same disposable container on a private loopback socket, proxying /rq-engine with
+its normal prefix stripping. Preserve real session-token authorization. The existing
+browser tests still intercept their own build requests; no RQ worker or model
+execution service is introduced. Startup and shutdown are bounded and owned by the
+fixture. This additional API is required by the observed controller authentication
+path, not an attempt to replicate the full production stack.

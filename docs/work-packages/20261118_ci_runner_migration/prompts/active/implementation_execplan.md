@@ -12,7 +12,7 @@ explicitly approved by the operator.
 ## Progress
 
 - [x] (2026-11-18 UTC) Audit and scope approval retained.
-- [ ] M1: Define per-workflow isolated runtime and implement faithful migration.
+- [x] M1: Define per-workflow isolated runtime and implement faithful migration.
 - [ ] M2: Generate YAML, validate real commands/reports, inspect security boundaries.
 - [ ] M3: Merge approved PR, observe runner execution and clean stale queue entries.
 
@@ -23,6 +23,11 @@ emits homelab profile jobs; fixing generated YAML alone would be undone.
 Status2 smoke consumes development Compose secrets; browser accessibility targets
 a retired public Forest URL. Both need real runtime migration rather than relabeling.
 
+Remote preflight exposed missing candidate-native parsers and mounted browser
+assets. Local preflight passes after repairing those shared CI prerequisites.
+Browser validation exposed a shared header alias defect plus required CAP and
+RQ authentication services; retained evidence explains each minimal fixture addition.
+
 ## Decision Log
 
 The operator chose to migrate nightly checks and retire old profile schedules on
@@ -31,8 +36,10 @@ CI runtime components; no new host credentials, runners or deployment topology.
 
 ## Outcomes & Retrospective
 
-Pending implementation and acceptance. Do not claim runner acceptance from local
-YAML checks alone.
+Implementation is on draft PR #684. NPM, Cloc, docs/quality/exception guards and
+Status/Preflight/Status2 smoke passed on supported runners. Native preflight repair
+and browser runtime acceptance remain in progress; do not claim full migration
+acceptance yet. See tracker and immutable run IDs for each execution.
 
 ## Context and Orientation
 

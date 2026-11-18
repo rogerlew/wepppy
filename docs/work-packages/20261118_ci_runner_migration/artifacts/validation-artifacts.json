@@ -1,4 +1,16 @@
 {
+  "focused-tests.log.gz": {
+    "raw_sha256": "d6e1152c3448ff2674d5bb890a6d3f0fb2cd338017aec0b5077d9f18848a7370"
+  },
+  "npm-coverage-final.log.gz": {
+    "raw_sha256": "e6bdf4b6e07bf5b57956e0ea096736e6a04dbe72eb891bc9cbe91a018417e152"
+  },
+  "npm-coverage.log.gz": {
+    "raw_sha256": "c470b56680a1434f3e8200c2823c2c4c55e70b053aa66ba34a8ccb5701e0973a"
+  },
+  "npm-tests.log.gz": {
+    "raw_sha256": "c81f8fac7f4f6428d4b305624f46bfc719b03b4904616c2a5a1aa6143643fca6"
+  },
   "preflight-tests.log.gz": {
     "raw_sha256": "535695ee8f1f75cbebb6d410c46b268fc64ff4a0e2a34e9d19328dcaecacc1f5"
   },

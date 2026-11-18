@@ -6,7 +6,7 @@ Updated: 2026-11-18 UTC. Branch: task/ci-runner-migration.
 
 - [x] Audit live runner labels, workflow state and retained runs.
 - [x] Operator approved migrating nightly checks and retiring 21 profile schedules.
-- [ ] Migrate active checks, nightly checks and telemetry; regenerate workflows.
+- [x] Migrate active checks, nightly checks and telemetry; regenerate workflows.
 - [ ] Validate generated workflows and real isolated executions; review boundaries.
 - [ ] Integrate through PR and retain receipt; clean obsolete queued runs.
 
@@ -32,3 +32,21 @@ explicit standalone setup removes that same host dependency. Cloc retains option
 repository behavior but now explicitly anchors its base directory to the checkout.
 The CI Samurai SSH/restart schedule is a separate discovered consumer; the operator explicitly approved retiring it as well. It is disabled on GitHub,
 and the source is archived alongside the profile catalog.
+
+## Validation update
+
+PR #684 is draft. NPM tests, Cloc, docs, quality, exception guards and both
+required governance checks passed on b53395d36. Manual supported-runner executions
+also passed: Status Tests 44422206052, Preflight Tests 44422210831 and Status2
+Smoke 44422215161. All 22 retired workflows are disabled and their queues cleared.
+
+Initial Artifact Observability and Shape Gates runs failed preflight because the
+common CI image lacked native shape parsers and the checkout could not see locked
+browser assets. Candidate-native builds and explicit asset preparation repair this
+shared assumption, including existing stubtest/RQ/isolation consumers. Local broad
+preflight now passes all five readiness checks; remote reruns remain pending.
+
+Local NPM V8 coverage produced the verified 1.2 MiB LCOV artifact. The earlier
+relative output path passed tests but failed artifact-location validation; the
+workflow now uses the absolute workspace path. Browser login passes real CAPTCHA,
+CSRF and password validation; controller and accessibility acceptance remain open.
