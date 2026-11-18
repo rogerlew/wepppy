@@ -5,6 +5,10 @@ harnesses) stay consistent across agents.
 
 Canonical behavioral contract:
 
+* Soil transport selection and source tracking follow
+  `docs/schemas/soil-data-source-provenance-contract.md`; preserve legacy XML and
+  isolate explicit JSON caches by endpoint/profile/release.
+
 * Follow `docs/standards/contract-first-change-standard.md`, including its finite
   canonical-authority set, conflict handling, and ancestor-checkpoint gate.
 * `docs/schemas/nodb-persistence-concurrency-contract.md` is the authoritative
