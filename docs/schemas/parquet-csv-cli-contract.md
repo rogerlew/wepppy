@@ -23,7 +23,8 @@ The oracle collapses duplicate names through Python dictionaries; v1 excludes
 that lossy case rather than silently corrupting or changing its output. This is
 an integration-blocking compatibility exclusion. A valid zero-row file produces a header line.
 
-The oracle is `parquet_tables.py` plus the unfiltered batching loop in
+The oracle runtime is production Python 3.12 (retained benchmark receipts pin
+the patch version). The oracle is `parquet_tables.py` plus the unfiltered batching loop in
 `_download.py` at revision dff2f29f74158857da3b0c313e7ec7194501ed76. CSV is UTF-8,
 comma-delimited, minimally quoted, double-quote escaped, with LF record endings.
 Nulls and NaNs become empty cells; booleans are `True`/`False`; integers retain
@@ -31,8 +32,12 @@ exact decimal values; float32 is promoted to float64 before Python-compatible
 shortest formatting, including signed zero, infinities and exponent spelling.
 The supported corpus must match oracle bytes, not merely approximate floats.
 Empty strings and embedded CR/LF follow Python csv.writer behavior. Metadata
-parsing must preserve the oracle's handling of absent/invalid pandas metadata;
-non-UTF-8 units use its lossy decode policy. Unsupported schemas fail explicitly.
+parsing preserves absent or syntactically malformed UTF-8 pandas JSON as ignored.
+Valid JSON with a non-object root or non-array index_columns is explicitly rejected.
+Non-UTF-8 metadata is excluded: the Rust metadata decoder requires UTF-8 before
+projection. Rewriting input metadata or adding a second decoder exceeds this
+bounded v1. Unlike the Python oracle's lossy units decoding, v1 rejects this case;
+retain it as an integration-blocking exclusion. Unsupported schemas fail explicitly.
 
 Nested values, binary, decimals, date/time, extension types, encrypted/external
 column files and other codecs are excluded from v1. Filter evaluation and archive

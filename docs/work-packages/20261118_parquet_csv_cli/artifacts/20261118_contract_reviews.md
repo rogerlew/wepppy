@@ -46,3 +46,13 @@ Both original independent reviewers approved adding strict `peak_rss_kib` and
 They require non-boolean finite numeric validation and separate parent/aggregate
 memory evidence. Security review also accepted removal of csv from the candidate
 graph, conditional on serializer byte-parity tests and updated lock/audit.
+
+## Reviewed metadata compatibility amendment
+
+Both independent reviewers accept explicit rejection of non-UTF-8 metadata as a
+standalone v1, integration-blocking exclusion. Rust's upstream metadata model
+requires UTF-8 before projection; rewriting input or adding a second decoder is
+outside this bounded experiment. Syntactically invalid UTF-8 JSON remains ignored;
+valid JSON with invalid pandas shape is rejected. Oracle runtime is Python 3.12,
+including CR quoting; exact patch version is retained with benchmark evidence.
+Direct rejection and parity tests remain mandatory. No production behavior changes.
