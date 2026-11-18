@@ -1,0 +1,50 @@
+[
+  {
+    "workflow": "npm-tests.yml",
+    "run_id": 44243040386,
+    "head_sha": "9a50ccbf7d7ef279c1b13c41d3b72eeff77e7a39",
+    "reason": "Replacement accepted on supported runner; obsolete homelab queue"
+  },
+  {
+    "workflow": "npm-tests.yml",
+    "run_id": 44242285376,
+    "head_sha": "d7af0b40e11263e1ba9e33245df169cf00b784e9",
+    "reason": "Replacement accepted on supported runner; obsolete homelab queue"
+  },
+  {
+    "workflow": "npm-tests.yml",
+    "run_id": 44221360869,
+    "head_sha": "cc03ac326bf0a3771dee7b08f5351330bd0bbdf7",
+    "reason": "Replacement accepted on supported runner; obsolete homelab queue"
+  },
+  {
+    "workflow": "npm-coverage-nightly.yml",
+    "run_id": 44276650558,
+    "head_sha": "d164d711c1d7227c4b55e091e7fdf96885acca88",
+    "reason": "Replacement accepted on supported runner; obsolete homelab queue"
+  },
+  {
+    "workflow": "preflight-tests-nightly.yml",
+    "run_id": 44287012722,
+    "head_sha": "d164d711c1d7227c4b55e091e7fdf96885acca88",
+    "reason": "Replacement accepted on supported runner; obsolete homelab queue"
+  },
+  {
+    "workflow": "status-tests-nightly.yml",
+    "run_id": 44288021854,
+    "head_sha": "d164d711c1d7227c4b55e091e7fdf96885acca88",
+    "reason": "Replacement accepted on supported runner; obsolete homelab queue"
+  },
+  {
+    "workflow": "status2-smoke-nightly.yml",
+    "run_id": 44273142082,
+    "head_sha": "d164d711c1d7227c4b55e091e7fdf96885acca88",
+    "reason": "Replacement accepted on supported runner; obsolete homelab queue"
+  },
+  {
+    "workflow": "theme-metrics-nightly.yml",
+    "run_id": 44284967649,
+    "head_sha": "d164d711c1d7227c4b55e091e7fdf96885acca88",
+    "reason": "Replacement accepted on supported runner; obsolete homelab queue"
+  }
+]

@@ -7,7 +7,8 @@ Status: active, 2026-11-18 UTC. Target: faithful migration of existing checks.
 Three active PR checks and nine telemetry/nightly workflows target an unavailable
 homelab runner. Migrate Artifact Observability, NPM Tests, Shape-Converter Gates,
 eight nightly suites and Cloc telemetry onto supported execution environments.
-The operator explicitly approved retiring the 21 old Forest profile schedules;
+The operator explicitly approved retiring the 21 old Forest profile schedules
+and CI Samurai Nightly's legacy nuc1–nuc3 SSH/restart schedule;
 retain profile tooling and historical evidence. Retire their queued executions
 without touching unrelated CI jobs. Preserve test coverage and artifact semantics.
 

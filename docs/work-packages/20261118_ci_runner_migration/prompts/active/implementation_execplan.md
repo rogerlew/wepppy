@@ -37,8 +37,10 @@ CI runtime components; no new host credentials, runners or deployment topology.
 ## Outcomes & Retrospective
 
 Implementation is on draft PR #684. NPM, Cloc, docs/quality/exception guards and
-Status/Preflight/Status2 smoke passed on supported runners. Native preflight repair
-and browser runtime acceptance remain in progress; do not claim full migration
+Status/Preflight/Status2 smoke passed on supported runners. Native preflight passes locally; accessibility has 11 local passes with all seven
+required page reports. Theme Metrics and NPM coverage passed remotely. Controller
+assertion failures remain documented and unchanged; remaining runner acceptance
+is in progress; do not claim full migration
 acceptance yet. See tracker and immutable run IDs for each execution.
 
 ## Context and Orientation

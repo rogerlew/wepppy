@@ -1,6 +1,15 @@
 {
+  "accessibility-final.log.gz": {
+    "raw_sha256": "48baa39bc6e87698f51ed4d4138381af012415cde72ff5f6278f4cf585bc72cd"
+  },
+  "accessibility-initial.log.gz": {
+    "raw_sha256": "4973fe65a0ec184f222e39cc24f210151d3d2dfe3205cf33f85c021ff83e6cb2"
+  },
   "browser-cdn-failure.log.gz": {
     "raw_sha256": "9d932452643d84d92133c2dc9ef10a5bca7e95d10e125b5979c1d6872758bc89"
+  },
+  "controller-initial-egress.log.gz": {
+    "raw_sha256": "e8fbf47fb843f79e47c1346b147099759dc10b34e19d4f025b5de1c0897c7b9d"
   },
   "focused-final.log.gz": {
     "raw_sha256": "ddd77b865bd9964660337a7e6f1abcebe23910e47c8d79f2ff7f8980c652372f"

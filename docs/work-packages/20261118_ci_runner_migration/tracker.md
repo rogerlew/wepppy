@@ -58,3 +58,19 @@ are retained as fixture diagnostics, not claimed as accepted application tests.
 Focused generator/helper/header validation: 295 passed, 3 deselected, clean source
 receipt 49895803660d498f8af012d5b6d81aa0. Independent source security review has no
 unresolved findings before the final egress amendment (review requested).
+
+## Browser and artifact acceptance update
+
+Local accessibility fixture: 11 passed, one intentionally opt-in mixed-version
+activation canary skipped; all seven required pages are present in the retained
+axe report. Five supporting Python checks and 44 Jest checks also pass. Source
+security review covers the final fixture grants and early project provisioning.
+Theme Metrics passed remotely (44423392936); NPM coverage passed remotely
+(44423384936) with verified 1,192,148-byte LCOV. Eight obsolete homelab runs for
+accepted replacements were canceled, separate from retired profile cleanup.
+
+The controller run before the OpenET fixture grant was 15 passed/3 failed. A final
+run is checking that grant. Features Export selection on an empty run and PATH's
+missing second error-detail line remain visible assertions; no skip or weaker
+expectation has been added. These are follow-up findings outside runner migration.
+Pytest Coverage and remaining PR checks are still running/queued remotely.

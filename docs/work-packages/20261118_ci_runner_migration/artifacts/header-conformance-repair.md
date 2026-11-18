@@ -45,3 +45,17 @@ its existing public CDN assets can load. PostgreSQL, Redis and CAP remain on the
 internal network; no host ports, host secrets, production targets or worker are
 introduced. This preserves the existing page's dependencies rather than replacing
 production script libraries with test stubs. Cleanup removes both job-local networks.
+
+The disposable account also needs the existing OpenET feature grant, which generic
+Root/PowerUser roles do not supply. Seed registered group definitions, grant only
+openet_ts through the audited FeatureAccessStore mutation, and acknowledge the
+canonical internal-statement version for this fixture user. No role fallback or
+production admission change is allowed. The first egress-enabled controller run
+passed 15 checks and exposed this missing grant plus Features Export selection and
+PATH detail-rendering failures; preserve those assertions and failures.
+
+Accessibility's session-token canary reads SMOKE_RUN_PATH before its later dashboard
+test provisions a project. Provision a disposable project through the actual
+bearer-protected test-support endpoint before this suite and supply its absolute
+URL, matching the wrapper's usual pre-provisioning behavior. Project data remain
+on the job's tmpfs and disappear with unconditional Compose cleanup.

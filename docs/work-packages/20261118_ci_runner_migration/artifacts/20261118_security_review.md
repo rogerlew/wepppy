@@ -288,3 +288,63 @@ Source security review remains PASS with no new unresolved finding. The real
 controller rerun using this attachment was still in progress at review time.
 No successful controller or overall migration acceptance is inferred from the
 Compose readback or from the earlier four passing checks.
+
+### Incremental readback: disposable OpenET entitlement
+
+Reviewed `tests/ci_browser_runtime.py` SHA-256
+`8ee9255ce429cdf06a2e1bb8a6ec5dc6f110233f8f94d045028c371a011e79b7`.
+The fixture now seeds registered group definitions, then grants only `openet_ts`
+membership to its newly created `ci-browser@example.com` user. `seed_groups`
+creates definitions without memberships. `change_membership` uses the same
+disposable account as actor and subject and retains the store's active-Root
+authorization, row locks, validation, and atomic membership/audit-event write.
+The explicit reason is `Disposable CI controller coverage`. The fixture records
+the current `INTERNAL_STATEMENT_VERSION` through `acknowledge_internal`, rather
+than changing feature policy or deriving entitlement from the account's roles.
+
+This matches the canonical group-only OpenET action contract in
+`docs/schemas/feature-access-governance-contract.md`, Authorization composition
+and Account records and atomicity. Root alone still does not confer OpenET action
+permission. All mutations follow the existing test-profile/runtime checks and
+empty-database bootstrap. They use that application's disposable account engine;
+no production account, membership, registry, or authorization code changes.
+The existing job-scoped database teardown removes these fixture records.
+
+Source security review remains PASS with no new finding. The integrator reported
+15 controller passes and three failures before this entitlement addition; that
+partial run does not validate the new fixture grant or establish full acceptance.
+The outstanding Features Export availability and PATH stacktrace assertions remain
+visible failures, and accessibility execution was still running at review time.
+Neither those assertions nor production behavior are weakened by this amendment.
+
+### Incremental readback: accessibility run provisioning order
+
+Reviewed `tests/ci_browser_runtime.py` SHA-256
+`97233973c7cbb1c1decdad5f0a40d864a0a6b5117216c91d9ed9fb876e7b83af`.
+Before launching accessibility checks, the fixture now calls its actual loopback
+`/weppcloud/tests/api/create-run` endpoint and sets `SMOKE_RUN_PATH` to the returned
+site-prefixed path on that same ephemeral loopback origin. This supplies the run
+before the existing session-token canary consumes it; the later dashboard scan's
+lazy provisioning was too late. The request uses the fixed `disturbed9002_wbt`
+configuration, the existing one-hour `weppcloud-test-support` bearer with
+`test:support` scope, and a 60-second timeout. HTTP or payload failures stop setup.
+
+Source readback of the unchanged endpoint confirms deployment-profile/enablement,
+signature, audience, lifetime and scope enforcement. This request runs through
+Python requests outside Playwright tracing; it neither places the bearer in a URL
+nor changes browser context-wide headers. The helper's loopback URL is assigned
+locally and does not accept a production target. No authentication assertion is
+removed: the session-token canary still logs in and verifies the actual RQ API
+cookie-authenticated response.
+
+The pre-created run has no Playwright-owned `createdRunId`, so per-test deletion
+does not own it. Its lifecycle belongs to the job container's `/wc1/runs` tmpfs and
+the existing always-run, project-scoped Compose teardown. There is no durable
+project artifact or additional host mount. The container cleanup acceptance gate
+remains explicit rather than being inferred from this source review.
+
+No new source security or correctness finding. The integrator reported the
+preceding accessibility run as ten passes, one failure (`Invalid URL`) and one
+expected skip. That result does not validate this provisioning change; the new
+actual run and complete seven-page report were still pending at review time.
+Source review remains PASS; overall migration acceptance remains pending.

@@ -161,6 +161,17 @@ def main() -> int:
                 db.session.add(role)
             user.roles.append(role)
         db.session.commit()
+        from wepppy.weppcloud.feature_registry.runtime import feature_registry_by_id
+        from wepppy.weppcloud.utils.feature_access_store import FeatureAccessStore
+        from wepppy.weppcloud.utils.feature_access_identity import INTERNAL_STATEMENT_VERSION
+        features = tuple(feature_registry_by_id().values())
+        store = FeatureAccessStore(db.engine)
+        store.seed_groups(features)
+        store.change_membership(
+            actor_id=user.id, user_id=user.id, group_key="openet_ts", operation="add",
+            reason="Disposable CI controller coverage", features=features,
+        )
+        store.acknowledge_internal(user.id, INTERNAL_STATEMENT_VERSION)
     os.environ["SMOKE_TEST_SUPPORT_TOKEN"] = issue_token(
         "ci-browser", audience="weppcloud-test-support",
         scopes=["test:support"], expires_in=3600,
@@ -186,6 +197,17 @@ def main() -> int:
                 os.environ["SMOKE_STORAGE_STATE"] = str(prepare_controller_session(
                     os.environ["SMOKE_BASE_URL"], Path(scratch.name)))
             if args.suite == "accessibility":
+                import requests
+                response = requests.post(
+                    os.environ["SMOKE_BASE_URL"] + "/tests/api/create-run",
+                    headers={"Authorization": "Bearer " + os.environ["SMOKE_TEST_SUPPORT_TOKEN"]},
+                    json={"config": os.environ["SMOKE_RUN_CONFIG"]}, timeout=60,
+                )
+                response.raise_for_status()
+                run_path = response.json()["run"]["url"]
+                os.environ["SMOKE_RUN_PATH"] = (
+                    f"http://127.0.0.1:{server.server_port}" + run_path
+                )
                 subprocess.run([
                     "/opt/venv/bin/python", "-m", "pytest",
                     "tests/weppcloud/routes/test_pure_controls_render.py::test_report_templates_use_semantic_copy_buttons",

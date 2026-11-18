@@ -1,0 +1,584 @@
+{
+  "config": {
+    "configFile": "/workdir/wepppy/wepppy/weppcloud/static-src/playwright.config.mjs",
+    "rootDir": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ],
+      [
+        "html"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/workdir/wepppy/wepppy/weppcloud/static-src/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "runs0",
+        "name": "runs0",
+        "testDir": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "a11y/axe-runs0.spec.js",
+      "file": "a11y/axe-runs0.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "axe accessibility smoke",
+          "file": "a11y/axe-runs0.spec.js",
+          "line": 745,
+          "column": 6,
+          "specs": [
+            {
+              "title": "axe accessibility scan for ui components theme lab",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5401,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[axe] Using dev-agent credentials from environment\n"
+                        },
+                        {
+                          "text": "[axe] ui-components-theme-lab: 1 violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:13.817Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-dba3268c13bc218a1a71",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 767,
+              "column": 3
+            },
+            {
+              "title": "axe accessibility scan for report accessibility probe",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3082,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[axe] ui-components-report-a11y: 0 violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:19.495Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-c397d1a678f72e46fd7d",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 781,
+              "column": 3
+            },
+            {
+              "title": "axe accessibility scan for weppcloud root",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3658,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[axe] weppcloud-root: 0 violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:22.606Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-182a4d9d327b983f8dba",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 795,
+              "column": 3
+            },
+            {
+              "title": "axe accessibility scan for weppcloud interfaces",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3759,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[axe] weppcloud-interfaces: 0 violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:26.293Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-0c4a05a4d22d92109c71",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 809,
+              "column": 3
+            },
+            {
+              "title": "axe accessibility scan for weppcloud profile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3170,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[axe] weppcloud-profile: 0 violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:30.080Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-19971213a01164842dee",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 823,
+              "column": 3
+            },
+            {
+              "title": "axe accessibility and reflow scan for authenticated config builder",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7379,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[axe] weppcloud-config-builder: 0 violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:33.276Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-697ab0b8272fb222c482",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 840,
+              "column": 3
+            },
+            {
+              "title": "legacy session migration preserves authenticated SID without remember cookie",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2367,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:40.679Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-9d3f758ac43ee869d5da",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 867,
+              "column": 3
+            },
+            {
+              "title": "logout clears remember cookie before opt-out login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3621,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:43.071Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-a0ff66e4fc36aae14cfc",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 906,
+              "column": 3
+            },
+            {
+              "title": "reader-first legacy writer survives owned-cookie activation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set SMOKE_MIXED_VERSION_ACTIVATION_WAIT_MS to run the coordinated activation canary",
+                      "location": {
+                        "file": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/a11y/axe-runs0.spec.js",
+                        "line": 940,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 70,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:46.726Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set SMOKE_MIXED_VERSION_ACTIVATION_WAIT_MS to run the coordinated activation canary",
+                          "location": {
+                            "file": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/a11y/axe-runs0.spec.js",
+                            "line": 940,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-bc869b9f59c3f8f92e2d",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 939,
+              "column": 3
+            },
+            {
+              "title": "activated session mints directly through rq-engine cookie auth",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1578,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:46.836Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-6c9c14049342c496cd97",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 978,
+              "column": 3
+            },
+            {
+              "title": "axe accessibility scan for runs0 dashboard",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6821,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[axe] runs0-dashboard: 1 violations\n"
+                        },
+                        {
+                          "text": "[axe] Reports written to test-results/a11y/\n"
+                        },
+                        {
+                          "text": "[axe] - JSON: test-results/a11y/axe-violations.json\n"
+                        },
+                        {
+                          "text": "[axe] - Markdown: test-results/a11y/axe-summary.md\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:48.444Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bb24a7ad2bfccff7818a-44455c9c1eca6b69a5d9",
+              "file": "a11y/axe-runs0.spec.js",
+              "line": 1005,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "theme-metrics.spec.js",
+      "file": "theme-metrics.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "theme contrast metrics",
+          "file": "theme-metrics.spec.js",
+          "line": 127,
+          "column": 6,
+          "specs": [
+            {
+              "title": "collects rendered contrast ratios for every theme",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 21782,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[theme-metrics] Reports written to /workdir/wepppy/wepppy/weppcloud/static-src/test-results/theme-metrics/\n"
+                        },
+                        {
+                          "text": "[theme-metrics] - JSON: 1568 measurements\n"
+                        },
+                        {
+                          "text": "[theme-metrics] - Markdown: 14 themes\n"
+                        },
+                        {
+                          "text": "[theme-metrics] Non-enforced AA failures (59): onedark=6, dark-modern=5, ayu-dark=5, ayu-light=13, ayu-dark-bordered=6, ayu-light-bordered=13, cursor-dark-anysphere=6, cursor-dark-high-contrast=5\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:56:55.342Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "562c016f4ae02cf1b673-766a7ed2cd0431b975ec",
+              "file": "theme-metrics.spec.js",
+              "line": 128,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-18T23:56:10.801Z",
+    "duration": 66423.432,
+    "expected": 11,
+    "skipped": 1,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
