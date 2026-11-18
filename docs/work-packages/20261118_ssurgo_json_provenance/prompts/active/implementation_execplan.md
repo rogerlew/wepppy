@@ -29,9 +29,11 @@ geographic/live parity is deferred until SDA recovery, not a prerequisite.
 - [x] Retain review/evidence and update tracker; publish task branches task/ssurgo-json-provenance and task/wepppy-json-parity.
 
 - [x] Record the operator's mirror-first/SDA-fallback direction and revised parity scope.
-- [ ] Freeze selection-event schema, total timeout, default/migration behavior and transport ADR; complete contract reviews.
-- [ ] Implement collection-level source selection across all six consumers, retaining source-separated caches and failure evidence.
-- [ ] Integrate forest/forest1/production Compose and broader imported data; perform bounded worker/fallback acceptance.
+- [x] Freeze selection-event schema, total timeout, default/migration behavior and transport ADR; complete contract reviews.
+- [x] Implement collection-level source selection across all six consumers, retaining source-separated caches and failure evidence.
+- [x] Integrate forest dev Compose, import official regional data, and pass bounded queued soil/fallback acceptance.
+- [ ] Integrate the protected Compose change after exact-SHA/digest owner approval, then activate the shared forest client default.
+- [ ] Later scope: forest1 and production rollout; comprehensive live validation after SDA recovery.
 
 ## Context and plan
 
@@ -140,6 +142,28 @@ worker/queue and the actual runtime image first; preserve shared dirty checkout 
 unrelated running services. Activate only the narrowly changed dev services after
 bounded tests. Production/test-production activation remains outside this phase.
 
-Progress: contract/ADR drafted; independent reviews pending; official Idaho archive
-acquired, extraction/import and actual worker acceptance pending. Keep tracker and
-implementation evidence current through each milestone.
+Progress: contract ancestor 43c78bf95, ADR-0145 and independent reviews complete.
+Mirror-first implementation, regional import and forest Compose qualification pass.
+New services run on forest; shared clients remain unchanged pending protected-policy
+integration approval. Evidence: artifacts/forest-validation.md and the service's
+artifacts/forest directory.
+
+Surprises & Discoveries: PostgreSQL COPY requires ANALYZE before relationship joins
+to avoid a poor initial join plan; the canceled candidate import left the prior
+release intact. Review caught XML error envelopes treated as empty data, legacy
+config precedence, and a connection leak after evidence-read failure; all fixed
+and covered. An initial qualification comparator missed whitespace in Build Date
+comments; use the existing exact two-comment-value canonicalizer and retain the
+diagnostic failure. No numerical tolerance or extra exclusion was added.
+
+Decision Log: keep only the regional source scope in the manifest; missing keys
+use bounded SDA fallback. New project defaults persist, existing identity-absent
+projects resolve configuration/defaults, and saved identities remain explicit.
+Forest qualification uses the actual worker image and UID/GID with a separate Redis
+and queue. The shared dirty checkout and existing services are preserved.
+
+Outcomes & Retrospective: SSURGO MUKEY 78905 and STATSGO2 MUKEY 1390208 are outside
+all replay caches. Each produces 76 prepared soils with exact same-image reference
+parity through primary cold/warm and warm fallback. Base sidecar hashes and final
+inputs are independently read back; dual failure generates no soils. Shared forest
+default activation and public/test-production/production rollout remain distinct.

@@ -5,16 +5,16 @@ WEPPpy JSON integration and provenance identifying the queried soil-data server.
 This contract governs SurgoSoilCollection and all six Soils collection call sites.
 It is additive to NoDb persistence/concurrency and generated-soil artifact contracts.
 
-## Approved next revision: mirror-first with SDA fallback
+## Mirror-first with SDA fallback
 
 On 2026-11-18 the operator directed moving toward a mirror-first deployment default
 with USDA Soil Data Access (SDA, referred to conversationally as SDMS) as fallback.
 The retained SSURGO/STATSGO fixture parity is sufficient to proceed; comprehensive
 geographic/live SDA comparison is deferred until recovery. This supersedes the
-previous no-automatic-failover product direction. The remaining sections describe
-the implemented explicit-source mode until the next revision is implemented.
+previous no-automatic-failover product direction. The Forest implementation section below governs the additional selection policy;
+explicit-source callers retain their established transport behavior.
 
-Planned behavior: deployment defaults govern new/unconfigured projects; preserve
+Deployment defaults govern new/unconfigured projects; preserve
 explicit source overrides and existing artifacts. Persisted old XML settings cannot
 be assumed to be implicit defaults, so migration must be deliberate. Use bounded
 SDA fallback on primary connection/timeout, HTTP 429/5xx/not-ready, or missing required
@@ -29,22 +29,19 @@ fallback reason/time and actual supplier alongside existing retrieval evidence a
 base-soil sidecars. Return to mirror-first on the next construction without making
 an outage a permanent source switch. Preserve both errors when neither source works.
 
-Before code changes, freeze the total attempt deadline (including legacy XML),
-selection-event schema and configuration/migration rules, add the transport-policy
-ADR, and complete the normal independent contract reviews. Keep the five-query
-scientific builder unchanged. Validate fallback and dual failure through controlled
-HTTP endpoints now; live SDA recovery is not required for these tests. This is a
-pending behavior contract, not a claim that the deployed client already falls back.
+The contract, ADR-0145 and independent reviews precede implementation. Controlled
+HTTP/TLS tests cover fallback without relying on live SDA recovery. Deployment
+activation and code validation are reported separately.
 
 ## Selection and compatibility
 
-Default absent state remains the existing USDA XML endpoint and legacy filenames.
+Without a mirror-first deployment setting, absent state uses USDA XML and legacy filenames.
 Optional project settings are soil_data_endpoint, soil_data_profile, and
 soil_data_release under the soils configuration section, persisted together by a
 locked configure_soil_data_source method. Programmatic SurgoSoilCollection takes
-corresponding keyword-only endpoint/profile/release arguments. No environment-global
-or automatic failover selection is introduced. Legacy projects hydrate without
-changes and retain XML. Only the known USDA endpoint supports legacy-xml; JSON
+corresponding keyword-only endpoint/profile/release arguments. Direct explicit-source callers do not automatically fail over. Saved identities
+without a policy remain explicit; absent identity resolves project configuration
+before deployment defaults. Only the known USDA endpoint supports legacy-xml; JSON
 requires an explicit endpoint, wepppy-json-v1 profile, and immutable release ID.
 Release ID is 1–128 ASCII letters/digits/dot/underscore/hyphen. Endpoint is an
 absolute HTTP(S) URL ending in /Tabular/post.rest; reject userinfo, query strings,
@@ -120,7 +117,8 @@ paired treated/prepared outputs alongside the base sidecar and cache evidence.
 
 ## State matrix and regression plan
 
-Absent settings/legacy project: unchanged XML and filenames. Empty selected cache:
+Absent settings: apply explicit project configuration, then deployment defaults.
+Saved legacy identity: unchanged XML and filenames. Empty selected cache:
 create identity and schema, fetch and retain evidence. Populated matching JSON cache:
 reuse without network. Populated unknown cache selected as JSON: explicit rejection. Populated includes
 negative-marker-only caches. Malformed or partially present provenance tables are
@@ -140,7 +138,7 @@ reference. Keep known source limitations and unrelated project workflow gaps exp
 
 Operator usage and provenance inspection: [JSON soil source guide](../dev-notes/soil-json-source.md).
 
-## Forest implementation contract (approved scope; conformance pending)
+## Forest implementation contract
 
 Environment keys SOIL_DATA_MODE=mirror-first, SOIL_DATA_ENDPOINT and SOIL_DATA_RELEASE
 supply the default only when a project has no saved identity or source configuration.
@@ -156,7 +154,10 @@ connect/TLS, metadata, all query batches, headers and bodies. No retry/backoff s
 apply in this mode. This does not impose a wall-time limit on modeling/local SQLite.
 Explicit XML retains legacy requests behavior. Fallback XML uses bounded HTTP,
 identity encoding, a 16 MiB cap, no redirects, and rejects DTD/entity declarations,
-malformed XML, unexpected row columns/keys and nonfinite values. Preserve query and
+malformed XML, unexpected dataset envelopes, row columns/keys and nonfinite values.
+The XML root must be NewDataSet with direct Table rows and optional XML Schema
+metadata; empty NewDataSet is valid, an Error envelope is not. Nested cell elements
+are rejected. Preserve query and
 legacy first-row-wins/null semantics. TLS certificate failures are explicit defects.
 
 Only availability errors (DNS resolution, any network deadline expiry including
@@ -206,7 +207,7 @@ dns_unavailable, connection_failed, deadline_exceeded, http_429, http_5xx, not_r
 missing_components, source_contract_error, and selection_persistence_error. A successful
 event has exactly one successful final attempt matching actual_supplier; failed
 events have no actual_supplier. Every persisted successful event's supplier must
-match its cache binding; different configured primaries may validly share an SDA
+match its cache binding and historical-origin flag; different configured primaries may validly share an SDA
 cache. Translate selection schema/SQLite/filesystem failures to SoilDataSourceError
 so existing OSError/ValueError candidate handlers cannot hide provenance failure.
 DNS child exit codes must distinguish remote name resolution failure from local

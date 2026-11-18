@@ -17,7 +17,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Un
 import csv
 import json
 from contextvars import ContextVar
-from .source import (SoilDataSource, JsonSoilClient, SoilDataSourceError, bind_cache,
+from .source import (SoilDataSource, JsonSoilClient, BoundedXmlSoilClient, ACQUISITION_DEADLINE, SoilDataSourceError, bind_cache,
                      cache_evidence, record_fetch, response_origin, write_artifact_provenance)
 from pathlib import Path
 from . import retention as _retention
@@ -2055,64 +2055,65 @@ class SurgoSoilCollection(object):
         self._db_path = cache_db_path
         self.conn = None
         self.cur = None
-        self._connect()
-        cur = self.cur
         try:
+            self._connect()
+            cur = self.cur
             bind_cache(self.conn, self.data_source)
-        except (SoilDataSourceError, sqlite3.Error):
+            self._initialize_cache_db()
+            self._json_client = None
+            if self.data_source.profile == "wepppy-json-v1" or ACQUISITION_DEADLINE.get() is not None:
+                columns = {table: [row[1] for row in cur.execute(f"PRAGMA table_info({table})")]
+                           for table in ("component", "chorizon", "corestrictions", "chfrags", "chtexturegrp")}
+                client_type = JsonSoilClient if self.data_source.profile == "wepppy-json-v1" else BoundedXmlSoilClient
+                self._json_client = client_type(self.data_source, columns)
+
+            n = 0
+
+            # component
+            n += self._sync("component", _fetch_components, "mukey", mukeys)
+
+            # identify cokeys
+            if mukeys:
+                query = "SELECT  cokey FROM component WHERE mukey in (%s)" % ",".join(
+                    [str(k) for k in mukeys]
+                )
+                cokeys = [r[0] for r in cur.execute(query)]
+            else:
+                cokeys = []
+
+            # chorizon
+            n += self._sync("chorizon", _fetch_chorizon, "cokey", cokeys)
+
+            # corestrictions
+            n += self._sync("corestrictions", _fetch_corestrictions, "cokey", cokeys, True)
+
+            # identify chkeys
+            if cokeys:
+                query = "SELECT chkey FROM chorizon WHERE cokey in (%s)" % ",".join(
+                    [str(k) for k in cokeys]
+                )
+                chkeys = [r[0] for r in cur.execute(query)]
+            else:
+                chkeys = []
+
+            # chfrags
+            n += self._sync("chfrags", _fetch_chfrags, "chkey", chkeys, True)
+
+            # chtexturegrp
+            n += self._sync("chtexturegrp", _fetch_chtexturegrp, "chkey", chkeys, True)
+
+            # store keys to instance
+            self._sync_n = n
+            self.mukeys = mukeys
+            self.cokeys = cokeys
+            self.chkeys = chkeys
+
+            self.weppSoils = None
+            self.invalidSoils = None
+            self._write_cache_metadata()
+        except (SoilDataSourceError, sqlite3.Error, OSError, ValueError):
             self._disconnect()
             raise
-        self._initialize_cache_db()
-        self._json_client = None
-        if self.data_source.profile == "wepppy-json-v1":
-            columns = {table: [row[1] for row in cur.execute(f"PRAGMA table_info({table})")]
-                       for table in ("component", "chorizon", "corestrictions", "chfrags", "chtexturegrp")}
-            self._json_client = JsonSoilClient(self.data_source, columns)
-
-        n = 0
-
-        # component
-        n += self._sync("component", _fetch_components, "mukey", mukeys)
-
-        # identify cokeys
-        if mukeys:
-            query = "SELECT  cokey FROM component WHERE mukey in (%s)" % ",".join(
-                [str(k) for k in mukeys]
-            )
-            cokeys = [r[0] for r in cur.execute(query)]
-        else:
-            cokeys = []
-
-        # chorizon
-        n += self._sync("chorizon", _fetch_chorizon, "cokey", cokeys)
-
-        # corestrictions
-        n += self._sync("corestrictions", _fetch_corestrictions, "cokey", cokeys, True)
-
-        # identify chkeys
-        if cokeys:
-            query = "SELECT chkey FROM chorizon WHERE cokey in (%s)" % ",".join(
-                [str(k) for k in cokeys]
-            )
-            chkeys = [r[0] for r in cur.execute(query)]
-        else:
-            chkeys = []
-
-        # chfrags
-        n += self._sync("chfrags", _fetch_chfrags, "chkey", chkeys, True)
-
-        # chtexturegrp
-        n += self._sync("chtexturegrp", _fetch_chtexturegrp, "chkey", chkeys, True)
-
-        # store keys to instance
-        self._sync_n = n
-        self.mukeys = mukeys
-        self.cokeys = cokeys
-        self.chkeys = chkeys
-
-        self.weppSoils = None
-        self.invalidSoils = None
-        self._write_cache_metadata()
 
     def dump(self, table, fname):
         conn, cur = self.conn, self.cur
@@ -2285,6 +2286,7 @@ class SurgoSoilCollection(object):
                 "cokey": int(component.cokey) if component is not None else None,
                 "cache_file": os.path.basename(self._db_path) if self._db_path else None,
                 "source": cache_evidence(self.conn),
+                **({"selection": self.selection_event} if hasattr(self, "selection_event") else {}),
             })
             soils[soil.mukey] = soil
             if write_logs:

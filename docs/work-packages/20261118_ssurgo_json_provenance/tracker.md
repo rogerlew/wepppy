@@ -10,5 +10,9 @@
 - Integration candidate: task/ssurgo-json-merge, copied soil-only commits onto remote master; no inherited unrelated security changes. Exact soil sources match the validated branch; 75 focused tests pass again.
 
 - Next direction (2026-11-18): mirror-first deployment default with observable SDA fallback; geographic/live parity deferred until SDA recovery.
-- Pending: attempt/error contract, provenance selection schema, transport ADR/reviews, fallback implementation, broader import and Compose wiring. Current runtime remains explicit-source/XML-default.
-- Forest scope authorized: contract/ADR-0145 drafted, independent reviews pending; broader Idaho SSURGO plus Virgin Islands STATSGO2 import, client fallback and real queued acceptance are active work.
+- Forest contract: 43c78bf95 and ADR-0145; implementation and independent correctness/security reviews complete.
+- Forest validation: 151 focused tests plus 24 review-closure tests and four cache-clear/persistence tests passed; two-module stubtest, stub hygiene, exception gate passed. Broad suite blocked by missing SECRET_KEY during collection.
+- Official import: forest-id-20261001-vi-20161013-v1; 31,841 components, 132,604 horizons; 100 SSURGO and all eight selected STATSGO2 map units pass exact raw projection comparison.
+- Queued acceptance: two unseen keys; primary cold/warm, direct-file reference, warm SDA-cache fallback and dual failure. Each successful case has 76 prepared soils; exact base/prepared parity and independent sidecar/artifact readback pass.
+- Deployment: new soil-api and soil-db healthy on forest's existing Compose network. Shared web/workers unchanged; client-default activation follows protected Compose integration approval. forest1/production remain later scope.
+- Evidence and limitations: [forest-validation.md](artifacts/forest-validation.md); service artifacts/forest. No national coverage or live SDA success claim.

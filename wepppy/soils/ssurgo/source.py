@@ -1,8 +1,10 @@
 """Explicit soil transport identity and durable cache/artifact provenance."""
 from __future__ import annotations
 
+from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import errno
 import hashlib
 import http.client
 import io
@@ -19,6 +21,7 @@ import sys
 import tempfile
 import time
 from urllib.parse import urlencode, urlsplit, urlunsplit
+from xml.etree import ElementTree
 
 from wepppy.all_your_base import try_parse
 
@@ -26,12 +29,28 @@ XML_ENDPOINT = "https://sdmdataaccess.nrcs.usda.gov/Tabular/post.rest"
 JSON_PROFILE = "wepppy-json-v1"
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 MAX_METADATA_BYTES = 64 * 1024
-_RESOLVER_SCRIPT = "import json,socket,sys; host,port=json.load(sys.stdin); print(json.dumps(socket.getaddrinfo(host,port,type=socket.SOCK_STREAM)))"
+_RESOLVER_SCRIPT = """import json,socket,sys
+host,port=json.load(sys.stdin)
+try:
+    addresses=socket.getaddrinfo(host,port,type=socket.SOCK_STREAM)
+except socket.gaierror:
+    sys.exit(2)
+print(json.dumps(addresses))
+"""
 REQUEST_DEADLINE_SECONDS = 30.0
+ACQUISITION_DEADLINE = ContextVar("soil_acquisition_deadline", default=None)
 
 
 class SoilDataSourceError(Exception):
     """Source identity/transport failure; must not become a soil fallback."""
+
+
+class SoilServiceUnavailable(SoilDataSourceError):
+    """An availability failure eligible for an explicitly configured SDA fallback."""
+
+    def __init__(self, reason: str):
+        self.reason = reason
+        super().__init__(f'Soil service unavailable: {reason}')
 
 
 def canonical_endpoint(endpoint: str) -> str:
@@ -141,19 +160,30 @@ def _resolve_addresses(host, port, deadline):
     # getaddrinfo has no Python deadline; a killable child bounds resolver stalls.
     remaining = min(5.0, deadline - time.monotonic())
     if remaining <= 0:
-        raise SoilDataSourceError('Soil request deadline exceeded')
+        raise SoilServiceUnavailable('deadline_exceeded')
     try:
         result = subprocess.run([sys.executable, '-I', '-c', _RESOLVER_SCRIPT],
                                 input=json.dumps([host, port]), text=True, capture_output=True,
                                 timeout=remaining, check=True)
         return json.loads(result.stdout)
-    except (subprocess.TimeoutExpired, subprocess.CalledProcessError, OSError, ValueError) as exc:
-        raise SoilDataSourceError('Soil endpoint resolution failed or exceeded deadline') from exc
+    except subprocess.TimeoutExpired as exc:
+        raise SoilServiceUnavailable('deadline_exceeded') from exc
+    except subprocess.CalledProcessError as exc:
+        if exc.returncode == 2:
+            raise SoilServiceUnavailable('dns_unavailable') from exc
+        raise SoilDataSourceError('Soil resolver process failed') from exc
+    except (OSError, ValueError) as exc:
+        raise SoilDataSourceError('Soil resolver process failed') from exc
 
 
-def _request_json(url: str, form: dict | None = None, *, address_cache=None) -> tuple[dict, dict, str]:
+def _request_payload(url, form=None, *, address_cache=None, response_kind='json'):
     parts = urlsplit(url)
     deadline = time.monotonic() + REQUEST_DEADLINE_SECONDS
+    selected_deadline = ACQUISITION_DEADLINE.get()
+    if selected_deadline is not None:
+        deadline = min(deadline, selected_deadline)
+    if time.monotonic() >= deadline:
+        raise SoilServiceUnavailable('deadline_exceeded')
     port = parts.port or (443 if parts.scheme == 'https' else 80)
     cache = address_cache if address_cache is not None else {}
     key = (parts.hostname, port)
@@ -174,7 +204,9 @@ def _request_json(url: str, form: dict | None = None, *, address_cache=None) -> 
             except OSError as exc:
                 sock.close()
                 last_error = exc
-        raise OSError('No soil endpoint address connected') from last_error
+        if last_error is not None:
+            raise last_error
+        raise SoilDataSourceError('Soil resolver returned no addresses')
 
     connection = http.client.HTTPConnection(parts.hostname, port)
     connection._create_connection = connect_address
@@ -189,54 +221,127 @@ def _request_json(url: str, form: dict | None = None, *, address_cache=None) -> 
             connection.sock = ssl.create_default_context().wrap_socket(connection.sock, server_hostname=parts.hostname)
         connection.sock = _DeadlineSocket(connection.sock, deadline)
         body = None if form is None else urlencode(form).encode('ascii')
-        headers = {'Accept': 'application/json', 'Accept-Encoding': 'identity'}
+        accepted = ('application/json',) if response_kind == 'json' else ('application/xml', 'text/xml')
+        headers = {'Accept': ', '.join(accepted), 'Accept-Encoding': 'identity'}
         if form is not None:
             headers['Content-Type'] = 'application/x-www-form-urlencoded'
         connection.request('GET' if form is None else 'POST', parts.path, body=body, headers=headers)
         response = connection.getresponse()
+        if response.status == 429:
+            raise SoilServiceUnavailable('http_429')
+        if 500 <= response.status <= 599:
+            raise SoilServiceUnavailable('http_5xx')
         if response.status != 200:
             raise SoilDataSourceError(f'Soil service returned HTTP {response.status}')
         if response.getheader('Content-Encoding', 'identity').lower() not in ('identity', ''):
             raise SoilDataSourceError('Compressed soil responses are outside this profile')
-        if response.getheader('Content-Type', '').split(';')[0].strip().lower() != 'application/json':
-            raise SoilDataSourceError('Soil service did not return JSON')
+        if response.getheader('Content-Type', '').split(';')[0].strip().lower() not in accepted:
+            raise SoilDataSourceError('Soil service returned an unexpected content type')
         payload = bytearray()
+        limit = min(MAX_RESPONSE_BYTES, MAX_METADATA_BYTES if form is None else MAX_RESPONSE_BYTES)
         while True:
             if time.monotonic() >= deadline:
-                raise SoilDataSourceError('Soil request deadline exceeded')
+                raise SoilServiceUnavailable('deadline_exceeded')
             chunk = response.read1(65536)
             if not chunk:
                 break
             payload.extend(chunk)
-            if len(payload) > min(MAX_RESPONSE_BYTES, MAX_METADATA_BYTES if form is None else MAX_RESPONSE_BYTES):
+            if len(payload) > limit:
                 raise SoilDataSourceError('Soil response exceeds byte limit')
-        depth, quoted, escaped = 0, False, False
-        for byte in payload:
-            if quoted:
-                if escaped:
-                    escaped = False
-                elif byte == 92:
-                    escaped = True
-                elif byte == 34:
-                    quoted = False
-            elif byte == 34:
-                quoted = True
-            elif byte in (91, 123):
-                depth += 1
-                if depth > 64:
-                    raise SoilDataSourceError('Soil JSON nesting exceeds profile limit')
-            elif byte in (93, 125):
-                depth -= 1
-        parsed = json.loads(payload)
-        if not isinstance(parsed, dict):
-            raise SoilDataSourceError('Expected a JSON soil object')
-        return parsed, {name.lower(): value for name, value in response.getheaders()}, hashlib.sha256(payload).hexdigest()
-    except (OSError, http.client.HTTPException, ValueError, UnicodeError, RecursionError) as exc:
-        raise SoilDataSourceError('Soil service transport or JSON decoding failed') from exc
+        return bytes(payload), {name.lower(): value for name, value in response.getheaders()}, hashlib.sha256(payload).hexdigest()
+    except ssl.SSLError as exc:
+        raise SoilDataSourceError('Soil TLS verification or protocol failed') from exc
+    except TimeoutError as exc:
+        raise SoilServiceUnavailable('deadline_exceeded') from exc
+    except OSError as exc:
+        if exc.errno in (errno.EACCES, errno.EPERM, errno.EMFILE, errno.ENFILE, errno.ENOMEM, errno.EAGAIN):
+            raise SoilDataSourceError('Local soil transport resource failure') from exc
+        raise SoilServiceUnavailable('connection_failed') from exc
+    except (http.client.HTTPException, ValueError, UnicodeError) as exc:
+        raise SoilDataSourceError('Soil service transport contract failed') from exc
     finally:
         if response is not None:
             response.close()
         connection.close()
+
+
+def _request_json(url: str, form: dict | None = None, *, address_cache=None) -> tuple[dict, dict, str]:
+    payload, headers, response_hash = _request_payload(url, form, address_cache=address_cache)
+    depth, quoted, escaped = 0, False, False
+    for byte in payload:
+        if quoted:
+            if escaped:
+                escaped = False
+            elif byte == 92:
+                escaped = True
+            elif byte == 34:
+                quoted = False
+        elif byte == 34:
+            quoted = True
+        elif byte in (91, 123):
+            depth += 1
+            if depth > 64:
+                raise SoilDataSourceError('Soil JSON nesting exceeds profile limit')
+        elif byte in (93, 125):
+            depth -= 1
+    try:
+        parsed = json.loads(payload)
+    except (ValueError, UnicodeError, RecursionError) as exc:
+        raise SoilDataSourceError('Soil JSON decoding failed') from exc
+    if not isinstance(parsed, dict):
+        raise SoilDataSourceError('Expected a JSON soil object')
+    return parsed, headers, response_hash
+
+
+class _BoundedXmlTreeBuilder(ElementTree.TreeBuilder):
+    def __init__(self):
+        super().__init__()
+        self.depth = 0
+
+    def doctype(self, name, pubid, system):
+        # Parser callback rejects declarations independent of XML input encoding.
+        raise SoilDataSourceError('Soil XML DTD/entity declarations are forbidden')
+
+    def start(self, tag, attrs):
+        self.depth += 1
+        if self.depth > 64:
+            raise SoilDataSourceError('Soil XML nesting exceeds profile limit')
+        return super().start(tag, attrs)
+
+    def end(self, tag):
+        self.depth -= 1
+        return super().end(tag)
+
+
+class BoundedXmlSoilClient:
+    """Legacy query/XML semantics within the mirror-first acquisition budget."""
+
+    def __init__(self, source, columns):
+        self.source, self.columns = source, columns
+        self.address_cache = {}
+        self.last_event = None
+
+    def query(self, query, table, keys):
+        payload, _, response_hash = _request_payload(
+            self.source.endpoint, {'query': query, 'format': 'xml'},
+            address_cache=self.address_cache, response_kind='xml')
+        try:
+            root = ElementTree.fromstring(payload, parser=ElementTree.XMLParser(target=_BoundedXmlTreeBuilder()))
+        except (ElementTree.ParseError, ValueError, RecursionError) as exc:
+            raise SoilDataSourceError('Malformed soil XML response') from exc
+        schema_tag = '{http://www.w3.org/2001/XMLSchema}schema'
+        if root.tag != 'NewDataSet' or any(child.tag not in ('Table', schema_tag) for child in root):
+            raise SoilDataSourceError('Unexpected soil XML dataset envelope')
+        columns = self.columns[table]
+        rows = [columns]
+        for row in root.findall('Table'):
+            if [cell.tag for cell in row] != columns or any(len(cell) for cell in row):
+                raise SoilDataSourceError('Soil XML columns differ')
+            rows.append([cell.text for cell in row])
+        records = parse_table({'Table': rows}, columns, keys)
+        self.last_event = {'observed_at': utc_now(), 'response_sha256': response_hash,
+                           'response_origin': response_origin(self.source.endpoint)}
+        return records
 
 
 def parse_table(body: dict, columns: list[str], keys) -> list[tuple]:
@@ -334,6 +439,9 @@ class JsonSoilClient:
         if self.metadata is None:
             url = self.source.endpoint.removesuffix('/Tabular/post.rest') + '/v1/metadata'
             metadata, _, _ = _request_json(url, address_cache=self.address_cache)
+            if (metadata.get('service') == 'soil-data-access' and metadata.get('official') is False
+                    and metadata.get('contract_version') == JSON_PROFILE and metadata.get('ready') is False):
+                raise SoilServiceUnavailable('not_ready')
             release = metadata.get('active_release')
             revision = metadata.get('code_revision')
             if (metadata.get('service') != 'soil-data-access' or metadata.get('official') is not False or metadata.get('ready') is not True or metadata.get('contract_version') != JSON_PROFILE or
@@ -377,6 +485,8 @@ def bind_cache(conn: sqlite3.Connection, source: SoilDataSource) -> None:
         conn.execute('BEGIN IMMEDIATE')
         tables = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         provenance_tables = tables & {'soil_data_source', 'soil_data_fetch'}
+        if 'soil_data_selection' in tables and len(provenance_tables) != 2:
+            raise SoilDataSourceError('Partial soil selection provenance schema')
         if provenance_tables:
             if len(provenance_tables) != 2:
                 raise SoilDataSourceError('Partial soil cache provenance schema')
@@ -401,6 +511,8 @@ def bind_cache(conn: sqlite3.Connection, source: SoilDataSource) -> None:
             if source.profile == JSON_PROFILE:
                 if binding['historical_rows_unknown'] or (not events and any(conn.execute(f'SELECT 1 FROM "{table}" LIMIT 1').fetchone() is not None for table in tables if table in ('component', 'chorizon', 'chfrags', 'chtexturegrp', 'corestrictions') or table in ('bad_component_mukey', 'bad_chorizon_cokey', 'bad_chfrags_chkey', 'bad_chtexturegrp_chkey', 'bad_corestrictions_cokey'))):
                     raise SoilDataSourceError('Populated JSON cache has no verified retrieval history')
+            from .selection import validate_selection_history
+            validate_selection_history(conn, source.identity(), binding['historical_rows_unknown'])
             return
         known = {'component', 'chorizon', 'chfrags', 'chtexturegrp', 'corestrictions',
                  'bad_component_mukey', 'bad_chorizon_cokey', 'bad_chfrags_chkey',

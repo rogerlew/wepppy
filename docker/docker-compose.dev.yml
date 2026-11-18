@@ -13,6 +13,9 @@ x-wepppy-service: &wepppy-service
   working_dir: /workdir/wepppy
   environment: &wepppy-env
     PYTHONUNBUFFERED: "1"
+    SOIL_DATA_MODE: ${SOIL_DATA_MODE:-legacy-xml}
+    SOIL_DATA_ENDPOINT: ${SOIL_DATA_ENDPOINT:-http://soil-api:8080/Tabular/post.rest}
+    SOIL_DATA_RELEASE: ${SOIL_DATA_RELEASE:-}
     WMESQUE_ENDPOINTS: ${WMESQUE_ENDPOINTS:-}
     WMESQUE_SYNC_ENABLED: ${WMESQUE_SYNC_ENABLED:-false}
     WMESQUE_SYNC_SOURCE: ${WMESQUE_SYNC_SOURCE:-}
@@ -73,6 +76,53 @@ x-wepppy-service: &wepppy-service
     - "host.docker.internal:host-gateway"
 
 services:
+  soil-db:
+    profiles: [soil-data]
+    image: postgis/postgis:17-3.7@sha256:b2379049e1d7623127ec61ba802a44706109bf91c23ec76b8f323888fd037ed9
+    environment:
+      POSTGRES_DB: soil
+      POSTGRES_USER: soil_import
+      POSTGRES_PASSWORD_FILE: /run/secrets/soil_import_password
+      SOIL_SERVE_PASSWORD_FILE: /run/secrets/soil_serve_password
+    secrets: [soil_import_password, soil_serve_password]
+    volumes:
+      - soil-tabular-data:/var/lib/postgresql/data
+      - ${SOIL_DATA_SOURCE_DIR:-../../soil-data-access}/docker/init.sh:/docker-entrypoint-initdb.d/20-soil.sh:ro
+      - ${SOIL_DATA_SOURCE_DIR:-../../soil-data-access}/migrations/001_replay.sql:/opt/soil/001_replay.sql:ro
+    networks: [soil-database]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U soil_import -d soil']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+    shm_size: 128mb
+
+  soil-api:
+    profiles: [soil-data]
+    build:
+      context: ${SOIL_DATA_SOURCE_DIR:-../../soil-data-access}
+    environment:
+      DATABASE_URL_FILE: /run/secrets/soil_database_url
+      CODE_REVISION: ${SOIL_CODE_REVISION:-unset}
+      SOIL_DATA_RELEASE: ${SOIL_DATA_RELEASE:-}
+    secrets: [soil_database_url]
+    networks: [soil-database, default]
+    depends_on:
+      soil-db:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, /usr/local/bin/soil-data-access, --healthcheck]
+      interval: 10s
+      timeout: 4s
+      retries: 3
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 512m
+
   weppcloud:
     <<: *wepppy-service
     container_name: weppcloud
@@ -1077,6 +1127,8 @@ services:
       - "9000"
 
 networks:
+  soil-database:
+    internal: true
   default:
     name: wepppy-net
     driver: bridge
@@ -1090,6 +1142,7 @@ networks:
     internal: true
 
 volumes:
+  soil-tabular-data:
   forest-postgres-ssd:
   weppcloudr-renv-cache:
   weppcloudr-vendor:
@@ -1102,6 +1155,12 @@ volumes:
     driver: local
 
 secrets:
+  soil_import_password:
+    file: ./secrets/soil_import_password
+  soil_serve_password:
+    file: ./secrets/soil_serve_password
+  soil_database_url:
+    file: ./secrets/soil_database_url
   redis_password:
     file: ./secrets/redis_password
   postgres_password:

@@ -1,6 +1,6 @@
 # ADR-0145: Mirror-first soil retrieval with recorded SDA fallback
 
-Status: accepted direction; implementation pending.
+Status: accepted; implemented for forest qualification.
 Date: 2026-11-18
 Decision venue: this operator/Codex conversation. Participants: Roger Lew and Codex.
 Decision owner: Roger Lew. Implementer: Codex.
