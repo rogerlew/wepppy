@@ -8,6 +8,15 @@ which endpoint/profile/release supplied the cached data. Preserve XML by default
 and scientific soil outputs. Execute against the canonical soil-data-source-provenance
 contract; this is faithful integration, not a mocked transport demonstration.
 
+## Next phase: mirror-first rollout
+
+The operator's 2026-11-18 amendment to the canonical provenance contract directs
+mirror-first defaults and bounded, observable USDA SDA fallback. The original
+explicit-source integration is complete; the amendment is a new implementation
+phase. Execute the service plan at /workdir/soil-data-access/docs/mirror-first-rollout.md
+with the existing client/cache identity rules as the baseline. Comprehensive
+geographic/live parity is deferred until SDA recovery, not a prerequisite.
+
 ## Progress
 
 
@@ -18,6 +27,13 @@ contract; this is faithful integration, not a mocked transport demonstration.
 - [x] Run 75 focused tests, two-module stubtest, stub hygiene and broad-exception gate; broad suite attempted with unrelated environment blockers retained.
 - [x] Real PostgreSQL/API fresh-cache replay: 24,049 records, 499 valid soils, six unchanged non-valid outcomes, 501 canonical files and 499 verified sidecars.
 - [x] Retain review/evidence and update tracker; publish task branches task/ssurgo-json-provenance and task/wepppy-json-parity.
+
+- [x] Record the operator's mirror-first/SDA-fallback direction and revised parity scope.
+- [x] Freeze selection-event schema, total timeout, default/migration behavior and transport ADR; complete contract reviews.
+- [x] Implement collection-level source selection across all six consumers, retaining source-separated caches and failure evidence.
+- [x] Integrate forest dev Compose, import official regional data, and pass bounded queued soil/fallback acceptance.
+- [ ] Integrate the protected Compose change after exact-SHA/digest owner approval, then activate the shared forest client default.
+- [ ] Later scope: forest1 and production rollout; comprehensive live validation after SDA recovery.
 
 ## Context and plan
 
@@ -77,6 +93,13 @@ a matched-environment transport result, not proof of deployment-image equivalenc
 
 ## Decision Log
 
+2026-11-18 follow-up: accept retained SSURGO/STATSGO fixture evidence for broader
+query/builder behavior and move comprehensive geographic/live testing to recovery.
+The operator now prefers the mirror as default with SDA fallback. Keep actual data
+loading distinct from evidence generalization; preserve the real supplier in every
+cache/artifact record. These are prospective changes, not current runtime behavior.
+
+
 
 2026-11-18: the operator explicitly requested endpoint provenance with JSON integration.
 Use persisted per-project selection, SHA-256 cache namespaces, embedded identity,
@@ -98,3 +121,49 @@ Integration follow-up, 2026-11-18 UTC: PR #673 revealed inherited unmerged local
 master changes. Preserve that history and integrate only the four soil commits via
 task/ssurgo-json-merge from remote master. No protected policy paths change; all
 soil source files remain identical and 75 focused tests pass on the new checkout.
+
+Next-phase outcome: acceptance direction and pending contract recorded. No default,
+cache, project, or deployed service changed in this documentation checkpoint.
+
+## Authorized forest execution, 2026-11-18
+
+Implement the canonical Forest contract and ADR-0145 from task/mirror-first-contract.
+Use a bounded source-selection factory shared by six NoDb consumers. Extend HTTP
+acquisition for an absolute selection budget and bounded XML fallback, add typed
+availability errors and durable selection events, and preserve explicit-source code.
+Keep old saved identities explicit; environment defaults initialize only absent state.
+
+The service branch task/mirror-first-rollout owns an official-source importer and
+portable Compose integration. Import Idaho SSURGO and retained STATSGO2 Virgin
+Islands downloads as a scoped combined release, independently compare raw projections,
+and build keys outside the replay corpus. Do not claim nationwide data from this
+regional release. Use forest (verified local hostname) with isolated qualification
+worker/queue and the actual runtime image first; preserve shared dirty checkout and
+unrelated running services. Activate only the narrowly changed dev services after
+bounded tests. Production/test-production activation remains outside this phase.
+
+Progress: contract ancestor 43c78bf95, ADR-0145 and independent reviews complete.
+Mirror-first implementation, regional import and forest Compose qualification pass.
+New services run on forest; shared clients remain unchanged pending protected-policy
+integration approval. Evidence: artifacts/forest-validation.md and the service's
+artifacts/forest directory.
+
+Surprises & Discoveries: PostgreSQL COPY requires ANALYZE before relationship joins
+to avoid a poor initial join plan; the canceled candidate import left the prior
+release intact. Review caught XML error envelopes treated as empty data, legacy
+config precedence, and a connection leak after evidence-read failure; all fixed
+and covered. An initial qualification comparator missed whitespace in Build Date
+comments; use the existing exact two-comment-value canonicalizer and retain the
+diagnostic failure. No numerical tolerance or extra exclusion was added.
+
+Decision Log: keep only the regional source scope in the manifest; missing keys
+use bounded SDA fallback. New project defaults persist, existing identity-absent
+projects resolve configuration/defaults, and saved identities remain explicit.
+Forest qualification uses the actual worker image and UID/GID with a separate Redis
+and queue. The shared dirty checkout and existing services are preserved.
+
+Outcomes & Retrospective: SSURGO MUKEY 78905 and STATSGO2 MUKEY 1390208 are outside
+all replay caches. Each produces 76 prepared soils with exact same-image reference
+parity through primary cold/warm and warm fallback. Base sidecar hashes and final
+inputs are independently read back; dual failure generates no soils. Shared forest
+default activation and public/test-production/production rollout remain distinct.

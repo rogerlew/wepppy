@@ -27,3 +27,8 @@ Smoke/axe local auth convention:
   - Expected keys:
     - `ALLY_AGENT_EMAIL`
     - `ALLY_AGENT_PASSWORD`
+
+The optional dev soil-data profile uses soil_import_password, soil_serve_password
+and soil_database_url. Keep owner mode 0600 and add named-user read ACLs for UID 999
+(database passwords) or UID 10001 (API database URL). See
+[forest soil-data configuration](../../docs/infrastructure/soil-data-forest.md).

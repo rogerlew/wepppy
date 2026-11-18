@@ -212,7 +212,7 @@ def test_equal_bytes_new_identity_cannot_leave_old_sidecar_on_failure(tmp_path, 
 def test_real_resolver_process_is_killed_at_deadline(monkeypatch):
     monkeypatch.setattr(source, '_RESOLVER_SCRIPT', 'import time; time.sleep(30)')
     started = time.monotonic()
-    with pytest.raises(source.SoilDataSourceError, match='resolution'):
+    with pytest.raises(source.SoilServiceUnavailable, match='deadline_exceeded'):
         source._resolve_addresses('localhost', 80, started + 0.1)
     assert time.monotonic() - started < 1
 
