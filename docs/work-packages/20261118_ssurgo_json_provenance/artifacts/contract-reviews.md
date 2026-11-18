@@ -14,3 +14,13 @@ Read-only reviewers: /root/contract_correctness (reviewer) and
 Residual requirements: direct NoDb lock/reload and SQLite/HTTP boundary tests, all six
 call sites, rollback and externally isolated real-service generated-soil comparison.
 No public deployment or scientific parameterization authority is inferred.
+
+Implementation review refinement: the reviewers identified that general 16 MiB
+metadata could be repeated into every event and artifact sidecar. Adopt the explicit
+64 KiB metadata bound and 64-level JSON nesting bound in the canonical contract;
+query bodies retain 16 MiB. This narrows the client profile, so larger manifests
+fail explicitly rather than claiming compatibility. Stdlib resolver calls were
+confirmed to exceed socket timeouts; a killable short-lived resolver child is the
+smallest bounded fix, with addresses cached per collection to avoid per-query
+process cost. No external dependency/service is added. These reviewed refinements
+are committed separately before the implementation commit.

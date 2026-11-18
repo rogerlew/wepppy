@@ -31,7 +31,10 @@ Changing source settings does not relabel existing .sol files; rebuild explicitl
 
 Use form-urlencoded POST query plus format=JSON+COLUMNNAME, no redirects, bounded
 connect/read timeouts, a 30-second absolute network deadline (including headers),
-and 16 MiB response bytes on metadata and POST. Request identity encoding and reject
+and response byte caps of 64 KiB for metadata and 16 MiB for POST. The smaller
+metadata cap bounds amplification when the observed manifest is retained in fetch
+events and base-soil sidecars; this is an explicit client profile limit, not a claim
+that arbitrary larger SDA metadata is supported. Reject JSON nesting deeper than 64. Request identity encoding and reject
 compressed responses before parsing; read streaming bodies under the same deadline. Batch at most 1000 sorted keys so
 the service's 64 KiB query limit is respected even for long identifiers. For a
 collection's first missing-data fetch, GET the same service prefix's /v1/metadata,
