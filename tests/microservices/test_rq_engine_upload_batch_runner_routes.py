@@ -51,7 +51,9 @@ class _Lease:
 
 
 @pytest.fixture(autouse=True)
-def bounded_vector_normalizer(monkeypatch: pytest.MonkeyPatch) -> None:
+def bounded_vector_normalizer(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "batch-upload-route-test")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
     real_prepare = vector_upload_normalization.prepare_vector_upload
 
     def prepare(**kwargs):

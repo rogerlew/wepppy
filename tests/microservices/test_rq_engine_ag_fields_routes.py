@@ -173,6 +173,8 @@ def route_context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     from tests.factories.feature_access import stub_feature_accounts
     stub_feature_accounts(monkeypatch)
     monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "ag-fields-route-test")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
     controller = DummyAgFields(tmp_path)
     auth_calls: list[tuple[object, str]] = []
     monkeypatch.setattr(ag_fields_routes, "require_jwt", lambda request, required_scopes=None: {"sub": "2", "scopes": required_scopes})

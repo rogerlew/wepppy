@@ -29,6 +29,12 @@ from wepppy.microservices.vector_upload_normalization import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def vector_filesystem(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "vector-normalizer-test")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
+
+
 @dataclass
 class _Reservation:
     reservation_id: str = "reservation-test"
