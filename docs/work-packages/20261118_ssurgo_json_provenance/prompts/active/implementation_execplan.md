@@ -19,6 +19,8 @@ geographic/live parity is deferred until SDA recovery, not a prerequisite.
 
 ## Progress
 
+- [x] (2026-11-18) Implement and validate operator-directed deployment-script repair (118 tests; production integration pending): retain absence for first-install services, preserve existing rollback images, remove only newly created containers on failure, and preserve volumes. Reuse already built application images.
+
 - [x] (2026-11-18) Assemble combined committed release in isolated task worktree; preserve shared WIP. Back up production application database and successfully rehearse account migration on explicitly asserted disposable PostgreSQL database; all existing data hashes unchanged.
 - [ ] Finish production service preparation, exact-candidate integration gate, retained builds, live migration and full host rollout.
 
@@ -82,6 +84,8 @@ cover real filesystem/SQLite and local HTTP boundaries, plus real generated outp
 
 ## Surprises & Discoveries
 
+The canonical script rejects first installation: capture_known_good_state requires a running container for every candidate service. National soil services have never existed on wepp1. The operator chose a script repair over a one-time manual bootstrap. Absence must be captured and checked, not treated as an existing known-good image.
+
 Production discovery: all three hosts are clean at 917708c90dce46bbab920ecf9ce5f315e8611290; wepp1 application database reports f6b8d27a901c. The account migration a7c1106e42b9 exists on committed local master, not remote master b301ff64c. Its precondition rejects duplicate normalized login emails. Release assembly must account for local-master changes rather than assume remote master contains the requested migrations. No production mutation has occurred.
 
 The regional default failed all 22 Colorado keys in cavernous-oxygen while SDA returned HTTP 5xx. National imports contain those keys and both SSURGO/STATSGO2 domains; source/import parity and real queued recovery passed. Treat national loading separately from deferred live geographic parity.
@@ -102,6 +106,8 @@ a matched-environment transport result, not proof of deployment-image equivalenc
 
 ## Decision Log
 
+2026-11-18: Repair the existing canonical entry point for first-install services. A missing running container is accepted only if no stopped container exists and inventory succeeds. Record zero-count rows; verify absence until cutover; on failure remove newly introduced containers without deleting volumes, restore existing images, and retain the RQ fence if either operation fails. Use build-once direct transfer as the stated default: export/load exact image IDs, verify a checksum-pinned source receipt, and create separate host-local candidates without rebuilding. No registry is introduced. Keep application builds reusable across deployment-tool-only changes.
+
 2026-11-18: Operator prioritizes wepp.cloud over forest1 and explicitly requires a full deployment to include other changes and database migrations. Prepare a combined release in an isolated task worktree, preserve shared checkout WIP, and use scripts/deploy-production.sh with installed wctl in wepp1 → wepp2 → wepp3 order. Preserve the independent CILogon registration/credential activation hold. Back up and rehearse application migration against an explicitly asserted disposable database before live migration. Reuse national soil import/parity evidence; activate national SSURGO and STATSGO2 together, then verify generated soil artifacts from production workers.
 
 2026-11-18: Nationwide SSURGO and STATSGO2 are required for the shared default. The regional rollout was insufficient during the SDA outage; loading national data is mandatory while full live parity remains deferred. Canonical scope is now in soil-data-source-provenance-contract.md, Shared default geographic coverage.
@@ -121,6 +127,8 @@ files or silently relabel historical rows. Require an explicit expected release 
 warm-cache reuse needs no metadata request and cannot mix releases.
 
 ## Outcomes & Retrospective
+
+2026-11-18 production preparation: PR #678 integrated, full wepp1 images built and retained, national SQL verified, and database rehearsal passed. The canonical first-install limitation required a bounded operator-directed script repair. Image reuse and first-install tests pass; actual-image read-only checks pass. Script integration, local release bindings, live migration, host activation, and generated-output checks remain pending.
 
 National recovery completed on forest: 22,073,263 imported rows, source-family projection parity, successful real-project build/preparation, 152 reference-matching canary inputs, and authenticated HTTPS checks. Retained evidence is artifacts/national-activation.json. Regional qualification alone was insufficient for the outage-resilience deployment objective.
 

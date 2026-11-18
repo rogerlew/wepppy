@@ -214,3 +214,21 @@ Complete real-image producer qualification, CI integration, production-host
 receipt creation, evidence approval and production-equivalent recovery remain
 open. The canonical deploy integration is implemented but not yet authorized for
 M5 rollout. Ordinary `--skip-build` has not been weakened.
+
+## Reusing a source host's retained images
+
+`deploy-production.sh --retain-images-from <source-receipt> --source-receipt-sha256
+<sha256>` prepares a local candidate from already loaded immutable images. Verify
+the transport archive checksums, load the images, and retain the operator-owned
+source receipt as a 0600 file. The source receipt's image names must cover the
+local Compose selection, and application/build inputs must match (reviewed tooling
+and documentation differences remain allowed). Mutable local tags are not used
+as image authority. This command performs no build or service activation.
+
+The resulting local receipt still needs a release decision and host binding;
+another host's approval cannot authorize local configuration. Resume normally.
+For a new service, repeat its explicit `--new-service NAME` declaration in creation
+and resume. Existing stopped containers and failed inventory queries cannot be
+classified as first installations. Rollback restores pre-cutover absence by
+removing only new containers, preserving volumes and retaining the fence when
+absence or existing-service recovery cannot be verified.
