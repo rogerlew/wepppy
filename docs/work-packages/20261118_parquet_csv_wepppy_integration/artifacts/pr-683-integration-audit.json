@@ -1,0 +1,190 @@
+{
+  "pr": {
+    "mergeCommit": {
+      "oid": "92d1eb8771e3a5319e0a27f149c421e065a17482"
+    },
+    "mergedAt": "2026-11-18T23:05:55Z",
+    "state": "MERGED",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44416699225/job/135198784171",
+        "name": "artifact-observability",
+        "startedAt": "2026-11-18T22:59:27Z",
+        "status": "QUEUED",
+        "workflowName": "Artifact Observability"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44417711764/job/135202234721",
+        "name": "artifact-observability",
+        "startedAt": "2026-11-18T23:05:56Z",
+        "status": "QUEUED",
+        "workflowName": "Artifact Observability"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44417711905/job/135202235205",
+        "name": "broad-exception-guards",
+        "startedAt": "2026-11-18T23:05:56Z",
+        "status": "QUEUED",
+        "workflowName": "Broad Exception Guards"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44417711893/job/135202235251",
+        "name": "code-quality-observability",
+        "startedAt": "2026-11-18T23:05:56Z",
+        "status": "QUEUED",
+        "workflowName": "Code Quality Observability"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44417711824/job/135202235070",
+        "name": "docs-quality",
+        "startedAt": "2026-11-18T23:05:56Z",
+        "status": "QUEUED",
+        "workflowName": "Docs Quality"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44417711780/job/135202235664",
+        "name": "integration-governance",
+        "startedAt": "2026-11-18T23:05:58Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "Integration Governance"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44417711749/job/135202235593",
+        "name": "Verify exact-source integration eligibility",
+        "startedAt": "2026-11-18T23:05:59Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "Publish WEPPcloud common runtime image"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44417711725/job/135202234710",
+        "name": "stubtest",
+        "startedAt": "2026-11-18T23:06:24Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "Stubtest"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-18T23:00:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44416699253/job/135198784311",
+        "name": "broad-exception-guards",
+        "startedAt": "2026-11-18T23:00:18Z",
+        "status": "COMPLETED",
+        "workflowName": "Broad Exception Guards"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-18T22:59:53Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44416699162/job/135198783854",
+        "name": "code-quality-observability",
+        "startedAt": "2026-11-18T22:59:29Z",
+        "status": "COMPLETED",
+        "workflowName": "Code Quality Observability"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-18T23:00:17Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44416699198/job/135198784049",
+        "name": "docs-quality",
+        "startedAt": "2026-11-18T22:59:54Z",
+        "status": "COMPLETED",
+        "workflowName": "Docs Quality"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-18T23:03:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44416699248/job/135199883669",
+        "name": "integration-governance",
+        "startedAt": "2026-11-18T23:01:35Z",
+        "status": "COMPLETED",
+        "workflowName": "Integration Governance"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-18T23:03:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44416699235/job/135200215690",
+        "name": "Evaluate base-owned integration policy",
+        "startedAt": "2026-11-18T23:02:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Integration Policy"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-18T23:04:30Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44416699187/job/135198784118",
+        "name": "stubtest",
+        "startedAt": "2026-11-18T23:00:29Z",
+        "status": "COMPLETED",
+        "workflowName": "Stubtest"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-18T23:06:22Z",
+        "conclusion": "FAILURE",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44416699187/job/135201463213",
+        "name": "test-baseline",
+        "startedAt": "2026-11-18T23:04:31Z",
+        "status": "COMPLETED",
+        "workflowName": "Stubtest"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-18T23:03:36Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/actions/runs/44416699235/job/135200916865",
+        "name": "integration-governance-policy",
+        "startedAt": "2026-11-18T23:03:31Z",
+        "status": "COMPLETED",
+        "workflowName": "Integration Policy"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-18T23:00:08Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/rogerlew/wepppy/runs/135199109959",
+        "name": "markdown-doc",
+        "startedAt": "2026-11-18T23:00:06Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "url": "https://github.com/rogerlew/wepppy/pull/683"
+  },
+  "approved_candidate": "92d1eb8771e3a5319e0a27f149c421e065a17482",
+  "approved_policy_digest": "2838c086c553c12408fb27b14833c4d3a38cdcd4ff3a31833dae197a53b121f7",
+  "owner_approval": "Explicit conversation approval; Actions INTEGRATION_POLICY_APPROVAL set and read back before governance reruns.",
+  "integration": "Fast-forward of eligible PR head, containing merge of master; GitHub confirms PR merged. Shared local master checkout and its unrelated WIP were not modified.",
+  "validation": "143 deployment regression tests passed; clean wrapper receipt. Prior full 14535-pass suite and scoped repair evidence remain in validation.md.",
+  "deployment_receipt_raw_sha256": "385a1e644758e1ad4cdfde8e09e8ed2b4c7e5afe17af7212ee266d1e35409f1b",
+  "limitations": "Optional baseline CI was still running at integration; artifact-observability queued with no registered homelab-labelled runner. Required integration-governance and integration-governance-policy passed. No deployment performed.",
+  "receipt": "pr-683-integration-receipt.json"
+}
