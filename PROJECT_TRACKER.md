@@ -1,4 +1,4 @@
-In progress: [SSURGO JSON and source provenance](docs/work-packages/20261118_ssurgo_json_provenance/package.md) — explicit server/profile/release, isolated caches, retrieval evidence and fresh-cache soil parity. Contract review pending; no deployment.
+In progress: [SSURGO JSON and source provenance](docs/work-packages/20261118_ssurgo_json_provenance/package.md) — explicit server/profile/release, isolated caches, retrieval evidence and fresh-cache soil parity. Implementation/reviews complete; 501 canonical artifacts match in the frozen numerical environment. Task-branch handoff; no deployment.
 
 Implemented and enforced: [Integration and history preservation governance](docs/work-packages/20261116_integration_history_governance/package.md) — preserved history, live checkout identity, trusted required checks and exact-source release gates are active. Independent reviews, canaries, image readback and recovery pass; regression repairs and all four RQ fixture fixes pass scoped validation. Five-integration observation remains open.
 

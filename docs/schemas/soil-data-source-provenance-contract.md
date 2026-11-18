@@ -1,6 +1,6 @@
 # Soil data transport and provenance contract
 
-Status: accepted operator direction, implementation pending. The operator requested
+Status: implemented and validated for bounded cache replay (2026-11-18 UTC). The operator requested
 WEPPpy JSON integration and provenance identifying the queried soil-data server.
 This contract governs SurgoSoilCollection and all six Soils collection call sites.
 It is additive to NoDb persistence/concurrency and generated-soil artifact contracts.
@@ -106,3 +106,5 @@ selected-identity clearing, first-row-wins parsing and legacy XML regressions. R
 fresh-cache real Rust/PostgreSQL/JSON builds with external routing unavailable and
 compare canonical soil bytes/selection/invalid outcomes against the frozen legacy
 reference. Keep known source limitations and unrelated project workflow gaps explicit.
+
+Operator usage and provenance inspection: [JSON soil source guide](../dev-notes/soil-json-source.md).
