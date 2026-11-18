@@ -1,7 +1,10 @@
 # Evaluate a bounded Rust Parquet CSV CLI and Python harness
 
 
-This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
+Completed 2026-11-18 against implementation `fe82d99d5c5ec2bae60733e1c491f0cadebd9c58`.
+Standalone acceptance passed; runtime integration and broad pytest remain deferred.
+
+This archived ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
 current together with the package tracker. Execution was authorized by the operator after scaffold commit 11ace80c8.
 M0 ancestor and independent contract reviews were completed before implementation.

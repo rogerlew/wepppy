@@ -1,9 +1,9 @@
 # Parquet CSV CLI tracker
 
 **Updated**: 2026-11-18 UTC
-**Phase**: Standalone implementation and evaluation complete; integration deferred
+**Phase**: Closed locally; standalone accepted, integration and broad gate deferred
 **Security impact**: high; independent security review retained
-**Plan**: [implementation_execplan.md](prompts/active/implementation_execplan.md)
+**Plan**: [implementation_execplan.md](prompts/completed/implementation_execplan.md)
 
 ## Task board
 
@@ -62,3 +62,10 @@ tooling fixes receive their own exact-binary focused validation.
 
 Task branch: `codex/parquet-csv-cli-package` in
 `/home/workdir/wepppy-parquet-csv-cli-package`. Shared-master WIP was untouched.
+
+## Closeout
+
+Implementation commit: `fe82d99d5c5ec2bae60733e1c491f0cadebd9c58`. Final checks: 94 canonical Python tests,
+13 Rust tests, formatting, Clippy, documentation lint and changed-file exception
+enforcement passed. The rebuilt binary matches all retained benchmark/readback
+evidence. Plan archived under `prompts/completed/`; no runtime integration.

@@ -1,6 +1,6 @@
 # Bounded Parquet CSV CLI and Python harness
 
-**Status**: Standalone implementation evaluated; see [decision](artifacts/decision.md) (2026-11-18)
+**Status**: Closed 2026-11-18; standalone evaluation accepted, runtime integration deferred
 **Timezone**: UTC
 **Owner**: Roger Lew; implementation: Codex
 
@@ -112,7 +112,7 @@ is context, not evidence of a new compromise or authorization to block traffic.
 
 ## References and ownership
 
-- [ExecPlan](prompts/active/implementation_execplan.md) and [tracker](tracker.md).
+- [ExecPlan](prompts/completed/implementation_execplan.md) and [tracker](tracker.md).
 - Existing behavior: `wepppy/microservices/browse/_download.py` and
   `wepppy/microservices/browse/parquet_tables.py`.
 - Lifecycle precedent: `wepppy/microservices/shape_converter/convert.py` and
@@ -135,3 +135,6 @@ See [decision](artifacts/decision.md), [correctness review](artifacts/20261118_c
 [validation](artifacts/validation.md). Source and binary digests accompany raw
 benchmark, lifecycle and independent CSV readback records. Broad-suite disposition
 is separate from standalone acceptance; no production repair is claimed.
+
+Accepted implementation commit: `fe82d99d5c5ec2bae60733e1c491f0cadebd9c58`. Closeout changes only documentation and
+archives the completed plan; see the decision and validation for exact evidence.

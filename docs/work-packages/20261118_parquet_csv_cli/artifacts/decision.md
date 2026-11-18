@@ -1,7 +1,7 @@
 # Standalone evaluation decision
 
 Date: 2026-11-18 UTC. Decision: **go for the standalone CLI and Python harness**,
-subject to the final validation receipt recorded in [validation](validation.md).
+validated by the final receipt recorded in [validation](validation.md).
 This recommends a separately authorized integration package; it does not authorize
 runtime wiring, image publication, deployment or a production repair claim.
 
@@ -123,3 +123,6 @@ exhaustive fuzzing claim is made. The operator explicitly deferred broad reposit
 The stopped run and its cancellation-induced failure remain recorded; no green
 full-suite claim is made. This deferral does not weaken the standalone tests or
 artifact acceptance criteria.
+
+Accepted source commit: `fe82d99d5c5ec2bae60733e1c491f0cadebd9c58`. The final audit commit changes only
+closeout documentation and plan location; executable source remains identical.

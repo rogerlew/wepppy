@@ -105,7 +105,7 @@ pytest is deferred by explicit operator instruction until integration.
 Documentation lint passed on the package, contract, dependency registry, README
 and project board. Changed-file exception enforcement passed (five Python files,
 no unsuppressed broad catches). Rust formatting and Clippy with warnings denied
-passed. Source-only commit identity is attached in closeout. Remote integration,
+passed. Accepted implementation commit: `fe82d99d5c5ec2bae60733e1c491f0cadebd9c58`. Remote integration,
 publication and deployment: not performed.
 
 ## Observe-only tooling and spelling
