@@ -19,7 +19,7 @@ DATABASE = (SecretSourceSpec('POSTGRES_PASSWORD', 'POSTGRES_PASSWORD_FILE',
             SecretSourceSpec('DATABASE_URL', decoder='database-url', fallback_for=('SQLALCHEMY_DATABASE_URI',)))
 FLASK = _sources('SECRET_KEY', 'SECURITY_PASSWORD_SALT')
 MAIL_OAUTH = (*_sources('ZOHO_NOREPLY_EMAIL_PASSWORD', 'OAUTH_GITHUB_CLIENT_SECRET',
-                       'OAUTH_GOOGLE_CLIENT_SECRET', 'OAUTH_ORCID_CLIENT_SECRET'),
+                       'OAUTH_GOOGLE_CLIENT_SECRET', 'OAUTH_ORCID_CLIENT_SECRET', 'OAUTH_CILOGON_CLIENT_SECRET'),
               *(SecretSourceSpec(name) for name in ('GITHUB_OAUTH_CLIENT_SECRET', 'GITHUB_OAUTH_SECRET_KEY',
                                                    'GOOGLE_OAUTH_CLIENT_SECRET', 'ORCID_OAUTH_CLIENT_SECRET',
                                                    'ORCID_OAUTH_SECRET_KEY')))

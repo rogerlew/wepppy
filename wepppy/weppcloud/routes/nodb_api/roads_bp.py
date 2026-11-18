@@ -13,7 +13,12 @@ from flask import Response, jsonify, render_template
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.microservices.upload_boundary import UploadBoundaryError, write_stream_to_destination
+from wepppy.microservices.vector_upload_normalization import (
+    RetentionActor,
+    VectorUploadError,
+    prepare_vector_upload,
+    validate_feature_collection_geometries,
+)
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.roads import Roads
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -38,7 +43,6 @@ from .._common import *  # noqa: F401,F403
 
 roads_bp = Blueprint("roads", __name__)
 ROADS_UPLOAD_GEOJSON_MAX_BYTES = 10 * 1024 * 1024
-_UPLOAD_CHUNK_BYTES = 1024 * 1024
 
 
 @roads_bp.after_request
@@ -121,24 +125,24 @@ def _invalidate_roads_timestamp(wd: str) -> None:
     prep.remove_timestamp(TaskEnum.run_roads)
 
 
-def _roads_upload_size_error(max_bytes: int) -> str:
-    limit_mb = max(1, int(max_bytes // (1024 * 1024)))
-    return f"Roads upload exceeds maximum size of {limit_mb} MB."
-
-
-def _save_roads_upload_with_limit(uploaded, destination: str, *, max_bytes: int) -> int:
-    stream = getattr(uploaded, "stream", None)
-    if stream is None:
-        raise UploadBoundaryError("Uploaded file stream is unavailable.")
-
-    return write_stream_to_destination(
-        stream,
-        Path(destination),
-        overwrite=True,
-        max_bytes=max_bytes,
-        chunk_bytes=_UPLOAD_CHUNK_BYTES,
-        size_error_message=_roads_upload_size_error(max_bytes),
+def _run_vector_evidence_roots(wd: str) -> tuple[Path, ...]:
+    root = Path(wd)
+    return (
+        root / "roads" / "vector_upload_attempts",
+        root / "ag_fields" / "vector_upload_attempts",
+        root / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
+        root / "archives" / "private",
     )
+
+
+def _roads_retention_actor() -> RetentionActor:
+    try:
+        user_id = int(getattr(current_user, "id", 0) or 0)
+    except (TypeError, ValueError):
+        user_id = 0
+    if user_id > 0:
+        return RetentionActor("human", user_id)
+    return RetentionActor("unattributed", None)
 
 
 def _roads_run_results_report_links(
@@ -352,53 +356,47 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
         )
 
     filename = str(uploaded.filename)
-    if not filename.lower().endswith(".geojson"):
-        return upload_error_factory(
-            "Roads upload must be a .geojson file.",
-            status_code=400,
-            code="invalid_upload_extension",
+    attempt_root = Path(controller.roads_upload_dir) / "vector_upload_attempts"
+
+    def _validate_candidate(_path: Path, payload: Dict[str, object]) -> Dict[str, object]:
+        return validate_feature_collection_geometries(
+            payload,
+            ("LineString", "MultiLineString"),
         )
-    os.makedirs(controller.roads_upload_dir, exist_ok=True)
-    source_path = os.path.join(controller.roads_upload_dir, "roads.upload.source.geojson")
+
     try:
-        bytes_written = _save_roads_upload_with_limit(
-            uploaded,
-            source_path,
-            max_bytes=ROADS_UPLOAD_GEOJSON_MAX_BYTES,
+        prepared = prepare_vector_upload(
+            raw_filename=filename,
+            stream=uploaded.stream,
+            endpoint_max_bytes=ROADS_UPLOAD_GEOJSON_MAX_BYTES,
+            attempt_root=attempt_root,
+            evidence_roots=_run_vector_evidence_roots(wd),
+            filesystem_root=Path(wd),
+            project_key=f"run:{runid}",
+            workflow="roads",
+            project_identity=runid,
+            actor=_roads_retention_actor(),
+            validator=_validate_candidate,
         )
-    except UploadBoundaryError as exc:
-        status_code = 413 if getattr(exc, "status_code", 400) == 413 else 400
-        code = "payload_too_large" if status_code == 413 else "validation_error"
-        return upload_error_factory(str(exc), status_code=status_code, code=code)
+        canonical_path = Path(controller.roads_upload_dir) / "roads.uploaded.geojson"
+        summary = prepared.publish_transactional(
+            mutation=lambda candidate, commit: controller.set_uploaded_geojson(
+                str(candidate), publication_commit=commit,
+            ),
+            canonical_path=canonical_path,
+            canonical_relative_path=os.fspath(canonical_path.relative_to(wd)),
+        )
+    except VectorUploadError as exc:
+        return upload_error_factory(str(exc), status_code=exc.status_code, code=exc.code)
+    except (FileNotFoundError, ValueError) as exc:
+        return upload_error_factory(str(exc), status_code=400, code="validation_error")
     except OSError as exc:
-        try:
-            os.remove(source_path)
-        except OSError:
-            pass
         return upload_exception_factory(
-            f"Failed to save Roads upload: {exc}",
+            "Failed to persist Roads upload.",
             status_code=500,
             code="internal_error",
-            details=f"Failed to save Roads upload: {exc}",
+            details=str(exc),
         )
-
-    if bytes_written <= 0:
-        try:
-            os.remove(source_path)
-        except OSError:
-            pass
-        return upload_error_factory(
-            "Roads upload is empty.",
-            status_code=400,
-            code="empty_upload",
-        )
-
-    try:
-        summary = controller.set_uploaded_geojson(str(source_path))
-    except FileNotFoundError as exc:
-        return upload_error_factory(str(exc), status_code=404, code="not_found")
-    except ValueError as exc:
-        return upload_error_factory(str(exc), status_code=400, code="validation_error")
 
     _invalidate_roads_timestamp(wd)
     return success_factory(summary)

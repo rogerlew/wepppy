@@ -38,12 +38,27 @@ Point-source preparation splits and orients monotonic line segments and identifi
 low points. Non-channel hillslope low points require successful run-stage tracing
 to a channel; unsuccessful traces are recorded as skipped contributors.
 
-Unrutted replacement uses hillslope-specific overlap rather than requiring
-point-source low-point delivery. Inclusion requires at least 10 m overlap and
-an overlap-length / modeled-hillslope-width ratio of at least 0.60. At most three
-qualifying crossings per hillslope are retained, ranked by descending overlap
-length with segment-ID tie breaking. Required fill/buffer inputs, area closure,
-and short downstream landuse handling are detailed in the
+Unrutted replacement keeps contour crossings intact through longitudinal elevation
+reversals and groups connected equal-input pieces before eligibility. It requires
+10 m overlap and retains at most three crossings per hillslope; the former 60%
+width gate is removed. Each strip models transverse road flow at 4%, with physical
+road width as road OFE length. Strips and remainder conserve original hillslope
+area. Width compression reports modeled road-area loss explicitly.
+
+This is a simplified parallel-profile abstraction: switchbacks and shared upslope
+contributing areas are not resolved. Missing fill/buffer inputs still fail explicitly. RUPC-02 places a road at the
+profile top when ordinary upstream length is non-positive, omitting that OFE.
+The road receives no modeled upstream runon. Road/fill dimensions stay fixed;
+positive downhill landuse (even below 10 m) preserves area, and exact fit uses
+road/fill only. A road plus fill longer than the hill fails with dimensions to
+inspect. Area compensation stays downhill for top-placed strips.
+
+Existing strip preparation remains reusable; Run again is required for current
+`unrutted_top_placement_v1` results. Earlier preparation still requires Prepare.
+The summary holds the authoritative placement marker; per-crossing provenance
+records original/final lengths and separate top/bottom compensation. Old archives
+restore as historical only after their ordinary artifact checks pass. See the
+[strip contract](../../../../docs/schemas/roads-unrutted-strip-contract.md) and
 [implementation specification](specification.md#settled-step-4-contract-details-implemented-2026-04-08).
 
 ## Workflow and integration
@@ -73,7 +88,18 @@ pointer encoding. See the [flow-direction contract](../../../../docs/schemas/roa
 
 | Component | Responsibility |
 | --- | --- |
-| [roads.py](roads.py) | NoDb state, upload/mapping, preparation, contributor assembly, execution and queries |
+| [roads.py](roads.py) | Stable NoDb facade, lifecycle/lock boundaries, upload, execution and compatibility adapters |
+| [_constants.py](_constants.py) | Shared design vocabulary and unchanged parameter bounds, re-exported by the facade |
+| [_inputs.py](_inputs.py) | Input normalization, validation and attribute mapping |
+| [_prepare.py](_prepare.py) | Preparation arguments, candidate summary construction and summary logging |
+| [_soil_inputs.py](_soil_inputs.py), [_management_inputs.py](_management_inputs.py), [_slope_inputs.py](_slope_inputs.py) | Native input writers with unchanged scientific transformations |
+| [_spatial.py](_spatial.py) | Terrain sampling and hillslope/road geometry selection |
+| [_queries.py](_queries.py), [_parameterization_support.py](_parameterization_support.py) | Inspection views, retained templates and execution provenance |
+| [_pass_routing.py](_pass_routing.py), [_native_runner.py](_native_runner.py) | PASS climate identity, workspace staging and facade-injected native runners |
+| [_reporting.py](_reporting.py) | Modeled-area accounting and report resource regeneration |
+| [_execution.py](_execution.py) | Run-local outcome records, contributor orchestration and summary construction |
+| [_point_source.py](_point_source.py) | Point-source tracing, input assembly and contributor execution |
+| [_unrutted_execution.py](_unrutted_execution.py), [_unrutted_planning.py](_unrutted_planning.py), [_unrutted_native.py](_unrutted_native.py) | Unrutted selection, strip geometry and native strip/remainder execution |
 | [monotonic_segments.py](monotonic_segments.py) | Line segmentation and low-point attribution |
 | [parameterization.py](parameterization.py) | Retained baseline, validated role overrides and resolution |
 | [_parameterization_comparisons.py](_parameterization_comparisons.py) | Execution input evidence and compatible retained-run comparisons |
@@ -84,6 +110,13 @@ pointer encoding. See the [flow-direction contract](../../../../docs/schemas/roa
 | [roads_pure.htm](../../../weppcloud/templates/controls/roads_pure.htm) | Run-page control and user-guide link |
 | [roads.js](../../../weppcloud/controllers_js/roads.js) | Upload, mapping and job UI |
 | [roads_parameterization.js](../../../weppcloud/controllers_js/roads_parameterization.js) | Parameter inspection, editing and comparison UI |
+
+The facade retains existing method signatures, lifecycle decorators and transaction
+boundaries. Internal helpers call facade methods so existing caller/test seams
+remain available. Native runner callables are passed from the facade explicitly.
+Execution accumulators and open terrain datasets are local to one attempt and
+are never stored in `roads.nodb`. Adding a collaborator must not create another
+persistence owner or bypass the existing lifecycle guards.
 
 ## Parameterization ownership and overrides
 

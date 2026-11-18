@@ -53,6 +53,7 @@ describe("Omni controller", () => {
                     <input type="radio" name="omni_contrast_selection_mode" value="cumulative" checked />
                     Cumulative
                 </label>
+                <input type="file" name="omni_contrast_geojson" accept=".geojson,.json,.zip,.parquet,.geoparquet" />
                 <button type="button" data-omni-contrast-action="run-contrasts">Run contrasts</button>
                 <button type="button" data-omni-contrast-action="delete-contrasts">Delete contrasts</button>
             </form>
@@ -119,6 +120,12 @@ describe("Omni controller", () => {
         delete global.url_for_run;
         delete window.WCControllerBootstrap;
         document.body.innerHTML = "";
+    });
+
+    test("contrast vector upload advertises every supported format", () => {
+        expect(document.querySelector("input[name='omni_contrast_geojson']").accept).toBe(
+            ".geojson,.json,.zip,.parquet,.geoparquet"
+        );
     });
 
     function addScenarioAndSelect(type) {

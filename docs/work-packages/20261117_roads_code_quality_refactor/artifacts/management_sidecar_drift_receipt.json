@@ -1,0 +1,20 @@
+{
+  "path": "wepppy/wepp/management/scripts/man42_5.man.json",
+  "head_sha256": "c20bdf210f1a10aac0bfbc6a7e13a51e079ee4057d2236d92ac0d397e69911b0",
+  "after_v5_sha256": "9ba3c8e1a9961adcb767f7cd7f32ffa21f66bff8ca909d35892720131261017b",
+  "restored_sha256": "c20bdf210f1a10aac0bfbc6a7e13a51e079ee4057d2236d92ac0d397e69911b0",
+  "semantic_delta": {
+    "added": {
+      "_pmet_plant_names": null
+    }
+  },
+  "baseline_bytes_equal_head": true,
+  "authorization": "Root directed preserving drift evidence then exact HEAD restoration after v5.",
+  "writer_assessment": "tests/test_imports.py recursively imports modules; export_covers.py changes cwd to scriptsdir at module import, and data/UnDisturbed/dump_to_json.py writes every cwd *.man. Running the writer on an isolated copied input reproduces the observed after-v5 bytes exactly.",
+  "isolated_reproduction": {
+    "reproduced_sha256": "9ba3c8e1a9961adcb767f7cd7f32ffa21f66bff8ca909d35892720131261017b",
+    "matches_observed_v5_drift": true,
+    "input_sha256": "f1a43836b628685a166315308eb3727ba58ca17c35ed529193ed72b562c86019",
+    "source_unchanged": true
+  }
+}

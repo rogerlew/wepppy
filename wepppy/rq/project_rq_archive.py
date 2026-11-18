@@ -11,15 +11,35 @@ from wepppy.query_engine.catalog_refresh import (
 from wepppy.wepp.interchange import _roads_lifecycle as roads_lifecycle
 
 import errno
+import hashlib
+import io
+import json
 import logging
 import os
 import shutil
 import stat
 import zipfile
+from contextlib import ExitStack
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, ContextManager, Mapping, Sequence
+
+from wepppy.microservices.vector_retention_lifecycle import (
+    _sensitive as _is_sensitive_vector_path,
+    discover_retention_scopes,
+)
+from wepppy.microservices.vector_upload_normalization import (
+    RedisRetentionLedger,
+    RedisScopeLeaseFactory,
+    acquire_retention_maintenance_lease,
+    RetentionActor,
+    VectorUploadError,
+    assert_project_retention_capacity,
+    begin_retention_rebuild_obligation,
+    complete_retention_rebuild_obligation,
+    reconcile_retention,
+)
 
 _ARCHIVE_DISK_HEADROOM_RATIO = 0.02
 _ARCHIVE_MIN_HEADROOM_BYTES = 64 * 1024 * 1024
@@ -30,6 +50,23 @@ _PROJECT_CONFIG_TRANSACTION_FILES = frozenset({
     "roads.lifecycle.lock",
     ".config-amendment.pending.json",
 })
+
+
+class _BoundedPrivateArchiveFile(io.BufferedRandom):
+    """Bound ZIP writes by final file offset, including header rewrites."""
+
+    def __init__(self, path: str, limit: int) -> None:
+        self._limit = limit
+        super().__init__(io.FileIO(path, "w+"))
+
+    def write(self, data: bytes) -> int:
+        if self.tell() + memoryview(data).nbytes > self._limit:
+            raise VectorUploadError(
+                "vector_retention_quota_exceeded",
+                "Private archive exceeded its reserved size; retry the archive.",
+                status_code=507,
+            )
+        return super().write(data)
 
 
 @dataclass(frozen=True)
@@ -99,6 +136,8 @@ def _calculate_run_payload_bytes(wd: Path) -> tuple[int, int]:
     file_count = 0
 
     for root, dirs, files in os.walk(wd):
+        if any((Path(root) / name).is_symlink() for name in (*dirs, *files)):
+            raise ValueError("Project archives cannot include symbolic links")
         rel_root = os.path.relpath(root, wd)
         if rel_root == ".":
             rel_root = ""
@@ -127,6 +166,88 @@ def _calculate_run_payload_bytes(wd: Path) -> tuple[int, int]:
     return total_bytes, file_count
 
 
+def _contains_vector_upload_attempts(wd: Path) -> bool:
+    for root, dirs, files in os.walk(wd):
+        if any((Path(root) / name).is_symlink() for name in (*dirs, *files)):
+            raise ValueError("Project archives cannot include symbolic links")
+        relative = os.path.relpath(root, wd)
+        if _is_archive_excluded_relpath(relative):
+            dirs[:] = []
+            continue
+        if any(_is_sensitive_vector_path(Path(relative) / name) for name in (*dirs, *files)):
+            return True
+        dirs[:] = [
+            name for name in dirs
+            if not _is_archive_excluded_relpath(os.path.join(relative, name))
+        ]
+    return False
+
+
+def _assert_archive_member_visibility(relative: str, *, contains_sensitive: bool) -> None:
+    if not contains_sensitive and _is_sensitive_vector_path(Path(relative)):
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Retained evidence appeared while creating the archive; retry the archive.",
+            status_code=507,
+        )
+
+
+def _write_private_archive_sidecar(path: Path, payload: Mapping[str, Any]) -> None:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    temp = path.with_name(f".{path.name}.tmp")
+    descriptor = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temp, path)
+        os.chmod(path, 0o600)
+    finally:
+        temp.unlink(missing_ok=True)
+
+
+def _fsync_archive_directory(path: Path) -> None:
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _verify_private_archive(archive_path: Path, wd: Path) -> None:
+    try:
+        relative = archive_path.relative_to(wd)
+    except ValueError as exc:
+        raise ValueError("Invalid private archive path") from exc
+    if relative.parts[:2] != ("archives", "private"):
+        return
+    sidecar_path = archive_path.with_suffix(".zip.sensitive.json")
+    receipt_path = archive_path.parent / "normalization.json"
+    try:
+        sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        size = archive_path.stat().st_size
+        digest = hashlib.sha256()
+        with archive_path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise ValueError("Private archive provenance is invalid") from exc
+    archive_digest = digest.hexdigest()
+    if (
+        sidecar.get("schema") != "vector-upload-private-archive-v1"
+        or sidecar.get("archive") != archive_path.name
+        or sidecar.get("archive_size") != size
+        or sidecar.get("archive_sha256") != archive_digest
+        or sidecar.get("contains_vector_upload_attempts") is not True
+        or receipt.get("schema") != "vector-normalization-v1"
+        or receipt.get("status") not in {"accepted", "accepted_recovered"}
+        or receipt.get("canonical_path") != relative.as_posix()
+        or receipt.get("canonical_size") != size
+        or receipt.get("canonical_sha256") != archive_digest
+    ):
+        raise ValueError("Private archive provenance is invalid")
 def _collect_restore_members(
     zf: zipfile.ZipFile,
     wd: Path,
@@ -277,7 +398,13 @@ def _clear_archive_job_id(runtime: ArchiveRuntime, prep: Any | None, runid: str)
             pass
 
 
-def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> None:
+def archive_rq(
+    runid: str,
+    comment: str | None,
+    retention_actor: Mapping[str, Any] | None = None,
+    *,
+    runtime: ArchiveRuntime,
+) -> None:
     job = runtime.get_current_job()
     job_id = getattr(job, "id", "sync")
     func_name = "archive_rq"
@@ -285,7 +412,11 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
     runtime.publish_status(status_channel, f"rq:{job_id} STARTED {func_name}({runid})")
 
     prep = None
+    archive_path: str | None = None
     archive_path_tmp: str | None = None
+    retention_reservation = None
+    retention_lease = None
+    maintenance_lease = None
     try:
         prep = runtime.get_prep_from_runid(runid)
         wd = runtime.get_wd(runid)
@@ -300,8 +431,19 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
             if locked:
                 raise RuntimeError("Cannot archive while files are locked: " + ", ".join(locked))
 
+            # Hold the owning project's upload lease before inspection. Child
+            # scopes can still upload; each write guards public classification.
+            retention_configured = bool(
+                os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+                and os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+            )
+            if retention_configured:
+                retention_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+                retention_lease.assert_owned()
+
             payload_bytes, payload_file_count = _calculate_run_payload_bytes(wd_path)
             required_bytes = _estimate_archive_required_bytes(payload_bytes, payload_file_count)
+            contains_sensitive = _contains_vector_upload_attempts(wd_path)
             _assert_sufficient_disk_space(
                 wd_path,
                 required_bytes=required_bytes,
@@ -309,12 +451,42 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
                 disk_usage=runtime.disk_usage,
             )
 
-            archives_dir = os.path.join(wd, "archives")
-            os.makedirs(archives_dir, exist_ok=True)
+            archives_dir = Path(wd) / "archives"
+            archives_dir.mkdir(exist_ok=True)
 
             timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
             archive_name = f"{runid}.{timestamp}.zip"
-            archive_path = os.path.join(archives_dir, archive_name)
+            if contains_sensitive:
+                bundle_dir = archives_dir / "private" / f"{runid}.{timestamp}"
+                bundle_dir.mkdir(parents=True, mode=0o700)
+                os.chmod(bundle_dir.parent, 0o700)
+                os.chmod(bundle_dir, 0o700)
+                archive_path_obj = bundle_dir / archive_name
+                archive_name = archive_path_obj.relative_to(archives_dir).as_posix()
+                assert_project_retention_capacity(
+                    (
+                        wd_path / "roads" / "vector_upload_attempts",
+                        wd_path / "ag_fields" / "vector_upload_attempts",
+                        wd_path / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
+                        archives_dir / "private",
+                    ),
+                    worst_case_bytes=required_bytes + 1024 * 1024,
+                )
+                actor_payload = retention_actor if isinstance(retention_actor, Mapping) else {}
+                actor = RetentionActor(
+                    str(actor_payload.get("kind") or "unattributed"),
+                    actor_payload.get("identifier"),
+                )
+                retention_reservation = RedisRetentionLedger().reserve(
+                    project_key=f"run:{runid}",
+                    actor=actor,
+                    worst_case_bytes=required_bytes + 1024 * 1024,
+                    filesystem_root=wd_path,
+                )
+                retention_reservation.bind_attempt(bundle_dir)
+            else:
+                archive_path_obj = archives_dir / archive_name
+            archive_path = os.fspath(archive_path_obj)
             archive_path_tmp = archive_path + ".tmp"
 
             for candidate in (archive_path, archive_path_tmp):
@@ -325,8 +497,20 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
 
             comment_bytes = (comment or "").encode("utf-8")
 
-            with runtime.zip_file_cls(archive_path_tmp, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
+            with ExitStack() as archive_streams:
+                archive_target = archive_path_tmp
+                if contains_sensitive:
+                    archive_target = archive_streams.enter_context(
+                        _BoundedPrivateArchiveFile(archive_path_tmp, required_bytes)
+                    )
+                zf = archive_streams.enter_context(runtime.zip_file_cls(
+                    archive_target, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=6,
+                ))
                 for root, dirs, files in os.walk(wd):
+                    if retention_lease is not None:
+                        retention_lease.assert_owned()
+                    if any(os.path.islink(os.path.join(root, name)) for name in (*dirs, *files)):
+                        raise ValueError("Project archives cannot include symbolic links")
                     rel_root = os.path.relpath(root, wd)
                     if rel_root == ".":
                         rel_root = ""
@@ -344,21 +528,68 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
                     if rel_root:
                         # os.walk does not traverse symlink directories. Retain
                         # ordinary directory metadata, including empty folders.
+                        _assert_archive_member_visibility(rel_root, contains_sensitive=contains_sensitive)
                         zf.write(root, rel_root + "/")
 
                     for filename in files:
+                        if retention_lease is not None:
+                            retention_lease.assert_owned()
                         abs_path = os.path.join(root, filename)
                         arcname = os.path.relpath(abs_path, wd)
                         if _is_archive_excluded_relpath(arcname):
                             continue
 
                         runtime.publish_status(status_channel, f"Adding {arcname}")
+                        _assert_archive_member_visibility(arcname, contains_sensitive=contains_sensitive)
                         zf.write(abs_path, arcname)
 
                 if comment_bytes:
                     zf.comment = comment_bytes
 
+            if retention_lease is not None:
+                retention_lease.assert_owned()
             os.replace(archive_path_tmp, archive_path)
+            if contains_sensitive:
+                archive_size = archive_path_obj.stat().st_size
+                archive_digest = hashlib.sha256()
+                with archive_path_obj.open("rb") as archive_stream:
+                    for chunk in iter(lambda: archive_stream.read(1024 * 1024), b""):
+                        archive_digest.update(chunk)
+                archive_sha256 = archive_digest.hexdigest()
+                os.chmod(archive_path_obj, 0o600)
+                sidecar = archive_path_obj.with_suffix(archive_path_obj.suffix + ".sensitive.json")
+                sidecar_payload = {
+                    "schema": "vector-upload-private-archive-v1",
+                    "archive": archive_path_obj.name,
+                    "archive_size": archive_size,
+                    "archive_sha256": archive_sha256,
+                    "contains_vector_upload_attempts": True,
+                }
+                _write_private_archive_sidecar(sidecar, sidecar_payload)
+                _write_private_archive_sidecar(
+                    archive_path_obj.parent / "normalization.json",
+                    {
+                        "schema": "vector-normalization-v1",
+                        "attempt_id": archive_path_obj.parent.name,
+                        "status": "accepted",
+                        "outcome": "retained",
+                        "enforcement_stage": "private_archive",
+                        "accounting_status": "committed",
+                        "actor": actor.receipt_value(),
+                        "reservation_id": retention_reservation.reservation_id,
+                        "project_root": wd_path.resolve(strict=True).relative_to(
+                            Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"]).resolve(strict=True)
+                        ).as_posix(),
+                        "canonical_path": (Path("archives") / archive_name).as_posix(),
+                        "canonical_size": archive_size,
+                        "canonical_sha256": archive_sha256,
+                    },
+                )
+                retained_bytes = sum(
+                    item.stat().st_size for item in archive_path_obj.parent.iterdir() if item.is_file()
+                )
+                retention_reservation.commit(retained_bytes)
+                retention_lease.release()
         runtime.publish_status(status_channel, f"Archive ready: {archive_name}")
         runtime.publish_status(status_channel, f"rq:{job_id} COMPLETED {func_name}({runid})")
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive ARCHIVE_COMPLETE")
@@ -369,11 +600,54 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive ARCHIVE_FAILED")
         raise
     finally:
+        cleanup_complete = True
         if archive_path_tmp and os.path.exists(archive_path_tmp):
             try:
                 os.remove(archive_path_tmp)
             except OSError:
-                pass
+                cleanup_complete = False
+                logging.getLogger(__name__).warning(
+                    "Archive temporary-file cleanup failed for %s", archive_path_tmp, exc_info=True,
+                )
+
+        if retention_reservation is not None and (archive_path is None or not os.path.exists(archive_path)):
+            if cleanup_complete:
+                try:
+                    _fsync_archive_directory(bundle_dir)
+                except OSError:
+                    cleanup_complete = False
+                    logging.getLogger(__name__).warning(
+                        "Private archive cleanup directory sync failed for %s", bundle_dir, exc_info=True,
+                    )
+            if cleanup_complete:
+                retention_reservation.release_prewrite()
+            else:
+                # This bounded failure receipt lets existing reconciliation
+                # retain exact remaining bytes under the verified archive actor.
+                try:
+                    _write_private_archive_sidecar(bundle_dir / "normalization.json", {
+                        "schema": "vector-normalization-v1",
+                        "attempt_id": bundle_dir.name,
+                        "status": "incomplete",
+                        "outcome": "quarantined",
+                        "enforcement_stage": "private_archive_cleanup",
+                        "accounting_status": "pending",
+                        "error_code": "archive_cleanup_incomplete",
+                        "actor": actor.receipt_value(),
+                        "project_identity": runid,
+                        "reservation_id": retention_reservation.reservation_id,
+                    })
+                    _fsync_archive_directory(bundle_dir)
+                except OSError:
+                    logging.getLogger(__name__).warning(
+                        "Private archive incomplete receipt persistence failed for %s; reservation retained",
+                        bundle_dir, exc_info=True,
+                    )
+        if retention_lease is not None:
+            try:
+                retention_lease.release()
+            except VectorUploadError:
+                logging.getLogger(__name__).warning("Private archive retention lock release deferred", exc_info=True)
 
         _clear_archive_job_id(runtime, prep, runid)
 
@@ -405,13 +679,38 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
     prep = None
     restore_started = False
     restore_completed = False
+    retention_identity_failed = False
+    retention_leases = []
+    maintenance_lease = None
+    rebuild_obligation = None
     try:
-        prep = runtime.get_prep_from_runid(runid)
         notification_wd = runtime.get_wd(runid)
         wd = Path(notification_wd).resolve()
-
+        retention_configured = bool(
+            os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+            and os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+        )
+        private_archive = str(archive_name).replace("\\", "/").startswith("private/")
+        live_sensitive = _contains_vector_upload_attempts(wd)
+        if (private_archive or live_sensitive) and not retention_configured:
+            retention_identity_failed = True
+            raise RuntimeError("Vector evidence retention identity is not configured")
+        filesystem_root = None
+        if retention_configured:
+            try:
+                filesystem_root = Path(os.environ["VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT"]).resolve(strict=True)
+                wd.relative_to(filesystem_root)
+            except (OSError, ValueError):
+                retention_identity_failed = True
+                raise
         archives_dir = wd / "archives"
-        archive_path = (archives_dir / archive_name).resolve()
+        archive_entry = archives_dir / archive_name
+        # A queued archive identity must still name the admitted regular path.
+        if archive_entry.is_symlink() or any(
+            parent.is_symlink() for parent in archive_entry.parents if parent != wd and wd in parent.parents
+        ):
+            raise ValueError("Invalid archive path")
+        archive_path = archive_entry.resolve()
 
         if not archive_path.exists() or not archive_path.is_file():
             raise FileNotFoundError(f"Archive not found: {archive_name}")
@@ -419,11 +718,12 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         # Ensure the archive resides inside the archives directory.
         if archives_dir not in archive_path.parents:
             raise ValueError("Invalid archive path")
+        _verify_private_archive(archive_path, wd)
 
         runtime.publish_status(status_channel, f"Preparing to restore from {archive_name}")
 
         authority_wd = runtime.project_config_authority_wd(runid)
-        with catalog_lifecycle_guard(wd), runtime.project_config_lifecycle_guard(authority_wd), runtime.zip_file_cls(archive_path, mode="r") as zf:
+        with runtime.zip_file_cls(archive_path, mode="r") as zf, ExitStack() as restore_guards:
             failed_member = zf.testzip()
             if failed_member:
                 raise zipfile.BadZipFile(
@@ -431,6 +731,29 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 )
 
             restore_members, restore_bytes, restore_file_count = _collect_restore_members(zf, wd)
+            incoming_sensitive = any(
+                "vector_upload_attempts" in relative.parts
+                for _member, _target, relative in restore_members
+            )
+            if incoming_sensitive and not retention_configured:
+                retention_identity_failed = True
+                raise RuntimeError("Vector evidence retention identity is not configured")
+            prep = runtime.get_prep_from_runid(runid)
+            restore_guards.enter_context(catalog_lifecycle_guard(wd))
+            restore_guards.enter_context(runtime.project_config_lifecycle_guard(authority_wd))
+            if retention_configured:
+                # Include reserved child uploads even before their attempt
+                # directory exists; global admission prevents new reservations.
+                maintenance_lease = acquire_retention_maintenance_lease()
+                factory = RedisScopeLeaseFactory()
+                for key in sorted(discover_retention_scopes(
+                    maintenance_lease, filesystem_root, (wd,), (f"run:{runid}",),
+                )):
+                    retention_leases.append(factory(key))
+                for lease in retention_leases:
+                    lease.assert_owned()
+            if _contains_vector_upload_attempts(wd) and maintenance_lease is None:
+                raise RuntimeError("Vector evidence appeared during restore admission; retry the restore")
             from wepppy.declarative.archive import validate_restore
             preserve_declarative = validate_restore(wd, zf, restore_members)
             directory_modes = _restore_directory_modes(restore_members, wd)
@@ -469,12 +792,20 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
 
             roads_guard = roads_lifecycle.restore_operation(wd)
             with roads_guard:
+                if maintenance_lease is not None:
+                    rebuild_obligation = begin_retention_rebuild_obligation(
+                        filesystem_root,
+                        operation="private_archive_restore",
+                        target=wd.relative_to(filesystem_root).as_posix(),
+                    )
                 # Commit the replacement fence BEFORE destruction; a killed
                 # restorer must not later masquerade as first initialization.
                 invalidate_catalog_incarnation(wd)
                 restore_started = True
                 try:
                     for entry in sorted(wd.iterdir()):
+                        for lease in retention_leases:
+                            lease.assert_owned()
                         if preserve_declarative and entry.name in {"provenance", "READONLY"}:
                             continue
                         if entry.name in {"archives", ".config-amendment.lock", "roads.lifecycle.lock", "redisprep.dump"}:
@@ -496,10 +827,14 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                     # ZIP ordering cannot expose a private payload before its ancestry
                     # is restricted. Owner access is temporary for readonly directories.
                     for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts)):
+                        for lease in retention_leases:
+                            lease.assert_owned()
                         directory.mkdir(mode=mode | 0o700, parents=True, exist_ok=True)
                         os.chmod(directory, mode | 0o700)
 
                     for member, target_path, relative_target in restore_members:
+                        for lease in retention_leases:
+                            lease.assert_owned()
                         if preserve_declarative and relative_target.parts[0] in {"provenance", "READONLY"}:
                             continue
                         if member.is_dir():
@@ -525,6 +860,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                         else:
                             with zf.open(member, "r") as src, open(target_path, "wb") as dst:
                                 shutil.copyfileobj(src, dst)
+                                dst.flush()
+                                os.fsync(dst.fileno())
 
                         perm = member.external_attr >> 16
                         if perm and target_path.name != 'redisprep.dump':
@@ -553,10 +890,37 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 restore_completed = True
 
                 for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts), reverse=True):
-                    os.chmod(directory, mode)
+                    descriptor = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+                    try:
+                        os.chmod(directory, mode)
+                        os.fsync(descriptor)
+                    finally:
+                        os.close(descriptor)
+                root_descriptor = os.open(wd, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+                try:
+                    os.fsync(root_descriptor)
+                finally:
+                    os.close(root_descriptor)
                 if preserve_declarative:
                     from wepppy.declarative.records import verify_protected
                     verify_protected(wd)
+
+        if rebuild_obligation is not None:
+            for lease in retention_leases:
+                lease.assert_owned()
+            reconcile_retention(
+                filesystem_root,
+                apply=True,
+                rebuild_ledger=True,
+                stale_seconds=0,
+                committed_only=True,
+                maintenance_lease=maintenance_lease,
+                required_scope_leases=tuple(retention_leases),
+            )
+            maintenance_lease.assert_owned()
+            for lease in retention_leases:
+                lease.assert_owned()
+            complete_retention_rebuild_obligation(rebuild_obligation)
 
         from wepppy.nodb.persistence_events import notify_committed
         notify_committed(str(notification_wd), runid, "lifecycle")
@@ -582,9 +946,23 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive RESTORE_FAILED")
         raise
     finally:
-        if not restore_started or restore_completed:
+        for lease in reversed(retention_leases):
+            try:
+                lease.release()
+            except VectorUploadError:
+                logging.getLogger(__name__).warning(
+                    "Restore vector retention lock release deferred", exc_info=True,
+                )
+        if maintenance_lease is not None:
+            try:
+                maintenance_lease.release()
+            except VectorUploadError:
+                logging.getLogger(__name__).warning(
+                    "Restore vector maintenance lock release deferred", exc_info=True,
+                )
+        if not retention_identity_failed and (not restore_started or restore_completed):
             _clear_archive_job_id(runtime, prep, runid)
-        else:
+        elif restore_started:
             # Old live metadata is not reconciled with committed incoming bytes.
             # Receipt cleanup must not publish that old hash over recovery evidence.
             logging.getLogger(__name__).warning(

@@ -186,6 +186,16 @@ def write_comparison_snapshot(wd, *, parameterization: dict, configuration_hash:
     snapshot["sources"] = {str(MANIFEST): _digest(_source(root, MANIFEST))}
     if not _source(root, SUMMARY).is_file():
         snapshot.update(status="unavailable", reason="Continuous-run profile summary unavailable; no comparison generated.")
+    elif pq.read_metadata(_source(root, SUMMARY)).num_rows == 0:
+        manifest = json.loads(_source(root, MANIFEST).read_text())
+        if not isinstance(manifest, list) or any(
+            row.get("status", "completed") in {"completed", "failed"} for row in manifest
+        ):
+            raise ValueError("Empty comparison summary does not match executed profile set")
+        snapshot.update(status="unavailable", reason="No executed road contributors; baseline-equivalent run.",
+                        profile_count=0, metrics={"modeled_area_m2": 0.0,
+                        "annual_runoff_m3": 0.0, "annual_sediment_kg": 0.0})
+        snapshot["sources"][str(SUMMARY)] = _digest(_source(root, SUMMARY))
     else:
         metrics, profiles = _metrics(root)
         manifest = json.loads(_source(root, MANIFEST).read_text())

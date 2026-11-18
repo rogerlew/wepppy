@@ -22,6 +22,7 @@ from urllib.parse import parse_qsl, urljoin, urlparse
 import requests
 
 from wepppy.nodb.base import clear_locks
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
 from wepppy.nodb.core.ron import Ron
 from wepppy.profile_recorder.expectations import ProfileExpectationError, evaluate_job_expectations
 
@@ -117,10 +118,18 @@ class PlaybackSession:
         playback_root = _playback_run_root()
         playback_root.mkdir(parents=True, exist_ok=True)
         target = playback_root / run_id
-        if target.exists():
-            shutil.rmtree(target)
-        target.mkdir(parents=True, exist_ok=True)
-        self._hydrate_seed_files(target)
+        config_seed = self.seed_root / "config"
+        with retained_tree_operation(
+            target=target, source=config_seed if config_seed.exists() else None,
+            project_keys=(f"run:{self.playback_run_id}",),
+            operation="profile_playback_reset",
+        ) as retention:
+            retention.checkpoint()
+            if target.exists():
+                shutil.rmtree(target)
+            retention.checkpoint()
+            target.mkdir(parents=True, exist_ok=True)
+            self._hydrate_seed_files(target)
         return target
 
     @staticmethod

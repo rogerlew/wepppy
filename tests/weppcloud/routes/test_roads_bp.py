@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import hashlib
 import io
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, Optional
@@ -10,6 +12,7 @@ import pytest
 from flask import Flask
 
 import wepppy.weppcloud.routes.nodb_api.roads_bp as roads_module
+from wepppy.rq import submission_recovery
 from wepppy.weppcloud.utils import cap_guard
 from tests.factories.singleton import LockedMixin, singleton_factory
 
@@ -122,7 +125,7 @@ class RoadsStub(LockedMixin):
             self._parameterization_state = {"status": "bound", "overrides": payload["parameterization"].get("overrides", {})}
         return dict(self._params)
 
-    def set_uploaded_geojson(self, src_path: str) -> Dict[str, Any]:
+    def set_uploaded_geojson(self, src_path: str, *, publication_commit=None) -> Dict[str, Any]:
         src = Path(src_path)
         if not src.exists():
             raise FileNotFoundError(f"Roads input file not found: {src}")
@@ -130,7 +133,7 @@ class RoadsStub(LockedMixin):
         rel = "roads/roads.uploaded.geojson"
         dst = Path(self.wd) / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_text(json.dumps(payload), encoding="utf-8")
+        dst.write_bytes(src.read_bytes())
         field_names = sorted(
             {
                 key
@@ -154,6 +157,8 @@ class RoadsStub(LockedMixin):
         }
         self._params["attribute_field_map"] = dict(self._attribute_field_map)
         self._uploaded_geojson_relpath = rel
+        if publication_commit is not None:
+            publication_commit()
         return {
             "uploaded_geojson_relpath": rel,
             "feature_count": len(payload.get("features", [])),
@@ -234,12 +239,16 @@ def roads_client(
     tmp_path,
     rq_environment,
 ):
+    monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "roads-route-test")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(roads_module.roads_bp)
 
     run_dir = tmp_path / RUN_ID
     run_dir.mkdir()
+    monkeypatch.setattr(submission_recovery, "_LIFECYCLE_LOCK_DIR", str(tmp_path / "lifecycle"))
 
     context = SimpleNamespace(active_root=run_dir)
     monkeypatch.setattr(roads_module, "load_run_context", lambda runid, cfg: context)
@@ -323,6 +332,40 @@ def roads_client(
             self.removed.append(task)
 
     monkeypatch.setattr(roads_module, "RedisPrep", RedisPrepStub)
+
+    class Reservation:
+        reservation_id = "roads-test-reservation"
+
+        def commit(self, _exact_bytes: int) -> None:
+            return None
+
+        def release_prewrite(self) -> None:
+            return None
+
+    class Ledger:
+        def reserve(self, **_kwargs):
+            return Reservation()
+
+    class Lease:
+        def __init__(self) -> None:
+            self.owned = True
+
+        def assert_owned(self) -> None:
+            assert self.owned
+
+        def release(self) -> None:
+            self.owned = False
+
+    real_prepare = roads_module.prepare_vector_upload
+    monkeypatch.setattr(
+        roads_module,
+        "prepare_vector_upload",
+        lambda **kwargs: real_prepare(
+            **kwargs,
+            ledger=Ledger(),
+            scope_lease_factory=lambda _key: Lease(),
+        ),
+    )
     RoadsStub.getInstance(str(run_dir)).set_enabled(True)
 
     with app.test_client() as client:
@@ -364,6 +407,148 @@ def test_upload_geojson_multipart_file(roads_client):
     assert prep.removed == [roads_module.TaskEnum.run_roads]
 
 
+def test_upload_geoparquet_retains_source_and_publishes_wgs84_candidate(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, RoadsStub, _RonStub, _RedisPrepStub, _rq_environment, run_dir = roads_client
+    source = b"PAR1roads-controlPAR1"
+    geojson = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": [[-117.0, 46.0], [-117.1, 46.1]]},
+                "properties": {"name": "control"},
+            }
+        ],
+    }
+    canonical = json.dumps(geojson, separators=(",", ":")).encode()
+
+    class Response:
+        status_code = 200
+        headers = {}
+
+        def iter_content(self, **_kwargs):
+            yield json.dumps({
+                "request_id": "roads-converter-request",
+                "geojson": geojson,
+                "metadata": {
+                    "source_size": len(source),
+                    "source_sha256": hashlib.sha256(source).hexdigest(),
+                    "canonical_size": len(canonical),
+                    "canonical_sha256": hashlib.sha256(canonical).hexdigest(),
+                    "parser_provenance": {
+                        "binary_name": "geoparquet_parser_cli",
+                        "binary_version": "geoparquet_parser_cli 0.0.0",
+                        "binary_sha256": "1" * 64,
+                        "cargo_lock_sha256": "2" * 64,
+                        "source_revision": "3" * 40,
+                    },
+                },
+            }).encode()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(
+        "wepppy.microservices.vector_upload_normalization.requests.post",
+        lambda *_args, **_kwargs: Response(),
+    )
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", "http://shape-converter.test/convert")
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
+        data={"file": (io.BytesIO(source), "roads.parquet")},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    accepted = json.loads((Path(run_dir) / "roads" / "roads.uploaded.geojson").read_text())
+    assert accepted["crs"]["properties"]["name"] == "EPSG:4326"
+    attempt = next((Path(run_dir) / "roads" / "vector_upload_attempts").iterdir())
+    receipt = json.loads((attempt / "normalization.json").read_text())
+    assert receipt["status"] == "accepted"
+    assert receipt["source_sha256"] == hashlib.sha256(source).hexdigest()
+    assert next((attempt / "original").iterdir()).read_bytes() == source
+    assert RoadsStub.getInstance(run_dir).query_summary()["uploaded_geojson_relpath"] == "roads/roads.uploaded.geojson"
+
+
+def test_exact_converter_formats_cross_roads_http_boundary(
+    roads_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    converter_url = os.getenv("VECTOR_UPLOAD_INTEGRATION_URL")
+    fixture_root_value = os.getenv("VECTOR_UPLOAD_INTEGRATION_FIXTURES")
+    if not converter_url or not fixture_root_value:
+        pytest.skip("exact converter integration environment is not configured")
+    client, _RoadsStub, _RonStub, _RedisPrepStub, _rq_environment, run_dir = roads_client
+    monkeypatch.setenv("VECTOR_UPLOAD_SHAPE_CONVERTER_URL", converter_url)
+    fixture_root = Path(fixture_root_value)
+    semantics: list[dict[str, Any]] = []
+    for suffix, fixture_suffix in (("geojson", "geojson"), ("zip", "zip"), ("parquet", "parquet"), ("geoparquet", "parquet")):
+        response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
+            data={"file": (io.BytesIO((fixture_root / f"line.{fixture_suffix}").read_bytes()), f"line.{suffix}")},
+            content_type="multipart/form-data",
+        )
+        assert response.status_code == 200
+        payload = json.loads((Path(run_dir) / "roads" / "roads.uploaded.geojson").read_text())
+        semantics.append({"geometry": payload["features"][0]["geometry"], "properties": payload["features"][0]["properties"]})
+    assert semantics[1:] == semantics[:1] * 3
+
+
+def test_upload_geometry_rejection_preserves_accepted_roads(roads_client):
+    client, RoadsStub, _RonStub, _RedisPrepStub, _rq_environment, run_dir = roads_client
+    accepted_payload = json.dumps(
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "LineString", "coordinates": [[0, 0], [1, 1]]},
+                    "properties": {"name": "accepted"},
+                }
+            ],
+        }
+    ).encode()
+    accepted_response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
+        data={"file": (io.BytesIO(accepted_payload), "roads.geojson")},
+        content_type="multipart/form-data",
+    )
+    canonical_path = Path(run_dir) / "roads" / "roads.uploaded.geojson"
+    accepted_bytes = canonical_path.read_bytes()
+
+    rejected_payload = json.dumps(
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "Point", "coordinates": [0, 0]},
+                    "properties": {"name": "rejected"},
+                }
+            ],
+        }
+    ).encode()
+    rejected_response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
+        data={"file": (io.BytesIO(rejected_payload), "roads.json")},
+        content_type="multipart/form-data",
+    )
+
+    assert accepted_response.status_code == 200
+    assert rejected_response.status_code == 400
+    assert rejected_response.get_json()["error"]["code"] == "invalid_vector"
+    assert canonical_path.read_bytes() == accepted_bytes
+    assert RoadsStub.getInstance(run_dir).query_summary()["uploaded_geojson_relpath"] == "roads/roads.uploaded.geojson"
+    receipts = [
+        json.loads(path.read_text())
+        for path in (Path(run_dir) / "roads" / "vector_upload_attempts").glob("*/normalization.json")
+    ]
+    assert sorted(receipt["status"] for receipt in receipts) == ["accepted", "rejected"]
+
+
 def test_upload_geojson_rejects_json_path_mode(roads_client):
     client, *_rest = roads_client
 
@@ -385,15 +570,15 @@ def test_upload_geojson_rejects_invalid_extension(roads_client):
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/upload_geojson",
-        data={"file": (io.BytesIO(b"{}"), "roads.json")},
+        data={"file": (io.BytesIO(b"{}"), "roads.txt")},
         content_type="multipart/form-data",
     )
 
     assert response.status_code == 400
     payload = response.get_json()
-    assert payload["error"]["message"] == "Roads upload must be a .geojson file."
-    assert payload["error"]["details"] == "Roads upload must be a .geojson file."
-    assert payload["error"]["code"] == "invalid_upload_extension"
+    assert "GeoJSON, Shapefile ZIP, or GeoParquet" in payload["error"]["message"]
+    assert payload["error"]["details"] == payload["error"]["message"]
+    assert payload["error"]["code"] == "unsupported_vector"
     assert payload["error_id"]
 
 
@@ -412,9 +597,9 @@ def test_upload_geojson_rejects_oversize_payload(
 
     assert response.status_code == 413
     payload = response.get_json()
-    assert "maximum size" in payload["error"]["message"]
+    assert "endpoint size limit" in payload["error"]["message"]
     assert payload["error"]["details"] == payload["error"]["message"]
-    assert payload["error"]["code"] == "payload_too_large"
+    assert payload["error"]["code"] == "vector_limit_exceeded"
     assert payload["error_id"]
 
 
@@ -428,7 +613,7 @@ def test_upload_geojson_server_fault_logs_error_id_correlation(
     def _raise_os_error(*_args, **_kwargs):
         raise OSError("filesystem quota exceeded")
 
-    monkeypatch.setattr(roads_module, "_save_roads_upload_with_limit", _raise_os_error)
+    monkeypatch.setattr(roads_module, "prepare_vector_upload", _raise_os_error)
     caplog.set_level("ERROR", logger="wepppy.weppcloud.utils.helpers")
 
     response = client.post(
@@ -439,8 +624,8 @@ def test_upload_geojson_server_fault_logs_error_id_correlation(
 
     assert response.status_code == 500
     payload = response.get_json()
-    assert payload["error"]["message"] == "Failed to save Roads upload: filesystem quota exceeded"
-    assert payload["error"]["details"] == payload["error"]["message"]
+    assert payload["error"]["message"] == "Failed to persist Roads upload."
+    assert payload["error"]["details"] == "filesystem quota exceeded"
     assert payload["error"]["code"] == "internal_error"
     assert payload["error_id"]
 

@@ -192,6 +192,7 @@ def _split_line_to_monotonic_segments(
     input_crs: str,
     feature_index: int,
     part_index: int,
+    split_elevation_reversals: bool = True,
 ) -> List[Tuple[LineString, LineString]]:
     line_dem = transform(to_dem.transform, line_src)
     invalid_vertex_index = _first_nonfinite_xy_vertex_index(line_dem)
@@ -222,7 +223,7 @@ def _split_line_to_monotonic_segments(
         if not isinstance(valid_line_dem, LineString):
             raise RuntimeError("Failed to clip road segment to valid DEM sampling interval.")
 
-    break_indices = _find_break_indices(elevations, tolerance_m=tolerance_m)
+    break_indices = _find_break_indices(elevations, tolerance_m=tolerance_m) if split_elevation_reversals else []
     if not break_indices:
         if valid_line_dem is line_dem:
             return [(line_src, line_dem)]
@@ -717,6 +718,12 @@ def _convert_geojson_to_monotonic_segments_internal(
                         input_crs=input_crs,
                         feature_index=feature_index,
                         part_index=part_index,
+                        split_elevation_reversals=(
+                            _resolve_eligible_inslope_design(
+                                feature.get("properties", {}),
+                                design_property_keys=normalized_design_property_keys,
+                            )[0] != "outslope_unrutted"
+                        ),
                     )
                 except ValueError as exc:
                     if "has no valid DEM samples" in str(exc):

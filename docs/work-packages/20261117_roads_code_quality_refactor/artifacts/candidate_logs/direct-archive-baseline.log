@@ -1,0 +1,110 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-baseline:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-txgqcjmv a9fbd6a7bfe009d6473717231ddffee969dbc1d72a43150a2db6dcabebb26be1 && cd /workdir/wepppy && VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT=/tmp PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_cli_parquet_lineage.py::test_cleanup_skeleton_archive_restore_keep_history tests/wepp/reports/test_report_cache_freshness.py::test_canonical_archive_restore_keeps_report_provenance_and_failed_work -q --tb=short'
+time="2026-11-17T15:55:00-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-c7b6f6e283e9 Creating
+ Container docker-weppcloud-run-c7b6f6e283e9 Created
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+______________ test_cleanup_skeleton_archive_restore_keep_history ______________
+wepppy/rq/project_rq_archive.py:442: in archive_rq
+    retention_lease.assert_owned()
+wepppy/microservices/vector_upload_normalization.py:802: in assert_owned
+    owned = not self._released and int(self.connection.eval(
+                                       ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'RecordingRedis' object has no attribute 'eval'
+
+During handling of the above exception, another exception occurred:
+tests/nodb/test_cli_parquet_lineage.py:283: in test_cleanup_skeleton_archive_restore_keep_history
+    archive_rq('climate-fixture', 'climate lineage history', runtime=runtime)
+wepppy/rq/project_rq_archive.py:648: in archive_rq
+    retention_lease.release()
+wepppy/microservices/vector_upload_normalization.py:825: in release
+    self.connection.eval(_LOCK_RELEASE_LUA, 1, self.key, self.token)
+    ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'RecordingRedis' object has no attribute 'eval'
+---------------------------- Captured stderr setup -----------------------------
+2026-11-17 23:55:14 [INFO] wepppy.run.test_cleanup_skeleton_archive_0.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-11-17 23:55:14 [INFO] wepppy.run.test_cleanup_skeleton_archive_0.soils: soils.dump_soils_parquet()
+2026-11-17 23:55:14 [INFO] wepppy.run.test_cleanup_skeleton_archive_0.climate: Exported CLI parquet with peak intensities
+----------------------------- Captured stdout call -----------------------------
+Removing _query_engine/
+Removing ash.nodb
+Removing ash/
+Removing ashpost.nodb
+Removing debris_flow.nodb
+Removing dem/dem.tif
+Removing dem/wbt/bound.tif
+Removing disturbed/disturbed_lookup_audit.jsonl
+Removing disturbed/sbs_4class.tif
+Removing export/
+Removing observed.nodb
+Removing observed/
+Removing polaris/
+Removing rusle/
+Removing soils/123.sol
+Removing sources/
+Removing treatments.nodb
+Removing treatments/
+Removing wepp/flowpaths/
+Removing wepp/plots/
+Removing wepp/runs/
+Removing wepp/stats/
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.rq.project_rq_archive:project_rq_archive.py:598 Boundary exception at wepppy/rq/project_rq_archive.py:234
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/project_rq_archive.py", line 442, in archive_rq
+    retention_lease.assert_owned()
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 802, in assert_owned
+    owned = not self._released and int(self.connection.eval(
+                                       ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'RecordingRedis' object has no attribute 'eval'
+____ test_canonical_archive_restore_keeps_report_provenance_and_failed_work ____
+wepppy/rq/project_rq_archive.py:442: in archive_rq
+    retention_lease.assert_owned()
+wepppy/microservices/vector_upload_normalization.py:802: in assert_owned
+    owned = not self._released and int(self.connection.eval(
+                                       ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'RecordingRedis' object has no attribute 'eval'
+
+During handling of the above exception, another exception occurred:
+tests/wepp/reports/test_report_cache_freshness.py:406: in test_canonical_archive_restore_keeps_report_provenance_and_failed_work
+    archive_rq("report-fixture", "report generations", runtime=runtime)
+wepppy/rq/project_rq_archive.py:648: in archive_rq
+    retention_lease.release()
+wepppy/microservices/vector_upload_normalization.py:825: in release
+    self.connection.eval(_LOCK_RELEASE_LUA, 1, self.key, self.token)
+    ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'RecordingRedis' object has no attribute 'eval'
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.rq.project_rq_archive:project_rq_archive.py:598 Boundary exception at wepppy/rq/project_rq_archive.py:234
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/project_rq_archive.py", line 442, in archive_rq
+    retention_lease.assert_owned()
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 802, in assert_owned
+    owned = not self._released and int(self.connection.eval(
+                                       ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'RecordingRedis' object has no attribute 'eval'
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/test_cli_parquet_lineage.py::test_cleanup_skeleton_archive_restore_keep_history
+FAILED tests/wepp/reports/test_report_cache_freshness.py::test_canonical_archive_restore_keeps_report_provenance_and_failed_work
+2 failed, 2 warnings in 11.64s

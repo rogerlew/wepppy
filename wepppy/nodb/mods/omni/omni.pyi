@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import AbstractContextManager
 from enum import IntEnum
 from typing import Any, Callable, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
 
@@ -81,6 +82,8 @@ class Omni(NoDbBase):
         run_group: Optional[str] = ...,
         group_name: Optional[str] = ...,
     ) -> None: ...
+
+    def workflow_transaction(self, project_scope_lease: Any = ...) -> AbstractContextManager[None]: ...
 
     def __getstate__(self) -> dict[str, Any]: ...
 

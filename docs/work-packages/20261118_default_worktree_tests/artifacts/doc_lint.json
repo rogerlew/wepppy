@@ -1,0 +1,67 @@
+[
+  {
+    "path": "AGENTS.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "PROJECT_TRACKER.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_default_worktree_tests/artifacts/validation.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_default_worktree_tests/package.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_default_worktree_tests/prompts/completed/implementation_execplan.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "docs/work-packages/20261118_default_worktree_tests/tracker.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "tests/AGENTS.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "tests/disturbed/PLAN.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "tools/wctl2/AGENTS.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "tools/wctl2/docs/SPEC.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "tools/wctl2/docs/worktree-tests.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "wctl/AGENTS.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  },
+  {
+    "path": "wctl/README.md",
+    "exitstatus": 0,
+    "output": "\u2705 1 files validated, 0 errors, 0 warnings\n"
+  }
+]

@@ -1,0 +1,29 @@
+# Local source-test harness only. Never merge with production/dev topology.
+name: vector-upload-normalization-tests
+services:
+  weppcloud:
+    image: sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0
+    init: true
+    user: "1000:993"
+    working_dir: /workdir/wepppy
+    entrypoint: []
+    command: ["/bin/sleep", "infinity"]
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 256
+    mem_limit: 1536m
+    cpus: "1.50"
+    volumes:
+      - type: bind
+        source: /tmp/wepppy-vector-upload-normalization
+        target: /workdir/wepppy
+        read_only: true
+    tmpfs:
+      - /tmp:size=402653184,nosuid,nodev,mode=1777
+    environment:
+      PYTHONPATH: /workdir/wepppy
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      MPLCONFIGDIR: /tmp/matplotlib

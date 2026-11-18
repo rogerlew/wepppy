@@ -1,0 +1,423 @@
+{
+  "schema": "vector-upload-red-fixtures-v1",
+  "generator": "generate_fixtures.py",
+  "writer": {
+    "pyarrow": "16.1.0"
+  },
+  "fixtures": [
+    {
+      "file": "polygon.geojson",
+      "sha256": "66040fe93747de73a1c6673ac8eda9aec56984340d56ebc4c57c49fe73f67b56",
+      "bytes": 224,
+      "category": "workflow-control",
+      "expected": "workflow-specific",
+      "workflows": [
+        "agfields",
+        "omni",
+        "batch"
+      ]
+    },
+    {
+      "file": "polygon-1.0.0-none.parquet",
+      "sha256": "00a2cc77bcc28b864adf2ebc23db12b95364f2ffe50684cbe4ea1110bb5a5176",
+      "bytes": 717,
+      "category": "valid",
+      "expected": "convert",
+      "semantic_oracle": "polygon.geojson",
+      "crs": "CRS84 (absent metadata)"
+    },
+    {
+      "file": "polygon-1.1.0-snappy.parquet",
+      "sha256": "039eba296e7c190a9235cb8ca9caa3d754cb2084054630dd0e4966229d9c1e17",
+      "bytes": 685,
+      "category": "valid",
+      "expected": "convert",
+      "semantic_oracle": "polygon.geojson",
+      "crs": "CRS84 (absent metadata)"
+    },
+    {
+      "file": "line.geojson",
+      "sha256": "36560a3ef46da624ac455f3d8581404365f54211ccdbd9d6247c64e95eaac870",
+      "bytes": 198,
+      "category": "workflow-control",
+      "expected": "workflow-specific",
+      "workflows": [
+        "roads"
+      ]
+    },
+    {
+      "file": "line-1.0.0-none.parquet",
+      "sha256": "4ec889583530a63c4499690b41f27d5ce5c903f6d6ba693a038dd7c31e81cdf9",
+      "bytes": 684,
+      "category": "valid",
+      "expected": "convert",
+      "semantic_oracle": "line.geojson",
+      "crs": "CRS84 (absent metadata)"
+    },
+    {
+      "file": "line-1.1.0-snappy.parquet",
+      "sha256": "a084494cfefb81d29590a9380f7559aad90d8a7b10944c99f3b9a6ca42cc0890",
+      "bytes": 680,
+      "category": "valid",
+      "expected": "convert",
+      "semantic_oracle": "line.geojson",
+      "crs": "CRS84 (absent metadata)"
+    },
+    {
+      "file": "multipolygon.geojson",
+      "sha256": "7cda92f3208cc6a31b6f25c4821358b4c9f9a4a81b9cbaf0bcb1cfdc889437b2",
+      "bytes": 231,
+      "category": "workflow-control",
+      "expected": "workflow-specific",
+      "workflows": [
+        "agfields",
+        "omni",
+        "batch"
+      ]
+    },
+    {
+      "file": "multipolygon-1.0.0-none.parquet",
+      "sha256": "4ae97c7e9170df47285c235256754718ca27fa38cc1d0c97ff724ae69ca5da5a",
+      "bytes": 731,
+      "category": "valid",
+      "expected": "convert",
+      "semantic_oracle": "multipolygon.geojson",
+      "crs": "CRS84 (absent metadata)"
+    },
+    {
+      "file": "multipolygon-1.1.0-snappy.parquet",
+      "sha256": "82d543fb5986b3d678f73289943336c4b81b4932103cc75e6c7a131c0d884365",
+      "bytes": 696,
+      "category": "valid",
+      "expected": "convert",
+      "semantic_oracle": "multipolygon.geojson",
+      "crs": "CRS84 (absent metadata)"
+    },
+    {
+      "file": "point.geojson",
+      "sha256": "e015597f020bbb09f42a3e2fa78eafb0928489c29ec44409dd612d558b7d741a",
+      "bytes": 162,
+      "category": "workflow-control",
+      "expected": "workflow-specific",
+      "workflows": []
+    },
+    {
+      "file": "point-1.0.0-none.parquet",
+      "sha256": "672a167372d9b6a93a28fe58de3b9a4b66054cbe70505e246145230d0c134e5d",
+      "bytes": 635,
+      "category": "valid",
+      "expected": "convert",
+      "semantic_oracle": "point.geojson",
+      "crs": "CRS84 (absent metadata)"
+    },
+    {
+      "file": "point-1.1.0-snappy.parquet",
+      "sha256": "b4f4fef9892060c48b3276b6cfb9c4b68d7f1a209a11fa604a2dbda6cbdb345b",
+      "bytes": 636,
+      "category": "valid",
+      "expected": "convert",
+      "semantic_oracle": "point.geojson",
+      "crs": "CRS84 (absent metadata)"
+    },
+    {
+      "file": "missing-geo.parquet",
+      "sha256": "030281332926fc82caa40b274ea26b4b3c3b2c8f8f318d265c0d5b3718e59d6f",
+      "bytes": 559,
+      "category": "metadata",
+      "expected": "reject"
+    },
+    {
+      "file": "version-unsupported.parquet",
+      "sha256": "7b894cfee26ad73a672e708f3396f44d10e818d71dc5e99e081dbf9a38d756a0",
+      "bytes": 685,
+      "category": "metadata",
+      "expected": "reject"
+    },
+    {
+      "file": "crs-null.parquet",
+      "sha256": "49a985fe24b41ae2b67a249c5c5badd53e25080181e16df30579e255de35bee7",
+      "bytes": 697,
+      "category": "crs",
+      "expected": "reject"
+    },
+    {
+      "file": "crs-invalid.parquet",
+      "sha256": "e25c400127002163d61b7333eb559d17afa4d77996dfce9ac670ae0bc8ceb3ac",
+      "bytes": 711,
+      "category": "crs",
+      "expected": "reject"
+    },
+    {
+      "file": "encoding-geoarrow.parquet",
+      "sha256": "b58c84f402fd982fac40f1c575455300635a3045167f5a5ab8867b3a2fe8485b",
+      "bytes": 689,
+      "category": "metadata",
+      "expected": "reject"
+    },
+    {
+      "file": "primary-column-missing.parquet",
+      "sha256": "4cdf155b0da3a32d5170ac18f792e8997235033b4612ca815f89d8b9ed5cf763",
+      "bytes": 684,
+      "category": "schema",
+      "expected": "reject"
+    },
+    {
+      "file": "nested-properties.parquet",
+      "sha256": "ffcc8a1d6f1afc752a1676f2fabf74fb57cb46d1f26694e1a7df5b04a54b9630",
+      "bytes": 749,
+      "category": "schema",
+      "expected": "reject"
+    },
+    {
+      "file": "schema-columns.parquet",
+      "sha256": "26c24eaf03c2c0847b6366804fc09bfe3f83b28becc1f63f4f58896d5c8d0f1f",
+      "bytes": 8441,
+      "category": "schema-budget",
+      "expected": "reject"
+    },
+    {
+      "file": "extension-metadata.parquet",
+      "sha256": "4eff52fb0b4f629e793a1867329f43a7582f3afc4ae9cf9303b79b0a643580c7",
+      "bytes": 729,
+      "category": "extension",
+      "expected": "reject"
+    },
+    {
+      "file": "codec-gzip.parquet",
+      "sha256": "059b4c1d25340a199b37c424f5bfbdc5fb7e85a0484be54b5226764a56deabb0",
+      "bytes": 709,
+      "category": "codec",
+      "expected": "reject"
+    },
+    {
+      "file": "encoding-delta.parquet",
+      "sha256": "44c6dd75e8d558d023df5bbbd6e278790fa2381b4d0ec700c727c8122807d77a",
+      "bytes": 410,
+      "category": "encoding",
+      "expected": "reject"
+    },
+    {
+      "file": "wkb-truncated.parquet",
+      "sha256": "94fb811d27b4600c5301ea566dd13827c5590ef93101bb8f57c5a1c739e2eebd",
+      "bytes": 634,
+      "category": "wkb",
+      "expected": "reject"
+    },
+    {
+      "file": "wkb-count-bomb.parquet",
+      "sha256": "a984204370608310776b567c4c21494e4beda410cd8f3801eec85c0c7b8d1d96",
+      "bytes": 634,
+      "category": "wkb-budget",
+      "expected": "reject"
+    },
+    {
+      "file": "wkb-nesting.parquet",
+      "sha256": "401c29df41fab39ec773c9f11f7a820425727e5a2e54b32047cdd805a1a79438",
+      "bytes": 658,
+      "category": "wkb-depth",
+      "expected": "reject"
+    },
+    {
+      "file": "coordinates-nonfinite.parquet",
+      "sha256": "81c3d14eeb686173c5e6562b6862719d7140276c822c9a411fe632ae83cc42a0",
+      "bytes": 636,
+      "category": "nonfinite",
+      "expected": "reject"
+    },
+    {
+      "file": "property-nonfinite.parquet",
+      "sha256": "abcffba4f13c6def740606d93b9600fbfe105aa176de264551580935fa173043",
+      "bytes": 676,
+      "category": "nonfinite",
+      "expected": "reject"
+    },
+    {
+      "file": "magic-head.parquet",
+      "sha256": "8addae062f8cf49bce7cbb1dcbfba0cc53b5f85e9558b68b69425b6d65d85b5d",
+      "bytes": 685,
+      "category": "magic",
+      "expected": "reject"
+    },
+    {
+      "file": "magic-tail.parquet",
+      "sha256": "3883b87cb2bf01b59a93e32f9e6d815016e629d58a141e67e0e1aea4ff054cff",
+      "bytes": 685,
+      "category": "magic",
+      "expected": "reject"
+    },
+    {
+      "file": "encrypted-pare.parquet",
+      "sha256": "5a1e2fc14ee46a766e00d5b0cb69aa2548e8eb30e090cb6e5d1425ceaf7ffb12",
+      "bytes": 685,
+      "category": "encryption",
+      "expected": "reject"
+    },
+    {
+      "file": "footer-truncated.parquet",
+      "sha256": "d645f2694eafd63ddce66fed73a01ad8727e01524af35303f6f9f45e89051804",
+      "bytes": 673,
+      "category": "footer",
+      "expected": "reject"
+    },
+    {
+      "file": "footer-size-bomb.parquet",
+      "sha256": "a796589263d1b78d9ba6f8fc0c6c34be4f8fc453db2800f9d47d3535bac3b659",
+      "bytes": 685,
+      "category": "footer-budget",
+      "expected": "reject"
+    },
+    {
+      "file": "footer-list-bomb.parquet",
+      "sha256": "04f1c8a77930952d05341bb425fae3bf6f0874f76aa94073aa157503ea969fd6",
+      "bytes": 137,
+      "category": "metadata-budget",
+      "expected": "reject"
+    },
+    {
+      "file": "external-path.parquet",
+      "sha256": "3476264f14c83c176799701952cd21de52cddc6b5252bff0ce95d5501ad9496f",
+      "bytes": 393,
+      "category": "external",
+      "expected": "reject"
+    },
+    {
+      "file": "encrypted-column.parquet",
+      "sha256": "262084d45b9d9c867efe0046dcd46b1320d8955016d5ff6277e40d89d44cabd6",
+      "bytes": 360,
+      "category": "encryption",
+      "expected": "reject"
+    },
+    {
+      "file": "encrypted-footer-metadata.parquet",
+      "sha256": "748e97559a79f5aeb4a3a9d0d2a6161be4a53ee389f30e8339537153f5a540d5",
+      "bytes": 360,
+      "category": "encryption",
+      "expected": "reject"
+    },
+    {
+      "file": "page-declared-expansion.parquet",
+      "sha256": "64cff6414d50fe7b11b9d9e930a7bd36bce484b9e297fce131a2a713a41a4081",
+      "bytes": 325,
+      "category": "page-budget",
+      "expected": "reject"
+    },
+    {
+      "file": "page-actual-expansion.parquet",
+      "sha256": "9ed1d079a833e809a63a8e867ea530c374bc25f572b52292c6212d63386d7a75",
+      "bytes": 1798,
+      "category": "decompression",
+      "expected": "reject"
+    },
+    {
+      "file": "page-value-count.parquet",
+      "sha256": "ac8f7e930c39adf13e1611edd84fca25539c8cebd7cac493af28f2de3225e478",
+      "bytes": 360,
+      "category": "page-budget",
+      "expected": "reject"
+    },
+    {
+      "file": "dictionary-value-count.parquet",
+      "sha256": "87f58d4dd245ec8dfe9e7e666de9bd74633c1f079b47afde245e0f26754e77e0",
+      "bytes": 358,
+      "category": "dictionary-budget",
+      "expected": "reject"
+    },
+    {
+      "file": "page-header-string-bomb.parquet",
+      "sha256": "c939f31a0c0f4d04e04ed32af6e9f0f5260dc4aa58c5a121b605d7dad48a61de",
+      "bytes": 363,
+      "category": "header-budget",
+      "expected": "reject"
+    },
+    {
+      "file": "manual-plain-control.parquet",
+      "sha256": "0e4e25e2e2c83903205cdcba2e8f4c9c8cdfcde254f8d6c8dafb4ef160385aec",
+      "bytes": 356,
+      "category": "valid",
+      "expected": "convert",
+      "note": "geometry only; AgFields must reject missing field_id"
+    },
+    {
+      "file": "dictionary-control.parquet",
+      "sha256": "aafa2e1e9bd5b93d9b0ec57d65dff392e3d18c66345fb642970e58ef7fefb097",
+      "bytes": 809,
+      "category": "valid",
+      "expected": "convert",
+      "expected_rows": 2
+    },
+    {
+      "file": "data-page-v2-control.parquet",
+      "sha256": "52d6655b9f8e06b01f093670063f37bc3122e4dbaabc804c9f16bb0f9a6a0c69",
+      "bytes": 361,
+      "category": "valid-v2",
+      "expected": "convert",
+      "expected_rows": 1
+    },
+    {
+      "file": "data-page-v2-row-mismatch.parquet",
+      "sha256": "4843273d1a7ff1eb2f9bfa91404a941a4fa22a4e0e6f7cda3f3197d881fbedc1",
+      "bytes": 361,
+      "category": "v2-row-count",
+      "expected": "reject"
+    },
+    {
+      "file": "data-page-v2-snappy-control.parquet",
+      "sha256": "5f9cea0daa77f4a6c4f80bf085f0ab4d71e551d6b88c184a9dc0fa81b9101776",
+      "bytes": 324,
+      "category": "valid-v2-snappy",
+      "expected": "convert",
+      "expected_rows": 1
+    },
+    {
+      "file": "data-page-v2-snappy-flag-mismatch.parquet",
+      "sha256": "375dfa13cb5a137670f747b8ddd4ad48fe337bdcdf4256e42ef001513f05274e",
+      "bytes": 324,
+      "category": "v2-compression-flag",
+      "expected": "reject"
+    },
+    {
+      "file": "multiple-row-groups-control.parquet",
+      "sha256": "a5301725d25f42938c20c80b3a89ca6d28919276137b89915cf95067de2b64ba",
+      "bytes": 1118,
+      "category": "row-group-control",
+      "expected": "convert",
+      "expected_rows": 2,
+      "expected_row_groups": 2
+    },
+    {
+      "file": "projected-crs-control.parquet",
+      "sha256": "cf7779e998d9ada529fbf09b0daf65c6c072bc1cfa048f859ffcb416face3e3f",
+      "bytes": 3201,
+      "category": "projected-crs-control",
+      "expected": "convert",
+      "expected_wgs84": [
+        -116.0,
+        44.0
+      ]
+    },
+    {
+      "file": "missing-grid-crs.parquet",
+      "sha256": "64c387b6083be14ad96660df1b12bf80451ad4ccc6a79a9de740d56e8044fd34",
+      "bytes": 1348,
+      "category": "workflow-rejection",
+      "expected": "workflow-rejection",
+      "note": "Rust parser accepts data; shape-converter rejects unavailable best offline grid."
+    },
+    {
+      "file": "null-geometry.parquet",
+      "sha256": "4f826fbbcdc5bf9e1029aadd946a6020e932f5a3b7f3854ac0f0d2b17a2f4f79",
+      "bytes": 609,
+      "category": "all-null-geometry",
+      "expected": "reject",
+      "note": "Parser rejects all-null input: finite observed bounds are required"
+    },
+    {
+      "file": "mixed-polygon-point.parquet",
+      "sha256": "9de43f6796e9bf449d5a6dbde9e362ea433033a0ec457f8c2398a26c4862e5a0",
+      "bytes": 729,
+      "category": "workflow-rejection",
+      "expected": "batch/agfields/omni reject before replacement"
+    }
+  ],
+  "note": "Expected outcomes are acceptance assertions, not observed candidate results."
+}

@@ -1,0 +1,267 @@
+{
+  "measured_at_utc": "2026-11-17T23:10:21.623020+00:00",
+  "baseline": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "candidate_head": "5ef26481068cada863371d34b2d62ffd2c6e77fa",
+  "interpreter": "/usr/bin/python",
+  "python_version": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "radon_version": "6.0.1",
+  "radon_module": "/usr/lib/python3/dist-packages/radon/__init__.py",
+  "analyzer_sha256": "e31a33ea34350033e06ef644de280ca9f447aaddc96beb8f1d28ed9e72ccd128",
+  "note": "Null baseline means new path; its code was extracted from roads.py, not newly created behavior. Root metrics are observe-only.",
+  "files": [
+    {
+      "path": "wepppy/nodb/mods/roads/roads.py",
+      "sha256": "a53920220275bc46afc2ba405f061788c3621b87fc22b4c0bcbd3a3796775321",
+      "baseline": {
+        "python_file_sloc": 5907.0,
+        "python_function_len": 2069.0,
+        "python_cc": 158.0,
+        "longest_function": "run_roads_wepp",
+        "broad_exception_handlers": 19
+      },
+      "candidate": {
+        "python_file_sloc": 1888.0,
+        "python_function_len": 269.0,
+        "python_cc": 25.0,
+        "longest_function": "run_roads_wepp",
+        "broad_exception_handlers": 10
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_constants.py",
+      "sha256": "a44595427152e3ab93d80f4d9cefe940430d7f7b732ab596ace9fd2c53f10561",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 122.0,
+        "python_function_len": 7.0,
+        "python_cc": 3.0,
+        "longest_function": "_normalize_design",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_inputs.py",
+      "sha256": "31c51b50f207cde9fb7a130d02738ddee3b4bccd7045957e25442a94063559d6",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 770.0,
+        "python_function_len": 140.0,
+        "python_cc": 44.0,
+        "longest_function": "_resolve_segment_run_inputs",
+        "broad_exception_handlers": 1
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_prepare.py",
+      "sha256": "b77a2208c634d2e8f5189a5c84e80320b34ce9d8f10977d389cce82baf1b340d",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 151.0,
+        "python_function_len": 81.0,
+        "python_cc": 8.0,
+        "longest_function": "build_summary",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_soil_inputs.py",
+      "sha256": "fcbdf4d840cf9cd555f79eae79de5a90cba33e78d47740e3149c9a5c935fe595",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 349.0,
+        "python_function_len": 106.0,
+        "python_cc": 25.0,
+        "longest_function": "_build_routed_three_ofe_soil_file",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_management_inputs.py",
+      "sha256": "f92d3b2ab7d6a8a2025d41e94d8f93d683d583fd51f04d17199f2331bc63ca3f",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 241.0,
+        "python_function_len": 96.0,
+        "python_cc": 27.0,
+        "longest_function": "_build_single_ofe_management_file",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_slope_inputs.py",
+      "sha256": "fd23e48ca799755eb4e36a16fdc1e3fe49fdd0dc2cfe7c184150637ab8ba459b",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 210.0,
+        "python_function_len": 43.0,
+        "python_cc": 15.0,
+        "longest_function": "_derive_buffer_profile_from_feature_or_defaults",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_spatial.py",
+      "sha256": "02b84f6bffd77f95854736dd842874e067aa29f31d1e38034c3439b57f04137e",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 231.0,
+        "python_function_len": 103.0,
+        "python_cc": 27.0,
+        "longest_function": "_select_outslope_unrutted_hillslope_segments",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_queries.py",
+      "sha256": "f2fc4179d65b9eda931ac823abdffa86d0ce7d3fa3b73bc2796695b8739832a3",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 562.0,
+        "python_function_len": 157.0,
+        "python_cc": 61.0,
+        "longest_function": "query_segment_detail",
+        "broad_exception_handlers": 2
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_parameterization_support.py",
+      "sha256": "362ac0339308df1ec41b362aaca2de654ef25763713cba79019177d0b986b33f",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 100.0,
+        "python_function_len": 29.0,
+        "python_cc": 14.0,
+        "longest_function": "_attach_parameterization_records",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_pass_routing.py",
+      "sha256": "4e954fb59c108d21ebbb67a2deadda027cd01d4c8182bc9b37e0217cd5ef6d47",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 141.0,
+        "python_function_len": 46.0,
+        "python_cc": 7.0,
+        "longest_function": "_normalize_road_pass_header_climate_tokens",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_native_runner.py",
+      "sha256": "cc553403ea447b9eb8044e10df50e59db7a00235b9921341d4456a2f61210e20",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 52.0,
+        "python_function_len": 52.0,
+        "python_cc": 7.0,
+        "longest_function": "_run_segment_hillslope",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_reporting.py",
+      "sha256": "493a509c8d2cc4e23a7993cede9dc1b9b044587b984d804a898587a8e3820a82",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 207.0,
+        "python_function_len": 163.0,
+        "python_cc": 24.0,
+        "longest_function": "_regenerate_roads_report_resources",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_execution.py",
+      "sha256": "15c408dec725c4e7e93e75984c2884ed67f337034102209502a1bb79d6c87b0d",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 233.0,
+        "python_function_len": 49.0,
+        "python_cc": 8.0,
+        "longest_function": "build_run_summary",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_point_source.py",
+      "sha256": "8e489ea4020adf32fdc0d24a672cb0153f27db91ad524df4fada90da066f4d4a",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 869.0,
+        "python_function_len": 149.0,
+        "python_cc": 12.0,
+        "longest_function": "_execute_point_source",
+        "broad_exception_handlers": 2
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_unrutted_execution.py",
+      "sha256": "b89ff1633caf18b8ecc26987f4943729078f156876a78bb84e4ae1d07873232f",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 341.0,
+        "python_function_len": 116.0,
+        "python_cc": 10.0,
+        "longest_function": "_hillslope_dimensions",
+        "broad_exception_handlers": 2
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_unrutted_planning.py",
+      "sha256": "340fb7d58ae15f775476fcb541f0df9d39f67bb463aaeba3f61d296153a469ae",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 723.0,
+        "python_function_len": 122.0,
+        "python_cc": 22.0,
+        "longest_function": "reconcile_hillslope",
+        "broad_exception_handlers": 0
+      }
+    },
+    {
+      "path": "wepppy/nodb/mods/roads/_unrutted_native.py",
+      "sha256": "587670bd59956c1ee04d066542b3ff837c1627a5d1ba592c6dc955e2511f4001",
+      "baseline": null,
+      "candidate": {
+        "python_file_sloc": 549.0,
+        "python_function_len": 90.0,
+        "python_cc": 3.0,
+        "longest_function": "execute_strip",
+        "broad_exception_handlers": 2
+      }
+    }
+  ],
+  "aggregate_baseline_sloc": 5907.0,
+  "aggregate_candidate_sloc": 7739.0,
+  "residual_hotspot_equivalence": [
+    {
+      "module": "_inputs",
+      "function": "_validated_params_payload",
+      "baseline_complexity": 44,
+      "candidate_complexity": 44,
+      "body_ast_identical": true
+    },
+    {
+      "module": "_queries",
+      "function": "query_segment_detail",
+      "baseline_complexity": 40,
+      "candidate_complexity": 40,
+      "body_ast_identical": true
+    },
+    {
+      "module": "_queries",
+      "function": "_last_parameterization_readback",
+      "baseline_complexity": 61,
+      "candidate_complexity": 61,
+      "body_ast_identical": true
+    },
+    {
+      "module": "_reporting",
+      "function": "_regenerate_roads_report_resources",
+      "baseline_complexity": 24,
+      "candidate_complexity": 24,
+      "body_ast_identical": true
+    }
+  ]
+}

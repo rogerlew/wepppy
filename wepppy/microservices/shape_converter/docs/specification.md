@@ -33,6 +33,60 @@ state; this table does not assert deployed behavior:
 Until the nonconformant and partial items are closed or explicitly risk-accepted,
 the service must not be represented as fully conformant with this contract.
 
+## GeoParquet input normalization amendment (VUN-01)
+
+Accepted contract intent 2026-11-16; implementation and exact-image conformance
+are pending. WEPPcloud's Roads, AgFields, Omni contrasts and Batch Runner may
+submit one admitted local GeoParquet file to this service for normalization to
+canonical WGS84 GeoJSON. The public converter UI remains ZIP/Shapefile-oriented.
+Culvert and D-Tale paths are excluded.
+
+GeoParquet uses a separate service-local `geoparquet_parser_cli`; it is never a
+mode of `shape_parser_cli`. The exact accepted graph is Parquet 60.1.0 with
+default features disabled and Snappy only, plus serde_json 1.0.145, bound to the
+exact `Cargo.lock` SHA-256
+`ce923427941fabe153c8b282dcfddeb1168b60670055ab34f47911d039748f13`.
+Direct use of an upstream Parquet decoder on unpreflighted hostile bytes is
+forbidden. Any graph, feature, version or lock-hash change reopens dependency
+review.
+
+Before any upstream decoder runs, owned code must open one regular nonsymlink
+immutable local file and perform the complete bounded Compact-Thrift/footer,
+schema, row-group, column, page, dictionary, encoding, codec, offset and range
+preflight required by
+[ADR-0145](../../../../docs/adrs/ADR-0145-geoparquet-upload-resource-bounds.md).
+Preflight and decode use that same descriptor, with identity and size rechecked
+before decode. The parser accepts no pathname selected by output metadata, URL,
+directory, dataset, external column file, encryption, plugin or network resource.
+
+The admitted profile and canonical output are defined by the
+[vector-upload normalization contract](../../../../docs/schemas/vector-upload-normalization-contract.md).
+The CLI emits strict bounded data-only JSON. The service revalidates its schema,
+feature count, finite coordinates, geometry types, observed bounds and hashes,
+resolves/reprojects CRS offline without ballpark fallback, serializes canonical
+GeoJSON, reads that artifact back and reconciles its declared metadata before
+success. The service computes and returns `source_size` and `source_sha256` from
+its own complete staged request snapshot; receiving workflows must reconcile both
+against their descriptor-bound retained original before receiving validation or
+accepted-state mutation. Every receiving workflow then revalidates canonical
+GeoJSON before any accepted-resource or workflow-state mutation.
+
+Reuse the accepted `shape_parser_cli` lifecycle: private request scratch, minimal
+environment, fixed argv without shell, process-group ownership, direct resource
+limits, wall timeout, cancellation shielding/drainage, bounded stdout/stderr/IPC,
+adjacent binary provenance, runtime canary and cleanup after every outcome. A
+missing, changed, unready, timed-out or invalid parser fails closed with the
+stable normalization errors; no Python, GDAL/Fiona, PyArrow, alternate CLI or
+in-process fallback is allowed. Exact-image qualification, SBOM/advisory scan and
+rollout remain separate gates.
+
+Receiving workflows retain their original project uploads and provenance under
+the canonical normalization contract. Shape-converter receives no user account,
+ban authority or project-artifact pathname. Its request copy remains private
+ephemeral scratch and is removed after complete process-group drainage. A
+project-retained quarantined original is never a converter retry source; a retry
+must create a new receiving attempt and repeat all admission controls.
+
 ## Objective
 Provide a sandboxed upload/conversion service where users can upload a ZIP containing a shapefile and convert it to GeoJSON or GeoParquet, with explicit CRS handling options:
 - Same as shapefile

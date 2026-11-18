@@ -1,0 +1,29 @@
+{
+  "qualified_image": "sha256:4487dec16cdb1a0ed735e60f10672c646ecc3b26d0586dbfce93479b9eae98fa",
+  "files": {
+    "line.geojson": {
+      "sha256": "36560a3ef46da624ac455f3d8581404365f54211ccdbd9d6247c64e95eaac870",
+      "size": 198
+    },
+    "line.zip": {
+      "sha256": "9fd92c79931630edba20006ad955793e894ee484d54d0823a69f5e3401ea1543",
+      "size": 777
+    },
+    "line.parquet": {
+      "sha256": "a084494cfefb81d29590a9380f7559aad90d8a7b10944c99f3b9a6ca42cc0890",
+      "size": 680
+    },
+    "polygon.geojson": {
+      "sha256": "66040fe93747de73a1c6673ac8eda9aec56984340d56ebc4c57c49fe73f67b56",
+      "size": 224
+    },
+    "polygon.zip": {
+      "sha256": "4ccd2c7f7edea584ba93dc3e2d245fff510cd2b25edc1ecffac9c72b09953d9a",
+      "size": 806
+    },
+    "polygon.parquet": {
+      "sha256": "039eba296e7c190a9235cb8ca9caa3d754cb2084054630dd0e4966229d9c1e17",
+      "size": 685
+    }
+  }
+}

@@ -14,6 +14,14 @@ wepppy/**
 !wepppy/observability/
 !wepppy/observability/**
 
+!docs/
+docs/**
+!docs/work-packages/
+!docs/work-packages/20261116_vector_upload_normalization/
+!docs/work-packages/20261116_vector_upload_normalization/artifacts/
+!docs/work-packages/20261116_vector_upload_normalization/artifacts/red_fixtures/
+!docs/work-packages/20261116_vector_upload_normalization/artifacts/red_fixtures/data-page-v2-control.parquet
+
 wepppy/microservices/shape_converter/docs/
 **/__pycache__
 **/*.pyc

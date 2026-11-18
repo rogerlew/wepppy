@@ -32,7 +32,9 @@ Canonical behavioral contract:
   omitted kslast preserves saved state; explicit clearing remains supported.
 * Roads repository baselines and project-owned overrides follow
   `docs/schemas/roads-parameterization-baseline-contract.md` and
-  `docs/schemas/roads-settings-contract.md`. `roads.nodb` owns retained template
+  `docs/schemas/roads-settings-contract.md`. Unrutted strip geometry follows
+  `docs/schemas/roads-unrutted-strip-contract.md`; preserve area readback and
+  source-membership provenance without inferring switchback connectivity. `roads.nodb` owns retained template
   contents and overrides; generated soil/management files are readback evidence.
   Reset removes overrides against the bound baseline, not current repository
   defaults. Validate native input propagation and legacy binding/invalidation.

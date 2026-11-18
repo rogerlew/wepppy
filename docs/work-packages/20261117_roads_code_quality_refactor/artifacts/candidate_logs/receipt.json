@@ -1,0 +1,59 @@
+{
+  "normalization": "Trailing whitespace removed only; original logs retained at runtime paths.",
+  "logs": [
+    {
+      "file": "analysis-candidate-20261117b.log",
+      "runtime_log": "/tmp/roads-refactor-validation/analysis-candidate-20261117b.log",
+      "original_sha256": "1696f40c61200ce0bfe3c1be3ab7c64a54b2e8b3e57304bb64d931cda4d2b188",
+      "retained_sha256": "bd707da0ead2510f4e3294f357875c0598a30781346e7b8336f9f7ec5be5d447"
+    },
+    {
+      "file": "native-candidate-20261117b.log",
+      "runtime_log": "/tmp/roads-refactor-validation/native-candidate-20261117b.log",
+      "original_sha256": "e00fc74aac3a8661f5fcbce308d558612be11cf6607948dd27831026da96d6ad",
+      "retained_sha256": "cb82a057babd4a33c37ee16d874470b6cb2073a9194e1dc36da11bf580b00c03"
+    },
+    {
+      "file": "project-candidate-20261117b-inslope_bd.log",
+      "runtime_log": "/tmp/roads-refactor-validation/project-candidate-20261117b-inslope_bd.log",
+      "original_sha256": "e7249e3cc82110f4c315199ada501ae19684d8bd1a52e6ef97f4e5115b6c0c50",
+      "retained_sha256": "64754e787f96b142171407ced5a38a18eace251855cdc8ed0bd2b5496919c272"
+    },
+    {
+      "file": "project-candidate-20261117b-inslope_rd.log",
+      "runtime_log": "/tmp/roads-refactor-validation/project-candidate-20261117b-inslope_rd.log",
+      "original_sha256": "1b3d149910bcb2abfa557ffa0629261f97555544690e4fbc51375a64d532f84a",
+      "retained_sha256": "c13cd3338b72ff8283771261cc5fc4575acac547477bf5d27cccd71aa179a44f"
+    },
+    {
+      "file": "project-candidate-20261117b-outslope_rutted.log",
+      "runtime_log": "/tmp/roads-refactor-validation/project-candidate-20261117b-outslope_rutted.log",
+      "original_sha256": "05619b4747e866e9a94a6fca0cf3b0b08c9d7d3996648081519e1c099719600f",
+      "retained_sha256": "72eda35eda8deb6a8ea3df819bed6b086d01c921b067cba05c64722be0f6edbd"
+    },
+    {
+      "file": "project-candidate-20261117b-unrutted-negative.log",
+      "runtime_log": "/tmp/roads-refactor-validation/project-candidate-20261117b-unrutted-negative.log",
+      "original_sha256": "db93e366652dfe343f46a09e9c7375bc8e02770d6cb1ec57d106a96c730da43a",
+      "retained_sha256": "5b32e56fc43a7eaec14625aef12cee2cc741675d3ec170b5b18611977d3c98be"
+    },
+    {
+      "file": "project-candidate-20261117b-unrutted-positive.log",
+      "runtime_log": "/tmp/roads-refactor-validation/project-candidate-20261117b-unrutted-positive.log",
+      "original_sha256": "785ca9c087808bc843ffb50bb7fb2331a42d8e1ada3474d9684294da911b4fd3",
+      "retained_sha256": "0c0a2a7e0f73b40d879df150481338573697ed732a7048960da5b0f72b3517bd"
+    },
+    {
+      "file": "project-comparison-final.log",
+      "runtime_log": "/tmp/roads-refactor-validation/project-comparison-final.log",
+      "original_sha256": "e151eb8074e1df492b6397713c218f30b589eb63c1ce3c6affb6eed14b80e690",
+      "retained_sha256": "ce01d342fa67ff4f94a1ad372d0e86259d0d74ac82b274898c2c2b10f3ae1630"
+    },
+    {
+      "file": "project-field-metadata.log",
+      "runtime_log": "/tmp/roads-refactor-validation/project-field-metadata.log",
+      "original_sha256": "32e0eabd6bfc81e07bbbcc1f95f1ee3c47320810f1c1ce0dc058b3d07a66b8b8",
+      "retained_sha256": "f75277022d0bfba0b58e9969dc13c4acfe96d7edec5536f6a83dd6e4ed8ef9b2"
+    }
+  ]
+}

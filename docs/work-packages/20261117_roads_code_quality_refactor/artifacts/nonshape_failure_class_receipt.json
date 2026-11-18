@@ -1,0 +1,438 @@
+{
+  "schema": "roads-nonshape-diagnostic-v1",
+  "baseline_selection": [
+    "tests/rq/test_batch_rq_retry_selection.py::test_delete_batch_rq_checks_active_jobs_before_cleanup",
+    "tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_marks_ttl_when_rmtree_fails",
+    "tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_reports_non_retryable_delete_errors",
+    "tests/rq/test_project_rq_delete_run.py::test_gc_runs_rq_deferred_delete_suppresses_messages",
+    "tests/rq/test_project_rq_fork.py::test_reset_fork_omni_directories_rejects_hostile_ancestor[socket-_pups/omni]",
+    "tests/weppcloud/controllers_js/test_unitizer_client_js.py::test_unitizer_bundle_contains_blank_guard",
+    "tests/weppcloud/routes/test_feature_access_routes.py::test_grant_ack_remove_real_transport_and_admission",
+    "tests/weppcloud/routes/test_feature_access_routes.py::test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent",
+    "tests/weppcloud/routes/test_feature_access_routes.py::test_legacy_poweruser_is_preserved_without_fabricated_acceptance",
+    "tests/weppcloud/routes/test_feature_access_routes.py::test_dates_conflict_and_expired_profile",
+    "tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[False]",
+    "tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[True]",
+    "tests/weppcloud/test_run_catalog_postgres.py::test_marker_notification_latency_without_prior_sql_mirror[readonly]",
+    "tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain",
+    "tests/weppcloud/test_user_preferences_postgres.py::test_postgres_schema_constraints_and_cascade"
+  ],
+  "baseline_result": {
+    "failed": 13,
+    "passed": 1,
+    "errors": 1,
+    "exit_status": 1,
+    "seconds": 17.48,
+    "outcomes": [
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_delete_batch_rq_checks_active_jobs_before_cleanup",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_delete_run_rq_marks_ttl_when_rmtree_fails",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_delete_run_rq_reports_non_retryable_delete_errors",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_gc_runs_rq_deferred_delete_suppresses_messages",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_fork",
+        "name": "test_reset_fork_omni_directories_rejects_hostile_ancestor[socket-_pups/omni]",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.weppcloud.controllers_js.test_unitizer_client_js",
+        "name": "test_unitizer_bundle_contains_blank_guard",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.weppcloud.routes.test_feature_access_routes",
+        "name": "test_grant_ack_remove_real_transport_and_admission",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.weppcloud.routes.test_feature_access_routes",
+        "name": "test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.weppcloud.routes.test_feature_access_routes",
+        "name": "test_legacy_poweruser_is_preserved_without_fabricated_acceptance",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.weppcloud.routes.test_feature_access_routes",
+        "name": "test_dates_conflict_and_expired_profile",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.weppcloud.routes.test_runs_catalog_contract",
+        "name": "test_runs_sort_navigation_and_fixed_layout_in_chromium[False]",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.weppcloud.routes.test_runs_catalog_contract",
+        "name": "test_runs_sort_navigation_and_fixed_layout_in_chromium[True]",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.weppcloud.test_run_catalog_postgres",
+        "name": "test_marker_notification_latency_without_prior_sql_mirror[readonly]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.weppcloud.test_run_catalog_reader",
+        "name": "test_real_file_sql_http_browser_chain",
+        "outcome": "failure"
+      },
+      {
+        "classname": "tests.weppcloud.test_user_preferences_postgres",
+        "name": "test_postgres_schema_constraints_and_cascade",
+        "outcome": "error"
+      }
+    ]
+  },
+  "candidate_retention_result": {
+    "passed": 50,
+    "exit_status": 0,
+    "seconds": 15.61,
+    "outcomes": [
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_batch_directory_root_lock_uses_effective_path_scope",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_batch_directory_root_lock_retries_nodir_locked",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_clear_batch_leaf_nodb_state_clears_cache_and_locks",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_project_clears_existing_leaf_locks_before_redisprep",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_project_repairs_hillslope_interchange_before_watershed_retry",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_state_marks_base_climate_drift_retry_eligible",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_state_ignores_leaf_generated_cligen_seed",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_resync_copies_explicit_cligen_seed_override_but_preserves_runtime_seed",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_state_accepts_runtime_resolved_climate_station",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_state_accepts_compatible_runtime_station_modes[legacy]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_state_accepts_compatible_runtime_station_modes[raw]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_state_rejects_foreign_runtime_station_mode",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_resync_preserves_runtime_resolved_climate_station_and_timestamps",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_state_detects_explicit_climate_station_change",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_project_resyncs_base_climate_and_invalidates_downstream_timestamps",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_project_watar_only_reuses_runtime_resolved_climate_and_wepp",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_project_rehydrates_climate_inside_lock_for_downstream_readers",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_clear_retry_runtime_locks_uses_child_path_scope",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_states_uses_timestamps_and_metadata",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_retry_eligible_watershed_features_skips_completed_old_style_runs",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_states_skips_absent_optional_timeseries_tasks",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_classify_batch_run_state_rejects_invalid_leaf_runid",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_generate_runstate_cli_report_omits_retry_status_text",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_release_deferred_finalizer_if_ready_enqueues_met_dependencies",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_release_deferred_finalizer_if_ready_keeps_unmet_dependencies_deferred",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_rq_enqueues_only_retry_eligible_features[None]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_rq_enqueues_only_retry_eligible_features[ValueError]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_rq_enqueues_only_retry_eligible_features[RuntimeError]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_rq_enqueues_only_retry_eligible_features[RecursionError]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_rq_full_rerun_enqueues_all_features",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_rq_raises_when_batch_jobs_are_active",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_delete_batch_rq_checks_active_jobs_before_cleanup",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_watershed_rq_writes_success_metadata",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_watershed_rq_writes_failed_metadata_and_returns_false",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_run_batch_watershed_rq_task_status_failure_is_metadata_warning",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_final_batch_complete_publishes_failure_summary",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_batch_phases_stop_at_interchange_and_rehydrate[True-True-False]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_batch_phases_stop_at_interchange_and_rehydrate[False-True-False]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_batch_phases_stop_at_interchange_and_rehydrate[True-False-False]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_batch_phases_stop_at_interchange_and_rehydrate[False-False-False]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_batch_rq_retry_selection",
+        "name": "test_batch_phases_stop_at_interchange_and_rehydrate[True-True-True]",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_delete_run_rq_marks_ttl_when_rmtree_fails",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_delete_run_rq_reports_non_retryable_delete_errors",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_delete_run_holds_vector_scope_and_rebuilds_ledger_after_durable_removal",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_delete_run_releases_global_maintenance_when_project_scope_acquisition_fails",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_gc_runs_rq_deferred_delete_suppresses_messages",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_index_usersum_docs_rq_builds_index_without_postgres",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_index_usersum_docs_rq_syncs_vendor_docs_before_require_vendor_validation",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_index_usersum_docs_rq_syncs_vendor_docs_when_write_index_disabled",
+        "outcome": "passed"
+      },
+      {
+        "classname": "tests.rq.test_project_rq_delete_run",
+        "name": "test_index_usersum_docs_rq_postgres_sync_is_readonly_on_repo_paths",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "source_transitions": {
+    "tests/rq/test_batch_rq_retry_selection.py": {
+      "before_sha256": "046a3b522b6fcfe9b2a97511d3000698df06b3ab262d12a00d0c98d7e5539e45",
+      "after_sha256": "046a3b522b6fcfe9b2a97511d3000698df06b3ab262d12a00d0c98d7e5539e45",
+      "before_equals_baseline": false
+    },
+    "tests/rq/test_project_rq_delete_run.py": {
+      "before_sha256": "4f12bb7d42f9cb96e3bc13f7473a92e67297504e9a92b24558d38ee73599a2d2",
+      "after_sha256": "4f12bb7d42f9cb96e3bc13f7473a92e67297504e9a92b24558d38ee73599a2d2",
+      "before_equals_baseline": false
+    }
+  },
+  "other_test_sources": {
+    "tests/rq/test_project_rq_fork.py": {
+      "sha256": "29ba9c48c8615622bbe73ed547fb07e3a3a3baf73a33abb22720aafa67d06012",
+      "baseline_equal": true
+    },
+    "tests/weppcloud/controllers_js/test_unitizer_client_js.py": {
+      "sha256": "afa32e526d8c9d9de1ad33d2469cc2abbc0661d939ac6007a60e20361fb59ec6",
+      "baseline_equal": true
+    },
+    "tests/weppcloud/routes/test_feature_access_routes.py": {
+      "sha256": "8ad8ba5911c335451f52b691d1fdf15ac7f8b83b6cb598b9c8c7bb1146a0ca18",
+      "baseline_equal": true
+    },
+    "tests/weppcloud/routes/test_runs_catalog_contract.py": {
+      "sha256": "db5769739016ada39619490b4fb9847ae1719bcbbf69d9b09c417ff3ff568cd0",
+      "baseline_equal": true
+    },
+    "tests/weppcloud/test_run_catalog_postgres.py": {
+      "sha256": "352dfa3584078a5a04adb4fd0f433d8eb73773959a8763ebc7180124e11427a8",
+      "baseline_equal": true
+    },
+    "tests/weppcloud/test_run_catalog_reader.py": {
+      "sha256": "5fd875014891bfee167782fb4203fd696b1e5993258f3a083304cbba675a4775",
+      "baseline_equal": true
+    },
+    "tests/weppcloud/test_user_preferences_postgres.py": {
+      "sha256": "cb5f55f6794d850620a82d1ed5baca219c641ce9b08a2eecdf9e19db573cd4a3",
+      "baseline_equal": true
+    }
+  },
+  "v5_postgres_setup_errors": [
+    {
+      "test": "test_postgres_schema_constraints_and_cascade",
+      "missing_account_kind": true
+    },
+    {
+      "test": "test_postgres_concurrent_first_save_retries_whole_record",
+      "missing_account_kind": true
+    },
+    {
+      "test": "test_postgres_existing_update_is_serialized_and_last_commit_wins",
+      "missing_account_kind": true
+    },
+    {
+      "test": "test_postgres_read_and_save_serialize_in_both_orders[read]",
+      "missing_account_kind": true
+    },
+    {
+      "test": "test_postgres_read_and_save_serialize_in_both_orders[save]",
+      "missing_account_kind": true
+    },
+    {
+      "test": "test_postgres_identity_binding_and_owned_run_receipt",
+      "missing_account_kind": true
+    },
+    {
+      "test": "test_postgres_runid_collision_cannot_delete_preexisting_run",
+      "missing_account_kind": true
+    },
+    {
+      "test": "test_two_users_view_same_project_in_preferred_units_without_mutation",
+      "missing_account_kind": true
+    }
+  ],
+  "note": "The isolated baseline latency pass does not resolve full-suite load behavior. No shared schema or permission change."
+}

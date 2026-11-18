@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from types import SimpleNamespace
 import uuid
 
@@ -28,12 +29,40 @@ def rq_connection(runtime_redis_credentials):
     return connection
 
 
+@pytest.fixture
+def batch_queue(rq_connection, monkeypatch: pytest.MonkeyPatch):
+    queue = Queue(f"batch-recovery-{uuid.uuid4().hex}", connection=rq_connection)
+
+    def private_queue(name, *, connection):
+        assert name == "batch"
+        assert connection is rq_connection
+        return queue
+
+    original_targets_batch = batch_rq._job_targets_batch
+
+    def private_targets_batch(job, batch_name):
+        if job.origin != queue.name:
+            return False
+        # Alias only the predicate's logical queue name; never persist the copy.
+        # Real WATCH, registries, cancellation and cleanup use the private origin.
+        logical_job = copy(job)
+        logical_job.origin = "batch"
+        return original_targets_batch(logical_job, batch_name)
+
+    monkeypatch.setattr(batch_rq, "Queue", private_queue)
+    monkeypatch.setattr(batch_rq, "_job_targets_batch", private_targets_batch)
+    try:
+        yield queue
+    finally:
+        queue.delete(delete_jobs=True)
+
+
 def test_batch_recovery_uses_persisted_root_and_cancels_omni_descendant(
-    rq_connection, monkeypatch: pytest.MonkeyPatch,
+    rq_connection, batch_queue, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     batch_name = f"retry-{uuid.uuid4().hex}"
     runid = f"batch;;{batch_name};;1"
-    queue = Queue("batch", connection=rq_connection)
+    queue = batch_queue
     root = queue.enqueue(
         batch_rq.run_batch_rq,
         batch_name,
@@ -88,7 +117,7 @@ def test_batch_recovery_uses_persisted_root_and_cancels_omni_descendant(
         assert child.get_status(refresh=True) == "canceled"
         assert omni_receipt.get_status(refresh=True) == "canceled"
         assert batch_finalizer.get_status(refresh=True) == "canceled"
-        deferred_ids = DeferredJobRegistry("batch", connection=rq_connection).get_job_ids()
+        deferred_ids = DeferredJobRegistry(queue=queue).get_job_ids()
         assert {child.id, omni_receipt.id, batch_finalizer.id}.isdisjoint(deferred_ids)
     finally:
         for candidate in (batch_finalizer, omni_receipt, child, root):
@@ -101,10 +130,10 @@ def test_batch_recovery_uses_persisted_root_and_cancels_omni_descendant(
 
 
 def test_batch_recovery_detects_bytes_id_in_intermediate_queue(
-    rq_connection, monkeypatch: pytest.MonkeyPatch,
+    rq_connection, batch_queue, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     batch_name = f"retry-{uuid.uuid4().hex}"
-    queue = Queue("batch", connection=rq_connection)
+    queue = batch_queue
     job = queue.create_job(
         batch_rq.run_batch_rq,
         args=(batch_name,),

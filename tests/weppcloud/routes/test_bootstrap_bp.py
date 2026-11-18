@@ -251,7 +251,7 @@ def test_enable_bootstrap_enqueues_job(bootstrap_context, monkeypatch: pytest.Mo
     monkeypatch.setattr(
         module,
         "enable_bootstrap_operation",
-        lambda runid, actor, email, require_user_access: BootstrapOperationResult(
+        lambda runid, actor, user_id, require_user_access: BootstrapOperationResult(
             payload={
                 "enabled": False,
                 "queued": True,

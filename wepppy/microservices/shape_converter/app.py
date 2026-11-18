@@ -41,14 +41,16 @@ from .cleanup import (
     sweep_stale_request_dirs,
 )
 from .convert import (
+    _geoparquet_parser_cli_path,
     _parser_cli_path,
     convert_uploaded_archive,
+    probe_geoparquet_parser_runtime,
     probe_parser_runtime,
     validate_conversion_resource_envelope,
 )
 from .errors import ShapeConverterError, error_response
 from .inspect import inspect_uploaded_archive
-from .parser_provenance import validate_parser_executable
+from .parser_provenance import read_parser_provenance, validate_parser_executable
 
 SERVICE_SCOPE = "shape-converter"
 DEFAULT_SCRATCH_ROOT = Path("/tmp/shape-converter")
@@ -103,6 +105,23 @@ def _is_scratch_root_writable(scratch_root: Path) -> tuple[bool, str | None]:
 
 def _is_toolchain_available() -> tuple[bool, str | None]:
     return validate_parser_executable(_parser_cli_path())
+
+
+def _is_geoparquet_toolchain_available() -> tuple[bool, str | None]:
+    return validate_parser_executable(_geoparquet_parser_cli_path())
+
+
+def _require_geoparquet_ready(app: Starlette, upload: UploadFile) -> None:
+    if Path(upload.filename or "").suffix.lower() not in {".parquet", ".geoparquet"}:
+        return
+    if bool(getattr(app.state, "startup_geoparquet_ready", False)):
+        return
+    raise ShapeConverterError(
+        code="vector_converter_unavailable",
+        message="GeoParquet normalization is unavailable.",
+        details="The bounded GeoParquet parser did not pass startup readiness.",
+        status_code=503,
+    )
 
 
 def _log_structured_event(*, level: int, event: str, **fields: object) -> None:
@@ -382,7 +401,17 @@ async def health_ready(request: Request) -> JSONResponse:
             "check": "ready",
             "scratch_root": str(scratch_root),
             "parser": "shape_parser_cli",
+            "geoparquet_parser": (
+                "ready"
+                if bool(getattr(request.app.state, "startup_geoparquet_ready", False))
+                else "unavailable"
+            ),
             "provenance": "binary_binding_verified",
+            "geoparquet_parser_provenance": (
+                read_parser_provenance(_geoparquet_parser_cli_path())
+                if bool(getattr(request.app.state, "startup_geoparquet_ready", False))
+                else None
+            ),
         }
     )
 
@@ -467,12 +496,31 @@ async def inspect_archive(request: Request) -> JSONResponse:
                 )
 
             try:
+                _require_geoparquet_ready(request.app, archive_field)
+            except ShapeConverterError as exc:
+                cleanup_reason = f"shape_error:{exc.code}"
+                return error_response(exc, request_id=request_id)
+
+            try:
                 inspect_started = time.perf_counter()
-                payload = await inspect_uploaded_archive(
-                    archive=archive_field,
-                    scratch=scratch_layout,
-                    request_id=request_id,
-                )
+                if Path(archive_field.filename or "").suffix.lower() in {
+                    ".parquet",
+                    ".geoparquet",
+                }:
+                    inspected = await convert_uploaded_archive(
+                        archive=archive_field,
+                        scratch=scratch_layout,
+                        request_id=request_id,
+                        output_format="geojson",
+                        target_crs="wgs84",
+                    )
+                    payload = inspected.metadata
+                else:
+                    payload = await inspect_uploaded_archive(
+                        archive=archive_field,
+                        scratch=scratch_layout,
+                        request_id=request_id,
+                    )
                 parse_duration_ms = _elapsed_ms(inspect_started)
                 _log_structured_event(
                     level=logging.INFO,
@@ -766,6 +814,12 @@ async def convert_archive(request: Request) -> Response:
                 )
 
             try:
+                _require_geoparquet_ready(request.app, archive_field)
+            except ShapeConverterError as exc:
+                cleanup_reason = f"shape_error:{exc.code}"
+                return error_response(exc, request_id=request_id)
+
+            try:
                 convert_started = time.perf_counter()
                 converted = await convert_uploaded_archive(
                     archive=archive_field,
@@ -964,6 +1018,15 @@ async def app_lifespan(app: Starlette):
     parser_ready, parser_failure_reason = await probe_parser_runtime(app.state.scratch_root)
     if not parser_ready:
         raise RuntimeError(parser_failure_reason or "shape-converter parser startup canary failed")
+    geoparquet_toolchain_ready, geoparquet_failure_reason = _is_geoparquet_toolchain_available()
+    if geoparquet_toolchain_ready:
+        geoparquet_ready, geoparquet_failure_reason = await probe_geoparquet_parser_runtime(
+            app.state.scratch_root
+        )
+    else:
+        geoparquet_ready = False
+    app.state.startup_geoparquet_ready = geoparquet_ready
+    app.state.startup_geoparquet_failure_reason = geoparquet_failure_reason
     app.state.startup_parser_ready = True
     app.state.startup_parser_failure_reason = None
     app.state.relay_cors_allowed_origins = _resolve_relay_cors_allowed_origins()

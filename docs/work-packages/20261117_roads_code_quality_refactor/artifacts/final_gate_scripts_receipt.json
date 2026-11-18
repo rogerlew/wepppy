@@ -1,0 +1,12 @@
+[
+  {
+    "source": "/tmp/roads_candidate_tests.py",
+    "snapshot": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/scripts/roads_candidate_tests.py",
+    "sha256": "122fc1207fec022e98abab047c3b182c7d1bb9b0408db5e92f643e9b825892f9"
+  },
+  {
+    "source": "/tmp/roads_candidate_command.py",
+    "snapshot": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/scripts/roads_candidate_command.py",
+    "sha256": "c5b4de63560779ec9d2d2ebecae556e7df4bda43755dc819e427ced09c9f75a0"
+  }
+]

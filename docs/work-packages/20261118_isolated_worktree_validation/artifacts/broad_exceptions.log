@@ -1,0 +1,27 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy-worktree-validation
+Base ref: 0aaabd9e8
+Merge base: 0aaabd9e816e0f943c287e0142275e40cfa8bcd1
+Path filter: tools/wctl2, tests/weppcloud/routes/test_feature_access_routes.py
+Allowlist source: /home/workdir/wepppy-worktree-validation/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 6
+
+Files:
+  M tests/weppcloud/routes/test_feature_access_routes.py
+  M tools/wctl2/checkout_identity.py
+  M tools/wctl2/commands/__init__.py
+  A tools/wctl2/commands/worktree_tests.py
+  A tools/wctl2/test_runtime.py
+  A tools/wctl2/tests/test_worktree_tests.py
+
+Per-file delta (unsuppressed broad catches):
+  M tests/weppcloud/routes/test_feature_access_routes.py (base=0 current=0 delta=+0)
+  M tools/wctl2/checkout_identity.py (base=0 current=0 delta=+0)
+  M tools/wctl2/commands/__init__.py (base=0 current=0 delta=+0)
+  A tools/wctl2/commands/worktree_tests.py (base=0 current=0 delta=+0)
+  A tools/wctl2/test_runtime.py (base=0 current=0 delta=+0)
+  A tools/wctl2/tests/test_worktree_tests.py (base=0 current=0 delta=+0)
+
+Net delta (all changed files): +0
+Result: PASS

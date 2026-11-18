@@ -1,0 +1,11 @@
+# Opt-in overlay for dev/prod web service. Base stacks need no CILogon secret file.
+services:
+  weppcloud:
+    environment:
+      OAUTH_CILOGON_CLIENT_ID: ${OAUTH_CILOGON_CLIENT_ID:?Set the registered CILogon client ID}
+      OAUTH_CILOGON_CLIENT_SECRET_FILE: /run/secrets/oauth_cilogon_client_secret
+    secrets:
+      - oauth_cilogon_client_secret
+secrets:
+  oauth_cilogon_client_secret:
+    file: ./secrets/oauth_cilogon_client_secret

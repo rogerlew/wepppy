@@ -450,6 +450,7 @@ def _scan_directory_snapshot(
     sort_order: str,
     root_wd: str | None = None,
     hide_mixed_nodir: bool = False,
+    excluded_names: frozenset[str] = frozenset(),
 ) -> tuple[list[dict], int]:
     entries = []
     directory_abs = os.path.abspath(directory)
@@ -461,6 +462,8 @@ def _scan_directory_snapshot(
             for entry in it:
                 name = entry.name
                 if name in (".", ".."):
+                    continue
+                if name.casefold() in excluded_names:
                     continue
                 nodir_root = _allowlisted_nodir_root(name)
                 if mixed_roots and (
@@ -710,11 +713,14 @@ async def get_page_entries(
     sort_by: str = "name",
     sort_order: str = "asc",
     hide_mixed_nodir: bool = False,
+    excluded_names: frozenset[str] = frozenset(),
 ):
     """List directory contents with pagination and optional filtering."""
     skip_manifest = MANIFEST_CACHE_UNSTABLE
     if hide_mixed_nodir:
         skip_manifest = skip_manifest or bool(_mixed_nodir_roots(str(wd)))
+    if excluded_names:
+        skip_manifest = True
 
     if not skip_manifest:
         manifest_result = await asyncio.to_thread(
@@ -745,6 +751,7 @@ async def get_page_entries(
         sort_order,
         wd,
         hide_mixed_nodir,
+        excluded_names,
     )
     page_entries = await _format_page_entries(entries[start_index:end_index], directory)
     elapsed = loop.time() - start_time
@@ -783,6 +790,7 @@ async def html_dir_list(
     page_entries_override: list[tuple] | None = None,
     total_items_override: int | None = None,
     using_manifest_override: bool | None = None,
+    excluded_names: frozenset[str] = frozenset(),
 ):
     _padding = " "
     s = []
@@ -802,6 +810,7 @@ async def html_dir_list(
             sort_by,
             sort_order,
             hide_mixed_nodir=hide_mixed_nodir,
+            excluded_names=excluded_names,
         )
 
     # The request adapter exposes a decoded path; encode it once before URL assembly.

@@ -1,0 +1,27 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-baseline:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-aikncz50 8807aa31882966b308d8610bde4bd811da86610eaf3b8411ed9066b7a3d9ad0d && cd /workdir/wepppy && VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT=/tmp PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_redis_prep_snapshots.py::test_real_archive_roundtrip_and_incoming_mode_before_visibility tests/nodb/test_redis_prep_snapshots.py::test_failed_restore_retains_incoming_snapshot_and_replacement_fence tests/nodb/test_redis_prep_snapshots.py::test_nested_archived_snapshot_is_not_authority_to_replace_other_hash tests/nodb/test_redis_prep_snapshots.py::test_killed_restore_retains_pre_destructive_fence tests/rq/test_project_rq_archive_helpers.py -q --tb=short'
+time="2026-11-17T15:55:47-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-71b50449994c Creating
+ Container docker-weppcloud-run-71b50449994c Created
+ssss...                                                                  [100%]
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/nodb/test_redis_prep_snapshots.py::test_real_archive_roundtrip_and_incoming_mode_before_visibility
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+3 passed, 4 skipped, 2 warnings in 9.94s

@@ -807,3 +807,7 @@ Declarative DEM projects reject Bootstrap enablement, initialization, checkout,
 push authorization and no-prep execution before Git/model writes. Their local
 provenance repository confers no Bootstrap capability. Ordinary projects retain
 existing Bootstrap behavior.
+
+## Stable account identity compatibility
+
+The [account identity contract](schemas/weppcloud-account-email-verification-contract.md#nullable-identity-consumer-compatibility) extends the token lifecycle for accounts with no shared login email. New tokens include a positive signed `user_id`; `sub` retains the shared login email when available, otherwise `user:<id>`. Verification resolves the ID when present, rejects a malformed ID without email fallback, and supports existing email-only tokens. Check active account and current run authorization on every request. Enrollment also resolves the authenticated user ID. `X-Auth-User` uses shared login email or `user:<id>`. Contact email is never used for authorization. This supersedes email-required wording above without invalidating existing tokens.

@@ -414,3 +414,7 @@ defines a separate short-lived issuance profile, exact service audience/scope,
 and no token cookie. It must not inherit general default-audience injection or
 shorten existing run markers. SID fences/markers remain in DB 11; JTI revocation
 remains in DB 0. Other token profiles remain unchanged.
+
+## Independent institutional account compatibility
+
+Per the [account identity contract](../schemas/weppcloud-account-email-verification-contract.md#nullable-identity-consumer-compatibility), personal and administrative run tokens retain stable user identity and existing role checks when shared login email is absent; omit the optional email claim. Bootstrap Git tokens add a positive signed `user_id` for current account resolution, with legacy email-only tokens supported. Never use a CILogon contact as an identity claim or email authorization fallback.

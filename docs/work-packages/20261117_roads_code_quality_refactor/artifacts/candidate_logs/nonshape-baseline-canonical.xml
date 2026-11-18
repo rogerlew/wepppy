@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="13" skipped="0" tests="15" time="17.455" timestamp="2026-11-18T01:18:50.397084+00:00" hostname="2b297f6c3ae2"><testcase classname="tests.rq.test_batch_rq_retry_selection" name="test_delete_batch_rq_checks_active_jobs_before_cleanup" time="0.011"><failure message="ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_batch_rq_checks_ac0/demo' is not in the subpath of '/wc1'">tests/rq/test_batch_rq_retry_selection.py:1421: in test_delete_batch_rq_checks_active_jobs_before_cleanup
+    batch_rq.delete_batch_rq("demo")
+wepppy/rq/batch_rq.py:548: in delete_batch_rq
+    retention_root = _retention_delete_root(
+wepppy/rq/project_rq_delete.py:105: in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_batch_rq_checks_ac0/demo' is not in the subpath of '/wc1'</failure></testcase><testcase classname="tests.rq.test_project_rq_delete_run" name="test_delete_run_rq_marks_ttl_when_rmtree_fails" time="0.014"><failure message="ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_run_rq_marks_ttl_w0/test-run' is not in the subpath of '/wc1'">tests/rq/test_project_rq_delete_run.py:117: in test_delete_run_rq_marks_ttl_when_rmtree_fails
+    project_rq.delete_run_rq(runid, wd=str(run_dir), delete_files=True)
+wepppy/rq/exception_logging.py:68: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+wepppy/rq/project_rq.py:1256: in delete_run_rq
+    _delete_helpers.delete_run_rq(
+wepppy/rq/project_rq_delete.py:115: in delete_run_rq
+    _retention_delete_root(target, has_evidence=_has_retained_vector_evidence(target))
+wepppy/rq/project_rq_delete.py:105: in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_run_rq_marks_ttl_w0/test-run' is not in the subpath of '/wc1'</failure></testcase><testcase classname="tests.rq.test_project_rq_delete_run" name="test_delete_run_rq_reports_non_retryable_delete_errors" time="0.013"><failure message="ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_run_rq_reports_non0/test-run-hard-fail' is not in the subpath of '/wc1'">tests/rq/test_project_rq_delete_run.py:144: in test_delete_run_rq_reports_non_retryable_delete_errors
+    project_rq.delete_run_rq(runid, wd=str(run_dir), delete_files=True)
+wepppy/rq/exception_logging.py:68: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+wepppy/rq/project_rq.py:1256: in delete_run_rq
+    _delete_helpers.delete_run_rq(
+wepppy/rq/project_rq_delete.py:115: in delete_run_rq
+    _retention_delete_root(target, has_evidence=_has_retained_vector_evidence(target))
+wepppy/rq/project_rq_delete.py:105: in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_run_rq_reports_non0/test-run-hard-fail' is not in the subpath of '/wc1'</failure></testcase><testcase classname="tests.rq.test_project_rq_delete_run" name="test_gc_runs_rq_deferred_delete_suppresses_messages" time="0.008"><failure message="assert 0 == 1">tests/rq/test_project_rq_delete_run.py:290: in test_gc_runs_rq_deferred_delete_suppresses_messages
+    assert result["deferred"] == 1
+E   assert 0 == 1</failure></testcase><testcase classname="tests.rq.test_project_rq_fork" name="test_reset_fork_omni_directories_rejects_hostile_ancestor[socket-_pups/omni]" time="0.003"><failure message="OSError: AF_UNIX path too long">tests/rq/test_project_rq_fork.py:233: in test_reset_fork_omni_directories_rejects_hostile_ancestor
+    bound_socket.bind(str(target))
+E   OSError: AF_UNIX path too long</failure></testcase><testcase classname="tests.weppcloud.controllers_js.test_unitizer_client_js" name="test_unitizer_bundle_contains_blank_guard" time="0.001"><failure message="FileNotFoundError: [Errno 2] No such file or directory: '/workdir/wepppy/wepppy/weppcloud/static/js/controllers-gl.js'">tests/weppcloud/controllers_js/test_unitizer_client_js.py:38: in test_unitizer_bundle_contains_blank_guard
+    contents = bundle_path.read_text(encoding="utf-8")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/workdir/wepppy/wepppy/weppcloud/static/js/controllers-gl.js'</failure></testcase><testcase classname="tests.weppcloud.routes.test_feature_access_routes" name="test_grant_ack_remove_real_transport_and_admission" time="0.699"><failure message="assert 500 == 200&#10; +  where 500 = &lt;WrapperTestResponse streamed [500 INTERNAL SERVER ERROR]&gt;.status_code">tests/weppcloud/routes/test_feature_access_routes.py:181: in test_grant_ack_remove_real_transport_and_admission
+    assert profile.status_code == 200
+E   assert 500 == 200
+E    +  where 500 = &lt;WrapperTestResponse streamed [500 INTERNAL SERVER ERROR]&gt;.status_code</failure></testcase><testcase classname="tests.weppcloud.routes.test_feature_access_routes" name="test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent" time="0.473"><failure message="assert 500 == 200&#10; +  where 500 = &lt;WrapperTestResponse streamed [500 INTERNAL SERVER ERROR]&gt;.status_code">tests/weppcloud/routes/test_feature_access_routes.py:247: in test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent
+    assert profile.status_code == 200
+E   assert 500 == 200
+E    +  where 500 = &lt;WrapperTestResponse streamed [500 INTERNAL SERVER ERROR]&gt;.status_code</failure></testcase><testcase classname="tests.weppcloud.routes.test_feature_access_routes" name="test_legacy_poweruser_is_preserved_without_fabricated_acceptance" time="0.298"><failure message="assert 500 == 200&#10; +  where 500 = &lt;WrapperTestResponse streamed [500 INTERNAL SERVER ERROR]&gt;.status_code">tests/weppcloud/routes/test_feature_access_routes.py:337: in test_legacy_poweruser_is_preserved_without_fabricated_acceptance
+    assert profile.status_code == 200
+E   assert 500 == 200
+E    +  where 500 = &lt;WrapperTestResponse streamed [500 INTERNAL SERVER ERROR]&gt;.status_code</failure></testcase><testcase classname="tests.weppcloud.routes.test_feature_access_routes" name="test_dates_conflict_and_expired_profile" time="0.291"><failure message="assert 'membership expired' in '{&quot;error&quot;:{&quot;message&quot;:&quot;Error Handling Request&quot;},&quot;error_id&quot;:&quot;d94c49006089431e8fa1aeb71bbf5aa0&quot;}\n'&#10; +  where '{&quot;error&quot;:{&quot;message&quot;:&quot;Error Handling Request&quot;},&quot;error_id&quot;:&quot;d94c49006089431e8fa1aeb71bbf5aa0&quot;}\n' = &lt;WrapperTestResponse 93 bytes [500 INTERNAL SERVER ERROR]&gt;.text&#10; +    where &lt;WrapperTestResponse 93 bytes [500 INTERNAL SERVER ERROR]&gt; = get('/profile')&#10; +      where get = &lt;FlaskClient &lt;Flask 'test_feature_access_routes'&gt;&gt;.get">tests/weppcloud/routes/test_feature_access_routes.py:378: in test_dates_conflict_and_expired_profile
+    assert 'membership expired' in access_client[1].get('/profile').text
+E   assert 'membership expired' in '{"error":{"message":"Error Handling Request"},"error_id":"d94c49006089431e8fa1aeb71bbf5aa0"}\n'
+E    +  where '{"error":{"message":"Error Handling Request"},"error_id":"d94c49006089431e8fa1aeb71bbf5aa0"}\n' = &lt;WrapperTestResponse 93 bytes [500 INTERNAL SERVER ERROR]&gt;.text
+E    +    where &lt;WrapperTestResponse 93 bytes [500 INTERNAL SERVER ERROR]&gt; = get('/profile')
+E    +      where get = &lt;FlaskClient &lt;Flask 'test_feature_access_routes'&gt;&gt;.get</failure></testcase><testcase classname="tests.weppcloud.routes.test_runs_catalog_contract" name="test_runs_sort_navigation_and_fixed_layout_in_chromium[False]" time="0.510"><failure message="AssertionError: node:internal/modules/cjs/loader:1210&#10;    throw err;&#10;    ^&#10;  &#10;  Error: Cannot find module '/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/@playwright/test'&#10;  Require stack:&#10;  - /workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs&#10;      at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)&#10;      at Module._load (node:internal/modules/cjs/loader:1038:27)&#10;      at Module.require (node:internal/modules/cjs/loader:1289:19)&#10;      at require (node:internal/modules/helpers:182:18)&#10;      at Object.&lt;anonymous&gt; (/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs:1:28)&#10;      at Module._compile (node:internal/modules/cjs/loader:1521:14)&#10;      at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)&#10;      at Module.load (node:internal/modules/cjs/loader:1266:32)&#10;      at Module._load (node:internal/modules/cjs/loader:1091:12)&#10;      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {&#10;    code: 'MODULE_NOT_FOUND',&#10;    requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]&#10;  }&#10;  &#10;  Node.js v20.20.2&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['node', '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs', 'http://127.0.0.1:4020...FOUND',\n  requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]\n}\n\nNode.js v20.20.2\n&quot;).returncode">tests/weppcloud/routes/test_runs_catalog_contract.py:207: in test_runs_sort_navigation_and_fixed_layout_in_chromium
+    assert result.returncode == 0, result.stderr
+E   AssertionError: node:internal/modules/cjs/loader:1210
+E       throw err;
+E       ^
+E
+E     Error: Cannot find module '/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/@playwright/test'
+E     Require stack:
+E     - /workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs
+E         at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+E         at Module._load (node:internal/modules/cjs/loader:1038:27)
+E         at Module.require (node:internal/modules/cjs/loader:1289:19)
+E         at require (node:internal/modules/helpers:182:18)
+E         at Object.&lt;anonymous&gt; (/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs:1:28)
+E         at Module._compile (node:internal/modules/cjs/loader:1521:14)
+E         at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+E         at Module.load (node:internal/modules/cjs/loader:1266:32)
+E         at Module._load (node:internal/modules/cjs/loader:1091:12)
+E         at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+E       code: 'MODULE_NOT_FOUND',
+E       requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]
+E     }
+E
+E     Node.js v20.20.2
+E
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs', 'http://127.0.0.1:4020...FOUND',\n  requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]\n}\n\nNode.js v20.20.2\n").returncode</failure></testcase><testcase classname="tests.weppcloud.routes.test_runs_catalog_contract" name="test_runs_sort_navigation_and_fixed_layout_in_chromium[True]" time="0.515"><failure message="AssertionError: node:internal/modules/cjs/loader:1210&#10;    throw err;&#10;    ^&#10;  &#10;  Error: Cannot find module '/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/@playwright/test'&#10;  Require stack:&#10;  - /workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs&#10;      at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)&#10;      at Module._load (node:internal/modules/cjs/loader:1038:27)&#10;      at Module.require (node:internal/modules/cjs/loader:1289:19)&#10;      at require (node:internal/modules/helpers:182:18)&#10;      at Object.&lt;anonymous&gt; (/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs:1:28)&#10;      at Module._compile (node:internal/modules/cjs/loader:1521:14)&#10;      at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)&#10;      at Module.load (node:internal/modules/cjs/loader:1266:32)&#10;      at Module._load (node:internal/modules/cjs/loader:1091:12)&#10;      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {&#10;    code: 'MODULE_NOT_FOUND',&#10;    requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]&#10;  }&#10;  &#10;  Node.js v20.20.2&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['node', '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs', 'http://127.0.0.1:3948...FOUND',\n  requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]\n}\n\nNode.js v20.20.2\n&quot;).returncode">tests/weppcloud/routes/test_runs_catalog_contract.py:207: in test_runs_sort_navigation_and_fixed_layout_in_chromium
+    assert result.returncode == 0, result.stderr
+E   AssertionError: node:internal/modules/cjs/loader:1210
+E       throw err;
+E       ^
+E
+E     Error: Cannot find module '/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/@playwright/test'
+E     Require stack:
+E     - /workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs
+E         at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+E         at Module._load (node:internal/modules/cjs/loader:1038:27)
+E         at Module.require (node:internal/modules/cjs/loader:1289:19)
+E         at require (node:internal/modules/helpers:182:18)
+E         at Object.&lt;anonymous&gt; (/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs:1:28)
+E         at Module._compile (node:internal/modules/cjs/loader:1521:14)
+E         at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+E         at Module.load (node:internal/modules/cjs/loader:1266:32)
+E         at Module._load (node:internal/modules/cjs/loader:1091:12)
+E         at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+E       code: 'MODULE_NOT_FOUND',
+E       requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]
+E     }
+E
+E     Node.js v20.20.2
+E
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs', 'http://127.0.0.1:3948...FOUND',\n  requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]\n}\n\nNode.js v20.20.2\n").returncode</failure></testcase><testcase classname="tests.weppcloud.test_run_catalog_postgres" name="test_marker_notification_latency_without_prior_sql_mirror[readonly]" time="0.567" /><testcase classname="tests.weppcloud.test_run_catalog_reader" name="test_real_file_sql_http_browser_chain" time="0.633"><failure message="AssertionError: node:internal/modules/cjs/loader:1210&#10;    throw err;&#10;    ^&#10;  &#10;  Error: Cannot find module 'playwright'&#10;  Require stack:&#10;  - /workdir/wepppy/wepppy/weppcloud/static-src/[eval]&#10;      at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)&#10;      at Module._load (node:internal/modules/cjs/loader:1038:27)&#10;      at Module.require (node:internal/modules/cjs/loader:1289:19)&#10;      at require (node:internal/modules/helpers:182:18)&#10;      at [eval]:1:22&#10;      at runScriptInThisContext (node:internal/vm:209:10)&#10;      at node:internal/process/execution:118:14&#10;      at [eval]-wrapper:6:24&#10;      at runScript (node:internal/process/execution:101:62)&#10;      at evalScript (node:internal/process/execution:133:3) {&#10;    code: 'MODULE_NOT_FOUND',&#10;    requireStack: [ '/workdir/wepppy/wepppy/weppcloud/static-src/[eval]' ]&#10;  }&#10;  &#10;  Node.js v20.20.2&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['node', '-e', &quot;const { chromium } = require('playwright');\n(async () =&gt; {\n  const browser = a...MODULE_NOT_FOUND',\n  requireStack: [ '/workdir/wepppy/wepppy/weppcloud/static-src/[eval]' ]\n}\n\nNode.js v20.20.2\n&quot;).returncode">tests/weppcloud/test_run_catalog_reader.py:226: in test_real_file_sql_http_browser_chain
+    assert result.returncode == 0, result.stderr
+E   AssertionError: node:internal/modules/cjs/loader:1210
+E       throw err;
+E       ^
+E
+E     Error: Cannot find module 'playwright'
+E     Require stack:
+E     - /workdir/wepppy/wepppy/weppcloud/static-src/[eval]
+E         at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+E         at Module._load (node:internal/modules/cjs/loader:1038:27)
+E         at Module.require (node:internal/modules/cjs/loader:1289:19)
+E         at require (node:internal/modules/helpers:182:18)
+E         at [eval]:1:22
+E         at runScriptInThisContext (node:internal/vm:209:10)
+E         at node:internal/process/execution:118:14
+E         at [eval]-wrapper:6:24
+E         at runScript (node:internal/process/execution:101:62)
+E         at evalScript (node:internal/process/execution:133:3) {
+E       code: 'MODULE_NOT_FOUND',
+E       requireStack: [ '/workdir/wepppy/wepppy/weppcloud/static-src/[eval]' ]
+E     }
+E
+E     Node.js v20.20.2
+E
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', "const { chromium } = require('playwright');\n(async () =&gt; {\n  const browser = a...MODULE_NOT_FOUND',\n  requireStack: [ '/workdir/wepppy/wepppy/weppcloud/static-src/[eval]' ]\n}\n\nNode.js v20.20.2\n").returncode</failure></testcase><testcase classname="tests.weppcloud.test_user_preferences_postgres" name="test_postgres_schema_constraints_and_cascade" time="0.064"><error message="failed on setup with &quot;sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column &quot;account_kind&quot; of relation &quot;user&quot; does not exist&#10;LINE 1: ..._name, last_name, password, active, confirmed_at, account_ki...&#10;                                                             ^&#10;&#10;[SQL: INSERT INTO &quot;user&quot; (fs_uniquifier, email, first_name, last_name, password, active, confirmed_at, account_kind, contact_email, local_credential_state, mailbox_verified_email, mailbox_verified_at, verification_nonce, verification_sent_at, last_login_at, current_login_at, last_login_ip, current_login_ip, login_count) VALUES (%(fs_uniquifier)s, %(email)s, %(first_name)s, %(last_name)s, %(password)s, %(active)s, %(confirmed_at)s, %(account_kind)s, %(contact_email)s, %(local_credential_state)s, %(mailbox_verified_email)s, %(mailbox_verified_at)s, %(verification_nonce)s, %(verification_sent_at)s, %(last_login_at)s, %(current_login_at)s, %(last_login_ip)s, %(current_login_ip)s, %(login_count)s) RETURNING &quot;user&quot;.id]&#10;[parameters: {'fs_uniquifier': 'f6e30de462da4f1f8ec4e34aafdc36b4', 'email': 'surf14a-f6e30de462da4f1f8ec4e34aafdc36b4@example.com', 'first_name': None, 'last_name': None, 'password': None, 'active': True, 'confirmed_at': None, 'account_kind': 'shared', 'contact_email': None, 'local_credential_state': 'legacy', 'mailbox_verified_email': None, 'mailbox_verified_at': None, 'verification_nonce': None, 'verification_sent_at': None, 'last_login_at': None, 'current_login_at': None, 'last_login_ip': None, 'current_login_ip': None, 'login_count': None}]&#10;(Background on this error at: https://sqlalche.me/e/20/f405)&quot;">/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py:924: in do_execute
+    cursor.execute(statement, parameters)
+E   psycopg2.errors.UndefinedColumn: column "account_kind" of relation "user" does not exist
+E   LINE 1: ..._name, last_name, password, active, confirmed_at, account_ki...
+E                                                                ^
+
+The above exception was the direct cause of the following exception:
+tests/weppcloud/test_user_preferences_postgres.py:53: in postgres_user
+    db.session.commit()
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/scoping.py:597: in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:2017: in commit
+    trans.commit(_to_root=True)
+&lt;string&gt;:2: in commit
+    ???
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:1302: in commit
+    self._prepare_impl()
+&lt;string&gt;:2: in _prepare_impl
+    ???
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:1277: in _prepare_impl
+    self.session.flush()
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:4341: in flush
+    self._flush(objects)
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:4476: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py:146: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:4437: in _flush
+    flush_context.execute()
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/unitofwork.py:466: in execute
+    rec.execute(self)
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/persistence.py:93: in save_obj
+    _emit_insert_statements(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1418: in execute
+    return meth(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py:515: in _execute_on_connection
+    return connection._execute_clauseelement(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1640: in _execute_clauseelement
+    ret = self._execute_context(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:2353: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py:924: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column "account_kind" of relation "user" does not exist
+E   LINE 1: ..._name, last_name, password, active, confirmed_at, account_ki...
+E                                                                ^
+E
+E   [SQL: INSERT INTO "user" (fs_uniquifier, email, first_name, last_name, password, active, confirmed_at, account_kind, contact_email, local_credential_state, mailbox_verified_email, mailbox_verified_at, verification_nonce, verification_sent_at, last_login_at, current_login_at, last_login_ip, current_login_ip, login_count) VALUES (%(fs_uniquifier)s, %(email)s, %(first_name)s, %(last_name)s, %(password)s, %(active)s, %(confirmed_at)s, %(account_kind)s, %(contact_email)s, %(local_credential_state)s, %(mailbox_verified_email)s, %(mailbox_verified_at)s, %(verification_nonce)s, %(verification_sent_at)s, %(last_login_at)s, %(current_login_at)s, %(last_login_ip)s, %(current_login_ip)s, %(login_count)s) RETURNING "user".id]
+E   [parameters: {'fs_uniquifier': 'f6e30de462da4f1f8ec4e34aafdc36b4', 'email': 'surf14a-f6e30de462da4f1f8ec4e34aafdc36b4@example.com', 'first_name': None, 'last_name': None, 'password': None, 'active': True, 'confirmed_at': None, 'account_kind': 'shared', 'contact_email': None, 'local_credential_state': 'legacy', 'mailbox_verified_email': None, 'mailbox_verified_at': None, 'verification_nonce': None, 'verification_sent_at': None, 'last_login_at': None, 'current_login_at': None, 'last_login_ip': None, 'current_login_ip': None, 'login_count': None}]
+E   (Background on this error at: https://sqlalche.me/e/20/f405)</error></testcase></testsuite></testsuites>

@@ -305,7 +305,7 @@ def test_restore_rejects_incomplete_or_corrupt_generated_set(tmp_path, damage):
         data[4:16] = b'\xff' * 12
         path.write_bytes(data)
         assert pq.read_metadata(path).num_rows == 1
-    with pytest.raises((OSError, ValueError)), lifecycle.restore_operation(tmp_path):
+    with pytest.raises((OSError, ValueError, lifecycle.RoadsResultsUnavailable)), lifecycle.restore_operation(tmp_path):
         pass
     assert not lifecycle.available(tmp_path)
 
@@ -490,3 +490,98 @@ def test_reader_catalog_barrier_finishes_during_archive_or_writer_admission(tmp_
             assert ensure_catalog_fresh(tmp_path)['files']
             future.result(timeout=5)
     assert not pending_catalog_requests(tmp_path)
+
+
+def _unrutted_execution(root, *, empty=False, mixed=False):
+    from wepppy.nodb.mods.roads.roads import Roads
+    from wepppy.nodb.mods.roads._unrutted import PLACEMENT_POLICY
+    resources = prepared(root)
+    geometry = root / lifecycle.SEGMENTS / 'roads.inslope.monotonic.geojson'
+    features = json.loads(geometry.read_text())['features']
+    features[0]['properties']['DESIGN'] = 'Outslope_unrutted'
+    if mixed:
+        features.append({'properties': {'segment_id': 'other', 'DESIGN': 'inslope_rd'}})
+    geometry.write_text(json.dumps({'features': features}))
+    path = root / lifecycle.SEGMENTS / 'roads.segment.pass.manifest.json'
+    rows = json.loads(path.read_text())
+    rows[0].update(design='outslope_unrutted', placement_policy=PLACEMENT_POLICY)
+    path.write_text(json.dumps([] if empty else rows))
+    controller = Roads.__new__(Roads)
+    controller.__dict__.update(wd=str(root), _last_run_summary={
+        'status': 'completed', 'unrutted_placement_policy': PLACEMENT_POLICY})
+    (root / 'roads.nodb').write_text(jsonpickle.encode(controller))
+    with lifecycle.operation(root):
+        lifecycle.publish(root, resources, single_storm=False)
+    return controller, path
+
+
+@pytest.mark.parametrize('empty,mixed', [(False,False),(True,False),(False,True),(True,True)])
+def test_unrutted_execution_policy_required_even_with_no_contributors(tmp_path, empty, mixed):
+    controller, manifest = _unrutted_execution(tmp_path, empty=empty, mixed=mixed)
+    assert lifecycle.available(tmp_path)
+    for value in (None, 'unknown', {'malformed': True}):
+        controller._last_run_summary['unrutted_placement_policy'] = value
+        (tmp_path/'roads.nodb').write_text(jsonpickle.encode(controller))
+        assert not lifecycle.available(tmp_path)
+    # Archive restoration preserves history instead of claiming new policy output.
+    original = (tmp_path/'roads.nodb').read_bytes()
+    manifest_bytes = manifest.read_bytes()
+    with lifecycle.restore_operation(tmp_path):
+        pass
+    assert not (tmp_path/lifecycle.RECEIPT).exists()
+    assert (tmp_path/'roads.nodb').read_bytes() == original
+    assert manifest.read_bytes() == manifest_bytes
+
+
+def test_unrutted_execution_policy_checks_manifest_and_completion(tmp_path):
+    controller, path = _unrutted_execution(tmp_path)
+    original = path.read_text()
+    for value in (None, 'unknown', []):
+        rows = json.loads(original)
+        rows[0]['placement_policy'] = value
+        path.write_text(json.dumps(rows))
+        assert not lifecycle.available(tmp_path)
+    path.write_text(original)
+    controller._last_run_summary['status'] = 'failed'
+    (tmp_path/'roads.nodb').write_text(jsonpickle.encode(controller))
+    assert not lifecycle.available(tmp_path)
+    with pytest.raises(lifecycle.RoadsResultsUnavailable):
+        with lifecycle.restore_operation(tmp_path):
+            pass
+
+
+@pytest.mark.parametrize('damage', ['parquet', 'manifest'])
+def test_old_unrutted_policy_does_not_hide_corrupt_restore(tmp_path, damage):
+    controller, manifest = _unrutted_execution(tmp_path)
+    controller._last_run_summary.pop('unrutted_placement_policy')
+    (tmp_path/'roads.nodb').write_text(jsonpickle.encode(controller))
+    if damage == 'parquet':
+        (tmp_path/lifecycle.OUTPUT/'interchange/H.pass.parquet').write_bytes(b'corrupt')
+    else:
+        rows = json.loads(manifest.read_text())
+        rows[0]['segment_id'] = 'not-prepared'
+        manifest.write_text(json.dumps(rows))
+    with pytest.raises((ValueError, OSError)), lifecycle.restore_operation(tmp_path):
+        pass
+    assert not (tmp_path/lifecycle.RECEIPT).exists()
+
+
+def test_missing_status_does_not_bypass_placement_provenance(tmp_path):
+    _, path = _unrutted_execution(tmp_path)
+    rows=json.loads(path.read_text())
+    rows[0].pop('status')
+    rows[0].pop('placement_policy')
+    path.write_text(json.dumps(rows))
+    assert not lifecycle.available(tmp_path)
+
+
+@pytest.mark.parametrize('design', [None, 'outslope_rutted', 'outslope_unrutted_remainder'])
+def test_prepared_unrutted_source_cannot_be_relabelled_to_bypass_policy(tmp_path, design):
+    _, path = _unrutted_execution(tmp_path)
+    rows=json.loads(path.read_text())
+    rows[0]['design'] = design
+    rows[0].pop('placement_policy')
+    path.write_text(json.dumps(rows))
+    assert not lifecycle.available(tmp_path)
+    with pytest.raises(lifecycle.RoadsResultsUnavailable), lifecycle.restore_operation(tmp_path):
+        pass

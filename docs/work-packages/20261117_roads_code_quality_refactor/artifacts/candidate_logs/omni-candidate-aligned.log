@@ -1,0 +1,45 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-code-quality:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-pstudozv 453ce2ae2e3271b16cf906ba28c65e39962ac38afac8b95b921d5bd6221cd6b9 && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python /tmp/roads-refactor-validation/check_omni_environment.py aligned'
+time="2026-11-17T16:06:07-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-59e094a7857d Creating
+ Container docker-weppcloud-run-59e094a7857d Created
+RETENTION_ENV {'VECTOR_UPLOAD_RUN_FILESYSTEM_ID': 'dev-wc1', 'VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT': '/tmp'}
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_omni_clone_links_directory_shared_inputs _________________
+tests/nodb/mods/test_omni.py:709: in test_omni_clone_links_directory_shared_inputs
+    scenario_wd = Path(omni_module._omni_clone(scenario_def, str(base_wd), runid="run-123"))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/nodb/mods/omni/omni.py:502: in _omni_clone
+    return _OMNI_CLONE_CONTRAST_SERVICE.omni_clone(
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py:367: in omni_clone
+    if _exists(new_wd) or retained_tree_repair_pending(
+wepppy/microservices/vector_retention_lifecycle.py:176: in retained_tree_repair_pending
+    return retention.retention_rebuild_obligation_pending(
+wepppy/microservices/vector_upload_normalization.py:1109: in retention_rebuild_obligation_pending
+    return path.is_file() or bool(client.sismember(pending_key, identity))
+                                  ^^^^^^^^^^^^^^^^
+E   AttributeError: 'RecordingRedis' object has no attribute 'sismember'
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/nodb/mods/test_omni.py::test_omni_clone_links_directory_shared_inputs
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_omni.py::test_omni_clone_links_directory_shared_inputs
+1 failed, 2 warnings in 10.42s

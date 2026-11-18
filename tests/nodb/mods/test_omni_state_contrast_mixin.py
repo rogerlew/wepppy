@@ -170,3 +170,43 @@ def test_reset_contrast_build_state_removes_contrast_id_definitions_psv(
     omni._reset_contrast_build_state()
 
     assert not definitions_path.exists()
+
+
+@pytest.mark.parametrize("operation", ["clean", "stale", "clear", "reset"])
+def test_contrast_cleanup_preserves_retained_upload_bytes(tmp_path, omni_module_stub, operation, monkeypatch):
+    # This unit case exercises cleanup selection; real ledger/lease accounting
+    # is covered by test_vector_retention_copy_consumers.py.
+    @contextmanager
+    def retention_boundary(*_args, **_kwargs):
+        yield types.SimpleNamespace(checkpoint=lambda: None)
+
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.omni.omni_state_contrast_mixin.retained_tree_operation",
+        retention_boundary,
+    )
+    omni = _OmniContrastDummy(tmp_path, logger_name="tests.omni.retained_cleanup")
+    omni._fail_first_lock = False
+    root = tmp_path / "_pups/omni/contrasts"
+    source = root / "vector_upload_attempts" / "attempt" / "original" / "hostile.zip.upload"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"complete retained source")
+    receipt = source.parent.parent / "normalization.json"
+    receipt.write_text('{"status":"rejected","source_complete":true}')
+    canonical = root / "_uploads" / "accepted.geojson"
+    canonical.parent.mkdir()
+    canonical.write_text('{"type":"FeatureCollection","features":[]}')
+    for child in ("1", "2"):
+        (root / child).mkdir()
+        (root / child / "output").write_text("generated")
+    expected = {p: p.read_bytes() for p in (source, receipt, canonical)}
+    if operation == "clean":
+        omni._clean_contrast_runs()
+    elif operation == "stale":
+        omni._clean_stale_contrast_runs([1])
+    elif operation == "clear":
+        omni.clear_contrasts()
+    else:
+        omni._reset_contrast_build_state()
+    assert {p: p.read_bytes() for p in expected} == expected
+    assert not (root / "2").exists()
+    assert (root / "1").exists() == (operation == "stale")

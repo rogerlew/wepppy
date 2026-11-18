@@ -1,0 +1,15 @@
+{% extends "security/_layout.html" %}
+{% from "security/_macros.html" import render_aligned_field, render_form_errors %}
+{% block title %}{{ 'Set your password' if setup_password else 'Verify your email' }}{% endblock %}
+{% block content %}
+<p>{{ 'Choose a password to finish creating your local sign-in. This replaces any earlier setup link.' if setup_password else 'Confirm this email address for your WEPPcloud account. This does not connect separate accounts or change your password.' }}</p>
+<form method="post" class="pure-form pure-form-stacked">
+  {{ form.hidden_tag() }}
+  {{ render_form_errors(form) }}
+  {% if setup_password %}
+  {{ render_aligned_field(form.password, label_text='New password', autocomplete='new-password') }}
+  {{ render_aligned_field(form.password_confirm, label_text='Confirm password', autocomplete='new-password') }}
+  {% endif %}
+  <button type="submit" class="pure-button pure-button-primary">{{ 'Verify email and set password' if setup_password else 'Verify email' }}</button>
+</form>
+{% endblock %}

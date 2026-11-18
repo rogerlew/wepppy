@@ -1136,6 +1136,29 @@ class OmniContrastBuildService:
         return hillslope_gdf, target_crs
 
     @staticmethod
+    def _validate_user_defined_gdf(user_gdf: Any) -> None:
+        if user_gdf.empty:
+            raise ValueError("Contrast GeoJSON contains no features.")
+        for index, row in user_gdf.iterrows():
+            geometry = row.get("geometry")
+            if geometry is None:
+                raise ValueError(f"Contrast feature {index} has null geometry.")
+            geometry_type = getattr(geometry, "geom_type", None)
+            if geometry_type not in {"Polygon", "MultiPolygon"}:
+                raise ValueError(
+                    f"Contrast feature {index} must be a Polygon or MultiPolygon."
+                )
+            if bool(getattr(geometry, "is_empty", False)):
+                raise ValueError(f"Contrast feature {index} has empty geometry.")
+
+    @classmethod
+    def prevalidate_user_defined_geojson(cls, geojson_path: str) -> None:
+        """Validate a new user-defined upload before Omni persists its path."""
+        import geopandas as gpd
+
+        cls._validate_user_defined_gdf(gpd.read_file(geojson_path))
+
+    @staticmethod
     def _load_user_defined_gdf(
         omni: "Omni",
         gpd: Any,
@@ -1143,8 +1166,7 @@ class OmniContrastBuildService:
         target_crs: str,
     ) -> Any:
         user_gdf = gpd.read_file(geojson_path)
-        if user_gdf.empty:
-            raise ValueError("Contrast GeoJSON contains no features.")
+        OmniContrastBuildService._validate_user_defined_gdf(user_gdf)
 
         if user_gdf.crs is None:
             user_gdf = user_gdf.set_crs(epsg=4326)

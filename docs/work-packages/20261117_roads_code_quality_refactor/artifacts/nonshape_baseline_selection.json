@@ -1,0 +1,17 @@
+[
+  "tests/rq/test_batch_rq_retry_selection.py::test_delete_batch_rq_checks_active_jobs_before_cleanup",
+  "tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_marks_ttl_when_rmtree_fails",
+  "tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_reports_non_retryable_delete_errors",
+  "tests/rq/test_project_rq_delete_run.py::test_gc_runs_rq_deferred_delete_suppresses_messages",
+  "tests/rq/test_project_rq_fork.py::test_reset_fork_omni_directories_rejects_hostile_ancestor[socket-_pups/omni]",
+  "tests/weppcloud/controllers_js/test_unitizer_client_js.py::test_unitizer_bundle_contains_blank_guard",
+  "tests/weppcloud/routes/test_feature_access_routes.py::test_grant_ack_remove_real_transport_and_admission",
+  "tests/weppcloud/routes/test_feature_access_routes.py::test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent",
+  "tests/weppcloud/routes/test_feature_access_routes.py::test_legacy_poweruser_is_preserved_without_fabricated_acceptance",
+  "tests/weppcloud/routes/test_feature_access_routes.py::test_dates_conflict_and_expired_profile",
+  "tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[False]",
+  "tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[True]",
+  "tests/weppcloud/test_run_catalog_postgres.py::test_marker_notification_latency_without_prior_sql_mirror[readonly]",
+  "tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain",
+  "tests/weppcloud/test_user_preferences_postgres.py::test_postgres_schema_constraints_and_cascade"
+]

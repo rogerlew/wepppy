@@ -196,3 +196,20 @@ For behavior-changing overrides, verify saved project state -> reload -> prepara
 comparisons. Preserve source and baseline-WEPP artifacts. Unit tests alone cannot
 establish runtime consumer behavior or lifecycle correctness. Native-source readback
 in this inventory establishes mechanisms; it is not a new native execution result.
+
+## RUPC-01 partial-crossing amendment
+
+The accepted [unrutted strip contract](roads-unrutted-strip-contract.md) defines the bounded
+geometry, accounting and lifecycle delta. Scoped forest conformance was validated on 2026-11-17; production rollout remains pending. RUPC-01 supersedes conflicting unrutted
+geometry, eligibility and preparation provisions above. Unrelated road
+designs, parameterization ownership and lifecycle safeguards remain unchanged.
+
+### RUPC-02 top-placement amendment (locally validated 2026-11-17)
+
+The [RUPC-02 placement contract](roads-unrutted-strip-contract.md#rupc-02-top-of-hillslope-placement)
+supersedes rejection solely for non-positive upstream length. Its native role order,
+additive provenance, downstream area compensation and execution-policy admission
+are authoritative. Preparation geometry stays compatible; old executions require
+Run again to become current under RUPC-02. Existing parameter defaults, PASS
+accounting, history retention and other designs remain unchanged. RUPC-02 conformance has separate scoped/native evidence in the work package;
+production rollout remains separate.

@@ -35,6 +35,9 @@ class _User:
         email: str = "user@example.test",
     ) -> None:
         self.id = 42
+        self.account_kind = "shared"
+        self.local_credential_state = "legacy"
+        self.mailbox_verified_at = None
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
@@ -52,7 +55,8 @@ def profile_renderer() -> tuple[Flask, Environment]:
     env = Environment(
         loader=DictLoader(
             {
-                "security/_layout.html": "{% block content %}{% endblock %}",
+                "base_pure.htm": "{% block body %}{% endblock %}",
+                "security/_messages.html": "",
                 "security/_macros.html": (
                     "{% macro render_field_with_errors() %}{% endmacro %}"
                     "{% macro render_checkbox_with_errors() %}{% endmacro %}"
@@ -65,9 +69,13 @@ def profile_renderer() -> tuple[Flask, Environment]:
     )
     env.globals.update(
         csrf_token=lambda: "csrf-value",
+        account_display_email=lambda user:user.email,
+        account_mailbox_verified=lambda user:False,
         url_for=lambda endpoint, **values: (
             {
                 "security.logout": "/logout",
+                "security.forgot_password": "/reset",
+                "account_security.send": "/account/email/send",
                 "security.change_password": "/change",
                 "security_oauth.disconnect": (
                     f"/oauth/disconnect/{values.get('provider', '')}"
@@ -145,7 +153,8 @@ def test_profile_renders_provider_disconnect_and_privileged_token_contract(
     assert rendered.index("GitHub") < rendered.index("Google")
     assert 'action="/oauth/disconnect/github"' in rendered
     assert 'action="/oauth/disconnect/google"' in rendered
-    assert rendered.count('name="csrf_token" value="csrf-value"') == 2
+    assert rendered.count('name="csrf_token" value="csrf-value"') == 3
+    assert 'action="/account/email/send"' in rendered
     assert 'data-mint-endpoint="/profile/mint-token"' in rendered
     assert 'data-profile-token-action="mint"' in rendered
     assert 'data-profile-token-field="token"' in rendered

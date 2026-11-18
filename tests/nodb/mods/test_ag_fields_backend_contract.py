@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -118,7 +119,12 @@ def test_boundary_reupload_clears_schema_and_marks_subfields_stale(
         controller._subfields_source_signature = controller._schema_signature()
 
     source = tmp_path / "replacement.geojson"
-    source.write_text('{"type":"FeatureCollection","features":[]}', encoding="utf-8")
+    source.write_text(
+        '{"type":"FeatureCollection","features":[{"type":"Feature",'
+        '"properties":{"field_id":7},"geometry":{"type":"Polygon",'
+        '"coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}',
+        encoding="utf-8",
+    )
     frame = pd.DataFrame([{"field_id": 7, "Crop2001": "wheat"}])
     import geopandas as geopandas_module
 
@@ -155,7 +161,12 @@ def test_invalid_boundary_reupload_preserves_canonical_artifacts_and_state(
         controller._rotation_accessor = "Crop{}"
 
     source = tmp_path / "invalid.geojson"
-    source.write_text("new-invalid-content", encoding="utf-8")
+    source.write_text(
+        '{"type":"FeatureCollection","features":[{"type":"Feature",'
+        '"properties":{},"geometry":{"type":"Polygon",'
+        '"coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}',
+        encoding="utf-8",
+    )
     import geopandas as geopandas_module
 
     monkeypatch.setattr(
@@ -172,6 +183,206 @@ def test_invalid_boundary_reupload_preserves_canonical_artifacts_and_state(
     assert controller.geojson_hash == "old-hash"
     assert controller.field_id_key == "field_id"
     assert controller.rotation_accessor == "Crop{}"
+
+
+def test_boundary_reupload_rolls_back_files_and_persisted_state_on_commit_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _controller(tmp_path)
+    canonical = Path(controller.ag_fields_dir) / "fields.WGS.geojson"
+    canonical.write_text("old-valid-content", encoding="utf-8")
+    parquet = Path(controller.rotation_schedule_parquet)
+    parquet.parent.mkdir(parents=True, exist_ok=True)
+    parquet.write_bytes(b"old-parquet")
+    with controller.locked():
+        controller._field_boundaries_geojson = canonical.name
+        controller._field_boundaries_source_filename = "old-fields.geojson"
+        controller._geojson_is_valid = True
+        controller._geojson_hash = "old-hash"
+        controller._field_columns = ["field_id", "Crop2001"]
+
+    source = tmp_path / "replacement.geojson"
+    source.write_text(
+        '{"type":"FeatureCollection","features":[{"type":"Feature",'
+        '"properties":{"field_id":7},"geometry":{"type":"Polygon",'
+        '"coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}',
+        encoding="utf-8",
+    )
+    import geopandas as geopandas_module
+    monkeypatch.setattr(
+        geopandas_module,
+        "read_file",
+        lambda *_args, **_kwargs: pd.DataFrame([{"field_id": 7, "Crop2001": "wheat"}]),
+    )
+    monkeypatch.setattr(pd.DataFrame, "to_parquet", lambda self, path, **_kwargs: Path(path).write_bytes(b"new-parquet"))
+
+    refreshes: list[str] = []
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.ag_fields.ag_fields.request_catalog_refresh",
+        lambda *_args, **_kwargs: refreshes.append("refresh"),
+    )
+    with pytest.raises(OSError, match="receipt fsync failed"):
+        controller.validate_field_boundary_geojson(
+            source,
+            publication_commit=lambda: (_ for _ in ()).throw(OSError("receipt fsync failed")),
+        )
+
+    assert canonical.read_text(encoding="utf-8") == "old-valid-content"
+    assert parquet.read_bytes() == b"old-parquet"
+    assert refreshes == []
+    assert controller.geojson_hash == "old-hash"
+    reloaded = type(controller).load_detached(str(tmp_path))
+    assert reloaded.geojson_hash == "old-hash"
+
+
+def test_boundary_reupload_does_not_rollback_after_publication_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _controller(tmp_path)
+    source = tmp_path / "replacement.geojson"
+    source.write_text(
+        '{"type":"FeatureCollection","features":[{"type":"Feature",'
+        '"properties":{"field_id":7},"geometry":{"type":"Polygon",'
+        '"coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}',
+        encoding="utf-8",
+    )
+    import geopandas as geopandas_module
+    monkeypatch.setattr(
+        geopandas_module,
+        "read_file",
+        lambda *_args, **_kwargs: pd.DataFrame([{"field_id": 7, "Crop2001": "wheat"}]),
+    )
+    monkeypatch.setattr(pd.DataFrame, "to_parquet", lambda self, path, **_kwargs: Path(path).write_bytes(b"new-parquet"))
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.ag_fields.ag_fields.request_catalog_refresh",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(KeyboardInterrupt()),
+    )
+    committed: list[bool] = []
+
+    with pytest.raises(KeyboardInterrupt):
+        controller.validate_field_boundary_geojson(
+            source,
+            publication_commit=lambda: committed.append(True),
+        )
+
+    assert committed == [True]
+    reloaded = type(controller).load_detached(str(tmp_path))
+    assert reloaded.field_boundaries_source_filename == source.name
+    assert Path(reloaded.rotation_schedule_parquet).read_bytes() == b"new-parquet"
+
+
+def test_failed_boundary_upload_restores_latest_committed_file_state(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _controller(tmp_path)
+
+    def source(path: Path, field_id: int) -> None:
+        path.write_text(json.dumps({
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": {"field_id": field_id},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 0]]],
+                },
+            }],
+        }), encoding="utf-8")
+
+    old = tmp_path / "old.geojson"
+    upload_a = tmp_path / "upload-a.geojson"
+    upload_b = tmp_path / "upload-b.geojson"
+    source(old, 1)
+    source(upload_a, 2)
+    source(upload_b, 3)
+    controller.validate_field_boundary_geojson(old, source_filename=old.name)
+
+    staged = threading.Event()
+    allow_a = threading.Event()
+    original_to_parquet = pd.DataFrame.to_parquet
+
+    def synchronized_to_parquet(frame, path, *args, **kwargs):
+        result = original_to_parquet(frame, path, *args, **kwargs)
+        if threading.current_thread().name == "ag-upload-a":
+            staged.set()
+            assert allow_a.wait(timeout=2.0)
+        return result
+
+    monkeypatch.setattr(pd.DataFrame, "to_parquet", synchronized_to_parquet)
+    failures: list[BaseException] = []
+
+    def run_a() -> None:
+        try:
+            controller.validate_field_boundary_geojson(
+                upload_a,
+                source_filename=upload_a.name,
+                publication_commit=lambda: (_ for _ in ()).throw(OSError("receipt fsync failed")),
+            )
+        except BaseException as exc:
+            failures.append(exc)
+
+    worker = threading.Thread(target=run_a, name="ag-upload-a")
+    worker.start()
+    assert staged.wait(timeout=2.0)
+    controller.validate_field_boundary_geojson(upload_b, source_filename=upload_b.name)
+    allow_a.set()
+    worker.join(timeout=3.0)
+    assert not worker.is_alive()
+    assert len(failures) == 1 and isinstance(failures[0], OSError)
+
+    reloaded = type(controller).load_detached(str(tmp_path))
+    canonical = json.loads((Path(reloaded.ag_fields_dir) / "fields.WGS.geojson").read_text())
+    table = pd.read_parquet(reloaded.rotation_schedule_parquet)
+    assert canonical["features"][0]["properties"]["field_id"] == 3
+    assert table["field_id"].tolist() == [3]
+    assert reloaded.field_boundaries_source_filename == upload_b.name
+
+
+@pytest.mark.parametrize(
+    "geometry",
+    [
+        None,
+        {"type": "Point", "coordinates": [0, 0]},
+        {"type": "LineString", "coordinates": [[0, 0], [1, 1]]},
+        {"type": "GeometryCollection", "geometries": []},
+        {"type": "Polygon", "coordinates": []},
+    ],
+)
+def test_boundary_geometry_rejection_preserves_existing_state(
+    tmp_path: Path,
+    geometry: object,
+) -> None:
+    controller = _controller(tmp_path)
+    canonical = Path(controller.ag_fields_dir) / "fields.WGS.geojson"
+    canonical.write_text("old-valid-content", encoding="utf-8")
+    with controller.locked():
+        controller._field_boundaries_geojson = canonical.name
+        controller._field_boundaries_source_filename = "old-fields.geojson"
+        controller._geojson_hash = "old-hash"
+        controller._geojson_is_valid = True
+
+    source = tmp_path / "invalid-geometry.geojson"
+    source.write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {"type": "Feature", "properties": {"field_id": 1}, "geometry": geometry}
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Polygon or MultiPolygon"):
+        controller.validate_field_boundary_geojson(source)
+
+    assert canonical.read_text(encoding="utf-8") == "old-valid-content"
+    assert controller.field_boundaries_source_filename == "old-fields.geojson"
+    assert controller.geojson_hash == "old-hash"
 
 
 def test_plant_upload_normalizes_case_replaces_and_suffixes_archive_collisions(

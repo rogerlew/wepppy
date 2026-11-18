@@ -1,0 +1,63 @@
+{
+  "reviewed_at_utc": "2026-11-17T23:03:51.796716+00:00",
+  "base": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "candidate_head": "01dca0d28d223e7957842225c16e88601cca60ba",
+  "candidate_state": "six production modules have uncommitted literal __all__ declarations only; remaining reviewed production/test bytes unchanged",
+  "sha256": {
+    "wepppy/nodb/mods/roads/roads.py": "a53920220275bc46afc2ba405f061788c3621b87fc22b4c0bcbd3a3796775321",
+    "wepppy/nodb/mods/roads/_constants.py": "a44595427152e3ab93d80f4d9cefe940430d7f7b732ab596ace9fd2c53f10561",
+    "wepppy/nodb/mods/roads/_inputs.py": "31c51b50f207cde9fb7a130d02738ddee3b4bccd7045957e25442a94063559d6",
+    "wepppy/nodb/mods/roads/_prepare.py": "b77a2208c634d2e8f5189a5c84e80320b34ce9d8f10977d389cce82baf1b340d",
+    "wepppy/nodb/mods/roads/_soil_inputs.py": "fcbdf4d840cf9cd555f79eae79de5a90cba33e78d47740e3149c9a5c935fe595",
+    "wepppy/nodb/mods/roads/_management_inputs.py": "f92d3b2ab7d6a8a2025d41e94d8f93d683d583fd51f04d17199f2331bc63ca3f",
+    "wepppy/nodb/mods/roads/_slope_inputs.py": "fd23e48ca799755eb4e36a16fdc1e3fe49fdd0dc2cfe7c184150637ab8ba459b",
+    "wepppy/nodb/mods/roads/_spatial.py": "02b84f6bffd77f95854736dd842874e067aa29f31d1e38034c3439b57f04137e",
+    "wepppy/nodb/mods/roads/_queries.py": "f2fc4179d65b9eda931ac823abdffa86d0ce7d3fa3b73bc2796695b8739832a3",
+    "wepppy/nodb/mods/roads/_parameterization_support.py": "362ac0339308df1ec41b362aaca2de654ef25763713cba79019177d0b986b33f",
+    "wepppy/nodb/mods/roads/_pass_routing.py": "4e954fb59c108d21ebbb67a2deadda027cd01d4c8182bc9b37e0217cd5ef6d47",
+    "wepppy/nodb/mods/roads/_native_runner.py": "cc553403ea447b9eb8044e10df50e59db7a00235b9921341d4456a2f61210e20",
+    "wepppy/nodb/mods/roads/_reporting.py": "493a509c8d2cc4e23a7993cede9dc1b9b044587b984d804a898587a8e3820a82",
+    "wepppy/nodb/mods/roads/_execution.py": "15c408dec725c4e7e93e75984c2884ed67f337034102209502a1bb79d6c87b0d",
+    "wepppy/nodb/mods/roads/_point_source.py": "8e489ea4020adf32fdc0d24a672cb0153f27db91ad524df4fada90da066f4d4a",
+    "wepppy/nodb/mods/roads/_unrutted_execution.py": "b89ff1633caf18b8ecc26987f4943729078f156876a78bb84e4ae1d07873232f",
+    "wepppy/nodb/mods/roads/_unrutted_planning.py": "340fb7d58ae15f775476fcb541f0df9d39f67bb463aaeba3f61d296153a469ae",
+    "wepppy/nodb/mods/roads/_unrutted_native.py": "587670bd59956c1ee04d066542b3ff837c1627a5d1ba592c6dc955e2511f4001",
+    "tests/nodb/mods/test_roads_execution_diagnostics.py": "1281a2c342aa48dfc5a5bac78993ba306b21c4271a0e25a1989eb909b31c7119"
+  },
+  "previous_reviews": [
+    {
+      "reviewed_at_utc": "2026-11-17T23:00:52.612697+00:00",
+      "base": "96555f2f95326350d2d7007c19327378ea831ab0",
+      "candidate_head": "01dca0d28d223e7957842225c16e88601cca60ba",
+      "candidate_state": "dirty roads.py and untracked execution modules/test; hashes bind actual source",
+      "sha256": {
+        "wepppy/nodb/mods/roads/roads.py": "a53920220275bc46afc2ba405f061788c3621b87fc22b4c0bcbd3a3796775321",
+        "wepppy/nodb/mods/roads/_constants.py": "a84566a6d3f294d51efaee0736c9f0448c613f23b0cbaa1e275e3fc04b99d810",
+        "wepppy/nodb/mods/roads/_inputs.py": "31c51b50f207cde9fb7a130d02738ddee3b4bccd7045957e25442a94063559d6",
+        "wepppy/nodb/mods/roads/_prepare.py": "b77a2208c634d2e8f5189a5c84e80320b34ce9d8f10977d389cce82baf1b340d",
+        "wepppy/nodb/mods/roads/_soil_inputs.py": "fcbdf4d840cf9cd555f79eae79de5a90cba33e78d47740e3149c9a5c935fe595",
+        "wepppy/nodb/mods/roads/_management_inputs.py": "f92d3b2ab7d6a8a2025d41e94d8f93d683d583fd51f04d17199f2331bc63ca3f",
+        "wepppy/nodb/mods/roads/_slope_inputs.py": "fd23e48ca799755eb4e36a16fdc1e3fe49fdd0dc2cfe7c184150637ab8ba459b",
+        "wepppy/nodb/mods/roads/_spatial.py": "02b84f6bffd77f95854736dd842874e067aa29f31d1e38034c3439b57f04137e",
+        "wepppy/nodb/mods/roads/_queries.py": "f2fc4179d65b9eda931ac823abdffa86d0ce7d3fa3b73bc2796695b8739832a3",
+        "wepppy/nodb/mods/roads/_parameterization_support.py": "362ac0339308df1ec41b362aaca2de654ef25763713cba79019177d0b986b33f",
+        "wepppy/nodb/mods/roads/_pass_routing.py": "4e954fb59c108d21ebbb67a2deadda027cd01d4c8182bc9b37e0217cd5ef6d47",
+        "wepppy/nodb/mods/roads/_native_runner.py": "cc553403ea447b9eb8044e10df50e59db7a00235b9921341d4456a2f61210e20",
+        "wepppy/nodb/mods/roads/_reporting.py": "493a509c8d2cc4e23a7993cede9dc1b9b044587b984d804a898587a8e3820a82",
+        "wepppy/nodb/mods/roads/_execution.py": "9b818fa58c6a24e6bd16688323eccd31cfed01376bc7ff0bd5827851c38b3a02",
+        "wepppy/nodb/mods/roads/_point_source.py": "307234e49c0709399c10677aacfcb4b73bc0e411b2ec8dc1d903d1628a4898f7",
+        "wepppy/nodb/mods/roads/_unrutted_execution.py": "b565c56b24520e086b11e1f36906774c020d1ade4b34f730f8f3f097fc283380",
+        "wepppy/nodb/mods/roads/_unrutted_planning.py": "33288212743d590a2b885dc2460a50308fb28c1ebd19f4b9dcf18c559ea58f44",
+        "wepppy/nodb/mods/roads/_unrutted_native.py": "756768a5bc611e7a71aa6c2f168827fc984d3a845c7fb7c09e7a023e74e69a74",
+        "tests/nodb/mods/test_roads_execution_diagnostics.py": "1281a2c342aa48dfc5a5bac78993ba306b21c4271a0e25a1989eb909b31c7119"
+      }
+    }
+  ],
+  "delta_review": "All six module ASTs are identical to 01dca0d28 after excluding literal __all__ assignments.",
+  "boundary_validation": {
+    "log": "/tmp/roads-refactor-validation/execution-boundaries.log",
+    "sha256": "9ded90dd7e51a31b5a69b09b056fd992241cc20f2da14b0e213b7052617e4f2f",
+    "result": "4 passed; includes both diagnostic tests and two mixed execution tests",
+    "tested_method_bodies_unchanged_by_export_delta": true
+  }
+}

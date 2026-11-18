@@ -262,3 +262,7 @@ Flask CSRF under the [test-support contract](weppcloud-test-support-contract.md)
 They require the scoped non-ambient Authorization bearer before payload parsing
 or side effects; session cookies alone authorize nothing. Production must not
 register these routes. This exception adds no exemption to ordinary run APIs.
+
+## Account email verification
+
+Task-branch implementation; deployment deferred: [account verification](weppcloud-account-email-verification-contract.md) send actions MUST use CSRF-protected POST and the authenticated account's stored target address. Token GETs display a form; CSRF-protected POST completes verification/setup after purpose, account, email, expiry, and replay checks. CILogon contact verification MUST NOT install local credentials or merge accounts. Existing registration CAPTCHA/CSRF and recovery CSRF controls remain in force; this amendment adds no CAPTCHA to recovery. These requirements add no broad exemption and prevent mail scanners or cross-site requests from activating credentials.

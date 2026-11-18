@@ -1,0 +1,30 @@
+{
+  "baseline_head": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "baseline_source_sha256": "2e29dc63da1d58edbdc1b8fec97926830671e405a354af8c3a390488c8ace531",
+  "candidate_source_sha256": {
+    "tests/rq/test_batch_rq_delete_batch.py": "5c740a42d872ed534e47755b9ef62aa7c0cbcc62338682aa429efcde23ce545f"
+  },
+  "baseline_target": {
+    "failed": 1,
+    "seconds": 10.11
+  },
+  "candidate_module": {
+    "passed": 5,
+    "failed": 0,
+    "seconds": 9.79,
+    "nodeids": [
+      "tests/rq/test_batch_rq_delete_batch.py::test_delete_batch_rq_removes_workspace",
+      "tests/rq/test_batch_rq_delete_batch.py::test_delete_batch_rq_handles_missing_workspace",
+      "tests/rq/test_batch_rq_delete_batch.py::test_delete_batch_rq_raises_when_batch_jobs_active",
+      "tests/rq/test_batch_rq_delete_batch.py::test_active_batch_summaries_use_rq_status_values[False]",
+      "tests/rq/test_batch_rq_delete_batch.py::test_active_batch_summaries_use_rq_status_values[True]"
+    ]
+  },
+  "artifacts_sha256": {
+    "candidate_logs/batch-delete-baseline-canonical.log": "414f6646a3d72718ceac2bb13660332d25bc6a9f10183700036563ba55780523",
+    "candidate_logs/batch-delete-baseline-canonical.xml": "a6b067c8a227576114ef8213c2e4d19b98af798ca9d300d9a489ee3c8bb68060",
+    "candidate_logs/batch-delete-candidate-canonical.log": "6ef730d3bba23e68b7ae1a393f327a7cd6c7a35dd6abdbd7d59a67628b2e845d",
+    "candidate_logs/batch-delete-candidate-canonical.xml": "0bd97fa9377a3a0e04e6869f8c61da4916a5bb1585cde633743b12c91f82f8c8"
+  },
+  "scope": "One ordinary test-module fixture clears inherited retention ID/root. No dedicated retention or production changes. Other RQ consumers inventoried read-only; no further edits before diagnostic."
+}

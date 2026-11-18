@@ -1,0 +1,32 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-code-quality:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-fgptkbzm 7c9d79535a648c5ae8043071b65e665493614a475128dcce377da62fc654ae2b && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python /tmp/roads-refactor-validation/check_broad_v2_postexit_sources.py'
+time="2026-11-17T16:31:15-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-a250b04f6456 Creating
+ Container docker-weppcloud-run-a250b04f6456 Created
+{
+  "checkpoint": "5a6e45c463c6c3ce7720325d78c4060e0f96c1e4",
+  "environment": {
+    "VECTOR_UPLOAD_RUN_FILESYSTEM_ID": "dev-wc1",
+    "VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT": "/wc1"
+  },
+  "frozen_observer_sha256": "ca4c2eada6dea587c522a1b86ac035473c6eabe95842bea09e1ee21d6d68887e",
+  "before": "/tmp/roads-refactor-validation/broad-continuation-v2-source-before.json",
+  "before_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+  "after": "/tmp/roads-refactor-validation/broad-continuation-v2-postexit-source-after.json",
+  "after_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+  "before_files": 2836,
+  "after_files": 2836,
+  "changed_paths": [],
+  "source_unchanged": true,
+  "scope": "Fresh process imports only frozen observer definitions and calls source_manifest; no Continuation construction or pytest observer execution."
+}

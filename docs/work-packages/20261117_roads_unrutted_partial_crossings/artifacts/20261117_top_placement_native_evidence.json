@@ -1,0 +1,3289 @@
+{
+  "contract_checkpoint": "f46d59422009d5adb8641b1d2b7494cd5f9b788a",
+  "candidate_sources": {
+    "wepppy/nodb/mods/roads/_unrutted.py": "9ab3aa83737b259ee6fe9a74b21391764de4757db6e62e3e50a5891d50bc9784",
+    "wepppy/nodb/mods/roads/roads.py": "ddb110e083fbc85eb29da9efbc66c636ee3333247e1ddbbd6a7337588564f7c5",
+    "wepppy/wepp/interchange/_roads_lifecycle.py": "86019c49af0c34382f6f1301d22588e53bb10c048b13744e4ac4499457352eaa",
+    "wepppy/weppcloud/routes/nodb_api/_roads_detachment.py": "7e885cc0cee88af42585c4498b4ebfd161ee2872f6a4f7fccbda187c60218b84"
+  },
+  "runtime_identity": {
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ]
+  },
+  "source_unchanged": true,
+  "full_30m_fill_dispositions": [
+    {
+      "segment_hillslope_id": "roads-seg-000006::cac93d14f326::h42",
+      "target_hillslope_topaz_id": 42,
+      "status": "completed",
+      "reason": null,
+      "placement_adjustment": "top_of_hillslope",
+      "original_top_landuse_length_m": -7.071067422806837,
+      "hillslope_length_m": 40.62741699796953,
+      "road_width_m": 4.0,
+      "fill_length_m": 30.0,
+      "top_landuse_length_m": 0.0,
+      "bottom_landuse_length_m": 6.62741699796953,
+      "placement_source": "distance_to_channel_median",
+      "discha_median_m": 43.69848442077637
+    },
+    {
+      "segment_hillslope_id": "roads-seg-000005::7d9376e34ba1::h43",
+      "target_hillslope_topaz_id": 43,
+      "status": "failed",
+      "reason": "failed_road_fill_exceeds_hillslope",
+      "placement_adjustment": "top_of_hillslope",
+      "original_top_landuse_length_m": -4.029437251522857,
+      "hillslope_length_m": 29.970562748477143,
+      "road_width_m": 4.0,
+      "fill_length_m": 30.0,
+      "top_landuse_length_m": 0.0,
+      "bottom_landuse_length_m": 0.0,
+      "placement_source": "distance_to_channel_median",
+      "discha_median_m": 28.485280990600586
+    },
+    {
+      "segment_hillslope_id": "roads-seg-000005::effc04073fe3::h62",
+      "target_hillslope_topaz_id": 62,
+      "status": "failed",
+      "reason": "failed_road_fill_exceeds_hillslope",
+      "placement_adjustment": "top_of_hillslope",
+      "original_top_landuse_length_m": -45.75740773306251,
+      "hillslope_length_m": 24.8700107850039,
+      "road_width_m": 4.0,
+      "fill_length_m": 30.0,
+      "top_landuse_length_m": 0.0,
+      "bottom_landuse_length_m": 36.627418518066406,
+      "placement_source": "distance_to_channel_median",
+      "discha_median_m": 66.6274185180664
+    },
+    {
+      "segment_hillslope_id": "roads-seg-000005::137156d35d01::h63",
+      "target_hillslope_topaz_id": 63,
+      "status": "failed",
+      "reason": "failed_road_fill_exceeds_hillslope",
+      "placement_adjustment": "top_of_hillslope",
+      "original_top_landuse_length_m": -8.814944368986364,
+      "hillslope_length_m": 25.185055631013636,
+      "road_width_m": 4.0,
+      "fill_length_m": 30.0,
+      "top_landuse_length_m": 0.0,
+      "bottom_landuse_length_m": 0.0,
+      "placement_source": "distance_to_channel_median",
+      "discha_median_m": 14.242640495300293
+    },
+    {
+      "segment_hillslope_id": "roads-seg-000007::h82",
+      "target_hillslope_topaz_id": 82,
+      "status": "completed",
+      "reason": null,
+      "placement_adjustment": "top_of_hillslope",
+      "original_top_landuse_length_m": -112.2546825625788,
+      "hillslope_length_m": 77.08340642667902,
+      "road_width_m": 4.0,
+      "fill_length_m": 30.0,
+      "top_landuse_length_m": 0.0,
+      "bottom_landuse_length_m": 43.08340642667902,
+      "placement_source": "distance_to_channel_median",
+      "discha_median_m": 185.3380889892578
+    },
+    {
+      "segment_hillslope_id": "roads-seg-000007::07b3c7655e24::h141",
+      "target_hillslope_topaz_id": 141,
+      "status": "completed",
+      "reason": null,
+      "placement_adjustment": "top_of_hillslope",
+      "original_top_landuse_length_m": -10.48527983968664,
+      "hillslope_length_m": 111.4558441227157,
+      "road_width_m": 4.0,
+      "fill_length_m": 30.0,
+      "top_landuse_length_m": 0.0,
+      "bottom_landuse_length_m": 77.4558441227157,
+      "placement_source": "distance_to_channel_median",
+      "discha_median_m": 117.94112396240234
+    },
+    {
+      "segment_hillslope_id": "roads-seg-000007::0c3c0abdfade::h143",
+      "target_hillslope_topaz_id": 143,
+      "status": "failed",
+      "reason": "failed_road_fill_exceeds_hillslope",
+      "placement_adjustment": "top_of_hillslope",
+      "original_top_landuse_length_m": -8.574982718736802,
+      "hillslope_length_m": 25.425017281263198,
+      "road_width_m": 4.0,
+      "fill_length_m": 30.0,
+      "top_landuse_length_m": 0.0,
+      "bottom_landuse_length_m": 0.0,
+      "placement_source": "distance_to_channel_median",
+      "discha_median_m": 2.0
+    },
+    {
+      "segment_hillslope_id": "roads-seg-000007::75d0e71f09aa::h143",
+      "target_hillslope_topaz_id": 143,
+      "status": "failed",
+      "reason": "failed_road_fill_exceeds_hillslope",
+      "placement_adjustment": "top_of_hillslope",
+      "original_top_landuse_length_m": -8.574982718736802,
+      "hillslope_length_m": 25.425017281263198,
+      "road_width_m": 4.0,
+      "fill_length_m": 30.0,
+      "top_landuse_length_m": 0.0,
+      "bottom_landuse_length_m": 0.0,
+      "placement_source": "distance_to_channel_median",
+      "discha_median_m": 2.8284270763397217
+    }
+  ],
+  "short_5m_fill_run": {
+    "root": "/wc1/runs/ru/rupc2-misty-shortfill",
+    "profiles": [
+      {
+        "segment_hillslope_id": "roads-seg-000006::cac93d14f326::h42",
+        "target_hillslope_topaz_id": 42,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "top_of_hillslope",
+        "original_top_landuse_length_m": -7.071067422806838,
+        "hillslope_length_m": 40.62741699796953,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 0.0,
+        "bottom_landuse_length_m": 31.62741699796953,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 43.69848442077637,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000005::h42",
+        "target_hillslope_topaz_id": 42,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "top_of_hillslope",
+        "original_top_landuse_length_m": -1.3431449832316424,
+        "hillslope_length_m": 40.62741699796953,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 0.0,
+        "bottom_landuse_length_m": 31.62741699796953,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 37.97056198120117,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000006::acd379b3a13b::h42",
+        "target_hillslope_topaz_id": 42,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "none",
+        "original_top_landuse_length_m": 21.313708692610643,
+        "hillslope_length_m": 40.62741699796953,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 21.313708692610643,
+        "bottom_landuse_length_m": 10.313708305358887,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 15.313708305358887,
+        "contributor_ofe_count": 4,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000005::7d9376e34ba1::h43",
+        "target_hillslope_topaz_id": 43,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "top_of_hillslope",
+        "original_top_landuse_length_m": -2.5147182421234433,
+        "hillslope_length_m": 29.970562748477143,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 0.0,
+        "bottom_landuse_length_m": 20.970562748477143,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 28.485280990600586,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000005::5a4e193c2ab4::h51",
+        "target_hillslope_topaz_id": 51,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "none",
+        "original_top_landuse_length_m": 46.11269723213543,
+        "hillslope_length_m": 84.08326112068524,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 46.11269723213543,
+        "bottom_landuse_length_m": 28.970563888549805,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 33.970563888549805,
+        "contributor_ofe_count": 4,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000005::effc04073fe3::h62",
+        "target_hillslope_topaz_id": 62,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "top_of_hillslope",
+        "original_top_landuse_length_m": -45.75740773306251,
+        "hillslope_length_m": 24.8700107850039,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 0.0,
+        "bottom_landuse_length_m": 15.8700107850039,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 66.6274185180664,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000005::137156d35d01::h63",
+        "target_hillslope_topaz_id": 63,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "none",
+        "original_top_landuse_length_m": 16.185055631013636,
+        "hillslope_length_m": 25.185055631013636,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 16.185055631013636,
+        "bottom_landuse_length_m": 0.0,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 14.242640495300293,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000007::h82",
+        "target_hillslope_topaz_id": 82,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "top_of_hillslope",
+        "original_top_landuse_length_m": -112.2546825625788,
+        "hillslope_length_m": 77.08340642667902,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 0.0,
+        "bottom_landuse_length_m": 68.08340642667902,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 185.3380889892578,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000007::29d2f76e5a53::h132",
+        "target_hillslope_topaz_id": 132,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "none",
+        "original_top_landuse_length_m": 11.384776314463977,
+        "hillslope_length_m": 89.52691193458116,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 11.384776314463977,
+        "bottom_landuse_length_m": 69.14213562011719,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 74.14213562011719,
+        "contributor_ofe_count": 4,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000007::07b3c7655e24::h141",
+        "target_hillslope_topaz_id": 141,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "top_of_hillslope",
+        "original_top_landuse_length_m": -10.48527983968664,
+        "hillslope_length_m": 111.4558441227157,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 0.0,
+        "bottom_landuse_length_m": 102.4558441227157,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 117.94112396240234,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000007::746dbb8900f9::h141",
+        "target_hillslope_topaz_id": 141,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "none",
+        "original_top_landuse_length_m": 32.999998289890996,
+        "hillslope_length_m": 111.4558441227157,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 32.999998289890996,
+        "bottom_landuse_length_m": 69.4558458328247,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 74.4558458328247,
+        "contributor_ofe_count": 4,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000007::2fa349c30296::h141",
+        "target_hillslope_topaz_id": 141,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "none",
+        "original_top_landuse_length_m": 102.4558441227157,
+        "hillslope_length_m": 111.4558441227157,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 102.4558441227157,
+        "bottom_landuse_length_m": 0.0,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 8.8284273147583,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000007::ff180f66a8bd::h142",
+        "target_hillslope_topaz_id": 142,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "none",
+        "original_top_landuse_length_m": 63.5269119345812,
+        "hillslope_length_m": 72.5269119345812,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 63.5269119345812,
+        "bottom_landuse_length_m": 0.0,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 7.656854152679443,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000007::75d0e71f09aa::h143",
+        "target_hillslope_topaz_id": 143,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "none",
+        "original_top_landuse_length_m": 16.425017281263198,
+        "hillslope_length_m": 25.425017281263198,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 16.425017281263198,
+        "bottom_landuse_length_m": 0.0,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 2.8284270763397217,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      },
+      {
+        "segment_hillslope_id": "roads-seg-000007::0c3c0abdfade::h143",
+        "target_hillslope_topaz_id": 143,
+        "status": "completed",
+        "reason": null,
+        "placement_adjustment": "none",
+        "original_top_landuse_length_m": 16.425017281263198,
+        "hillslope_length_m": 25.425017281263198,
+        "road_width_m": 4.0,
+        "fill_length_m": 5.0,
+        "top_landuse_length_m": 16.425017281263198,
+        "bottom_landuse_length_m": 0.0,
+        "placement_source": "distance_to_channel_median",
+        "discha_median_m": 2.0,
+        "contributor_ofe_count": 3,
+        "top_ofe_compensation_m": 0.0,
+        "bottom_ofe_compensation_m": 0.0
+      }
+    ],
+    "hillslopes": [
+      {
+        "topaz_id_hill": 42,
+        "wepp_id_hill": 5,
+        "segment_ids_included": [
+          "roads-seg-000005::h42",
+          "roads-seg-000006::acd379b3a13b::h42",
+          "roads-seg-000006::cac93d14f326::h42"
+        ],
+        "segment_ids_excluded": [
+          "roads-seg-000006::181d3d054117::h42",
+          "roads-seg-000006::bebd1d730fc8::h42",
+          "roads-seg-000006::59956eec9035::h42"
+        ],
+        "segment_ids_capped": [],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000006::181d3d054117::h42": 0.00483897169757271,
+          "roads-seg-000006::59956eec9035::h42": 0.0019455846676037392,
+          "roads-seg-000005::h42": 0.23320394408065329,
+          "roads-seg-000006::acd379b3a13b::h42": 0.051828996627688646,
+          "roads-seg-000006::bebd1d730fc8::h42": 0.00452714278763948,
+          "roads-seg-000006::cac93d14f326::h42": 0.04943249060785686
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": 0.0,
+        "area_error_after_compensation_m2": 0.0,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 22.804142519287872,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 20476.0,
+        "affected_area_m2": 6848.514171630486,
+        "remainder_area_m2": 13627.485828369514,
+        "area_residual_m2": 0.0,
+        "road_target_area_m2": 674.2751252901714,
+        "road_modeled_area_m2": 674.2751252901714,
+        "road_area_deficit_m2": 0.0,
+        "strip_width_factor": 1.0,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": -2.2919266484677792e-10,
+        "readback_area_m2": 20476.00000000023
+      },
+      {
+        "topaz_id_hill": 43,
+        "wepp_id_hill": 6,
+        "segment_ids_included": [
+          "roads-seg-000005::7d9376e34ba1::h43"
+        ],
+        "segment_ids_excluded": [
+          "roads-seg-000005::5d3036350920::h43",
+          "roads-seg-000005::b6b4922245ab::h43",
+          "roads-seg-000005::a1e319384bf4::h43",
+          "roads-seg-000005::9ed80d35ef11::h43",
+          "roads-seg-000005::9fe577123e90::h43"
+        ],
+        "segment_ids_capped": [],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000005::5d3036350920::h43": 0.00988933581293458,
+          "roads-seg-000005::7d9376e34ba1::h43": 0.11287204414278404,
+          "roads-seg-000005::9ed80d35ef11::h43": 0.002920343944452648,
+          "roads-seg-000005::9fe577123e90::h43": 0.0010405952407623149,
+          "roads-seg-000005::a1e319384bf4::h43": 0.003295313276925512,
+          "roads-seg-000005::b6b4922245ab::h43": 0.006519585720759105
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": 0.0,
+        "area_error_after_compensation_m2": 0.0,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 48.046428736867306,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 15212.0,
+        "affected_area_m2": 1717.0095355000303,
+        "remainder_area_m2": 13494.99046449997,
+        "area_residual_m2": 0.0,
+        "road_target_area_m2": 229.15946556088943,
+        "road_modeled_area_m2": 229.15946556088943,
+        "road_area_deficit_m2": 0.0,
+        "strip_width_factor": 1.0,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": 9.276845958083868e-11,
+        "readback_area_m2": 15211.999999999907
+      },
+      {
+        "topaz_id_hill": 51,
+        "wepp_id_hill": 7,
+        "segment_ids_included": [
+          "roads-seg-000005::5a4e193c2ab4::h51"
+        ],
+        "segment_ids_excluded": [
+          "roads-seg-000005::77b731e8953f::h51",
+          "roads-seg-000005::f7c2b0653607::h51",
+          "roads-seg-000005::1a751c254bbf::h51",
+          "roads-seg-000005::492a93009f6e::h51",
+          "roads-seg-000005::3e7cb3854aec::h51",
+          "roads-seg-000005::5282e7ee9004::h51",
+          "roads-seg-000005::45a44300c5e2::h51",
+          "roads-seg-000005::e561b3634d50::h51"
+        ],
+        "segment_ids_capped": [],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000005::1a751c254bbf::h51": 0.01704669304708714,
+          "roads-seg-000005::3e7cb3854aec::h51": 0.008438128650711108,
+          "roads-seg-000005::45a44300c5e2::h51": 0.0019356668724883716,
+          "roads-seg-000005::492a93009f6e::h51": 0.009434852743334977,
+          "roads-seg-000005::5282e7ee9004::h51": 0.006208775576546986,
+          "roads-seg-000005::5a4e193c2ab4::h51": 0.24008006648259478,
+          "roads-seg-000005::77b731e8953f::h51": 0.039031151492673596,
+          "roads-seg-000005::e561b3634d50::h51": 0.0016738957032275171,
+          "roads-seg-000005::f7c2b0653607::h51": 0.0272393945786562
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": 0.0,
+        "area_error_after_compensation_m2": 0.0,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 67.76434718635491,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 12832.0,
+        "affected_area_m2": 3080.7074131046556,
+        "remainder_area_m2": 9751.292586895344,
+        "area_residual_m2": 0.0,
+        "road_target_area_m2": 146.5550870432058,
+        "road_modeled_area_m2": 146.5550870432058,
+        "road_area_deficit_m2": 0.0,
+        "strip_width_factor": 1.0,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": 3.2741809263825417e-11,
+        "readback_area_m2": 12831.999999999967
+      },
+      {
+        "topaz_id_hill": 62,
+        "wepp_id_hill": 10,
+        "segment_ids_included": [
+          "roads-seg-000005::effc04073fe3::h62"
+        ],
+        "segment_ids_excluded": [
+          "roads-seg-000005::67027192cb1f::h62",
+          "roads-seg-000005::b3cb2303f960::h62",
+          "roads-seg-000005::bc3c759ffb1b::h62",
+          "roads-seg-000005::d1c9a7bcbaf0::h62",
+          "roads-seg-000005::764edacb4c9c::h62"
+        ],
+        "segment_ids_capped": [],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000005::67027192cb1f::h62": 0.04191868252886236,
+          "roads-seg-000005::764edacb4c9c::h62": 0.013108537166096109,
+          "roads-seg-000005::b3cb2303f960::h62": 0.023593301023282193,
+          "roads-seg-000005::bc3c759ffb1b::h62": 0.015129431902006909,
+          "roads-seg-000005::d1c9a7bcbaf0::h62": 0.014433759270255102,
+          "roads-seg-000005::effc04073fe3::h62": 0.11130418091744285
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": 0.0,
+        "area_error_after_compensation_m2": 0.0,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 93.40247906581311,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 5368.0,
+        "affected_area_m2": 597.4808431648335,
+        "remainder_area_m2": 4770.5191568351665,
+        "area_residual_m2": 0.0,
+        "road_target_area_m2": 96.09659574817744,
+        "road_modeled_area_m2": 96.09659574817744,
+        "road_area_deficit_m2": 0.0,
+        "strip_width_factor": 1.0,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": -1.0913936421275139e-11,
+        "readback_area_m2": 5368.000000000011
+      },
+      {
+        "topaz_id_hill": 63,
+        "wepp_id_hill": 11,
+        "segment_ids_included": [
+          "roads-seg-000005::137156d35d01::h63"
+        ],
+        "segment_ids_excluded": [
+          "roads-seg-000005::dacd49f314eb::h63",
+          "roads-seg-000005::45439658a494::h63",
+          "roads-seg-000005::127006f6902c::h63",
+          "roads-seg-000005::343316529914::h63",
+          "roads-seg-000005::c4478bff5d44::h63",
+          "roads-seg-000005::7cf81eccc2bd::h63"
+        ],
+        "segment_ids_capped": [],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000005::127006f6902c::h63": 0.020474536462115066,
+          "roads-seg-000005::137156d35d01::h63": 0.04948191133167733,
+          "roads-seg-000005::343316529914::h63": 0.01917927287451996,
+          "roads-seg-000005::45439658a494::h63": 0.027841885581691088,
+          "roads-seg-000005::7cf81eccc2bd::h63": 9.719979496646852e-07,
+          "roads-seg-000005::c4478bff5d44::h63": 0.004995806941493953,
+          "roads-seg-000005::dacd49f314eb::h63": 0.03898241600366578
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": 0.0,
+        "area_error_after_compensation_m2": 0.0,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 96.24398058355598,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 5436.0,
+        "affected_area_m2": 268.98366999899827,
+        "remainder_area_m2": 5167.016330001002,
+        "area_residual_m2": 0.0,
+        "road_target_area_m2": 42.72115558367294,
+        "road_modeled_area_m2": 42.72115558367294,
+        "road_area_deficit_m2": 0.0,
+        "strip_width_factor": 1.0,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": -6.730260793119669e-11,
+        "readback_area_m2": 5436.000000000067
+      },
+      {
+        "topaz_id_hill": 82,
+        "wepp_id_hill": 14,
+        "segment_ids_included": [
+          "roads-seg-000007::h82"
+        ],
+        "segment_ids_excluded": [],
+        "segment_ids_capped": [],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000007::h82": 0.07531582022393024
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": -3.637978807091713e-12,
+        "area_error_after_compensation_m2": -3.637978807091713e-12,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 0.0,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 22036.0,
+        "affected_area_m2": 1659.659414454527,
+        "remainder_area_m2": 20376.340585545477,
+        "area_residual_m2": -3.637978807091713e-12,
+        "road_target_area_m2": 86.12278524733743,
+        "road_modeled_area_m2": 86.12278524733743,
+        "road_area_deficit_m2": 0.0,
+        "strip_width_factor": 1.0,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": 4.001776687800884e-11,
+        "readback_area_m2": 22035.99999999996
+      },
+      {
+        "topaz_id_hill": 132,
+        "wepp_id_hill": 29,
+        "segment_ids_included": [
+          "roads-seg-000007::29d2f76e5a53::h132"
+        ],
+        "segment_ids_excluded": [
+          "roads-seg-000007::8c51669b4baf::h132",
+          "roads-seg-000007::c32c92c30788::h132",
+          "roads-seg-000007::237a7ce055ac::h132"
+        ],
+        "segment_ids_capped": [],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000007::237a7ce055ac::h132": 0.00023351399798082515,
+          "roads-seg-000007::29d2f76e5a53::h132": 0.25588576565785304,
+          "roads-seg-000007::8c51669b4baf::h132": 0.005452852450007826,
+          "roads-seg-000007::c32c92c30788::h132": 0.0022984110215360813
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": 0.0,
+        "area_error_after_compensation_m2": 0.0,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 10.902411093861101,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 30560.0,
+        "affected_area_m2": 7819.868998503989,
+        "remainder_area_m2": 22740.13100149601,
+        "area_residual_m2": 0.0,
+        "road_target_area_m2": 349.3862942225953,
+        "road_modeled_area_m2": 349.3862942225953,
+        "road_area_deficit_m2": 0.0,
+        "strip_width_factor": 1.0,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": 7.275957614183426e-12,
+        "readback_area_m2": 30559.999999999993
+      },
+      {
+        "topaz_id_hill": 141,
+        "wepp_id_hill": 31,
+        "segment_ids_included": [
+          "roads-seg-000007::746dbb8900f9::h141",
+          "roads-seg-000007::07b3c7655e24::h141",
+          "roads-seg-000007::2fa349c30296::h141"
+        ],
+        "segment_ids_excluded": [
+          "roads-seg-000007::ce630bf27d0c::h141"
+        ],
+        "segment_ids_capped": [
+          "roads-seg-000007::ce630bf27d0c::h141"
+        ],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000007::07b3c7655e24::h141": 0.330188681494819,
+          "roads-seg-000007::2fa349c30296::h141": 0.17927078753234932,
+          "roads-seg-000007::746dbb8900f9::h141": 0.545625644705689,
+          "roads-seg-000007::ce630bf27d0c::h141": 0.1528362468269591
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": 0.0,
+        "area_error_after_compensation_m2": 0.0,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 54.850868711265605,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 10000.0,
+        "affected_area_m2": 10000.0,
+        "remainder_area_m2": 0.0,
+        "area_residual_m2": 0.0,
+        "road_target_area_m2": 378.6558244792196,
+        "road_modeled_area_m2": 358.8865197230841,
+        "road_area_deficit_m2": 19.769304756135455,
+        "strip_width_factor": 0.9477908341081905,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": -2.3646862246096134e-11,
+        "readback_area_m2": 10000.000000000024
+      },
+      {
+        "topaz_id_hill": 142,
+        "wepp_id_hill": 32,
+        "segment_ids_included": [
+          "roads-seg-000007::ff180f66a8bd::h142"
+        ],
+        "segment_ids_excluded": [
+          "roads-seg-000007::c2f464468a47::h142"
+        ],
+        "segment_ids_capped": [],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000007::c2f464468a47::h142": 0.0038468548791722778,
+          "roads-seg-000007::ff180f66a8bd::h142": 0.2834068654710223
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": 0.0,
+        "area_error_after_compensation_m2": 0.0,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 3.7391345409375574,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 17624.0,
+        "affected_area_m2": 4994.762597061297,
+        "remainder_area_m2": 12629.237402938703,
+        "area_residual_m2": 0.0,
+        "road_target_area_m2": 275.47085427084176,
+        "road_modeled_area_m2": 275.47085427084176,
+        "road_area_deficit_m2": 0.0,
+        "strip_width_factor": 1.0,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": 8.003553375601768e-11,
+        "readback_area_m2": 17623.99999999992
+      },
+      {
+        "topaz_id_hill": 143,
+        "wepp_id_hill": 33,
+        "segment_ids_included": [
+          "roads-seg-000007::0c3c0abdfade::h143",
+          "roads-seg-000007::75d0e71f09aa::h143"
+        ],
+        "segment_ids_excluded": [
+          "roads-seg-000007::47500b2f5ea3::h143",
+          "roads-seg-000007::a28649075850::h143",
+          "roads-seg-000007::b79b366bb423::h143",
+          "roads-seg-000007::b251c267e2e4::h143",
+          "roads-seg-000007::6ee770817aa8::h143",
+          "roads-seg-000007::ed5135f2376d::h143"
+        ],
+        "segment_ids_capped": [],
+        "inclusion_ratio_by_segment": {
+          "roads-seg-000007::0c3c0abdfade::h143": 0.14711851867720094,
+          "roads-seg-000007::47500b2f5ea3::h143": 0.022571455061020474,
+          "roads-seg-000007::6ee770817aa8::h143": 0.0037113634981880373,
+          "roads-seg-000007::75d0e71f09aa::h143": 0.08762707550662749,
+          "roads-seg-000007::a28649075850::h143": 0.016392527026070056,
+          "roads-seg-000007::b251c267e2e4::h143": 0.010622905006166111,
+          "roads-seg-000007::b79b366bb423::h143": 0.011459242474619482,
+          "roads-seg-000007::ed5135f2376d::h143": 0.0018775213822814323
+        },
+        "top_ofe_compensation_m": 0.0,
+        "area_error_before_compensation_m2": 0.0,
+        "area_error_after_compensation_m2": 0.0,
+        "geometry_policy": "unrutted_strips_v1",
+        "connectivity_limitation": "Simplified parallel strips; switchbacks and shared contributing-area connectivity are not resolved.",
+        "excluded_road_target_area_m2": 61.72612757451244,
+        "excluded_road_area_unknown_count": 0,
+        "area_accounting_status": "complete",
+        "area_accounting_reason": null,
+        "reference_area_m2": 5888.0,
+        "affected_area_m2": 1382.182058554382,
+        "remainder_area_m2": 4505.817941445618,
+        "area_residual_m2": 0.0,
+        "road_target_area_m2": 217.45229012260643,
+        "road_modeled_area_m2": 217.45229012260643,
+        "road_area_deficit_m2": 0.0,
+        "strip_width_factor": 1.0,
+        "bottom_ofe_compensation_m": 0.0,
+        "emitted_area_residual_m2": 4.729372449219227e-11,
+        "readback_area_m2": 5887.999999999953
+      }
+    ],
+    "replacement_receipts": [
+      {
+        "area_change_m2": 13.609999999996944,
+        "area_m2": 20476.01,
+        "baseline_area_m2": 20462.4,
+        "id": 5,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 4.443248651543722,
+              "gwdsv_m3": 6.4196261519282,
+              "runvol_m3": 3.762320501261266,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.017792987010939832,
+              "sediment_class_2_kg": 0.02536630486470243,
+              "sediment_class_3_kg": 0.08617538928018277,
+              "sediment_class_4_kg": 0.1421453275730561,
+              "sediment_class_5_kg": 0.03940677116584475,
+              "tdep_kg": 0.014745000025020879,
+              "tdet_kg": 0.15629550007663898
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.004998530082943375,
+              "gwdsv_m3": 0.0049997973300435206,
+              "runvol_m3": 0.04833743102039989,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.0006331932544298979,
+              "sediment_class_2_kg": 0.00031758288887928643,
+              "sediment_class_3_kg": 0.0027515052579332178,
+              "sediment_class_4_kg": 0.0038557915436854273,
+              "sediment_class_5_kg": 0.0014476278847794788,
+              "tdep_kg": 0.0004902292825654797,
+              "tdet_kg": 0.003452622067612765
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.9999438898672179,
+              "gwdsv_m3": 0.9999618236757161,
+              "runvol_m3": 0.9980966737937158,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.9804957994389266,
+              "sediment_class_2_kg": 0.9291606477448469,
+              "sediment_class_3_kg": 0.9288491315117794,
+              "sediment_class_4_kg": 0.9386670219912787,
+              "sediment_class_5_kg": 0.9650583523582387,
+              "tdep_kg": 0.9987750864368471,
+              "tdet_kg": 0.9988678396256198
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 216702.12520649994,
+              "gwdsv_m3": 270878.0019712003,
+              "runvol_m3": 174803.02776500004,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 405.7697535876202,
+              "sediment_class_2_kg": 699.8874600621272,
+              "sediment_class_3_kg": 1976.1374381282742,
+              "sediment_class_4_kg": 3229.7062340935577,
+              "sediment_class_5_kg": 1067.8719966634912,
+              "tdep_kg": -658.6937200000002,
+              "tdet_kg": 8038.024286999999
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": -0.07347843609750271,
+              "gwdsv_m3": 0.1871709460974671,
+              "runvol_m3": -0.14436998561723158,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.0009489765819807872,
+              "sediment_class_2_kg": -0.0009040170388061597,
+              "sediment_class_3_kg": 0.0017043464813468745,
+              "sediment_class_4_kg": 0.003193070216639171,
+              "sediment_class_5_kg": 0.0014674060198558436,
+              "tdep_kg": 0.0026541110820517133,
+              "tdet_kg": -0.012644707975596248
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 216702.19868493604,
+              "gwdsv_m3": 270877.8148002542,
+              "runvol_m3": 174803.17213498565,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 405.7688046110382,
+              "sediment_class_2_kg": 699.888364079166,
+              "sediment_class_3_kg": 1976.1357337817929,
+              "sediment_class_4_kg": 3229.703041023341,
+              "sediment_class_5_kg": 1067.8705292574714,
+              "tdep_kg": -658.6963741110823,
+              "tdet_kg": 8038.036931707975
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 20476.0,
+          "source_count": 4,
+          "sources": [
+            {
+              "climate_token": "p900001.cli",
+              "modeled_area_m2": 1012.2,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 10227.106455740013,
+                "gwdsv_m3": 12783.882798509983,
+                "runvol_m3": 9061.937489999998,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 60.93751528116367,
+                "sediment_class_2_kg": 104.82219144611177,
+                "sediment_class_3_kg": 294.52838059553005,
+                "sediment_class_4_kg": 484.18590738003843,
+                "sediment_class_5_kg": 160.7829316738401,
+                "tdep_kg": -90.03100690000002,
+                "tdet_kg": 1195.2912200000014
+              },
+              "represented_area_m2": 1012.1800000000001,
+              "row_count": 5844,
+              "scale": 0.9999802410590792,
+              "source_id": "roads:900001",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 10226.904378947764,
+                "gwdsv_m3": 12783.63020252503,
+                "runvol_m3": 9061.758435712505,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 60.93631122039937,
+                "sediment_class_2_kg": 104.8201202706238,
+                "sediment_class_3_kg": 294.52256102665837,
+                "sediment_class_4_kg": 484.17634037929986,
+                "sediment_class_5_kg": 160.77975477339209,
+                "tdep_kg": -90.02922798265365,
+                "tdet_kg": 1195.2676023114022
+              }
+            },
+            {
+              "climate_token": "p900002.cli",
+              "modeled_area_m2": 4775.1,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 48247.638452999956,
+                "gwdsv_m3": 60309.57774010007,
+                "runvol_m3": 42750.77310000002,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 287.48086290612025,
+                "sediment_class_2_kg": 494.512704147121,
+                "sediment_class_3_kg": 1389.4770214820103,
+                "sediment_class_4_kg": 2284.2122706772534,
+                "sediment_class_5_kg": 758.5151071133619,
+                "tdep_kg": -424.73220019999997,
+                "tdet_kg": 5638.933299999999
+              },
+              "represented_area_m2": 4775.08,
+              "row_count": 5844,
+              "scale": 0.9999958116060396,
+              "source_id": "roads:900002",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 48247.436372882454,
+                "gwdsv_m3": 60309.32513982891,
+                "runvol_m3": 42750.594042920166,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 287.4796588230103,
+                "sediment_class_2_kg": 494.51063293309755,
+                "sediment_class_3_kg": 1389.4712018048454,
+                "sediment_class_4_kg": 2284.2027034963744,
+                "sediment_class_5_kg": 758.5119301532683,
+                "tdep_kg": -424.73042125421784,
+                "tdet_kg": 5638.909681925822
+              }
+            },
+            {
+              "climate_token": "p900003.cli",
+              "modeled_area_m2": 1061.3,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 10960.202881270037,
+                "gwdsv_m3": 13700.256645110007,
+                "runvol_m3": 12310.061883,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 42.17388300986196,
+                "sediment_class_2_kg": 71.7516067676684,
+                "sediment_class_3_kg": 204.18517076723114,
+                "sediment_class_4_kg": 339.62160339829654,
+                "sediment_class_5_kg": 110.3183795785067,
+                "tdep_kg": -143.94215,
+                "tdet_kg": 911.9585217999997
+              },
+              "represented_area_m2": 1061.26,
+              "row_count": 5844,
+              "scale": 0.9999623103740696,
+              "source_id": "roads:900003",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 10959.78979532332,
+                "gwdsv_m3": 13699.740287561901,
+                "runvol_m3": 12309.59792137245,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 42.17229349198728,
+                "sediment_class_2_kg": 71.74890247644943,
+                "sediment_class_3_kg": 204.17747510452438,
+                "sediment_class_4_kg": 339.60880318710656,
+                "sediment_class_5_kg": 110.31422172004713,
+                "tdep_kg": -143.93672487421088,
+                "tdet_kg": 911.9241504244491
+              }
+            },
+            {
+              "climate_token": "p900004.cli",
+              "modeled_area_m2": 13627.0,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 147262.772859386,
+                "gwdsv_m3": 184078.5000711205,
+                "runvol_m3": 110677.24199999993,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 15.179995233,
+                "sediment_class_2_kg": 28.807672531999998,
+                "sediment_class_3_kg": 87.96133293,
+                "sediment_class_4_kg": 121.71081748000002,
+                "sediment_class_5_kg": 38.26324674,
+                "tdep_kg": 0.0,
+                "tdet_kg": 291.925
+              },
+              "represented_area_m2": 13627.49,
+              "row_count": 5844,
+              "scale": 1.0000359580245102,
+              "source_id": "roads:900004",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 147268.0681377819,
+                "gwdsv_m3": 184085.11917033786,
+                "runvol_m3": 110681.22173498049,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 15.180541075640653,
+                "sediment_class_2_kg": 28.808708398994984,
+                "sediment_class_3_kg": 87.96449584576544,
+                "sediment_class_4_kg": 121.71519396055811,
+                "sediment_class_5_kg": 38.264622610764114,
+                "tdep_kg": 0.0,
+                "tdet_kg": 291.93549704630516
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.5000000000727454,
+          "target_area_m2": 20476.01,
+          "target_area_residual_m2": -0.00999999999839929
+        }
+      },
+      {
+        "area_change_m2": -16.0,
+        "area_m2": 15212.0,
+        "baseline_area_m2": 15228.0,
+        "id": 6,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 2.1913451511646542,
+              "gwdsv_m3": 3.94954060145407,
+              "runvol_m3": 2.337225500918579,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.00553886388943862,
+              "sediment_class_2_kg": 0.00979688547018792,
+              "sediment_class_3_kg": 0.023603394681473593,
+              "sediment_class_4_kg": 0.04262433534421604,
+              "sediment_class_5_kg": 0.012886291728990317,
+              "tdep_kg": 0.004600000022146827,
+              "tdet_kg": 0.05530500003950869
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.004992496818957193,
+              "gwdsv_m3": 0.004995156472233475,
+              "runvol_m3": 0.04996670338232434,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.00010137420611489034,
+              "sediment_class_2_kg": 0.00018617141211407784,
+              "sediment_class_3_kg": 0.0006441970696560162,
+              "sediment_class_4_kg": 0.0009323001055321356,
+              "sediment_class_5_kg": 0.0002639879656376465,
+              "tdep_kg": 6.676179382836267e-05,
+              "tdet_kg": 0.00033821520328558563
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.9999928248438772,
+              "gwdsv_m3": 0.999986398775311,
+              "runvol_m3": 0.9993340675695116,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.9804367957825529,
+              "sediment_class_2_kg": 0.8549864127816413,
+              "sediment_class_3_kg": 0.9886338768721958,
+              "sediment_class_4_kg": 0.9606023532100048,
+              "sediment_class_5_kg": 0.9145194706316458,
+              "tdep_kg": 0.9631217232670708,
+              "tdet_kg": 0.9979499119989289
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 163143.90732290034,
+              "gwdsv_m3": 203929.80138399982,
+              "runvol_m3": 126554.82040099996,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 142.77931129471185,
+              "sediment_class_2_kg": 241.9057485039866,
+              "sediment_class_3_kg": 685.4560976133473,
+              "sediment_class_4_kg": 1117.9135704242624,
+              "sediment_class_5_kg": 373.54512192596604,
+              "tdep_kg": -234.1842,
+              "tdet_kg": 2795.7746199999992
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": -0.14306655200198293,
+              "gwdsv_m3": -0.2494033313705586,
+              "runvol_m3": 0.16175027866847813,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.00014986610335654404,
+              "sediment_class_2_kg": -0.00012850385689944233,
+              "sediment_class_3_kg": -0.00046279257833248266,
+              "sediment_class_4_kg": -0.00035744306524065905,
+              "sediment_class_5_kg": 0.00045940532186250493,
+              "tdep_kg": 0.0012439142690254812,
+              "tdet_kg": -0.014091533041209914
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 163144.05038945234,
+              "gwdsv_m3": 203930.0507873312,
+              "runvol_m3": 126554.65865072129,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 142.7791614286085,
+              "sediment_class_2_kg": 241.9058770078435,
+              "sediment_class_3_kg": 685.4565604059256,
+              "sediment_class_4_kg": 1117.9139278673276,
+              "sediment_class_5_kg": 373.5446625206442,
+              "tdep_kg": -234.18544391426903,
+              "tdet_kg": 2795.7887115330404
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 15212.0,
+          "source_count": 2,
+          "sources": [
+            {
+              "climate_token": "p900005.cli",
+              "modeled_area_m2": 1717.0,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 17071.691445100038,
+                "gwdsv_m3": 21339.60586109992,
+                "runvol_m3": 16470.151300999994,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 138.96569322071176,
+                "sediment_class_2_kg": 234.6688076142361,
+                "sediment_class_3_kg": 663.3595439191374,
+                "sediment_class_4_kg": 1087.3379946838115,
+                "sediment_class_5_kg": 363.93236987911524,
+                "tdep_kg": -234.18408,
+                "tdet_kg": 2722.452009999999
+              },
+              "represented_area_m2": 1717.01,
+              "row_count": 5844,
+              "scale": 1.000005824111823,
+              "source_id": "roads:900005",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 17071.790872540023,
+                "gwdsv_m3": 21339.730145350717,
+                "runvol_m3": 16470.247225002913,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 138.96650257244863,
+                "sediment_class_2_kg": 234.670174351613,
+                "sediment_class_3_kg": 663.3634073993001,
+                "sediment_class_4_kg": 1087.344327461882,
+                "sediment_class_5_kg": 363.9344894619334,
+                "tdep_kg": -234.1854439142691,
+                "tdet_kg": 2722.467865864938
+              }
+            },
+            {
+              "climate_token": "p900006.cli",
+              "modeled_area_m2": 13495.0,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 146072.367758756,
+                "gwdsv_m3": 182590.45594428197,
+                "runvol_m3": 110084.49299999999,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 3.8126616814,
+                "sediment_class_2_kg": 7.235708018,
+                "sediment_class_3_kg": 22.093169378,
+                "sediment_class_4_kg": 30.569623058,
+                "sediment_class_5_kg": 9.61018018,
+                "tdep_kg": 0.0,
+                "tdet_kg": 73.3209
+              },
+              "represented_area_m2": 13494.99,
+              "row_count": 5844,
+              "scale": 0.9999992589848091,
+              "source_id": "roads:900006",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 146072.25951691254,
+                "gwdsv_m3": 182590.32064198042,
+                "runvol_m3": 110084.4114257184,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 3.8126588561597763,
+                "sediment_class_2_kg": 7.235702656230442,
+                "sediment_class_3_kg": 22.093153006625876,
+                "sediment_class_4_kg": 30.569600405444938,
+                "sediment_class_5_kg": 9.6101730587105,
+                "tdep_kg": 0.0,
+                "tdet_kg": 73.32084566809928
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.5000000000540439,
+          "target_area_m2": 15212.0,
+          "target_area_residual_m2": 0.0
+        }
+      },
+      {
+        "area_change_m2": -4.699999999998909,
+        "area_m2": 12832.0,
+        "baseline_area_m2": 12836.699999999999,
+        "id": 7,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 1.771437910993612,
+              "gwdsv_m3": 2.539922351240295,
+              "runvol_m3": 2.0703300008780716,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.008449509223638378,
+              "sediment_class_2_kg": 0.01284919936057828,
+              "sediment_class_3_kg": 0.04143472561111466,
+              "sediment_class_4_kg": 0.06898782384718442,
+              "sediment_class_5_kg": 0.0161477418646549,
+              "tdep_kg": 0.002705000021535241,
+              "tdet_kg": 0.06889550004741744
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.004998218728815118,
+              "gwdsv_m3": 0.004998473215138688,
+              "runvol_m3": 0.04997808926509606,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.0006359249028093927,
+              "sediment_class_2_kg": 0.0006069165427931011,
+              "sediment_class_3_kg": 0.0021110611494918885,
+              "sediment_class_4_kg": 0.002373919239857969,
+              "sediment_class_5_kg": 0.0013651698015735292,
+              "tdep_kg": 4.801830752754199e-05,
+              "tdet_kg": 0.004496169978949638
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.9999943384278227,
+              "gwdsv_m3": 0.9999904922134606,
+              "runvol_m3": 0.999561785204971,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.8323237832960179,
+              "sediment_class_2_kg": 0.986842503433081,
+              "sediment_class_3_kg": 0.8604754638156791,
+              "sediment_class_4_kg": 0.8220524087692233,
+              "sediment_class_5_kg": 0.8373154042555854,
+              "tdep_kg": 0.3414483719910881,
+              "tdet_kg": 0.899233995662902
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 139020.5947121496,
+              "gwdsv_m3": 173775.68043089958,
+              "runvol_m3": 120849.07434999997,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 192.87459072265997,
+              "sediment_class_2_kg": 352.64606577445994,
+              "sediment_class_3_kg": 1032.6263416662082,
+              "sediment_class_4_kg": 1600.805032206086,
+              "sediment_class_5_kg": 513.9419968488484,
+              "tdep_kg": -131.41980999999998,
+              "tdet_kg": 3824.3262130000003
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": -0.047024397645145655,
+              "gwdsv_m3": -0.10543791041709483,
+              "runvol_m3": 0.06504291700548492,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.00034164917042289744,
+              "sediment_class_2_kg": 0.0002798631974769705,
+              "sediment_class_3_kg": 0.003369995902176015,
+              "sediment_class_4_kg": -0.004347305856526873,
+              "sediment_class_5_kg": 0.001764058937169466,
+              "tdep_kg": 0.00042659074239281836,
+              "tdet_kg": -0.0012172563060630637
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 139020.64173654726,
+              "gwdsv_m3": 173775.78586881,
+              "runvol_m3": 120849.00930708296,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 192.87424907348955,
+              "sediment_class_2_kg": 352.64578591126246,
+              "sediment_class_3_kg": 1032.622971670306,
+              "sediment_class_4_kg": 1600.8093795119426,
+              "sediment_class_5_kg": 513.9402327899112,
+              "tdep_kg": -131.42023659074238,
+              "tdet_kg": 3824.3274302563063
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 12832.0,
+          "source_count": 2,
+          "sources": [
+            {
+              "climate_token": "p900007.cli",
+              "modeled_area_m2": 3080.7,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 32946.13426657998,
+                "gwdsv_m3": 41182.674393849986,
+                "runvol_m3": 39983.00844999999,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 132.04845362459886,
+                "sediment_class_2_kg": 237.212395988313,
+                "sediment_class_3_kg": 680.1675027219413,
+                "sediment_class_4_kg": 1113.1192891523467,
+                "sediment_class_5_kg": 360.6202886590806,
+                "tdep_kg": -131.41980999999998,
+                "tdet_kg": 2654.585112999999
+              },
+              "represented_area_m2": 3080.71,
+              "row_count": 5844,
+              "scale": 1.000003246015516,
+              "source_id": "roads:900007",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 32946.241210243,
+                "gwdsv_m3": 41182.808073450055,
+                "runvol_m3": 39983.13823546579,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 132.0488822559282,
+                "sediment_class_2_kg": 237.21316598343097,
+                "sediment_class_3_kg": 680.1697105562087,
+                "sediment_class_4_kg": 1113.1229023548303,
+                "sediment_class_5_kg": 360.62145923813296,
+                "tdep_kg": -131.42023659074235,
+                "tdet_kg": 2654.5937298244644
+              }
+            },
+            {
+              "climate_token": "p900008.cli",
+              "modeled_area_m2": 9751.3,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 106074.50930616901,
+                "gwdsv_m3": 132593.11377016729,
+                "runvol_m3": 80865.95399999993,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 60.82542919429999,
+                "sediment_class_2_kg": 115.4327383046,
+                "sediment_class_3_kg": 352.4536225568,
+                "sediment_class_4_kg": 487.6869772822,
+                "sediment_class_5_kg": 153.31893078099998,
+                "tdep_kg": 0.0,
+                "tdet_kg": 1169.7348999999997
+              },
+              "represented_area_m2": 9751.29,
+              "row_count": 5844,
+              "scale": 0.9999989744957084,
+              "source_id": "roads:900008",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 106074.4005263045,
+                "gwdsv_m3": 132592.9777953601,
+                "runvol_m3": 80865.87107161706,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 60.82536681756132,
+                "sediment_class_2_kg": 115.43261992783147,
+                "sediment_class_3_kg": 352.4532611140975,
+                "sediment_class_4_kg": 487.6864771571119,
+                "sediment_class_5_kg": 153.3187735517785,
+                "tdep_kg": 0.0,
+                "tdet_kg": 1169.7337004318397
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.5000000000455884,
+          "target_area_m2": 12832.0,
+          "target_area_residual_m2": 0.0
+        }
+      },
+      {
+        "area_change_m2": -5.420000000000073,
+        "area_m2": 5368.0,
+        "baseline_area_m2": 5373.42,
+        "id": 10,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 1.2626892404149002,
+              "gwdsv_m3": 1.386967225516743,
+              "runvol_m3": 0.857215000338842,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.002589140021800186,
+              "sediment_class_2_kg": 0.00389052329016302,
+              "sediment_class_3_kg": 0.010078340987935155,
+              "sediment_class_4_kg": 0.018639358114016465,
+              "sediment_class_5_kg": 0.0052170032619266475,
+              "tdep_kg": 0.002611550021360367,
+              "tdet_kg": 0.023205000027950205
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.0004999266324290375,
+              "gwdsv_m3": 0.0004998092443138091,
+              "runvol_m3": 0.004985389372222926,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 2.5106199999958e-05,
+              "sediment_class_2_kg": 4.4529999999820546e-05,
+              "sediment_class_3_kg": 0.00012142000000103792,
+              "sediment_class_4_kg": 0.0002971799999986757,
+              "sediment_class_5_kg": 0.00010050250564974661,
+              "tdep_kg": 0.0,
+              "tdet_kg": 0.00014410858400637494
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.9999371129496337,
+              "gwdsv_m3": 0.9996184884405078,
+              "runvol_m3": 0.9970778742547196,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.968716407721022,
+              "sediment_class_2_kg": 0.927275892693416,
+              "sediment_class_3_kg": 0.9341043272902867,
+              "sediment_class_4_kg": 0.935717063720406,
+              "sediment_class_5_kg": 0.9172885271818253,
+              "tdep_kg": 0.0,
+              "tdet_kg": 0.32087202579659424
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 57472.04582825002,
+              "gwdsv_m3": 71840.02725955968,
+              "runvol_m3": 44968.44389000002,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 59.453242101684786,
+              "sediment_class_2_kg": 98.92208538236413,
+              "sediment_class_3_kg": 281.39757948887893,
+              "sediment_class_4_kg": 456.4218906680462,
+              "sediment_class_5_kg": 152.48209446374787,
+              "tdep_kg": -123.8689816,
+              "tdet_kg": 1172.5415999999998
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.003088455297984183,
+              "gwdsv_m3": -0.020156065322225913,
+              "runvol_m3": 0.05929548013955355,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.00011554471912944564,
+              "sediment_class_2_kg": 0.0001434180944528407,
+              "sediment_class_3_kg": 0.0005192779495928335,
+              "sediment_class_4_kg": 0.0026700159658048506,
+              "sediment_class_5_kg": 0.0004491016909753398,
+              "tdep_kg": 0.0,
+              "tdet_kg": -0.00016015218511711282
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 57472.04273979472,
+              "gwdsv_m3": 71840.047415625,
+              "runvol_m3": 44968.38459451988,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 59.45312655696566,
+              "sediment_class_2_kg": 98.92194196426968,
+              "sediment_class_3_kg": 281.39706021092934,
+              "sediment_class_4_kg": 456.4192206520804,
+              "sediment_class_5_kg": 152.4816453620569,
+              "tdep_kg": -123.8689816,
+              "tdet_kg": 1172.541760152185
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 5368.0,
+          "source_count": 2,
+          "sources": [
+            {
+              "climate_token": "p900009.cli",
+              "modeled_area_m2": 597.48,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 5853.471297840005,
+                "gwdsv_m3": 7316.843386360036,
+                "runvol_m3": 6020.781209999997,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 58.70703459803846,
+                "sediment_class_2_kg": 97.50606057230718,
+                "sediment_class_3_kg": 277.07372413771,
+                "sediment_class_4_kg": 450.43708469648345,
+                "sediment_class_5_kg": 150.60101761768476,
+                "tdep_kg": -123.8689816,
+                "tdet_kg": 1158.1938999999995
+              },
+              "represented_area_m2": 597.48,
+              "row_count": 5844,
+              "scale": 1.0,
+              "source_id": "roads:900009",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 5853.471297840005,
+                "gwdsv_m3": 7316.843386360036,
+                "runvol_m3": 6020.781209999997,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 58.70703459803846,
+                "sediment_class_2_kg": 97.50606057230718,
+                "sediment_class_3_kg": 277.07372413771,
+                "sediment_class_4_kg": 450.43708469648345,
+                "sediment_class_5_kg": 150.60101761768476,
+                "tdep_kg": -123.8689816,
+                "tdet_kg": 1158.1938999999995
+              }
+            },
+            {
+              "climate_token": "p900010.cli",
+              "modeled_area_m2": 4770.5,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 51618.355035477194,
+                "gwdsv_m3": 64522.93352121136,
+                "runvol_m3": 38947.44009999999,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 0.746088831,
+                "sediment_class_2_kg": 1.415875456,
+                "sediment_class_3_kg": 4.323317948,
+                "sediment_class_4_kg": 5.982110876,
+                "sediment_class_5_kg": 1.88061986,
+                "tdep_kg": 0.0,
+                "tdet_kg": 14.347800000000001
+              },
+              "represented_area_m2": 4770.52,
+              "row_count": 5844,
+              "scale": 1.000004192432659,
+              "source_id": "roads:900010",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 51618.57144195465,
+                "gwdsv_m3": 64523.20402926511,
+                "runvol_m3": 38947.603384519854,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 0.7460919589271816,
+                "sediment_class_2_kg": 1.4158813919625028,
+                "sediment_class_3_kg": 4.323336073219361,
+                "sediment_class_4_kg": 5.982135955597006,
+                "sediment_class_5_kg": 1.8806277443721202,
+                "tdep_kg": 0.0,
+                "tdet_kg": 14.347860152185307
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.05000000001907097,
+          "target_area_m2": 5368.0,
+          "target_area_residual_m2": 0.0
+        }
+      },
+      {
+        "area_change_m2": -2.1599999999998545,
+        "area_m2": 5436.0,
+        "baseline_area_m2": 5438.16,
+        "id": 11,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 1.280279665429027,
+              "gwdsv_m3": 1.4000752905344116,
+              "runvol_m3": 0.8031835003312775,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.00045229777962031524,
+              "sediment_class_2_kg": 0.0009887629502008082,
+              "sediment_class_3_kg": 0.0025121699249902566,
+              "sediment_class_4_kg": 0.004026872185400433,
+              "sediment_class_5_kg": 0.0016246422091759582,
+              "tdep_kg": 0.00031554507082342213,
+              "tdet_kg": 0.005111550022263031
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.0004992877878784441,
+              "gwdsv_m3": 0.0004999845171269612,
+              "runvol_m3": 0.0049410489646106726,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 2.59200000000126e-05,
+              "sediment_class_2_kg": 2.9336999999962643e-05,
+              "sediment_class_3_kg": 3.698999999990349e-05,
+              "sediment_class_4_kg": 0.0002642599999997941,
+              "sediment_class_5_kg": 4.9701000000013096e-05,
+              "tdep_kg": 0.0,
+              "tdet_kg": 1.3280820591710096e-05
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.9998645177792999,
+              "gwdsv_m3": 0.999969034060373,
+              "runvol_m3": 0.9882097927823018,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.9674519344032952,
+              "sediment_class_2_kg": 0.9147528886504398,
+              "sediment_class_3_kg": 0.8752619797483175,
+              "sediment_class_4_kg": 0.9800971552983855,
+              "sediment_class_5_kg": 0.922100017621452,
+              "tdep_kg": 0.0,
+              "tdet_kg": 0.26561641168769534
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 59443.42184162,
+              "gwdsv_m3": 74304.30375590005,
+              "runvol_m3": 43872.47036599997,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 14.194054394189692,
+              "sediment_class_2_kg": 25.03133403756696,
+              "sediment_class_3_kg": 70.28346087033599,
+              "sediment_class_4_kg": 119.54268320028402,
+              "sediment_class_5_kg": 36.94933862790706,
+              "tdep_kg": -17.272110146000017,
+              "tdet_kg": 283.27168860000006
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": -0.0014419022991205566,
+              "gwdsv_m3": 6.091006798669696e-05,
+              "runvol_m3": -0.030804383408394642,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 3.8567121011467975e-05,
+              "sediment_class_2_kg": 0.00010157166171254062,
+              "sediment_class_3_kg": -2.535178529683435e-05,
+              "sediment_class_4_kg": 0.0003202183983574969,
+              "sediment_class_5_kg": 0.00012180300674913269,
+              "tdep_kg": 0.0,
+              "tdet_kg": -4.00696728775074e-06
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 59443.4232835223,
+              "gwdsv_m3": 74304.30369498998,
+              "runvol_m3": 43872.50117038338,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 14.19401582706868,
+              "sediment_class_2_kg": 25.031232465905248,
+              "sediment_class_3_kg": 70.28348622212128,
+              "sediment_class_4_kg": 119.54236298188566,
+              "sediment_class_5_kg": 36.94921682490031,
+              "tdep_kg": -17.272110146000017,
+              "tdet_kg": 283.27169260696735
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 5436.0,
+          "source_count": 2,
+          "sources": [
+            {
+              "climate_token": "p900011.cli",
+              "modeled_area_m2": 268.98,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 3435.43207961,
+                "gwdsv_m3": 4294.289909609987,
+                "runvol_m3": 1466.927331,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 13.60283384377878,
+                "sediment_class_2_kg": 23.909317067703906,
+                "sediment_class_3_kg": 66.85780459632501,
+                "sediment_class_4_kg": 114.802312014556,
+                "sediment_class_5_kg": 35.45906296555724,
+                "tdep_kg": -17.272110146000017,
+                "tdet_kg": 271.90244860000007
+              },
+              "represented_area_m2": 268.98,
+              "row_count": 5844,
+              "scale": 1.0,
+              "source_id": "roads:900011",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 3435.43207961,
+                "gwdsv_m3": 4294.289909609987,
+                "runvol_m3": 1466.927331,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 13.60283384377878,
+                "sediment_class_2_kg": 23.909317067703906,
+                "sediment_class_3_kg": 66.85780459632501,
+                "sediment_class_4_kg": 114.802312014556,
+                "sediment_class_5_kg": 35.45906296555724,
+                "tdep_kg": -17.272110146000017,
+                "tdet_kg": 271.90244860000007
+              }
+            },
+            {
+              "climate_token": "p900012.cli",
+              "modeled_area_m2": 5167.0,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 56007.77441361064,
+                "gwdsv_m3": 70009.742797407,
+                "runvol_m3": 42405.40969999998,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 0.591179695,
+                "sediment_class_2_kg": 1.1219110556,
+                "sediment_class_3_kg": 3.425668366,
+                "sediment_class_4_kg": 4.74003262,
+                "sediment_class_5_kg": 1.4901480914,
+                "tdep_kg": 0.0,
+                "tdet_kg": 11.3692
+              },
+              "represented_area_m2": 5167.02,
+              "row_count": 5844,
+              "scale": 1.0000038707180183,
+              "source_id": "roads:900012",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 56007.99120391223,
+                "gwdsv_m3": 70010.01378537991,
+                "runvol_m3": 42405.57383938338,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 0.5911819832898975,
+                "sediment_class_2_kg": 1.121915398201338,
+                "sediment_class_3_kg": 3.425681625796269,
+                "sediment_class_4_kg": 4.74005096732967,
+                "sediment_class_5_kg": 1.4901538593430674,
+                "tdep_kg": 0.0,
+                "tdet_kg": 11.369244006967293
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.050000000019312554,
+          "target_area_m2": 5436.0,
+          "target_area_residual_m2": 0.0
+        }
+      },
+      {
+        "area_change_m2": -6.869999999998981,
+        "area_m2": 22035.99,
+        "baseline_area_m2": 22042.86,
+        "id": 14,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 5.2057342766753285,
+              "gwdsv_m3": 7.220113962092482,
+              "runvol_m3": 3.6623300012586375,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.005455319734377018,
+              "sediment_class_2_kg": 0.008660228714209763,
+              "sediment_class_3_kg": 0.03407443836184178,
+              "sediment_class_4_kg": 0.04631952230699743,
+              "sediment_class_5_kg": 0.012713308144621483,
+              "tdep_kg": 0.0007855000209419103,
+              "tdet_kg": 0.03156500003592696
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.004988104007367156,
+              "gwdsv_m3": 0.00499780019111995,
+              "runvol_m3": 0.04945503367252968,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.00022932980934342595,
+              "sediment_class_2_kg": 0.0008493950186334587,
+              "sediment_class_3_kg": 0.001912804162827797,
+              "sediment_class_4_kg": 0.003515511961040829,
+              "sediment_class_5_kg": 0.0010026843142583175,
+              "tdep_kg": 4.61830451286005e-05,
+              "tdet_kg": 0.0043858419713558305
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.9999979074873526,
+              "gwdsv_m3": 0.9995600381185455,
+              "runvol_m3": 0.9933038198158836,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.9554770131863716,
+              "sediment_class_2_kg": 0.9258865310245742,
+              "sediment_class_3_kg": 0.9456089004080138,
+              "sediment_class_4_kg": 0.9491235363795162,
+              "sediment_class_5_kg": 0.9590288967267436,
+              "tdep_kg": 0.9963246362791358,
+              "tdet_kg": 0.9996384887698078
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 234989.8154039302,
+              "gwdsv_m3": 293737.31677542976,
+              "runvol_m3": 174385.55860999992,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 117.31876003585441,
+              "sediment_class_2_kg": 215.95062021276104,
+              "sediment_class_3_kg": 638.8453366058048,
+              "sediment_class_4_kg": 952.2354343088049,
+              "sediment_class_5_kg": 305.196358089405,
+              "tdep_kg": -38.665896999999994,
+              "tdet_kg": 2268.1773799999987
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.014102666347753257,
+              "gwdsv_m3": -0.09494679176714271,
+              "runvol_m3": -0.36232694040518254,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": -0.0003418882216124075,
+              "sediment_class_2_kg": -0.0013802307474577447,
+              "sediment_class_3_kg": 0.0008498564312731105,
+              "sediment_class_4_kg": -0.004283979870706389,
+              "sediment_class_5_kg": -0.0024625350445148797,
+              "tdep_kg": -3.388003855775423e-05,
+              "tdet_kg": -0.0023433180131178233
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 234989.80130126385,
+              "gwdsv_m3": 293737.4117222215,
+              "runvol_m3": 174385.92093694033,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 117.31910192407602,
+              "sediment_class_2_kg": 215.9520004435085,
+              "sediment_class_3_kg": 638.8444867493736,
+              "sediment_class_4_kg": 952.2397182886756,
+              "sediment_class_5_kg": 305.1988206244495,
+              "tdep_kg": -38.665863119961436,
+              "tdet_kg": 2268.179723318012
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 22036.0,
+          "source_count": 2,
+          "sources": [
+            {
+              "climate_token": "p900013.cli",
+              "modeled_area_m2": 1659.7,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 16903.248712210043,
+                "gwdsv_m3": 21129.06165731,
+                "runvol_m3": 13198.906989999994,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 49.91934477984767,
+                "sediment_class_2_kg": 88.04291210503767,
+                "sediment_class_3_kg": 248.28813450883976,
+                "sediment_class_4_kg": 411.8315903894398,
+                "sediment_class_5_kg": 135.30950502723982,
+                "tdep_kg": -38.667027999999995,
+                "tdet_kg": 972.0608799999994
+              },
+              "represented_area_m2": 1659.65,
+              "row_count": 5844,
+              "scale": 0.9999698740736278,
+              "source_id": "roads:900013",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 16902.739486183887,
+                "gwdsv_m3": 21128.4251247542,
+                "runvol_m3": 13198.50936069982,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 49.91784091334228,
+                "sediment_class_2_kg": 88.04025973075001,
+                "sediment_class_3_kg": 248.28065459878047,
+                "sediment_class_4_kg": 411.81918358126995,
+                "sediment_class_5_kg": 135.3054287030539,
+                "tdep_kg": -38.665863119961436,
+                "tdet_kg": 972.0315957654992
+              }
+            },
+            {
+              "climate_token": "p900014.cli",
+              "modeled_area_m2": 20376.0,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 218083.4228101837,
+                "gwdsv_m3": 272604.4378386882,
+                "runvol_m3": 161184.722,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 67.400136352,
+                "sediment_class_2_kg": 127.909606375,
+                "sediment_class_3_kg": 390.557315195,
+                "sediment_class_4_kg": 540.41151724,
+                "sediment_class_5_kg": 169.89055707699998,
+                "tdep_kg": 0.0,
+                "tdet_kg": 1296.1264999999999
+              },
+              "represented_area_m2": 20376.34,
+              "row_count": 5844,
+              "scale": 1.000016686297605,
+              "source_id": "roads:900014",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 218087.06181507942,
+                "gwdsv_m3": 272608.9865974664,
+                "runvol_m3": 161187.41157624067,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 67.40126101073379,
+                "sediment_class_2_kg": 127.9117407127585,
+                "sediment_class_3_kg": 390.56383215059316,
+                "sediment_class_4_kg": 540.4205347074057,
+                "sediment_class_5_kg": 169.89339192139565,
+                "tdep_kg": 0.0,
+                "tdet_kg": 1296.1481275525125
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.5000000000782876,
+          "target_area_m2": 22035.99,
+          "target_area_residual_m2": 0.00999999999839929
+        }
+      },
+      {
+        "area_change_m2": 6.80000000000291,
+        "area_m2": 30560.0,
+        "baseline_area_m2": 30553.199999999997,
+        "id": 29,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 8.094363702298077,
+              "gwdsv_m3": 10.008145302871192,
+              "runvol_m3": 5.374205001722971,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.014184317270580359,
+              "sediment_class_2_kg": 0.023751203270911805,
+              "sediment_class_3_kg": 0.08513962127817219,
+              "sediment_class_4_kg": 0.1256811870352369,
+              "sediment_class_5_kg": 0.03189237566812372,
+              "tdep_kg": 0.0013000000213066703,
+              "tdet_kg": 0.12407100006501354
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.004810661712724595,
+              "gwdsv_m3": 0.004995068333300878,
+              "runvol_m3": 0.04810792774787842,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.0016688385678378381,
+              "sediment_class_2_kg": 0.0017824082326569624,
+              "sediment_class_3_kg": 0.007825157853062592,
+              "sediment_class_4_kg": 0.019753315999992083,
+              "sediment_class_5_kg": 0.003231905178921579,
+              "tdep_kg": 3.927671709291758e-05,
+              "tdet_kg": 0.04332653121218755
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.9995769043296567,
+              "gwdsv_m3": 0.9998354606266316,
+              "runvol_m3": 0.9852968370809583,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.9449001797184954,
+              "sediment_class_2_kg": 0.9392078983093454,
+              "sediment_class_3_kg": 0.9276279546935247,
+              "sediment_class_4_kg": 0.9300393314470915,
+              "sediment_class_5_kg": 0.9239082838973625,
+              "tdep_kg": 0.6766045597241203,
+              "tdet_kg": 0.9415348461911445
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 322785.09481469955,
+              "gwdsv_m3": 403481.1588723988,
+              "runvol_m3": 239733.5458099999,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 323.6501220004178,
+              "sediment_class_2_kg": 601.0896620573837,
+              "sediment_class_3_kg": 1801.4816848363796,
+              "sediment_class_4_kg": 2619.919394619385,
+              "sediment_class_5_kg": 831.8266019875356,
+              "tdep_kg": -85.1476,
+              "tdet_kg": 6263.029123999998
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": -0.23854078265139833,
+              "gwdsv_m3": -0.35020391532452777,
+              "runvol_m3": -0.5391138534760103,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": -0.0016187234894573521,
+              "sediment_class_2_kg": -0.0014763788490199659,
+              "sediment_class_3_kg": 0.0043543550552840316,
+              "sediment_class_4_kg": -0.018256235970511625,
+              "sediment_class_5_kg": -0.0022392174416836497,
+              "tdep_kg": -0.0003266573741314005,
+              "tdet_kg": -0.042188486057966657
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 322785.3333554822,
+              "gwdsv_m3": 403481.5090763141,
+              "runvol_m3": 239734.08492385337,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 323.65174072390727,
+              "sediment_class_2_kg": 601.0911384362328,
+              "sediment_class_3_kg": 1801.4773304813243,
+              "sediment_class_4_kg": 2619.9376508553555,
+              "sediment_class_5_kg": 831.8288412049773,
+              "tdep_kg": -85.14727334262587,
+              "tdet_kg": 6263.071312486056
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 30560.0,
+          "source_count": 2,
+          "sources": [
+            {
+              "climate_token": "p900015.cli",
+              "modeled_area_m2": 7819.9,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 80208.65074309999,
+                "gwdsv_m3": 100260.83409459997,
+                "runvol_m3": 61591.437809999996,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 142.8503360928678,
+                "sediment_class_2_kg": 257.9708331936941,
+                "sediment_class_3_kg": 753.80214167404,
+                "sediment_class_4_kg": 1170.2923159335342,
+                "sediment_class_5_kg": 376.0956827907076,
+                "tdep_kg": -85.1476,
+                "tdet_kg": 2786.1111240000005
+              },
+              "represented_area_m2": 7819.87,
+              "row_count": 5844,
+              "scale": 0.9999961636338061,
+              "source_id": "roads:900015",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 80208.34303334382,
+                "gwdsv_m3": 100260.44945732546,
+                "runvol_m3": 61591.20152269014,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 142.8497880666676,
+                "sediment_class_2_kg": 257.9698435231106,
+                "sediment_class_3_kg": 753.7992498129867,
+                "sediment_class_4_kg": 1170.2878262636564,
+                "sediment_class_5_kg": 376.09423994994444,
+                "tdep_kg": -85.14727334262587,
+                "tdet_kg": 2786.1004354574716
+              }
+            },
+            {
+              "climate_token": "p900016.cli",
+              "modeled_area_m2": 22740.0,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 242575.60356626997,
+                "gwdsv_m3": 303219.32617517206,
+                "runvol_m3": 178141.86500000017,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 180.8009190548,
+                "sediment_class_2_kg": 343.119333369,
+                "sediment_class_3_kg": 1047.6720913380002,
+                "sediment_class_4_kg": 1449.641537283,
+                "sediment_class_5_kg": 455.731995927,
+                "tdep_kg": 0.0,
+                "tdet_kg": 3476.9509999999996
+              },
+              "represented_area_m2": 22740.13,
+              "row_count": 5844,
+              "scale": 1.0000057167985927,
+              "source_id": "roads:900016",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 242576.99032213909,
+                "gwdsv_m3": 303221.05961898924,
+                "runvol_m3": 178142.8834011633,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 180.8019526572396,
+                "sediment_class_2_kg": 343.12129491312214,
+                "sediment_class_3_kg": 1047.6780806683375,
+                "sediment_class_4_kg": 1449.6498245917003,
+                "sediment_class_5_kg": 455.734601255033,
+                "tdep_kg": 0.0,
+                "tdet_kg": 3476.9708770285833
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.5000000001085709,
+          "target_area_m2": 30560.0,
+          "target_area_residual_m2": 0.0
+        }
+      },
+      {
+        "area_change_m2": 0.1999999999989086,
+        "area_m2": 9999.98,
+        "baseline_area_m2": 9999.78,
+        "id": 31,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 1.5646222007683355,
+              "gwdsv_m3": 1.7838095509587928,
+              "runvol_m3": 1.5712250006234552,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.015450808405139006,
+              "sediment_class_2_kg": 0.025107010034235575,
+              "sediment_class_3_kg": 0.08763899242684399,
+              "sediment_class_4_kg": 0.12818641419669957,
+              "sediment_class_5_kg": 0.03497323164238599,
+              "tdep_kg": 0.004529100071876204,
+              "tdet_kg": 0.12862600007507388
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.0004917234494623557,
+              "gwdsv_m3": 0.00485043978507349,
+              "runvol_m3": 0.042547696485144115,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.0006721859628129323,
+              "sediment_class_2_kg": 0.0011558688401223094,
+              "sediment_class_3_kg": 0.006186111662088933,
+              "sediment_class_4_kg": 0.006589716476923968,
+              "sediment_class_5_kg": 0.0012504387512990434,
+              "tdep_kg": 0.00017367943050139445,
+              "tdet_kg": 0.004914426086941148
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.999981509763894,
+              "gwdsv_m3": 0.999983472826938,
+              "runvol_m3": 0.9972570040395786,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.920962408226033,
+              "sediment_class_2_kg": 0.9431784545843823,
+              "sediment_class_3_kg": 0.9361052917519299,
+              "sediment_class_4_kg": 0.9327897301300762,
+              "sediment_class_5_kg": 0.9327897301300762,
+              "tdep_kg": 0.9955858977259979,
+              "tdet_kg": 0.9847220774514865
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 107405.77103599955,
+              "gwdsv_m3": 134257.2006709999,
+              "runvol_m3": 84997.88488,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 398.2978453148876,
+              "sediment_class_2_kg": 728.0601475298362,
+              "sediment_class_3_kg": 2145.1287825312943,
+              "sediment_class_4_kg": 3258.698873724806,
+              "sediment_class_5_kg": 1042.983348598917,
+              "tdep_kg": -220.29296668760003,
+              "tdet_kg": 7793.449563000008
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.06595494010252878,
+              "gwdsv_m3": 0.06582289608195424,
+              "runvol_m3": -0.015391238237498328,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.0002394957871842962,
+              "sediment_class_2_kg": -0.0033277331968974977,
+              "sediment_class_3_kg": 0.003896410577453935,
+              "sediment_class_4_kg": -0.010451410295900132,
+              "sediment_class_5_kg": -0.0019013547907889006,
+              "tdep_kg": 0.0007071134615443952,
+              "tdet_kg": -0.008611183912762499
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 107405.70508105945,
+              "gwdsv_m3": 134257.13484810383,
+              "runvol_m3": 84997.90027123824,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 398.2976058191004,
+              "sediment_class_2_kg": 728.0634752630331,
+              "sediment_class_3_kg": 2145.124886120717,
+              "sediment_class_4_kg": 3258.709325135102,
+              "sediment_class_5_kg": 1042.9852499537078,
+              "tdep_kg": -220.29367380106157,
+              "tdet_kg": 7793.458174183921
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 10000.0,
+          "source_count": 3,
+          "sources": [
+            {
+              "climate_token": "p900017.cli",
+              "modeled_area_m2": 3129.5,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 31893.703530179977,
+                "gwdsv_m3": 39867.13697759999,
+                "runvol_m3": 23275.796969999978,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 128.82065727312641,
+                "sediment_class_2_kg": 235.96801357049142,
+                "sediment_class_3_kg": 695.1717035980392,
+                "sediment_class_4_kg": 1053.1905337561304,
+                "sediment_class_5_kg": 337.8820332502301,
+                "tdep_kg": -30.047179699999994,
+                "tdet_kg": 2481.069820000001
+              },
+              "represented_area_m2": 3129.49,
+              "row_count": 5844,
+              "scale": 0.999996804601374,
+              "source_id": "roads:900017",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 31893.60161708354,
+                "gwdsv_m3": 39867.00958620527,
+                "runvol_m3": 23275.72259455032,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 128.82024563977515,
+                "sediment_class_2_kg": 235.96725955862507,
+                "sediment_class_3_kg": 695.1694822473327,
+                "sediment_class_4_kg": 1053.187168392546,
+                "sediment_class_5_kg": 337.8809535824453,
+                "tdep_kg": -30.047083687283266,
+                "tdet_kg": 2481.061891992907
+              }
+            },
+            {
+              "climate_token": "p900018.cli",
+              "modeled_area_m2": 5171.4,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 53592.92747941999,
+                "gwdsv_m3": 66991.13601010009,
+                "runvol_m3": 49768.71556000001,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 202.18513197554512,
+                "sediment_class_2_kg": 374.3491697691145,
+                "sediment_class_3_kg": 1111.9898658130699,
+                "sediment_class_4_kg": 1659.3659061627386,
+                "sediment_class_5_kg": 529.167451553057,
+                "tdep_kg": -50.86301,
+                "tdet_kg": 3927.9202059999993
+              },
+              "represented_area_m2": 5171.38,
+              "row_count": 5844,
+              "scale": 0.9999961325753182,
+              "source_id": "roads:900018",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 53592.72021280948,
+                "gwdsv_m3": 66990.87692692722,
+                "runvol_m3": 49768.523083241074,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 202.1843500397754,
+                "sediment_class_2_kg": 374.3477220018957,
+                "sediment_class_3_kg": 1111.9855652760168,
+                "sediment_class_4_kg": 1659.359488690077,
+                "sediment_class_5_kg": 529.1654050377941,
+                "tdep_kg": -50.86281329113974,
+                "tdet_kg": 3927.905015064446
+              }
+            },
+            {
+              "climate_token": "p900019.cli",
+              "modeled_area_m2": 1699.1,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 21919.2542460801,
+                "gwdsv_m3": 27399.08707849995,
+                "runvol_m3": 11953.584241000002,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 67.29261409097025,
+                "sediment_class_2_kg": 117.74780070150693,
+                "sediment_class_3_kg": 337.9678494981394,
+                "sediment_class_4_kg": 546.1594536480656,
+                "sediment_class_5_kg": 175.93785585671003,
+                "tdep_kg": -139.38295648859997,
+                "tdet_kg": 1384.4831187944003
+              },
+              "represented_area_m2": 1699.1100000000001,
+              "row_count": 5844,
+              "scale": 1.0000058854687777,
+              "source_id": "roads:900019",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 21919.383251166597,
+                "gwdsv_m3": 27399.248334971486,
+                "runvol_m3": 11953.654593446834,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 67.29301013954945,
+                "sediment_class_2_kg": 117.7484937025116,
+                "sediment_class_3_kg": 337.9698385973655,
+                "sediment_class_4_kg": 546.1626680524777,
+                "sediment_class_5_kg": 175.9388913334675,
+                "tdep_kg": -139.38377682263854,
+                "tdet_kg": 1384.4912671265693
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.05000000003552707,
+          "target_area_m2": 9999.98,
+          "target_area_residual_m2": 0.020000000000436557
+        }
+      },
+      {
+        "area_change_m2": 11.360000000000582,
+        "area_m2": 17624.0,
+        "baseline_area_m2": 17612.64,
+        "id": 32,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 3.815005151412541,
+              "gwdsv_m3": 5.628902951764012,
+              "runvol_m3": 3.0154050009515556,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.008624801206642446,
+              "sediment_class_2_kg": 0.01582485452043232,
+              "sediment_class_3_kg": 0.044304926671249384,
+              "sediment_class_4_kg": 0.06925626173691805,
+              "sediment_class_5_kg": 0.02096719719114531,
+              "tdep_kg": 0.009316000024179554,
+              "tdet_kg": 0.07595850004735896
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.004999517636846917,
+              "gwdsv_m3": 0.004999567761402091,
+              "runvol_m3": 0.04894191072025933,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.00024382997419003516,
+              "sediment_class_2_kg": 0.0004047165510474571,
+              "sediment_class_3_kg": 0.0016451822830205742,
+              "sediment_class_4_kg": 0.0026522504435604333,
+              "sediment_class_5_kg": 0.0010316995028958331,
+              "tdep_kg": 0.00011584848242129908,
+              "tdet_kg": 0.003943305091439697
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.9999035272974445,
+              "gwdsv_m3": 0.9999313017373045,
+              "runvol_m3": 0.9988573776191271,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.919994240357642,
+              "sediment_class_2_kg": 0.9609743098294833,
+              "sediment_class_3_kg": 0.9191043498817549,
+              "sediment_class_4_kg": 0.9007831105983913,
+              "sediment_class_5_kg": 0.9379819675411293,
+              "tdep_kg": 0.9965404015948298,
+              "tdet_kg": 0.9983342671857068
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 198104.77578550085,
+              "gwdsv_m3": 247630.85154049986,
+              "runvol_m3": 131170.56129,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 187.9043816463366,
+              "sediment_class_2_kg": 317.4320660297188,
+              "sediment_class_3_kg": 922.1387027388506,
+              "sediment_class_4_kg": 1414.9680810865934,
+              "sediment_class_5_kg": 452.5228367683867,
+              "tdep_kg": -556.685373,
+              "tdet_kg": 3851.6728180000014
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.33697249938268214,
+              "gwdsv_m3": 0.335534232435748,
+              "runvol_m3": -0.23889922982198186,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": -0.0012859135339056138,
+              "sediment_class_2_kg": -0.0014568430176495895,
+              "sediment_class_3_kg": -0.004460779470264242,
+              "sediment_class_4_kg": -0.005664246603600986,
+              "sediment_class_5_kg": 0.00046214912509867645,
+              "tdep_kg": -0.0029781312803152105,
+              "tdet_kg": 0.005150657490048616
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 198104.43881300147,
+              "gwdsv_m3": 247630.51600626743,
+              "runvol_m3": 131170.80018922983,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 187.9056675598705,
+              "sediment_class_2_kg": 317.43352287273643,
+              "sediment_class_3_kg": 922.1431635183209,
+              "sediment_class_4_kg": 1414.973745333197,
+              "sediment_class_5_kg": 452.5223746192616,
+              "tdep_kg": -556.6823948687197,
+              "tdet_kg": 3851.6676673425113
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 17624.0,
+          "source_count": 2,
+          "sources": [
+            {
+              "climate_token": "p900020.cli",
+              "modeled_area_m2": 4994.8,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 64078.09011870022,
+                "gwdsv_m3": 80097.62415779993,
+                "runvol_m3": 33340.282060000005,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 141.0797692690205,
+                "sediment_class_2_kg": 228.56841000705563,
+                "sediment_class_3_kg": 650.8026991955659,
+                "sediment_class_4_kg": 1039.5249153502637,
+                "sediment_class_5_kg": 334.48986277105183,
+                "tdep_kg": -556.6868529999999,
+                "tdet_kg": 2951.162287999999
+              },
+              "represented_area_m2": 4994.76,
+              "row_count": 5844,
+              "scale": 0.9999919916713382,
+              "source_id": "roads:900020",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 64077.57696029453,
+                "gwdsv_m3": 80096.98270970065,
+                "runvol_m3": 33340.01506006359,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 141.07863945586067,
+                "sediment_class_2_kg": 228.5665795561066,
+                "sediment_class_3_kg": 650.7974873536567,
+                "sediment_class_4_kg": 1039.5165904930893,
+                "sediment_class_5_kg": 334.4871840662967,
+                "tdep_kg": -556.6823948687194,
+                "tdet_kg": 2951.1386541224624
+              }
+            },
+            {
+              "climate_token": "p900021.cli",
+              "modeled_area_m2": 12629.0,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 134024.31487071636,
+                "gwdsv_m3": 167530.3495699146,
+                "runvol_m3": 97828.92599999998,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 46.8261382257,
+                "sediment_class_2_kg": 88.865254532,
+                "sediment_class_3_kg": 271.34051964200006,
+                "sediment_class_4_kg": 375.450019833,
+                "sediment_class_5_kg": 118.03294746899999,
+                "tdep_kg": 0.0,
+                "tdet_kg": 900.5119
+              },
+              "represented_area_m2": 12629.24,
+              "row_count": 5844,
+              "scale": 1.0000190038799588,
+              "source_id": "roads:900021",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 134026.86185270772,
+                "gwdsv_m3": 167533.53329656727,
+                "runvol_m3": 97830.78512916618,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 46.82702810400978,
+                "sediment_class_2_kg": 88.86694331662963,
+                "sediment_class_3_kg": 271.3456761646633,
+                "sediment_class_4_kg": 375.4571548401074,
+                "sediment_class_5_kg": 118.03519055296488,
+                "tdep_kg": 0.0,
+                "tdet_kg": 900.529013220049
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.500000000062613,
+          "target_area_m2": 17624.0,
+          "target_area_residual_m2": 0.0
+        }
+      },
+      {
+        "area_change_m2": 3.039999999999054,
+        "area_m2": 5887.99,
+        "baseline_area_m2": 5884.950000000001,
+        "id": 33,
+        "mode": "replacement",
+        "pass_receipt": {
+          "algorithm": "roads_modeled_area_v1",
+          "row_count": 5844,
+          "run_closure": {
+            "budgets": {
+              "drrunv_m3": 2.0765611452588928e-11,
+              "gwbfv_m3": 1.3218157004697613,
+              "gwdsv_m3": 1.4419931505854324,
+              "runvol_m3": 0.7761200003208083,
+              "sbrunv_m3": 2.0765611452588928e-11,
+              "sediment_class_1_kg": 0.001953217842288205,
+              "sediment_class_2_kg": 0.002997969413685648,
+              "sediment_class_3_kg": 0.011823168640830866,
+              "sediment_class_4_kg": 0.01710572198061458,
+              "sediment_class_5_kg": 0.004765437925922287,
+              "tdep_kg": 0.002125006021157909,
+              "tdet_kg": 0.020301000028045076
+            },
+            "max_abs_event_residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.0004969919076369678,
+              "gwdsv_m3": 0.0004982112753282308,
+              "runvol_m3": 0.045965332187620334,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.00017079023936439341,
+              "sediment_class_2_kg": 0.00020036890814978392,
+              "sediment_class_3_kg": 0.0008114511282890646,
+              "sediment_class_4_kg": 0.0006571715515057974,
+              "sediment_class_5_kg": 0.00031273716980440014,
+              "tdep_kg": 4.940691927513008e-05,
+              "tdet_kg": 0.00048507219691806824
+            },
+            "max_event_budget_ratios": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.9998933273197154,
+              "gwdsv_m3": 0.9997074600922442,
+              "runvol_m3": 0.9979183492194638,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.9803498778754142,
+              "sediment_class_2_kg": 0.935972408594691,
+              "sediment_class_3_kg": 0.980028006528059,
+              "sediment_class_4_kg": 0.875028633546769,
+              "sediment_class_5_kg": 0.8648739547278579,
+              "tdep_kg": 0.9979649120006868,
+              "tdet_kg": 0.9939335199814298
+            },
+            "reparsed_output": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 65300.96134990009,
+              "gwdsv_m3": 81626.1931215997,
+              "runvol_m3": 42400.63962000006,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 56.05921278584908,
+              "sediment_class_2_kg": 97.95437777699019,
+              "sediment_class_3_kg": 274.2211630637207,
+              "sediment_class_4_kg": 468.10439812269,
+              "sediment_class_5_kg": 138.98031669524406,
+              "tdep_kg": -86.18096267200002,
+              "tdet_kg": 1121.5002789999999
+            },
+            "residuals": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 0.0238145387993427,
+              "gwdsv_m3": 0.01474689033057075,
+              "runvol_m3": 0.011179631284903735,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 0.00027470135548668395,
+              "sediment_class_2_kg": 0.00023500542744159247,
+              "sediment_class_3_kg": 0.0014490654758105848,
+              "sediment_class_4_kg": 0.000732743532182667,
+              "sediment_class_5_kg": 0.0006134795969217066,
+              "tdep_kg": -0.000265901250799061,
+              "tdet_kg": 0.0036946528664429934
+            },
+            "weighted_input": {
+              "drrunv_m3": 0.0,
+              "gwbfv_m3": 65300.93753536129,
+              "gwdsv_m3": 81626.17837470937,
+              "runvol_m3": 42400.628440368775,
+              "sbrunv_m3": 0.0,
+              "sediment_class_1_kg": 56.05893808449359,
+              "sediment_class_2_kg": 97.95414277156274,
+              "sediment_class_3_kg": 274.2197139982449,
+              "sediment_class_4_kg": 468.1036653791578,
+              "sediment_class_5_kg": 138.97970321564713,
+              "tdep_kg": -86.18069677074922,
+              "tdet_kg": 1121.4965843471334
+            }
+          },
+          "semantic_contract": "roads_modeled_area_v1",
+          "serialized_target_area_m2": 5888.0,
+          "source_count": 3,
+          "sources": [
+            {
+              "climate_token": "p900022.cli",
+              "modeled_area_m2": 515.95,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 6470.72140584999,
+                "gwdsv_m3": 8088.406569789979,
+                "runvol_m3": 2683.0074709999994,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 20.47496725741674,
+                "sediment_class_2_kg": 35.70890517910405,
+                "sediment_class_3_kg": 99.74859481633356,
+                "sediment_class_4_kg": 171.12014389065996,
+                "sediment_class_5_kg": 50.74227839142155,
+                "tdep_kg": -32.1701352154,
+                "tdet_kg": 409.9646920000002
+              },
+              "represented_area_m2": 515.94,
+              "row_count": 5844,
+              "scale": 0.9999806182769648,
+              "source_id": "roads:900022",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 6470.595992119865,
+                "gwdsv_m3": 8088.249802534047,
+                "runvol_m3": 2682.955469692295,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 20.4745704172722,
+                "sediment_class_2_kg": 35.70821307899398,
+                "sediment_class_3_kg": 99.74666151669568,
+                "sediment_class_4_kg": 171.11682728742534,
+                "sediment_class_5_kg": 50.741294918635596,
+                "tdep_kg": -32.169511702749254,
+                "tdet_kg": 409.95674617788563
+              }
+            },
+            {
+              "climate_token": "p900023.cli",
+              "modeled_area_m2": 866.23,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 10863.80363621005,
+                "gwdsv_m3": 13579.757449050005,
+                "runvol_m3": 4504.537269999999,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 34.37573445845668,
+                "sediment_class_2_kg": 59.95223097551975,
+                "sediment_class_3_kg": 167.46945755466638,
+                "sediment_class_4_kg": 287.29623358801007,
+                "sediment_class_5_kg": 85.19197277478689,
+                "tdep_kg": -54.01118506799999,
+                "tdet_kg": 688.2967350000001
+              },
+              "represented_area_m2": 866.23,
+              "row_count": 5844,
+              "scale": 1.0,
+              "source_id": "roads:900023",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 10863.80363621005,
+                "gwdsv_m3": 13579.757449050005,
+                "runvol_m3": 4504.537269999999,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 34.37573445845668,
+                "sediment_class_2_kg": 59.95223097551975,
+                "sediment_class_3_kg": 167.46945755466638,
+                "sediment_class_4_kg": 287.29623358801007,
+                "sediment_class_5_kg": 85.19197277478689,
+                "tdep_kg": -54.01118506799999,
+                "tdet_kg": 688.2967350000001
+              }
+            },
+            {
+              "climate_token": "p900024.cli",
+              "modeled_area_m2": 4505.8,
+              "raw_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 47966.32499778088,
+                "gwdsv_m3": 59957.90498656808,
+                "runvol_m3": 35212.979400000004,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 1.2086278440000002,
+                "sediment_class_2_kg": 2.293688536,
+                "sediment_class_3_kg": 7.00356384,
+                "sediment_class_4_kg": 9.69056149,
+                "sediment_class_5_kg": 3.046422,
+                "tdep_kg": 0.0,
+                "tdet_kg": 23.243
+              },
+              "represented_area_m2": 4505.82,
+              "row_count": 5844,
+              "scale": 1.000004438723423,
+              "source_id": "roads:900024",
+              "weighted_totals": {
+                "drrunv_m3": 0.0,
+                "gwbfv_m3": 47966.53790703117,
+                "gwdsv_m3": 59958.171123125336,
+                "runvol_m3": 35213.13570067646,
+                "sbrunv_m3": 0.0,
+                "sediment_class_1_kg": 1.2086332087647211,
+                "sediment_class_2_kg": 2.29369871704903,
+                "sediment_class_3_kg": 7.003594926882862,
+                "sediment_class_4_kg": 9.690604503722268,
+                "sediment_class_5_kg": 3.046435522224688,
+                "tdep_kg": 0.0,
+                "tdet_kg": 23.24310316924852
+              }
+            }
+          ],
+          "target_area_budget_m2": 0.050000000020918346,
+          "target_area_m2": 5887.99,
+          "target_area_residual_m2": 0.010000000000218279
+        }
+      }
+    ],
+    "native_files": {
+      "wepp/roads/runs/p900001.slp": "c4d9e1ae01d1a908e8619d960365ad48ad7a121747116b21e52127883809e2a9",
+      "wepp/roads/runs/p900001.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "wepp/roads/runs/p900001.man": "561f398f63a2a026df92b41703733c5402c2601d6bb1573cc04580d9a3a9b4cc",
+      "wepp/roads/runs/p900001.cli": "7dc14f37a2e344f2b85151b3ca38d0b39dd47360cfc76ad66d7fa1f88cdb825f",
+      "wepp/roads/runs/p900001.run": "3972b9a8cd73ed550100d3a2fb5cc08d174c8aaf0391ef398e1647da09806f81",
+      "wepp/roads/output/H900001.pass.dat": "f3da6796c2cf658942c91051ca69c33bd86458ab9bcfacb3cf0ba9a4cc83a0c2",
+      "wepp/roads/runs/p900002.slp": "9632d83c06b0b302ea9893616e1d0a65f2f405695598049739aad8621a2fba3f",
+      "wepp/roads/runs/p900002.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "wepp/roads/runs/p900002.man": "561f398f63a2a026df92b41703733c5402c2601d6bb1573cc04580d9a3a9b4cc",
+      "wepp/roads/runs/p900002.cli": "7dc14f37a2e344f2b85151b3ca38d0b39dd47360cfc76ad66d7fa1f88cdb825f",
+      "wepp/roads/runs/p900002.run": "911b84d606dd7fed575c66a51e05e44650fb571c2e850a861a91c23fc533dc98",
+      "wepp/roads/output/H900002.pass.dat": "46e7af01f83347b5189c98dabcc33e771fad118db56901fe7ff8918a5be45ada",
+      "wepp/roads/runs/p900003.slp": "a0c13c5bbc4b8a5e7697c8b1f3bf9335b81d8e105c810f9a95124c14fbe73184",
+      "wepp/roads/runs/p900003.sol": "65b5bab443aa23d42b7b4004f283a1b8519f6568fa3ed7faaeebde44cd6abf1b",
+      "wepp/roads/runs/p900003.man": "13d6472160797d29c114283e4785dbbbd1f1f7c65d68bf98bb02c81849243359",
+      "wepp/roads/runs/p900003.cli": "7dc14f37a2e344f2b85151b3ca38d0b39dd47360cfc76ad66d7fa1f88cdb825f",
+      "wepp/roads/runs/p900003.run": "cf44c33a5432997308a81e76985f1febd1c364d18a5f7d7cb19624b39066c32c",
+      "wepp/roads/output/H900003.pass.dat": "7aa7a6ddb89c1290c4aac1d60953cf51c94e9efd98ecafa1b9a706d319debb7b",
+      "wepp/roads/runs/p900004.slp": "8b4bf031d9e70ac5f96a57614dee761c4249352e4097c778edae1128f1fdbdba",
+      "wepp/roads/runs/p900004.sol": "b1de4eea354a4ea313591d3df745486d94ebc04fe4c83ecd4b311d049b03aa8b",
+      "wepp/roads/runs/p900004.man": "3ab001e1b13dd93b5007c921dc29bf48a109d832c4421498a218e8173ec924bc",
+      "wepp/roads/runs/p900004.cli": "7dc14f37a2e344f2b85151b3ca38d0b39dd47360cfc76ad66d7fa1f88cdb825f",
+      "wepp/roads/runs/p900004.run": "cb549ba8908840f5d4351a3b75424d2f2e7914d3ada6404a79202928e63205ce",
+      "wepp/roads/output/H900004.pass.dat": "747cc6b9604a7d02d24a37cecf57c17140326fe15aa9f2abace25388ad71be98",
+      "wepp/roads/runs/p900005.slp": "840c0245f2edc0a1bd7fe6dc35e449f216167e53d3f4e2f3ac0c3825da0d0e77",
+      "wepp/roads/runs/p900005.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "wepp/roads/runs/p900005.man": "561f398f63a2a026df92b41703733c5402c2601d6bb1573cc04580d9a3a9b4cc",
+      "wepp/roads/runs/p900005.cli": "c846f65579e31dec0fc7c95ed0aa3624a9bb8a1225333974f0598438f607ecc8",
+      "wepp/roads/runs/p900005.run": "4a3cab1909ba641881a0be6d438f9533566e986f49d04db1c0e22ad079c52147",
+      "wepp/roads/output/H900005.pass.dat": "fc9440ff90cb950627bf5c57176cfefb586873db437432d6ec52319cf412af8c",
+      "wepp/roads/runs/p900006.slp": "247f619807b45d00816f9ec886c7bb8f3e2c77fb204f064a75172bbe8f3fa38b",
+      "wepp/roads/runs/p900006.sol": "b1de4eea354a4ea313591d3df745486d94ebc04fe4c83ecd4b311d049b03aa8b",
+      "wepp/roads/runs/p900006.man": "3ab001e1b13dd93b5007c921dc29bf48a109d832c4421498a218e8173ec924bc",
+      "wepp/roads/runs/p900006.cli": "c846f65579e31dec0fc7c95ed0aa3624a9bb8a1225333974f0598438f607ecc8",
+      "wepp/roads/runs/p900006.run": "cc37082edead67e87866b30d1d8183cd468ea1a509c54be89a95f3fd069e8443",
+      "wepp/roads/output/H900006.pass.dat": "be50c7c18b888e4dc4b207170033ce039c5b4b20450b6678d5f29c0319bbc60c",
+      "wepp/roads/runs/p900007.slp": "0f74c207f5c4f93d148673df2ca74809a1d0c1984680ca3abd10380ce7346765",
+      "wepp/roads/runs/p900007.sol": "65b5bab443aa23d42b7b4004f283a1b8519f6568fa3ed7faaeebde44cd6abf1b",
+      "wepp/roads/runs/p900007.man": "13d6472160797d29c114283e4785dbbbd1f1f7c65d68bf98bb02c81849243359",
+      "wepp/roads/runs/p900007.cli": "37b8d33b2c4696bfd0d47d5a405ef5e846a80eb5eff74e733f9d9e73b7a8550d",
+      "wepp/roads/runs/p900007.run": "a3152abbef64c1318f85d9630dbf80aab777b767fb418b4156ff123467a27370",
+      "wepp/roads/output/H900007.pass.dat": "4de663c175fc07229308f3bf8bdb95910287bb89ec85985c0c600f9d04a40a0c",
+      "wepp/roads/runs/p900008.slp": "d99422a792b9e2f5d286c3bf7fdd7860128577e85ed69ec09d08be600bc8c644",
+      "wepp/roads/runs/p900008.sol": "b1de4eea354a4ea313591d3df745486d94ebc04fe4c83ecd4b311d049b03aa8b",
+      "wepp/roads/runs/p900008.man": "3ab001e1b13dd93b5007c921dc29bf48a109d832c4421498a218e8173ec924bc",
+      "wepp/roads/runs/p900008.cli": "37b8d33b2c4696bfd0d47d5a405ef5e846a80eb5eff74e733f9d9e73b7a8550d",
+      "wepp/roads/runs/p900008.run": "bef4ef63f99c3fa119ca1aab1d322634604d0c412e5e23a28d4baa1ed45b689d",
+      "wepp/roads/output/H900008.pass.dat": "642a88f21e78e5bf4cbbedaa7224ff919e6b14c5da2ea2fd8b2b3d55c7ac5da4",
+      "wepp/roads/runs/p900009.slp": "c9a63a04181ac4428bf9a94fcb0e691949e16410d6c37cfcc26a66ed130bbe51",
+      "wepp/roads/runs/p900009.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "wepp/roads/runs/p900009.man": "561f398f63a2a026df92b41703733c5402c2601d6bb1573cc04580d9a3a9b4cc",
+      "wepp/roads/runs/p900009.cli": "ef23bd874e0908ce6025c16cd22e257b74897acda94db57680680933e8712378",
+      "wepp/roads/runs/p900009.run": "8a243b3d46c3922156e4a67871c587389458caa4720b557c8320fbe41ef091f5",
+      "wepp/roads/output/H900009.pass.dat": "d413a92186f04d8be7c3d907db7fd84ff2b23ae377893c9242a7d55047f2d2d1",
+      "wepp/roads/runs/p900010.slp": "d7e36c5180292e30246e0f285432fbc07e5a21e58d3a1f81b4a7847b4c52a1c1",
+      "wepp/roads/runs/p900010.sol": "b1de4eea354a4ea313591d3df745486d94ebc04fe4c83ecd4b311d049b03aa8b",
+      "wepp/roads/runs/p900010.man": "3ab001e1b13dd93b5007c921dc29bf48a109d832c4421498a218e8173ec924bc",
+      "wepp/roads/runs/p900010.cli": "ef23bd874e0908ce6025c16cd22e257b74897acda94db57680680933e8712378",
+      "wepp/roads/runs/p900010.run": "1fe59522a0487a746ed920cdb8c114371686736d491eed5bfbc33dd89a2c47ba",
+      "wepp/roads/output/H900010.pass.dat": "de0d2570e8d1cfa745c8f3d7489c8e08e8ec694796f429bbe7be79ae523fd2c3",
+      "wepp/roads/runs/p900011.slp": "416385f8a2cd344951056412a52376c52cab41123e441eab0105ade169fc5bcb",
+      "wepp/roads/runs/p900011.sol": "1ad4f5919a2e49d219405de6428ba96b28379c01827c98b7496852c7d134eef7",
+      "wepp/roads/runs/p900011.man": "9f9e8596c09b62b945e022ff6e63aa6dc761694cce5e68d58e2edc46fb12f144",
+      "wepp/roads/runs/p900011.cli": "faaace3c342f7a077b15c194671a2736065f23b6be05ceb268704ae9feab927e",
+      "wepp/roads/runs/p900011.run": "0de578bfa7e3f60f465f7f21acc1d68f12f25c1e8b6f4089e262638ec8798c03",
+      "wepp/roads/output/H900011.pass.dat": "e8655b2996a072a7a99028bcfa06abac216f5b190ddc14fe9a36cbed50d951a5",
+      "wepp/roads/runs/p900012.slp": "2b5fb9d99581d41b6b97efb07bb0e1ae0b7cbce02ed60c53465d104aab55ffcd",
+      "wepp/roads/runs/p900012.sol": "b1de4eea354a4ea313591d3df745486d94ebc04fe4c83ecd4b311d049b03aa8b",
+      "wepp/roads/runs/p900012.man": "3ab001e1b13dd93b5007c921dc29bf48a109d832c4421498a218e8173ec924bc",
+      "wepp/roads/runs/p900012.cli": "faaace3c342f7a077b15c194671a2736065f23b6be05ceb268704ae9feab927e",
+      "wepp/roads/runs/p900012.run": "b9293124ad7d2df37627c380e6f221ba344446e2a9c15ed3c5374265ad06925e",
+      "wepp/roads/output/H900012.pass.dat": "07aacf62960c5e0309b2c9d2debb95d6acfc4cb6e6222029d5d3fed2885625a2",
+      "wepp/roads/runs/p900013.slp": "7d39cd4a011d12b4878e4218e6aa4d091539b9babd79df12be00ba1263bce758",
+      "wepp/roads/runs/p900013.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "wepp/roads/runs/p900013.man": "561f398f63a2a026df92b41703733c5402c2601d6bb1573cc04580d9a3a9b4cc",
+      "wepp/roads/runs/p900013.cli": "dcbc60f183612b7032f5f3508097c32c8e6a16237bdc71366073b51eb2021985",
+      "wepp/roads/runs/p900013.run": "00a3832215c8b4853c286c30ec323dedbaf04fc2e4779d2049a7ea4c5f173aa3",
+      "wepp/roads/output/H900013.pass.dat": "e7a79afd8a619f57ac4e862999359c95fa63e4b99597da0a1af00886b7530642",
+      "wepp/roads/runs/p900014.slp": "96ba0fb4e81de33ae54ac5551adbb3df35dd8c00a3dffbc63e33c53af5647b87",
+      "wepp/roads/runs/p900014.sol": "b1de4eea354a4ea313591d3df745486d94ebc04fe4c83ecd4b311d049b03aa8b",
+      "wepp/roads/runs/p900014.man": "3ab001e1b13dd93b5007c921dc29bf48a109d832c4421498a218e8173ec924bc",
+      "wepp/roads/runs/p900014.cli": "dcbc60f183612b7032f5f3508097c32c8e6a16237bdc71366073b51eb2021985",
+      "wepp/roads/runs/p900014.run": "47f44df194cbd09a0a15670883040adab16d8ff858bd288fc54ee2642d385865",
+      "wepp/roads/output/H900014.pass.dat": "b7793840c01c997c75d3c95d517370b1e8c19784739f490003ecc550937faf45",
+      "wepp/roads/runs/p900015.slp": "4683faadcc433cadf154f67d31996df9bbb9b72735b68ad6083abdf16a364528",
+      "wepp/roads/runs/p900015.sol": "65b5bab443aa23d42b7b4004f283a1b8519f6568fa3ed7faaeebde44cd6abf1b",
+      "wepp/roads/runs/p900015.man": "13d6472160797d29c114283e4785dbbbd1f1f7c65d68bf98bb02c81849243359",
+      "wepp/roads/runs/p900015.cli": "e4097b2365c2538f0a4537c4500a3fe3411bed5e097b8f65d45157beb49df5cb",
+      "wepp/roads/runs/p900015.run": "c2aeda3f1335b35f3aea7d6ba3f173cff2227bc9786efd5a09fa50a62dcbaa79",
+      "wepp/roads/output/H900015.pass.dat": "9d7fa99fab76c1e633434bb5bbd4d9886bc888a2e91bd2e6bea405b302ef072f",
+      "wepp/roads/runs/p900016.slp": "f76cffd5d015048ed4c946580e65b239918fc1547bbcf135fa4c08a52fbe9d8f",
+      "wepp/roads/runs/p900016.sol": "b1de4eea354a4ea313591d3df745486d94ebc04fe4c83ecd4b311d049b03aa8b",
+      "wepp/roads/runs/p900016.man": "3ab001e1b13dd93b5007c921dc29bf48a109d832c4421498a218e8173ec924bc",
+      "wepp/roads/runs/p900016.cli": "e4097b2365c2538f0a4537c4500a3fe3411bed5e097b8f65d45157beb49df5cb",
+      "wepp/roads/runs/p900016.run": "ed2dc97a6cb709a553e535885f265a789d8125e2c87bee7cca215fc2af9ffa14",
+      "wepp/roads/output/H900016.pass.dat": "77b5d3d02a270e3f7f9b25a48ef4f8c3e46bbebe388c6c47fcd07c2c22bba014",
+      "wepp/roads/runs/p900017.slp": "239d6e4ea4c521e34a20d0b4b9365cd251f72eb63aed9dc984a378bafa41c36e",
+      "wepp/roads/runs/p900017.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+      "wepp/roads/runs/p900017.man": "561f398f63a2a026df92b41703733c5402c2601d6bb1573cc04580d9a3a9b4cc",
+      "wepp/roads/runs/p900017.cli": "41629faa4376305468ccba06b22eade37cba312fc03b9e5c85054f041e8e2f06",
+      "wepp/roads/runs/p900017.run": "435dfbfa46c9515b87af5c0aae54f3ad505357bd2cdf799ef7268a8455470faf",
+      "wepp/roads/output/H900017.pass.dat": "676cb027ebca9153dc05539714e3d8316fac59515766b00d50c8169390d90106",
+      "wepp/roads/runs/p900018.slp": "64484d3ec671345470865af59b713b18ed3559f7e8dd3c91c51b5386a33f47da",
+      "wepp/roads/runs/p900018.sol": "65b5bab443aa23d42b7b4004f283a1b8519f6568fa3ed7faaeebde44cd6abf1b",
+      "wepp/roads/runs/p900018.man": "13d6472160797d29c114283e4785dbbbd1f1f7c65d68bf98bb02c81849243359",
+      "wepp/roads/runs/p900018.cli": "41629faa4376305468ccba06b22eade37cba312fc03b9e5c85054f041e8e2f06",
+      "wepp/roads/runs/p900018.run": "c25ff5d7b1a8a956563f2ed5cd884d216bdacae61074d6b5b4e18e77bb474afc",
+      "wepp/roads/output/H900018.pass.dat": "86b891103c45200b01de0f0f761b3594c54e37d9fac25c4fb905c3ac64ab1b78",
+      "wepp/roads/runs/p900019.slp": "a5601e7d4b711c263293a6a216c2f3398bbf364013124ba41f16326e22c302ea",
+      "wepp/roads/runs/p900019.sol": "1ad4f5919a2e49d219405de6428ba96b28379c01827c98b7496852c7d134eef7",
+      "wepp/roads/runs/p900019.man": "9f9e8596c09b62b945e022ff6e63aa6dc761694cce5e68d58e2edc46fb12f144",
+      "wepp/roads/runs/p900019.cli": "41629faa4376305468ccba06b22eade37cba312fc03b9e5c85054f041e8e2f06",
+      "wepp/roads/runs/p900019.run": "638209ce6efe6eeebd37f79551fc5aefec19b3af7cd729c845ceb0ecf86448fb",
+      "wepp/roads/output/H900019.pass.dat": "b3dfc048147e68a1c60e1bb5cf89449b9b11c957d59a81515519816aaa0a39c1",
+      "wepp/roads/runs/p900020.slp": "ee7bd4edd7c2a40be56d14948e25e9e6df764b1d1aa8241b6362bf3b6aba5be0",
+      "wepp/roads/runs/p900020.sol": "1ad4f5919a2e49d219405de6428ba96b28379c01827c98b7496852c7d134eef7",
+      "wepp/roads/runs/p900020.man": "9f9e8596c09b62b945e022ff6e63aa6dc761694cce5e68d58e2edc46fb12f144",
+      "wepp/roads/runs/p900020.cli": "05846469c001c844b6ea4e9e6cbc74443122820f05ec9fc36a39836084e54fa4",
+      "wepp/roads/runs/p900020.run": "8973e993bddbc014506654301f42fbbe8ffb073337e692811de40327b5f697ab",
+      "wepp/roads/output/H900020.pass.dat": "8031c54a53740da329967e0dfacb3ea8c87e20cb685cc581dc57067f7980248d",
+      "wepp/roads/runs/p900021.slp": "91580f5e69511f3ad561a9ed294234a9526e742f5dd1afc33c3c3a738e380880",
+      "wepp/roads/runs/p900021.sol": "b1de4eea354a4ea313591d3df745486d94ebc04fe4c83ecd4b311d049b03aa8b",
+      "wepp/roads/runs/p900021.man": "3ab001e1b13dd93b5007c921dc29bf48a109d832c4421498a218e8173ec924bc",
+      "wepp/roads/runs/p900021.cli": "05846469c001c844b6ea4e9e6cbc74443122820f05ec9fc36a39836084e54fa4",
+      "wepp/roads/runs/p900021.run": "9e88c682435b2e7aff371f5c0a281109a652228c67152f7b4671e0cfb35cd274",
+      "wepp/roads/output/H900021.pass.dat": "e182ccaa275621b9273fceab851bca31690a50706e3dc0bd67d22ed1ee567b30",
+      "wepp/roads/runs/p900022.slp": "063dac8f17f3dddbb677befc1fa1dbfcb48f1d900556642cc8b7e7caca1c1b52",
+      "wepp/roads/runs/p900022.sol": "1ad4f5919a2e49d219405de6428ba96b28379c01827c98b7496852c7d134eef7",
+      "wepp/roads/runs/p900022.man": "9f9e8596c09b62b945e022ff6e63aa6dc761694cce5e68d58e2edc46fb12f144",
+      "wepp/roads/runs/p900022.cli": "b6430d3e6a208625166defd216f7355e93a57572652f4710343525d0f48b21ae",
+      "wepp/roads/runs/p900022.run": "786ff21bca80719e6671134e2a093fe66c5ceccdae6027dbe84cfb525375e5d7",
+      "wepp/roads/output/H900022.pass.dat": "41a8427683829e56415a56f1bb17cce9ba1750f0c43020b6af940e7100058bd5",
+      "wepp/roads/runs/p900023.slp": "8dfc9d62bd9ef302e65ea48109495168d1bdc8a45876839d298e21f7e1192a3c",
+      "wepp/roads/runs/p900023.sol": "1ad4f5919a2e49d219405de6428ba96b28379c01827c98b7496852c7d134eef7",
+      "wepp/roads/runs/p900023.man": "9f9e8596c09b62b945e022ff6e63aa6dc761694cce5e68d58e2edc46fb12f144",
+      "wepp/roads/runs/p900023.cli": "b6430d3e6a208625166defd216f7355e93a57572652f4710343525d0f48b21ae",
+      "wepp/roads/runs/p900023.run": "4d85faca15e55e15211004d28dc9682b66c8f2e067b5fef55ea4638224ba3904",
+      "wepp/roads/output/H900023.pass.dat": "d3bbc03c5f43479b1dd09744c0201d9d8288019e99dbf78bfb413d22b7d974b7",
+      "wepp/roads/runs/p900024.slp": "d3c880d2005b1d56aa73c56819f4be6fe896f71a7d27a70f3cb0bd95a27038ec",
+      "wepp/roads/runs/p900024.sol": "b1de4eea354a4ea313591d3df745486d94ebc04fe4c83ecd4b311d049b03aa8b",
+      "wepp/roads/runs/p900024.man": "3ab001e1b13dd93b5007c921dc29bf48a109d832c4421498a218e8173ec924bc",
+      "wepp/roads/runs/p900024.cli": "b6430d3e6a208625166defd216f7355e93a57572652f4710343525d0f48b21ae",
+      "wepp/roads/runs/p900024.run": "e0966393c5d7a01ecda53f1159050e1031006669f6100606018e007c00606e56",
+      "wepp/roads/output/H900024.pass.dat": "5844a42867f692f128cfbf573856999dc57f601bdf61e3f0d16113e0b0b08e9b"
+    },
+    "watershed_run_sha256": "a3a4bd1f31507cafa30aab31e47a968a0cbb250092dcdcbab7967aac205bb8b9",
+    "receipt": {
+      "is_single_storm": false,
+      "parameterization_hash": "6cbbdeace9b618c35a55783208561ae098e3f3c92efe0af6b7f085af9879343c",
+      "parameterization_snapshot_sha256": "364ae5f81a4e8e783bd395fd23a8a5a8351592e5688d0f2316f4be8538cb9f04",
+      "policy": "roads_current_v1",
+      "required_relpaths": [
+        "wepp/roads/output/interchange/H.pass.parquet",
+        "wepp/roads/output/interchange/ebe_pw0.parquet",
+        "wepp/roads/output/interchange/README.md",
+        "wepp/roads/output/interchange/H.wat.parquet",
+        "wepp/roads/output/interchange/loss_pw0.out.parquet",
+        "wepp/roads/output/interchange/loss_pw0.hill.parquet",
+        "wepp/roads/output/interchange/loss_pw0.chn.parquet",
+        "wepp/roads/output/interchange/totalwatsed3.parquet",
+        "wepp/roads/output/interchange/roads_segment_loss_summary.parquet",
+        "wepp/roads/output/interchange/H.accounting.wat.parquet",
+        "wepp/roads/segments/roads.accounting.json",
+        "wepp/roads/output/roads.parameterization.comparison.json"
+      ]
+    },
+    "pass_rows": 333108,
+    "report_rows": 5844,
+    "inspection": {
+      "state": "available",
+      "units": "t/ha/year",
+      "remainder_profile_count": 9,
+      "reason": null
+    }
+  },
+  "native_shapes": {
+    "990001": {
+      "placement": {
+        "fits": true,
+        "placement_policy": "unrutted_top_placement_v1",
+        "placement_adjustment": "top_of_hillslope",
+        "placement_adjustment_reason": "non_positive_upstream_length",
+        "original_top_landuse_length_m": -79.8,
+        "hillslope_length_m": 24.3,
+        "upslope_runon_assumed_zero": true,
+        "top_landuse_length_m": 0.0,
+        "bottom_landuse_length_m": 0.0,
+        "parity_profile": {
+          "sim_length_m": 4.1
+        },
+        "fill_profile": {
+          "fill_length_m": 20.2,
+          "fill_slope_pct": 10.0
+        },
+        "top_landuse_slope_pct": 10.0,
+        "bottom_landuse_slope_pct": 10.0
+      },
+      "roles": [
+        1,
+        2
+      ],
+      "lengths": [
+        4.1,
+        20.2
+      ],
+      "emitted_area_m2": 2429.9999999999995,
+      "files": {
+        "wepp/roads/runs/p990001.sol": "cc1411818b0a4f150bb84147061171a1a0c7efce6b7d2010cbd25386e2d920c7",
+        "wepp/roads/runs/p990001.slp": "f2ead4bb10941820b8da580169c01c5f4f59e385668bd66e03cc49ef48c5c073",
+        "wepp/roads/runs/p990001.parameterization.json": "da78fe1c5223c137c8c31e53a0532ac7f663d810e144fe9d758f42dc4cdd0a8e",
+        "wepp/roads/runs/p990001.run": "e41ac68b5f0a53af6fd17e7f499b31168903feb47b88d8971f07d9ac4f4e93ef",
+        "wepp/roads/runs/p990001.man": "515f7cd1ee85befdca47c36b5cd65736aa66edfcb6ec20e24d0de26ac8f93f60",
+        "wepp/roads/runs/p990001.cli": "41629faa4376305468ccba06b22eade37cba312fc03b9e5c85054f041e8e2f06",
+        "wepp/roads/runs/p990001.err": "64455e54374dc635e32d4da1f3b63ba6e0603aea94412fff94f121cd513b60ec",
+        "wepp/roads/output/H990001.pass.dat": "71ae3b13c5a9aebd6030aa37a3272abb51305e4441467a11371c0de0f84c1750"
+      },
+      "parameterization": {
+        "baseline_id": "roads-legacy-v1-3293894ba3394c99836302c5e1bf669acb08c68a4316f1914f12ed60d7e92b63",
+        "configuration_hash": "6cbbdeace9b618c35a55783208561ae098e3f3c92efe0af6b7f085af9879343c",
+        "source_asset_hashes": {
+          "soils/3gloam2.sol": "f7e2c9eacdab69e0fb0933e897368631ab7be7c04f418bfebe9026e9d0e7bc8c",
+          "managements/3inslope.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+        },
+        "ofes": [
+          {
+            "ofe_index": 1,
+            "role": "road",
+            "baseline": {
+              "ksat_mm_h": 8.1,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "adjusted": {
+              "ksat_mm_h": 8.1,
+              "ki_kg_s_m4": 500000.0,
+              "kr_s_m": 7.5e-05,
+              "critical_shear_pa": 2.0
+            },
+            "requested": {
+              "ksat_mm_h": {
+                "mode": "default"
+              },
+              "ki_kg_s_m4": {
+                "mode": "default"
+              },
+              "kr_s_m": {
+                "mode": "default"
+              },
+              "critical_shear_pa": {
+                "mode": "default"
+              }
+            },
+            "resolved": {
+              "ksat_mm_h": 8.1,
+              "ki_kg_s_m4": 500000.0,
+              "kr_s_m": 7.5e-05,
+              "critical_shear_pa": 2.0
+            },
+            "emitted": {
+              "ksat_mm_h": 8.1,
+              "ki_kg_s_m4": 500000.0,
+              "kr_s_m": 7.5e-05,
+              "critical_shear_pa": 2.0
+            }
+          },
+          {
+            "ofe_index": 2,
+            "role": "fill",
+            "baseline": {
+              "ksat_mm_h": 11.4,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "adjusted": {
+              "ksat_mm_h": 11.4,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "requested": {
+              "ksat_mm_h": {
+                "mode": "default"
+              },
+              "ki_kg_s_m4": {
+                "mode": "default"
+              },
+              "kr_s_m": {
+                "mode": "default"
+              },
+              "critical_shear_pa": {
+                "mode": "default"
+              }
+            },
+            "resolved": {
+              "ksat_mm_h": 11.4,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "emitted": {
+              "ksat_mm_h": 11.4,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            }
+          }
+        ],
+        "input_files": [
+          {
+            "relpath": "wepp/roads/runs/p990001.sol",
+            "sha256": "cc1411818b0a4f150bb84147061171a1a0c7efce6b7d2010cbd25386e2d920c7"
+          },
+          {
+            "relpath": "wepp/roads/runs/p990001.slp",
+            "sha256": "f2ead4bb10941820b8da580169c01c5f4f59e385668bd66e03cc49ef48c5c073"
+          },
+          {
+            "relpath": "wepp/roads/runs/p990001.man",
+            "sha256": "515f7cd1ee85befdca47c36b5cd65736aa66edfcb6ec20e24d0de26ac8f93f60"
+          }
+        ]
+      },
+      "pass_rows": 5844,
+      "runoff_m3": 5368.27923
+    },
+    "990002": {
+      "placement": {
+        "fits": true,
+        "placement_policy": "unrutted_top_placement_v1",
+        "placement_adjustment": "top_of_hillslope",
+        "placement_adjustment_reason": "non_positive_upstream_length",
+        "original_top_landuse_length_m": -78.8,
+        "hillslope_length_m": 25.3,
+        "upslope_runon_assumed_zero": true,
+        "top_landuse_length_m": 0.0,
+        "bottom_landuse_length_m": 1.0,
+        "parity_profile": {
+          "sim_length_m": 4.1
+        },
+        "fill_profile": {
+          "fill_length_m": 20.2,
+          "fill_slope_pct": 10.0
+        },
+        "top_landuse_slope_pct": 10.0,
+        "bottom_landuse_slope_pct": 10.0
+      },
+      "roles": [
+        1,
+        2,
+        3
+      ],
+      "lengths": [
+        4.1,
+        20.2,
+        1.0
+      ],
+      "emitted_area_m2": 2529.9999999999995,
+      "files": {
+        "wepp/roads/runs/p990002.cli": "41629faa4376305468ccba06b22eade37cba312fc03b9e5c85054f041e8e2f06",
+        "wepp/roads/runs/p990002.err": "bf88cd09dbb7bbcd01873a8f4c9271cf9eaac0e047f37365213ad02de1ef0166",
+        "wepp/roads/runs/p990002.man": "561f398f63a2a026df92b41703733c5402c2601d6bb1573cc04580d9a3a9b4cc",
+        "wepp/roads/runs/p990002.run": "802819ef04d99d868486832e4e65d526b183a260b9c90b0b57b80908a8f8e9c5",
+        "wepp/roads/runs/p990002.parameterization.json": "71069e042665a4401fa74fcff7caf8cb8071cc5d06885a8624042891d7c58ea8",
+        "wepp/roads/runs/p990002.sol": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346",
+        "wepp/roads/runs/p990002.slp": "874cc2d94148dc1509ab82a70adc14a2b60d4ab151a90414368b14214a2734b8",
+        "wepp/roads/output/H990002.pass.dat": "fe41935658419525e9b1c8fa58262d4ed4c84aa71d49d6df273aa704dc319041"
+      },
+      "parameterization": {
+        "baseline_id": "roads-legacy-v1-3293894ba3394c99836302c5e1bf669acb08c68a4316f1914f12ed60d7e92b63",
+        "configuration_hash": "6cbbdeace9b618c35a55783208561ae098e3f3c92efe0af6b7f085af9879343c",
+        "source_asset_hashes": {
+          "soils/3gloam2.sol": "f7e2c9eacdab69e0fb0933e897368631ab7be7c04f418bfebe9026e9d0e7bc8c",
+          "managements/3inslope.man": "e2c3781ee9c5dc8333dc0ec16c76053c47872dd944e1a6a430afc7e70663e9a5"
+        },
+        "ofes": [
+          {
+            "ofe_index": 1,
+            "role": "road",
+            "baseline": {
+              "ksat_mm_h": 8.1,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "adjusted": {
+              "ksat_mm_h": 8.1,
+              "ki_kg_s_m4": 500000.0,
+              "kr_s_m": 7.5e-05,
+              "critical_shear_pa": 2.0
+            },
+            "requested": {
+              "ksat_mm_h": {
+                "mode": "default"
+              },
+              "ki_kg_s_m4": {
+                "mode": "default"
+              },
+              "kr_s_m": {
+                "mode": "default"
+              },
+              "critical_shear_pa": {
+                "mode": "default"
+              }
+            },
+            "resolved": {
+              "ksat_mm_h": 8.1,
+              "ki_kg_s_m4": 500000.0,
+              "kr_s_m": 7.5e-05,
+              "critical_shear_pa": 2.0
+            },
+            "emitted": {
+              "ksat_mm_h": 8.1,
+              "ki_kg_s_m4": 500000.0,
+              "kr_s_m": 7.5e-05,
+              "critical_shear_pa": 2.0
+            }
+          },
+          {
+            "ofe_index": 2,
+            "role": "fill",
+            "baseline": {
+              "ksat_mm_h": 11.4,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "adjusted": {
+              "ksat_mm_h": 11.4,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "requested": {
+              "ksat_mm_h": {
+                "mode": "default"
+              },
+              "ki_kg_s_m4": {
+                "mode": "default"
+              },
+              "kr_s_m": {
+                "mode": "default"
+              },
+              "critical_shear_pa": {
+                "mode": "default"
+              }
+            },
+            "resolved": {
+              "ksat_mm_h": 11.4,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "emitted": {
+              "ksat_mm_h": 11.4,
+              "ki_kg_s_m4": 2000000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            }
+          },
+          {
+            "ofe_index": 3,
+            "role": "buffer",
+            "baseline": {
+              "ksat_mm_h": 26.0,
+              "ki_kg_s_m4": 120000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "adjusted": {
+              "ksat_mm_h": 26.0,
+              "ki_kg_s_m4": 120000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "requested": {
+              "ksat_mm_h": {
+                "mode": "default"
+              },
+              "ki_kg_s_m4": {
+                "mode": "default"
+              },
+              "kr_s_m": {
+                "mode": "default"
+              },
+              "critical_shear_pa": {
+                "mode": "default"
+              }
+            },
+            "resolved": {
+              "ksat_mm_h": 26.0,
+              "ki_kg_s_m4": 120000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            },
+            "emitted": {
+              "ksat_mm_h": 26.0,
+              "ki_kg_s_m4": 120000.0,
+              "kr_s_m": 0.0003,
+              "critical_shear_pa": 2.0
+            }
+          }
+        ],
+        "input_files": [
+          {
+            "relpath": "wepp/roads/runs/p990002.sol",
+            "sha256": "748becf8c67b4af377310c78df43b226dba33c427a52e68c8257f21dd4fd8346"
+          },
+          {
+            "relpath": "wepp/roads/runs/p990002.slp",
+            "sha256": "874cc2d94148dc1509ab82a70adc14a2b60d4ab151a90414368b14214a2734b8"
+          },
+          {
+            "relpath": "wepp/roads/runs/p990002.man",
+            "sha256": "561f398f63a2a026df92b41703733c5402c2601d6bb1573cc04580d9a3a9b4cc"
+          }
+        ]
+      },
+      "pass_rows": 5844,
+      "runoff_m3": 18419.462638999998
+    }
+  },
+  "scope": "Synthetic 30m/5m fill and exact-fit probes; not site calibration or deployment",
+  "runtime": {
+    "weppcloud": {
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "configured_user": "1000:993",
+      "identity": "uid=1000 gid=993 groups=993",
+      "umask": "0022",
+      "checkout_mount": "/home/workdir/wepppy"
+    },
+    "roads-rupc-validation-weppcloud-1": {
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "configured_user": "1000:993",
+      "identity": "uid=1000 gid=993 groups=993",
+      "umask": "0022",
+      "checkout_mount": "/tmp/wepppy-roads-unrutted-strip-contract"
+    }
+  }
+}

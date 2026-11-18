@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, ClassVar, Dict, Iterable, List, Mapping, NoReturn, Optional, Tuple
+from typing import Any, Callable, ClassVar, Dict, Iterable, List, Mapping, NoReturn, Optional, Tuple
 
 from wepppy.topo.watershed_collection import WatershedCollection, WatershedFeature
 from .base import NoDbBase
@@ -89,6 +89,10 @@ class BatchRunner(NoDbBase):
     def logs_dir(self) -> str: ...
 
     def register_geojson(self, watershed_collection: WatershedCollection, metadata: Optional[Dict[str, Any]] = ...) -> None: ...
+
+    def register_geojson_transactional(self, watershed_collection: WatershedCollection, *, metadata: Optional[Dict[str, Any]] = ..., publication_commit: Callable[[], None]) -> None: ...
+
+    def publish_geojson_transactional(self, candidate_path: Any, destination_path: Any, *, metadata: Optional[Dict[str, Any]] = ..., publication_commit: Callable[[], None]) -> None: ...
 
     def get_watershed_collection(self) -> WatershedCollection: ...
 

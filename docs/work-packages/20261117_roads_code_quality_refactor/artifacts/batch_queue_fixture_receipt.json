@@ -1,0 +1,31 @@
+{
+  "baseline_test_sha256": "2ea4b9d244889061dad363cd37ff9169a5d5118de6d8c5e349b4b71499f80355",
+  "pre_repair_source_identical_to_baseline": true,
+  "candidate_source_sha256": {
+    "tests/rq/test_batch_deferred_recovery.py": "823469a8b90c95607c1bd6a468dfceaf9cccdeb4dc7f2e0a535e97914aaad5cd"
+  },
+  "shared_batch_workers_observed": 4,
+  "original_shared_queue_test_rerun": false,
+  "workers_stopped": false,
+  "private_queue_final": {
+    "passed": 2,
+    "seconds": 9.79,
+    "failed": 0
+  },
+  "check_test_stubs": "passed",
+  "prior_v3_failure_log": {
+    "path": "/tmp/roads-refactor-validation/broad-continuation-v3.log",
+    "sha256": "d7a684a1531f1760053b6cf543c21d81d5a1a7815920f481ce5d062e22437044"
+  },
+  "artifacts_sha256": {
+    "candidate_logs/batch-worker-observation.log": "95e37a0ee512ef161406f58321bb3abc12ec68e0100acb7ae22818ca16dfc9a1",
+    "candidate_logs/batch-deferred-private-canonical.log": "a17860946c0ecaf303f5b251035f1dcf883f359e9c6c81eda1a221c3a2d7d8a6",
+    "candidate_logs/batch-deferred-private-canonical.xml": "d6c8486c285734ec3143e28cb7bc12334efab34cfe552942034b23aa37a787a0",
+    "candidate_logs/batch-deferred-private-canonical-final.log": "6bdec7dd0c95823029b8a81ce47c5ddd6ac12e81fe27e920373fbe8e16e336f6",
+    "candidate_logs/batch-deferred-private-canonical-final.xml": "55274f86dcaf1b90d84710beba2a93ae73982f4b9669be33a32fbefe6d34a5c7",
+    "candidate_logs/batch-fixture-check-test-stubs.log": "c24185f0ca2a1c3fe5406629a1e05fea75d081f624b5a7e546c5a2f7267c955b",
+    "batch-worker-observation.json": "b72e60e2f8e0dfb0041470105410cede255db7605ceaca020dd4e1e717ad76e3",
+    "scripts/observe_batch_workers.py": "9a9e62bbe23bbd7fb238943a6a2ac020892e5ae335de289c8a65bde39c308729"
+  },
+  "limitation": "Logical queue-name alias only for original association predicate; literal production queue-name selection is not tested. Actual persisted origins, WATCH and cancellation use private UUID queues."
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="9.450" timestamp="2026-11-18T00:50:08.578623+00:00" hostname="dac1a8ed5058"><testcase classname="tests.rq.test_batch_deferred_recovery" name="test_batch_recovery_uses_persisted_root_and_cancels_omni_descendant" time="0.033"><failure message="AssertionError: assert ['9b35fa7f-82...af0:mismatch'] == []&#10;  &#10;  Left contains one more item: '9b35fa7f-826e-4aad-9cb3-9dc29c5a9af0:mismatch'&#10;  Use -v to get more diff">tests/rq/test_batch_deferred_recovery.py:103: in test_batch_recovery_uses_persisted_root_and_cancels_omni_descendant
+    assert conflicts == []
+E   AssertionError: assert ['9b35fa7f-82...af0:mismatch'] == []
+E
+E     Left contains one more item: '9b35fa7f-826e-4aad-9cb3-9dc29c5a9af0:mismatch'
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.rq.test_batch_deferred_recovery" name="test_batch_recovery_detects_bytes_id_in_intermediate_queue" time="0.011"><failure message="AssertionError: assert ['cc6bb463-56...c28:mismatch'] == ['cc6bb463-56...62c28:queued']&#10;  &#10;  At index 0 diff: 'cc6bb463-56f2-4ff7-9b85-41f3c2062c28:mismatch' != 'cc6bb463-56f2-4ff7-9b85-41f3c2062c28:queued'&#10;  Use -v to get more diff">tests/rq/test_batch_deferred_recovery.py:144: in test_batch_recovery_detects_bytes_id_in_intermediate_queue
+    assert conflicts == [f"{job.id}:queued"]
+E   AssertionError: assert ['cc6bb463-56...c28:mismatch'] == ['cc6bb463-56...62c28:queued']
+E
+E     At index 0 diff: 'cc6bb463-56f2-4ff7-9b85-41f3c2062c28:mismatch' != 'cc6bb463-56f2-4ff7-9b85-41f3c2062c28:queued'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,47 @@
+{
+  "capture": "after successful runtime execution; final comparator snapshot includes observed generated_at and failed-attempt archive handling; original baseline scripts unchanged",
+  "scripts": [
+    {
+      "runtime_path": "/tmp/roads_candidate_projects.py",
+      "snapshot": "scripts/roads_candidate_projects.py",
+      "sha256": "73347820995e4d2441d18baa611bd2113dc4acd5c8ee76ba248d4337e34f0a69",
+      "bytes": 1959
+    },
+    {
+      "runtime_path": "/tmp/roads_candidate_native.py",
+      "snapshot": "scripts/roads_candidate_native.py",
+      "sha256": "8f5f05fa4776b39bd4bfb990b4fac47153dec9545b0679d43d28c214e90c4f9b",
+      "bytes": 2787
+    },
+    {
+      "runtime_path": "/tmp/roads_candidate_command.py",
+      "snapshot": "scripts/roads_candidate_command.py",
+      "sha256": "c5b4de63560779ec9d2d2ebecae556e7df4bda43755dc819e427ced09c9f75a0",
+      "bytes": 858
+    },
+    {
+      "runtime_path": "/tmp/roads-refactor-validation/candidate_project_parity.py",
+      "snapshot": "scripts/candidate_project_parity.py",
+      "sha256": "e4e1d9f00cd8ce3caaf6d889b7190c0001ae910c5732e842f47b82c664d1243d",
+      "bytes": 1712
+    },
+    {
+      "runtime_path": "/tmp/roads-refactor-validation/compare_projects.py",
+      "snapshot": "scripts/compare_projects.py",
+      "sha256": "022cc47bcf9a33ccbbc88e941cf3147d186ad699c30136306db68b5c1dcd4263",
+      "bytes": 6900
+    },
+    {
+      "runtime_path": "/tmp/roads-refactor-validation/check_project_field_metadata.py",
+      "snapshot": "scripts/check_project_field_metadata.py",
+      "sha256": "faa4c6ddb60811b57c3832bd8291b7bc9c479c71781dac644fd1648b8fa299bc",
+      "bytes": 849
+    },
+    {
+      "runtime_path": "/tmp/roads-refactor-validation/compare_analysis.py",
+      "snapshot": "scripts/compare_analysis.py",
+      "sha256": "f3be39772cdd566a053caba9b2d402cb3932a14ae9cda80ad77df02950deefda",
+      "bytes": 1382
+    }
+  ]
+}

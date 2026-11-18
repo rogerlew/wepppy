@@ -1,0 +1,56 @@
+[
+  {
+    "page": "login",
+    "width": 320,
+    "viewport": 320,
+    "document": 320
+  },
+  {
+    "page": "profile-shared",
+    "width": 320,
+    "viewport": 320,
+    "document": 320
+  },
+  {
+    "page": "profile-cilogon",
+    "width": 320,
+    "viewport": 320,
+    "document": 320
+  },
+  {
+    "page": "login",
+    "width": 375,
+    "viewport": 375,
+    "document": 375
+  },
+  {
+    "page": "profile-shared",
+    "width": 375,
+    "viewport": 375,
+    "document": 375
+  },
+  {
+    "page": "profile-cilogon",
+    "width": 375,
+    "viewport": 375,
+    "document": 375
+  },
+  {
+    "page": "login",
+    "width": 1280,
+    "viewport": 1280,
+    "document": 1280
+  },
+  {
+    "page": "profile-shared",
+    "width": 1280,
+    "viewport": 1280,
+    "document": 1280
+  },
+  {
+    "page": "profile-cilogon",
+    "width": 1280,
+    "viewport": 1280,
+    "document": 1280
+  }
+]

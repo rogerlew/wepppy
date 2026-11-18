@@ -42,6 +42,10 @@ class RoadsResultsUnavailable(RuntimeError):
         super().__init__(message)
 
 
+class RoadsPlacementPolicyUnavailable(RoadsResultsUnavailable):
+    """Historical unrutted execution can be restored, but must be rerun."""
+
+
 class RoadsOperationBusy(RuntimeError):
     code = 'roads_operation_busy'
 
@@ -129,8 +133,8 @@ def mandatory_paths(single_storm: bool) -> set[str]:
     return {str(OUTPUT/'interchange'/name) for name in COMMON + (() if single_storm else CONTINUOUS)}
 
 
-def _parameterization_identity(root: Path) -> str | None:
-    """Read durable project authority without creating/hydrating a controller."""
+def _saved_controller(root: Path):
+    """Read durable authority without controller hydration or initialization."""
     path = _path(root, 'roads.nodb')
     from wepppy.nodb import _read_retry
     from wepppy.nodb.mods.roads.roads import Roads
@@ -143,6 +147,13 @@ def _parameterization_identity(root: Path) -> str | None:
     instance = Roads._decode_jsonpickle(Roads._preprocess_json_for_decode(snapshot[0]))
     if not isinstance(instance, Roads):
         raise ValueError('Roads saved state must decode to its owning controller')
+    return instance
+
+
+def _parameterization_identity(root: Path) -> str | None:
+    instance = _saved_controller(root)
+    if instance is None:
+        return None
     state = instance.__dict__
     if '_parameterization' not in state:
         return None
@@ -155,7 +166,48 @@ def _parameterization_identity(root: Path) -> str | None:
     return identity
 
 
-def _validate_receipt(root: Path, payload: dict) -> list[str]:
+def _require_placement_policy(root: Path):
+    from wepppy.nodb.mods.roads import _unrutted
+    from wepppy.nodb.mods.roads.roads import Roads
+
+    geometry = json.loads(_path(root, SEGMENTS/'roads.inslope.monotonic.geojson').read_text())
+    features = geometry.get('features') if isinstance(geometry, dict) else None
+    if not isinstance(features, list) or any(not isinstance(f, dict) or not isinstance(f.get('properties'), dict) for f in features):
+        raise ValueError('Prepared Roads features must have property objects')
+    instance = _saved_controller(root)
+    resolver = instance if instance is not None else Roads.__new__(Roads)
+    params = Roads._normalize_params_with_defaults(getattr(resolver, '_roads_params', {}))
+    designs = [resolver._resolve_design_for_feature(
+        properties=f['properties'], attribute_field_map=params['attribute_field_map'],
+    )[0] for f in features]
+    if 'outslope_unrutted' not in designs:
+        return
+    prepared_designs = dict(zip(segment_ids(features), designs))
+    summary = getattr(resolver, '_last_run_summary', None)
+    if (not isinstance(summary, dict)
+            or summary.get('unrutted_placement_policy') != _unrutted.PLACEMENT_POLICY):
+        raise RoadsPlacementPolicyUnavailable('Unrutted placement policy changed; Run Roads again. Prepared geometry can be reused.')
+    if summary.get('status') != 'completed':
+        raise RoadsResultsUnavailable('Run Roads successfully before viewing current results.')
+    records = json.loads(_path(root, SEGMENTS/'roads.segment.pass.manifest.json').read_text())
+    if not isinstance(records, list) or any(not isinstance(row, dict) for row in records):
+        raise RoadsResultsUnavailable('Roads execution manifest is invalid.')
+    for row in records:
+        if row.get('status', 'completed') != 'completed':
+            continue
+        members = row.get('source_segment_ids', [row.get('segment_id')])
+        if not isinstance(members, list) or any(not isinstance(member, str) for member in members):
+            raise RoadsResultsUnavailable('Roads profile source membership is invalid.')
+        source_designs = {prepared_designs.get(member) for member in [row.get('segment_id'), *members]
+                          if isinstance(member, str)}
+        affected_row = 'outslope_unrutted' in source_designs
+        if affected_row != (row.get('design') == 'outslope_unrutted'):
+            raise RoadsResultsUnavailable('Roads profile design does not match its prepared source.')
+        if affected_row and row.get('placement_policy') != _unrutted.PLACEMENT_POLICY:
+            raise RoadsPlacementPolicyUnavailable('Unrutted placement provenance is incomplete; Run Roads again.')
+
+
+def _validate_receipt(root: Path, payload: dict, *, check_placement=True) -> list[str]:
     required_keys = {'policy', 'is_single_storm', 'required_relpaths'}
     if (not isinstance(payload, dict) or not required_keys.issubset(payload)
             or set(payload) - required_keys - {'parameterization_hash', 'parameterization_snapshot_sha256'}
@@ -188,6 +240,8 @@ def _validate_receipt(root: Path, payload: dict) -> list[str]:
         snapshot_hash = hashlib.sha256(_path(root, PARAMETERIZATION_SNAPSHOT).read_bytes()).hexdigest()
         if payload.get('parameterization_snapshot_sha256') != snapshot_hash:
             raise RoadsResultsUnavailable('Roads parameterization comparison evidence changed after publication.')
+    if check_placement:
+        _require_placement_policy(root)
     return paths
 
 
@@ -307,6 +361,33 @@ def retain(root: str | Path, *, replace_segments=False) -> Path | None:
     return snapshot
 
 
+def restore_retained(root: str | Path, snapshot: str | Path | None) -> None:
+    """Restore one failed mutation's retained current outputs."""
+    if snapshot is None:
+        return
+    root = Path(root).resolve()
+    snapshot = Path(snapshot).resolve()
+    history = _path(root, HISTORY).resolve()
+    if snapshot.parent != history or root not in _WRITERS.get():
+        raise RuntimeError("Roads retained-output restore requires its mutation guard")
+    for relative in (OUTPUT, RUNS, SEGMENTS, *[CACHE / (CACHE_KEY + suffix) for suffix in ('.parquet', '.meta.json', '.attempts')]):
+        source = snapshot / relative
+        if not source.exists():
+            continue
+        target = _path(root, relative)
+        if target.is_dir() and not target.is_symlink():
+            shutil.rmtree(target)
+        else:
+            target.unlink(missing_ok=True)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if source.is_dir() and not source.is_symlink():
+            shutil.copytree(source, target, symlinks=True)
+        else:
+            shutil.copy2(source, target)
+    shutil.rmtree(snapshot)
+    _INVALIDATED.set(_INVALIDATED.get() - {root})
+
+
 def segment_ids(features):
     if not isinstance(features, list):
         raise ValueError('Prepared Roads features must be a list')
@@ -322,8 +403,8 @@ def segment_ids(features):
     return ids
 
 
-def _validate_generated_set(root, payload):
-    paths = _validate_receipt(root, payload)
+def _validate_generated_set(root, payload, *, check_placement=True):
+    paths = _validate_receipt(root, payload, check_placement=check_placement)
     import pyarrow.parquet as pq
     for relative in paths:
         if relative.endswith('.parquet'):
@@ -434,8 +515,17 @@ def restore_operation(root):
         try:
             yield
             if (Path(root) / RECEIPT).exists():
-                payload = require_current(root)
-                _validate_generated_set(Path(root).resolve(), payload)
+                restored_root = Path(root).resolve()
+                payload = json.loads(_path(restored_root, RECEIPT).read_text())
+                # Validate all archived artifacts before allowing a historical
+                # policy mismatch; it must never conceal corrupt output.
+                _validate_generated_set(restored_root, payload, check_placement=False)
+                try:
+                    _require_placement_policy(restored_root)
+                except RoadsPlacementPolicyUnavailable:
+                    # A policy upgrade does not corrupt an otherwise restorable
+                    # archive. Keep its bytes historical, without current admission.
+                    _revoke_receipt(Path(root).resolve())
             completed = True
         finally:
             if not completed:
