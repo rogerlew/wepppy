@@ -1,4 +1,4 @@
-# ADR: Project Config Locale and View Authority
+# ADR-0047: Project Config Locale and View Authority
 
 Status: Accepted
 Date: 2026-08-27

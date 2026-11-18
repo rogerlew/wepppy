@@ -1,4 +1,4 @@
-# ADR: Candidate nominal 1 m culvert pruning boundary
+# ADR-0143: Candidate nominal 1 m culvert pruning boundary
 
 Status: Superseded candidate by ADR-0144  
 Date: 2026-11-16

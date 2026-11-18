@@ -1,4 +1,4 @@
-# ADR: RAP_TS Management Cover Fraction Normalization
+# ADR-0010: RAP_TS Management Cover Fraction Normalization
 
 Status: Accepted
 Date: 2026-06-26

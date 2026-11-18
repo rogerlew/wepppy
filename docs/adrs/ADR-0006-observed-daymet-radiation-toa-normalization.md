@@ -1,4 +1,4 @@
-# ADR: Observed-Daymet Radiation TOA Normalization
+# ADR-0006: Observed-Daymet Radiation TOA Normalization
 
 Status: Accepted
 Date: 2026-06-06

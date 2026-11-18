@@ -1,4 +1,4 @@
-# ADR: Time-Limited Publication Embargo for OMNI Contrasts
+# ADR-0001: Time-Limited Publication Embargo for OMNI Contrasts
 
 Status: Accepted  
 Date: 2026-05-22  

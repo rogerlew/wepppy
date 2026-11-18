@@ -1,4 +1,4 @@
-# ADR: RUSLE K Conservative Second-Stage Gap Fill
+# ADR-0005: RUSLE K Conservative Second-Stage Gap Fill
 
 Status: Accepted  
 Date: 2026-05-27  

@@ -1,4 +1,4 @@
-# ADR: MOFE Configuration Cap of Five OFEs
+# ADR-0024: MOFE Configuration Cap of Five OFEs
 
 Status: Accepted
 Date: 2026-07-21

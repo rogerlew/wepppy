@@ -1,4 +1,4 @@
-# ADR: Canonical USGS SBS Accessibility Palette
+# ADR-0041: Canonical USGS SBS Accessibility Palette
 
 Status: Accepted  
 Date: 2026-08-07

@@ -1,4 +1,4 @@
-# ADR: Config Builder Model and Landuse-Modification Defaults
+# ADR-0046: Config Builder Model and Landuse-Modification Defaults
 
 Status: Accepted
 Date: 2026-08-27
