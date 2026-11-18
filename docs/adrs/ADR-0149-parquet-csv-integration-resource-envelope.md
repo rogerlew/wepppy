@@ -52,3 +52,20 @@ Whole-release rollback uses the canonical deployment workflow; no runtime fallba
 
 [Integration contract](../schemas/parquet-csv-integration-contract.md#integration-implementation-checkpoint)
 and [active package](../work-packages/20261118_parquet_csv_wepppy_integration/package.md).
+
+
+## Dictionary compatibility amendment (2026-11-18)
+
+Implementation corpus readback found legitimate flowpath and road-event exports
+rejected by the standalone100,000 dictionary-entry ceiling. A bounded scan of
+all inventoried dictionary headers found a maximum125,855 entries; see
+[dictionary evidence](../work-packages/20261118_parquet_csv_wepppy_integration/artifacts/dictionary-compatibility.json).
+The integrated limit becomes131,072 entries. This is the smallest conventional
+power-of-two bound above observed use, not an unbounded decoder setting.
+
+All8 MiB page limits,4 GiB cumulative decode,1 GiB address space, CPU/wall limits
+and two-slot accounting remain unchanged. The additional32,000-ish entries add
+bounded dictionary bookkeeping within those same process/page ceilings. Require
+exact-boundary and limit-plus-one tests plus real flowpath/event byte readback.
+Do not silently route these valid files back to Python. Independent contract
+amendment review and a documentation ancestor precede changing the source limit.

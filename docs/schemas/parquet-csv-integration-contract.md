@@ -202,7 +202,9 @@ Replicas with separate filesystems each add their own two-slot budget.
 
 ADR-0149 sets 30 seconds staging, 120 seconds conversion wall time, 100 CPU seconds
 and 600 seconds serving time. Admission does not queue. Preserve the standalone
-512 MiB input, 2 GiB output, 1 GiB address-space and structural ceilings. Thus two
+512 MiB input, 2 GiB output and 1 GiB address-space ceilings. Structural limits
+remain as standalone except the dictionary-entry cap is131,072 per ADR-0149,
+required by observed valid flowpath/road-event dictionaries up to125,855 entries. Thus two
 slots admit at most 5 GiB staged/output payload and 2 GiB child address space,
 plus bounded metadata and web workers. Retained failed scratch occupies its fixed
 slot until safe recovery; it cannot accumulate unbounded request directories.
@@ -342,3 +344,11 @@ raw authorized Parquet remains downloadable. Do not add a metadata rewriter or
 second decoder solely to retain silent byte dropping. This is an approved bounded
 compatibility exception, not a claim of byte parity for these inputs. Preserve
 native parity for duplicate projected labels separately as specified above.
+
+
+### Metadata parser exhaustion
+
+Pandas metadata parser depth/numeric-range exhaustion must fail explicitly with
+input_rejected; it must never masquerade as malformed syntax and silently remove
+index projection. Ordinary malformed UTF-8 JSON syntax retains the documented
+ignored-metadata behavior. Bound parsing before presentation even for hidden fields.
