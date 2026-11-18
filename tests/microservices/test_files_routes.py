@@ -471,6 +471,7 @@ def test_download_watershed_parquet_as_csv_converts_for_nodir_root(
     tmp_path: Path,
     monkeypatch,
     load_browse,
+    native_csv_converter,
 ):
     runid = "run-nodir-csv"
     config = "disturbed9002_wbt"
@@ -488,6 +489,8 @@ def test_download_watershed_parquet_as_csv_converts_for_nodir_root(
     pq.write_table(table, watershed_dir / "channels.parquet")
 
     browse = load_browse(SITE_PREFIX="/weppcloud")
+    import wepppy.microservices.browse.parquet_csv as csv_adapter
+    monkeypatch.setattr(csv_adapter, 'CONVERTER', native_csv_converter)
     monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
     import wepppy.microservices.browse._download as download_mod
     monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
@@ -500,7 +503,7 @@ def test_download_watershed_parquet_as_csv_converts_for_nodir_root(
 
     assert response.status_code == 200
     assert response.headers.get("content-type", "").startswith("text/csv")
-    assert 'filename="channels.csv"' in response.headers.get("content-disposition", "")
+    assert "filename*=UTF-8''channels.csv" in response.headers.get("content-disposition", "")
     csv_text = response.text
     assert "topaz_id" in csv_text
     assert "chn_enum" in csv_text

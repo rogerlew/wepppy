@@ -45,5 +45,26 @@
     "source_changes": [],
     "runtime_changes": [],
     "exitstatus": 0
+  },
+  {
+    "receipt": "692d9eb1e6f840c28cb6e13dd363bfa8",
+    "sha256": "6ff5c0196b3d8fc6b81893d9ad8a10e9d68c3b74ba117faf45d5e65c870357f0",
+    "passed": 104,
+    "status": "passed",
+    "tests_started": true,
+    "pytest_args": [
+      "tests/microservices/test_files_routes.py",
+      "--maxfail=1",
+      "-q"
+    ],
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "head": "185665dce4f8485818b3ccecdc663e5f6cc4cf42",
+    "source_changes": [],
+    "runtime_changes": [],
+    "exitstatus": 0
   }
 ]

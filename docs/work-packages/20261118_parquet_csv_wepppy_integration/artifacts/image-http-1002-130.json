@@ -1,0 +1,78 @@
+{
+  "status": "ok",
+  "records": [
+    {
+      "workers_ready": 8,
+      "uid": 1002,
+      "gid": 130,
+      "groups": [
+        130
+      ],
+      "umask": "0o22"
+    },
+    {
+      "slow_readers": 2,
+      "busy": {
+        "file": "flowpaths.parquet",
+        "status": 503,
+        "bytes": 187,
+        "sha256": "5fd3c95f83c2ada9f027d0bf3da609984372210da536ffd1642711a218649537",
+        "seconds": 7.16489739716053e-05,
+        "request_id": "13b03c5934b84b3ea718b907d4df5f9c"
+      }
+    },
+    {
+      "disconnect_cleanup": true,
+      "lock_files": 2
+    },
+    {
+      "file": "H.wat.parquet",
+      "status": 200,
+      "bytes": 444752939,
+      "sha256": "3b46f65692f3fbab2db74891eb1ce647114c640f021c36cc3e3a156c969c7231",
+      "seconds": 3.9095669952221215,
+      "request_id": "e9302b3593e84581a6715ebb444af810"
+    },
+    {
+      "raw_readback": {
+        "file": "H.wat.parquet",
+        "status": 200,
+        "bytes": 51199048,
+        "sha256": "1b2cfd1a7939c854a4ca33fc16c51b9f65816fa82bc2a0a055dc420648f5fa9d",
+        "seconds": 0.21313842432573438,
+        "request_id": null
+      }
+    },
+    {
+      "file": "flowpaths.parquet",
+      "status": 200,
+      "bytes": 18417716,
+      "sha256": "d509c7c446ba7477063c73fc33d8a336066f273405c808dc4cd23fcb0a417312",
+      "seconds": 0.144528164062649,
+      "request_id": "a78a11916b87482d8d02e471825186e4"
+    },
+    {
+      "invalid": {
+        "file": "invalid.parquet",
+        "status": 422,
+        "bytes": 279,
+        "sha256": "1db7e38f827b0f22c5b9b5da81af502e1e6d81e9772e89452eb79b2e773d846c",
+        "seconds": 4.6995002776384354e-05,
+        "request_id": "f56563105fb94388a272c5aad50214af"
+      }
+    },
+    {
+      "invalid_raw": {
+        "file": "invalid.parquet",
+        "status": 200,
+        "bytes": 15,
+        "sha256": "ac9f5e0a43e5e0fcf0d5e2d06027a1b21e6fea05796c604d662b4ebe99ff2434",
+        "seconds": 0.0004520881921052933,
+        "request_id": null
+      }
+    },
+    {
+      "success_hash_retained_in_service_log": true
+    }
+  ]
+}
