@@ -1,0 +1,19 @@
+{
+  "files": {
+    "wepppy/soils/ssurgo/source.py": "33e4b4af598bb03a05d6317113d3ea96b6aa4bd192fcac3c09ded46e3701b8d7",
+    "wepppy/soils/ssurgo/selection.py": "871d71ec05829e9d4565181ae14544df283952ba6b13d07037454c6115daf6e3",
+    "wepppy/soils/ssurgo/ssurgo.py": "a384f279102594ae481526aebf0f46ac9be1140f552de47ca1507cc91ca0e744",
+    "wepppy/soils/ssurgo/ssurgo.pyi": "dbce31205f822e2374aad447fbc92f30f13b4c34d1ff7e017ed808f197d8dfb0",
+    "wepppy/nodb/core/soils.py": "42de5560ab10ca477e1508611bce95b82771b2e65f7dcb8c5c3967dcaeb8e665",
+    "wepppy/nodb/core/soils.pyi": "25e274ba9816682bd7e96bfb25c267dfec51bf70626e6ef1005d25c32e259852",
+    "docker/docker-compose.dev.yml": "d20fb17c6e2ea88e2fbbc876eda7b50d7b88011c9731606ff9969e01236234b1"
+  },
+  "environment": {
+    "SOIL_DATA_MODE": "mirror-first",
+    "SOIL_DATA_ENDPOINT": "http://soil-api:8080/Tabular/post.rest",
+    "SOIL_DATA_RELEASE": "forest-id-20261001-vi-20161013-v1",
+    "SOIL_CODE_REVISION": "9d09f7ff3bca5d243075763055155c721d84b065"
+  },
+  "unrelated_wip_preserved": true,
+  "compose_existing_vector_settings_preserved": true
+}

@@ -77,6 +77,11 @@ def _run_deploy(
     recovery_health_delay_checks: int = 0,
     recovery_registration_delay_checks: int = 0,
     running_map_drift_before_stop: bool = False,
+    new_service: str = "",
+    stopped_new_service: bool = False,
+    new_inventory_failure: bool = False,
+    new_cleanup_failure: bool = False,
+    import_images_failure: bool = False,
 ) -> tuple[subprocess.CompletedProcess[str], list[str]]:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(parents=True)
@@ -127,6 +132,14 @@ elif [[ "${args}" == *"ps --all --format json"* ]]; then
 elif [[ "${args}" == *" ps "* && "${args}" == *" -q "* ]] \
     || [[ "${args}" == *" ps -q "* ]]; then
     service="${!#}"
+    if [ -n "${FAKE_NEW_SERVICE}" ] && [ "${service}" = "${FAKE_NEW_SERVICE}" ]; then
+        if [ "${FAKE_NEW_INVENTORY_FAILURE}" = 1 ]; then exit 82; fi
+        if [ -f "${FAKE_NEW_MARKER}" ]; then printf 'cid-%s\n' "${service}"; fi
+        if [[ "$*" == *" --all "* ]] && [ "${FAKE_STOPPED_NEW_SERVICE}" = 1 ]; then
+            printf 'cid-stopped-%s\n' "${service}"
+        fi
+        exit 0
+    fi
     if [ "${service}" = "shape-converter" ] && [ "${FAKE_SHAPE_PS_FAILURE:-0}" = 1 ]; then
         exit 82
     fi
@@ -380,7 +393,14 @@ elif [ "${1:-}" = "compose" ]; then
     elif [[ "$*" == *" run "* && "$*" == *"Worker.all"* ]]; then
         printf '1:1\n'
     fi
+    if [[ "$*" == *" rm --stop --force "* ]]; then
+        if [ "${FAKE_NEW_CLEANUP_FAILURE}" = 1 ]; then exit 83; fi
+        rm -f "${FAKE_NEW_MARKER}"
+    fi
     if [[ "$*" == *" up -d "* ]]; then
+        if [[ "$*" != *"wepppy-known-good"* ]] && [ -n "${FAKE_NEW_SERVICE}" ]; then
+            : > "${FAKE_NEW_MARKER}"
+        fi
         rm -f "${FAKE_WORKER_STOPPED_MARKER}"
         if [[ "$*" == *"wepppy-known-good"* ]]; then
             : > "${FAKE_RECOVERY_STARTED_MARKER}"
@@ -416,6 +436,20 @@ fi
 if [[ "${1:-}" == *"tools/security/retained_candidate.py" ]]; then
     /bin/cat >/dev/null
     printf 'retained|%s\n' "${2:-}" >> "${FAKE_COMMAND_LOG}"
+    if [ "${2:-}" = "record-activation" ]; then
+        previous=""
+        for argument in "$@"; do
+            if [ "${previous}" = --known-good-rows ]; then
+                cp "${argument}" "${FAKE_KNOWN_ROWS_RETAINED}"
+            fi
+            previous="${argument}"
+        done
+    fi
+    if [ "${2:-}" = "prepare-images" ]; then
+        if [ "${FAKE_IMPORT_IMAGES_FAILURE}" = 1 ]; then exit 2; fi
+        "${REAL_PYTHON}" -c 'import json,os; print(json.dumps({"images": {name:"sha256:"+"0"*63+"1" for name in os.environ["FAKE_SERVICES"].splitlines()}}))'
+        exit 0
+    fi
     if [ "${2:-}" = "create" ]; then
         printf '{"approval":"%s","receipt":"%s","receipt_sha256":"%064d"}\n' \
             "${FAKE_APPROVAL}" "${FAKE_RECEIPT}" 1
@@ -577,6 +611,13 @@ exec /bin/cp "$@"
             "FAKE_RQ_PROBE_RESULT": rq_probe_result,
             "FAKE_COMMAND_LOG": str(command_log),
             "FAKE_SERVICES": "\n".join(services),
+            "FAKE_NEW_SERVICE": new_service,
+            "FAKE_KNOWN_ROWS_RETAINED": str(state_dir / "retained-images.tsv"),
+            "FAKE_IMPORT_IMAGES_FAILURE": "1" if import_images_failure else "0",
+            "FAKE_STOPPED_NEW_SERVICE": "1" if stopped_new_service else "0",
+            "FAKE_NEW_INVENTORY_FAILURE": "1" if new_inventory_failure else "0",
+            "FAKE_NEW_CLEANUP_FAILURE": "1" if new_cleanup_failure else "0",
+            "FAKE_NEW_MARKER": str(tmp_path / "introduced-service-running"),
             "FAKE_COMPOSE_FILES": compose_files,
             "FAKE_PRESET_QUERY_FAILURE": "1" if preset_query_failure else "0",
             "FAKE_COMPOSE_RENDER_FAILURE": "1" if compose_render_failure else "0",
@@ -675,7 +716,7 @@ exec /bin/cp "$@"
         retained_scope = not any(
             option in arguments
             for option in ("--targeted-web", "--targeted-cap", "--targeted-batch", "--print-plan")
-        ) and "--skip-build" not in arguments
+        ) and "--skip-build" not in arguments and "--retain-images-from" not in arguments
         if retained_scope:
             build_result = subprocess.run(
                 [*deploy_arguments, "--build-retained-candidate"],
@@ -1838,3 +1879,62 @@ def test_governance_failure_precedes_build_stop_and_activation(tmp_path: Path, t
     assert not any(_RQ_SUSPEND in command for command in commands)
     assert not any("build " in command or "--force-recreate" in command for command in commands)
     assert not any(command.startswith("docker|stop ") for command in commands)
+
+
+def test_first_install_service_is_retained_as_absent(tmp_path: Path) -> None:
+    services = _full_services_with_cap_and_renderer()
+    services['soil-api'] = _service('soil:test')
+    result, commands = _run_deploy(tmp_path, services, '--new-service', 'soil-api', new_service='soil-api')
+    assert result.returncode == 0, result.stderr
+    rows = (tmp_path / 'state/retained-images.tsv').read_text()
+    assert 'soil-api\t-\t0\n' in rows
+    assert not any('tag - ' in command for command in commands)
+    assert 'Deployment complete!' in result.stdout
+
+
+@pytest.mark.parametrize('failure', ['undeclared', 'stopped', 'inventory'])
+def test_first_install_requires_explicit_verified_absence(tmp_path: Path, failure: str) -> None:
+    services = _full_services_with_cap_and_renderer()
+    services['soil-api'] = _service('soil:test')
+    flags = () if failure == 'undeclared' else ('--new-service', 'soil-api')
+    result, commands = _run_deploy(tmp_path, services, *flags, new_service='soil-api',
+                                  stopped_new_service=failure == 'stopped',
+                                  new_inventory_failure=failure == 'inventory')
+    assert result.returncode != 0
+    assert not any('up -d' in command or 'stop --timeout' in command for command in commands)
+
+
+@pytest.mark.parametrize('cleanup_failure', [False, True])
+def test_rollback_removes_new_containers_preserves_volumes_and_restores_existing(tmp_path: Path, cleanup_failure: bool) -> None:
+    services = _full_services_with_cap_and_renderer()
+    services['soil-api'] = _service('soil:test')
+    result, commands = _run_deploy(tmp_path, services, '--new-service', 'soil-api',
+                                  new_service='soil-api', candidate_mismatch=True,
+                                  new_cleanup_failure=cleanup_failure)
+    assert result.returncode != 0
+    cleanup = next(command for command in commands if ' rm --stop --force ' in command)
+    assert cleanup.endswith(' soil-api')
+    assert '--volumes' not in cleanup and ' -v' not in cleanup
+    restores = [command for command in commands if 'wepppy-known-good' in command and ' up -d ' in command]
+    assert restores and all('soil-api' not in command for command in restores)
+    if cleanup_failure:
+        assert result.returncode == 88
+        assert not any(_RQ_RESUME in command for command in commands)
+    else:
+        assert any(_RQ_RESUME in command for command in commands)
+        assert not (tmp_path / 'introduced-service-running').exists()
+
+
+@pytest.mark.parametrize('rejected', [False, True])
+def test_imported_images_skip_build_and_never_activate(tmp_path: Path, rejected: bool) -> None:
+    result, commands = _run_deploy(
+        tmp_path, _full_services_with_cap_and_renderer(),
+        '--retain-images-from', '/source/receipt.json',
+        '--source-receipt-sha256', 'a' * 64,
+        import_images_failure=rejected,
+    )
+    assert (result.returncode != 0) == rejected, result.stderr
+    assert 'retained|prepare-images' in commands
+    assert ('retained|create' in commands) == (not rejected)
+    assert not any('build --no-cache' in command or 'builder prune' in command or
+                   ' up -d ' in command or _RQ_SUSPEND in command for command in commands)
