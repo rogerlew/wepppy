@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Require catalog-readable dates on every numbered Architecture Decision Record."""
+"""Validate catalog titles and recorded dates on numbered Architecture Decision Records."""
 
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 import sys
 
@@ -33,6 +34,16 @@ def check_dates(repo_root: Path) -> int:
             print(f'ERROR: {path}: cannot read ADR: {exc}', file=sys.stderr)
             failed += 1
             continue
+        title_pattern = re.escape(record.identifier) + r": \S.*"
+        if not re.fullmatch(r"ADR-[0-9]{4}", record.identifier) or not re.fullmatch(title_pattern, record.title):
+            print(
+                f'ERROR: {path}: invalid decision title. Use a first-level heading '
+                f'"# {record.identifier}: Description" with a four-digit ADR number '
+                'matching the filename and a nonempty description.',
+                file=sys.stderr,
+            )
+            failed += 1
+            continue
         if record.recorded_date is None:
             print(
                 f'ERROR: {path}: missing or invalid recorded date. Add a valid '
@@ -46,9 +57,9 @@ def check_dates(repo_root: Path) -> int:
         print(f'ERROR: {directory}: no numbered ADR files found.', file=sys.stderr)
         return 1
     if failed:
-        print(f'ADR date check failed: {failed} of {checked} ADRs need attention.', file=sys.stderr)
+        print(f'ADR metadata check failed: {failed} of {checked} ADRs need attention.', file=sys.stderr)
         return 1
-    print(f'ADR date check passed: {checked} ADRs have valid recorded dates.')
+    print(f'ADR metadata check passed: {checked} ADRs have matching titles and valid recorded dates.')
     return 0
 
 

@@ -1,4 +1,4 @@
-# ADR: RUSLE `observed_rap` Surface-Rock Partition for `C`
+# ADR-0003: RUSLE `observed_rap` Surface-Rock Partition for `C`
 
 Status: Accepted  
 Date: 2026-05-27  

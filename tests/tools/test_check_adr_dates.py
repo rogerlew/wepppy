@@ -34,7 +34,7 @@ def adr_dir(tmp_path):
     'Date: 2026-11-04 Pacific / 2026-11-05 UTC',
 ])
 def test_checker_accepts_catalog_date_formats(adr_dir, metadata):
-    (adr_dir / 'ADR-0001-valid.md').write_text('# Decision\n\n' + metadata + '\n')
+    (adr_dir / 'ADR-0001-valid.md').write_text('# ADR-0001: Decision\n\n' + metadata + '\n')
     result = run_checker(adr_dir.parents[1], cwd=adr_dir)
     assert result.returncode == 0, result.stderr
     assert '1 ADR' in result.stdout
@@ -53,8 +53,8 @@ def test_checker_accepts_catalog_date_formats(adr_dir, metadata):
     'Date: invalid\nDate: 2026-11-05',
 ])
 def test_checker_rejects_missing_or_invalid_recorded_dates(adr_dir, metadata):
-    (adr_dir / 'ADR-0001-bad.md').write_text('# Decision\n\n' + metadata + '\n')
-    (adr_dir / 'ADR-0002-good.md').write_text('# Good\nDate: 2026-11-05\n')
+    (adr_dir / 'ADR-0001-bad.md').write_text('# ADR-0001: Decision\n\n' + metadata + '\n')
+    (adr_dir / 'ADR-0002-good.md').write_text('# ADR-0002: Good\nDate: 2026-11-05\n')
     result = run_checker(adr_dir.parents[1])
     assert result.returncode == 1
     assert 'ADR-0001-bad.md' in result.stderr
@@ -69,7 +69,7 @@ def test_checker_rejects_unfilled_template_but_excludes_authoring_files(adr_dir)
     record = adr_dir / 'ADR-0001-example.md'
     record.write_text(template)
     assert run_checker(adr_dir.parents[1]).returncode == 1
-    record.write_text(template.replace('Date: YYYY-MM-DD  ', 'Date: 2026-11-05  ', 1))
+    record.write_text(template.replace('ADR-NNNN: [Decision Title]', 'ADR-0001: Example', 1).replace('Date: YYYY-MM-DD  ', 'Date: 2026-11-05  ', 1))
     result = run_checker(adr_dir.parents[1])
     assert result.returncode == 0, result.stderr
     assert '1 ADR' in result.stdout
@@ -103,3 +103,28 @@ def test_checker_rejects_absent_adr_source_tree(tmp_path, state):
 def test_repository_adrs_have_explicit_valid_dates():
     result = run_checker(_REPO_ROOT)
     assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize('title', [
+    '# ADR: Missing number',
+    '# ADR-0002: Wrong number',
+    '# ADR-0001 Missing colon',
+    '# ADR-0001:',
+    '# ADR-0001:   ',
+    '## ADR-0001: Wrong heading level',
+    '```\n# ADR-0001: Fenced title\n```',
+    'No heading',
+])
+def test_checker_rejects_inconsistent_decision_titles(adr_dir, title):
+    (adr_dir / 'ADR-0001-title.md').write_text(title + '\nDate: 2026-11-05\n')
+    result = run_checker(adr_dir.parents[1])
+    assert result.returncode == 1
+    assert 'ADR-0001-title.md' in result.stderr
+    assert 'invalid decision title' in result.stderr
+
+
+def test_checker_requires_four_digit_number(adr_dir):
+    (adr_dir / 'ADR-1-title.md').write_text('# ADR-1: Title\nDate: 2026-11-05\n')
+    result = run_checker(adr_dir.parents[1])
+    assert result.returncode == 1
+    assert 'four-digit' in result.stderr

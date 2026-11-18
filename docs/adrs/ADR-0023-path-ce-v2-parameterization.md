@@ -1,4 +1,4 @@
-# ADR: PATH-CE v2 Parameterization — Sddc Outlet Constraint, Treatment Cost Contract, Severity Map
+# ADR-0023: PATH-CE v2 Parameterization — Sddc Outlet Constraint, Treatment Cost Contract, Severity Map
 
 Status: Accepted (decisions D1–D5 ratified by Roger Lew 2026-07-20; finalized at package closure 2026-07-21)
 Date: 2026-07-20

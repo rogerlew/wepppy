@@ -1,4 +1,4 @@
-# ADR: SSURGO Field Capacity and Wilting Point Sanitization
+# ADR-0012: SSURGO Field Capacity and Wilting Point Sanitization
 
 Status: Accepted  
 Date: 2026-07-06  

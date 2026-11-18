@@ -1,6 +1,7 @@
 # ADR authoring
 
 - Start from `ADR-template.md`; use `ADR-NNNN-short-description.md`.
+- Use `# ADR-NNNN: Description` as the title; match the four-digit filename number.
 - Every numbered ADR requires an explicit, valid `Date: YYYY-MM-DD` in its
   preamble, before the first section heading. Replace the template placeholder.
 - Use the original decision date and retain its recorded timezone in provenance.
@@ -9,7 +10,7 @@
 - Dates only in status/provenance prose do not satisfy the catalog's Date field.
 - Before committing ADR changes, run `python3 tools/check_adr_dates.py` from the
   repository root, plus `wctl doc-lint --path <changed ADR>`.
-- Docs Quality CI enforces the date check for all numbered ADRs, using the same
+- Docs Quality CI enforces title/filename consistency and the date check for all numbered ADRs, using the same
   parser as Usersum. README/template files are excluded.
 - Follow `docs/standards/parameterization-adr-standard.md` for scientific
   parameterization decisions, including explicit decision provenance.

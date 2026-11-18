@@ -1,4 +1,4 @@
-# ADR: Geneva NOAA Rounded-Zero Intensity Row Normalization
+# ADR-0011: Geneva NOAA Rounded-Zero Intensity Row Normalization
 
 Status: Accepted
 Date: 2026-06-30

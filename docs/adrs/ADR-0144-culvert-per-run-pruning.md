@@ -1,4 +1,4 @@
-# ADR: Per-run culvert pruning with finer candidate fallback
+# ADR-0144: Per-run culvert pruning with finer candidate fallback
 
 Status: Accepted; implemented and validated on the native 1 m forest replay
 
