@@ -51,8 +51,8 @@ describe("BatchRunner controller", () => {
             <div id="batch-runner-root">
                 <section id="batch-runner-resource-card">
                     <div data-role="upload-form">
-                        <input type="file" data-role="geojson-input">
-                        <button type="button" data-role="upload-button" data-action="batch-upload">Upload GeoJSON</button>
+                        <input type="file" data-role="geojson-input" accept=".geojson,.json,.zip,.parquet,.geoparquet">
+                        <button type="button" data-role="upload-button" data-action="batch-upload">Upload vector file</button>
                     </div>
                     <div data-role="upload-status"></div>
                     <div data-role="resource-empty"></div>
@@ -239,9 +239,9 @@ describe("BatchRunner controller", () => {
         expect(document.getElementById("batch_run_message").textContent).toContain("Upload a watershed");
     });
 
-    test("uploadGeojson posts FormData and emits completion event", async () => {
-        const file = new TestFile([JSON.stringify({ type: "FeatureCollection", features: [] })], "demo.geojson", {
-            type: "application/geo+json"
+    test("uploadGeojson posts vector FormData and emits completion event", async () => {
+        const file = new TestFile(["PAR1"], "demo.geoparquet", {
+            type: "application/vnd.apache.parquet"
         });
         Object.defineProperty(controller.uploadInput, "files", {
             value: [file],
@@ -278,6 +278,8 @@ describe("BatchRunner controller", () => {
             body: expect.any(FormData),
             headers: { Authorization: "Bearer token-123" }
         }));
+        const requestOptions = requestMock.mock.calls[0][1];
+        expect(requestOptions.body.get("geojson_file").name).toBe("demo.geoparquet");
         expect(completed).toHaveBeenCalled();
         expect(controller.resourceDetails.hidden).toBe(false);
         expect(controller.runBatchButton.disabled).toBe(false);

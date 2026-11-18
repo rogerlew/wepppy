@@ -298,6 +298,7 @@ async def _handle_regular_tree(
     allow_recorder: bool,
     is_admin: bool,
     filter_pattern_default: str,
+    excluded_names: frozenset[str],
 ):
     full_path = os.path.abspath(os.path.join(wd, subpath))
     env._assert_within_root(wd, full_path)
@@ -326,6 +327,7 @@ async def _handle_regular_tree(
         config,
         filter_pattern=filter_pattern,
         hide_mixed_nodir=not is_admin,
+        excluded_names=excluded_names,
     )
 
 
@@ -340,6 +342,7 @@ async def browse_tree_helper(
     allow_recorder: bool,
     is_admin: bool,
     filter_pattern_default='',
+    excluded_names: frozenset[str] = frozenset(),
 ):
     """Handle browse tree traversal for both nodir and regular filesystem paths."""
     nodir_rel_path, nodir_filter = _normalize_nodir_request(
@@ -379,6 +382,7 @@ async def browse_tree_helper(
         allow_recorder=allow_recorder,
         is_admin=is_admin,
         filter_pattern_default=filter_pattern_default,
+        excluded_names=excluded_names,
     )
 
 
@@ -533,6 +537,7 @@ async def _render_directory_response(
     page_entries_override: list[tuple] | None,
     total_items_override: int | None,
     using_manifest_override: bool | None,
+    excluded_names: frozenset[str],
     diff_runid: str,
     diff_wd: str | None,
     base_query: dict[str, str],
@@ -572,6 +577,7 @@ async def _render_directory_response(
         page_entries_override=page_entries_override,
         total_items_override=total_items_override,
         using_manifest_override=using_manifest_override,
+        excluded_names=excluded_names,
     )
 
     redirect_response, total_pages = _normalize_page_or_redirect(
@@ -1034,6 +1040,7 @@ async def browse_response(
     page_entries_override: list[tuple] | None = None,
     total_items_override: int | None = None,
     using_manifest_override: bool | None = None,
+    excluded_names: frozenset[str] = frozenset(),
 ):
     args = request.args
     diff_runid = _sanitize_diff_runid(args)
@@ -1068,6 +1075,7 @@ async def browse_response(
             page_entries_override=page_entries_override,
             total_items_override=total_items_override,
             using_manifest_override=using_manifest_override,
+            excluded_names=excluded_names,
             diff_runid=diff_runid,
             diff_wd=diff_wd,
             base_query=base_query,

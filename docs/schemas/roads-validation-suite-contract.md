@@ -132,18 +132,30 @@ results may change; numerical changes require measurement, since the retained
 legacy fill/forest plant numerical rows are currently identical. Historical
 outputs are not rewritten or certified. No model defaults or formulas change.
 
-## Infeasible full-upload unrutted control
+## Full-upload unrutted acceptance after RUPC-02
 
-The unfiltered `clogging-starch` upload assigned entirely to unrutted design is
-also a negative acceptance case: explicit fill/buffer inputs (30 m at 10% each)
-produce non-positive upstream landuse OFEs for source feature OSUNUM `6`, on
-Topaz 271/272 (WEPP 61/62). Retain that rejection and prove no current receipt.
-Do not alter geometry formulas or silently discard failed records.
+The current [unrutted strip contract](roads-unrutted-strip-contract.md), including
+RUPC-02 top placement, governs full-project acceptance. A non-positive ordinary
+upstream length is no longer by itself a rejection: when road plus fill fits the
+representative hillslope, place the road at the top, omit upstream landuse, and
+retain every positive downstream length. Preserve exact-fit road/fill profiles,
+area conservation, role order, placement provenance and current-result admission.
 
-A separate positive unrutted full-project execution may exclude only that exact
-source feature, bound by the original upload hash and feature identity. Record
-the exclusion and source/input/prepared/completed/skipped counts. No automatic
-"drop until pass" policy is permitted. The three additive controls retain the
-full upload; the unrutted subset is not a like-for-like watershed comparison or
-proof that the unmodified whole-site unrutted configuration succeeds. Retain both
-attempts and describe the distinction in the published report.
+Retain an explicit negative geometry control when road plus fill exceeds the
+hillslope length, with `failed_road_fill_exceeds_hillslope`, dimensions and no
+current receipt. Do not shorten supplied geometry or silently drop failed records.
+Missing, malformed and non-finite dimensions retain their existing failures.
+
+The previously declared OSUNUM 6 exclusion and two non-positive-upstream failures
+are historical controls, not current expected outcomes. Keep their historical
+report evidence unchanged. Re-characterize the full upload against the current
+policy before declaring a fresh positive/negative project result. Do not assume
+that excluding OSUNUM 6 makes the remaining upload feasible. Any new positive
+control must declare its exact input geometry, source hashes, changes/exclusions,
+and preparation/execution counts before running. It is not a like-for-like
+full-upload comparison if input geometry or membership differs.
+
+This reconciliation was authorized on 2026-11-17 during the Roads code quality
+refactor. It removes stale acceptance wording in favor of the already approved
+RUPC-02 policy; no new production formula, default or behavior is authorized.
+The test harness reconciliation and fresh project evidence remain pending.

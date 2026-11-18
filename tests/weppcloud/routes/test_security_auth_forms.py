@@ -187,8 +187,6 @@ def security_route_app(monkeypatch: pytest.MonkeyPatch) -> Flask:
                 ("first_name", "given-name"),
                 ("last_name", "family-name"),
                 ("email", "email"),
-                ("password", "new-password"),
-                ("password_confirm", "new-password"),
                 ("cap_token", "off"),
             ),
         ),

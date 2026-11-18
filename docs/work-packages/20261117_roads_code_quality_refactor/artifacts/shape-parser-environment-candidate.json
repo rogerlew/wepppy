@@ -1,0 +1,53 @@
+{
+  "label": "candidate",
+  "configured_parser_cli": null,
+  "configured_scratch_root": null,
+  "selected_parser_cli": "/usr/local/bin/shape_parser_cli",
+  "validation": [
+    false,
+    "parser_binary_or_provenance_missing"
+  ],
+  "paths": {
+    "/workdir/wepppy/wepppy/microservices/shape_converter/rust/shape_parser_cli/target/release/shape_parser_cli": {
+      "exists": false,
+      "file": false,
+      "executable": false,
+      "symlink": false
+    },
+    "/workdir/wepppy/wepppy/microservices/shape_converter/rust/shape_parser_cli/target/release/shape_parser_cli.json": {
+      "exists": false,
+      "file": false,
+      "executable": false,
+      "symlink": false
+    },
+    "/usr/local/bin/shape_parser_cli": {
+      "exists": false,
+      "file": false,
+      "executable": false,
+      "symlink": false
+    },
+    "/usr/local/bin/shape_parser_cli.json": {
+      "exists": false,
+      "file": false,
+      "executable": false,
+      "symlink": false
+    }
+  },
+  "source_sha256": {
+    "wepppy/microservices/shape_converter/__init__.py": "b4f9757a9ae231db2166b5471d6c045e434d9ac96910c0e7fb766359ce3d2ed9",
+    "wepppy/microservices/shape_converter/abuse_controls.py": "ee89d0a11a5d2644107b9337301b84cd4e006ec63d7559c9836cc451d2641e87",
+    "wepppy/microservices/shape_converter/app.py": "9a74bed11f258ccde6ccb7000c9248e2633798ee350796648a83d19ca2adf442",
+    "wepppy/microservices/shape_converter/archive_validation.py": "c10c029c2e3530547fce42fce9f841ec2ebc85f6703c482df9d4da8e27ee6c00",
+    "wepppy/microservices/shape_converter/async_runtime.py": "dc797227ef16c9877af65ed9817d6434c7e4fea4a9203aaf4fe7d6836bc560aa",
+    "wepppy/microservices/shape_converter/cleanup.py": "006aab3ee35ed941dc74789cf14e22c10b9c54c04a2c074aaee7380292103961",
+    "wepppy/microservices/shape_converter/convert.py": "cbc4f33af09aca70c005c644968d197e0890bab9b0a85d29f495f27936412505",
+    "wepppy/microservices/shape_converter/crs.py": "db98d6cf4b4f214d938a7250cd7335cc2814f178ddc595515f4b580cab43d335",
+    "wepppy/microservices/shape_converter/errors.py": "337f4e91762d755573a02cec63442d45dadf8137343b3ee2cd9598e96491ff53",
+    "wepppy/microservices/shape_converter/inspect.py": "49644493419d253041e081257496eed9dbd0f2c907ae8c383c0c28bb07e9021c",
+    "wepppy/microservices/shape_converter/parser_ipc.py": "8cb6c0c51b0ed461b254b57819cd2b8f8f300e687907742f51921a8982b1eaed",
+    "wepppy/microservices/shape_converter/parser_provenance.py": "b587d40aabb4c7a142f438df65684cc8a7685bdf1be9e4682ccd5c585844cf66",
+    "wepppy/microservices/shape_converter/serialization.py": "afe40ad45b272cb1ec72fdf4fc60ed97a75ea88662990ce5a9405006b4afe725",
+    "tests/shape_converter/integration/test_abuse_controls_api.py": "6e740d0f14d022c408fcc5882c682d5cffc39e5a1472a5d8e82c27ea19e46b5c",
+    "tests/shape_converter/helpers/archive_builder.py": "611315de038e85b1542ca38b2ff7f4af1c92577622ec8fc469fb2de1ff5aab14"
+  }
+}

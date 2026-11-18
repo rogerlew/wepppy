@@ -27,6 +27,7 @@ import time
 import uuid
 import zipfile
 from glob import glob
+from pathlib import Path
 from subprocess import call
 from typing import Any, Mapping, Optional, Sequence
 
@@ -39,6 +40,8 @@ from rq.exceptions import InvalidJobOperation, NoSuchJobError
 from rq.job import Dependency, Job, JobStatus
 from rq.registry import DeferredJobRegistry, StartedJobRegistry
 from redis.exceptions import WatchError
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
+from wepppy.microservices.vector_upload_normalization import RetentionActor
 from wepppy.nodb.single_input_policy import require_feature_allowed
 from wepppy.config.redis_settings import (
     RedisDB,
@@ -945,21 +948,28 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
 
         StatusMessenger.publish(status_channel, f'base_wd: {base_wd}')
         with redisprep_snapshot_guard(runid_wd):
-            init_required = False
-            if os.path.exists(runid_wd) and TaskStub.is_task_enabled(TaskEnum.fetch_dem):
-                StatusMessenger.publish(status_channel, f'removing existing runid_wd: {runid_wd}')
-                shutil.rmtree(runid_wd)
-                init_required = True
-
-            if not os.path.exists(runid_wd):
-                init_required = True
+            init_required = (
+                not os.path.exists(runid_wd)
+                or TaskStub.is_task_enabled(TaskEnum.fetch_dem)
+            )
         
             StatusMessenger.publish(status_channel, f'init_required: {init_required}')
             prep: RedisPrep | None = None
             locks_cleared: list[str] | None = None
             if init_required:
-                StatusMessenger.publish(status_channel, f'copying base project to runid_wd: {runid_wd}')
-                shutil.copytree(base_wd, runid_wd)
+                with retained_tree_operation(
+                    target=Path(runid_wd),
+                    source=Path(base_wd),
+                    project_keys=(f"run:{runid}", f"run:{new_runid}"),
+                    operation="test_run_copy",
+                ) as retention:
+                    retention.checkpoint()
+                    if os.path.exists(runid_wd):
+                        StatusMessenger.publish(status_channel, f'removing existing runid_wd: {runid_wd}')
+                        shutil.rmtree(runid_wd)
+                    StatusMessenger.publish(status_channel, f'copying base project to runid_wd: {runid_wd}')
+                    shutil.copytree(base_wd, runid_wd)
+                    retention.checkpoint()
                 invalidate_catalog_incarnation(runid_wd)
 
                 for nodb_fn in glob(_join(runid_wd, '*.nodb')):
@@ -2890,6 +2900,14 @@ def _release_failure_tolerant_fork_finalizer(queue: Queue, finalizer_job: Job) -
     release_deferred_job_if_ready(queue, finalizer_job)
 
 
+def _fork_retention_actor(job: Job) -> RetentionActor:
+    """Read admission-verified attribution; older jobs remain unattributed."""
+    value = (getattr(job, "meta", None) or {}).get("vector_retention_actor")
+    if isinstance(value, Mapping):
+        return RetentionActor(str(value.get("kind") or "unattributed"), value.get("identifier"))
+    return RetentionActor("unattributed", None)
+
+
 @with_exception_logging
 def fork_rq(
     runid: str,
@@ -2966,6 +2984,7 @@ def fork_rq(
                 format_ttl_failure=lambda exc: f'rq:{job.id} STATUS TTL initialization failed ({exc})',
                 build_rsync_cmd=_fork_rsync_command,
                 clean_env_for_system_tools=_clean_env_for_system_tools,
+                retention_actor=_fork_retention_actor(job),
             )
             if skip_omni_scenarios_contrasts:
                 if _fork_helpers._has_regular_fork_file(new_wd, "omni.nodb"):
@@ -3075,8 +3094,17 @@ def fork_rq(
 
 
 @with_exception_logging
-def archive_rq(runid: str, comment: Optional[str] = None) -> None:
-    _archive_helpers.archive_rq(runid, comment, runtime=_archive_runtime())
+def archive_rq(
+    runid: str,
+    comment: Optional[str] = None,
+    retention_actor: Mapping[str, Any] | None = None,
+) -> None:
+    _archive_helpers.archive_rq(
+        runid,
+        comment,
+        retention_actor,
+        runtime=_archive_runtime(),
+    )
 
 
 @with_exception_logging

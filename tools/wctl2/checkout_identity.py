@@ -25,7 +25,8 @@ except OSError:
 if not matches:
     print('WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '
           'live checkout. Mount the requested checkout before testing, or invoke '
-          'wctl from the checkout already mounted. No tests were started.', file=sys.stderr)
+          'wctl from the checkout already mounted. For an isolated worktree use '
+          'wctl run-pytest-worktree --checkout PATH. No tests were started.', file=sys.stderr)
     raise SystemExit(2)
 """
 

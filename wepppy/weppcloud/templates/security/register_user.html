@@ -21,10 +21,7 @@
       {{ render_aligned_field(register_user_form.first_name, label_text='First name', input_class='pure-input-1', autocomplete='given-name') }}
       {{ render_aligned_field(register_user_form.last_name, label_text='Last name', input_class='pure-input-1', autocomplete='family-name') }}
       {{ render_aligned_field(register_user_form.email, input_class='pure-input-1', placeholder='you@example.com', autocomplete='email') }}
-      {{ render_aligned_field(register_user_form.password, input_class='pure-input-1', autocomplete='new-password') }}
-      {% if register_user_form.password_confirm %}
-        {{ render_aligned_field(register_user_form.password_confirm, label_text='Confirm password', input_class='pure-input-1', autocomplete='new-password') }}
-      {% endif %}
+      <p>We’ll email you a link to verify your address and choose your password.</p>
       <div class="wc-auth-cap">
         {{ cap_macros.cap_prompt("auth-register", "cap-auth-register", auth_cap_base_url, auth_cap_site_key, status_text="Complete verification to create your account.") }}
         {{ register_user_form.cap_token(type='hidden', data_cap_token=True, autocomplete='off') }}

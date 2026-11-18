@@ -1,0 +1,17 @@
+{
+  "checkpoint": "5a6e45c463c6c3ce7720325d78c4060e0f96c1e4",
+  "environment": {
+    "VECTOR_UPLOAD_RUN_FILESYSTEM_ID": "dev-wc1",
+    "VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT": "/wc1"
+  },
+  "frozen_observer_sha256": "ca4c2eada6dea587c522a1b86ac035473c6eabe95842bea09e1ee21d6d68887e",
+  "before": "/tmp/roads-refactor-validation/broad-continuation-v2-source-before.json",
+  "before_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+  "after": "/tmp/roads-refactor-validation/broad-continuation-v2-postexit-source-after.json",
+  "after_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+  "before_files": 2836,
+  "after_files": 2836,
+  "changed_paths": [],
+  "source_unchanged": true,
+  "scope": "Fresh process imports only frozen observer definitions and calls source_manifest; no Continuation construction or pytest observer execution."
+}

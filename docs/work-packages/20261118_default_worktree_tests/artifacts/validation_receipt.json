@@ -1,0 +1,66 @@
+{
+  "runs": [
+    {
+      "log": "evidence/default-tests-focused.log.gz",
+      "log_sha256": "81eb8db09abd8b115cb85021e7f3af81431b1ef32b9871c0184c8cfa7404277f",
+      "receipt": "evidence/default-tests-focused-receipt.json.gz",
+      "receipt_sha256": "810bfbbfa94c7f3d0b5f10cd0239489312c526c4e8e374a5e2a96db2cb7d58ab",
+      "status": "failed",
+      "tests_started": true,
+      "pytest_exitstatus": 1,
+      "source_changes": []
+    },
+    {
+      "log": "evidence/default-tests-focused-final.log.gz",
+      "log_sha256": "7e11ca287c5824c8a6dde6457047c385be45a499dd096a87017caa86e20e90cc",
+      "receipt": "evidence/default-tests-focused-final-receipt.json.gz",
+      "receipt_sha256": "04d5dc3b10f951602656a3ae407e6ee3f718fa0ad79b77e08d86d0151806e8a1",
+      "status": "passed",
+      "tests_started": true,
+      "pytest_exitstatus": 0,
+      "source_changes": []
+    },
+    {
+      "log": "evidence/default-disturbed-collection.log.gz",
+      "log_sha256": "eecd8daf31f4b7b5ac178dba7b685b5d000f015d1af8fd56ffaf968e4f51718c",
+      "receipt": "evidence/default-disturbed-collection-receipt.json.gz",
+      "receipt_sha256": "31588d5b9939930cb6a39fe41d15dcd65401743fe2bf2954621bf2015aa3c3cc",
+      "status": "passed",
+      "tests_started": true,
+      "pytest_exitstatus": 0,
+      "source_changes": []
+    },
+    {
+      "log": "evidence/optin-disturbed-collection.log.gz",
+      "log_sha256": "4ce95fa6d00a9290033d8cce0c18caf21a1201e0eb7a1ccfecc54236e682b73e",
+      "receipt": "evidence/optin-disturbed-collection-receipt.json.gz",
+      "receipt_sha256": "79c06dfc2d4ed164efb9d5a8fb384edb2437addd507a294ac92d1ab8355b79f9",
+      "status": "passed",
+      "tests_started": true,
+      "pytest_exitstatus": 0,
+      "source_changes": []
+    },
+    {
+      "log": "evidence/default-roads-collection.log.gz",
+      "log_sha256": "99ba2a11c2ce4645f3f69f0a84b2adf49a7808b6b74f7d2345037671faaa3f76",
+      "receipt": "evidence/default-roads-collection-receipt.json.gz",
+      "receipt_sha256": "7c9e690f7972d861e1d22c28b62076a6ca9c93c13325f50adc6670aac957a731",
+      "status": "passed",
+      "tests_started": true,
+      "pytest_exitstatus": 0,
+      "source_changes": []
+    },
+    {
+      "log": "evidence/default-broad-preflight.log.gz",
+      "log_sha256": "2823d786f79ebcc877872368efe382f7ba7a09064f23b79a438f03c6e8d2df10",
+      "receipt": "evidence/default-broad-preflight-receipt.json.gz",
+      "receipt_sha256": "9572b140b64f73a8d84a358f20effc5ef585e7e04390737850ecfee198ae474d",
+      "status": "not_ready",
+      "tests_started": false,
+      "pytest_exitstatus": null,
+      "source_changes": []
+    }
+  ],
+  "matrix_producer_unchanged": true,
+  "matrix_producer_sha256": "6e9d8fb4be6e38c7e7e559caf455bfb2412f9ec1498bac44113179f881ad8d32"
+}

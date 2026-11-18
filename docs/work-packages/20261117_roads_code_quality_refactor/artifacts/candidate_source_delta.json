@@ -1,0 +1,86 @@
+{
+  "baseline_head": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "candidate_head": "5ef26481068cada863371d34b2d62ffd2c6e77fa",
+  "changed_or_added_files": {
+    "wepppy/nodb/mods/roads/_constants.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "a44595427152e3ab93d80f4d9cefe940430d7f7b732ab596ace9fd2c53f10561"
+    },
+    "wepppy/nodb/mods/roads/_execution.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "15c408dec725c4e7e93e75984c2884ed67f337034102209502a1bb79d6c87b0d"
+    },
+    "wepppy/nodb/mods/roads/_inputs.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "31c51b50f207cde9fb7a130d02738ddee3b4bccd7045957e25442a94063559d6"
+    },
+    "wepppy/nodb/mods/roads/_management_inputs.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "f92d3b2ab7d6a8a2025d41e94d8f93d683d583fd51f04d17199f2331bc63ca3f"
+    },
+    "wepppy/nodb/mods/roads/_native_runner.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "cc553403ea447b9eb8044e10df50e59db7a00235b9921341d4456a2f61210e20"
+    },
+    "wepppy/nodb/mods/roads/_parameterization_support.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "362ac0339308df1ec41b362aaca2de654ef25763713cba79019177d0b986b33f"
+    },
+    "wepppy/nodb/mods/roads/_pass_routing.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "4e954fb59c108d21ebbb67a2deadda027cd01d4c8182bc9b37e0217cd5ef6d47"
+    },
+    "wepppy/nodb/mods/roads/_point_source.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "8e489ea4020adf32fdc0d24a672cb0153f27db91ad524df4fada90da066f4d4a"
+    },
+    "wepppy/nodb/mods/roads/_prepare.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "b77a2208c634d2e8f5189a5c84e80320b34ce9d8f10977d389cce82baf1b340d"
+    },
+    "wepppy/nodb/mods/roads/_queries.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "f2fc4179d65b9eda931ac823abdffa86d0ce7d3fa3b73bc2796695b8739832a3"
+    },
+    "wepppy/nodb/mods/roads/_reporting.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "493a509c8d2cc4e23a7993cede9dc1b9b044587b984d804a898587a8e3820a82"
+    },
+    "wepppy/nodb/mods/roads/_slope_inputs.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "fd23e48ca799755eb4e36a16fdc1e3fe49fdd0dc2cfe7c184150637ab8ba459b"
+    },
+    "wepppy/nodb/mods/roads/_soil_inputs.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "fcbdf4d840cf9cd555f79eae79de5a90cba33e78d47740e3149c9a5c935fe595"
+    },
+    "wepppy/nodb/mods/roads/_spatial.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "02b84f6bffd77f95854736dd842874e067aa29f31d1e38034c3439b57f04137e"
+    },
+    "wepppy/nodb/mods/roads/_unrutted_execution.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "b89ff1633caf18b8ecc26987f4943729078f156876a78bb84e4ae1d07873232f"
+    },
+    "wepppy/nodb/mods/roads/_unrutted_native.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "587670bd59956c1ee04d066542b3ff837c1627a5d1ba592c6dc955e2511f4001"
+    },
+    "wepppy/nodb/mods/roads/_unrutted_planning.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "340fb7d58ae15f775476fcb541f0df9d39f67bb463aaeba3f61d296153a469ae"
+    },
+    "wepppy/nodb/mods/roads/roads.py": {
+      "baseline_sha256": "ddb110e083fbc85eb29da9efbc66c636ee3333247e1ddbbd6a7337588564f7c5",
+      "candidate_sha256": "a53920220275bc46afc2ba405f061788c3621b87fc22b4c0bcbd3a3796775321"
+    },
+    "tests/roads/test_roads_project.py": {
+      "baseline_sha256": "e5e53d386bcd12b26020604be4508fb5db1d0bfa42c261b3de13a14c27cb1693",
+      "candidate_sha256": "7ff4de831cc04e5cee9c54779e3f168af0177072a4a546b2f8ed16d651c8b73f"
+    },
+    "tests/roads/unrutted_project.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "6a8e9ed608c2d172cb8cd53ce18b3a3b927c153b4eb75a0a90ed12d57827c72d"
+    }
+  }
+}

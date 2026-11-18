@@ -45,7 +45,7 @@ def _run_checked_test(ctx: typer.Context, context: CLIContext, command: str) -> 
 
 def register(app: typer.Typer) -> None:
     @app.command(
-        "run-pytest",
+        "run-pytest-shared",
         context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
     )
     def run_pytest(ctx: typer.Context) -> None:

@@ -7,6 +7,9 @@ primary orchestration file.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
+from pathlib import Path
+
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation, retained_tree_repair_pending
 
 from wepppy.nodb.base import NoDbAlreadyLockedError, nodb_setter
 
@@ -177,9 +180,15 @@ class OmniStateContrastMixin:
         missing: List[str],
     ) -> None:
         scenario_dir = _join(self.wd, OMNI_REL_DIR, 'scenarios', name)
-        if _exists(scenario_dir):
+        if _exists(scenario_dir) or retained_tree_repair_pending(Path(scenario_dir), "omni_scenario_delete"):
             try:
-                shutil.rmtree(scenario_dir)
+                with retained_tree_operation(
+                    Path(scenario_dir), project_keys=(f"run:{self.runid}",),
+                    operation="omni_scenario_delete",
+                ) as retention_operation:
+                    retention_operation.checkpoint()
+                    if _exists(scenario_dir):
+                        shutil.rmtree(scenario_dir)
                 pup_relpath = os.path.relpath(scenario_dir, self.wd)
                 _clear_nodb_cache_and_locks(self.runid, pup_relpath)
             except OSError as exc:
@@ -515,12 +524,17 @@ class OmniStateContrastMixin:
         if not _exists(contrasts_dir):
             contrasts_dir = None
         if contrasts_dir:
-            for entry in os.listdir(contrasts_dir):
-                if entry == '_uploads':
-                    continue
-                path = _join(contrasts_dir, entry)
-                if os.path.isdir(path):
-                    shutil.rmtree(path)
+            with retained_tree_operation(
+                Path(contrasts_dir), project_keys=(f"run:{self.runid}",),
+                operation="omni_contrast_cleanup",
+            ) as retention_operation:
+                for entry in os.listdir(contrasts_dir):
+                    if entry in {'_uploads', 'vector_upload_attempts'}:
+                        continue
+                    path = _join(contrasts_dir, entry)
+                    if os.path.isdir(path):
+                        retention_operation.checkpoint()
+                        shutil.rmtree(path)
         status_dir = self._contrast_sidecar_dir()
         if _exists(status_dir):
             for entry in os.listdir(status_dir):
@@ -539,12 +553,17 @@ class OmniStateContrastMixin:
             contrasts_dir = None
         active = {str(contrast_id) for contrast_id in active_ids}
         if contrasts_dir:
-            for entry in os.listdir(contrasts_dir):
-                if entry == '_uploads':
-                    continue
-                path = _join(contrasts_dir, entry)
-                if os.path.isdir(path) and entry not in active:
-                    shutil.rmtree(path)
+            with retained_tree_operation(
+                Path(contrasts_dir), project_keys=(f"run:{self.runid}",),
+                operation="omni_contrast_cleanup",
+            ) as retention_operation:
+                for entry in os.listdir(contrasts_dir):
+                    if entry in {'_uploads', 'vector_upload_attempts'}:
+                        continue
+                    path = _join(contrasts_dir, entry)
+                    if os.path.isdir(path) and entry not in active:
+                        retention_operation.checkpoint()
+                        shutil.rmtree(path)
         status_dir = self._contrast_sidecar_dir()
         if _exists(status_dir):
             for entry in os.listdir(status_dir):
@@ -567,8 +586,14 @@ class OmniStateContrastMixin:
     def _clean_contrast_run(self, contrast_id: int) -> None:
         contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
         path = _join(contrasts_dir, str(contrast_id))
-        if isdir(path):
-            shutil.rmtree(path)
+        if isdir(path) or retained_tree_repair_pending(Path(path), "omni_contrast_delete"):
+            with retained_tree_operation(
+                Path(path), project_keys=(f"run:{self.runid}",),
+                operation="omni_contrast_delete",
+            ) as retention_operation:
+                retention_operation.checkpoint()
+                if isdir(path):
+                    shutil.rmtree(path)
         self._clear_contrast_run_status(contrast_id)
 
     def _contrast_sidecar_dir(self) -> str:

@@ -18,8 +18,12 @@ from contextlib import ExitStack
 from dataclasses import dataclass
 from glob import glob
 import json
+from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import Any, Callable, TextIO
+
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
+from wepppy.microservices.vector_upload_normalization import RetentionActor
 
 
 FORK_RSYNC_HEARTBEAT_PREFIX = "FORK_HEARTBEAT "
@@ -1375,6 +1379,7 @@ def prepare_fork_run(
         )
     ),
     clean_env_for_system_tools: Callable[[], dict[str, str]] = _clean_env_for_system_tools,
+    retention_actor: RetentionActor | None = None,
 ) -> str:
     if mutate_root_fn is None:
         from wepppy.runtime_paths.mutations import mutate_root as mutate_root_fn
@@ -1424,13 +1429,22 @@ def prepare_fork_run(
 
     env = clean_env_for_system_tools()
     publish_status(status_channel, "Copying project files...")
-    _run_rsync_with_bounded_output(
-        cmd=cmd,
-        run_left=run_left,
-        status_channel=status_channel,
-        publish_status=publish_status,
-        env=env,
-    )
+    with retained_tree_operation(
+        target=Path(new_wd),
+        source=Path(wd),
+        project_keys=(f"run:{runid}", f"run:{new_runid}"),
+        actor=retention_actor,
+        operation="fork_copy",
+    ) as retention:
+        retention.checkpoint()
+        _run_rsync_with_bounded_output(
+            cmd=cmd,
+            run_left=run_left,
+            status_channel=status_channel,
+            publish_status=publish_status,
+            env=env,
+        )
+        retention.checkpoint()
     publish_status(status_channel, "Copying project files... done.")
 
     invalidate_catalog_incarnation(new_wd)

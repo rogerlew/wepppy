@@ -1,0 +1,36 @@
+{
+  "baseline_head": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "baseline_direct_tests": {
+    "failed": 2,
+    "seconds": 11.64,
+    "failure": "RecordingRedis.eval missing in inherited vector-retention maintenance lease"
+  },
+  "baseline_other_consumers": {
+    "passed": 3,
+    "skipped": 4,
+    "seconds": 9.94,
+    "limitation": "Four disposable Redis archive tests skip: redis-server/RQ212_TEST_REDIS_SOCKET unavailable"
+  },
+  "candidate_owned_modules": {
+    "passed": 76,
+    "failed": 0,
+    "seconds": 42.14
+  },
+  "source_sha256": {
+    "tests/nodb/test_cli_parquet_lineage.py": "4132bd669065517144bd5a1886e27c5bd113fa668546c81744672fb7991a6510",
+    "tests/wepp/reports/test_report_cache_freshness.py": "20be12834dc9af40e258ff1f450d58d7452739cc34ed5771edead119679686d8"
+  },
+  "logs_sha256": {
+    "candidate_logs/direct-archive-baseline.log": "432a60979e38146f5e391b58fde210bd00c007b24549e465a900b6db44f5fce2",
+    "candidate_logs/direct-archive-redis-baseline.log": "8156959dd4fff980a87a316bcad557870f381c8184e5d980f1f2855950671782",
+    "candidate_logs/direct-archive-candidate.log": "0094325ca1277e3e30e3366e6bb6ec1c25b2583b35e7c55385b5b839a87bb33f"
+  },
+  "scope": "Only the two directly reproduced ordinary provenance tests clear inherited VECTOR_UPLOAD_RUN_FILESYSTEM_ID/ROOT using monkeypatch. Dedicated retention tests and production unchanged.",
+  "original_logs_sha256": {
+    "candidate_logs/direct-archive-baseline.log": "51b1d54893b58f17d7a9b5282aa5df2b8f1c3b47dad5c12e3514ef43122fd0cb",
+    "candidate_logs/direct-archive-redis-baseline.log": "ef7f35616bbf86a2603f463b16a69a9c90ac6212c33c63e0fc00fde6e269b73f",
+    "candidate_logs/direct-archive-candidate.log": "89ba6729efce663d3ea4a146a7844e040281e5495fae217437ef76fffabc1229"
+  },
+  "log_normalization": "Retained copies strip trailing whitespace only; original logs remain under /tmp/roads-refactor-validation.",
+  "environment_qualification": "These baseline/candidate archive checks used the earlier global VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT=/tmp driver override. They do not establish failures under canonical /wc1; see validation_environment_scope.md."
+}

@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 from wepppy.nodb import base as nodb_base
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
 
 from .utils import sanitise_component
 
@@ -145,15 +146,27 @@ class ProfileAssembler:
         slug_key = sanitise_component(slug or run_id or "profile")
         profile_root = self.data_repo_root / "profiles" / slug_key
         capture_target = profile_root / "capture"
-        capture_target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(draft_root, capture_target, dirs_exist_ok=True)
+        with retained_tree_operation(
+            target=capture_target, source=draft_root,
+            project_keys=(f"run:{run_id}", f"profile:{slug_key}"),
+            operation="profile_promote_capture", managed_export=True,
+        ) as retention:
+            retention.checkpoint()
+            capture_target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(draft_root, capture_target, dirs_exist_ok=True)
 
         run_src = None
         run_pointer = draft_root / "run_dir.txt"
         if run_pointer.exists():
             run_src = Path(run_pointer.read_text().strip())
             if run_src.exists():
-                shutil.copytree(run_src, profile_root / "run", dirs_exist_ok=True)
+                with retained_tree_operation(
+                    target=profile_root / "run", source=run_src,
+                    project_keys=(f"run:{run_id}", f"profile:{slug_key}"),
+                    operation="profile_promote_run", managed_export=True,
+                ) as retention:
+                    retention.checkpoint()
+                    shutil.copytree(run_src, profile_root / "run", dirs_exist_ok=True)
 
         return {
             "profile_root": str(profile_root),

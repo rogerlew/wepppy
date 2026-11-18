@@ -1,0 +1,54 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-baseline:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-yx4fsn08 2b73caeabdd96c77d597a963f8f245e9bdd57c97e3f861474d657f572b8511f5 && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m pytest tests/rq/test_batch_rq_delete_batch.py::test_delete_batch_rq_removes_workspace -q --tb=short --junitxml=/tmp/roads-refactor-validation/batch-delete-baseline-canonical.xml'
+time="2026-11-17T16:58:49-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-91ae4d2bafec Creating
+ Container docker-weppcloud-run-91ae4d2bafec Created
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_delete_batch_rq_removes_workspace ____________________
+tests/rq/test_batch_rq_delete_batch.py:62: in test_delete_batch_rq_removes_workspace
+    result = batch_rq.delete_batch_rq(batch_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/rq/batch_rq.py:548: in delete_batch_rq
+    retention_root = _retention_delete_root(
+wepppy/rq/project_rq_delete.py:105: in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_delete_batch_rq_removes_w0/demo' is not in the subpath of '/wc1'
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.rq.batch_rq:batch_rq.py:597 Boundary exception at wepppy/rq/batch_rq.py:280
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/batch_rq.py", line 548, in delete_batch_rq
+    retention_root = _retention_delete_root(
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/rq/project_rq_delete.py", line 105, in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_delete_batch_rq_removes_w0/demo' is not in the subpath of '/wc1'
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/rq/test_batch_rq_delete_batch.py::test_delete_batch_rq_removes_workspace
+1 failed, 2 warnings in 10.11s

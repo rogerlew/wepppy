@@ -1,0 +1,364 @@
+# Tracker - Vector upload normalization
+
+## Quick Status
+
+**Timezone**: UTC  
+**Last updated**: 2026-11-17
+**Current phase**: Closed 2026-11-17 — M0-M5 accepted locally
+**Security impact**: high  
+**Starting revision**: `05e3450fa7d3b24572e65161100670ae542a6ea8`  
+**M0 contract ancestor**: `1aebebfe0`  
+**Architecture**: separate bounded `geoparquet_parser_cli` sibling to the existing
+`shape_parser_cli`; both normalize through shape-converter to canonical GeoJSON
+
+## Task Board
+
+- [x] Inventory the four first-party user-facing GeoJSON upload workflows.
+- [x] Exclude the culvert API and defer D-Tale.
+- [x] Record the operator-approved sibling Rust CLI architecture.
+- [x] Scaffold package, active ExecPlan, review artifacts, and project tracking.
+- [x] M0: verify the upload inventory and current size/geometry/error contracts.
+- [x] M0: ratify the normalization, GeoParquet security, CRS, metadata, and error contracts.
+- [x] M0: operator selected Polygon/MultiPolygon-only new Batch Runner uploads.
+- [x] M0: author and approve the resource-limit ADR.
+- [x] M0: conditionally accept the exact Rust dependency graph behind owned preflight.
+- [x] M0: retain red tests and hostile fixtures for every accepted/rejected state.
+- [x] M1: implement and directly test `geoparquet_parser_cli` at `eb6b0d3fb`.
+- [x] M2: final3 qualification passed; corrected final5
+      `sha256:4487dec16cdb…e98fa` supersedes it as the local exact candidate.
+      Final4 is disqualified because its claimed source revision does not exist.
+      Final5 has Git-resolved source-manifest proof and fresh daemon-free
+      SBOM/scan evidence.
+- [x] M3-M4: integrate all four browser/workflow upload paths without bypassing
+      receiving validation; preserve originals, provenance and failed replacement.
+- [x] M5: final correctness/code/QA/security/operations successor re-reviews.
+- [x] M5: prepare local validation and rollout/recovery evidence without
+      publishing or deploying.
+
+## Decisions
+
+- **2026-11-16 23:22 UTC** - Follow the shape-converter Rust CLI pattern for
+  hostile GeoParquet parsing, but use a separate `geoparquet_parser_cli` binary.
+  This keeps format-specific parsers and contracts narrow.
+- **2026-11-16 23:22 UTC** - Shapefile ZIP and GeoParquet normalize to canonical
+  GeoJSON before the existing workflow validators. The converter is not a trust
+  substitute for Roads, AgFields, Omni, or Batch Runner validation.
+- **2026-11-16 23:22 UTC** - Culvert API paths are excluded and D-Tale is
+  deferred. Neither may be pulled into implementation or closure claims.
+- **2026-11-16 23:22 UTC** - No PyArrow hostile-input parser and no new service,
+  queue, datastore, daemon, protocol, or deployment topology are authorized.
+
+- **2026-11-17** — Operator confirmed public/team project sharing includes
+  retained originals and private archives. Contract checkpoint `bbb216c0b`
+  preserves this behavior and charges physical copies to the verified copying
+  principal. No additional owner approval or evidence exclusion is required.
+- **2026-11-17** — Replacement admission grants no speculative deletion credit:
+  deferred stale-workspace cleanup can retain the old physical bytes.
+## Resolved Contract Decisions
+
+- Binary inputs preserve each endpoint source limit and add the independent
+  ADR-0145 decoded/canonical-output ceilings.
+- Batch Runner geometry resolved: Polygon/MultiPolygon-only new uploads;
+  implementation and regression evidence retained.
+- The supported GeoParquet metadata/version/codec subset and error translation
+  are ratified in the normalization contract and ADR-0145.
+- Existing offline PyProj performs CRS transformation; missing best grids and
+  ballpark transforms fail closed.
+- Canonical GeoJSON remains the visible accepted workflow resource. Complete
+  originals, SHA-256 provenance, receipts and failed canonical candidates are
+  privately retained under the bounded attempt lifecycle.
+
+## Risks and Blockers
+
+- Binary Parquet metadata, compression, encodings, and WKB can amplify CPU,
+  memory, allocation, and scratch use before logical row validation.
+- Parquet external file references, encryption, Arrow extension metadata, nested
+  schemas, and dataset semantics broaden authority and are rejected by default.
+- CRS ambiguity can silently move geometry; explicit unknown CRS cannot be
+  treated as WGS84.
+- The converter and workflow limits may diverge and create valid-state failures
+  unless the contract defines both boundaries together.
+- The existing shape-converter hardening has local closure, but production
+  rollout is still separate. This package cannot claim a deployed foundation.
+
+## Required Evidence
+
+- Verified source inventory and current endpoint-contract matrix.
+- Ratified normalization/security contract and parameterization ADR.
+- Exact dependency lock, unsafe/transitive inventory, vulnerability disposition,
+  build provenance, and malformed-input evidence.
+- Red/green hostile fixture matrix and valid format-equivalence fixtures.
+- Exact-image resource, cancellation, cleanup, readiness, and recovery receipts.
+- Per-workflow normalized payload and downstream artifact semantic readback.
+- Completed correctness, code, QA, security, and operations review artifacts.
+
+Final source: `4da014fee8a3c80643fc542165d6c529a85532ad` (executable `f96483108`).
+All five independent review lanes accept the final scope with no unresolved
+High/Medium findings. Broad predecessor: 7,966 passed/205 skipped before the
+reviewed Roads source-hash gate. First continuation: 1,719 passed/259 skipped;
+native-binary continuation: 2,422 passed/15 skipped; final continuation after
+building the generated controller bundle passed 1,533/1 skipped; final browser
+continuation after supplying locked dependencies and static assets: 854 passed and 1 skipped.
+Affected/source-qualified successor suites pass 721, 142, 98 and 130 cases with
+no skips; counts overlap. Exact commands, revisions, source/image hashes,
+individual results and skips are in
+`artifacts/20261117_final_validation.json`. See `artifacts/20261117_final_acceptance.md`.
+No remote integration, image publication or production deployment occurred.
+Earlier sections below are historical checkpoints superseded by this closure.
+
+## Notes - 2026-11-16 23:22 UTC
+
+- Package scaffolded only. No application code, dependency, image, upload
+  contract, or production behavior changed.
+- Next action is M0 contract-first work. Do not begin parser implementation until
+  the ADR, dependency evaluation, and open contract decisions are approved.
+
+
+
+## Execution checkpoint - 2026-11-16
+
+Execution started. Read the active plan, integration/history governance, and
+upload endpoint contract. Created task branch `codex/vector-upload-normalization`
+in `/tmp/wepppy-vector-upload-normalization` at
+`05e3450fa7d3b24572e65161100670ae542a6ea8`.
+The package exists in the shared checkout but is absent from that committed
+revision. Preserve and transfer the package before implementation; do not assume
+the task worktree contains uncommitted predecessor changes.
+
+The operator selected Polygon/MultiPolygon-only Batch Runner uploads; the
+active plan records rationale and compatibility/regression coverage. M0 is incomplete;
+no parser, workflow, dependency, image, or deployment change has been made.
+Next: reconcile required uncommitted source context into the task worktree,
+verify the source matrix, and complete M0 contracts and evidence before M1.
+
+
+## Decision amendment - 2026-11-16
+
+Polygon/MultiPolygon-only Batch Runner admission is authorized. Preserve saved
+projects; reject unsupported new uploads before resource replacement. See the
+active ExecPlan section "Decision amendment - Batch Runner geometry". The package
+has been copied into the isolated task worktree; unrelated shared changes were
+not transferred. M0 remains incomplete.
+
+
+## M0 evidence update - source and dependency audit
+
+Retained partial source verification in `artifacts/20261116_source_checkpoint.md`
+and drafted `docs/schemas/vector-upload-normalization-contract.md`. The dependency
+evaluation records pre-validation allocation concerns in cached parquet 53.4.1.
+No dependency is accepted and M0 remains open. Next work: finish source traces,
+evaluate a bounded current dependency candidate, author resource ADR and red
+fixtures, then review the complete checkpoint before M1.
+
+
+Validation checkpoint: direct `markdown-doc lint` from the task worktree passed
+for the draft contract (1 file) and package (7 files). Installed `wctl doc-lint`
+resolved the shared checkout: an absolute task path panicked and a relative draft
+path reported zero files. Those wrapper runs are not candidate validation.
+Parquet 60.1.0 source was acquired for evaluation; exact graph and allocation
+bounds remain unapproved. No runtime change or milestone completion is claimed.
+
+## Resumed execution evidence
+
+Candidate documentation selection is fixed through explicit
+`wctl --project-dir /tmp/wepppy-vector-upload-normalization`; draft contract lint
+validated one file without errors. No wrapper implementation change is needed.
+Independent correctness, dependency/security, QA and operations M0 reviews are
+active. Proposed ADR-0145 and threat matrix retain numeric/resource and
+observability decisions. M0 remains open; no runtime implementation has begun.
+
+## External review blocker and retained outcome
+
+The required dependency/security review agent was terminated by an account-
+security gate requiring Daybreak Blue eligibility and approved hardware-key
+sign-in. See `artifacts/20261116_security_review.md`. Do not bypass that gate or
+count partial findings as approval. The operator raw-input deletion exception
+is also pending. M0 is not accepted; no standalone checkpoint SHA exists.
+
+Proposed ADR-0145, expanded canonical draft, contract decision, source/state/
+threat matrices, evaluation-only lock/tree/audit, deterministic fixture corpus
+and isolated candidate Compose harness are retained. Operations/source review
+findings remain tracked; none is final implementation acceptance. M1–M5, exact
+candidate-image qualification, downstream artifact validation and final five-lane
+review have not occurred. No runtime changes, remote integration, image
+publication or deployment occurred. Shared unrelated changes were preserved.
+
+## Final retained QA and documentation evidence
+
+QA prepared 46 deterministic fixtures totaling 34,949 bytes. Independent
+correctness readback verified hashes/sizes, eight valid semantic controls, seven
+metadata-negative controls and zero contradictory outcomes for identical bytes.
+Manifest SHA-256: `3cb63c002cd9a5e9eda9c0210ad3f0aa679621e21177cf84a01709cc9378885f`.
+Candidate execution is NOT_RUN; hostile decoding, threshold/resource, ZIP
+equivalence, lifecycle and workflow acceptance remain pending. See
+`artifacts/20261116_qa_checkpoint.md`. Documentation lint and ADR date validation
+passed from the task checkout using explicit project selection. These checks
+do not advance M0 acceptance. No accepted checkpoint commit was created.
+
+Final fixture expectation amendment: all-null geometry now explicitly expects
+CLI rejection because finite observed bounds are required. All 46 fixture byte
+hashes are unchanged; regenerated manifest SHA-256 is
+`30f5ea40ae35fcd41843ca29e0d75671f32fc8e5a80a024b1965709daeac7bd5`.
+The earlier hash records the independently reviewed corpus before this expectation
+clarification. Regeneration/readback and QA Markdown lint pass; no runtime test
+is implied.
+
+## Daybreak M0 review and canonical amendments
+
+The resumed independent security review conditionally accepts the exact minimal
+graph only behind owned same-descriptor structural preflight. Canonical ADR,
+dependency, endpoint, normalization and converter documents are amended. The
+second canonical re-review closed the lock-hash authority finding. Focused
+retention correctness and security reviews pass after closing the explicit
+authorization and shared-filesystem admission findings. No unresolved High or
+Medium M0 finding remains. The standalone checkpoint commit and revision record
+are `1aebebfe0`; runtime implementation may now begin.
+
+## Original and hostile upload retention decision
+
+The operator requires users to recover complete within-limit original files and
+requires source SHA-256 provenance for conversion. Complete rejected/hostile
+uploads are retained for review and possible human account-governance action.
+The canonical design stores neutral-suffix private project artifacts, blocks
+anonymous public-run access and every server-side interpretation, and records
+minimal verified actor identity without credentials, sessions or client IP.
+Explicit owner/root or existing Batch group authority bypasses public-run read
+allowance. Existing-Redis atomic admission bounds all projects, principals,
+unattributed use and concurrent reservations while preserving 10 GiB free space.
+Oversize partial files are deleted and cannot claim a complete hash. No automatic
+ban or new datastore is authorized. The final security re-review passed before
+the standalone M0 commit.
+
+## M1 and M2 execution update
+
+M1 is complete at `eb6b0d3fb`: 30 locked/offline Rust tests, strict clippy and
+format checks, the final 53-file hostile/control corpus, and independent
+correctness/security review pass. M2 implementation is committed at
+`0e58feced`. Exact local image
+`sha256:d131f3df03a12083c138c0ebc65a4576390d90c3ad80352f62a041405b102df4`
+passed readiness/provenance, valid/projected conversion, inspect, unavailable-
+grid rejection, hostile-limit rejection, containment and scratch readback.
+See `artifacts/20261116_m2_validation.md`. Publication and deployment did not
+occur. Independent M2 review remains open while M3 source integration begins.
+
+## M3-M5 closure candidate - 2026-11-17
+
+M2 review passed for exact final3. Corrected final5 is the current local exact
+candidate; final4 is disqualified. Workflow integration was committed at
+`9ac7cb8f6`; the successor closure candidate adds reversible mutation, monotonic
+terminal receipts, durable Redis reconciliation/rebuild, private sensitive
+archives, resolved-alias protection, verified session-human provenance, bounded
+converter responses/error mapping, and independent binary UI/server activation.
+The expanded affected suite, exact final5 common-helper test and actual HTTP
+boundary tests cover Roads, AgFields, Omni run/dry-run and Batch for GeoJSON,
+Shapefile ZIP, `.parquet`, and `.geoparquet`. Final five-lane re-review is
+required before M5 acceptance.
+Publication, production deploy, and remote-host proof remain outside authority.
+
+## Successor remediation and final5 evidence - 2026-11-17
+
+The successor closes the review findings for exact-root ledger authority,
+active project-scope reconciliation, active-reservation-preserving rebuild,
+Batch rollback lifetime, Roads/AgFields post-commit side effects, owner/root
+private-archive authority, and idempotent destructive lifecycle repair. A
+mode-private filesystem marker plus Redis pending set now blocks runtime
+admission and readiness until deletion/restore accounting is rebuilt and read
+back. Private archive retry uses the identical globally qualified identity.
+
+Affected validation is 303 passed, one skipped. The exact final5 parsers pass
+315 shape-converter tests, and 10 exact-image receiving-boundary selections pass
+across all four supported suffixes. Fresh final5 SPDX/Grype evidence and the
+tar-to-image-ID/source-manifest proof are retained in the package artifacts.
+Final independent successor reviews remain required; no image publication,
+remote integration or deployment occurred.
+
+## Freeze-preparation successor evidence - 2026-11-17
+
+The next successor closes the remaining moving-review findings: renewable scope
+leases stop on unexpected receipt/accounting failures; project deletion releases
+the global lease if project-scope acquisition fails; private restore acquires
+global-before-project for incoming sensitive evidence; Omni holds one distributed
+workflow fence and reports competing admission as a conflict; Batch and AgFields
+hold file/state/receipt rollback inside their controller lock.
+
+Revision-pure focused validation is 384 passed, four skipped. A separate 16-case
+suite used the exact final5 HTTP converter and real detached controllers to read
+back Roads segments, AgFields rotation Parquet, Batch target watershed input,
+and Omni status-report artifacts for GeoJSON, Shapefile ZIP, Parquet, and
+GeoParquet. Signed Flask session cookies minted real session JWTs; accepted and
+hostile uploads retained only the verified numeric human ID, and the hostile
+event omitted session, email, roles, claims, and client IP. Final five-lane
+reviews remain required against the committed successor. Publication, remote
+integration, and deployment remain outside authorization.
+
+
+## Resumption checkpoint - 2026-11-17
+
+Recovered original execution session `01a1e6c3-7cf1-77c3-9cec-7050642a46ef`.
+The task branch at `0e861887e` contains M0-M4 and local final5 qualification;
+the shared checkout contains a stale scaffold and is not the working source.
+The retained frozen QA review has six Medium findings. Dedicated review lanes
+are closing real downstream artifact evidence, reproducible fixture/provenance
+binding, destructive recovery faults, all five signed-session boundaries,
+thread-failure-sensitive Batch concurrency, and whole-Batch deletion accounting.
+Initial run/Batch recovery and concurrency selection passes 50 tests. Final
+combined revision binding, full sanity gate and independent review remain open.
+
+Canonical conformance detail is in the normalization contract, "Retention and
+provenance" destructive-operation paragraphs: whole-Batch deletion shares the
+existing durable accounting lifecycle, including child-run upload scopes.
+Sanitized submitted filenames remain required in private receipts; only security
+events exclude filenames. The QA wording did not authorize removing that record.
+
+
+## Retained resumption outcome - 2026-11-17
+
+Current implementation commit: `1bb088da5eb3aed6a2d591333ad7931644a21329` on
+`codex/vector-upload-normalization`. Commits `de15403aa`, `ee26389f0`,
+`860ba6760`, and `1bb088da5` close the original six frozen QA findings, parent
+repair dependency, and Omni contrast cleanup deleting retained attempts.
+
+Canonical per-case receipt: `artifacts/20261117_resumed_validation.json`.
+It retains source revisions, complete qualified fixture hashes, exact final5
+readiness/image identity, commands, individual outcomes and skip reasons.
+Focused validation at `ee26389f0`: 452 passed, four skipped. The successor
+selection at `1bb088da5`: 206 passed, zero skipped, including those four exact
+receiving boundaries with the retained fixture directory configured. These
+selections overlap and are not additive. All 95 changed source/test/tool files
+match the final container snapshot. Frontend lint, 126 Jest suites/1,091 tests
+and nine Node tests pass. Stub completeness and changed broad-catch checks pass.
+The full sanity run was interrupted after 475 passed/28 skipped when the
+operator decision reopened scope; this is explicitly not a full-suite pass.
+
+Independent correctness/security review reproduced a High privacy defect:
+ordinary public-run forks copy source-private upload evidence and archives to a
+new owner. A Medium failure class also affects copy/reset accounting. The bounded
+inventory is `artifacts/20261117_vector_retention_copy_reset_inventory.md`;
+review findings are in `20261117_resumed_correctness_review.md` and
+`20261117_resumed_security_review.md`. Direct Omni cleanup was repaired within
+the existing retention contract; cloning disposition is not inferred.
+
+The operator question is pending: keep private evidence only in its source with
+a provenance reference in copied projects (recommended), or copy it only for
+authorized owners with full quota accounting and omit it from non-owner forks.
+Artifact-observability requires an explicit disposition before excluding these
+project records. No dependent copy-policy change has been made.
+
+Next: ratify the chosen copy/derivative semantics in the canonical normalization
+contract and a standalone checkpoint; remediate every confirmed copy/reset
+consumer in the inventory, including existing destination evidence; prove real
+copy/privacy/accounting/provenance and reset behavior; then freeze one final
+candidate and rerun affected/full gates and all five independent reviews. M5 is
+not complete. Remote integration, publication and production deployment have
+not occurred. The shared master and its unrelated changes remain untouched.
+
+
+## Operator sharing decision - 2026-11-17
+
+The operator rejected the proposed fork privacy restriction: public sharing or
+team access permits ordinary authorized copies to inherit the complete project.
+Canonical authority is the normalization contract section “Sharing, copies, and
+existing workspace resets”; rationale/checkpoint is
+`artifacts/20261117_sharing_contract_decision.md`. Do not ask this question again
+or exclude originals from forks. The privacy finding is resolved by this policy;
+physical copy/reset accounting and final validation remain to be completed.

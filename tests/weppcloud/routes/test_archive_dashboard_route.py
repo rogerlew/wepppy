@@ -91,3 +91,32 @@ def test_resolve_archive_job_state_preserves_job_id_on_lookup_error(
     assert job_id == "active-job"
     assert prep.clear_calls == 0
     assert prep.archive_job_id == "active-job"
+
+
+@pytest.mark.parametrize(
+    ("roles", "user_id", "owner_ids", "expected"),
+    [
+        ({"Root"}, 0, set(), True),
+        ({"Admin"}, 8, {7}, False),
+        ({"User"}, 7, {7}, True),
+        ({"User"}, 8, {7}, False),
+    ],
+)
+def test_private_archive_listing_is_owner_or_root_only(
+    roles: set[str],
+    user_id: int,
+    owner_ids: set[int],
+    expected: bool,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    user = type("User", (), {
+        "id": user_id,
+        "has_role": lambda self, role: role in roles,
+    })()
+    monkeypatch.setattr(archive_dashboard_module, "current_user", user)
+    monkeypatch.setattr(
+        archive_dashboard_module,
+        "get_run_owners_lazy",
+        lambda _runid: [type("Owner", (), {"id": value})() for value in owner_ids],
+    )
+    assert archive_dashboard_module._can_list_private_archives("run-1") is expected

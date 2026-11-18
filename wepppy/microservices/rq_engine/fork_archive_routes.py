@@ -5,6 +5,8 @@ from wepppy.query_engine.catalog_refresh import (
 )
 
 import logging
+import hashlib
+import json
 import os
 from pathlib import Path
 import fcntl
@@ -21,6 +23,7 @@ from wepppy.request_payload import RequestPayloadError
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from rq import Queue
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
@@ -57,10 +60,21 @@ from wepppy.rq.wepp_rq import (
     ensure_no_active_wepp_job,
     reconcile_deferred_wepp_jobs,
 )
+from wepppy.microservices.vector_upload_normalization import (
+    RetentionActor,
+    RedisScopeLeaseFactory,
+    VectorUploadError,
+    acquire_retention_maintenance_lease,
+    begin_retention_rebuild_obligation,
+    complete_retention_rebuild_obligation,
+    reconcile_retention,
+    retention_rebuild_obligation_pending,
+)
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation, retained_tree_repair_pending
 from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
 
-from .auth import AuthError, authorize_run_access, require_jwt
+from .auth import AuthError, authorize_run_access, require_jwt, _normalize_roles
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
@@ -71,6 +85,92 @@ logger = logging.getLogger(__name__)
 
 class ArchiveAdmissionUnavailable(RuntimeError):
     """Archive receipt reconciliation or enqueue storage is unavailable."""
+
+
+def _repair_private_archive_deletion(
+    *,
+    wd: str,
+    runid: str,
+    archive_path: str,
+    relative_archive: Path,
+    remove_bundle: bool,
+) -> None:
+    """Delete/reconcile private evidence without blocking the ASGI event loop."""
+    filesystem_id = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "").strip()
+    configured_root = os.getenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", "").strip()
+    if not filesystem_id or not configured_root:
+        raise VectorUploadError(
+            "vector_retention_quota_exceeded",
+            "Vector evidence retention is not configured.",
+            status_code=507,
+        )
+    filesystem_root = Path(configured_root).resolve(strict=True)
+    target = (
+        Path(wd).resolve().relative_to(filesystem_root.resolve())
+        / relative_archive.parent
+    ).as_posix()
+    if not remove_bundle and not retention_rebuild_obligation_pending(
+        filesystem_root,
+        operation="private_archive_delete",
+        target=target,
+    ):
+        return
+    maintenance_lease = acquire_retention_maintenance_lease()
+    vector_lease = None
+    try:
+        vector_lease = RedisScopeLeaseFactory()(f"run:{runid}")
+        vector_lease.assert_owned()
+        pending_repair = retention_rebuild_obligation_pending(
+            filesystem_root,
+            operation="private_archive_delete",
+            target=target,
+        )
+        if not remove_bundle and not pending_repair:
+            return
+        # Pending repair relaxes missing provenance, never path containment.
+        _resolve_run_archive_path(
+            wd,
+            Path(archive_path).relative_to(Path(wd) / "archives").as_posix(),
+            verify_private=remove_bundle and not pending_repair,
+        )
+        obligation = begin_retention_rebuild_obligation(
+            filesystem_root,
+            operation="private_archive_delete",
+            target=target,
+        )
+        bundle = Path(archive_path).parent
+        if remove_bundle or bundle.exists():
+            shutil.rmtree(bundle)
+        # An absent bundle may be the result of an interrupted, unflushed unlink.
+        # Retry must prove durability too before releasing the rebuild obligation.
+        descriptor = os.open(bundle.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        vector_lease.assert_owned()
+        reconcile_retention(
+            filesystem_root,
+            apply=True,
+            rebuild_ledger=True,
+            stale_seconds=0,
+            committed_only=True,
+            maintenance_lease=maintenance_lease,
+            required_scope_leases=(vector_lease,),
+        )
+        maintenance_lease.assert_owned()
+        vector_lease.assert_owned()
+        complete_retention_rebuild_obligation(obligation)
+    finally:
+        if vector_lease is not None:
+            try:
+                vector_lease.release()
+            except VectorUploadError:
+                logger.warning("Private archive retention scope release deferred to TTL", exc_info=True)
+        try:
+            maintenance_lease.release()
+        except VectorUploadError:
+            logger.warning("Private archive maintenance release deferred to TTL", exc_info=True)
 
 
 @contextmanager
@@ -535,6 +635,14 @@ def has_archive(runid: str) -> bool:
     for entry in os.scandir(archives_dir):
         if entry.is_file() and entry.name.endswith(".zip"):
             return True
+    private_root = Path(archives_dir) / "private"
+    if private_root.is_dir() and not private_root.is_symlink():
+        for bundle in private_root.iterdir():
+            if bundle.is_dir() and not bundle.is_symlink() and any(
+                child.is_file() and not child.is_symlink() and child.suffix.lower() == ".zip"
+                for child in bundle.iterdir()
+            ):
+                return True
     return False
 
 
@@ -550,7 +658,7 @@ def _archive_job_status(job_id: str) -> str | None:
             return job.get_status(refresh=True)
     except NoSuchJobError:
         return None
-    except Exception:
+    except Exception:  # broad-except: HTTP boundary preserves canonical error response
         # API boundary: treat status lookup failures as "in progress" to avoid double-enqueue.
         logger.exception("rq-engine archive job status lookup failed", extra={"job_id": job_id})
         return _ARCHIVE_JOB_STATUS_ERROR
@@ -606,15 +714,22 @@ def _reconcile_archive_receipt(
     return result.state
 
 
-def _resolve_run_archive_path(wd: str, archive_name: str) -> str:
-    """Resolve one ordinary zip basename directly below this run's archives."""
+def _resolve_run_archive_path(
+    wd: str,
+    archive_name: str,
+    *,
+    verify_private: bool = True,
+) -> str:
+    """Resolve an ordinary basename or one validated private archive identity."""
     name = str(archive_name).strip()
-    if (
-        not name
-        or name != os.path.basename(name)
-        or name in {".", ".."}
-        or not name.lower().endswith(".zip")
-    ):
+    normalized = name.replace("\\", "/")
+    parts = normalized.split("/")
+    ordinary = len(parts) == 1
+    private = len(parts) == 3 and parts[0] == "private"
+    if not name or not (ordinary or private) or any(
+        not part or part in {".", ".."} or part != os.path.basename(part)
+        for part in parts
+    ) or not parts[-1].lower().endswith(".zip"):
         raise ValueError("Invalid archive_name")
     canonical_wd = os.path.realpath(wd)
     archives_entry = os.path.join(canonical_wd, "archives")
@@ -623,13 +738,128 @@ def _resolve_run_archive_path(wd: str, archive_name: str) -> str:
     archives_root = os.path.realpath(archives_entry)
     if archives_root != archives_entry:
         raise ValueError("Invalid archives directory")
-    archive_path = os.path.join(archives_root, name)
+    archive_path = os.path.join(archives_root, *parts)
     if os.path.lexists(archive_path) and os.path.islink(archive_path):
         raise ValueError("Invalid archive_name")
     resolved = os.path.realpath(archive_path)
-    if os.path.dirname(resolved) != archives_root:
+    expected_parent = archives_root if ordinary else os.path.join(archives_root, parts[0], parts[1])
+    if os.path.dirname(resolved) != expected_parent:
         raise ValueError("Invalid archive_name")
+    if private and verify_private and os.path.exists(resolved):
+        bundle = Path(expected_parent)
+        if bundle.is_symlink() or bundle.parent.is_symlink():
+            raise ValueError("Invalid archive_name")
+        sidecar_path = Path(resolved).with_suffix(".zip.sensitive.json")
+        receipt_path = bundle / "normalization.json"
+        try:
+            sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            size = Path(resolved).stat().st_size
+            digest = hashlib.sha256()
+            with Path(resolved).open("rb") as stream:
+                for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                    digest.update(chunk)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise ValueError("Private archive provenance is invalid") from exc
+        expected_rel = Path(resolved).relative_to(Path(canonical_wd)).as_posix()
+        if (
+            sidecar.get("schema") != "vector-upload-private-archive-v1"
+            or sidecar.get("archive") != Path(resolved).name
+            or sidecar.get("archive_size") != size
+            or sidecar.get("archive_sha256") != digest.hexdigest()
+            or sidecar.get("contains_vector_upload_attempts") is not True
+            or receipt.get("schema") != "vector-normalization-v1"
+            or receipt.get("status") not in {"accepted", "accepted_recovered"}
+            or receipt.get("canonical_path") != expected_rel
+            or receipt.get("canonical_size") != size
+            or receipt.get("canonical_sha256") != digest.hexdigest()
+        ):
+            raise ValueError("Private archive provenance is invalid")
     return resolved
+
+
+def _authorize_private_archive(claims: Mapping[str, Any], runid: str, archive_name: str) -> None:
+    if not str(archive_name).replace("\\", "/").startswith("private/"):
+        return
+    if "root" in _normalize_roles(claims.get("roles")):
+        return
+    principal = claims.get("feature_access_principal")
+    candidate = claims.get("user_id")
+    if candidate is None and isinstance(principal, Mapping) and principal.get("kind") == "human":
+        candidate = principal.get("id")
+    try:
+        user_id = int(candidate)
+    except (TypeError, ValueError):
+        user_id = 0
+    if user_id > 0 and any(int(getattr(owner, "id", 0) or 0) == user_id for owner in (get_run_owners_lazy(runid) or ())):
+        return
+    raise AuthError("Private archive requires project owner or Root", status_code=403, code="forbidden")
+
+
+def _archive_retention_actor(claims: Mapping[str, Any]) -> dict[str, object]:
+    principal = claims.get("feature_access_principal")
+    candidate = claims.get("user_id")
+    if candidate is None and isinstance(principal, Mapping) and principal.get("kind") == "human":
+        candidate = principal.get("id")
+    try:
+        user_id = int(candidate)
+    except (TypeError, ValueError):
+        user_id = 0
+    if user_id > 0:
+        return {"kind": "human", "identifier": user_id}
+    token_class = str(claims.get("token_class") or "").strip().lower()
+    subject = str(claims.get("sub") or "").strip()[:160]
+    if token_class in {"service", "mcp"} and subject:
+        return {"kind": token_class, "identifier": subject}
+    return {"kind": "unattributed", "identifier": None}
+
+
+def _fork_retention_actor(
+    claims: Mapping[str, Any] | None, resolved_user: Any | None,
+) -> RetentionActor:
+    """Charge the verified copier while preserving the source upload actor."""
+    token_class = _token_class_from_claims(claims)
+    if token_class in {"service", "mcp"}:
+        return RetentionActor(token_class, str(claims.get("sub") or ""))
+    user_id = getattr(resolved_user, "id", None)
+    if token_class in {"user", "session"} and isinstance(user_id, int) and user_id > 0:
+        return RetentionActor("human", user_id)
+    return RetentionActor("unattributed", None)
+
+
+def _delete_fork_replacement_tree(
+    new_wd: str,
+    new_runid: str,
+    checkpoint: Callable[[], None],
+) -> None:
+    """Keep deletion repair tied to the destination, including absent retries."""
+    target = Path(new_wd)
+    # Admission creates a new job id on each retry. A stable tombstone keeps
+    # repeated absent-target retries from orphaning a previous partial removal.
+    tombstone = target.with_name(f".{target.name}.replacing-retained")
+    # Authorized API recovery may replace a failed worker copy. Finish that
+    # exact destination obligation; unrelated pending operations still block.
+    operation = "fork_copy" if retained_tree_repair_pending(
+        target, "fork_copy", recovery_paths=(tombstone,),
+    ) else "fork_target_replace"
+    with retained_tree_operation(
+        target=target,
+        project_keys=(f"run:{new_runid}",),
+        operation=operation,
+        recovery_paths=(tombstone,),
+    ) as retention:
+        checkpoint()
+        retention.checkpoint()
+        if tombstone.exists():
+            shutil.rmtree(tombstone)
+            retention.checkpoint()
+        if target.exists():
+            os.replace(target, tombstone)
+            # The original path is detached before recursive cleanup begins.
+            retention.checkpoint()
+            shutil.rmtree(tombstone)
+        retention.checkpoint()
+        checkpoint()
 
 
 def _ensure_anonymous_access(runid: str, wd: str) -> None:
@@ -766,6 +996,7 @@ def _verify_cap_token(request: Request, token: str) -> None:
         success_description="Fork job accepted and fork target metadata returned.",
         extra={
             404: "Source run was not found or not anonymously accessible. Returns the canonical error payload.",
+            507: "Retained evidence accounting could not authorize target replacement. Returns the canonical error payload.",
         },
     ),
 )
@@ -811,6 +1042,7 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             ) = _resolve_user_from_claims(claims)
 
         is_anonymous_session = token_class == "session" and resolved_user is None
+        retention_actor = _fork_retention_actor(claims, resolved_user)
 
         if claims is None or is_anonymous_session:
             _ensure_anonymous_access(runid, wd)
@@ -1239,15 +1471,12 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                     raise RqSubmissionConflict(
                         "Target ownership changed during fork recovery."
                     )
-                tombstone_wd = os.path.join(
-                    os.path.dirname(new_wd.rstrip("/")),
-                    f".{os.path.basename(new_wd.rstrip('/'))}.replacing-{fork_job_id}",
-                )
-                os.replace(new_wd, tombstone_wd)
-                # Once renamed, new target-path mutations cannot overlap the
-                # old tree even if recursive cleanup is slow.
-                shutil.rmtree(tombstone_wd)
-                replacement_lease.checkpoint()
+            await run_in_threadpool(
+                _delete_fork_replacement_tree,
+                new_wd,
+                new_runid,
+                replacement_lease.checkpoint if replacement_lease is not None else lease.checkpoint,
+            )
             lease.checkpoint()
             if replacement_lease is not None:
                 replacement_lease.checkpoint()
@@ -1386,12 +1615,20 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             ),
             timeout=RQ_TIMEOUT,
             job_id=fork_job_id,
+            meta={"vector_retention_actor": {
+                "kind": retention_actor.kind,
+                "identifier": retention_actor.identifier,
+            }},
         )
         profile_claim_handed_off = profile_claimed
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except (RqSubmissionConflict, WeppSingleFlightConflict) as exc:
         return error_response(str(exc), status_code=409, code="conflict")
+    except VectorUploadError as exc:
+        if profile_claimed and not profile_claim_handed_off:
+            _release_profile_fork_claim(new_wd, fork_job_id)
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
     except RqEnqueueVerificationError:
         logger.exception("rq-engine fork enqueue commit could not be verified")
         return error_response_with_traceback(
@@ -1422,8 +1659,8 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
     "/runs/{runid}/{config}/archive",
     summary="Archive a run",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates lock/job state and asynchronously enqueues archive creation."
+        "Requires JWT `rq:enqueue` and authorized run access. "
+        "Checks locks/jobs and enqueues archive creation."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("archive_run"),
@@ -1440,6 +1677,7 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
         authorize_run_access(claims, runid)
+        _authorize_private_archive(claims, runid, "private/archive")
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -1501,7 +1739,7 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
             lease.checkpoint()
             job = queue.enqueue_call(
                 archive_rq,
-                (runid, comment),
+                (runid, comment, _archive_retention_actor(claims)),
                 timeout=RQ_TIMEOUT,
                 job_id=job_id,
             )
@@ -1526,8 +1764,8 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
     "/runs/{runid}/{config}/restore-archive",
     summary="Restore a run archive",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates archive/lock state and asynchronously enqueues archive restoration."
+        "Requires JWT `rq:enqueue` and authorized run access. "
+        "Checks the archive and locks, then enqueues restoration."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("restore_archive"),
@@ -1561,6 +1799,7 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
             archive_name = archive_name[0] if archive_name else None
         if not archive_name:
             return error_response("Missing archive_name parameter", status_code=400)
+        _authorize_private_archive(claims, runid, str(archive_name))
 
         wd = get_wd(runid)
         if not _exists(wd):
@@ -1639,8 +1878,8 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
     "/runs/{runid}/{config}/delete-archive",
     summary="Delete a run archive",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates archive/lock state and synchronously deletes archive content; no queue enqueue."
+        "Requires JWT `rq:enqueue` and authorized run access. "
+        "Checks the archive and locks, then deletes it synchronously."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("delete_archive"),
@@ -1670,6 +1909,7 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
             archive_name = archive_name[0] if archive_name else None
         if not archive_name:
             return error_response("Missing archive_name parameter", status_code=400)
+        _authorize_private_archive(claims, runid, str(archive_name))
 
         wd = get_wd(runid)
         if not _exists(wd):
@@ -1683,10 +1923,25 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
             )
 
         try:
-            archive_path = _resolve_run_archive_path(wd, str(archive_name))
+            archive_path = _resolve_run_archive_path(
+                wd,
+                str(archive_name),
+                verify_private=False,
+            )
         except ValueError as exc:
             return error_response(str(exc), status_code=400, code="validation_error")
+        relative_archive = Path(archive_path).relative_to(Path(wd).resolve())
+        is_private = relative_archive.parts[:2] == ("archives", "private")
         if not os.path.exists(archive_path):
+            if is_private:
+                await run_in_threadpool(
+                    _repair_private_archive_deletion,
+                    wd=wd,
+                    runid=runid,
+                    archive_path=archive_path,
+                    relative_archive=relative_archive,
+                    remove_bundle=False,
+                )
             return error_response(f"Archive {archive_name} not found", status_code=404)
 
         prep = RedisPrep.getInstance(wd)
@@ -1709,7 +1964,17 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
                     status_code=400,
                 )
             lease.checkpoint()
-            os.remove(archive_path)
+            if is_private:
+                await run_in_threadpool(
+                    _repair_private_archive_deletion,
+                    wd=wd,
+                    runid=runid,
+                    archive_path=archive_path,
+                    relative_archive=relative_archive,
+                    remove_bundle=True,
+                )
+            else:
+                os.remove(archive_path)
             prep.clear_archive_job_id()
         StatusMessenger.publish(f"{runid}:archive", f"Archive deleted: {archive_name}")
 

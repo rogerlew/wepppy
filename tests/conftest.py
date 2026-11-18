@@ -8,6 +8,8 @@ import pytest
 
 from tests.factories.fixtures import rq_environment, rq_recorder  # noqa: F401
 
+pytest_plugins = ["tests.pytest_selection"]
+
 
 # Preserve only source metadata; real-Redis tests explicitly opt in below.
 _RUNTIME_REDIS_PASSWORD_FILE = os.environ.get("REDIS_PASSWORD_FILE")

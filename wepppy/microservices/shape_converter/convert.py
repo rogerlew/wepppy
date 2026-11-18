@@ -5,9 +5,13 @@ from __future__ import annotations
 import asyncio
 import collections.abc as cabc
 import errno
+import hashlib
+import json
+import math
 import os
 import shutil
 import signal
+import stat
 import struct
 import tempfile
 from dataclasses import dataclass
@@ -38,6 +42,7 @@ from .crs import (
 )
 from .errors import ShapeConverterError
 from .parser_ipc import read_payload
+from .parser_provenance import read_parser_provenance
 from .inspect import read_dbf_metadata, read_projection_metadata, select_single_shapefile_dataset
 from .serialization import (
     _MAX_GEOJSON_OUTPUT_BYTES,
@@ -77,6 +82,7 @@ _MAX_PARSER_INPUT_BYTES = max(
     1,
     int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_INPUT_BYTES", str(128 * 1024 * 1024))),
 )
+_MAX_GEOPARQUET_INPUT_BYTES = min(_MAX_PARSER_INPUT_BYTES, 100 * 1024 * 1024)
 _PARSER_MEMORY_LIMIT_BYTES = max(
     64 * 1024 * 1024,
     int(os.getenv("SHAPE_CONVERTER_PARSER_MEMORY_LIMIT_BYTES", str(384 * 1024 * 1024))),
@@ -97,6 +103,27 @@ _SOURCE_PARSER_CLI = (
     / "target"
     / "release"
     / "shape_parser_cli"
+)
+_INSTALLED_GEOPARQUET_PARSER_CLI = Path("/usr/local/bin/geoparquet_parser_cli")
+_SOURCE_GEOPARQUET_PARSER_CLI = (
+    Path(__file__).resolve().parent
+    / "rust"
+    / "geoparquet_parser_cli"
+    / "target"
+    / "release"
+    / "geoparquet_parser_cli"
+)
+_INSTALLED_GEOPARQUET_READINESS = Path(
+    "/usr/local/share/shape-converter/geoparquet-readiness.parquet"
+)
+_SOURCE_GEOPARQUET_READINESS = (
+    Path(__file__).resolve().parents[3]
+    / "docs"
+    / "work-packages"
+    / "20261116_vector_upload_normalization"
+    / "artifacts"
+    / "red_fixtures"
+    / "data-page-v2-control.parquet"
 )
 _REVIEWED_RESOURCE_MAXIMA = {
     "max_features": 1_000_000,
@@ -145,6 +172,9 @@ class _PreparedConversion:
     projection_status: str
     projection_warnings: tuple[str, ...]
     sidecar_warning: str | None
+    source_size: int
+    source_sha256: str
+    source_format: str
 
 
 def validate_conversion_resource_envelope(
@@ -208,16 +238,42 @@ async def convert_uploaded_archive(
         )
 
     archive_name = archive.filename or "upload.zip"
-    archive_bytes = await read_upload_bytes_with_limit(
-        upload=archive,
-        max_bytes=_MAX_UPLOAD_COMPRESSED_BYTES,
+    archive_suffix = Path(archive_name).suffix.lower()
+    upload_limit = (
+        _MAX_GEOPARQUET_INPUT_BYTES
+        if archive_suffix in {".parquet", ".geoparquet"}
+        else _MAX_UPLOAD_COMPRESSED_BYTES
     )
+    try:
+        archive_bytes = await read_upload_bytes_with_limit(
+            upload=archive,
+            max_bytes=upload_limit,
+        )
+    except ShapeConverterError as exc:
+        if archive_suffix not in {".parquet", ".geoparquet"} or exc.code != "archive_quota_exceeded":
+            raise
+        raise ShapeConverterError(
+            code="vector_limit_exceeded",
+            message="GeoParquet upload exceeds the input byte limit.",
+            details="The uploaded binary vector exceeds the 100 MiB normalization limit.",
+            status_code=413,
+        ) from exc
 
     if not archive_bytes:
         raise ShapeConverterError(
-            code="invalid_archive",
-            message="Archive payload is empty.",
-            details="Uploaded archive contained zero bytes.",
+            code="invalid_vector" if archive_suffix in {".parquet", ".geoparquet"} else "invalid_archive",
+            message="Uploaded vector is empty." if archive_suffix in {".parquet", ".geoparquet"} else "Archive payload is empty.",
+            details="Uploaded content contained zero bytes.",
+        )
+
+    if archive_suffix in {".parquet", ".geoparquet"}:
+        return await _convert_uploaded_geoparquet(
+            source_name=archive_name,
+            source_bytes=archive_bytes,
+            scratch=scratch,
+            request_id=request_id,
+            output_format=output_format,
+            target_crs=target_crs,
         )
 
     prepared = await _run_blocking_phase(
@@ -235,6 +291,101 @@ async def convert_uploaded_archive(
         ignore_source_crs=(
             target_crs == "same_as_shapefile" and prepared.projection_status == "invalid"
         ),
+    )
+    return await _run_blocking_phase(
+        _finish_conversion,
+        loaded=loaded,
+        prepared=prepared,
+        scratch=scratch,
+        request_id=request_id,
+        output_format=output_format,
+        target_crs=target_crs,
+    )
+
+
+async def _convert_uploaded_geoparquet(
+    *,
+    source_name: str,
+    source_bytes: bytes,
+    scratch: RequestScratchLayout,
+    request_id: str,
+    output_format: str,
+    target_crs: str,
+) -> ConvertedArtifact:
+    if target_crs != "wgs84" or output_format != "geojson":
+        raise ShapeConverterError(
+            code="unsupported_vector",
+            message="GeoParquet normalization requires WGS84 GeoJSON output.",
+            details="Use output_format=geojson and target_crs=wgs84.",
+        )
+    if len(source_bytes) < 12 or source_bytes[:4] != b"PAR1" or source_bytes[-4:] != b"PAR1":
+        raise ShapeConverterError(
+            code="invalid_vector",
+            message="Uploaded GeoParquet content is invalid.",
+            details="GeoParquet magic bytes are missing.",
+        )
+    _assert_request_scratch_quota(
+        scratch=scratch,
+        additional_bytes=len(source_bytes) + _MAX_PARSER_PAYLOAD_BYTES,
+        stage="geoparquet_stage",
+    )
+    staged = scratch.request_dir / "source.parquet"
+    try:
+        descriptor = os.open(
+            staged,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC,
+            0o600,
+        )
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(source_bytes)
+            stream.flush()
+            os.fsync(stream.fileno())
+    except OSError as exc:
+        raise _map_capacity_os_error(
+            exc=exc,
+            stage="geoparquet_stage",
+            fallback_code="invalid_vector",
+            fallback_message="Unable to stage uploaded GeoParquet.",
+            fallback_status_code=500,
+        ) from exc
+    source_sha256 = hashlib.sha256(source_bytes).hexdigest()
+    staged_size, staged_sha256 = _hash_regular_nofollow(staged)
+    if staged_size != len(source_bytes) or staged_sha256 != source_sha256:
+        raise ShapeConverterError(
+            code="vector_source_integrity_error",
+            message="GeoParquet source integrity verification failed.",
+            details="The staged request snapshot does not match the complete upload.",
+            status_code=502,
+        )
+    del source_bytes
+    payload_path = scratch.request_dir / "geoparquet_payload.json"
+    await _run_geoparquet_parser_worker(
+        input_path=staged,
+        output_path=payload_path,
+        scratch=scratch,
+    )
+    if _hash_regular_nofollow(staged) != (staged_size, source_sha256):
+        raise ShapeConverterError(
+            code="vector_source_integrity_error",
+            message="GeoParquet source integrity verification failed.",
+            details="The staged request snapshot changed during normalization.",
+            status_code=502,
+        )
+    payload = await _run_blocking_phase(
+        _read_geoparquet_payload,
+        payload_path=payload_path,
+    )
+    loaded = _loaded_geoparquet_from_payload(payload)
+    prepared = _PreparedConversion(
+        prefix_path=scratch.request_dir / Path(source_name).stem,
+        dbf_metadata={"fields": _infer_attribute_schema(loaded.properties)},
+        detected_crs=crs_to_response_payload(loaded.source_crs),
+        projection_status="known",
+        projection_warnings=(),
+        sidecar_warning=None,
+        source_size=staged_size,
+        source_sha256=source_sha256,
+        source_format="geoparquet",
     )
     return await _run_blocking_phase(
         _finish_conversion,
@@ -322,6 +473,9 @@ def _prepare_conversion_archive(
         projection_status=projection_status,
         projection_warnings=tuple(projection_warnings),
         sidecar_warning=sidecar_warning,
+        source_size=len(archive_bytes),
+        source_sha256=hashlib.sha256(archive_bytes).hexdigest(),
+        source_format="shapefile_zip",
     )
 
 
@@ -345,11 +499,21 @@ def _finish_conversion(
     if prepared.sidecar_warning:
         conversion_warnings.append(prepared.sidecar_warning)
 
-    transformed_geometries = reproject_geometries(
-        geometries=loaded.geometries,
-        source_crs=crs_plan.source_crs,
-        target_crs=crs_plan.target_crs,
-    )
+    try:
+        transformed_geometries = reproject_geometries(
+            geometries=loaded.geometries,
+            source_crs=crs_plan.source_crs,
+            target_crs=crs_plan.target_crs,
+            require_best_operation=prepared.source_format == "geoparquet",
+        )
+    except ShapeConverterError as exc:
+        if prepared.source_format != "geoparquet" or exc.code != "reprojection_failed":
+            raise
+        raise ShapeConverterError(
+            code="vector_crs_invalid",
+            message="GeoParquet CRS cannot be transformed safely.",
+            details="The best offline coordinate operation is unavailable or failed.",
+        ) from exc
 
     if output_format == "geojson":
         serialized = serialize_geojson(
@@ -379,6 +543,27 @@ def _finish_conversion(
         detected_crs=prepared.detected_crs,
         warnings=serialized.warnings,
     )
+    metadata.update(
+        source_size=prepared.source_size,
+        source_sha256=prepared.source_sha256,
+        source_format=prepared.source_format,
+        canonical_size=len(serialized.content),
+        canonical_sha256=hashlib.sha256(serialized.content).hexdigest(),
+    )
+    parser_path = (
+        _geoparquet_parser_cli_path()
+        if prepared.source_format == "geoparquet"
+        else _parser_cli_path()
+    )
+    try:
+        metadata["parser_provenance"] = read_parser_provenance(parser_path)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="Vector normalization provenance is unavailable.",
+            details="The parser binary binding could not be revalidated.",
+            status_code=503,
+        ) from exc
 
     prefix_name = prepared.prefix_path.name
     filename = f"{prefix_name}_{target_crs}.{serialized.extension}"
@@ -406,6 +591,14 @@ def _finish_conversion(
             fallback_message="Unable to persist converted output artifact.",
             fallback_status_code=500,
         ) from exc
+
+    if output_format == "geojson":
+        _verify_canonical_geojson(
+            serialized.content,
+            expected_count=len(loaded.properties),
+            expected_types=set(metadata["geometry_types"]),
+            expected_bounds=metadata["bbox"],
+        )
 
     return ConvertedArtifact(
         request_id=request_id,
@@ -498,6 +691,23 @@ def _scratch_tree_size_bytes(path: Path) -> int:
     return total
 
 
+def _hash_regular_nofollow(path: Path) -> tuple[int, str]:
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    digest = hashlib.sha256()
+    with os.fdopen(descriptor, "rb") as stream:
+        info = os.fstat(stream.fileno())
+        if not stat.S_ISREG(info.st_mode):
+            raise ShapeConverterError(
+                code="vector_source_integrity_error",
+                message="GeoParquet source integrity verification failed.",
+                details="The staged request snapshot is not a regular file.",
+                status_code=502,
+            )
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return info.st_size, digest.hexdigest()
+
+
 async def _load_shapefile(
     *,
     shp_path: Path,
@@ -547,6 +757,330 @@ def _parser_cli_path() -> Path:
     return _INSTALLED_PARSER_CLI
 
 
+def _geoparquet_parser_cli_path() -> Path:
+    configured = os.getenv("SHAPE_CONVERTER_GEOPARQUET_PARSER_CLI")
+    if configured:
+        return Path(configured)
+    if _SOURCE_GEOPARQUET_PARSER_CLI.is_file() and os.access(
+        _SOURCE_GEOPARQUET_PARSER_CLI, os.X_OK
+    ):
+        return _SOURCE_GEOPARQUET_PARSER_CLI
+    return _INSTALLED_GEOPARQUET_PARSER_CLI
+
+
+async def _run_geoparquet_parser_worker(
+    *,
+    input_path: Path,
+    output_path: Path,
+    scratch: RequestScratchLayout,
+) -> None:
+    command = [
+        os.fspath(_geoparquet_parser_cli_path()),
+        "--request-root",
+        scratch.request_dir.as_posix(),
+        "--input-path",
+        input_path.as_posix(),
+        "--output-path",
+        output_path.as_posix(),
+        "--max-payload-bytes",
+        str(_MAX_PARSER_PAYLOAD_BYTES),
+        "--max-input-bytes",
+        str(_MAX_GEOPARQUET_INPUT_BYTES),
+        "--max-features",
+        str(min(_MAX_CONVERT_FEATURES, 100_000)),
+        "--max-vertices-per-feature",
+        str(_MAX_VERTICES_PER_FEATURE),
+        "--max-memory-bytes",
+        str(_PARSER_MEMORY_LIMIT_BYTES),
+        "--max-cpu-seconds",
+        str(_PARSER_CPU_LIMIT_SECONDS),
+        "--max-open-files",
+        str(_PARSER_OPEN_FILE_LIMIT),
+    ]
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *command,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL,
+            cwd=scratch.request_dir.as_posix(),
+            env=_build_parser_worker_env(),
+            start_new_session=True,
+        )
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="GeoParquet normalization is unavailable.",
+            details="GeoParquet parser could not be started.",
+            status_code=503,
+        ) from exc
+    try:
+        await asyncio.wait_for(process.wait(), timeout=_PARSER_SUBPROCESS_TIMEOUT_SECONDS)
+    except TimeoutError as exc:
+        cancelled = await _drain_process_group_termination(process)
+        _remove_parser_outputs(output_path)
+        if cancelled:
+            raise asyncio.CancelledError
+        raise ShapeConverterError(
+            code="request_timeout",
+            message="GeoParquet normalization timed out.",
+            details="The bounded GeoParquet parser exceeded its deadline.",
+            status_code=408,
+        ) from exc
+    except asyncio.CancelledError:
+        await _drain_process_group_termination(process)
+        _remove_parser_outputs(output_path)
+        raise
+    if process.returncode == 4:
+        _remove_parser_outputs(output_path)
+        raise ShapeConverterError(
+            code="vector_limit_exceeded",
+            message="GeoParquet input exceeds a normalization limit.",
+            details="The bounded GeoParquet parser rejected a resource limit.",
+            status_code=413,
+        )
+    if process.returncode == 1:
+        _remove_parser_outputs(output_path)
+        raise ShapeConverterError(
+            code="invalid_vector",
+            message="GeoParquet content is invalid or unsupported.",
+            details="The bounded GeoParquet parser rejected the input.",
+        )
+    if process.returncode == -signal.SIGXCPU:
+        _remove_parser_outputs(output_path)
+        raise ShapeConverterError(
+            code="request_timeout",
+            message="GeoParquet normalization timed out.",
+            details="The bounded GeoParquet parser exceeded its CPU deadline.",
+            status_code=408,
+        )
+    if process.returncode == -signal.SIGXFSZ:
+        _remove_parser_outputs(output_path)
+        raise ShapeConverterError(
+            code="vector_limit_exceeded",
+            message="GeoParquet input exceeds a normalization limit.",
+            details="The bounded GeoParquet parser exceeded its file-size limit.",
+            status_code=413,
+        )
+    if process.returncode != 0:
+        _remove_parser_outputs(output_path)
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="GeoParquet normalization is unavailable.",
+            details="The bounded GeoParquet parser failed internally.",
+            status_code=503,
+        )
+
+
+def _read_geoparquet_payload(*, payload_path: Path) -> dict[str, object]:
+    def unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate key")
+            result[key] = value
+        return result
+
+    def reject_constant(_value: str) -> object:
+        raise ValueError("nonfinite constant")
+
+    def finite_float(value: str) -> float:
+        parsed = float(value)
+        if not math.isfinite(parsed):
+            raise ValueError("nonfinite number")
+        return parsed
+
+    try:
+        fd = os.open(payload_path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        with os.fdopen(fd, "rb") as stream:
+            stat_result = os.fstat(stream.fileno())
+            if not stat.S_ISREG(stat_result.st_mode) or stat_result.st_size > _MAX_PARSER_PAYLOAD_BYTES:
+                raise ValueError("payload type or size")
+            raw = stream.read(_MAX_PARSER_PAYLOAD_BYTES + 1)
+        if len(raw) > _MAX_PARSER_PAYLOAD_BYTES:
+            raise ValueError("payload size")
+        payload = json.loads(
+            raw,
+            object_pairs_hook=unique_object,
+            parse_constant=reject_constant,
+            parse_float=finite_float,
+        )
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, TypeError) as exc:
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="GeoParquet normalization output is invalid.",
+            details="GeoParquet parser output failed strict validation.",
+            status_code=503,
+        ) from exc
+    expected = {
+        "schema",
+        "properties",
+        "geometries",
+        "feature_count",
+        "geometry_types",
+        "source_bounds",
+        "source_crs",
+        "geoparquet_version",
+    }
+    if not isinstance(payload, dict) or set(payload) != expected or payload.get("schema") != "geoparquet-parser-v1":
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="GeoParquet normalization output is invalid.",
+            details="GeoParquet parser output schema mismatch.",
+            status_code=503,
+        )
+    properties = payload.get("properties")
+    geometries = payload.get("geometries")
+    if (
+        not isinstance(properties, list)
+        or not isinstance(geometries, list)
+        or len(properties) != len(geometries)
+        or payload.get("feature_count") != len(properties)
+        or len(properties) > min(_MAX_CONVERT_FEATURES, 100_000)
+    ):
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="GeoParquet normalization output is invalid.",
+            details="GeoParquet parser output cardinality mismatch.",
+            status_code=503,
+        )
+    return payload
+
+
+def _loaded_geoparquet_from_payload(payload: dict[str, object]) -> LoadedShapefile:
+    crs_value = payload["source_crs"]
+    try:
+        source_crs = CRS.from_user_input(crs_value)
+    except (CRSError, ValueError, TypeError) as exc:
+        raise ShapeConverterError(
+            code="vector_crs_invalid",
+            message="GeoParquet CRS is invalid or unsupported.",
+            details="The declared CRS cannot be resolved offline.",
+        ) from exc
+    declared_bounds = payload["source_bounds"]
+    raw_geometries = payload["geometries"]
+    if (
+        not isinstance(declared_bounds, list)
+        or len(declared_bounds) != 4
+        or not all(_finite_coordinate_number(value) for value in declared_bounds)
+        or not isinstance(raw_geometries, list)
+        or not all(_geometry_coordinates_are_finite(value) for value in raw_geometries)
+    ):
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="GeoParquet normalization output is invalid.",
+            details="Geometry coordinate validation failed.",
+            status_code=503,
+        )
+    mapped = {
+        "properties": payload["properties"],
+        "geometries": payload["geometries"],
+        "source_bounds": payload["source_bounds"],
+        "source_crs_wkt": source_crs.to_wkt(),
+    }
+    try:
+        loaded = _loaded_shapefile_from_payload(mapped)
+    except ShapeConverterError as exc:
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="GeoParquet normalization output is invalid.",
+            details="GeoParquet parser geometry output failed strict validation.",
+            status_code=503,
+        ) from exc
+    observed_types = {
+        f"{geometry.geom_type}{' Z' if geometry.has_z else ''}"
+        for geometry in loaded.geometries
+        if geometry is not None
+    }
+    if observed_types != set(payload["geometry_types"]):
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="GeoParquet normalization output is invalid.",
+            details="Geometry type reconciliation failed.",
+            status_code=503,
+        )
+    observed_bounds: tuple[float, float, float, float] | None = None
+    for geometry in loaded.geometries:
+        if geometry is None:
+            continue
+        bounds = tuple(float(value) for value in geometry.bounds)
+        if len(bounds) != 4 or not all(math.isfinite(value) for value in bounds):
+            raise ShapeConverterError(
+                code="vector_converter_unavailable",
+                message="GeoParquet normalization output is invalid.",
+                details="Geometry coordinate validation failed.",
+                status_code=503,
+            )
+        if observed_bounds is None:
+            observed_bounds = bounds
+        else:
+            observed_bounds = (
+                min(observed_bounds[0], bounds[0]),
+                min(observed_bounds[1], bounds[1]),
+                max(observed_bounds[2], bounds[2]),
+                max(observed_bounds[3], bounds[3]),
+            )
+    if (
+        observed_bounds is None
+        or not isinstance(declared_bounds, list)
+        or len(declared_bounds) != 4
+        or not all(_finite_coordinate_number(value) for value in declared_bounds)
+        or list(observed_bounds) != [float(value) for value in declared_bounds]
+    ):
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="GeoParquet normalization output is invalid.",
+            details="Source bounds reconciliation failed.",
+            status_code=503,
+        )
+    return loaded
+
+
+def _finite_coordinate_number(value: object) -> bool:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(float(value))
+    except (OverflowError, ValueError, TypeError):
+        return False
+
+
+def _coordinate_tree_is_finite(value: object, *, depth: int = 0) -> bool:
+    if depth > 16:
+        return False
+    if isinstance(value, (list, tuple)):
+        return bool(value) and all(
+            _coordinate_tree_is_finite(item, depth=depth + 1) for item in value
+        )
+    return _finite_coordinate_number(value)
+
+
+def _geometry_coordinates_are_finite(value: object, *, depth: int = 0) -> bool:
+    if depth > 16:
+        return False
+    if not isinstance(value, cabc.Mapping):
+        return False
+    if "coordinates" in value:
+        return _coordinate_tree_is_finite(value["coordinates"])
+    geometries = value.get("geometries")
+    return isinstance(geometries, list) and bool(geometries) and all(
+        _geometry_coordinates_are_finite(item, depth=depth + 1) for item in geometries
+    )
+
+
+def _infer_attribute_schema(properties: tuple[dict[str, object], ...]) -> list[dict[str, object]]:
+    names = sorted({name for item in properties for name in item})
+    return [
+        {
+            "name": name,
+            "type": sorted({type(item.get(name)).__name__ for item in properties}),
+            "width": None,
+            "precision": None,
+            "nullability_note": "nullable" if any(item.get(name) is None for item in properties) else "non-null",
+        }
+        for name in names
+    ]
+
+
 async def probe_parser_runtime(scratch_root: Path) -> tuple[bool, str | None]:
     try:
         scratch_root.mkdir(parents=True, exist_ok=True)
@@ -577,6 +1111,49 @@ async def probe_parser_runtime(scratch_root: Path) -> tuple[bool, str | None]:
         or payload.get("source_bounds") != [1.0, 2.0, 1.0, 2.0]
     ):
         return False, "parser_runtime_probe_semantics_invalid"
+    return True, None
+
+
+async def probe_geoparquet_parser_runtime(scratch_root: Path) -> tuple[bool, str | None]:
+    canary = (
+        _SOURCE_GEOPARQUET_READINESS
+        if _SOURCE_GEOPARQUET_READINESS.is_file()
+        else _INSTALLED_GEOPARQUET_READINESS
+    )
+    try:
+        scratch_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="geoparquet-readiness-", dir=scratch_root) as raw_root:
+            request_root = Path(raw_root)
+            input_path = request_root / "probe.parquet"
+            shutil.copyfile(canary, input_path)
+            output_path = request_root / "payload.json"
+            scratch = RequestScratchLayout(
+                request_dir=request_root,
+                upload_archive_path=input_path,
+                extraction_root=request_root,
+                output_root=request_root,
+            )
+            await _run_geoparquet_parser_worker(
+                input_path=input_path,
+                output_path=output_path,
+                scratch=scratch,
+            )
+            payload = _read_geoparquet_payload(payload_path=output_path)
+    except (OSError, ShapeConverterError, ValueError, TypeError):
+        return False, "geoparquet_parser_runtime_probe_failed"
+    try:
+        loaded = _loaded_geoparquet_from_payload(payload)
+    except ShapeConverterError:
+        return False, "geoparquet_parser_runtime_probe_semantics_invalid"
+    if (
+        payload.get("feature_count") != 1
+        or payload.get("geometry_types") != ["Polygon"]
+        or payload.get("geoparquet_version") != "1.1.0"
+        or loaded.properties != ({},)
+        or loaded.source_bounds != (-116.0, 44.0, -115.9, 44.1)
+        or loaded.source_crs.to_authority() != ("OGC", "CRS84")
+    ):
+        return False, "geoparquet_parser_runtime_probe_semantics_invalid"
     return True, None
 
 
@@ -1019,6 +1596,42 @@ def _geometry_bounds(geometries: tuple[BaseGeometry | None, ...]) -> tuple[float
         return None
 
     return float(min_x), float(min_y), float(max_x), float(max_y)
+
+
+def _verify_canonical_geojson(
+    content: bytes,
+    *,
+    expected_count: int,
+    expected_types: set[str],
+    expected_bounds: object,
+) -> None:
+    try:
+        payload = json.loads(content)
+        if not isinstance(payload, dict) or payload.get("type") != "FeatureCollection":
+            raise ValueError("feature collection")
+        features = payload.get("features")
+        if not isinstance(features, list) or len(features) != expected_count:
+            raise ValueError("feature count")
+        geometries = tuple(
+            None if feature.get("geometry") is None else shape(feature["geometry"])
+            for feature in features
+            if isinstance(feature, dict)
+        )
+        if len(geometries) != expected_count:
+            raise ValueError("features")
+        observed_types = {geometry.geom_type for geometry in geometries if geometry is not None}
+        observed_bounds = _geometry_bounds(geometries)
+        if observed_types != expected_types or (
+            expected_bounds is not None and list(observed_bounds or ()) != expected_bounds
+        ):
+            raise ValueError("geometry reconciliation")
+    except (UnicodeError, json.JSONDecodeError, ValueError, TypeError, KeyError, GEOSException) as exc:
+        raise ShapeConverterError(
+            code="vector_converter_unavailable",
+            message="Canonical GeoJSON verification failed.",
+            details="Serialized output did not pass semantic readback.",
+            status_code=503,
+        ) from exc
 
 
 __all__ = [

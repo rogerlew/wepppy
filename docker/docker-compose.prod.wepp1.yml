@@ -28,6 +28,58 @@ x-wepppy-image: &wepppy-image
     <<: *wepppy-env
 
 services:
+  soil-db:
+    profiles: [soil-data]
+    image: postgis/postgis:17-3.7@sha256:b2379049e1d7623127ec61ba802a44706109bf91c23ec76b8f323888fd037ed9
+    environment:
+      POSTGRES_DB: soil
+      POSTGRES_USER: soil_import
+      POSTGRES_PASSWORD_FILE: /run/secrets/soil_import_password
+      SOIL_SERVE_PASSWORD_FILE: /run/secrets/soil_serve_password
+    secrets: [soil_import_password, soil_serve_password]
+    volumes:
+      - soil-tabular-data:/var/lib/postgresql/data
+      - ${SOIL_BOOTSTRAP_SQL:-/dev/null}:/docker-entrypoint-initdb.d/30-national.sql:ro
+      - ${SOIL_DATA_SOURCE_DIR:-../../soil-data-access}/docker/init.sh:/docker-entrypoint-initdb.d/20-soil.sh:ro
+      - ${SOIL_DATA_SOURCE_DIR:-../../soil-data-access}/migrations/001_replay.sql:/opt/soil/001_replay.sql:ro
+    networks: [soil-database]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U soil_import -d soil']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30m
+    restart: unless-stopped
+    shm_size: 128mb
+
+  soil-api:
+    profiles: [soil-data]
+    image: ${SOIL_API_IMAGE:-wepppy-soil-data:local}
+    build:
+      context: ${SOIL_DATA_SOURCE_DIR:-../../soil-data-access}
+    environment:
+      DATABASE_URL_FILE: /run/secrets/soil_database_url
+      CODE_REVISION: ${SOIL_CODE_REVISION:-unset}
+      SOIL_DATA_RELEASE: ${SOIL_DATA_RELEASE:-}
+    secrets: [soil_database_url]
+    networks: [soil-database, backend]
+    ports:
+      - "${SOIL_API_BIND_IP:-127.0.0.1}:18080:8080"
+    depends_on:
+      soil-db:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, /usr/local/bin/soil-data-access, --healthcheck]
+      interval: 10s
+      timeout: 4s
+      retries: 3
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 512m
+
   # Production fork/archive work is consumed only by the wepp3 stack.
   rq-worker-fork-archive:
     scale: 0
@@ -197,11 +249,22 @@ services:
       - /geodata/wc1:/wc1
       - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
 
+networks:
+  soil-database:
+    internal: true
+
 volumes:
+  soil-tabular-data:
   caddy-data:
   caddy-config:
   weppcloudr-renv-cache:
 
 secrets:
+  soil_import_password:
+    file: ./secrets/soil_import_password
+  soil_serve_password:
+    file: ./secrets/soil_serve_password
+  soil_database_url:
+    file: ./secrets/soil_database_url
   discord_bot_token:
     file: /workdir/weppcloud2/weppcloud2/discord_bot/.bot_token

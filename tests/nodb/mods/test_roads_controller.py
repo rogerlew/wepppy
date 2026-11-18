@@ -87,6 +87,7 @@ def _seed_prepared_state(controller: Roads, *, upload_sha: str = "seed-upload-sh
             "uploaded_geojson_sha256": upload_sha,
             "roads_params_signature": controller._params_signature(params),
             "parameterization_hash": roads_module.roads_parameterization.configuration_hash(controller._parameterization),
+            "unrutted_geometry_policy": "unrutted_strips_v1",
         }
         controller._status = "prepared"
 
@@ -157,6 +158,66 @@ def test_set_uploaded_geojson_stages_file_and_checksum(tmp_path: Path) -> None:
     assert staged_path.read_text(encoding="utf-8") == source_path.read_text(encoding="utf-8")
     assert summary["uploaded_geojson_sha256"] == hashlib.sha256(staged_path.read_bytes()).hexdigest()
     assert summary["feature_count"] == 1
+
+
+def test_set_uploaded_geojson_rolls_back_file_and_persisted_state_on_commit_failure(
+    tmp_path: Path,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    original = tmp_path / "original.geojson"
+    replacement = tmp_path / "replacement.geojson"
+    _write_roads_geojson(original)
+    _write_roads_geojson(replacement)
+    original.write_text(original.read_text().replace('"features":', '"marker":"old","features":'))
+    replacement.write_text(replacement.read_text().replace('"features":', '"marker":"new","features":'))
+    accepted = controller.set_uploaded_geojson(str(original))
+    canonical = tmp_path / accepted["uploaded_geojson_relpath"]
+    prior_bytes = canonical.read_bytes()
+    prior_state = controller.query_summary()
+    prior_completed = Path(controller.roads_log_path).read_bytes().count(b"upload_completed")
+
+    def fail_commit() -> None:
+        raise OSError("receipt fsync failed")
+
+    with pytest.raises(OSError, match="receipt fsync failed"):
+        controller.set_uploaded_geojson(str(replacement), publication_commit=fail_commit)
+
+    assert canonical.read_bytes() == prior_bytes
+    assert Path(controller.roads_log_path).read_bytes().count(b"upload_completed") == prior_completed
+    assert controller.query_summary()["uploaded_geojson_sha256"] == prior_state["uploaded_geojson_sha256"]
+    reloaded = Roads.load_detached(str(tmp_path))
+    assert reloaded.query_summary()["uploaded_geojson_sha256"] == prior_state["uploaded_geojson_sha256"]
+
+
+def test_set_uploaded_geojson_does_not_rollback_after_publication_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    source = tmp_path / "replacement.geojson"
+    _write_roads_geojson(source)
+    committed: list[bool] = []
+    append_log = Roads._append_roads_log
+
+    def interrupt_completion(self, stage, event, details=None):
+        if event == "upload_completed":
+            raise KeyboardInterrupt()
+        return append_log(self, stage, event, details)
+
+    monkeypatch.setattr(Roads, "_append_roads_log", interrupt_completion)
+
+    with pytest.raises(KeyboardInterrupt):
+        controller.set_uploaded_geojson(
+            str(source),
+            publication_commit=lambda: committed.append(True),
+        )
+
+    assert committed == [True]
+    reloaded = Roads.load_detached(str(tmp_path))
+    summary = reloaded.query_summary()
+    assert summary["uploaded_geojson_sha256"] == hashlib.sha256(
+        (tmp_path / summary["uploaded_geojson_relpath"]).read_bytes()
+    ).hexdigest()
 
 
 def test_set_uploaded_geojson_uses_geojson_crs_when_present(tmp_path: Path) -> None:
@@ -2718,7 +2779,7 @@ def test_query_segment_detail_uses_unique_fallback_segment_ids_for_missing_ids(t
     assert detail["surface"] == "gravel"
 
 
-def test_select_outslope_unrutted_hillslope_segments_applies_minimum_ratio_and_cap(
+def test_select_outslope_unrutted_hillslope_segments_applies_minimum_and_cap_without_ratio(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -2759,12 +2820,14 @@ def test_select_outslope_unrutted_hillslope_segments_applies_minimum_ratio_and_c
     )
     monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
 
+    offsets = {name: i * 0.00005 for i, name in enumerate(["seg-a", "seg-b", "seg-c", "seg-d", "seg-short"])}
+
     def _pending(segment_id: str, x_end: float) -> dict[str, object]:
         feature = {
             "type": "Feature",
             "geometry": {
                 "type": "LineString",
-                "coordinates": [[0.0, 0.0], [x_end, 0.0]],
+                "coordinates": [[0.0, offsets[segment_id]], [x_end, offsets[segment_id]]],
             },
             "properties": {
                 "segment_id": segment_id,
@@ -2817,9 +2880,15 @@ def test_select_outslope_unrutted_hillslope_segments_applies_minimum_ratio_and_c
 
 
 @pytest.mark.usefixtures("modeled_accounting_stub")
+@pytest.mark.parametrize("legacy_prepare", [False, True])
+@pytest.mark.parametrize("hill_length,expected_roles,native_failure", [(300., (3, 1, 2, 3), False), (25., (1, 2, 3), False), (24., (1, 2), False), (23., None, False), (25., (1, 2, 3), True)])
 def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    legacy_prepare: bool,
+    hill_length: float,
+    expected_roles,
+    native_failure,
 ) -> None:
     controller = Roads(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
 
@@ -2865,7 +2934,7 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     watershed_instance = SimpleNamespace(
         delineation_backend_is_wbt=True,
         translator_factory=lambda: translator,
-        hillslope_length=lambda _topaz_id: 300.0,
+        hillslope_length=lambda _topaz_id: hill_length,
         hillslope_width=lambda _topaz_id: 100.0,
         discha=str(discha_path),
     )
@@ -2911,6 +2980,7 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
         candidate = {
             "segment_hillslope_id": segment_hillslope_id,
             "source_segment_id": pending["segment_id"],
+            "source_segment_ids": [pending["segment_id"]],
             "topaz_id_hill": 21,
             "hillslope_wepp_id": 1,
             "overlap_length_m": 111.0,
@@ -2990,10 +3060,11 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
         "_resolve_legacy_soil_template_path",
         lambda self, **_kwargs: soil_template_path,
     )
+    emitted_roles = []
     monkeypatch.setattr(
         Roads,
         "_build_routed_mofe_management_file",
-        lambda self, *, output_path, **_kwargs: Path(output_path).write_text("management", encoding="utf-8"),
+        lambda self, *, output_path, ofe_order, **_kwargs: (emitted_roles.append(ofe_order), Path(output_path).write_text("management", encoding="utf-8")),
     )
     monkeypatch.setattr(
         Roads,
@@ -3031,7 +3102,60 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
     controller.set_enabled(True)
     _seed_prepared_state(controller)
 
+    if legacy_prepare:
+        with controller.locked():
+            controller._last_prepare_summary.pop("unrutted_geometry_policy")
+        monkeypatch.setattr(roads_module.roads_lifecycle, "retain",
+            lambda *_a, **_k: pytest.fail("stale admission must not retain/reset workspace"))
+        monkeypatch.setattr(Roads, "_run_segment_hillslope",
+            lambda *_a, **_k: pytest.fail("stale admission must not execute model"))
+        with pytest.raises(ValueError, match="Prepare and run Roads again"):
+            controller.run_roads_wepp()
+        return
+    if expected_roles is None:
+        with pytest.raises(RuntimeError, match="1 segment"):
+            controller.run_roads_wepp()
+        failure = controller._last_run_summary["segment_execution_records"][0]
+        assert failure["reason"] == "failed_road_fill_exceeds_hillslope"
+        assert failure["hillslope_length_m"] == hill_length
+        assert failure["fill_length_m"] == 20.
+        assert failure["road_width_m"] == 4.
+        assert not emitted_roles
+        return
+    if native_failure:
+        def fail_native(*_args, **_kwargs):
+            raise RuntimeError("native probe failed")
+        monkeypatch.setattr(Roads, "_run_segment_hillslope", fail_native)
+        with pytest.raises(RuntimeError, match="1 segment"):
+            controller.run_roads_wepp()
+        failure = controller._last_run_summary["segment_execution_records"][0]
+        assert failure["reason"] == "segment_run_failed"
+        assert failure["placement_adjustment"] == "top_of_hillslope"
+        assert failure["placement_source"] == "distance_to_channel_median"
+        assert failure["discha_median_m"] == 100.
+        assert failure["top_landuse_length_m"] == 0.
+        assert failure["bottom_landuse_length_m"] == 1.
+        assert failure["original_top_landuse_length_m"] == -79.
+        return
     summary = controller.run_roads_wepp()
+    record = summary["segment_execution_records"][0]
+    assert emitted_roles == [expected_roles]
+    assert record["contributor_ofe_count"] == len(expected_roles)
+    assert record["placement_policy"] == "unrutted_top_placement_v1"
+    assert summary["unrutted_placement_policy"] == "unrutted_top_placement_v1"
+    assert record["upslope_runon_assumed_zero"] == (hill_length < 300)
+    assert record["top_landuse_length_m"] == (196. if hill_length == 300 else 0.)
+    slope_lines = (Path(controller.roads_runs_dir) / "p900001.slp").read_text().splitlines()
+    assert int(slope_lines[1]) == len(expected_roles)
+    assert record["sim_length_m"] == 4.0
+    assert record["road_target_area_m2"] == pytest.approx(444.0)
+    assert record["road_modeled_area_m2"] == pytest.approx(400.0)
+    assert record["road_area_deficit_m2"] == pytest.approx(44.0)
+    assert record["strip_width_factor"] == pytest.approx(100.0 / 111.0)
+    hill = summary["outslope_unrutted_hillslope_records"][0]
+    assert hill["reference_area_m2"] == pytest.approx(100. * hill_length)
+    assert abs(hill["emitted_area_residual_m2"]) <= 1e-6
+
 
     assert summary["executed_outslope_unrutted_segment_count"] == 1
     assert summary["segment_design_counts"]["outslope_unrutted"] == 1
@@ -3144,6 +3268,7 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
         candidate_a = {
             "segment_hillslope_id": seg_a,
             "source_segment_id": pending["segment_id"],
+            "source_segment_ids": [pending["segment_id"]],
             "topaz_id_hill": 21,
             "hillslope_wepp_id": 1,
             "overlap_length_m": 90.0,
@@ -3156,6 +3281,7 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
         candidate_b = {
             "segment_hillslope_id": seg_b,
             "source_segment_id": pending["segment_id"],
+            "source_segment_ids": [pending["segment_id"]],
             "topaz_id_hill": 21,
             "hillslope_wepp_id": 1,
             "overlap_length_m": 80.0,
@@ -3416,6 +3542,7 @@ def test_run_roads_wepp_outslope_unrutted_missing_discha_with_no_selected_candid
             segment_hillslope_id: {
                 "segment_hillslope_id": segment_hillslope_id,
                 "source_segment_id": pending["segment_id"],
+            "source_segment_ids": [pending["segment_id"]],
                 "topaz_id_hill": 21,
                 "hillslope_wepp_id": 1,
                 "overlap_length_m": 5.0,

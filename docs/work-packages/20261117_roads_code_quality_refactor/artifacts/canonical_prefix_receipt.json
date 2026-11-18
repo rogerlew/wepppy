@@ -1,0 +1,69 @@
+{
+  "selection_nodeids_exact": true,
+  "collected": 537,
+  "passed": 508,
+  "skipped": 29,
+  "seconds": 46.5,
+  "phase_counts": {
+    "setup_passed": 517,
+    "call_passed": 508,
+    "teardown_passed": 537,
+    "call_skipped": 9,
+    "setup_skipped": 20
+  },
+  "source_files_checked": 17,
+  "source_unchanged": true,
+  "exitstatus": 0,
+  "baseline_route_probe": {
+    "failed": 9,
+    "passed": 56,
+    "skipped": 1
+  },
+  "baseline_normalizer_probe": {
+    "failed": 1
+  },
+  "pre_repair_full_selection": {
+    "failed": 31,
+    "passed": 477,
+    "skipped": 29
+  },
+  "artifacts_sha256": {
+    "candidate_logs/prefix-canonical-complete-before.log": "be5758468b32e1177d1982a4b41915f5ca209767a8149b2f28328c64d2610846",
+    "candidate_logs/prefix-canonical-complete-before.xml": "49e60d5476f3dbf2dceca3cfa7b1e96194241915d83717b302259437d115fcb3",
+    "candidate_logs/prefix-managed-baseline-probes.log": "f80e215c88307784e86fe9237403da47449c07f5b450eea46d27c86186770e78",
+    "candidate_logs/prefix-managed-baseline-probes.xml": "cfe9237d66cbe686fa57a9f5e20ab915d3f66cc95c5b95e2748827f94a524721",
+    "candidate_logs/prefix-normalizer-baseline-probe.log": "84374c56db389d1b3b5d0bd146eabbcbde5e909efe94a12967fe52cda96c901d",
+    "candidate_logs/prefix-normalizer-baseline-probe.xml": "2b1ad67f7a46fb800c02fb0e10b2322f0c35c657fef1bf93f638726280be9267",
+    "candidate_logs/prefix-canonical-complete-after.log": "441c7ad4c7c59bf7f71e0a8587220ca170db49471ebb3f8a31f754b9360707d9",
+    "candidate_logs/prefix-canonical-complete-after.xml": "19ff14355726730214e1c0a951f8570c67df4155610b4d2acaa98b71d3e5e802",
+    "canonical_prefix_execution.json": "6bbd6a44b9cb773a9ba75f9cf8fbc35c089427f9a0043c7faebf8228733638ec",
+    "canonical_prefix_selection.json": "17b3f8fc6156b0429e0d74a529e6b033e6c5f7a8c52c4d767424b9bc3a2666b1",
+    "scripts/run_prefix_canonical.py": "f69ef9572bc788c7dd1a3ae82c160777a8f6513fb4fdfe7c9dc47071b7fc2670",
+    "scripts/run_prefix_canonical_audit.py": "4ae8048e06f33f8354027b30f178694a86d0afa182d6f41b818550d442c4c804"
+  },
+  "log_normalization": {
+    "rule": "Trailing whitespace removed from retained log copies only; runtime originals remain unchanged.",
+    "files": {
+      "candidate_logs/prefix-canonical-complete-before.log": {
+        "original_sha256": "eeae049c68376f0dc5510884eb77c2828e0a01df9ec665a559d5046d06118676",
+        "retained_sha256": "be5758468b32e1177d1982a4b41915f5ca209767a8149b2f28328c64d2610846",
+        "original_runtime_log": "/tmp/roads-refactor-validation/prefix-canonical-complete-before.log"
+      },
+      "candidate_logs/prefix-managed-baseline-probes.log": {
+        "original_sha256": "bc6cc3310113c5d42844b4bae8218c64bad6d079f1647598620ee55c3c4d2986",
+        "retained_sha256": "f80e215c88307784e86fe9237403da47449c07f5b450eea46d27c86186770e78",
+        "original_runtime_log": "/tmp/roads-refactor-validation/prefix-managed-baseline-probes.log"
+      },
+      "candidate_logs/prefix-normalizer-baseline-probe.log": {
+        "original_sha256": "b41754b884ab42e39e95b8bbd8592ba9dde338cc21c556d80c3bd08c7ffe4b84",
+        "retained_sha256": "84374c56db389d1b3b5d0bd146eabbcbde5e909efe94a12967fe52cda96c901d",
+        "original_runtime_log": "/tmp/roads-refactor-validation/prefix-normalizer-baseline-probe.log"
+      },
+      "candidate_logs/prefix-canonical-complete-after.log": {
+        "original_sha256": "3f1523439c35cb218fb636f320851d3d1a0ba8e592f813c0e59f4911e91610a7",
+        "retained_sha256": "441c7ad4c7c59bf7f71e0a8587220ca170db49471ebb3f8a31f754b9360707d9",
+        "original_runtime_log": "/tmp/roads-refactor-validation/prefix-canonical-complete-after.log"
+      }
+    }
+  }
+}

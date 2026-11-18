@@ -379,6 +379,10 @@ def test_canonical_archive_restore_keeps_report_provenance_and_failed_work(run, 
     from wepppy.rq.project_rq_archive import ArchiveRuntime, archive_rq, restore_archive_rq
     from wepppy.nodb.project_config_update import project_config_lifecycle_guard
 
+    # This provenance fixture has no vector-retention filesystem or ledger.
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", raising=False)
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", raising=False)
+
     HillslopeWatbalReport(run)
     AverageAnnualsByLanduseReport(run)
     _rewrite(run / "wepp/output/interchange/H.wat.parquet", "P", 9.0)

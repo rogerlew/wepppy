@@ -1,0 +1,27 @@
+{
+  "kind": "local-only-merge",
+  "repository": "https://github.com/rogerlew/wepppy",
+  "branch": "master",
+  "actor": "Codex primary integrator",
+  "authorization": "Operator requested merge to master; hold for CILogon registration approval and deployment",
+  "old_master": "3950b57520c029c75df67565238b94543a31b03a",
+  "accepted_source": "562fac84c27a8a7f9c70bddfa25a737efb2336b6",
+  "merge_commit": "d43e4b3e9803d2c49c588dbf781102b49f0e23fc",
+  "observed_utc": "2026-11-17T20:41:04.868828+00:00",
+  "remote_master_observed_after_fetch": "069fb74cb77ba7e6f23bbfe999cf1d345c715b04",
+  "remote_integration": false,
+  "pushed": false,
+  "published": false,
+  "deployed": false,
+  "cilogon_registration_approved": false,
+  "validation": {
+    "protected_ref_guard": "verified before merge",
+    "source_is_merge_ancestor": true,
+    "merge_tree_equals_source_tree": true,
+    "unrelated_wip_preserved": true,
+    "recovery_backup": "/tmp/cilogon-master-merge-060_w89s",
+    "source_test_evidence": "validation.md",
+    "new_tests": "Documentation-only hold update; readback, ancestry and tree equality checks. No runtime changes since accepted validation."
+  },
+  "hold": "Registration approval, environment acceptance, migration, credential activation, image publication and deployment remain pending."
+}

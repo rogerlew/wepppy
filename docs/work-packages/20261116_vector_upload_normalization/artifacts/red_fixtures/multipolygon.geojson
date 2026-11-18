@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"field_id":1,"label":"fixture"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-116.0,44.0],[-115.9,44.0],[-115.9,44.1],[-116.0,44.1],[-116.0,44.0]]]]}}]}

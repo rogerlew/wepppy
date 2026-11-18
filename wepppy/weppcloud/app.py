@@ -259,7 +259,7 @@ class Run(db.Model):
     def owner(self):
         _owner = self._owner
         if _owner:
-            return _owner.email
+            return _owner.email or f"User {_owner.id}"
         else:
             return '<anonymous>'
 
@@ -373,6 +373,8 @@ class OAuthAccount(db.Model):
 
 class User(db.Model, UserMixin):
     fs_uniquifier = db.Column(db.String(64), unique=True, nullable=False)
+    __table_args__ = (db.Index("uq_user_normalized_login_email", db.func.lower(db.func.trim(db.column("email"))), unique=True),)
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True)
     first_name = db.Column(db.String(255))
@@ -380,6 +382,18 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     confirmed_at = db.Column(db.DateTime())
+    account_kind = db.Column(db.String(16), nullable=False, default="shared", server_default="shared")
+    contact_email = db.Column(db.String(255))
+    local_credential_state = db.Column(db.String(16), nullable=False, default="legacy", server_default="legacy")
+    mailbox_verified_email = db.Column(db.String(255))
+    mailbox_verified_at = db.Column(db.DateTime(timezone=True))
+    verification_nonce = db.Column(db.String(64))
+    verification_sent_at = db.Column(db.DateTime(timezone=True))
+
+    @property
+    def display_email(self):
+        return self.contact_email if self.account_kind == "cilogon" else self.email
+
 
     last_login_at = db.Column(db.DateTime())
     current_login_at = db.Column(db.DateTime())
@@ -587,6 +601,9 @@ security = Security(app, user_datastore,
                     login_form=ExtendedLoginForm,
                     register_form=ExtendedRegisterForm,
                     confirm_register_form=ExtendedRegisterForm)
+
+from wepppy.weppcloud.account_security import init_account_security
+init_account_security(app, user_datastore)
 
 mail = Mail(app)
 session_manager = Session(app)

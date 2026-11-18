@@ -1,0 +1,51 @@
+# CILogon and account verification tracker
+
+**Updated**: 2026-11-17 (UTC).
+**Phase**: merged to local master; registration approval and environment acceptance pending.
+**Security impact**: high.
+**Provider approval**: CILogon registration is not yet approved (operator confirmation, 2026-11-17).
+**Production**: deployment/migration/credential activation deferred.
+
+## Task board
+
+- [x] Stage inactive wepp1 credentials and retain [receipt](artifacts/20261117_secret_staging.md).
+- [x] Approve independent CILogon identity, shared verified Google/GitHub matching, and exact login wording.
+- [x] Approve email-first password setup; complete independent contract reviews and checkpoint `9eb2dfcf0`.
+- [x] Review nullable-identity consumer compatibility and checkpoint `874de621c`.
+- [x] Implement additive migration, provider flow, mailbox lifecycle, responsive account pages, and consumer repairs.
+- [x] Dispatch independent implementation reviews and disposition source findings.
+- [x] Retain local signed-token/ORM/mail-sink/browser/frontend evidence and user/operator documentation.
+- [ ] Obtain CILogon registration approval before activation.
+- [ ] Complete PostgreSQL/live-provider/SMTP/production-mount acceptance and broader environment-dependent tests before release.
+
+## Current authority and decisions
+
+The [account contract](../../schemas/weppcloud-account-email-verification-contract.md) governs separate CILogon accounts and shared local/Google/GitHub accounts. Email-first signup and password selection after opening the mailbox link are approved; no product decision remains open. Existing local credentials remain usable. No forced legacy reset, account merge, contact-edit workflow, or production activation is authorized.
+
+Consumer findings were resolved using stable IDs: token issuance, Bootstrap authorization, detached role/member access, and owner display now tolerate missing shared login email. CILogon contact email remains informational. See [decision record](artifacts/20261117_contract_decision.md), [migration plan](artifacts/account_migration_plan.md), [implementation guide](../../oauth_spec.md), and [user help](../../user-guide/sign-in.md).
+
+## Reviews and validation
+
+Final focused Python batch: **429 passed**; diagnostic/asset checks: **36 passed**. Frontend: **1,091 Jest tests plus nine Node tests passed**, lint passed. Nine mobile/desktop browser combinations passed. Broader Redis/PostgreSQL suites remain environment-blocked.
+
+[Security review](artifacts/20261117_security_implementation_review.md) and [correctness review](artifacts/20261117_correctness_implementation_review.md) close local source findings. [Validation receipt](artifacts/validation.md) records overlapping test batches, browser evidence, the unavailable Redis/PostgreSQL gates, and production acceptance limits. No deployment readiness is inferred from synthetic tests.
+
+## Handoff boundary
+
+Implementation commit `679dc65d4` is on `work/cilogon-oidc-scaffold` in `/home/workdir/wepppy-cilogon-oidc`; original checkout WIP is preserved. The operator-approved isolated test container had no published ports or production credentials and was stopped after validation. Staged wepp1 secrets have not been activated. Future rollout must use the canonical deployment entry point with a coordinated schema/code plan and compatible rollback. No user decision is needed for the dispositioned findings; remaining gates require the appropriate nonproduction environment.
+
+## Master integration authorization
+
+The operator authorized merging to master while holding for CILogon approval and deployment. Integration is local only: local master already contains unpublished work, and pushing master triggers image publication. No push, image publication, live migration, restart, or activation is included. The local merge receipt records ancestry and preservation of shared-checkout WIP; it is not a remote integration receipt.
+
+Local merge completed at `d43e4b3e9803d2c49c588dbf781102b49f0e23fc` with accepted source `562fac84c27a8a7f9c70bddfa25a737efb2336b6`. Committed trees match exactly; unrelated WIP is preserved. See [local-only receipt](artifacts/20261117_local_master_merge.json). Freshly fetched remote master remains `069fb74cb77ba7e6f23bbfe999cf1d345c715b04`; this is not remote integration or deployment.
+
+## Production scope amendment, 2026-11-18
+
+The operator now authorizes the full wepp.cloud release and account-schema migration
+with other committed changes, explicitly excluding CILogon activation because app
+registration remains unapproved. Keep the provider disabled and staged credentials
+inactive. This supersedes the earlier deployment/migration hold only for the shared
+application release. Migration rehearsal on a restored production database passes
+with all legacy data unchanged; live migration is pending. Execution and evidence
+are tracked in the [production rollout](../../infrastructure/soil-data-production.md).

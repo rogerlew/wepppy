@@ -1,0 +1,93 @@
+{
+  "baseline_head": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "controlled_omni": {
+    "canonical": {
+      "filesystem_id": "dev-wc1",
+      "filesystem_root": "/wc1",
+      "baseline": "1 passed",
+      "candidate": "1 passed"
+    },
+    "aligned": {
+      "filesystem_id": "dev-wc1",
+      "filesystem_root": "/tmp",
+      "baseline": "RecordingRedis.sismember failed",
+      "candidate": "RecordingRedis.sismember failed"
+    }
+  },
+  "roads_route_canonical_before": "1 failed (507 response)",
+  "roads_route_canonical_after": {
+    "passed": 37,
+    "skipped": 1,
+    "seconds": 10.34
+  },
+  "focused_canonical_after": {
+    "passed": 413,
+    "skipped": 1,
+    "seconds": 38.1
+  },
+  "source_sha256": {
+    "tests/weppcloud/routes/test_roads_bp.py": "e496dc623eb197c6b15ed09e9b1f99ec50e1a86619309e0f07eb229068677fca"
+  },
+  "logs_sha256": {
+    "candidate_logs/omni-baseline-canonical.log": "72a029c2d33901c5fe50aac882f561605f863f2667c83f4503d3910a4bdfed72",
+    "candidate_logs/omni-candidate-canonical.log": "0b6bb2134133de16ad1b231f61fa09cad59ef2a3e8d83ef3e9af02ae6dbe19bb",
+    "candidate_logs/omni-baseline-aligned.log": "0462f9ad23d1123d243bbd232f1c548a1b0d7ab025fac1afd930da090ebbaa1b",
+    "candidate_logs/omni-candidate-aligned.log": "22b83883041c52954d427ee8d904f3669095a743754a34a1cb6f9d05c1397143",
+    "candidate_logs/roads-route-canonical-diagnostic.log": "67ce560dfdded77a00731562fcf9628d55ec58c63f0a0049b42a9adf6034e61c",
+    "candidate_logs/roads-route-canonical-fixed.log": "abe07c409b29f1f0e7572edea249becbf0638553017d5e209e9c27f04ee4d099",
+    "candidate_logs/focused-canonical-fixture-20261117c.log": "62c06cb3b747f7105d99a6d2f71184ae5d0fbe85008a88afbe73d0641a445e7b"
+  },
+  "scripts": [
+    {
+      "runtime_path": "/tmp/roads_environment_command.py",
+      "snapshot": "scripts/roads_environment_command.py",
+      "sha256": "56c5e1c94f5f1c66554abf2f06e8f46f9cbbb34c95f2ed5d37a0c5926e913074"
+    },
+    {
+      "runtime_path": "/tmp/roads-refactor-validation/check_omni_environment.py",
+      "snapshot": "scripts/check_omni_environment.py",
+      "sha256": "e9a634aeca3011f8e601221e7aef3a8356ebe53859ea1ab8868b2ad57932969c"
+    }
+  ],
+  "scope": "Two fixture-local environment declarations only; no Omni or production edits.",
+  "log_normalization": {
+    "rule": "Trailing whitespace removed from retained log copies only; runtime originals remain unchanged.",
+    "files": {
+      "candidate_logs/omni-baseline-canonical.log": {
+        "original_sha256": "0cd502858420ce73108835302ccb0b5e880e69cc21f1d487601bee47a64fd794",
+        "retained_sha256": "72a029c2d33901c5fe50aac882f561605f863f2667c83f4503d3910a4bdfed72",
+        "original_runtime_log": "/tmp/roads-refactor-validation/omni-baseline-canonical.log"
+      },
+      "candidate_logs/omni-candidate-canonical.log": {
+        "original_sha256": "604059d414f53ce80178ae256c5f8a6d85975ab96811124863c81d216485098c",
+        "retained_sha256": "0b6bb2134133de16ad1b231f61fa09cad59ef2a3e8d83ef3e9af02ae6dbe19bb",
+        "original_runtime_log": "/tmp/roads-refactor-validation/omni-candidate-canonical.log"
+      },
+      "candidate_logs/omni-baseline-aligned.log": {
+        "original_sha256": "498995cd403b8dbb84e32750737e82b0d8ff5b0794b7a14d79f91618a35127fa",
+        "retained_sha256": "0462f9ad23d1123d243bbd232f1c548a1b0d7ab025fac1afd930da090ebbaa1b",
+        "original_runtime_log": "/tmp/roads-refactor-validation/omni-baseline-aligned.log"
+      },
+      "candidate_logs/omni-candidate-aligned.log": {
+        "original_sha256": "d1826ae137625fd75a8ac2f1cd0faa1a8079acc8fd70f3bbed1d9ab1917c53a0",
+        "retained_sha256": "22b83883041c52954d427ee8d904f3669095a743754a34a1cb6f9d05c1397143",
+        "original_runtime_log": "/tmp/roads-refactor-validation/omni-candidate-aligned.log"
+      },
+      "candidate_logs/roads-route-canonical-diagnostic.log": {
+        "original_sha256": "ea49759b51054f8d3c06e3a8419af32f0085f373ad0993a771af4578cf557519",
+        "retained_sha256": "67ce560dfdded77a00731562fcf9628d55ec58c63f0a0049b42a9adf6034e61c",
+        "original_runtime_log": "/tmp/roads-refactor-validation/roads-route-canonical-diagnostic.log"
+      },
+      "candidate_logs/roads-route-canonical-fixed.log": {
+        "original_sha256": "be957086b12c47c5e69c13b5e74786631a055b7d22a7a5730e5474bd2b602f80",
+        "retained_sha256": "abe07c409b29f1f0e7572edea249becbf0638553017d5e209e9c27f04ee4d099",
+        "original_runtime_log": "/tmp/roads-refactor-validation/roads-route-canonical-fixed.log"
+      },
+      "candidate_logs/focused-canonical-fixture-20261117c.log": {
+        "original_sha256": "decc8c65744406cecb084825c580ea32dba6dd6706b0949e463820953e237de1",
+        "retained_sha256": "62c06cb3b747f7105d99a6d2f71184ae5d0fbe85008a88afbe73d0641a445e7b",
+        "original_runtime_log": "/tmp/roads-refactor-validation/focused-canonical-fixture-20261117c.log"
+      }
+    }
+  }
+}

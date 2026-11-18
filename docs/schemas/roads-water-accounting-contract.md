@@ -174,3 +174,21 @@ not independently make old beta files current. Historical compatibility descript
 in this contract apply to explicit diagnostic reads only. Direct Roads-scoped
 reports require current admission before accounting validation. Retained historical
 snapshots include the accounting ledger and original prepared/manifest context.
+
+## RUPC-01 geometry boundary
+
+The accepted [unrutted strip amendment](roads-unrutted-strip-contract.md) changes
+pre-execution geometry allocation under RUPC-01; scoped forest conformance was validated on 2026-11-17; production rollout remains pending. Keep this contract's
+full native source-area accounting, zero-contributor baseline equivalence,
+replacement precedence and WAT/PASS serialization reconciliation. Geometry area
+closure does not authorize post-execution rescaling to hide native discrepancies.
+
+### RUPC-02 top-placement amendment (locally validated 2026-11-17)
+
+The [RUPC-02 placement contract](roads-unrutted-strip-contract.md#rupc-02-top-of-hillslope-placement)
+supersedes rejection solely for non-positive upstream length. Its native role order,
+additive provenance, downstream area compensation and execution-policy admission
+are authoritative. Preparation geometry stays compatible; old executions require
+Run again to become current under RUPC-02. Existing parameter defaults, PASS
+accounting, history retention and other designs remain unchanged. RUPC-02 conformance has separate scoped/native evidence in the work package;
+production rollout remains separate.

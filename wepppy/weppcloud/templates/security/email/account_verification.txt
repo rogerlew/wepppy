@@ -1,0 +1,5 @@
+{% if setup_password %}Verify your email and choose a password to finish setting up local sign-in to WEPPcloud.{% else %}Verify your contact email for WEPPcloud. This does not change your password or connect separate accounts.{% endif %}
+
+{{ verification_link }}
+
+If you did not request this email, you can ignore it. Opening the link alone does not make any changes.

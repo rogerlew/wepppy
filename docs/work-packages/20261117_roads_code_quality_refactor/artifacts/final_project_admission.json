@@ -1,0 +1,40 @@
+{
+  "final_constants_sha256": "545dc010950acea4dda274fc7cf2f81e78c3fb43f84c34dafda2da9eb7b2ecde",
+  "projects": [
+    {
+      "design": "inslope_bd",
+      "root": "/wc1/runs/rq/roads-quality-candidate-20261117b-inslope_bd",
+      "current": true,
+      "roads_nodb_sha256": "d7f35b5bad258765c28d565c74d193221a3a6de837fa5d3a320feb55af301b0b",
+      "durable_state_unchanged": true
+    },
+    {
+      "design": "inslope_rd",
+      "root": "/wc1/runs/rq/roads-quality-candidate-20261117b-inslope_rd",
+      "current": true,
+      "roads_nodb_sha256": "9b32efd58369b3144c6bed9807b4017c7f2dbe7ea118c5d0d821d0c7e621fa0c",
+      "durable_state_unchanged": true
+    },
+    {
+      "design": "outslope_rutted",
+      "root": "/wc1/runs/rq/roads-quality-candidate-20261117b-outslope_rutted",
+      "current": true,
+      "roads_nodb_sha256": "31952cfc099630b96da9eb1ce7f83a0a436b54d0d9330108becac5bbf9560ceb",
+      "durable_state_unchanged": true
+    },
+    {
+      "design": "unrutted-positive",
+      "root": "/wc1/runs/rq/roads-quality-candidate-20261117b-unrutted-positive",
+      "current": true,
+      "roads_nodb_sha256": "9dadac4b9c727abacffea9c278f740b8d655cef0b9204abbfa9bc854b028ecd0",
+      "durable_state_unchanged": true
+    },
+    {
+      "design": "unrutted-negative",
+      "root": "/wc1/runs/rq/roads-quality-candidate-20261117b-unrutted-negative",
+      "current": false,
+      "roads_nodb_sha256": "ab54c771f2ba1353a80faff64c0ed45fa5d85fbe8ca12420e5338e3048ebdd6b",
+      "durable_state_unchanged": true
+    }
+  ]
+}

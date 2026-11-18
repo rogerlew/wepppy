@@ -28,6 +28,10 @@ class Rect:
         self.ymax = ymax
 
     @property
+    def geom_type(self):
+        return "Polygon"
+
+    @property
     def bounds(self):
         return (self.xmin, self.ymin, self.xmax, self.ymax)
 
@@ -159,6 +163,20 @@ def _stub_user_defined_geodata(
     monkeypatch.setattr(omni_module.Ron, "getInstance", lambda wd: DummyRon())
     monkeypatch.setattr(omni_module.NoDbBase, "has_sbs", property(lambda self: False))
     return user_geojson_path
+
+
+@pytest.mark.parametrize(
+    "geometry",
+    [None, Rect(0.0, 0.0, 0.0, 0.0), type("PointGeometry", (), {"geom_type": "Point", "is_empty": False})()],
+)
+def test_user_defined_geometry_prevalidation_rejects_nonpolygon_or_empty(
+    geometry: object,
+) -> None:
+    service = OmniContrastBuildService()
+    user_gdf = DummyGeoDataFrame([{"name": "invalid", "geometry": geometry}], crs="EPSG:4326")
+
+    with pytest.raises(ValueError, match="null geometry|empty geometry|Polygon or MultiPolygon"):
+        service._validate_user_defined_gdf(user_gdf)
 
 
 def test_build_contrasts_stream_order_service_groups_hillslopes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

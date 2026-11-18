@@ -8,7 +8,7 @@ from wepppy.observability.secret_profiles import WORKER
 
 from datetime import datetime, timezone
 import errno
-from glob import glob
+from glob import escape as glob_escape, glob
 import hashlib
 import json
 import os
@@ -22,11 +22,13 @@ from copy import deepcopy
 from contextlib import ExitStack
 from pathlib import Path
 import shutil
+import tempfile
 import time
 
 import jsonpickle
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar, Sequence, Literal
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar, Sequence, Literal
 
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation, retained_tree_repair_pending
 from wepppy.all_your_base.geo import raster_stacker
 from wepppy.topo.watershed_collection import WatershedCollection, WatershedFeature
 from wepppy.weppcloud.utils.helpers import get_batch_root_dir, get_wd
@@ -575,21 +577,39 @@ class BatchRunner(NoDbBase):
         base_wd = self.base_wd
         logger.info(f'base_wd: {base_wd}')
         with redisprep_snapshot_guard(runid_wd):
-            init_required = False
-            if os.path.exists(runid_wd) and self.is_task_enabled(TaskEnum.if_exists_rmtree):
-                logger.info(f'removing existing runid_wd: {runid_wd}')
-                _reset_run_workspace(runid_wd, logger)
-                init_required = True
+            reset_requested = self.is_task_enabled(TaskEnum.if_exists_rmtree)
+            target_path = Path(runid_wd)
+            stale_workspaces = tuple(target_path.parent.glob(f"{glob_escape(target_path.name)}.stale.*"))
+            repair_pending = retained_tree_repair_pending(
+                target_path, "batch_leaf_copy", recovery_paths=stale_workspaces,
+            )
+            init_required = reset_requested or repair_pending or not os.path.exists(runid_wd)
+            if init_required:
+                with retained_tree_operation(
+                    target_path, source=Path(base_wd),
+                    project_keys=(f"run:batch;;{self.batch_name};;_base", f"run:{runid}"),
+                    operation="batch_leaf_copy", recovery_paths=stale_workspaces,
+                ) as retention_operation:
+                    retention_operation.checkpoint()
+                    if os.path.exists(runid_wd):
+                        logger.info(f'removing existing runid_wd: {runid_wd}')
+                        if retention_operation.repair_pending:
+                            # An interrupted copy has not completed attribution;
+                            # retaining it as stale would create unadmitted bytes.
+                            shutil.rmtree(runid_wd)
+                        else:
+                            _reset_run_workspace(runid_wd, logger)
+                            retention_operation.sync_paths += tuple(
+                                target_path.parent.glob(f"{glob_escape(target_path.name)}.stale.*")
+                            )
+                    retention_operation.checkpoint()
+                    logger.info(f'copying base project to runid_wd: {runid_wd}')
+                    shutil.copytree(base_wd, runid_wd)
 
-            if not os.path.exists(runid_wd):
-                init_required = True
-        
             logger.info(f'init_required: {init_required}')
             prep = None
             locks_cleared = None
             if init_required:
-                logger.info(f'copying base project to runid_wd: {runid_wd}')
-                shutil.copytree(base_wd, runid_wd)
                 invalidate_catalog_incarnation(runid_wd)
 
                 logger
@@ -1104,14 +1124,19 @@ class BatchRunner(NoDbBase):
     def _init_base_project(self) -> None:
         from wepppy.nodb.core import Ron
 
+        batch_name = self.batch_name
+        if not batch_name:
+            raise ValueError("Batch name cannot be empty")
         with redisprep_snapshot_guard(self._base_wd):
-            if os.path.exists(self._base_wd):
-                shutil.rmtree(self._base_wd)
-            os.makedirs(self._base_wd)
-            batch_name = self.batch_name
-            if not batch_name:
-                raise ValueError("Batch name cannot be empty")
-
+            with retained_tree_operation(
+                Path(self._base_wd),
+                project_keys=(f"run:batch;;{batch_name};;_base",),
+                operation="batch_base_reset",
+            ) as retention_operation:
+                retention_operation.checkpoint()
+                if os.path.exists(self._base_wd):
+                    shutil.rmtree(self._base_wd)
+                os.makedirs(self._base_wd)
             Ron(self._base_wd, self._base_config, run_group='batch', group_name=self.batch_name)
 
     # ------------------------------------------------------------------
@@ -1151,6 +1176,107 @@ class BatchRunner(NoDbBase):
                 summary["is_valid"] = False
                 stale_state["summary"] = summary
                 self._runid_template_state = stale_state
+
+    def register_geojson_transactional(
+        self,
+        watershed_collection: WatershedCollection,
+        *,
+        metadata: Optional[Dict[str, Any]] = None,
+        publication_commit: Callable[[], None],
+    ) -> None:
+        """Register a watershed and its publication receipt under one NoDb lock."""
+        analysis_results = watershed_collection.analysis_results
+        if analysis_results["feature_count"] == 0:
+            os.remove(watershed_collection.geojson_filepath)
+            raise ValueError("GeoJSON contains no features.")
+        enriched_results = deepcopy(analysis_results)
+        if metadata:
+            enriched_results.update(metadata)
+
+        with self.locked():
+            prior_geojson_state = deepcopy(self._geojson_state)
+            prior_template_state = deepcopy(self._runid_template_state)
+            try:
+                self._geojson_state = enriched_results
+                if self._runid_template_state:
+                    stale_state = deepcopy(self._runid_template_state)
+                    stale_state["status"] = "stale"
+                    summary = stale_state.get("summary") or {}
+                    summary["is_valid"] = False
+                    stale_state["summary"] = summary
+                    self._runid_template_state = stale_state
+                publication_commit()
+            except BaseException:  # broad-except: transaction rollback includes cancellation
+                self._geojson_state = prior_geojson_state
+                self._runid_template_state = prior_template_state
+                raise
+
+    def publish_geojson_transactional(
+        self,
+        candidate_path: Path,
+        destination_path: Path,
+        *,
+        metadata: Optional[Dict[str, Any]] = None,
+        publication_commit: Callable[[], None],
+    ) -> None:
+        """Publish watershed bytes, state and receipt under one NoDb lock."""
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        backup_path: Path | None = None
+        staged_path: Path | None = None
+        with self.locked():
+            prior_geojson_state = deepcopy(self._geojson_state)
+            prior_template_state = deepcopy(self._runid_template_state)
+            try:
+                if destination_path.exists():
+                    descriptor, backup_name = tempfile.mkstemp(
+                        prefix=f".{destination_path.name}.",
+                        suffix=".backup",
+                        dir=destination_path.parent,
+                    )
+                    os.close(descriptor)
+                    backup_path = Path(backup_name)
+                    shutil.copy2(destination_path, backup_path)
+                descriptor, staged_name = tempfile.mkstemp(
+                    prefix=f".{destination_path.name}.",
+                    suffix=".tmp",
+                    dir=destination_path.parent,
+                )
+                os.close(descriptor)
+                staged_path = Path(staged_name)
+                shutil.copy2(candidate_path, staged_path)
+                os.replace(staged_path, destination_path)
+                staged_path = None
+
+                collection = WatershedCollection(str(destination_path))
+                analysis_results = collection.analysis_results
+                if analysis_results["feature_count"] == 0:
+                    raise ValueError("GeoJSON contains no features.")
+                enriched_results = deepcopy(analysis_results)
+                if metadata:
+                    enriched_results.update(metadata)
+                self._geojson_state = enriched_results
+                if self._runid_template_state:
+                    stale_state = deepcopy(self._runid_template_state)
+                    stale_state["status"] = "stale"
+                    summary = stale_state.get("summary") or {}
+                    summary["is_valid"] = False
+                    stale_state["summary"] = summary
+                    self._runid_template_state = stale_state
+                publication_commit()
+            except BaseException:  # broad-except: transaction rollback includes cancellation
+                if backup_path is not None:
+                    os.replace(backup_path, destination_path)
+                    backup_path = None
+                else:
+                    destination_path.unlink(missing_ok=True)
+                self._geojson_state = prior_geojson_state
+                self._runid_template_state = prior_template_state
+                raise
+            finally:
+                if staged_path is not None:
+                    staged_path.unlink(missing_ok=True)
+                if backup_path is not None:
+                    backup_path.unlink(missing_ok=True)
 
     def get_watershed_collection(self) -> WatershedCollection:
         """Get the registered watershed collection, if any."""

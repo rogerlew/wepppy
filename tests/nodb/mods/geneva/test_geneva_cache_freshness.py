@@ -230,11 +230,15 @@ def test_status_containment_error_after_commit_is_diagnostic(project, caplog):
     assert 'Unable to record Geneva derivation status' in caplog.text
 
 
-def test_canonical_archive_preserves_geneva_failed_and_accepted_work(project):
+def test_canonical_archive_preserves_geneva_failed_and_accepted_work(project, monkeypatch):
     import shutil
     import zipfile
     from wepppy.rq.project_rq_archive import ArchiveRuntime, archive_rq, restore_archive_rq
     from wepppy.nodb.project_config_update import project_config_lifecycle_guard
+
+    # This archive fixture has no managed vector-retention filesystem.
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", raising=False)
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", raising=False)
 
     service = GenevaHruMapGeometryService()
     expected_payload = service.query_feature_collection(project)

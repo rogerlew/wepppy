@@ -49,7 +49,7 @@ def test_mint_bootstrap_jwt_uses_six_month_expiry(monkeypatch: pytest.MonkeyPatc
     assert captured["subject"] == "user@example.com"
     assert captured["audience"] == "wepp.cloud"
     assert captured["expires_in"] == BOOTSTRAP_JWT_EXPIRES_SECONDS
-    assert captured["extra_claims"] == {"runid": "ab-run"}
+    assert captured["extra_claims"] == {"runid": "ab-run", "user_id": 42}
     assert clone_url == "https://42:signed-jwt@wepp.cloud/git/ab/ab-run/.git"
 
 

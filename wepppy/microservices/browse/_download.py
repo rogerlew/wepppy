@@ -38,6 +38,12 @@ from wepppy.microservices.browse.security import (
     validate_raw_subpath,
     validate_resolved_target,
 )
+from wepppy.microservices.browse.sensitive_vectors import (
+    can_access_batch_sensitive_vector,
+    can_access_run_sensitive_vector,
+    is_retained_original,
+    is_sensitive_vector_path,
+)
 from wepppy.microservices.browse.parquet_tables import (
     current_rss_kb,
     log_parquet_operation,
@@ -334,6 +340,7 @@ async def aria2c_spec(request: Request) -> PlainTextResponse:
         wd,
         base_url,
         auth_context.is_root,
+        can_access_run_sensitive_vector(auth_context, runid),
     )
     spec_content = "\n".join(file_specs)
     return PlainTextResponse(spec_content)
@@ -456,6 +463,11 @@ async def download_with_subpath(request: Request) -> Response:
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
     _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
+    resolved_relpath = os.path.relpath(os.path.realpath(dir_path), wd)
+    if is_sensitive_vector_path(resolved_relpath) and not can_access_run_sensitive_vector(
+        auth_context, runid
+    ):
+        raise HTTPException(status_code=403, detail="Access denied.")
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
     return await download_response_file(dir_path, query_params=request.query_params)
@@ -528,6 +540,11 @@ async def download_batch_with_subpath(request: Request) -> Response:
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
     _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
+    resolved_relpath = os.path.relpath(os.path.realpath(dir_path), wd)
+    if is_sensitive_vector_path(resolved_relpath) and not can_access_batch_sensitive_vector(
+        auth_context, batch_name
+    ):
+        raise HTTPException(status_code=403, detail="Access denied.")
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
@@ -538,6 +555,15 @@ async def download_response_file(path: str, query_params) -> Response:
     if not os.path.isfile(path):
         raise HTTPException(status_code=404)
     filename = os.path.basename(path)
+    resolved_path = os.path.realpath(path)
+    if is_retained_original(resolved_path):
+        filename = os.path.basename(resolved_path)
+        return FileResponse(
+            resolved_path,
+            filename=filename,
+            media_type="application/octet-stream",
+            headers={"X-Content-Type-Options": "nosniff"},
+        )
     ext = os.path.splitext(filename)[1].lower()
     as_csv = query_params.get('as_csv') if query_params else False
     raw_pqf = (query_params.get('pqf') or '').strip() if query_params else ''
@@ -744,7 +770,12 @@ def _assert_target_within_allowed_roots(
         raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
 
-def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool) -> list[str]:
+def _collect_file_specs(
+    wd: str,
+    base_url: str,
+    allow_recorder: bool,
+    allow_sensitive_vectors: bool = False,
+) -> list[str]:
     for root in _NODIR_ROOTS:
         if _is_mixed_nodir_root(wd, root):
             raise HTTPException(
@@ -759,10 +790,25 @@ def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool) -> list[st
             )
 
     specs: list[str] = []
-    for root, _dirs, files in os.walk(wd):
+    for root, dirs, files in os.walk(wd):
+        if not allow_sensitive_vectors:
+            dirs[:] = [
+                name
+                for name in dirs
+                if not is_sensitive_vector_path(os.path.relpath(os.path.join(root, name), wd))
+            ]
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, wd)
+            resolved_relative_path = os.path.relpath(os.path.realpath(file_path), wd)
+            if (
+                not allow_sensitive_vectors
+                and (
+                    is_sensitive_vector_path(relative_path)
+                    or is_sensitive_vector_path(resolved_relative_path)
+                )
+            ):
+                continue
             if is_root_only_path(relative_path) and not allow_recorder:
                 continue
             violation = validate_raw_subpath(relative_path)

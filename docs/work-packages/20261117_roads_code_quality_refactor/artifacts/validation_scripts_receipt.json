@@ -1,0 +1,43 @@
+{
+  "captured_utc": "2026-11-17T22:58:50.228705+00:00",
+  "purpose": "Retained validation scripts and explicit reproducibility recipe; no production code.",
+  "source_revision": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "scripts": [
+    {
+      "path": "scripts/roads_refactor_baseline.py",
+      "runtime_path": "/tmp/roads_refactor_baseline.py",
+      "sha256": "b2ee661f887b2ccf4826a8bb6e04972cca31024b0fb6a141b2a280936d51b52f",
+      "bytes": 2718
+    },
+    {
+      "path": "scripts/roads_refactor_projects.py",
+      "runtime_path": "/tmp/roads_refactor_projects.py",
+      "sha256": "9a556fd0346f8c22f82c99a6938d8d30e52d5f3e9b5496b3da2fc9e62dd2f781",
+      "bytes": 1329
+    },
+    {
+      "path": "scripts/project_parity.py",
+      "runtime_path": "/tmp/roads-refactor-validation/project_parity.py",
+      "sha256": "87b8aaedeff206f4902ad58f46d6224287febc9baa3b7b1f8d96b04f1f440fc2",
+      "bytes": 4927
+    },
+    {
+      "path": "scripts/compare_matrix.py",
+      "runtime_path": "/tmp/roads-refactor-validation/compare_matrix.py",
+      "sha256": "22f0d77f44ad59310ef2c9e9b05fb6b2005bba5205c5c747224d039b5a85e2b5",
+      "bytes": 2948
+    },
+    {
+      "path": "scripts/response_diagnostic.py",
+      "runtime_path": "/tmp/roads-refactor-validation/response_diagnostic.py",
+      "sha256": "efb2b12912661a9bec9816154cc94ef8b8c33b67117334defd35f0d6fa0a50f3",
+      "bytes": 283
+    }
+  ],
+  "provenance_limits": [
+    "These are the post-baseline reusable script versions, not a claim of pre-launch script hashing.",
+    "After baseline execution, the drivers gained environment-selected source/labels, unique project log names, and native basetemp overwrite refusal.",
+    "The matrix comparator gained explicit native executable/extension identity equality checks after its baseline self-check.",
+    "The recorded baseline process logs retain exact commands; source and executable identities are independently retained."
+  ]
+}

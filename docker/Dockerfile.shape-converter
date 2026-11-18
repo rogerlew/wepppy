@@ -44,6 +44,27 @@ RUN if [ "${SHAPE_PARSER_REQUIRE_RELEASE_PROVENANCE}" = "1" ]; then \
         --binary target/release/shape_parser_cli \
         --sidecar target/release/shape_parser_cli.json
 
+WORKDIR /src/geoparquet_parser_cli
+COPY wepppy/microservices/shape_converter/rust/geoparquet_parser_cli/Cargo.toml ./Cargo.toml
+COPY wepppy/microservices/shape_converter/rust/geoparquet_parser_cli/Cargo.lock ./Cargo.lock
+COPY wepppy/microservices/shape_converter/rust/geoparquet_parser_cli/src ./src
+
+RUN cargo build --release --locked && \
+    built_utc_arg="" && \
+    if [ -n "${SHAPE_PARSER_BUILT_UTC}" ]; then \
+        built_utc_arg="--built-utc=${SHAPE_PARSER_BUILT_UTC}"; \
+    fi && \
+    python3 /src/shape_parser_cli/tools/generate_provenance.py \
+        --binary target/release/geoparquet_parser_cli \
+        --source-root . \
+        --output target/release/geoparquet_parser_cli.json \
+        --source-revision "${SHAPE_PARSER_SOURCE_REVISION}" \
+        --release-label "${SHAPE_PARSER_RELEASE_LABEL}" \
+        ${built_utc_arg} && \
+    python3 /src/shape_parser_cli/tools/validate_provenance.py \
+        --binary target/release/geoparquet_parser_cli \
+        --sidecar target/release/geoparquet_parser_cli.json
+
 FROM python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b AS python-builder
 
 COPY docker/requirements-shape-converter.txt /tmp/requirements-runtime.txt
@@ -88,6 +109,9 @@ RUN groupadd --gid 10001 shape-converter && \
 COPY --from=python-builder /opt/venv /opt/venv
 COPY --from=rust-builder /src/shape_parser_cli/target/release/shape_parser_cli /usr/local/bin/shape_parser_cli
 COPY --from=rust-builder /src/shape_parser_cli/target/release/shape_parser_cli.json /usr/local/bin/shape_parser_cli.json
+COPY --from=rust-builder /src/geoparquet_parser_cli/target/release/geoparquet_parser_cli /usr/local/bin/geoparquet_parser_cli
+COPY --from=rust-builder /src/geoparquet_parser_cli/target/release/geoparquet_parser_cli.json /usr/local/bin/geoparquet_parser_cli.json
+COPY docs/work-packages/20261116_vector_upload_normalization/artifacts/red_fixtures/data-page-v2-control.parquet /usr/local/share/shape-converter/geoparquet-readiness.parquet
 COPY --chown=10001:10001 wepppy/__init__.py /opt/app/wepppy/__init__.py
 COPY --chown=10001:10001 wepppy/microservices/__init__.py /opt/app/wepppy/microservices/__init__.py
 COPY --chown=10001:10001 wepppy/microservices/shape_converter/*.py /opt/app/wepppy/microservices/shape_converter/
@@ -97,12 +121,14 @@ COPY --chown=10001:10001 wepppy/observability /opt/app/wepppy/observability
 RUN /opt/venv/bin/python -c \
         "import importlib.util; assert importlib.util.find_spec('fiona') is None; assert importlib.util.find_spec('pip') is None" && \
     /usr/local/bin/shape_parser_cli --version
+RUN /usr/local/bin/geoparquet_parser_cli --version
 
 ENV PATH="/opt/venv/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/opt/app \
-    SHAPE_CONVERTER_PARSER_CLI=/usr/local/bin/shape_parser_cli
+    SHAPE_CONVERTER_PARSER_CLI=/usr/local/bin/shape_parser_cli \
+    SHAPE_CONVERTER_GEOPARQUET_PARSER_CLI=/usr/local/bin/geoparquet_parser_cli
 
 WORKDIR /opt/app
 USER 10001:10001

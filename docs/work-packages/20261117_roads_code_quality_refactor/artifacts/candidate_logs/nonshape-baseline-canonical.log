@@ -1,0 +1,617 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-baseline:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-77meaxgd 10ccc4d2d26037b18535f7a6d255e2b3a82bb7618289a664c673660ce91e5013 && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m pytest tests/rq/test_batch_rq_retry_selection.py::test_delete_batch_rq_checks_active_jobs_before_cleanup tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_marks_ttl_when_rmtree_fails tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_reports_non_retryable_delete_errors tests/rq/test_project_rq_delete_run.py::test_gc_runs_rq_deferred_delete_suppresses_messages '"'"'tests/rq/test_project_rq_fork.py::test_reset_fork_omni_directories_rejects_hostile_ancestor[socket-_pups/omni]'"'"' tests/weppcloud/controllers_js/test_unitizer_client_js.py::test_unitizer_bundle_contains_blank_guard tests/weppcloud/routes/test_feature_access_routes.py::test_grant_ack_remove_real_transport_and_admission tests/weppcloud/routes/test_feature_access_routes.py::test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent tests/weppcloud/routes/test_feature_access_routes.py::test_legacy_poweruser_is_preserved_without_fabricated_acceptance tests/weppcloud/routes/test_feature_access_routes.py::test_dates_conflict_and_expired_profile '"'"'tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[False]'"'"' '"'"'tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[True]'"'"' '"'"'tests/weppcloud/test_run_catalog_postgres.py::test_marker_notification_latency_without_prior_sql_mirror[readonly]'"'"' tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain tests/weppcloud/test_user_preferences_postgres.py::test_postgres_schema_constraints_and_cascade -q --tb=short --maxfail=0 --basetemp=/tmp/roads-refactor-validation/nonshape-baseline-20261118a --junitxml=/tmp/roads-refactor-validation/nonshape-baseline-canonical.xml'
+time="2026-11-17T17:18:43-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-9dbc1c775639 Creating
+ Container docker-weppcloud-run-9dbc1c775639 Created
+FFFFFFFFFFFF.FE                                                          [100%]
+==================================== ERRORS ====================================
+________ ERROR at setup of test_postgres_schema_constraints_and_cascade ________
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py:924: in do_execute
+    cursor.execute(statement, parameters)
+E   psycopg2.errors.UndefinedColumn: column "account_kind" of relation "user" does not exist
+E   LINE 1: ..._name, last_name, password, active, confirmed_at, account_ki...
+E                                                                ^
+
+The above exception was the direct cause of the following exception:
+tests/weppcloud/test_user_preferences_postgres.py:53: in postgres_user
+    db.session.commit()
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/scoping.py:597: in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:2017: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:1302: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:1277: in _prepare_impl
+    self.session.flush()
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:4341: in flush
+    self._flush(objects)
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:4476: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py:146: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py:4437: in _flush
+    flush_context.execute()
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/unitofwork.py:466: in execute
+    rec.execute(self)
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/persistence.py:93: in save_obj
+    _emit_insert_statements(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/orm/persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1418: in execute
+    return meth(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py:515: in _execute_on_connection
+    return connection._execute_clauseelement(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1640: in _execute_clauseelement
+    ret = self._execute_context(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:2353: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py:924: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column "account_kind" of relation "user" does not exist
+E   LINE 1: ..._name, last_name, password, active, confirmed_at, account_ki...
+E                                                                ^
+E
+E   [SQL: INSERT INTO "user" (fs_uniquifier, email, first_name, last_name, password, active, confirmed_at, account_kind, contact_email, local_credential_state, mailbox_verified_email, mailbox_verified_at, verification_nonce, verification_sent_at, last_login_at, current_login_at, last_login_ip, current_login_ip, login_count) VALUES (%(fs_uniquifier)s, %(email)s, %(first_name)s, %(last_name)s, %(password)s, %(active)s, %(confirmed_at)s, %(account_kind)s, %(contact_email)s, %(local_credential_state)s, %(mailbox_verified_email)s, %(mailbox_verified_at)s, %(verification_nonce)s, %(verification_sent_at)s, %(last_login_at)s, %(current_login_at)s, %(last_login_ip)s, %(current_login_ip)s, %(login_count)s) RETURNING "user".id]
+E   [parameters: {'fs_uniquifier': 'f6e30de462da4f1f8ec4e34aafdc36b4', 'email': 'surf14a-f6e30de462da4f1f8ec4e34aafdc36b4@example.com', 'first_name': None, 'last_name': None, 'password': None, 'active': True, 'confirmed_at': None, 'account_kind': 'shared', 'contact_email': None, 'local_credential_state': 'legacy', 'mailbox_verified_email': None, 'mailbox_verified_at': None, 'verification_nonce': None, 'verification_sent_at': None, 'last_login_at': None, 'current_login_at': None, 'last_login_ip': None, 'current_login_ip': None, 'login_count': None}]
+E   (Background on this error at: https://sqlalche.me/e/20/f405)
+=================================== FAILURES ===================================
+____________ test_delete_batch_rq_checks_active_jobs_before_cleanup ____________
+tests/rq/test_batch_rq_retry_selection.py:1421: in test_delete_batch_rq_checks_active_jobs_before_cleanup
+    batch_rq.delete_batch_rq("demo")
+wepppy/rq/batch_rq.py:548: in delete_batch_rq
+    retention_root = _retention_delete_root(
+wepppy/rq/project_rq_delete.py:105: in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_batch_rq_checks_ac0/demo' is not in the subpath of '/wc1'
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.rq.batch_rq:batch_rq.py:597 Boundary exception at wepppy/rq/batch_rq.py:280
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/batch_rq.py", line 548, in delete_batch_rq
+    retention_root = _retention_delete_root(
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/rq/project_rq_delete.py", line 105, in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_batch_rq_checks_ac0/demo' is not in the subpath of '/wc1'
+________________ test_delete_run_rq_marks_ttl_when_rmtree_fails ________________
+tests/rq/test_project_rq_delete_run.py:117: in test_delete_run_rq_marks_ttl_when_rmtree_fails
+    project_rq.delete_run_rq(runid, wd=str(run_dir), delete_files=True)
+wepppy/rq/exception_logging.py:68: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+wepppy/rq/project_rq.py:1256: in delete_run_rq
+    _delete_helpers.delete_run_rq(
+wepppy/rq/project_rq_delete.py:115: in delete_run_rq
+    _retention_delete_root(target, has_evidence=_has_retained_vector_evidence(target))
+wepppy/rq/project_rq_delete.py:105: in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_run_rq_marks_ttl_w0/test-run' is not in the subpath of '/wc1'
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.rq.exception_logging:exception_logging.py:72 RQ task failed: delete_run_rq (runid=test-run job_id=None)
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/exception_logging.py", line 68, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/rq/project_rq.py", line 1256, in delete_run_rq
+    _delete_helpers.delete_run_rq(
+  File "/workdir/wepppy/wepppy/rq/project_rq_delete.py", line 115, in delete_run_rq
+    _retention_delete_root(target, has_evidence=_has_retained_vector_evidence(target))
+  File "/workdir/wepppy/wepppy/rq/project_rq_delete.py", line 105, in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_run_rq_marks_ttl_w0/test-run' is not in the subpath of '/wc1'
+____________ test_delete_run_rq_reports_non_retryable_delete_errors ____________
+tests/rq/test_project_rq_delete_run.py:144: in test_delete_run_rq_reports_non_retryable_delete_errors
+    project_rq.delete_run_rq(runid, wd=str(run_dir), delete_files=True)
+wepppy/rq/exception_logging.py:68: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+wepppy/rq/project_rq.py:1256: in delete_run_rq
+    _delete_helpers.delete_run_rq(
+wepppy/rq/project_rq_delete.py:115: in delete_run_rq
+    _retention_delete_root(target, has_evidence=_has_retained_vector_evidence(target))
+wepppy/rq/project_rq_delete.py:105: in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_run_rq_reports_non0/test-run-hard-fail' is not in the subpath of '/wc1'
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.rq.exception_logging:exception_logging.py:72 RQ task failed: delete_run_rq (runid=test-run-hard-fail job_id=None)
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/exception_logging.py", line 68, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/rq/project_rq.py", line 1256, in delete_run_rq
+    _delete_helpers.delete_run_rq(
+  File "/workdir/wepppy/wepppy/rq/project_rq_delete.py", line 115, in delete_run_rq
+    _retention_delete_root(target, has_evidence=_has_retained_vector_evidence(target))
+  File "/workdir/wepppy/wepppy/rq/project_rq_delete.py", line 105, in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_delete_run_rq_reports_non0/test-run-hard-fail' is not in the subpath of '/wc1'
+_____________ test_gc_runs_rq_deferred_delete_suppresses_messages ______________
+tests/rq/test_project_rq_delete_run.py:290: in test_gc_runs_rq_deferred_delete_suppresses_messages
+    assert result["deferred"] == 1
+E   assert 0 == 1
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.rq.project_rq_delete:project_rq_delete.py:395 Boundary exception at wepppy/rq/project_rq_delete.py:268
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/project_rq_delete.py", line 384, in gc_runs_rq
+    delete_run_rq(str(runid), str(wd), delete_files=True, runtime=runtime)
+  File "/workdir/wepppy/wepppy/rq/project_rq_delete.py", line 115, in delete_run_rq
+    _retention_delete_root(target, has_evidence=_has_retained_vector_evidence(target))
+  File "/workdir/wepppy/wepppy/rq/project_rq_delete.py", line 105, in _retention_delete_root
+    relative = target.resolve().relative_to(root)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/roads-refactor-validation/nonshape-baseline-20261118a/test_gc_runs_rq_deferred_delet0/gc-run' is not in the subpath of '/wc1'
+_ test_reset_fork_omni_directories_rejects_hostile_ancestor[socket-_pups/omni] _
+tests/rq/test_project_rq_fork.py:233: in test_reset_fork_omni_directories_rejects_hostile_ancestor
+    bound_socket.bind(str(target))
+E   OSError: AF_UNIX path too long
+__________________ test_unitizer_bundle_contains_blank_guard ___________________
+tests/weppcloud/controllers_js/test_unitizer_client_js.py:38: in test_unitizer_bundle_contains_blank_guard
+    contents = bundle_path.read_text(encoding="utf-8")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/workdir/wepppy/wepppy/weppcloud/static/js/controllers-gl.js'
+______________ test_grant_ack_remove_real_transport_and_admission ______________
+tests/weppcloud/routes/test_feature_access_routes.py:181: in test_grant_ack_remove_real_transport_and_admission
+    assert profile.status_code == 200
+E   assert 500 == 200
+E    +  where 500 = <WrapperTestResponse streamed [500 INTERNAL SERVER ERROR]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.weppcloud.routes.user:user.py:513 user.profile failed
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/user.py", line 506, in profile
+    return render_template(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 2, in top-level template code
+    {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 50, in top-level template code
+    {% block body_container %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 52, in block 'body_container'
+    {% block body %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 26, in block 'body'
+    <dd class="wc-profile-details__value">{{ account_display_email(user) or "Not supplied" }}</dd>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'account_display_email' is undefined
+
+ERROR    wepppy.weppcloud.utils.helpers:helpers.py:728 Exception handling request [error_id=68bc877feb8241b28b35eefe882046a9]: Error Handling Request
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/user.py", line 506, in profile
+    return render_template(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 2, in top-level template code
+    {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 50, in top-level template code
+    {% block body_container %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 52, in block 'body_container'
+    {% block body %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 26, in block 'body'
+    <dd class="wc-profile-details__value">{{ account_display_email(user) or "Not supplied" }}</dd>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'account_display_email' is undefined
+_____ test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent _____
+tests/weppcloud/routes/test_feature_access_routes.py:247: in test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent
+    assert profile.status_code == 200
+E   assert 500 == 200
+E    +  where 500 = <WrapperTestResponse streamed [500 INTERNAL SERVER ERROR]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.weppcloud.routes.user:user.py:513 user.profile failed
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/user.py", line 506, in profile
+    return render_template(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 2, in top-level template code
+    {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 50, in top-level template code
+    {% block body_container %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 52, in block 'body_container'
+    {% block body %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 26, in block 'body'
+    <dd class="wc-profile-details__value">{{ account_display_email(user) or "Not supplied" }}</dd>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'account_display_email' is undefined
+
+ERROR    wepppy.weppcloud.utils.helpers:helpers.py:728 Exception handling request [error_id=e234d37325d04883969d38c62e3bdc48]: Error Handling Request
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/user.py", line 506, in profile
+    return render_template(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 2, in top-level template code
+    {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 50, in top-level template code
+    {% block body_container %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 52, in block 'body_container'
+    {% block body %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 26, in block 'body'
+    <dd class="wc-profile-details__value">{{ account_display_email(user) or "Not supplied" }}</dd>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'account_display_email' is undefined
+_______ test_legacy_poweruser_is_preserved_without_fabricated_acceptance _______
+tests/weppcloud/routes/test_feature_access_routes.py:337: in test_legacy_poweruser_is_preserved_without_fabricated_acceptance
+    assert profile.status_code == 200
+E   assert 500 == 200
+E    +  where 500 = <WrapperTestResponse streamed [500 INTERNAL SERVER ERROR]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.weppcloud.routes.user:user.py:513 user.profile failed
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/user.py", line 506, in profile
+    return render_template(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 2, in top-level template code
+    {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 50, in top-level template code
+    {% block body_container %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 52, in block 'body_container'
+    {% block body %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 26, in block 'body'
+    <dd class="wc-profile-details__value">{{ account_display_email(user) or "Not supplied" }}</dd>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'account_display_email' is undefined
+
+ERROR    wepppy.weppcloud.utils.helpers:helpers.py:728 Exception handling request [error_id=58b3ae2c26274661ad8e1c466d3e527c]: Error Handling Request
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/user.py", line 506, in profile
+    return render_template(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 2, in top-level template code
+    {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 50, in top-level template code
+    {% block body_container %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 52, in block 'body_container'
+    {% block body %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 26, in block 'body'
+    <dd class="wc-profile-details__value">{{ account_display_email(user) or "Not supplied" }}</dd>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'account_display_email' is undefined
+___________________ test_dates_conflict_and_expired_profile ____________________
+tests/weppcloud/routes/test_feature_access_routes.py:378: in test_dates_conflict_and_expired_profile
+    assert 'membership expired' in access_client[1].get('/profile').text
+E   assert 'membership expired' in '{"error":{"message":"Error Handling Request"},"error_id":"d94c49006089431e8fa1aeb71bbf5aa0"}\n'
+E    +  where '{"error":{"message":"Error Handling Request"},"error_id":"d94c49006089431e8fa1aeb71bbf5aa0"}\n' = <WrapperTestResponse 93 bytes [500 INTERNAL SERVER ERROR]>.text
+E    +    where <WrapperTestResponse 93 bytes [500 INTERNAL SERVER ERROR]> = get('/profile')
+E    +      where get = <FlaskClient <Flask 'test_feature_access_routes'>>.get
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.weppcloud.routes.user:user.py:513 user.profile failed
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/user.py", line 506, in profile
+    return render_template(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 2, in top-level template code
+    {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 50, in top-level template code
+    {% block body_container %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 52, in block 'body_container'
+    {% block body %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 26, in block 'body'
+    <dd class="wc-profile-details__value">{{ account_display_email(user) or "Not supplied" }}</dd>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'account_display_email' is undefined
+
+ERROR    wepppy.weppcloud.utils.helpers:helpers.py:728 Exception handling request [error_id=d94c49006089431e8fa1aeb71bbf5aa0]: Error Handling Request
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/weppcloud/routes/user.py", line 506, in profile
+    return render_template(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 2, in top-level template code
+    {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 50, in top-level template code
+    {% block body_container %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm", line 52, in block 'body_container'
+    {% block body %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/weppcloud/templates/user/profile.html", line 26, in block 'body'
+    <dd class="wc-profile-details__value">{{ account_display_email(user) or "Not supplied" }}</dd>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'account_display_email' is undefined
+________ test_runs_sort_navigation_and_fixed_layout_in_chromium[False] _________
+tests/weppcloud/routes/test_runs_catalog_contract.py:207: in test_runs_sort_navigation_and_fixed_layout_in_chromium
+    assert result.returncode == 0, result.stderr
+E   AssertionError: node:internal/modules/cjs/loader:1210
+E       throw err;
+E       ^
+E
+E     Error: Cannot find module '/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/@playwright/test'
+E     Require stack:
+E     - /workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs
+E         at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+E         at Module._load (node:internal/modules/cjs/loader:1038:27)
+E         at Module.require (node:internal/modules/cjs/loader:1289:19)
+E         at require (node:internal/modules/helpers:182:18)
+E         at Object.<anonymous> (/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs:1:28)
+E         at Module._compile (node:internal/modules/cjs/loader:1521:14)
+E         at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+E         at Module.load (node:internal/modules/cjs/loader:1266:32)
+E         at Module._load (node:internal/modules/cjs/loader:1091:12)
+E         at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+E       code: 'MODULE_NOT_FOUND',
+E       requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]
+E     }
+E
+E     Node.js v20.20.2
+E
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs', 'http://127.0.0.1:4020...FOUND',\n  requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]\n}\n\nNode.js v20.20.2\n").returncode
+_________ test_runs_sort_navigation_and_fixed_layout_in_chromium[True] _________
+tests/weppcloud/routes/test_runs_catalog_contract.py:207: in test_runs_sort_navigation_and_fixed_layout_in_chromium
+    assert result.returncode == 0, result.stderr
+E   AssertionError: node:internal/modules/cjs/loader:1210
+E       throw err;
+E       ^
+E
+E     Error: Cannot find module '/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/@playwright/test'
+E     Require stack:
+E     - /workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs
+E         at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+E         at Module._load (node:internal/modules/cjs/loader:1038:27)
+E         at Module.require (node:internal/modules/cjs/loader:1289:19)
+E         at require (node:internal/modules/helpers:182:18)
+E         at Object.<anonymous> (/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs:1:28)
+E         at Module._compile (node:internal/modules/cjs/loader:1521:14)
+E         at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+E         at Module.load (node:internal/modules/cjs/loader:1266:32)
+E         at Module._load (node:internal/modules/cjs/loader:1091:12)
+E         at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+E       code: 'MODULE_NOT_FOUND',
+E       requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]
+E     }
+E
+E     Node.js v20.20.2
+E
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs', 'http://127.0.0.1:3948...FOUND',\n  requireStack: [ '/workdir/wepppy/tests/weppcloud/routes/runs_table_browser.cjs' ]\n}\n\nNode.js v20.20.2\n").returncode
+____________________ test_real_file_sql_http_browser_chain _____________________
+tests/weppcloud/test_run_catalog_reader.py:226: in test_real_file_sql_http_browser_chain
+    assert result.returncode == 0, result.stderr
+E   AssertionError: node:internal/modules/cjs/loader:1210
+E       throw err;
+E       ^
+E
+E     Error: Cannot find module 'playwright'
+E     Require stack:
+E     - /workdir/wepppy/wepppy/weppcloud/static-src/[eval]
+E         at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+E         at Module._load (node:internal/modules/cjs/loader:1038:27)
+E         at Module.require (node:internal/modules/cjs/loader:1289:19)
+E         at require (node:internal/modules/helpers:182:18)
+E         at [eval]:1:22
+E         at runScriptInThisContext (node:internal/vm:209:10)
+E         at node:internal/process/execution:118:14
+E         at [eval]-wrapper:6:24
+E         at runScript (node:internal/process/execution:101:62)
+E         at evalScript (node:internal/process/execution:133:3) {
+E       code: 'MODULE_NOT_FOUND',
+E       requireStack: [ '/workdir/wepppy/wepppy/weppcloud/static-src/[eval]' ]
+E     }
+E
+E     Node.js v20.20.2
+E
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['node', '-e', "const { chromium } = require('playwright');\n(async () => {\n  const browser = a...MODULE_NOT_FOUND',\n  requireStack: [ '/workdir/wepppy/wepppy/weppcloud/static-src/[eval]' ]\n}\n\nNode.js v20.20.2\n").returncode
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+../../opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_marks_ttl_when_rmtree_fails
+tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_reports_non_retryable_delete_errors
+  /workdir/wepppy/wepppy/rq/exception_logging.py:39: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/rq/test_batch_rq_retry_selection.py::test_delete_batch_rq_checks_active_jobs_before_cleanup
+FAILED tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_marks_ttl_when_rmtree_fails
+FAILED tests/rq/test_project_rq_delete_run.py::test_delete_run_rq_reports_non_retryable_delete_errors
+FAILED tests/rq/test_project_rq_delete_run.py::test_gc_runs_rq_deferred_delete_suppresses_messages
+FAILED tests/rq/test_project_rq_fork.py::test_reset_fork_omni_directories_rejects_hostile_ancestor[socket-_pups/omni]
+FAILED tests/weppcloud/controllers_js/test_unitizer_client_js.py::test_unitizer_bundle_contains_blank_guard
+FAILED tests/weppcloud/routes/test_feature_access_routes.py::test_grant_ack_remove_real_transport_and_admission
+FAILED tests/weppcloud/routes/test_feature_access_routes.py::test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent
+FAILED tests/weppcloud/routes/test_feature_access_routes.py::test_legacy_poweruser_is_preserved_without_fabricated_acceptance
+FAILED tests/weppcloud/routes/test_feature_access_routes.py::test_dates_conflict_and_expired_profile
+FAILED tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[False]
+FAILED tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[True]
+FAILED tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain
+ERROR tests/weppcloud/test_user_preferences_postgres.py::test_postgres_schema_constraints_and_cascade
+13 failed, 1 passed, 8 warnings, 1 error in 17.48s

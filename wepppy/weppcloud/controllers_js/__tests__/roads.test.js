@@ -76,7 +76,7 @@ describe("Roads controller", () => {
 
         document.body.innerHTML = `
             <form id="roads_form" data-roads-max-upload-mb="50">
-                <input id="roads_geojson_file" name="file" type="file">
+                <input id="roads_geojson_file" name="file" type="file" accept=".geojson,.json,.zip,.parquet,.geoparquet">
                 <div id="roads_geojson_file-progress" hidden>
                     <div class="wc-upload-progress__fill" style="width: 0%"></div>
                     <p class="wc-upload-progress__status">Uploading: 0%</p>
@@ -221,12 +221,12 @@ describe("Roads controller", () => {
         await roads.uploadGeojson();
 
         expect(FakeXMLHttpRequest.instances).toHaveLength(0);
-        expect(document.getElementById("roads_upload_message").textContent).toContain("Select a .geojson file");
+        expect(document.getElementById("roads_upload_message").textContent).toContain("GeoJSON, Shapefile ZIP, or GeoParquet");
     });
 
-    test("upload action posts geojson with progress UI", async () => {
-        const file = new File(['{"type":"FeatureCollection","features":[]}'], "roads.geojson", {
-            type: "application/geo+json"
+    test("upload action posts an admitted vector file with progress UI", async () => {
+        const file = new File(["PK fixture"], "roads.zip", {
+            type: "application/zip"
         });
         const input = document.getElementById("roads_geojson_file");
         Object.defineProperty(input, "files", {
@@ -241,6 +241,7 @@ describe("Roads controller", () => {
         expect(xhr.method).toBe("POST");
         expect(xhr.url).toBe("/runs/test-run/test-config/tasks/roads/upload_geojson");
         expect(xhr.headers["X-CSRFToken"]).toBe("csrf-token");
+        expect(xhr.body.get("file").name).toBe("roads.zip");
 
         xhr.triggerUploadProgress(5, 10);
         expect(document.querySelector(".wc-upload-progress__fill").style.width).toBe("50%");
@@ -272,6 +273,21 @@ describe("Roads controller", () => {
         expect(document.getElementById("roads_design_field").value).toBe("DESIGN");
         expect(document.getElementById("roads_surface_default").value).toBe("gravel");
         expect(document.getElementById("roads_traffic_default").value).toBe("low");
+    });
+
+    test("upload action rejects unsupported vector extensions before posting", async () => {
+        const input = document.getElementById("roads_geojson_file");
+        Object.defineProperty(input, "files", {
+            configurable: true,
+            value: [new File(["bad"], "roads.csv", { type: "text/csv" })]
+        });
+
+        await roads.uploadGeojson();
+
+        expect(FakeXMLHttpRequest.instances).toHaveLength(0);
+        expect(document.getElementById("roads_upload_message").textContent).toContain(
+            "GeoJSON, Shapefile ZIP, or GeoParquet"
+        );
     });
 
     test("prepare and run actions enqueue roads jobs with matching completion events", async () => {

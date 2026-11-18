@@ -17,7 +17,8 @@ tools/wctl2/
 │   ├── npm.py                 # run-npm wrapper
 │   ├── playback.py            # run-test/fork/archive profile commands
 │   ├── passthrough.py         # docker compose fallback
-│   ├── python_tasks.py        # run-pytest, run-stubtest, etc.
+│   ├── python_tasks.py        # run-pytest-shared/sharded, run-stubtest, etc.
+│   ├── worktree_tests.py       # default run-pytest and worktree alias
 │   └── playwright.py          # run-playwright command
 ├── docs/                      # Specs, prompts, acceptance reports
 └── tests/                     # pytest coverage for CLI modules
@@ -28,6 +29,7 @@ tools/wctl2/
 - `tools/wctl2/docs/PROMPT.md` – original scaffolding brief for the CLI.
 - `tools/wctl2/docs/playwright.*` – spec/prompt/review for `run-playwright`.
 - `wctl/README.md` – user-facing instructions for installing/running `wctl`.
+- `tools/wctl2/docs/worktree-tests.md` – isolated checkout runtime prerequisites, read-only dependency reuse and receipts.
 
 Always cross-check requirements here before coding; the docs move along with the implementation.
 

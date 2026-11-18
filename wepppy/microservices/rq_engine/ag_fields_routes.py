@@ -20,6 +20,7 @@ from rq import Queue
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
 from starlette.datastructures import UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
@@ -29,6 +30,12 @@ from wepppy.microservices.shape_converter.archive_validation import (
     validate_and_extract_zip_archive,
 )
 from wepppy.microservices.shape_converter.errors import ShapeConverterError
+from wepppy.microservices.vector_upload_normalization import (
+    RetentionActor,
+    VectorUploadError,
+    prepare_vector_upload,
+    validate_feature_collection_geometries,
+)
 from wepppy.nodb.mods.ag_fields import (
     AgFields,
     AgFieldsNoDbLockedException,
@@ -67,7 +74,6 @@ from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
-from .upload_helpers import UploadError, save_upload_file
 from .webhooks import reject_unsupported as reject_unsupported_webhook
 
 
@@ -109,7 +115,7 @@ AGFIELDS_ROOT_FUNCTION_BY_JOB_KEY = {
     AGFIELDS_RUN_WATERSHED_JOB_KEY: run_ag_fields_watershed_rq,
 }
 
-AGFIELDS_BOUNDARY_ALLOWED_EXTENSIONS = ("geojson", "json")
+AGFIELDS_BOUNDARY_ALLOWED_EXTENSIONS = ("geojson", "json", "zip", "parquet", "geoparquet")
 AGFIELDS_BOUNDARY_MAX_BYTES = 10 * 1024 * 1024
 AGFIELDS_PLANT_DB_MAX_BYTES = 100 * 1024 * 1024
 AGFIELDS_PLANT_DB_LIMITS = ArchiveLimits(
@@ -155,10 +161,31 @@ def _plant_archive_member_policy(member: zipfile.ZipInfo, path: PurePosixPath) -
         )
 
 
-def _upload_error_response(exc: UploadError) -> JSONResponse:
-    message = str(exc)
-    status = getattr(exc, "status_code", None) or (413 if "maximum allowed size" in message.lower() else 400)
-    return error_response(message, status_code=status)
+def _run_vector_evidence_roots(wd: str) -> tuple[Path, ...]:
+    root = Path(wd)
+    return (
+        root / "roads" / "vector_upload_attempts",
+        root / "ag_fields" / "vector_upload_attempts",
+        root / "_pups" / "omni" / "contrasts" / "vector_upload_attempts",
+        root / "archives" / "private",
+    )
+
+
+def _retention_actor_from_request() -> RetentionActor:
+    actor = current_auth_actor() or {}
+    token_class = str(actor.get("token_class") or "").strip().lower()
+    if token_class in {"user", "session"}:
+        try:
+            user_id = int(actor.get("user_id") or 0)
+        except (TypeError, ValueError):
+            user_id = 0
+        if user_id > 0:
+            return RetentionActor("human", user_id)
+    if token_class in {"service", "mcp"}:
+        subject = str(actor.get("sub") or "").strip()
+        if subject:
+            return RetentionActor(token_class, subject)
+    return RetentionActor("unattributed", None)
 
 
 def _invalidate_ag_fields_preflight(wd: str) -> None:
@@ -619,32 +646,66 @@ async def upload_boundaries(runid: str, config: str, request: Request) -> JSONRe
             return error_response("field_boundaries upload is required", status_code=400, code="missing_upload_file")
         validation_result: dict[str, Any] = {}
 
-        def _validate_boundary(path: Path) -> None:
-            try:
+        def _prevalidate_boundary(_path: Path, payload: dict[str, object]) -> dict[str, object]:
+            geometry_result = validate_feature_collection_geometries(
+                payload,
+                ("Polygon", "MultiPolygon"),
+            )
+            features = payload.get("features")
+            if not isinstance(features, list):
+                raise VectorUploadError(
+                    "invalid_vector",
+                    "Field boundary upload must be a GeoJSON FeatureCollection.",
+                    status_code=400,
+                )
+            if any(
+                not isinstance(feature, dict)
+                or not isinstance(feature.get("properties"), dict)
+                or "field_id" not in feature["properties"]
+                for feature in features
+            ):
+                raise VectorUploadError(
+                    "invalid_vector",
+                    "Field boundary upload requires a field_id property on every feature.",
+                    status_code=400,
+                )
+            return geometry_result
+
+        prepared = await run_in_threadpool(
+            lambda: prepare_vector_upload(
+                raw_filename=str(upload.filename),
+                stream=upload.file,
+                endpoint_max_bytes=AGFIELDS_BOUNDARY_MAX_BYTES,
+                attempt_root=Path(ag_fields.ag_fields_dir) / "vector_upload_attempts",
+                evidence_roots=_run_vector_evidence_roots(wd),
+                filesystem_root=Path(wd),
+                project_key=f"run:{runid}",
+                workflow="ag_fields",
+                project_identity=runid,
+                actor=_retention_actor_from_request(),
+                validator=_prevalidate_boundary,
+            )
+        )
+
+        def _publish_boundary() -> dict[str, Any]:
+            def _mutate(candidate: Path, commit: Callable[[], None]) -> dict[str, Any]:
                 validation_result.update(
                     ag_fields.validate_field_boundary_geojson(
-                        path,
+                        candidate,
                         source_filename=upload.filename,
+                        publication_commit=commit,
                     )
                 )
-            except Exception as exc:  # broad-except: untrusted geospatial parser boundary
-                logger.warning(
-                    "rq-engine AgFields boundary validation rejected upload",
-                    exc_info=True,
-                    extra={"runid": runid, "config": config},
-                )
-                raise UploadError(f"Field boundary validation failed: {str(exc) or exc.__class__.__name__}") from exc
+                return validation_result
 
-        saved_path = save_upload_file(
-            upload,
-            allowed_extensions=AGFIELDS_BOUNDARY_ALLOWED_EXTENSIONS,
-            dest_dir=Path(ag_fields.ag_fields_dir),
-            filename_transform=lambda value: f"field-boundaries-upload{Path(value).suffix.lower()}",
-            overwrite=True,
-            max_bytes=AGFIELDS_BOUNDARY_MAX_BYTES,
-            post_save=_validate_boundary,
-        )
-        saved_path.unlink(missing_ok=True)
+            canonical_path = Path(ag_fields.ag_fields_dir) / "fields.WGS.geojson"
+            return prepared.publish_transactional(
+                mutation=_mutate,
+                canonical_path=canonical_path,
+                canonical_relative_path=os.fspath(canonical_path.relative_to(wd)),
+            )
+
+        await run_in_threadpool(_publish_boundary)
         _invalidate_ag_fields_preflight(wd)
         return JSONResponse(
             {
@@ -657,8 +718,8 @@ async def upload_boundaries(runid: str, config: str, request: Request) -> JSONRe
                 },
             }
         )
-    except UploadError as exc:
-        return _upload_error_response(exc)
+    except VectorUploadError as exc:
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
     except (FileNotFoundError, OSError, ValueError) as exc:
         return error_response(str(exc), status_code=400)
     except RequestPayloadError:

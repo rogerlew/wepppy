@@ -599,3 +599,15 @@ def test_custom_design_property_keys_accept_outslope_unrutted_alias(tmp_path: Pa
     assert len(output["features"]) == 1
     props = output["features"][0]["properties"]
     assert props["_roads_design_source_key"] == "ROADTYPE"
+
+
+@pytest.mark.parametrize("design,expected", [("Outslope_unrutted", 1), ("outunrut", 1), ("Inslope_bd", 2), ("Outslope_rutted", 2)])
+def test_unrutted_crossing_keeps_elevation_reversal(tmp_path, design, expected):
+    dem = _write_dem(tmp_path, [10, 9, 8, 9, 10])
+    source = _write_line_geojson(tmp_path, [[0.5, 0.5], [4.5, 0.5]], {"DESIGN": design})
+    output = tmp_path / "prepared.geojson"
+    summary = convert_geojson_file_to_monotonic_segments(
+        input_geojson_path=source, dem_path=dem, output_geojson_path=output,
+        input_crs="EPSG:32610", sample_step_m=1, tolerance_m=0.1,
+    )
+    assert summary.output_feature_count == expected

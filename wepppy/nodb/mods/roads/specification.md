@@ -9,7 +9,7 @@ Canonical cross-route `output_scope` contract: `docs/schemas/output-scope-contra
 
 Implement a repeatable pipeline that:
 
-1. Converts road linework into monotonic segments.
+1. Prepares point-source downhill segments and intact unrutted crossings.
 2. Preserves original feature properties and adds segment metadata.
 3. Tags each segment with channel and receiving-hillslope Topaz IDs near its low point.
 4. Runs road-segment WEPP hillslopes and injects their effects into watershed routing via pass-file combination.
@@ -721,7 +721,9 @@ Non-selected segments are recorded but not executed.
 
 ## Road Slope File Monotonicity Requirement
 
-Road segment WEPP slope files must be monotonic in elevation for each simulated segment.
+Point-source road segment WEPP slope files must be monotonic in elevation for each
+simulated segment. Unrutted roads instead use transverse positive-slope profiles
+under RUPC-01; their longitudinal linework need not be monotonic.
 
 Required behavior:
 
@@ -908,7 +910,7 @@ Step-3 as-implemented contract notes (2026-04-07 review):
 
 ### Top-Level Implementation Summary
 
-1. For `outslope_unrutted`, burn all eligible road strips into an analysis raster aligned to watershed rasters (`subwta`, `discha`); monotonic segment geometry is not required for this path.
+1. For `outslope_unrutted`, intersect intact crossings with dissolved hillslope polygons and use `discha` for placement; longitudinal monotonic geometry is not required.
 2. Evaluate overlap hillslope-by-hillslope, then partition included strips by receiving WEPP hillslope ID so each contributor maps deterministically.
 3. For each affected strip, build a roads-aware MOFE profile with ordering:
    - upslope hillslope segment -> road -> fill -> downslope buffer segment.
@@ -923,15 +925,16 @@ Step-3 as-implemented contract notes (2026-04-07 review):
 - **Area conservation**: affected-strip plus unaffected remainder area equals original hillslope area.
 - **Buffer preservation**: final downslope buffer OFE remains explicit in the roads-aware contributor profile.
 - **Topology preservation**: watershed structure remains unchanged (`left/right/top` hillslope-channel linkage stays canonical).
-- **Road geometry parity**: `Outslope_unrutted` road OFE parameterization follows legacy outslope geometry intent (including area-preserving transform behavior).
+- **Road geometry**: RUPC-01 uses physical transverse road dimensions with explicit
+  width compression and road-area deficit accounting.
 
 ### Settled Step-4 Contract Details (Implemented 2026-04-08)
 
 Inclusion and minimum-length rules (physical-length based):
 
 - A hillslope `h` is included for `outslope_unrutted` replacement when:
-  - `L_overlap_h / W_h >= 0.60`, and
-  - `L_overlap_h >= 10 m`.
+  - `L_overlap_h >= 10 m` after connected equal-input normalization.
+  - No whole-hillslope width-ratio eligibility gate (RUPC-01).
 - Definitions:
   - `L_overlap_h`: physical road-overlap length computed from vector intersection length between roads geometry and hillslope geometry for `h`.
   - `W_h`: abstracted hillslope width used by the watershed profile (`watershed_mixins.hillslope_width(topaz_id)` contract).
@@ -941,8 +944,11 @@ Inclusion and minimum-length rules (physical-length based):
 Cross-hillslope segmentation and IDs:
 
 - Segment `outslope_unrutted` roads per hillslope (distinct segment ID per `(source_segment_id, receiving_hillslope_topaz_id)`).
-- Apply the `60%` inclusion rule independently per hillslope-specific segment.
-- Preserve area conservation per replaced hillslope; preserving aggregate road area across hillslopes is not required.
+- Apply the minimum overlap and crossing cap after grouping connected equal-input
+  pieces within the dissolved hillslope geometry; do not split at longitudinal
+  elevation reversals. See the RUPC-01 contract for duplicate/conflict handling.
+- Preserve area conservation per replaced hillslope and included road area where
+  feasible. Report width-compression deficits and excluded road-area targets.
 
 Road/fill placement in profile:
 
@@ -951,19 +957,25 @@ Road/fill placement in profile:
 - Use 4-OFE form (`landuse -> road -> fill -> landuse`) when downslope landuse length is at least `L_landuse_min`.
 - Collapse to 3-OFE form (`landuse -> road -> fill`) when downslope landuse length is below `L_landuse_min`.
 
-Road geometry parity rule:
+Transverse strip geometry (RUPC-01, superseding the legacy parity transform):
 
-- Use fixed outslope parity of `4%` (`0.04`) for `outslope_unrutted`.
-- Preserve legacy area-preserving transform behavior from `/workdir/fswepp2/api/wepproad.py`:
-  - `sim_length_m = length_m * (slope / 0.04)`
-  - `sim_width_m = width_m / (slope / 0.04)`
-  - with legacy road-slope expression used by that path for compatibility.
+- Road OFE length equals physical road width; cross slope is 4%.
+- Unscaled strip width equals measured in-hillslope road overlap length.
+- Multiply widths by `min(1, W_h / sum(overlap_lengths))`; record resulting road-area
+  deficits, never silently extend the road OFE or expand hillslope area.
+- Use RUPC-02 top placement for non-positive ordinary upstream length; omit that
+  OFE, retain positive short downhill landuse and place area compensation downhill.
+  Scoped native conformance is validated. Other placement stays unchanged.
+- Serialize unrutted slope dimensions to 12 decimals and read back positive
+  dimensions and absolute hillslope-area closure within `1e-6 m²` before execution.
+- Native WAT/PASS area reconciliation retains the modeled-area accounting contract.
 
 Area-conservation closure contract:
 
 - Use absolute area closure by construction.
 - After contributor assembly for each targeted hillslope, compute residual area error and compensate using the top (upslope) landuse OFE length.
-- If compensation would create a non-positive top landuse OFE length, fail the replacement for that hillslope explicitly.
+- RUPC-02 top-placed strips compensate downhill, omitting zero-length landuse;
+  reject negative corrected lengths and any non-positive emitted dimension.
 - Relative tolerance terms are not used.
 
 Routing and replacement contract:
@@ -989,7 +1001,7 @@ Aggregation and design-activation decisions:
 Performance guardrail and multi-road support:
 
 - Cap qualifying `outslope_unrutted` road crossings at `3` per hillslope.
-- When more than `3` crossings qualify, keep the deterministic top-3 by overlap length (descending, tie-break by segment ID ascending) and record truncation diagnostics.
+- When more than `3` crossings qualify, keep the deterministic top-3 by overlap length (descending, tie-break by canonical crossing geometry) and record truncation diagnostics.
 - Replacement aggregation must preserve:
   - deterministic contributor ordering,
   - area conservation,
@@ -1013,7 +1025,8 @@ Each record in `outslope_unrutted_hillslope_records` must include:
 - `segment_ids_excluded`
 - `segment_ids_capped`
 - `inclusion_ratio_by_segment`
-- `top_ofe_compensation_m`
+- `top_ofe_compensation_m` (upstream only)
+- `bottom_ofe_compensation_m` (RUPC-02 downstream adjustment)
 - `area_error_before_compensation_m2`
 - `area_error_after_compensation_m2`
 
@@ -1024,7 +1037,8 @@ Per-segment replacement status codes are limited to:
 - `excluded_overlap_length_min`
 - `excluded_cap_limit`
 - `failed_missing_parameter`
-- `failed_non_positive_top_ofe`
+- `failed_non_positive_top_ofe` (invalid upstream compensation; ordinary non-positive placement uses RUPC-02)
+- `failed_road_fill_exceeds_hillslope` (RUPC-02)
 
 ### Remaining Deferred Details
 
@@ -1117,3 +1131,22 @@ wiring. Independent scientific/technical review does not substitute for that
 approval. Before approval, permitted work includes disposable generated-input
 experiments and static specification/layout proposals. Preserve existing project
 behavior, explicit version adoption and the standard contract-first checkpoint.
+
+## RUPC-01 partial-crossing amendment
+
+The accepted [unrutted strip contract](../../../../docs/schemas/roads-unrutted-strip-contract.md) defines the bounded
+geometry, accounting and lifecycle delta. Scoped RUPC-01/RUPC-02 conformance is validated locally; deployment remains separate. RUPC-01 supersedes conflicting unrutted
+geometry, eligibility and preparation provisions above. Unrelated road
+designs, parameterization ownership and lifecycle safeguards remain unchanged.
+
+## RUPC-02 top-placement amendment
+
+Implemented and locally validated 2026-11-17. The canonical
+[top-placement rule](../../../../docs/schemas/roads-unrutted-strip-contract.md#rupc-02-top-of-hillslope-placement)
+supersedes the ordinary non-positive-top failure and upstream-only compensation
+rules above. Top placement emits road/fill/downhill landuse, or road/fill for exact
+fit; it has no modeled upstream runon. Keep positive downhill lengths below 10 m.
+Fail explicitly if road plus fill exceeds H; preserve dimensions and area rather
+than fabricating upstream landuse or shortening fill. Native role selection and
+execution-policy admission must follow the canonical amendment. Original RUPC-01
+receipts do not validate these new layouts.

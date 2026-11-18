@@ -11,6 +11,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 
 | Area | Location | Focus |
 |------|----------|-------|
+| Account identity | `tests/weppcloud/routes/test_account_security.py`, `test_security_oauth_routes.py`, `tests/weppcloud/bootstrap/test_account_identity.py`, `tests/weppcloud/test_account_identity_migration.py` | Real auth forms/CSRF, mailbox sink, signed OIDC/JWT, ORM identity separation, nullable-email consumers and additive migration |
 | Smoke/import checks | `tests/test_0_imports.py`, `tests/test_imports.py` | Early detection of missing optional dependencies or circular imports |
 | ADR authoring gate | `tests/tools/test_check_adr_dates.py` | Isolated CLI, explicit date semantics, malformed/absent source, template enforcement and real ADR inventory |
 | Diagnostic sanitation | `tests/observability/` | Canary readback of API/file/log/status/RQ outputs, isolated subprocess hooks, explicit disposable Redis socket |
@@ -36,7 +37,15 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 
 ## Execution Strategy
 
+- **Isolated worktrees:** use `wctl run-pytest --preflight-only -- tests`
+  before a broad run, then the same command without `--preflight-only`. See
+  [worktree testing](../tools/wctl2/docs/worktree-tests.md) for explicit runtime
+  prerequisites and source receipts. Do not invent per-task mount wrappers.
 - **Always run through the Docker wrapper.** `wctl run-pytest …` guarantees Redis stubs, optional dependencies, and env variables match production images.
+- **Disturbed native matrix is opt-in:** ordinary discovery deselects its 96
+  simulations and three dependent summaries. Add `--run-disturbed-matrix` for
+  relevant Disturbed/native/scientific changes. Lightweight contracts still run;
+  other matrix selection is unchanged.
 - **Target first; use a full sweep only when proportionate.**
   - Example focused run: `wctl run-pytest tests/weppcloud/routes/test_climate_bp.py`
   - Full pre-handoff sweep for substantive code changes:

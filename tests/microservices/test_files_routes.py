@@ -174,6 +174,31 @@ def test_files_meta_response(tmp_path: Path, monkeypatch, load_browse):
     assert payload["content_type"].startswith("text/")
 
 
+def test_files_hides_and_denies_symlink_alias_to_sensitive_vector_artifact(
+    tmp_path: Path, monkeypatch, load_browse,
+):
+    runid = "run-sensitive-alias"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    original = run_root / "roads" / "vector_upload_attempts" / "attempt" / "original" / "x.upload"
+    original.parent.mkdir(parents=True)
+    original.write_bytes(b"hostile")
+    (run_root / "innocent.bin").symlink_to(original)
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+    with TestClient(app) as client:
+        listing = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
+        metadata = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/innocent.bin?meta=true"
+        )
+
+    assert listing.status_code == 200
+    assert "innocent.bin" not in {entry["name"] for entry in listing.json()["entries"]}
+    assert metadata.status_code == 403
+
+
 def test_files_meta_directory_response(tmp_path: Path, monkeypatch, load_browse):
     runid = "run-456a"
     config = "disturbed9002_wbt"

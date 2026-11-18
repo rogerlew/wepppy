@@ -1082,7 +1082,7 @@ var BatchRunner = (function () {
                 message = "Batch runner is disabled.";
                 state = "warning";
             } else if (!resource) {
-                message = "Upload a watershed GeoJSON before running.";
+                message = "Upload a watershed vector file before running.";
             } else if (!templateIsValid) {
                 message = "Validate and resolve template issues before running.";
                 state = "warning";
@@ -1603,14 +1603,14 @@ var BatchRunner = (function () {
             }
             var fileInput = controller.uploadInput;
             if (!fileInput || !fileInput.files || !fileInput.files.length) {
-                setUploadStatus("Choose a GeoJSON file before uploading.", "warning");
+                setUploadStatus("Choose a GeoJSON, Shapefile ZIP, or GeoParquet file before uploading.", "warning");
                 return;
             }
 
             var formData = new FormData();
             formData.append("geojson_file", fileInput.files[0]);
 
-            setUploadBusy(true, "Uploading GeoJSON…");
+            setUploadBusy(true, "Uploading vector file…");
             controller.emitter.emit("batch:upload:started", {
                 batchName: controller.state.batchName,
                 filename: fileInput.files[0].name,

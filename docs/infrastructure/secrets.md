@@ -41,6 +41,7 @@ Use stable secret IDs so Compose and Kubernetes mount the same filenames:
 | `agent_jwt_secret` | agent auth paths | Keep distinct from Flask secret key. |
 | `oauth_github_client_secret` | `weppcloud` | Optional, but treat as secret if enabled. |
 | `oauth_google_client_secret` | `weppcloud` | Optional, but treat as secret if enabled. |
+| `oauth_cilogon_client_secret` | `OAUTH_CILOGON_CLIENT_SECRET` | `OAUTH_CILOGON_CLIENT_SECRET_FILE` | `weppcloud` CILogon OIDC | Optional opt-in overlay; staged inactive on wepp1. See [OAuth implementation](../oauth_spec.md). |
 | `oauth_orcid_client_secret` | `weppcloud` | Optional, but treat as secret if enabled. |
 | `dtale_internal_token` | `browse`, `dtale` | Internal service-to-service auth token. |
 | `cap_secret` | `cap` | CAPTCHA secret; do not expose to browser clients. |

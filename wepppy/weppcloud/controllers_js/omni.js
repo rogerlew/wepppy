@@ -2363,7 +2363,7 @@ var Omni = (function () {
                 return;
             }
             if (state.mode === CONTRAST_SELECTION_MODES.user_defined_areas && !state.hasGeojson) {
-                setContrastStatus("Upload a GeoJSON file to run user-defined contrasts.");
+                setContrastStatus("Upload a polygon vector file to run user-defined contrasts.");
                 return;
             }
             if (
@@ -2549,7 +2549,7 @@ var Omni = (function () {
                     return;
                 }
                 if (!hasContrastGeojson()) {
-                    setContrastStatus("Upload a GeoJSON file to run user-defined contrasts.");
+                    setContrastStatus("Upload a polygon vector file to run user-defined contrasts.");
                     return;
                 }
             } else if (mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups) {
@@ -2674,7 +2674,7 @@ var Omni = (function () {
                     return;
                 }
                 if (!hasContrastGeojson()) {
-                    setContrastStatus("Upload a GeoJSON file to dry run user-defined contrasts.");
+                    setContrastStatus("Upload a polygon vector file to dry run user-defined contrasts.");
                     return;
                 }
             } else if (mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups) {

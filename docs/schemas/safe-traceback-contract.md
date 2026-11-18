@@ -215,3 +215,7 @@ Standalone corpus, fuzzing, benchmark and data-preparation scripts are outside
 production service acceptance. Generic agent transcripts/command output and
 historical stored diagnostics are outside Python exception sanitization. The
 production-invoked Wojak bootstrap catch and playback results are included.
+
+## CILogon and account-verification extension
+
+Task-branch implementation; deployment deferred: `OAUTH_CILOGON_CLIENT_SECRET` and `OAUTH_CILOGON_CLIENT_SECRET_FILE` MUST join the owned OAuth secret-source inventory. Account verification/setup tokens, callback codes, state, nonce, cookies, and signed links MUST NOT appear in logs, public artifacts, or user-facing diagnostic details. Use value-free expected authentication failure messages and preserve canonical sanitized error handling. See the [account identity contract](weppcloud-account-email-verification-contract.md).

@@ -1,5 +1,14 @@
 Completed forest phase: [SSURGO mirror-first and provenance](docs/work-packages/20261118_ssurgo_json_provenance/package.md) — PR #675 merged; regional API/PostGIS and shared forest client defaults active, with real queued SSURGO/STATSGO artifact parity. Broader rollout and live SDA validation remain follow-up scope.
 
+Complete locally: [Default isolated tests](docs/work-packages/20261118_default_worktree_tests/package.md) - Promote run-pytest to isolated execution; native Disturbed matrix explicitly opt-in.
+
+Complete locally: [Durable isolated-worktree validation](docs/work-packages/20261118_isolated_worktree_validation/package.md) - Canonical disposable test runner, runtime preflight and source/runtime integrity receipts. Real browser/native/fixture/tooling tests pass; broad execution stops on the preexisting database-schema prerequisite.
+
+Implemented; broad acceptance unresolved: [Roads controller code quality refactor](docs/work-packages/20261117_roads_code_quality_refactor/package.md) - Facade reduced from 5,907 to 1,888 SLOC; execution method from 2,069 to 269 lines. Focused tests, native/project parity and source reviews pass. Broad diagnostics expose baseline fixture/runtime failures; package remains open. No integration or deployment.
+
+Implementation: [CILogon accounts and local email verification](docs/work-packages/20261117_cilogon_oidc/package.md) — separate institutional identities, shared local/verified Google/GitHub accounts, email-first password setup and responsive profile. Independent source reviews closed; local validation retained. CILogon registration approval is pending; production migration/activation and environment acceptance remain deferred.
+
+Completed locally: [Vector upload normalization](docs/work-packages/20261116_vector_upload_normalization/package.md) — Roads, AgFields, Omni contrasts and Batch Runner support Shapefile ZIP and GeoParquet. Public/team copies preserve retained records with copying-principal accounting. Exact-image/downstream checks, source-qualified broad validation and five independent reviews pass. No publication/deployment.
 Implemented and enforced: [Integration and history preservation governance](docs/work-packages/20261116_integration_history_governance/package.md) — preserved history, live checkout identity, trusted required checks and exact-source release gates are active. Independent reviews, canaries, image readback and recovery pass; regression repairs and all four RQ fixture fixes pass scoped validation. Five-integration observation remains open.
 
 Complete: [Omni SBS map reload and resubmission](docs/work-packages/20261116_omni_sbs_reload/package.md) - Contract-first shared staging/Omni fix; 118 scoped Python and 26 JS tests pass. Disposable fixture repaired; native watershed/report and queued browser no-upload resubmission pass. No production rollout.
@@ -52,6 +61,8 @@ Implementation validated; deployment HOLD: [Service secret dependency audit](doc
 Completed locally: [Browse filesystem transparency and timeout](docs/work-packages/20261026_browse_worker_timeout/package.md) — restored physical file access with security/PII guards; 333 focused tests and segmented broad regression coverage pass; explicit 120-second wepp1 timeout validated. Production deployment remains separate.
 
 # PROJECT_TRACKER.md
+
+Implemented and locally validated: [Unrutted Roads partial-crossing strips](docs/work-packages/20261117_roads_unrutted_partial_crossings/package.md) — RUPC-01 strips and RUPC-02 top placement complete; 199 scoped tests, native two/three-OFE probes, independent reviews and synthetic 5 m-fill full-upload watershed run pass. Original 30 m-fill case resolves three prior failures, retains five explicit road/fill fit failures. Forest test deployment and requested RQ run now verified with provisional inputs; original upload retained and baseline unchanged. No wepp1 rollout or site calibration.
 
 Completed locally: [WEPPcloud Forest Service basemap and attribution](docs/work-packages/20261116_weppcloud_forest_service_basemap/package.md) — Optional run/dashboard basemap retains Google Terrain default; both landing themes retain credits/limitations; obsolete Flask fallback removed with explicit 503 for unavailable exports; legacy header user-guide link repaired. Served-browser and independent reviews pass; scoped Python 327, controller 43, adapter 6 pass. Broad run stopped at operator request without failures; no production deployment.
 

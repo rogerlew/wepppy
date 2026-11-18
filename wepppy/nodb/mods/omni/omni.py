@@ -27,6 +27,8 @@ import hashlib
 import time
 import logging
 from pathlib import Path
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -45,6 +47,45 @@ from copy import deepcopy
 from glob import glob
 import json
 import shutil
+
+from wepppy.microservices.vector_retention_lifecycle import borrow_retention_scope
+from wepppy.microservices.vector_upload_normalization import (
+    RedisScopeLeaseFactory,
+    VectorUploadError,
+)
+
+
+_OMNI_WORKFLOW_ROOTS: ContextVar[frozenset[Path]] = ContextVar(
+    "omni_workflow_roots", default=frozenset()
+)
+
+
+@contextmanager
+def _omni_workflow_operation(root_value: str, runid: str, existing_lease=None):
+    root = Path(root_value).resolve()
+    if root in _OMNI_WORKFLOW_ROOTS.get():
+        yield
+        return
+    lease = existing_lease
+    owns_lease = lease is None
+    token = None
+    try:
+        try:
+            if lease is None:
+                lease = RedisScopeLeaseFactory()(f"run:{runid}")
+            lease.assert_owned()
+        except VectorUploadError as exc:
+            raise NoDbAlreadyLockedError(
+                "Omni is busy; wait for the active workflow mutation to finish."
+            ) from exc
+        token = _OMNI_WORKFLOW_ROOTS.set(_OMNI_WORKFLOW_ROOTS.get() | {root})
+        with borrow_retention_scope(f"run:{runid}", lease):
+            yield
+    finally:
+        if token is not None:
+            _OMNI_WORKFLOW_ROOTS.reset(token)
+        if owns_lease and lease is not None:
+            lease.release()
 
 from wepppy.nodb.core import Climate, Ron, Soils, Watershed, Wepp
 from wepppy.nodb.core.climate import ClimateMode
@@ -780,6 +821,19 @@ class Omni(OmniStateContrastMixin, NoDbBase):
                    '_boundary')
 
     filename = 'omni.nodb'
+
+    @contextmanager
+    def workflow_transaction(self, project_scope_lease=None):
+        """Hold the cross-process Omni workflow fence across related mutations."""
+        with _omni_workflow_operation(self.wd, self.runid, project_scope_lease):
+            yield
+
+    @contextmanager
+    def locked(self, validate_on_success: bool = True):
+        """Serialize every persisted Omni mutation with workflow transactions."""
+        with _omni_workflow_operation(self.wd, self.runid):
+            with super().locked(validate_on_success=validate_on_success):
+                yield
 
     def __init__(self, wd, cfg_fn='0.cfg', run_group=None, group_name=None):
         super(Omni, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)

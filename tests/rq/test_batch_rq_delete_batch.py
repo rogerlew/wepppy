@@ -10,6 +10,13 @@ import wepppy.rq.batch_rq as batch_rq
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def ordinary_batch_storage(monkeypatch: pytest.MonkeyPatch) -> None:
+    # These ordinary workspaces have no managed vector-retention ledger.
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", raising=False)
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", raising=False)
+
+
 class DummyJob:
     def __init__(self, job_id: str) -> None:
         self.id = job_id

@@ -1,0 +1,72 @@
+[
+  {
+    "control": "inslope_bd",
+    "root": "/wc1/runs/rq/roads-quality-baseline-20261117a-inslope_bd",
+    "status": "completed",
+    "executed_segment_count": 35,
+    "failed_segment_count": 0,
+    "policy": null,
+    "artifact_count": 3037,
+    "artifact_manifest_sha256": "2d3e04a15ba61a26d4caa3b08af5880b507f6b02398f49afb00fb6ea0e192659",
+    "binary_sha256": {
+      "/workdir/wepppy/wepp_runner/bin/wepp_260409": "c119c39224933c8892933cdd3154d79a9c325e8cbda5d5e1db17bd4758d45913",
+      "/workdir/wepppy/wepp_runner/bin/wepp_260409_hill": "4109371b12389d6ece5c135222fc8cdbf26db0bd6966cb5c89955e26811145b4"
+    }
+  },
+  {
+    "control": "inslope_rd",
+    "root": "/wc1/runs/rq/roads-quality-baseline-20261117a-inslope_rd",
+    "status": "completed",
+    "executed_segment_count": 35,
+    "failed_segment_count": 0,
+    "policy": null,
+    "artifact_count": 3037,
+    "artifact_manifest_sha256": "d29efbfd76180018b0624800f921e4dc9d6887814c8e72d7e0b0ac1fe3883d06",
+    "binary_sha256": {
+      "/workdir/wepppy/wepp_runner/bin/wepp_260409": "c119c39224933c8892933cdd3154d79a9c325e8cbda5d5e1db17bd4758d45913",
+      "/workdir/wepppy/wepp_runner/bin/wepp_260409_hill": "4109371b12389d6ece5c135222fc8cdbf26db0bd6966cb5c89955e26811145b4"
+    }
+  },
+  {
+    "control": "outslope_rutted",
+    "root": "/wc1/runs/rq/roads-quality-baseline-20261117a-outslope_rutted",
+    "status": "completed",
+    "executed_segment_count": 35,
+    "failed_segment_count": 0,
+    "policy": null,
+    "artifact_count": 3036,
+    "artifact_manifest_sha256": "e85cacbba54e50d91ec149ad505e7c3b616283064d630c1be7d5aec8ca33533e",
+    "binary_sha256": {
+      "/workdir/wepppy/wepp_runner/bin/wepp_260409": "c119c39224933c8892933cdd3154d79a9c325e8cbda5d5e1db17bd4758d45913",
+      "/workdir/wepppy/wepp_runner/bin/wepp_260409_hill": "4109371b12389d6ece5c135222fc8cdbf26db0bd6966cb5c89955e26811145b4"
+    }
+  },
+  {
+    "control": "unrutted-positive",
+    "root": "/wc1/runs/rq/roads-quality-baseline-20261117a-unrutted-positive",
+    "status": "completed",
+    "executed_segment_count": 24,
+    "failed_segment_count": 0,
+    "policy": "unrutted_top_placement_v1",
+    "artifact_count": 4037,
+    "artifact_manifest_sha256": "c6458bec340e3994708850d5e396a1410985913da603ef0fc043aeff126fade0",
+    "binary_sha256": {
+      "/workdir/wepppy/wepp_runner/bin/wepp_260803": "4a5158e224c175ac06c760f1006cc19f7691a9bd28911d94788af2622ba178a5",
+      "/workdir/wepppy/wepp_runner/bin/wepp_260803_hill": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7"
+    }
+  },
+  {
+    "control": "unrutted-negative",
+    "root": "/wc1/runs/rq/roads-quality-baseline-20261117a-unrutted-negative",
+    "status": "failed",
+    "executed_segment_count": 15,
+    "failed_segment_count": 5,
+    "policy": "unrutted_top_placement_v1",
+    "artifact_count": 3830,
+    "artifact_manifest_sha256": "48ddcf2bd660b9db0e2ead7535fa18f530cc04ec425c5f6318bfa4934ccab204",
+    "binary_sha256": {
+      "/workdir/wepppy/wepp_runner/bin/wepp_260803": "4a5158e224c175ac06c760f1006cc19f7691a9bd28911d94788af2622ba178a5",
+      "/workdir/wepppy/wepp_runner/bin/wepp_260803_hill": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7"
+    }
+  }
+]

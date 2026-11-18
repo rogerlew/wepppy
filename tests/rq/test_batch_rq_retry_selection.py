@@ -1391,6 +1391,9 @@ def test_delete_batch_rq_checks_active_jobs_before_cleanup(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    # This ordinary temporary batch is outside deployment retention storage.
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", raising=False)
+    monkeypatch.delenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", raising=False)
     parent_job = _DummyJob("delete-parent")
     batch_dir = tmp_path / "demo"
     (batch_dir / "runs" / "WA-38").mkdir(parents=True)

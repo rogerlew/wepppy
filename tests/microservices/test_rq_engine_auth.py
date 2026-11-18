@@ -403,6 +403,14 @@ def test_authorize_user_claims_allows_public_batch_run_without_owners(
             {"token_class": "session", "session_id": "sid-1"},
         ),
         (
+            {
+                "token_class": "session",
+                "session_id": "sid-2",
+                "feature_access_principal": {"version": 1, "kind": "human", "id": 44},
+            },
+            {"token_class": "session", "session_id": "sid-2", "user_id": 44},
+        ),
+        (
             {"token_class": "service", "sub": "svc-1", "service_groups": ["alpha", "beta"]},
             {"token_class": "service", "sub": "svc-1", "service_groups": ["alpha", "beta"]},
         ),
@@ -467,3 +475,16 @@ def test_require_current_claims_rechecks_session_revocation(
 
     assert checked_jtis == ["session-token"]
     assert checked_sessions == ["session-1"]
+
+
+def test_user_claims_tolerate_null_owner_email_and_keep_identity_boundary(monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(auth,'get_wd',lambda *a,**kw:'/tmp/private-run')
+    monkeypatch.setattr(auth.Ron,'ispublic',lambda wd:False)
+    owners=[SimpleNamespace(id=7,email=None),SimpleNamespace(id=8,email='shared@example.com')]
+    monkeypatch.setattr(auth,'get_run_owners_lazy',lambda runid:owners)
+    auth._authorize_user_claims({'sub':'7'},'ab-run')
+    auth._authorize_user_claims({'sub':'8','email':'shared@example.com'},'ab-run')
+    with pytest.raises(auth.AuthError) as error:
+        auth._authorize_user_claims({'sub':'9','email':'contact@example.com'},'ab-run')
+    assert error.value.status_code==403

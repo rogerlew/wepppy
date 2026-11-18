@@ -49,6 +49,7 @@ os.environ.setdefault("EXTENDED_MODS_DATA", _EXTENDED_MODS_DATA_ROOT)
 
 from wepppy.config.secrets import get_secret
 from wepppy.nodb.base import clear_locks, NoDbBase
+from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
 from wepppy.nodb.core import Ron
 from wepppy.profile_recorder.playback import PlaybackSession
 from wepppy.profile_coverage import load_settings_from_env
@@ -497,9 +498,6 @@ def _prepare_sandbox_run(profile_root: Path, run_id: str) -> tuple[str, Path]:
     PLAYBACK_RUN_ROOT.mkdir(parents=True, exist_ok=True)
     sandbox_run_dir = PLAYBACK_RUN_ROOT / sandbox_uuid
 
-    shutil.rmtree(sandbox_run_dir, ignore_errors=True)
-    sandbox_run_dir.mkdir(parents=True, exist_ok=True)
-
     config_candidates = [
         source_run_dir / "config",
         profile_root / "capture" / "seed" / "config",
@@ -528,49 +526,58 @@ def _prepare_sandbox_run(profile_root: Path, run_id: str) -> tuple[str, Path]:
                     active_config_slug = Path(active_text).stem
         break
 
-    if selected_config_dir:
-        available_config_slugs = sorted(cfg.stem for cfg in config_files)
-        if not available_config_slugs:
-            raise ProfileOperationError(
-                f"Profile seed config missing .cfg files in {selected_config_dir}"
+    with retained_tree_operation(
+        target=sandbox_run_dir, source=selected_config_dir or source_run_dir,
+        project_keys=(f"profile:{profile_root.name}", f"run:profile;;tmp;;{sandbox_uuid}"),
+        operation="profile_sandbox_reset",
+    ) as retention:
+        retention.checkpoint()
+        if sandbox_run_dir.exists():
+            shutil.rmtree(sandbox_run_dir)
+        retention.checkpoint()
+        if selected_config_dir:
+            sandbox_run_dir.mkdir(parents=True, exist_ok=True)
+            available_config_slugs = sorted(cfg.stem for cfg in config_files)
+            if not available_config_slugs:
+                raise ProfileOperationError(
+                    f"Profile seed config missing .cfg files in {selected_config_dir}"
+                )
+            if active_config_slug and active_config_slug not in available_config_slugs:
+                raise ProfileOperationError(
+                    "Profile seed active_config.txt references "
+                    f"'{active_config_slug}.cfg' but only {available_config_slugs} exist"
+                )
+
+            for item in sorted(selected_config_dir.iterdir()):
+                if item.name == "active_config.txt":
+                    continue
+                target_path = sandbox_run_dir / item.name
+                if item.is_dir():
+                    shutil.copytree(item, target_path, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(item, target_path)
+
+            config_slug = active_config_slug or available_config_slugs[0]
+
+            try:
+                (sandbox_run_dir / "active_config.txt").write_text(config_slug, encoding="utf-8")
+            except OSError as exc:
+                _RUNNER_LOGGER.warning("Unable to write active config marker for %s: %s", sandbox_run_dir, exc)
+
+            config_path = sandbox_run_dir / f"{config_slug}.cfg"
+            if not config_path.exists():
+                raise ProfileOperationError(
+                    f"Profile seed config failed to copy {config_slug}.cfg into sandbox {sandbox_run_dir}"
+                )
+
+            Ron(str(sandbox_run_dir), f"{config_slug}.cfg", run_group="profile", group_name="tmp")
+        else:
+            # Fallback: profile lacks usable config seeds; clone the recorded run snapshot
+            shutil.copytree(source_run_dir, sandbox_run_dir)
+            _RUNNER_LOGGER.warning(
+                "Profile %s missing config seeds; using snapshot copy for playback",
+                profile_root,
             )
-        if active_config_slug and active_config_slug not in available_config_slugs:
-            raise ProfileOperationError(
-                "Profile seed active_config.txt references "
-                f"'{active_config_slug}.cfg' but only {available_config_slugs} exist"
-            )
-
-        for item in sorted(selected_config_dir.iterdir()):
-            if item.name == "active_config.txt":
-                continue
-            target_path = sandbox_run_dir / item.name
-            if item.is_dir():
-                shutil.copytree(item, target_path, dirs_exist_ok=True)
-            else:
-                shutil.copy2(item, target_path)
-
-        config_slug = active_config_slug or available_config_slugs[0]
-
-        try:
-            (sandbox_run_dir / "active_config.txt").write_text(config_slug, encoding="utf-8")
-        except OSError as exc:
-            _RUNNER_LOGGER.warning("Unable to write active config marker for %s: %s", sandbox_run_dir, exc)
-
-        config_path = sandbox_run_dir / f"{config_slug}.cfg"
-        if not config_path.exists():
-            raise ProfileOperationError(
-                f"Profile seed config failed to copy {config_slug}.cfg into sandbox {sandbox_run_dir}"
-            )
-
-        Ron(str(sandbox_run_dir), f"{config_slug}.cfg", run_group="profile", group_name="tmp")
-    else:
-        # Fallback: profile lacks usable config seeds; clone the recorded run snapshot
-        shutil.rmtree(sandbox_run_dir, ignore_errors=True)
-        shutil.copytree(source_run_dir, sandbox_run_dir)
-        _RUNNER_LOGGER.warning(
-            "Profile %s missing config seeds; using snapshot copy for playback",
-            profile_root,
-        )
 
     return sandbox_uuid, sandbox_run_dir
 
@@ -584,12 +591,19 @@ def _prepare_sandbox_clone(profile_root: Path, run_id: str) -> tuple[str, Path]:
     PLAYBACK_RUN_ROOT.mkdir(parents=True, exist_ok=True)
     sandbox_run_dir = PLAYBACK_RUN_ROOT / sandbox_uuid
 
-    shutil.rmtree(sandbox_run_dir, ignore_errors=True)
-
-    try:
-        shutil.copytree(source_run_dir, sandbox_run_dir)
-    except OSError as exc:
-        raise ProfileOperationError(f"Failed to clone profile run snapshot: {exc}") from exc
+    with retained_tree_operation(
+        target=sandbox_run_dir, source=source_run_dir,
+        project_keys=(f"profile:{profile_root.name}", f"run:profile;;tmp;;{sandbox_uuid}"),
+        operation="profile_sandbox_clone",
+    ) as retention:
+        retention.checkpoint()
+        if sandbox_run_dir.exists():
+            shutil.rmtree(sandbox_run_dir)
+        retention.checkpoint()
+        try:
+            shutil.copytree(source_run_dir, sandbox_run_dir)
+        except OSError as exc:
+            raise ProfileOperationError(f"Failed to clone profile run snapshot: {exc}") from exc
 
     return sandbox_uuid, sandbox_run_dir
 
@@ -762,15 +776,22 @@ def archive_profile(profile: str, payload: ProfileArchiveRequest, logger: Option
 
     archives_dir = sandbox_run_dir / "archives"
     archive_target = PLAYBACK_ARCHIVE_ROOT / archive_uuid
-    archive_target.parent.mkdir(parents=True, exist_ok=True)
-    if archive_target.exists():
-        shutil.rmtree(archive_target)
     archives: List[str] = []
-    if archives_dir.exists():
-        shutil.copytree(archives_dir, archive_target)
-        archives = sorted(p.name for p in archive_target.iterdir())
-    else:
-        archive_target.mkdir(parents=True, exist_ok=True)
+    with retained_tree_operation(
+        target=archive_target, source=archives_dir if archives_dir.exists() else None,
+        project_keys=(f"run:{sandbox_run_id}", f"run:{archive_run_id}"),
+        operation="profile_archive_export", managed_export=True,
+    ) as retention:
+        retention.checkpoint()
+        archive_target.parent.mkdir(parents=True, exist_ok=True)
+        if archive_target.exists():
+            shutil.rmtree(archive_target)
+        retention.checkpoint()
+        if archives_dir.exists():
+            shutil.copytree(archives_dir, archive_target)
+            archives = sorted(p.name for p in archive_target.iterdir())
+        else:
+            archive_target.mkdir(parents=True, exist_ok=True)
 
     return ProfileArchiveResult(
         profile=profile,

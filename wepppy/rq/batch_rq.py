@@ -21,6 +21,7 @@ import shutil
 import socket
 import time
 import tempfile
+from contextlib import ExitStack, contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Tuple, List, Optional
@@ -39,7 +40,14 @@ from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq import batch_outcome
 from wepppy.rq.submission_recovery import rq_submission_lock
 
-from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.weppcloud.utils.helpers import get_wd, get_batch_root_dir
+from wepppy.microservices.vector_retention_lifecycle import discover_retention_scopes, retained_tree_operation
+from wepppy.rq.project_rq_delete import _has_retained_vector_evidence, _retention_delete_root
+from wepppy.microservices.vector_upload_normalization import (
+    RedisScopeLeaseFactory, VectorUploadError, acquire_retention_maintenance_lease,
+    begin_retention_rebuild_obligation, complete_retention_rebuild_obligation,
+    reconcile_retention,
+)
 
 from wepppy.nodb.base import (
     NoDbAlreadyLockedError,
@@ -151,27 +159,37 @@ def _reset_omni_nodb_from_base(base_wd: Path, runid_wd: Path, runid: str) -> Non
     else:
         state["wd"] = str(runid_wd)
 
-    runid_wd.mkdir(parents=True, exist_ok=True)
-    target = runid_wd / "omni.nodb"
-    with target.open("w", encoding="utf-8") as fp:
-        json.dump(state, fp)
-        fp.flush()
-        os.fsync(fp.fileno())
-
-    try:
-        clear_nodb_file_cache(runid)
-    except Exception as exc:
-        logger.warning("batch_rq: failed to clear NoDb cache for %s - %s", runid, exc)
-
     base_omni_dir = base_wd / "_pups" / "omni"
-    if not base_omni_dir.exists():
-        logger.info("batch_rq: omni dir missing in base_wd=%s; skipping sync", base_omni_dir)
-        return
-
     target_omni_dir = runid_wd / "_pups" / "omni"
-    if target_omni_dir.exists():
-        shutil.rmtree(target_omni_dir)
-    shutil.copytree(base_omni_dir, target_omni_dir)
+    with ExitStack() as retention_guards:
+        if base_omni_dir.exists():
+            retention_operation = retention_guards.enter_context(retained_tree_operation(
+                target_omni_dir,
+                source=base_omni_dir,
+                project_keys=(f"run:batch;;{base_wd.parent.name};;_base", f"run:{runid}"),
+                operation="batch_omni_reset",
+            ))
+            retention_operation.checkpoint()
+
+        runid_wd.mkdir(parents=True, exist_ok=True)
+        target = runid_wd / "omni.nodb"
+        with target.open("w", encoding="utf-8") as fp:
+            json.dump(state, fp)
+            fp.flush()
+            os.fsync(fp.fileno())
+
+        try:
+            clear_nodb_file_cache(runid)
+        except Exception as exc:
+            logger.warning("batch_rq: failed to clear NoDb cache for %s - %s", runid, exc)
+
+        if not base_omni_dir.exists():
+            logger.info("batch_rq: omni dir missing in base_wd=%s; skipping sync", base_omni_dir)
+            return
+        retention_operation.checkpoint()
+        if target_omni_dir.exists():
+            shutil.rmtree(target_omni_dir)
+        shutil.copytree(base_omni_dir, target_omni_dir)
 
 
 def _collect_batch_runids(batch_wd: Path, batch_name: str) -> list[str]:
@@ -450,6 +468,59 @@ def _release_deferred_finalizer_if_ready(queue: Queue, final_job: Job) -> None:
     release_deferred_job_if_ready(queue, final_job)
 
 
+@contextmanager
+def _batch_retention_delete_guard(batch_name: str, target: Path, root: Path | None):
+    """Fence existing Batch/child uploads and retain interrupted deletion repair."""
+    if root is None:
+        yield
+        return
+    maintenance = acquire_retention_maintenance_lease()
+    leases = []
+    try:
+        factory = RedisScopeLeaseFactory()
+        project_keys = (f"batch:{batch_name}", f"run:batch;;{batch_name}", *(
+            f"run:{runid}" for runid in _collect_batch_runids(target, batch_name)
+        ))
+        for key in sorted(discover_retention_scopes(maintenance, root, (target,), project_keys)):
+            leases.append(factory(key))
+        maintenance.assert_owned()
+        for lease in leases:
+            lease.assert_owned()
+        obligation = begin_retention_rebuild_obligation(
+            root, operation="batch_delete", target=target.relative_to(root).as_posix(),
+        )
+        yield
+        maintenance.assert_owned()
+        for lease in leases:
+            lease.assert_owned()
+        # Also fsync on absent-target retry: the preceding remove may have
+        # succeeded before a directory fsync or accounting failure.
+        descriptor = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        reconcile_retention(
+            root, apply=True, rebuild_ledger=True, stale_seconds=0,
+            committed_only=True, maintenance_lease=maintenance,
+            required_scope_leases=tuple(leases),
+        )
+        maintenance.assert_owned()
+        for lease in leases:
+            lease.assert_owned()
+        complete_retention_rebuild_obligation(obligation)
+    finally:
+        for lease in reversed(leases):
+            try:
+                lease.release()
+            except VectorUploadError:
+                logger.warning("Batch retention scope release deferred to TTL", exc_info=True)
+        try:
+            maintenance.release()
+        except VectorUploadError:
+            logger.warning("Batch retention maintenance release deferred to TTL", exc_info=True)
+
+
 def delete_batch_rq(batch_name: str) -> dict[str, Any]:
     """Delete an entire batch workspace (base + generated runs)."""
     job = get_current_job()
@@ -463,55 +534,63 @@ def delete_batch_rq(batch_name: str) -> dict[str, Any]:
             job.meta['runid'] = batch_name
             job.save()
 
+        if not batch_name or Path(batch_name).name != batch_name or batch_name in {".", ".."}:
+            raise ValueError("Invalid batch name")
         try:
             batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+            batch_wd = Path(batch_runner.wd)
         except FileNotFoundError:
-            StatusMessenger.publish(
-                status_channel,
-                f'rq:{job_id} COMPLETED {func_name}({batch_name}) already-missing',
-            )
-            StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_COMPLETED')
-            return {'batch_name': batch_name, 'deleted': False, 'already_missing': True}
-
-        with catalog_lifecycle_guard(batch_runner.wd):
+            batch_wd = Path(get_batch_root_dir()) / batch_name
+        children = [batch_wd / "_base"]
+        runs = batch_wd / "runs"
+        if runs.is_dir():
+            children.extend(runs.iterdir())
+        retention_root = _retention_delete_root(
+            batch_wd,
+            has_evidence=any(_has_retained_vector_evidence(path) for path in [batch_wd, *children]),
+        )
+        batch_wd = batch_wd.resolve()
+        already_missing = not batch_wd.exists()
+        with catalog_lifecycle_guard(batch_wd, allow_missing=True):
             active_jobs = _active_batch_job_summaries(batch_name, exclude_job_ids={job_id})
             if active_jobs:
                 raise RuntimeError(
                     "Batch cannot be deleted while jobs are active. "
                     f"Active jobs: {_format_active_jobs_text(active_jobs)}"
                 )
+            with _batch_retention_delete_guard(batch_name, batch_wd, retention_root):
+                runids = _collect_batch_runids(batch_wd, batch_name)
 
-            batch_wd = Path(batch_runner.wd).resolve()
-            runids = _collect_batch_runids(batch_wd, batch_name)
+                for runid in runids if not already_missing else []:
+                    _cleanup_batch_run_cache_and_locks(runid)
 
-            for runid in runids:
-                _cleanup_batch_run_cache_and_locks(runid)
+                wd_targets: list[str] = [str(batch_wd)]
+                base_wd = batch_wd / '_base'
+                if base_wd.exists():
+                    wd_targets.append(str(base_wd))
+                runs_dir = batch_wd / 'runs'
+                if runs_dir.exists():
+                    wd_targets.extend(str(path) for path in runs_dir.iterdir() if path.is_dir())
 
-            wd_targets: list[str] = [str(batch_wd)]
-            base_wd = batch_wd / '_base'
-            if base_wd.exists():
-                wd_targets.append(str(base_wd))
-            runs_dir = batch_wd / 'runs'
-            if runs_dir.exists():
-                wd_targets.extend(str(path) for path in runs_dir.iterdir() if path.is_dir())
-
-            try:
-                BatchRunner.cleanup_run_instances(str(batch_wd))
-            except Exception as exc:
-                logger.warning("batch_rq: failed to cleanup BatchRunner instance for %s - %s", batch_wd, exc)
-
-            for wd in wd_targets:
                 try:
-                    NoDbBase.cleanup_run_instances(wd)
+                    BatchRunner.cleanup_run_instances(str(batch_wd))
                 except Exception as exc:
-                    logger.warning("batch_rq: failed to cleanup NoDb instances for %s - %s", wd, exc)
+                    logger.warning("batch_rq: failed to cleanup BatchRunner instance for %s - %s", batch_wd, exc)
 
-            if batch_wd.exists():
-                shutil.rmtree(batch_wd)
+                for wd in wd_targets:
+                    try:
+                        NoDbBase.cleanup_run_instances(wd)
+                    except Exception as exc:
+                        logger.warning("batch_rq: failed to cleanup NoDb instances for %s - %s", wd, exc)
 
-            StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({batch_name})')
-            StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_COMPLETED')
-            return {'batch_name': batch_name, 'deleted': True}
+                if batch_wd.exists():
+                    shutil.rmtree(batch_wd)
+
+        StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({batch_name})')
+        StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_COMPLETED')
+        if already_missing:
+            return {'batch_name': batch_name, 'deleted': False, 'already_missing': True}
+        return {'batch_name': batch_name, 'deleted': True}
 
     except Exception as exc:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
