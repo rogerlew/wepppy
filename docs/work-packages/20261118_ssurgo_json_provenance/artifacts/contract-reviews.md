@@ -24,3 +24,19 @@ confirmed to exceed socket timeouts; a killable short-lived resolver child is th
 smallest bounded fix, with addresses cached per collection to avoid per-query
 process cost. No external dependency/service is added. These reviewed refinements
 are committed separately before the implementation commit.
+
+## Final implementation review
+
+Both independent read-only reviewers rechecked implementation 39f24ce92 and closed
+all prior findings. Correctness: no remaining blockers. Security: no remaining
+medium/high findings for this operator-selected scope. Reviewers did not author
+changes or independently rerun the full suite. The security reviewer directly
+confirmed resolver-launch exception translation. Real-service artifact validation
+is retained separately; neither review establishes public deployment acceptance.
+
+Additional closed findings: process-launch OSError and malformed-cache RecursionError
+translate to SoilDataSourceError; metadata fields/events/table schemas validate
+before reuse; invalid NoDb endpoint input is validated before logging/locking.
+The 75 focused tests include real HTTP/SQLite, real disposable Redis lock/reload,
+all six consumer arguments, and rollback of failed later batches. HTTPS was not
+independently exercised by the reviewers.

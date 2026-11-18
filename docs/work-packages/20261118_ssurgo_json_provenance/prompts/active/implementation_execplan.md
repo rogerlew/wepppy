@@ -13,11 +13,11 @@ contract; this is faithful integration, not a mocked transport demonstration.
 
 - [x] Inspect six collection consumers, legacy transport/cache and frozen service contracts.
 - [x] Author operator-authorized canonical contract and data compatibility plan.
-- [ ] Complete independent reviews and commit the contract ancestor.
-- [ ] Implement transport, cache identity/events, base-sidecar and NoDb selection.
-- [ ] Run focused/broad tests and stub checks against the candidate checkout.
-- [ ] Run externally isolated fresh-cache service builds and compare generated artifacts.
-- [ ] Retain review/evidence, update tracker, commit/push task branches.
+- [x] Complete independent reviews; contract ancestors 090e9f2b6 and 2f9aff0a7.
+- [x] Implement transport, cache identity/events, base-sidecar and NoDb selection (39f24ce92).
+- [x] Run 75 focused tests, two-module stubtest, stub hygiene and broad-exception gate; broad suite attempted with unrelated environment blockers retained.
+- [x] Real PostgreSQL/API fresh-cache replay: 24,049 records, 499 valid soils, six unchanged non-valid outcomes, 501 canonical files and 499 verified sidecars.
+- [x] Retain review/evidence and update tracker; publish task branches task/ssurgo-json-provenance and task/wepppy-json-parity.
 
 ## Context and plan
 
@@ -68,6 +68,13 @@ record those attempts atomically; XML behavior remains unchanged apart from addi
 honest provenance. Local candidate fallback catches SsurgoRequestError/ValueError;
 a distinct source-contract exception must propagate instead of silently falling back.
 
+The existing development image differs from the frozen reference in Python, libc,
+and Rosetta source. Its first ssurgo-004 run failed two diagnostic-comment bytes
+(5.917715041673642 versus 5.917715041673644). Preserve that failure and the fixed
+comparison rules. Matching the reference libraries/interpreter through read-only
+mounts in the isolated client container restores all five exact artifacts; this is
+a matched-environment transport result, not proof of deployment-image equivalence.
+
 ## Decision Log
 
 
@@ -80,4 +87,9 @@ warm-cache reuse needs no metadata request and cannot mix releases.
 ## Outcomes & Retrospective
 
 
-Contract preparation only. No implementation or generated-output acceptance yet.
+Implementation and independent review complete. Paired ssurgo-004 real-service run
+passes all five canonical artifacts in the matched reference numerical environment.
+All six corpus cases have been accounted for: five complete (one empty) and one
+incomplete explicitly excluded. Full matched-environment parity passes; evidence
+is retained in soil-data-access/artifacts/wepppy-parity/json-client. Public deployment
+and broader service release gates remain deferred.
