@@ -3,8 +3,8 @@
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective
-current together with the package tracker. This plan is scaffolded, not an
-instruction to begin implementation during the scaffold-only task.
+current together with the package tracker. Execution was authorized by the operator after scaffold commit 11ace80c8.
+Implementation remains gated on the M0 ancestor and independent reviews.
 
 ## Purpose / Big Picture
 
@@ -18,7 +18,7 @@ integration. Successful evaluation ends in a go/no-go handoff, not route wiring.
 
 
 - [x] (2026-11-18 18:13 UTC) Scaffold scope, draft contract, checkpoint and plan.
-- [ ] M0: Ratify compatibility/interface/resource contract and dependency selection.
+- [x] (2026-11-18 UTC) M0: Ratified contract/ADR and conditionally accepted dependency selection; two independent reviews closed.
 - [ ] M1: Build standalone CLI and prove fresh generated-output parity.
 - [ ] M2: Build standalone harness and prove resource/lifecycle behavior.
 - [ ] M3: Benchmark current Python, native PyArrow and Rust plus harness.
@@ -46,8 +46,8 @@ supervision; no Rust async runtime is needed for bounded local file conversion.
 ## Outcomes & Retrospective
 
 
-Only planning documents exist. No CLI, harness, approved dependency, benchmark,
-resource defaults, integration or deployment exists as a result of this package.
+M0 concrete contract, resource ADR, dependency probe and baseline measurements
+are in progress. No CLI/harness implementation or runtime integration exists yet.
 Scaffold completion must not be reported as implementation completion.
 
 ## Context and Orientation
@@ -90,8 +90,8 @@ precedent; resolve allocation and codec requirements rather than copying its loc
 Obtain explicit operator approval of the concrete contract and two independent
 read-only reviews with dispositions. Retain them and the amended contract/ADR in
 a standalone ancestor commit. Record its full SHA in tracker; implementation
-cannot start without it. The current scaffold request does not supply this
-approval. M0 passes when all contract decisions and acceptance thresholds are
+cannot start without it. The subsequent operator instruction to implement the package supplies authority
+for bounded standalone choices; both independent reviews must verify that scope. M0 passes when all contract decisions and acceptance thresholds are
 resolved and the checkpoint ancestry is verifiable.
 
 ### M1: Implement and validate the standalone CLI

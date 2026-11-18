@@ -94,7 +94,7 @@ path/symlink races, inherited authority, output overwrite, IPC and cancellation.
 A subprocess shares its container authority; do not claim arbitrary-code sandboxing.
 
 Resource defaults and rejection thresholds require a new resource-envelope ADR
-before implementation acceptance. Numeric limits remain unset here. They must be
+before implementation acceptance. Numeric evaluation limits are now specified in ADR-0148 and the standalone contract. They must be
 justified with representative valid workloads and a declared host-wide budget;
 small batches alone do not bound decoder allocations. No model formulas, units
 or project data schemas are changed.

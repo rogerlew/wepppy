@@ -1,6 +1,6 @@
 # Contract decision checkpoint: Parquet CSV CLI
 
-**Status**: Draft; NOT ratified; implementation gate CLOSED.
+**Status**: M0 accepted for standalone implementation; gate opens only at checkpoint commit.
 **Recorded**: 2026-11-18 18:13 UTC
 **Starting revision**: `dff2f29f74158857da3b0c313e7ec7194501ed76`
 **Amendment ID**: PARQUET-CSV-CLI-01
@@ -10,8 +10,10 @@
 The operator requested a contract-first work-package scaffold and explicitly
 made WEPPpy integration contingent on CLI and Python-harness success. Rust and
 the shape-converter asynchronous subprocess pattern are the selected evaluation
-direction. This is scaffold authority, not approval of unresolved interfaces,
-limits, implementation, deployment or integration.
+direction. The later instruction "commit scaffold and implement the work-package" authorizes
+standalone implementation and routine bounded evaluation choices. It does not
+authorize runtime integration or deployment. Numeric choices and interface details
+are now concrete in the standalone contract and ADR-0148 for independent review.
 
 The intended delta is a standalone bounded converter/harness with contracted CSV
 semantics, reproducible performance evidence and explicit failure behavior.
@@ -55,8 +57,11 @@ cleanup under success, failure, cancellation, concurrency and repeated use.
 
 ## Approval and reviews
 
-Operator approval of concrete contract: **pending**.
-Independent contract review A: **not performed**.
-Independent contract review B: **not performed**.
-Checkpoint ancestor commit: **none**.
+Operator authority: **2026-11-18 instruction to implement the scoped package**;
+no runtime behavior change or scope expansion is proposed. Independent reviewers
+must assess that the concrete contract stays within this authorization.
+Independent contract review A: **passed after two medium clarifications**.
+Independent contract review B: **conditional dependency acceptance; no open medium/high findings**.
+Checkpoint ancestor commit: recorded by full SHA in tracker after this commit.
+See `20261118_contract_reviews.md` for findings and post-fix confirmation.
 No acceptance verdict or zero-findings claim is implied by this scaffold.
