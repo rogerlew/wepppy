@@ -32,7 +32,7 @@ geographic/live parity is deferred until SDA recovery, not a prerequisite.
 - [x] Freeze selection-event schema, total timeout, default/migration behavior and transport ADR; complete contract reviews.
 - [x] Implement collection-level source selection across all six consumers, retaining source-separated caches and failure evidence.
 - [x] Integrate forest dev Compose, import official regional data, and pass bounded queued soil/fallback acceptance.
-- [ ] Integrate the protected Compose change after exact-SHA/digest owner approval, then activate the shared forest client default.
+- [x] Integrate the protected Compose change after exact-SHA/digest owner approval, then activate the shared forest client default.
 - [ ] Later scope: forest1 and production rollout; comprehensive live validation after SDA recovery.
 
 ## Context and plan
@@ -167,3 +167,28 @@ all replay caches. Each produces 76 prepared soils with exact same-image referen
 parity through primary cold/warm and warm fallback. Base sidecar hashes and final
 inputs are independently read back; dual failure generates no soils. Shared forest
 default activation and public/test-production/production rollout remain distinct.
+
+
+## Approved forest cutover, 2026-11-18 UTC
+
+The operator approved candidate 09f6633e660c73570cc3f181bef75c6b49853ef3 and policy
+digest af780106f077abb9cd1ace333aeec80cd04f2295ac94b0f96f354f9d15a08d12. PR #675
+merged as 0ae17ad8a393a4fbe250241b2253b77cc475d06b with an identical tree. Required
+candidate and merge governance checks passed after recording approval externally.
+
+Progress: shared forest consumers are refreshed and source/default/readiness checks
+pass. The source overlay preserves local master history, unrelated dirty files and
+existing vector-upload settings. Canonical fence programs guarded the empty default,
+batch and fork/archive registries, then released dequeue after readiness. Runtime
+source/configuration backups remain in the ignored activation directory.
+
+Decision Log: apply the seven approved runtime paths to the existing dev mounts;
+do not rebase/reset the divergent shared checkout or replace unrelated local work.
+Every Python runtime file matches the approved candidate. The Compose file retains
+both its existing local vector settings and the approved soil additions. Public,
+forest1 and production activation remain separate scope.
+
+Evidence: artifacts/forest-activation contains exact approval/integration, source
+hashes, consumer defaults and normal-queue canary receipts. This completes the
+approved forest implementation/activation phase; comprehensive live SDA comparison
+remains deferred until recovery.

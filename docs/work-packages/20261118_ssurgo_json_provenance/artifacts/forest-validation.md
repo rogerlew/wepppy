@@ -50,3 +50,12 @@ Source downloads, failed diagnostic qualification attempts and complete runtime 
 remain in ignored service data directories. No source project was modified. The
 initial import was canceled when an unanalyzed COPY join plan ran slowly; adding
 ANALYZE before relational checks fixed it and the previous active release survived.
+
+## Approved activation follow-up
+
+The operator approved the exact revision; PR #675 is merged and forest defaults
+are active. See forest-activation/activation.json and live-canary.json: four actual
+normal-queue jobs built/prepared both datasets, 152 final inputs match, base hashes
+verify and recorded supplier is the mirror. Existing explicit selections and all
+unrelated shared work are preserved. Dequeue is resumed and web/RQ/soil services
+are healthy. This supersedes the pre-approval deployment status above.

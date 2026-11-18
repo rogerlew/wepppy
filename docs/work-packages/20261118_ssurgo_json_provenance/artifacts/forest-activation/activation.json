@@ -1,0 +1,15 @@
+{
+  "observed_at": "2026-11-18T03:31:31.705225+00:00",
+  "state": "forest mirror-first default active",
+  "merged_revision": "0ae17ad8a393a4fbe250241b2253b77cc475d06b",
+  "shared_checkout_head_preserved": true,
+  "unrelated_work_preserved": true,
+  "api_and_database_healthy": true,
+  "web_root_status": 200,
+  "rq_health_status": "ok",
+  "rq_dequeue_resumed": true,
+  "live_canary_jobs": 4,
+  "exact_reference_prepared_files": 152,
+  "region": "Idaho SSURGO and Virgin Islands STATSGO2",
+  "scope": "forest development; existing explicit source selections preserved"
+}

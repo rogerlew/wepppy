@@ -1,0 +1,12 @@
+{
+  "accepted_sha": "09f6633e660c73570cc3f181bef75c6b49853ef3",
+  "branch": "master",
+  "claim": "remote_integration_snapshot",
+  "integration_mode": "merge-preserving",
+  "observed_at": "2026-11-18T03:23:52.209726+00:00",
+  "observed_remote_sha": "0ae17ad8a393a4fbe250241b2253b77cc475d06b",
+  "remote": "origin",
+  "repository": "https://github.com/rogerlew/wepppy",
+  "schema_version": 1,
+  "validation_scope": "ancestry-only; not behavioral acceptance or release approval"
+}

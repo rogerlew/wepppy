@@ -1,0 +1,84 @@
+[
+  {
+    "runid": "soil-mirror-activation-20261118-ssurgo",
+    "mukey": 78905,
+    "build_job": "77570e01-372c-4e4f-b01f-5f2d94173355",
+    "prepare_job": "0d237315-79f1-41ad-a66e-ddb5397eff9a",
+    "build_worker": "d798e85f87494beba529c8f7cd095606",
+    "prepare_worker": "5006b263eddc424ba558d93519e5e289",
+    "policy": "mirror-first",
+    "selection": {
+      "actual_supplier": {
+        "endpoint": "http://soil-api:8080/Tabular/post.rest",
+        "profile": "wepppy-json-v1",
+        "release": "forest-id-20261001-vi-20161013-v1"
+      },
+      "attempts": [
+        {
+          "ended_at": "2026-11-18T03:29:16.249247+00:00",
+          "identity": {
+            "endpoint": "http://soil-api:8080/Tabular/post.rest",
+            "profile": "wepppy-json-v1",
+            "release": "forest-id-20261001-vi-20161013-v1"
+          },
+          "outcome": "success",
+          "reason": "selected",
+          "started_at": "2026-11-18T03:29:16.000700+00:00"
+        }
+      ],
+      "configured_primary": {
+        "endpoint": "http://soil-api:8080/Tabular/post.rest",
+        "profile": "wepppy-json-v1",
+        "release": "forest-id-20261001-vi-20161013-v1"
+      },
+      "historical_rows_unknown": false,
+      "policy": "mirror-first",
+      "schema_version": 1,
+      "selected_at": "2026-11-18T03:29:16.249258+00:00"
+    },
+    "base_hash_verified": true,
+    "exact_reference_parity": true,
+    "prepared_files": 76
+  },
+  {
+    "runid": "soil-mirror-activation-20261118-statsgo",
+    "mukey": 1390208,
+    "build_job": "8ccaa8d9-525b-4dab-a4f5-af57295a0118",
+    "prepare_job": "9f9dd76d-bac0-4931-ba0a-8edee2f35daf",
+    "build_worker": "6e86fd03332c477f868527648ce9afbb",
+    "prepare_worker": "d0d94d7c221b422b9c7ef54f5f5586fc",
+    "policy": "mirror-first",
+    "selection": {
+      "actual_supplier": {
+        "endpoint": "http://soil-api:8080/Tabular/post.rest",
+        "profile": "wepppy-json-v1",
+        "release": "forest-id-20261001-vi-20161013-v1"
+      },
+      "attempts": [
+        {
+          "ended_at": "2026-11-18T03:29:51.425982+00:00",
+          "identity": {
+            "endpoint": "http://soil-api:8080/Tabular/post.rest",
+            "profile": "wepppy-json-v1",
+            "release": "forest-id-20261001-vi-20161013-v1"
+          },
+          "outcome": "success",
+          "reason": "selected",
+          "started_at": "2026-11-18T03:29:51.191697+00:00"
+        }
+      ],
+      "configured_primary": {
+        "endpoint": "http://soil-api:8080/Tabular/post.rest",
+        "profile": "wepppy-json-v1",
+        "release": "forest-id-20261001-vi-20161013-v1"
+      },
+      "historical_rows_unknown": false,
+      "policy": "mirror-first",
+      "schema_version": 1,
+      "selected_at": "2026-11-18T03:29:51.425994+00:00"
+    },
+    "base_hash_verified": true,
+    "exact_reference_parity": true,
+    "prepared_files": 76
+  }
+]

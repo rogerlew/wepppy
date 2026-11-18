@@ -48,8 +48,8 @@ configure_soil_data_source(..., fallback_to_sda=True) method. Setting the deploy
 mode back to legacy-xml affects new/unconfigured projects only; explicitly restore
 saved projects with configure_soil_data_source() when needed. Retain both caches.
 
-The soil API/database are running for forest qualification. Global client-default
-activation is a separate deployment step after integration approval. The Compose
+The soil API/database and shared forest client default are active. The dated
+activation record below identifies approval, source integration and cutover evidence. The Compose
 file is a protected policy path: exact candidate SHA/digest approval is required by
 the integration-history standard before merge. No forest1 or production activation
 is included. Their deployment remains governed by scripts/deploy-production.sh.
@@ -63,3 +63,23 @@ reference caches retain unknown historical origin and are not represented as liv
 SDA retrievals. Compare bytes excluding only Build Date and Source File values.
 Retain primary cold/warm, SDA warm-cache fallback and dual-failure results. Cold
 XML fallback is additionally exercised against controlled verified TLS peers.
+
+## Forest activation, 2026-11-18 UTC
+
+PR #675 merged as 0ae17ad8a393a4fbe250241b2253b77cc475d06b after the operator
+approved candidate 09f6633e660c73570cc3f181bef75c6b49853ef3 and its policy digest.
+The merge tree is identical to the approved candidate; exact-source governance passed.
+
+The forest shared checkout contains unrelated work. Activation applies only seven
+approved runtime paths to its existing mount, retaining local master history and
+all unrelated edits, including the existing vector-upload Compose settings. Python
+source hashes match the accepted revision. Before-state and rollback copies are
+retained in the ignored soil-data-access/data/forest-activation directory. This is
+a bounded forest development cutover, not a replacement production deploy workflow.
+
+The web service, rq-engine and all three RQ worker services now receive mirror-first
+settings and can reach the pinned regional release. Their original image, UID/GID
+and mounts are retained. Canonical deployment fence programs suspended dequeue;
+all three registries were empty before refresh, and the owned fence was released
+after web/API and consumer readiness checks. Secrets remain file-backed with their
+consumer ACLs. Existing explicit project selections remain authoritative.
