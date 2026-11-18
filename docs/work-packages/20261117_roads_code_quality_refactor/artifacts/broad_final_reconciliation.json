@@ -1,0 +1,192 @@
+{
+  "acceptance_status": "incomplete",
+  "broad_gate_passed": false,
+  "coverage": {
+    "unique_collected_nodes": 15104,
+    "all_nodes_accounted_for": true,
+    "retrospectively_reconstructed_nodes": 2947,
+    "nodes_with_retained_phase_reports": 12157
+  },
+  "before_replacement_counts": {
+    "passed": 14383,
+    "skipped": 505,
+    "failed": 208,
+    "error": 8
+  },
+  "replaced_node_count": 391,
+  "replaced_original_outcomes": {
+    "passed": 192,
+    "failed": 199
+  },
+  "replacement_outcomes": {
+    "passed": 391
+  },
+  "final_counts": {
+    "passed": 14582,
+    "skipped": 505,
+    "failed": 9,
+    "error": 8
+  },
+  "collection_skips_separate": [
+    {
+      "nodeid": "tests/sbs_map/test_sbs_map_large_fixtures.py",
+      "outcome": "skipped",
+      "reason": "('/workdir/wepppy/tests/sbs_map/test_sbs_map_large_fixtures.py', 17, 'Skipped: Set SBS_MAP_LARGE_FIXTURES=1 to run large SBS map fixture tests.')"
+    }
+  ],
+  "remaining_classes": {
+    "missing_generated_js_bundle": 1,
+    "missing_jinja_fixture_global": 4,
+    "missing_playwright_dependencies": 3,
+    "catalog_notification_latency": 1,
+    "postgres_account_kind_schema_missing": 8
+  },
+  "remaining_failures_and_errors": [
+    {
+      "nodeid": "tests/weppcloud/controllers_js/test_unitizer_client_js.py::test_unitizer_bundle_contains_blank_guard",
+      "outcome": "failed",
+      "class": "missing_generated_js_bundle",
+      "attribution_status": "baseline_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/routes/test_feature_access_routes.py::test_grant_ack_remove_real_transport_and_admission",
+      "outcome": "failed",
+      "class": "missing_jinja_fixture_global",
+      "attribution_status": "baseline_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/routes/test_feature_access_routes.py::test_poweruser_onboarding_is_atomic_current_user_only_and_idempotent",
+      "outcome": "failed",
+      "class": "missing_jinja_fixture_global",
+      "attribution_status": "baseline_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/routes/test_feature_access_routes.py::test_legacy_poweruser_is_preserved_without_fabricated_acceptance",
+      "outcome": "failed",
+      "class": "missing_jinja_fixture_global",
+      "attribution_status": "baseline_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/routes/test_feature_access_routes.py::test_dates_conflict_and_expired_profile",
+      "outcome": "failed",
+      "class": "missing_jinja_fixture_global",
+      "attribution_status": "baseline_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[False]",
+      "outcome": "failed",
+      "class": "missing_playwright_dependencies",
+      "attribution_status": "baseline_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/routes/test_runs_catalog_contract.py::test_runs_sort_navigation_and_fixed_layout_in_chromium[True]",
+      "outcome": "failed",
+      "class": "missing_playwright_dependencies",
+      "attribution_status": "baseline_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_run_catalog_postgres.py::test_marker_notification_latency_without_prior_sql_mirror[readonly]",
+      "outcome": "failed",
+      "class": "catalog_notification_latency",
+      "attribution_status": "isolated_baseline_passed_full_suite_load_inconclusive"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_run_catalog_reader.py::test_real_file_sql_http_browser_chain",
+      "outcome": "failed",
+      "class": "missing_playwright_dependencies",
+      "attribution_status": "baseline_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_user_preferences_postgres.py::test_postgres_schema_constraints_and_cascade",
+      "outcome": "error",
+      "class": "postgres_account_kind_schema_missing",
+      "attribution_status": "representative_baseline_setup_error_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_user_preferences_postgres.py::test_postgres_concurrent_first_save_retries_whole_record",
+      "outcome": "error",
+      "class": "postgres_account_kind_schema_missing",
+      "attribution_status": "representative_baseline_setup_error_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_user_preferences_postgres.py::test_postgres_existing_update_is_serialized_and_last_commit_wins",
+      "outcome": "error",
+      "class": "postgres_account_kind_schema_missing",
+      "attribution_status": "representative_baseline_setup_error_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_user_preferences_postgres.py::test_postgres_read_and_save_serialize_in_both_orders[read]",
+      "outcome": "error",
+      "class": "postgres_account_kind_schema_missing",
+      "attribution_status": "representative_baseline_setup_error_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_user_preferences_postgres.py::test_postgres_read_and_save_serialize_in_both_orders[save]",
+      "outcome": "error",
+      "class": "postgres_account_kind_schema_missing",
+      "attribution_status": "representative_baseline_setup_error_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_user_preferences_postgres.py::test_postgres_identity_binding_and_owned_run_receipt",
+      "outcome": "error",
+      "class": "postgres_account_kind_schema_missing",
+      "attribution_status": "representative_baseline_setup_error_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_user_preferences_postgres.py::test_postgres_runid_collision_cannot_delete_preexisting_run",
+      "outcome": "error",
+      "class": "postgres_account_kind_schema_missing",
+      "attribution_status": "representative_baseline_setup_error_reproduced"
+    },
+    {
+      "nodeid": "tests/weppcloud/test_user_preferences_postgres.py::test_two_users_view_same_project_in_preferred_units_without_mutation",
+      "outcome": "error",
+      "class": "postgres_account_kind_schema_missing",
+      "attribution_status": "representative_baseline_setup_error_reproduced"
+    }
+  ],
+  "v5_subtest_outcomes_separate": {
+    "passed": 12
+  },
+  "original_prefix_subtests": "Original v3 console reports three passed subtests; per-node reports were not retained. Not added to unique item counts.",
+  "limitations": [
+    "No uninterrupted, single-process full-suite pass; prefix order is retrospective.",
+    "2,947 retained original-prefix items used global /tmp retention root; canonical replays use /wc1.",
+    "Each continuation/replacement introduces a process boundary; cross-boundary session state is not revalidated.",
+    "v5 changed one generated management JSON file. Exact restoration and isolated writer reproduction explain the drift but do not make its integrity gate pass.",
+    "Replacement uses reviewed read-only native parser mounts and a shorter AF_UNIX-compatible basetemp; these differ from v5.",
+    "Nine failures and eight setup errors remain. Baseline attribution explains scope, not a passing gate."
+  ],
+  "v5_source_drift_preserved": {
+    "wepppy/wepp/management/scripts/man42_5.man.json": {
+      "before": "c20bdf210f1a10aac0bfbc6a7e13a51e079ee4057d2236d92ac0d397e69911b0",
+      "after": "9ba3c8e1a9961adcb767f7cd7f32ffa21f66bff8ca909d35892720131261017b"
+    }
+  },
+  "final_source_manifest_sha256": "4c58acdf39d0ffef185b86b14c0d8d15b60520e902f67bc5ce0cf2e450412100",
+  "node_evidence_path": "/tmp/roads-refactor-validation/broad_final_node_evidence.json",
+  "node_evidence_sha256": "8c8485d3fbeeaf44199524bc41f8d9ea65cb663c8deb516f83325ebdcfd29b18",
+  "input_sha256": {
+    "/tmp/roads-refactor-validation/run_broad_module_replacements.py": "911b289cdb86892907dcaccae93d9044e0df5df2faca1ac8414b89042b2de18b",
+    "/tmp/roads-refactor-validation/run_broad_continuation_v5.py": "e1baeb2bfcd91c4eb698c8690e65471389e5b2ac6fde353b870264e24b476f2a",
+    "/tmp/roads-refactor-validation/broad-continuation-v5-inventory.json": "a6b313fb019070b428cc6f941e2723ac7a91c8b1f2f21c09eddfb0feca01e864",
+    "/tmp/roads-refactor-validation/broad-continuation-v5-source-before.json": "e7d74f07ac341cc76f8e5bf0c8954392dc4fc8918ebc4aab2f2bd23e7870ab5d",
+    "/tmp/roads-refactor-validation/broad-continuation-v5-source-after.json": "3dfc7290d8ec3b49c1fe6b3ee6974a8cc95f161fe78180ff7760b3af1bb4c696",
+    "/tmp/roads-refactor-validation/broad-continuation-v5-summary.json": "ecb81bb4e5e38f93052b36d4dcbc9e925132cab300b899b3ff910da614185cd6",
+    "/tmp/roads-refactor-validation/broad-continuation-v5-outcomes.jsonl": "9456bf1215b045fd572b62d15655348badf26dd5bdc0cdf6be1d454b0590ca6c",
+    "/tmp/roads-refactor-validation/broad-continuation-inventory.json": "49d8a5a64755d18e7b2991633940b1624cbe81e501477cdffe03491146a65703",
+    "/tmp/roads-refactor-validation/prefix-canonical-complete-after.json": "6bbd6a44b9cb773a9ba75f9cf8fbc35c089427f9a0043c7faebf8228733638ec",
+    "/tmp/roads-refactor-validation/broad-continuation-v2-outcomes.jsonl": "938aa3acfe54761718198f907beebc2d7feb61e6b66f2f5235a309be72e9f2d1",
+    "/tmp/roads-refactor-validation/broad-continuation-v3-outcomes.jsonl": "884e24a4f0144a96da0b5c727dd520e217667e60f25c6da9c9b3544c472fc9d3",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-inventory.json": "018a90b47c12a248db2024e888df3c3a6a5e7aba66759818cef4fc299a4ceadb",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-summary.json": "fc4643a0d9833191b8f5377ffee6cfcf5b8bd6e0196d6c68a9f3b94217aefdcb",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-spec.json": "d3fe10a3d26e1bb0ed4730af05452f3bf47e0ca27ef2e6193ce5d925f073440f",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-outcomes.jsonl": "c327e53f177c191c68337c748889e77cc25cde73572525c98eb6f67ce85b0586",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-source-before.json": "4c58acdf39d0ffef185b86b14c0d8d15b60520e902f67bc5ce0cf2e450412100",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-source-after.json": "4c58acdf39d0ffef185b86b14c0d8d15b60520e902f67bc5ce0cf2e450412100",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-runtime-before.json": "9e09a2ec758621ad722f809e235048ec6a190f5ad8bb238db2fe0e61e5422197",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-runtime-after.json": "9e09a2ec758621ad722f809e235048ec6a190f5ad8bb238db2fe0e61e5422197",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-environment-before.json": "67a5b1529eb849200501679108e382887f6ba563bf530ff32a11e9677eeea471",
+    "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-environment-after.json": "67a5b1529eb849200501679108e382887f6ba563bf530ff32a11e9677eeea471"
+  }
+}

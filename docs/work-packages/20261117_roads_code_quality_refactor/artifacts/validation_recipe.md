@@ -49,7 +49,7 @@ Host logs are separately labeled. Inspect those paths before running any command
 
     ROADS_TEST_CHECKOUT=/home/workdir/wepppy-roads-code-quality \
       ROADS_OUTPUT_LABEL=candidate-final \
-      python3 /tmp/roads_refactor_baseline.py focused-aligned
+      python3 /tmp/roads_refactor_baseline.py focused
 
     ROADS_TEST_CHECKOUT=/home/workdir/wepppy-roads-code-quality \
       ROADS_OUTPUT_LABEL=candidate-final \
@@ -59,8 +59,11 @@ Host logs are separately labeled. Inspect those paths before running any command
       ROADS_OUTPUT_LABEL=candidate-final \
       python3 /tmp/roads_refactor_baseline.py analysis
 
-The focused command aligns the vector-retention filesystem setting with pytest's
-`/tmp` fixtures. It does not alter application configuration. Expected completion
+The focused command preserves the canonical inherited vector-retention storage
+settings. The Roads route fixture declares its own temporary storage scope. Do
+not apply the older `focused-aligned` mode or a global `/tmp` root override to
+broad validation; `validation_environment_scope.md` records the confirmed
+cross-fixture failure caused by that override. Expected completion
 is no new focused failure, all 516 matrix profiles complete, and 516 native
 summaries validated. Evaluate all failures explicitly; the host helper is not a
 replacement for the required final broad suite.
@@ -142,3 +145,21 @@ Use `wctl --project-dir /home/workdir/wepppy-roads-code-quality doc-lint --path 
 for candidate-relative paths. This selects the intended checkout and avoids the
 zero-file result observed with relative paths under the default preset. Individual
 absolute file paths also worked; final closeout uses the explicit project override.
+
+## Broad-suite worktree prerequisites
+
+A source bind mount hides ignored assets from the shared checkout. Before a new
+broad run, inventory native parser binaries and provenance, generated controller
+bundles, Node/Playwright dependencies and the test database schema. Validate
+existing artifact provenance against the tested sources before reusing an asset.
+The retained replacement run uses exact read-only parser mounts; it neither
+builds new binaries nor changes shared services. Use a short unique basetemp for
+AF_UNIX socket fixtures, whose socket paths have an operating-system length limit.
+
+The final diagnostic also demonstrates that the import sweep can rewrite the
+management JSON fixture through an import-time writer. Retain before/after source
+hashes and the written bytes, then restore only the proven test-generated delta.
+Restoration does not erase the original run's failed integrity check. Missing
+runtime assets, baseline test failures and load-sensitive timing failures must
+remain explicit until qualified; they are not reasons to weaken assertions or
+silently mark the broad gate passed.

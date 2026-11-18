@@ -1,0 +1,1087 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-code-quality:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-cp_1lkch 25717d70c6bb90c98b08a504efc76d6552bbdefbe623173551a056b47119709f && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python /tmp/roads-refactor-validation/run_prefix_canonical.py prefix-canonical-complete-before'
+time="2026-11-17T16:09:59-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-9b5b7d4681eb Creating
+ Container docker-weppcloud-run-9b5b7d4681eb Created
+RETENTION_ENV {'VECTOR_UPLOAD_RUN_FILESYSTEM_ID': 'dev-wc1', 'VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT': '/wc1'}
+........................................................................ [ 13%]
+.................................................FFFsFFF................ [ 26%]
+........................................................................ [ 40%]
+........................................................................ [ 53%]
+..FFssF.FFF............................................................. [ 67%]
+........................................................................ [ 80%]
+.......FsF.FFFF.......F................................sssssssssssssssss [ 93%]
+ssssssssFFFFFFFFF.......FFF......                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_boundary_upload_returns_controller_summary ________________
+tests/microservices/test_rq_engine_ag_fields_routes.py:295: in test_boundary_upload_returns_controller_summary
+    assert response.status_code == 200
+E   assert 507 == 200
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=c7dd2269f52e4ae6863b202ef9b6be54 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_boundary_upload_returns_c0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 674, in upload_boundaries
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 675, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_ag_fields_routes.py", line 216, in <lambda>
+    lambda **kwargs: real_prepare(
+                     ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+__ test_signed_browser_session_provenance_and_hostile_quarantine_are_minimal ___
+tests/microservices/test_rq_engine_ag_fields_routes.py:367: in test_signed_browser_session_provenance_and_hostile_quarantine_are_minimal
+    assert accepted.status_code == 200
+E   assert 507 == 200
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=57d875cea71046ad81f20ddd68eee499 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_signed_browser_session_pr0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 674, in upload_boundaries
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 675, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_ag_fields_routes.py", line 216, in <lambda>
+    lambda **kwargs: real_prepare(
+                     ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+__ test_boundary_geoparquet_retains_source_and_publishes_canonical_candidate ___
+tests/microservices/test_rq_engine_ag_fields_routes.py:445: in test_boundary_geoparquet_retains_source_and_publishes_canonical_candidate
+    assert response.status_code == 200
+E   assert 507 == 200
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=d62b9919fc674eabb18144df2dc606a0 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_boundary_geoparquet_retai0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 674, in upload_boundaries
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 675, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_ag_fields_routes.py", line 216, in <lambda>
+    lambda **kwargs: real_prepare(
+                     ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+__________ test_boundary_geometry_rejection_preserves_accepted_fields __________
+tests/microservices/test_rq_engine_ag_fields_routes.py:492: in test_boundary_geometry_rejection_preserves_accepted_fields
+    accepted_bytes = canonical_path.read_bytes()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-unknown/pytest-0/test_boundary_geometry_rejecti0/ag_fields/fields.WGS.geojson'
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=c55ac0b28541473ab6ff667a32615ad5 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_boundary_geometry_rejecti0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 674, in upload_boundaries
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 675, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_ag_fields_routes.py", line 216, in <lambda>
+    lambda **kwargs: real_prepare(
+                     ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+________ test_successful_sync_mutations_invalidate_ag_fields_preflight _________
+tests/microservices/test_rq_engine_ag_fields_routes.py:553: in test_successful_sync_mutations_invalidate_ag_fields_preflight
+    assert all(response.status_code == 200 for response in responses)
+E   assert False
+E    +  where False = all(<generator object test_successful_sync_mutations_invalidate_ag_fields_preflight.<locals>.<genexpr> at 0x7f13820eea80>)
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=10b4ecacece54e5c894df66c17dfc827 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_successful_sync_mutations0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 674, in upload_boundaries
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 675, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_ag_fields_routes.py", line 216, in <lambda>
+    lambda **kwargs: real_prepare(
+                     ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_____________ test_boundary_upload_rejects_extension_and_oversize ______________
+tests/microservices/test_rq_engine_ag_fields_routes.py:574: in test_boundary_upload_rejects_extension_and_oversize
+    assert oversize.status_code == 413
+E   assert 507 == 413
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=560a39f0832a4b2facdd91f8dbf6d8d9 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_boundary_upload_rejects_e0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 674, in upload_boundaries
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/ag_fields_routes.py", line 675, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_ag_fields_routes.py", line 216, in <lambda>
+    lambda **kwargs: real_prepare(
+                     ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_ test_omni_contrast_routes_normalize_before_persisting_geojson_upload[run-omni-contrasts-202] _
+tests/microservices/test_rq_engine_omni_routes.py:1273: in test_omni_contrast_routes_normalize_before_persisting_geojson_upload
+    assert response.status_code == expected_status
+E   assert 507 == 202
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=4c0bc7976fde42a68ede58f57cfc7f2a code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_omni_contrast_routes_norm0/run' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 1017, in _run_omni_contrasts
+    parsed_inputs = await run_in_threadpool(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 720, in _prepare_omni_contrasts
+    prepared = prepare_vector_upload(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_omni_routes.py", line 68, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_ test_omni_contrast_routes_normalize_before_persisting_geojson_upload[run-omni-contrasts-dry-run-200] _
+tests/microservices/test_rq_engine_omni_routes.py:1273: in test_omni_contrast_routes_normalize_before_persisting_geojson_upload
+    assert response.status_code == expected_status
+E   assert 507 == 200
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=1e2ea82798854fd7a7fd0e83a06e0289 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_omni_contrast_routes_norm1/run' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 1187, in _dry_run_omni_contrasts
+    parsed_inputs = await run_in_threadpool(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 720, in _prepare_omni_contrasts
+    prepared = prepare_vector_upload(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_omni_routes.py", line 68, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+___________ test_omni_upload_rolls_back_staged_file_when_build_fails ___________
+tests/microservices/test_rq_engine_omni_routes.py:1410: in test_omni_upload_rolls_back_staged_file_when_build_fails
+    assert response.status_code == 400
+E   assert 507 == 400
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=c266288377e64e9cac36af29afde4d6c code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_omni_upload_rolls_back_st0/run' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 1017, in _run_omni_contrasts
+    parsed_inputs = await run_in_threadpool(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 720, in _prepare_omni_contrasts
+    prepared = prepare_vector_upload(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_omni_routes.py", line 68, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_______ test_run_omni_contrasts_rejects_oversize_geojson_upload_with_413 _______
+tests/microservices/test_rq_engine_omni_routes.py:1544: in test_run_omni_contrasts_rejects_oversize_geojson_upload_with_413
+    assert response.status_code == 413
+E   assert 507 == 413
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=46305e6246f34c7c80964ab3e3063d64 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_run_omni_contrasts_reject0/run' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 1017, in _run_omni_contrasts
+    parsed_inputs = await run_in_threadpool(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 720, in _prepare_omni_contrasts
+    prepared = prepare_vector_upload(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_omni_routes.py", line 68, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_ test_omni_contrast_routes_reject_unsupported_geometry_before_parse_inputs[run-omni-contrasts] _
+tests/microservices/test_rq_engine_omni_routes.py:1592: in test_omni_contrast_routes_reject_unsupported_geometry_before_parse_inputs
+    assert response.status_code == 400
+E   assert 507 == 400
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=c43be85b80aa4b7d911da3b479924e11 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_omni_contrast_routes_reje0/run' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 1017, in _run_omni_contrasts
+    parsed_inputs = await run_in_threadpool(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 720, in _prepare_omni_contrasts
+    prepared = prepare_vector_upload(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_omni_routes.py", line 68, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_ test_omni_contrast_routes_reject_unsupported_geometry_before_parse_inputs[run-omni-contrasts-dry-run] _
+tests/microservices/test_rq_engine_omni_routes.py:1592: in test_omni_contrast_routes_reject_unsupported_geometry_before_parse_inputs
+    assert response.status_code == 400
+E   assert 507 == 400
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=3bbb2a6a8ef04e3d966d3ebe7bdb8a26 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_omni_contrast_routes_reje1/run' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 1187, in _dry_run_omni_contrasts
+    parsed_inputs = await run_in_threadpool(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/omni_routes.py", line 720, in _prepare_omni_contrasts
+    prepared = prepare_vector_upload(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_omni_routes.py", line 68, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_________________________ test_upload_geojson_succeeds _________________________
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py:223: in test_upload_geojson_succeeds
+    assert response.status_code == 200
+E   assert 507 == 200
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=4e517f15282543c9b6dd85646fef262a code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_upload_geojson_succeeds0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 225, in upload_geojson
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 226, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_upload_batch_runner_routes.py", line 58, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_________________ test_upload_geojson_rejects_oversize_payload _________________
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py:305: in test_upload_geojson_rejects_oversize_payload
+    assert response.status_code == 413
+E   assert 507 == 413
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=2733995c2f2140dc8a6063899c5cc3db code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_upload_geojson_rejects_ov0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 225, in upload_geojson
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 226, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_upload_batch_runner_routes.py", line 58, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+___ test_upload_geojson_normalizes_binary_and_publishes_converter_provenance ___
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py:404: in test_upload_geojson_normalizes_binary_and_publishes_converter_provenance
+    assert response.status_code == 200
+E   assert 507 == 200
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=b11fa923ce1e43f180967a4e76b16e44 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_upload_geojson_normalizes0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 225, in upload_geojson
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 226, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_upload_batch_runner_routes.py", line 58, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_______ test_upload_geojson_registration_failure_restores_previous_bytes _______
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py:455: in test_upload_geojson_registration_failure_restores_previous_bytes
+    assert response.status_code == 500
+E   assert 507 == 500
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=1380d396e9fd4ebc948c4c1003259ba9 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_upload_geojson_registrati0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 225, in upload_geojson
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 226, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_upload_batch_runner_routes.py", line 58, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_____ test_upload_geojson_receipt_failure_restores_previous_file_and_state _____
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py:501: in test_upload_geojson_receipt_failure_restores_previous_file_and_state
+    assert response.status_code == 500
+E   assert 507 == 500
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=4dda136d79424c9ca11fb7e59a31c33e code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_upload_geojson_receipt_fa0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 225, in upload_geojson
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 226, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_upload_batch_runner_routes.py", line 58, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_____________ test_upload_geojson_rejects_point_before_replacement _____________
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py:551: in test_upload_geojson_rejects_point_before_replacement
+    assert response.status_code == 400
+E   assert 507 == 400
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=67773562fd5f444495f15fc590376bf8 code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_upload_geojson_rejects_po0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 225, in upload_geojson
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 226, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_upload_batch_runner_routes.py", line 58, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+__________ test_invalid_geojson_replacement_preserves_existing_source __________
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py:782: in test_invalid_geojson_replacement_preserves_existing_source
+    assert response.status_code == 400
+E   assert 507 == 400
+E    +  where 507 = <Response [507 Insufficient Storage]>.status_code
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.microservices.rq_engine.responses:responses.py:77 rq-engine error response emitted [error_id=9e02b5adb19b4ef29b68c2b18da819cd code=vector_retention_quota_exceeded status=507]: Vector evidence could not be persisted safely.
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1791, in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '/tmp/pytest-of-unknown/pytest-0/test_invalid_geojson_replaceme0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 225, in upload_geojson
+    prepared = await run_in_threadpool(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 65, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2641, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1033, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/rq_engine/upload_batch_runner_routes.py", line 226, in <lambda>
+    lambda: prepare_vector_upload(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/tests/microservices/test_rq_engine_upload_batch_runner_routes.py", line 58, in prepare
+    return real_prepare(
+           ^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/microservices/vector_upload_normalization.py", line 1964, in prepare_vector_upload
+    raise VectorUploadError(
+wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+__________ test_direct_geojson_retains_original_and_accepts_readback ___________
+wepppy/microservices/vector_upload_normalization.py:1791: in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_direct_geojson_retains_or0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+tests/microservices/test_vector_upload_normalization.py:123: in test_direct_geojson_retains_original_and_accepts_readback
+    prepared = prepare_vector_upload(
+wepppy/microservices/vector_upload_normalization.py:1964: in prepare_vector_upload
+    raise VectorUploadError(
+E   wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+__________ test_accounting_failure_never_downgrades_accepted_workflow __________
+wepppy/microservices/vector_upload_normalization.py:1791: in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_accounting_failure_never_0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+tests/microservices/test_vector_upload_normalization.py:156: in test_accounting_failure_never_downgrades_accepted_workflow
+    prepared = prepare_vector_upload(
+wepppy/microservices/vector_upload_normalization.py:1964: in prepare_vector_upload
+    raise VectorUploadError(
+E   wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+___ test_unexpected_terminal_accounting_failure_releases_scope_lease[reject] ___
+wepppy/microservices/vector_upload_normalization.py:1791: in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_unexpected_terminal_accou0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+tests/microservices/test_vector_upload_normalization.py:187: in test_unexpected_terminal_accounting_failure_releases_scope_lease
+    prepared = prepare_vector_upload(
+wepppy/microservices/vector_upload_normalization.py:1964: in prepare_vector_upload
+    raise VectorUploadError(
+E   wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_ test_unexpected_terminal_accounting_failure_releases_scope_lease[incomplete] _
+wepppy/microservices/vector_upload_normalization.py:1791: in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_unexpected_terminal_accou1' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+tests/microservices/test_vector_upload_normalization.py:187: in test_unexpected_terminal_accounting_failure_releases_scope_lease
+    prepared = prepare_vector_upload(
+wepppy/microservices/vector_upload_normalization.py:1964: in prepare_vector_upload
+    raise VectorUploadError(
+E   wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+___________ test_terminal_receipt_write_failure_releases_scope_lease ___________
+wepppy/microservices/vector_upload_normalization.py:1791: in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_terminal_receipt_write_fa0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+tests/microservices/test_vector_upload_normalization.py:213: in test_terminal_receipt_write_failure_releases_scope_lease
+    prepared = prepare_vector_upload(
+wepppy/microservices/vector_upload_normalization.py:1964: in prepare_vector_upload
+    raise VectorUploadError(
+E   wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+__________ test_partial_mutation_is_recorded_incomplete_not_rejected ___________
+wepppy/microservices/vector_upload_normalization.py:1791: in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_partial_mutation_is_recor0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+tests/microservices/test_vector_upload_normalization.py:234: in test_partial_mutation_is_recorded_incomplete_not_rejected
+    prepared = prepare_vector_upload(
+wepppy/microservices/vector_upload_normalization.py:1964: in prepare_vector_upload
+    raise VectorUploadError(
+E   wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_ test_failed_workflow_validation_quarantines_complete_original_and_candidate __
+wepppy/microservices/vector_upload_normalization.py:1791: in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_failed_workflow_validatio0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+tests/microservices/test_vector_upload_normalization.py:259: in test_failed_workflow_validation_quarantines_complete_original_and_candidate
+    prepare_vector_upload(
+wepppy/microservices/vector_upload_normalization.py:1964: in prepare_vector_upload
+    raise VectorUploadError(
+E   wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+
+During handling of the above exception, another exception occurred:
+tests/microservices/test_vector_upload_normalization.py:258: in test_failed_workflow_validation_quarantines_complete_original_and_candidate
+    with pytest.raises(VectorUploadError, match="geometry must be") as raised:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'geometry must be'
+E     Actual message: 'Vector evidence could not be persisted safely.'
+____________ test_deep_geometry_is_stably_rejected_and_quarantined _____________
+wepppy/microservices/vector_upload_normalization.py:1791: in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_deep_geometry_is_stably_r0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+tests/microservices/test_vector_upload_normalization.py:287: in test_deep_geometry_is_stably_rejected_and_quarantined
+    prepare_vector_upload(
+wepppy/microservices/vector_upload_normalization.py:1964: in prepare_vector_upload
+    raise VectorUploadError(
+E   wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+
+During handling of the above exception, another exception occurred:
+tests/microservices/test_vector_upload_normalization.py:286: in test_deep_geometry_is_stably_rejected_and_quarantined
+    with pytest.raises(VectorUploadError, match="nesting exceeds") as raised:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'nesting exceeds'
+E     Actual message: 'Vector evidence could not be persisted safely.'
+________ test_json_parser_recursion_is_stably_rejected_and_quarantined _________
+tests/microservices/test_vector_upload_normalization.py:318: in test_json_parser_recursion_is_stably_rejected_and_quarantined
+    receipt = json.loads((attempt / "normalization.json").read_text())
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-unknown/pytest-0/test_json_parser_recursion_is_0/project/vector_upload_attempts/055f7a30-c780-45fe-a8c8-7082b618717e/normalization.json'
+______________ test_oversize_records_no_original_hash_or_partial _______________
+tests/microservices/test_vector_upload_normalization.py:896: in test_oversize_records_no_original_hash_or_partial
+    receipt = json.loads((attempt / "normalization.json").read_text())
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-unknown/pytest-0/test_oversize_records_no_origi0/project/vector_upload_attempts/e5626900-497e-452a-a7f1-f35958899967/normalization.json'
+__________________ test_binary_converter_digest_is_reconciled __________________
+wepppy/microservices/vector_upload_normalization.py:1791: in prepare_vector_upload
+    "project_root": filesystem_root.resolve(strict=True).relative_to(
+/usr/local/lib/python3.12/pathlib.py:682: in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+E   ValueError: '/tmp/pytest-of-unknown/pytest-0/test_binary_converter_digest_i0' is not in the subpath of '/wc1'
+
+The above exception was the direct cause of the following exception:
+tests/microservices/test_vector_upload_normalization.py:940: in test_binary_converter_digest_is_reconciled
+    prepared = prepare_vector_upload(
+wepppy/microservices/vector_upload_normalization.py:1964: in prepare_vector_upload
+    raise VectorUploadError(
+E   wepppy.microservices.vector_upload_normalization.VectorUploadError: Vector evidence could not be persisted safely.
+_____________ test_converter_source_digest_mismatch_is_quarantined _____________
+tests/microservices/test_vector_upload_normalization.py:989: in test_converter_source_digest_mismatch_is_quarantined
+    receipt = json.loads((attempt / "normalization.json").read_text())
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-unknown/pytest-0/test_converter_source_digest_m0/project/vector_upload_attempts/f0f31482-78ef-495f-b9ac-2511ff76f3a8/normalization.json'
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+tests/climates/test_maca_artifacts.py::test_selected_source_reaches_native_prepared_and_restored_artifacts
+tests/climates/test_maca_artifacts.py::test_replay_validation_failure_retains_working_input_and_real_exception_log
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:457: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/climates/test_maca_artifacts.py::test_replay_validation_failure_retains_working_input_and_real_exception_log
+  /workdir/wepppy/wepppy/rq/exception_logging.py:39: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+tests/microservices/test_files_routes.py::test_files_pattern_literal_underscore_percent
+tests/microservices/test_files_routes.py::test_files_sort_stability_matches_manifest
+tests/microservices/test_files_routes.py::test_files_manifest_cached_flag
+tests/microservices/test_files_routes.py::test_files_meta_skips_cached_flag
+tests/microservices/test_files_routes.py::test_files_manifest_pattern_filtering
+tests/microservices/test_files_routes.py::test_files_manifest_stale_cache_is_ignored
+tests/microservices/test_files_routes.py::test_files_dotfiles_hidden_by_default
+  /workdir/wepppy/wepppy/microservices/browse/listing.py:254: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    generated_at = datetime.utcnow().isoformat()
+
+tests/microservices/test_rq_engine_ag_fields_routes.py: 1 warning
+tests/microservices/test_vector_upload_session_provenance.py: 16 warnings
+  /opt/venv/lib/python3.12/site-packages/httpx/_client.py:822: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
+    warnings.warn(message, DeprecationWarning)
+
+tests/microservices/test_rq_engine_fork_archive_routes.py::test_fork_target_runid_rejects_invalid_identifier
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/microservices/test_rq_engine_fork_archive_routes.py::test_fork_target_runid_rejects_invalid_identifier
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_invalid_json_returns_400
+tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_contrasts_invalid_json_returns_400
+tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_contrasts_dry_run_invalid_json_returns_400
+  /opt/venv/lib/python3.12/site-packages/httpx/_content.py:204: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/microservices/test_rq_engine_ag_fields_routes.py::test_boundary_upload_returns_controller_summary
+FAILED tests/microservices/test_rq_engine_ag_fields_routes.py::test_signed_browser_session_provenance_and_hostile_quarantine_are_minimal
+FAILED tests/microservices/test_rq_engine_ag_fields_routes.py::test_boundary_geoparquet_retains_source_and_publishes_canonical_candidate
+FAILED tests/microservices/test_rq_engine_ag_fields_routes.py::test_boundary_geometry_rejection_preserves_accepted_fields
+FAILED tests/microservices/test_rq_engine_ag_fields_routes.py::test_successful_sync_mutations_invalidate_ag_fields_preflight
+FAILED tests/microservices/test_rq_engine_ag_fields_routes.py::test_boundary_upload_rejects_extension_and_oversize
+FAILED tests/microservices/test_rq_engine_omni_routes.py::test_omni_contrast_routes_normalize_before_persisting_geojson_upload[run-omni-contrasts-202]
+FAILED tests/microservices/test_rq_engine_omni_routes.py::test_omni_contrast_routes_normalize_before_persisting_geojson_upload[run-omni-contrasts-dry-run-200]
+FAILED tests/microservices/test_rq_engine_omni_routes.py::test_omni_upload_rolls_back_staged_file_when_build_fails
+FAILED tests/microservices/test_rq_engine_omni_routes.py::test_run_omni_contrasts_rejects_oversize_geojson_upload_with_413
+FAILED tests/microservices/test_rq_engine_omni_routes.py::test_omni_contrast_routes_reject_unsupported_geometry_before_parse_inputs[run-omni-contrasts]
+FAILED tests/microservices/test_rq_engine_omni_routes.py::test_omni_contrast_routes_reject_unsupported_geometry_before_parse_inputs[run-omni-contrasts-dry-run]
+FAILED tests/microservices/test_rq_engine_upload_batch_runner_routes.py::test_upload_geojson_succeeds
+FAILED tests/microservices/test_rq_engine_upload_batch_runner_routes.py::test_upload_geojson_rejects_oversize_payload
+FAILED tests/microservices/test_rq_engine_upload_batch_runner_routes.py::test_upload_geojson_normalizes_binary_and_publishes_converter_provenance
+FAILED tests/microservices/test_rq_engine_upload_batch_runner_routes.py::test_upload_geojson_registration_failure_restores_previous_bytes
+FAILED tests/microservices/test_rq_engine_upload_batch_runner_routes.py::test_upload_geojson_receipt_failure_restores_previous_file_and_state
+FAILED tests/microservices/test_rq_engine_upload_batch_runner_routes.py::test_upload_geojson_rejects_point_before_replacement
+FAILED tests/microservices/test_rq_engine_upload_batch_runner_routes.py::test_invalid_geojson_replacement_preserves_existing_source
+FAILED tests/microservices/test_vector_upload_normalization.py::test_direct_geojson_retains_original_and_accepts_readback
+FAILED tests/microservices/test_vector_upload_normalization.py::test_accounting_failure_never_downgrades_accepted_workflow
+FAILED tests/microservices/test_vector_upload_normalization.py::test_unexpected_terminal_accounting_failure_releases_scope_lease[reject]
+FAILED tests/microservices/test_vector_upload_normalization.py::test_unexpected_terminal_accounting_failure_releases_scope_lease[incomplete]
+FAILED tests/microservices/test_vector_upload_normalization.py::test_terminal_receipt_write_failure_releases_scope_lease
+FAILED tests/microservices/test_vector_upload_normalization.py::test_partial_mutation_is_recorded_incomplete_not_rejected
+FAILED tests/microservices/test_vector_upload_normalization.py::test_failed_workflow_validation_quarantines_complete_original_and_candidate
+FAILED tests/microservices/test_vector_upload_normalization.py::test_deep_geometry_is_stably_rejected_and_quarantined
+FAILED tests/microservices/test_vector_upload_normalization.py::test_json_parser_recursion_is_stably_rejected_and_quarantined
+FAILED tests/microservices/test_vector_upload_normalization.py::test_oversize_records_no_original_hash_or_partial
+FAILED tests/microservices/test_vector_upload_normalization.py::test_binary_converter_digest_is_reconciled
+FAILED tests/microservices/test_vector_upload_normalization.py::test_converter_source_digest_mismatch_is_quarantined
+31 failed, 477 passed, 29 skipped, 37 warnings in 47.50s

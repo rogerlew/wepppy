@@ -1,0 +1,10 @@
+{
+  "baseline": "/tmp/roads-refactor-validation/native-baseline/roads_matrix0",
+  "candidate": "/tmp/roads-refactor-validation/broad-candidate-20261117f/roads_matrix0",
+  "cases": 516,
+  "files_compared": 6192,
+  "normalization": "Exact root-path byte substitution only; case elapsed_seconds excluded; all scientific metadata and native bytes otherwise exact.",
+  "raw_equal_files": 6192,
+  "differences": [],
+  "pass": true
+}

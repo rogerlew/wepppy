@@ -222,5 +222,7 @@ hashes in [candidate_logs/receipt.json](candidate_logs/receipt.json). Normalizat
 removes trailing line/end-of-file whitespace only; original runtime logs remain
 intact. The scoped diff whitespace check passes. See
 [final_source_disposition.md](final_source_disposition.md) for the integrator's
-receipt. Final-format focused tests and the broad rerun were still in progress
-when this source addendum was written; their runtime results remain separate gates.
+receipt. Final-format focused tests passed **413 tests**, one skipped, in
+38.12 seconds (`focused-aligned-candidate-format-final.log`); the final-format
+publication rerun passed **3 tests** in 9.53 seconds. Broad qualification remains
+pending and is assessed separately in [broad_continuation_review.md](broad_continuation_review.md).

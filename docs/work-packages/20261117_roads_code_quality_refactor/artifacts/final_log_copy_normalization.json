@@ -1,0 +1,281 @@
+{
+  "purpose": "Retained text copies only; compressed exact evidence and runtime originals are unchanged.",
+  "files": [
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-deferred-private-canonical-final.log",
+      "original_sha256": "6bdec7dd0c95823029b8a81ce47c5ddd6ac12e81fe27e920373fbe8e16e336f6",
+      "retained_sha256": "fbe60f871f57b83f49b378a40227167f9ca8b2fd917e4ca38afebaea598e6bec",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-deferred-private-canonical.log",
+      "original_sha256": "a17860946c0ecaf303f5b251035f1dcf883f359e9c6c81eda1a221c3a2d7d8a6",
+      "retained_sha256": "8b4f5f76e539617fde8b8392b325f7b9c0ac20254161a705de7f6bdba89ac70c",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-deferred-private-canonical.xml",
+      "original_sha256": "d6c8486c285734ec3143e28cb7bc12334efab34cfe552942034b23aa37a787a0",
+      "retained_sha256": "f24c7c917c12e87696f9749d1c4586c154f34f57fd229e78e3116a0d91474136",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-delete-baseline-canonical.log",
+      "original_sha256": "414f6646a3d72718ceac2bb13660332d25bc6a9f10183700036563ba55780523",
+      "retained_sha256": "8ed37c59db3e30db326c4d517aa70f59344792c1d3586af7ecb6a22c5944f391",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-delete-candidate-canonical.log",
+      "original_sha256": "6ef730d3bba23e68b7ae1a393f327a7cd6c7a35dd6abdbd7d59a67628b2e845d",
+      "retained_sha256": "96fd48168d37c31832254e107b58a7a95f4a4b8e9ea9dbe11e983f2da6023c9e",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-fixture-check-test-stubs.log",
+      "original_sha256": "c24185f0ca2a1c3fe5406629a1e05fea75d081f624b5a7e546c5a2f7267c955b",
+      "retained_sha256": "79f07b1e8902fe9f29a03b172525641412e71f4aab3956581fa814470936a22d",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-worker-observation.log",
+      "original_sha256": "95e37a0ee512ef161406f58321bb3abc12ec68e0100acb7ae22818ca16dfc9a1",
+      "retained_sha256": "1b3662832159a9f2c5a250e1ffcdd669d7e9b8129da57b41b5828f4a01cc94e1",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/broad-v2-postexit-source-check.log",
+      "original_sha256": "c295c6344ce112d9aa6cb192adc3425fe6033c0474ab5fa4bf15119d86846ecf",
+      "retained_sha256": "7f752fd5e6203c96908f844d4417fce0efe01f934fa580b07e5ed7e4323ba26d",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/derived-signature-ordinary-canonical.log",
+      "original_sha256": "fd71ba5761a5ff1a96c3de81a0915760bea9d8cdc8c55b247f97b2023dc1b9aa",
+      "retained_sha256": "570eccb36791e28d930e891014601a845a3cf592cd6136c48a3f8e6b2610bc73",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/final-stub-hygiene-corrected.log",
+      "original_sha256": "f2a27e184dfa19555e5730cb373a24a25e40fccbbdd1c46978ed40b7ade3049b",
+      "retained_sha256": "9a27d1c6807d02f311f16de03bd40d11a83398cec9047a00dc3ab2572ef1c459",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/final-stub-hygiene.log",
+      "original_sha256": "ff57fe2b102d38ee6c7c52508a34cbaf4581a52c943522b774dc3a33071c2b77",
+      "retained_sha256": "b2acdf40274bd50e666036cf6a2bfc8823fd55266f5fd6d8838f8fc97a719ed3",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/management-writer-reproduction.log",
+      "original_sha256": "1c71c5727f86e6c2e0885292f8c02de903fcc118d984851af912e349ee1d5a69",
+      "retained_sha256": "e30e4b9a5174b11284cc69daa3507a8f582d1f2244095baf559642e723f76018",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/nonshape-baseline-canonical.log",
+      "original_sha256": "6f33a387de04344168f5d37704e26701e2aad458ab506978abc081da29141a3d",
+      "retained_sha256": "2cc675197423e2b064b8abbfd830e2f40665a382f34d9a87632bc21f1ca698da",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/nonshape-baseline-canonical.xml",
+      "original_sha256": "10601e98825dc072f64459b2f33ae44a9ca1a01665edcf992a03fe3c59f38fe8",
+      "retained_sha256": "ae3fa93c3c9c54d68d93267d2235f56c2302bef67ffae0d9e884d5c078b7fa63",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/nonshape-retention-candidate.log",
+      "original_sha256": "06ec23207c8bda0df0947bdea8aed7c493aa2e14705e433ffe84e48f125f323c",
+      "retained_sha256": "cdbc664749e15ebdd1fa06673a2581cfbff560fc6da7ebed5062809f7795bf91",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/shape-abuse-baseline-canonical.log",
+      "original_sha256": "437aeb3aa5c0817aebd8c775a94cc263f01e34cfb3a505629bea3d59d1c714d2",
+      "retained_sha256": "ff475f9ce5ffcef54b7f0e47d2db2fa41f53319f7589b4600f98820cde3fd62d",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/shape-abuse-candidate-canonical.log",
+      "original_sha256": "46090baf7f23742afa52d3b8db60fcce84df5341d2e06d3724c15936c25e9151",
+      "retained_sha256": "e168af49819fac5407fe512836b0093c97946181b34077022961da5bd942274e",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/shape-parser-environment-baseline.log",
+      "original_sha256": "c3dc47b8bc80f30b2f0279d03b3e5a5d597ec133679795454f9207653d2bd99b",
+      "retained_sha256": "bc31b7fe0761662922d4119a6ca3ecab6a13fac4f46359001cf6b0ab3689b3ac",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/shape-parser-environment-candidate.log",
+      "original_sha256": "8f2be535140648381480d953db1fedcfcb446fa6fde37551f4cfb28a214991d9",
+      "retained_sha256": "258952985c1d21bd29b2d57f53ca1eb90ea4499a8a4acf17b587b8b644120acc",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/shape-parser-mounted-runtime.log",
+      "original_sha256": "00287361ac26e824483b898e05ea56cc84fc3c7e42264c92476d48df2c95fb8b",
+      "retained_sha256": "b8d63c48b3374d2025c0e6c2cb53894a5f56277591540f67ef348cac1a4ea3a6",
+      "normalization": "Strip trailing whitespace only; original runtime evidence remains untouched."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-deferred-private-canonical-final.xml",
+      "original_sha256": "55274f86dcaf1b90d84710beba2a93ae73982f4b9669be33a32fbefe6d34a5c7",
+      "retained_sha256": "eac1fb9d8b339e7ff92e68745f4fa13acf6294ba21bd522297742a9fa7dc43f5",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-deferred-private-canonical.log",
+      "original_sha256": "8b4f5f76e539617fde8b8392b325f7b9c0ac20254161a705de7f6bdba89ac70c",
+      "retained_sha256": "28b048b95c6a4ea4eaf18d306774d600962542a46c947964aa3b6d02623df662",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-deferred-private-canonical.xml",
+      "original_sha256": "f24c7c917c12e87696f9749d1c4586c154f34f57fd229e78e3116a0d91474136",
+      "retained_sha256": "a6f65f89df4e3c882a5ecc6cab5a71b847a6856f8c48c9b4f33b56e1a7208078",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-delete-baseline-canonical.log",
+      "original_sha256": "8ed37c59db3e30db326c4d517aa70f59344792c1d3586af7ecb6a22c5944f391",
+      "retained_sha256": "6c1f64466e0d04a7f3dd4c60c3d89b4222cb0a634fb648beaf50cdb1402c408b",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-delete-baseline-canonical.xml",
+      "original_sha256": "a6b067c8a227576114ef8213c2e4d19b98af798ca9d300d9a489ee3c8bb68060",
+      "retained_sha256": "4f30a22056389ed78a2b5ac656abe2e27ea3287a2b76367e9258205e9a042d59",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/batch-delete-candidate-canonical.xml",
+      "original_sha256": "0bd97fa9377a3a0e04e6869f8c61da4916a5bb1585cde633743b12c91f82f8c8",
+      "retained_sha256": "37db1c9660560cfefb061b0ef8d3400672d775c1acaa0ce494781223017379cd",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/derived-signature-ordinary-canonical.xml",
+      "original_sha256": "ba3bd1fe19ef2973a7509a9512311121d9de0483a8599257a6719cbd9e2f6f4f",
+      "retained_sha256": "4fcdcec4619cbfdca46a8bc45470a3148002f4ca5a4da863ab1b7da79f7e90b8",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/direct-archive-baseline.log",
+      "original_sha256": "432a60979e38146f5e391b58fde210bd00c007b24549e465a900b6db44f5fce2",
+      "retained_sha256": "25b9ed0194ce23ac88ab072b3c7dd5cf354d9abe97f156c475461834bd68a11f",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/final-stub-hygiene.log",
+      "original_sha256": "b2acdf40274bd50e666036cf6a2bfc8823fd55266f5fd6d8838f8fc97a719ed3",
+      "retained_sha256": "f8a31b6de303c87367123dddac9be66467d813726f5e833355f8c9807a85ef03",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/nonshape-baseline-canonical.log",
+      "original_sha256": "2cc675197423e2b064b8abbfd830e2f40665a382f34d9a87632bc21f1ca698da",
+      "retained_sha256": "b3ab1b2ba1cd33366f5dfaf4a7a4500f009a20a893bdb640d6e5fb8983d761f0",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/nonshape-baseline-canonical.xml",
+      "original_sha256": "ae3fa93c3c9c54d68d93267d2235f56c2302bef67ffae0d9e884d5c078b7fa63",
+      "retained_sha256": "80b77e06887ee33660303a35242ae951c435c2a4031e265979642ac46297476a",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/nonshape-retention-candidate.xml",
+      "original_sha256": "8d324e722ab216a0a7bb3335d5c7fb0955a459b66adb1a19c05d7df4263e4b1f",
+      "retained_sha256": "04e2f45794d0b18455e945f5847dd3d2a7ad5924ba7c20eb14aeaae71d513f19",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/omni-baseline-aligned.log",
+      "original_sha256": "0462f9ad23d1123d243bbd232f1c548a1b0d7ab025fac1afd930da090ebbaa1b",
+      "retained_sha256": "f970ff8639f4fb288a3fe09f098a342d248b2043d2bc2e3839baba7cd3533e87",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/omni-candidate-aligned.log",
+      "original_sha256": "22b83883041c52954d427ee8d904f3669095a743754a34a1cb6f9d05c1397143",
+      "retained_sha256": "6b0515e9ffd404c789014c42b23c8b4789631f17d5d757170fe0072207be4ff0",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/prefix-canonical-complete-after.xml",
+      "original_sha256": "19ff14355726730214e1c0a951f8570c67df4155610b4d2acaa98b71d3e5e802",
+      "retained_sha256": "cfc6505c6ee7c17ab53fcaee7660f2c8fa8c585dad4e06c6693402a68ea57159",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/prefix-canonical-complete-before.log",
+      "original_sha256": "be5758468b32e1177d1982a4b41915f5ca209767a8149b2f28328c64d2610846",
+      "retained_sha256": "fed347264629dfce835f8e0ddd27125df76cbf83cde03a01b9259ecc1dc1ee73",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/prefix-canonical-complete-before.xml",
+      "original_sha256": "49e60d5476f3dbf2dceca3cfa7b1e96194241915d83717b302259437d115fcb3",
+      "retained_sha256": "3535fca3395c86aa87c44c039eca5b4cc303ca26fd9a2b6c35c0c090a8d62219",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/prefix-managed-baseline-probes.log",
+      "original_sha256": "f80e215c88307784e86fe9237403da47449c07f5b450eea46d27c86186770e78",
+      "retained_sha256": "08322ad47cc9438710c2c0222f2e5e79f04c8006076807674b55d4c66e63dda4",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/prefix-managed-baseline-probes.xml",
+      "original_sha256": "cfe9237d66cbe686fa57a9f5e20ab915d3f66cc95c5b95e2748827f94a524721",
+      "retained_sha256": "2e4d8927f9b374dba8f1ea02b110dee48590a66c8f479b2dfb706198cfca35f6",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/prefix-normalizer-baseline-probe.log",
+      "original_sha256": "84374c56db389d1b3b5d0bd146eabbcbde5e909efe94a12967fe52cda96c901d",
+      "retained_sha256": "4914f03f9985c89d40b5237537a39521a14a835ede07fa3065b3827cf426a1d6",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/prefix-normalizer-baseline-probe.xml",
+      "original_sha256": "2b1ad67f7a46fb800c02fb0e10b2322f0c35c657fef1bf93f638726280be9267",
+      "retained_sha256": "78fd2ff211e072f181255a77cb1e5d2c6abdac2bc0fb681820bd92849072c23a",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/roads-route-canonical-diagnostic.log",
+      "original_sha256": "67ce560dfdded77a00731562fcf9628d55ec58c63f0a0049b42a9adf6034e61c",
+      "retained_sha256": "ce6c04802ec964418a3384b2a0758e5d08640a268e982d42c506006537a674da",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/shape-abuse-baseline-canonical.log",
+      "original_sha256": "ff475f9ce5ffcef54b7f0e47d2db2fa41f53319f7589b4600f98820cde3fd62d",
+      "retained_sha256": "c071be8c5c7d708e10aa7469f9a5017100a826e57e1d89d05bebac46d0138fe2",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/shape-abuse-baseline-canonical.xml",
+      "original_sha256": "189976ea0d4338e436282329e21bfa788e48f8c110f77db2faee57d107511fbe",
+      "retained_sha256": "becc529ed2779f737030429cb4e27715667a8ea119d4ba74d8a9b8832f00e7b2",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/shape-abuse-candidate-canonical.log",
+      "original_sha256": "e168af49819fac5407fe512836b0093c97946181b34077022961da5bd942274e",
+      "retained_sha256": "fb03786160a7a8824c60cc8402c5c60e12f8b00496f44c35ace480409a4c3216",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    },
+    {
+      "file": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/candidate_logs/shape-abuse-candidate-canonical.xml",
+      "original_sha256": "ad917e8aa8b2c0435260d1ef4aed9f35d0fce37bc067ef95c814e5fc2774c144",
+      "retained_sha256": "549b6767859311e32fe0a5468e41293474217c140c582956661f7d0867f2f115",
+      "normalization": "Remove blank lines at EOF of retained copy; original runtime and compressed evidence unchanged."
+    }
+  ]
+}

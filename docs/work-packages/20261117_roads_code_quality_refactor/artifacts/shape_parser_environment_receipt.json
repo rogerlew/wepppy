@@ -1,0 +1,55 @@
+{
+  "schema": "roads-shape-parser-environment-diagnostic-v1",
+  "baseline_head": "96555f2f95326350d2d7007c19327378ea831ab0",
+  "candidate_head": "b653c295222ec4e94a31e21cf2998a5d8ec4ab9f",
+  "nodeid": "tests/shape_converter/integration/test_abuse_controls_api.py::test_inspect_rate_limit_returns_429_with_retry_after_header",
+  "baseline": {
+    "exit_status": 1,
+    "failed": 1,
+    "seconds": 10.75
+  },
+  "candidate": {
+    "exit_status": 1,
+    "failed": 1,
+    "seconds": 10.79
+  },
+  "common_failure": "RuntimeError: parser_binary_or_provenance_missing during TestClient startup",
+  "relevant_python_sources_equal": true,
+  "binary_and_sidecar_before": {
+    "binary_sha256": "4fb067f0953002194e5a8269459559ff27ad0acc681635640efb0ac68c2f7d01",
+    "sidecar_sha256": "539e94369f87ab6ff61a3b63eefde9c2aaa6ffd085e3f9334419f40fc08adbae"
+  },
+  "binary_and_sidecar_after_runtime_check": {
+    "binary_sha256": "4fb067f0953002194e5a8269459559ff27ad0acc681635640efb0ac68c2f7d01",
+    "sidecar_sha256": "539e94369f87ab6ff61a3b63eefde9c2aaa6ffd085e3f9334419f40fc08adbae"
+  },
+  "artifact_drift": false,
+  "runtime_mounted_validation": [
+    true,
+    null
+  ],
+  "environment_delta": {
+    "mounts": [
+      "/home/workdir/wepppy/wepppy/microservices/shape_converter/rust/shape_parser_cli/target/release/shape_parser_cli:/usr/local/bin/shape_parser_cli:ro",
+      "/home/workdir/wepppy/wepppy/microservices/shape_converter/rust/shape_parser_cli/target/release/shape_parser_cli.json:/usr/local/bin/shape_parser_cli.json:ro"
+    ],
+    "environment_overrides": {},
+    "source_edits": []
+  },
+  "qualification_scope": "Existing parser provenance and --version validated; complete affected modules deferred until v5 completes.",
+  "evidence_sha256": {
+    "candidate_logs/shape-abuse-baseline-canonical.log": "437aeb3aa5c0817aebd8c775a94cc263f01e34cfb3a505629bea3d59d1c714d2",
+    "candidate_logs/shape-abuse-baseline-canonical.xml": "189976ea0d4338e436282329e21bfa788e48f8c110f77db2faee57d107511fbe",
+    "candidate_logs/shape-abuse-candidate-canonical.log": "46090baf7f23742afa52d3b8db60fcce84df5341d2e06d3724c15936c25e9151",
+    "candidate_logs/shape-abuse-candidate-canonical.xml": "ad917e8aa8b2c0435260d1ef4aed9f35d0fce37bc067ef95c814e5fc2774c144",
+    "candidate_logs/shape-parser-environment-baseline.log": "c3dc47b8bc80f30b2f0279d03b3e5a5d597ec133679795454f9207653d2bd99b",
+    "candidate_logs/shape-parser-environment-candidate.log": "8f2be535140648381480d953db1fedcfcb446fa6fde37551f4cfb28a214991d9",
+    "candidate_logs/shape-parser-mounted-runtime.log": "00287361ac26e824483b898e05ea56cc84fc3c7e42264c92476d48df2c95fb8b",
+    "shape-parser-existing-artifact-check.json": "9672bf8ae10fc8e3327d602c08d08ecd0711b1f998c6529e22deb7c9d2e23856",
+    "shape-parser-environment-baseline.json": "8eeb972f6712c70665eadd691408b9dbc08acb80f9e2eab22c7664d60bab8d37",
+    "shape-parser-environment-candidate.json": "778fec84ed6cd30113d3cb29a9c80ea4c4765011c378ed5d559212279ce3f76e",
+    "shape-parser-environment-mounted-candidate.json": "cc2182a58b2885065e0c799925a35c9537fc874fedba7cef41fd33f5c35b1120",
+    "scripts/roads_shape_parser_command.py": "05ee1a744dd79299f0e8ead2caa7801efc1b65d9923a77af1171c15f0e51075b",
+    "scripts/inspect_shape_parser_environment.py": "09a05a61499f15f6420be36f2d630714b2132eae02ae91cd698c691242e6bd8d"
+  }
+}

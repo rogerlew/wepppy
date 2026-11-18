@@ -1,6 +1,6 @@
 # Roads controller code quality refactor
 
-**Status**: Open; implementation complete, final acceptance in progress (2026-11-17)
+**Status**: Open; implementation complete, broad regression acceptance unresolved (2026-11-18)
 **Timezone**: UTC
 
 ## Overview
@@ -32,7 +32,7 @@ Applicable to execution and all writer/publication extractions. Retain intent an
 
 Exercise writers and native consumers directly, including failed/partial execution and retry. Full-project acceptance uses disposable copies of an available real project under `/wc1/runs/`, with source hashes retained; never mutate the source. Record unavailable fixtures or runtime as explicit open gates. Native binaries are not changed here: use and hash the currently installed executable, and verify the candidate Python checkout consumed by the container. No binary rebuild is required by this package.
 
-Current claim: refactor implemented and focused tests pass; final native/project parity, broad-suite validation and review closeout remain in progress.
+Current claim: refactor implemented; 413 focused tests pass (one skipped), all 6,192 final-source native files match baseline across 516 profiles, and all five project controls match. Correctness, QA and security source reviews have no unresolved medium/high findings. Repository-wide acceptance remains open: the complete suffix diagnostic reports failures outside Roads, including missing native/browser assets, stale PostgreSQL test schema and baseline fixture defects. Retained runs and bounded module reruns qualify coverage without claiming one uninterrupted green suite. See the tracker for current disposition.
 
 ## Success Criteria
 
@@ -63,6 +63,6 @@ Related implementation history: [Unrutted partial crossings](../20261117_roads_u
 - [Active ExecPlan](prompts/active/roads_code_quality_refactor_execplan.md)
 - [Tracker](tracker.md)
 - [Baseline and extraction map](artifacts/baseline.md)
-- Production extraction, regression coverage, artifact parity receipts, reviews, and module documentation (final acceptance pending).
+- Production extraction, regression coverage, artifact parity receipts, reviews, and module documentation (broad regression acceptance pending).
 
 This is a multi-milestone effort. Local acceptance, remote integration, publication, and deployment are separate states; no deployment is included. Use `docs/standards/integration-history-governance.md` for any later integration receipt.

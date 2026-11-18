@@ -1,4 +1,4 @@
-Planning ready: [Roads controller code quality refactor](docs/work-packages/20261117_roads_code_quality_refactor/package.md) - Measured 5,907 SLOC; staged facade/collaborator extraction with native artifact parity, persistence compatibility, and independent review gates. Implementation pending.
+Implemented; broad acceptance unresolved: [Roads controller code quality refactor](docs/work-packages/20261117_roads_code_quality_refactor/package.md) - Facade reduced from 5,907 to 1,888 SLOC; execution method from 2,069 to 269 lines. Focused tests, native/project parity and source reviews pass. Broad diagnostics expose baseline fixture/runtime failures; package remains open. No integration or deployment.
 
 Implementation: [CILogon accounts and local email verification](docs/work-packages/20261117_cilogon_oidc/package.md) — separate institutional identities, shared local/verified Google/GitHub accounts, email-first password setup and responsive profile. Independent source reviews closed; local validation retained. CILogon registration approval is pending; production migration/activation and environment acceptance remain deferred.
 

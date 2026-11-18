@@ -1,0 +1,19 @@
+{
+  "checkpoint": "5a6e45c463c6c3ce7720325d78c4060e0f96c1e4",
+  "source_entries": 2836,
+  "source_unchanged": true,
+  "ordinary_derived_signature_module": {
+    "passed": 8,
+    "seconds": 9.4,
+    "observer": false
+  },
+  "artifacts_sha256": {
+    "broad-continuation-v2-source-before.json": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+    "broad-continuation-v2-postexit-source-after.json": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+    "broad-continuation-v2-postexit-source-receipt.json": "7cd6b643197373bc6c43ae665a0ed53e117282e2eba76e734cd81c21e7db7f4b",
+    "candidate_logs/broad-v2-postexit-source-check.log": "c295c6344ce112d9aa6cb192adc3425fe6033c0474ab5fa4bf15119d86846ecf",
+    "candidate_logs/derived-signature-ordinary-canonical.log": "fd71ba5761a5ff1a96c3de81a0915760bea9d8cdc8c55b247f97b2023dc1b9aa",
+    "candidate_logs/derived-signature-ordinary-canonical.xml": "ba3bd1fe19ef2973a7509a9512311121d9de0483a8599257a6719cbd9e2f6f4f",
+    "scripts/check_broad_v2_postexit_sources.py": "1807cfa8f8b69de4957bf7317a3118bd03df0e6c1699798ceadca65b144a5872"
+  }
+}

@@ -1,0 +1,921 @@
+{
+  "status": "complete",
+  "acceptance_claim": null,
+  "purpose": "Exact original broad attempt, replacement, failure-attribution and reconciliation evidence. Broad acceptance remains incomplete; no failed outcome is converted into a pass by packaging.",
+  "spec_path": "/tmp/roads-refactor-validation/broad_evidence_package_spec.final.json",
+  "spec_sha256": "8e5e8970ca5ba194d0cfeb4ae750b434b9481d6ceedf319b3bdf5242cc22c0fe",
+  "packager_sha256": "59ec1b7297989465372d8290220ab709696837d76d0f0e90d71af53198ec9b5f",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "compression": "gzip level 9, empty filename, mtime=0",
+  "files": [
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-baseline-fork.log",
+      "original_sha256": "e9ea4f23dd8a423a4128ee0ddab8ede62d0c3a43279929185ea8c046c786a39e",
+      "original_bytes": 10413,
+      "compressed_file": "broad-baseline-fork.log.gz",
+      "compressed_sha256": "a9ff6450786faa7fde7ce16929d3dcf82cb24809d2a4d3e37a3b087e436b1cf0",
+      "compressed_bytes": 2973,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-baseline-geneva.log",
+      "original_sha256": "98ec9de38d0328813e3261e199bfd1815bc975484316753102f2c83c9aaa29c4",
+      "original_bytes": 9598,
+      "compressed_file": "broad-baseline-geneva.log.gz",
+      "compressed_sha256": "81cb56df9f9e4ae2992b4e2a1329b6d147c16d013753698ded54adadc7adbcba",
+      "compressed_bytes": 3315,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-baseline-maca.log",
+      "original_sha256": "5701863915349facf39523d6a295d7392108683409486110871ae0d4836ac11c",
+      "original_bytes": 20936,
+      "compressed_file": "broad-baseline-maca.log.gz",
+      "compressed_sha256": "e7658c3c64aa6c23013c11057f13a27b802a6c816ccc34a076b7996f13e5a493",
+      "compressed_bytes": 5844,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-collection.jsonl",
+      "original_sha256": "a97170a01f90b1b13f5983608e12050f468363445573e06adc92f167d1a761dc",
+      "original_bytes": 240,
+      "compressed_file": "broad-continuation-collection.jsonl.gz",
+      "compressed_sha256": "ab831bf2606104976d8a581929e752a2c3757ae35026a7537cc9f04d1f96982d",
+      "compressed_bytes": 181,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-inventory.json",
+      "original_sha256": "49d8a5a64755d18e7b2991633940b1624cbe81e501477cdffe03491146a65703",
+      "original_bytes": 3809640,
+      "compressed_file": "broad-continuation-inventory.json.gz",
+      "compressed_sha256": "47d1fbf6e62d12e2eeba2863a3c6aec18040bb6230a3c87056c1139a3180226c",
+      "compressed_bytes": 462381,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-outcomes.jsonl",
+      "original_sha256": "e5c2d3029bb3185b72615d814eb15abe7ee7a7cc12eada5ef34bc2524d0e78d5",
+      "original_bytes": 336598,
+      "compressed_file": "broad-continuation-outcomes.jsonl.gz",
+      "compressed_sha256": "f70c11dfd462863df15da205973bb3342f8df810f7eb1d54ca32dc488e603e84",
+      "compressed_bytes": 17630,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-source-after.json",
+      "original_sha256": "f08fbbd32315ade2fc4778aeb4695fcc60cfb79016538585ed22fc1699a9a933",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-source-after.json.gz",
+      "compressed_sha256": "9ab36d71f748a8d63c0da34e6060f92445e5c46796725f5ebc7ca9a42730092e",
+      "compressed_bytes": 135985,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-source-before.json",
+      "original_sha256": "f08fbbd32315ade2fc4778aeb4695fcc60cfb79016538585ed22fc1699a9a933",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-source-before.json.gz",
+      "compressed_sha256": "9ab36d71f748a8d63c0da34e6060f92445e5c46796725f5ebc7ca9a42730092e",
+      "compressed_bytes": 135985,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-summary.json",
+      "original_sha256": "98d35316eb0844432dd301936e5982b1ab4d97d52c1df45f69dd44ca923a9bb7",
+      "original_bytes": 1337142,
+      "compressed_file": "broad-continuation-summary.json.gz",
+      "compressed_sha256": "6a85914a661ab3aa17f7d5765da3b4685cafdaeaeabb2a1af3d00e89220b7008",
+      "compressed_bytes": 154070,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v2-collection.jsonl",
+      "original_sha256": "a97170a01f90b1b13f5983608e12050f468363445573e06adc92f167d1a761dc",
+      "original_bytes": 240,
+      "compressed_file": "broad-continuation-v2-collection.jsonl.gz",
+      "compressed_sha256": "ab831bf2606104976d8a581929e752a2c3757ae35026a7537cc9f04d1f96982d",
+      "compressed_bytes": 181,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v2-environment-before.json",
+      "original_sha256": "1cccb01c3c26ede8f172f8fb494a92e037958a9d56a3906d0924ad02a43e317a",
+      "original_bytes": 98,
+      "compressed_file": "broad-continuation-v2-environment-before.json.gz",
+      "compressed_sha256": "c18426df2a942154bab51f99001b8f6b51e027745ae11e0e14cd2d85c88561a4",
+      "compressed_bytes": 83,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v2-inventory.json",
+      "original_sha256": "720e497e151cbaa53556cc6ccddf3271332a35f2d25af422a4399856c7981058",
+      "original_bytes": 4263471,
+      "compressed_file": "broad-continuation-v2-inventory.json.gz",
+      "compressed_sha256": "6b589abf25e983fa5c7698fa0b8ce634ecf2eb6d787fa92f11dfe9ff921c987e",
+      "compressed_bytes": 510057,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v2-outcomes.jsonl",
+      "original_sha256": "938aa3acfe54761718198f907beebc2d7feb61e6b66f2f5235a309be72e9f2d1",
+      "original_bytes": 1667075,
+      "compressed_file": "broad-continuation-v2-outcomes.jsonl.gz",
+      "compressed_sha256": "0494582f836595e393aaec9f8e602759e11147f055b14f6a2d8a589db7dd88a0",
+      "compressed_bytes": 68360,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v2-postexit-source-after.json",
+      "original_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v2-postexit-source-after.json.gz",
+      "compressed_sha256": "7f3b44f9576d385a40db7239ea9977fee50dda67e71eeb176bf1cd12a53faaf6",
+      "compressed_bytes": 135978,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v2-postexit-source-receipt.json",
+      "original_sha256": "7cd6b643197373bc6c43ae665a0ed53e117282e2eba76e734cd81c21e7db7f4b",
+      "original_bytes": 888,
+      "compressed_file": "broad-continuation-v2-postexit-source-receipt.json.gz",
+      "compressed_sha256": "219d503956d6792694f41ca8284b7babf2f914af1eb08d0e477b5506b4265025",
+      "compressed_bytes": 479,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v2-source-before.json",
+      "original_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v2-source-before.json.gz",
+      "compressed_sha256": "7f3b44f9576d385a40db7239ea9977fee50dda67e71eeb176bf1cd12a53faaf6",
+      "compressed_bytes": 135978,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v2.log",
+      "original_sha256": "a19307dafecc66626cb12fd2727f87126de19fd062d1769810d5946d4d8c0010",
+      "original_bytes": 15034,
+      "compressed_file": "broad-continuation-v2.log.gz",
+      "compressed_sha256": "856b05603711c5d7a1c671871a494e4f54cd7885164f08cfe234c899f0bd2102",
+      "compressed_bytes": 2021,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-collection.jsonl",
+      "original_sha256": "a97170a01f90b1b13f5983608e12050f468363445573e06adc92f167d1a761dc",
+      "original_bytes": 240,
+      "compressed_file": "broad-continuation-v3-collection.jsonl.gz",
+      "compressed_sha256": "ab831bf2606104976d8a581929e752a2c3757ae35026a7537cc9f04d1f96982d",
+      "compressed_bytes": 181,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-environment-after.json",
+      "original_sha256": "1cccb01c3c26ede8f172f8fb494a92e037958a9d56a3906d0924ad02a43e317a",
+      "original_bytes": 98,
+      "compressed_file": "broad-continuation-v3-environment-after.json.gz",
+      "compressed_sha256": "c18426df2a942154bab51f99001b8f6b51e027745ae11e0e14cd2d85c88561a4",
+      "compressed_bytes": 83,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-environment-before.json",
+      "original_sha256": "1cccb01c3c26ede8f172f8fb494a92e037958a9d56a3906d0924ad02a43e317a",
+      "original_bytes": 98,
+      "compressed_file": "broad-continuation-v3-environment-before.json.gz",
+      "compressed_sha256": "c18426df2a942154bab51f99001b8f6b51e027745ae11e0e14cd2d85c88561a4",
+      "compressed_bytes": 83,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-inventory.json",
+      "original_sha256": "6e52047556bbbae5d88dd727ddca6b3ccc19bb07015097f0484ed52bb91e370d",
+      "original_bytes": 4637579,
+      "compressed_file": "broad-continuation-v3-inventory.json.gz",
+      "compressed_sha256": "4996102dc09f300140aa4359d25d0e9b9d7c34ff5cae7b03d3703d70b68506b6",
+      "compressed_bytes": 549316,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-observer-smoke.log",
+      "original_sha256": "3859c6dbd8ae9ccf20467c4b252b674bfa47c3222959a7671b7af486bfa472e3",
+      "original_bytes": 3981,
+      "compressed_file": "broad-continuation-v3-observer-smoke.log.gz",
+      "compressed_sha256": "e1f22bb3544afa55e02aa448aeba9d148709ae167a2cac9523dbb39481b09e23",
+      "compressed_bytes": 1467,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-outcomes.jsonl",
+      "original_sha256": "884e24a4f0144a96da0b5c727dd520e217667e60f25c6da9c9b3544c472fc9d3",
+      "original_bytes": 1241837,
+      "compressed_file": "broad-continuation-v3-outcomes.jsonl.gz",
+      "compressed_sha256": "385fb0bf4b3666a31f9edde6b0a6d6d19b06e3671687999259ae1f12c84c071e",
+      "compressed_bytes": 53271,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-smoke-collection.jsonl",
+      "original_sha256": "a97170a01f90b1b13f5983608e12050f468363445573e06adc92f167d1a761dc",
+      "original_bytes": 240,
+      "compressed_file": "broad-continuation-v3-smoke-collection.jsonl.gz",
+      "compressed_sha256": "ab831bf2606104976d8a581929e752a2c3757ae35026a7537cc9f04d1f96982d",
+      "compressed_bytes": 181,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-smoke-environment-after.json",
+      "original_sha256": "1cccb01c3c26ede8f172f8fb494a92e037958a9d56a3906d0924ad02a43e317a",
+      "original_bytes": 98,
+      "compressed_file": "broad-continuation-v3-smoke-environment-after.json.gz",
+      "compressed_sha256": "c18426df2a942154bab51f99001b8f6b51e027745ae11e0e14cd2d85c88561a4",
+      "compressed_bytes": 83,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-smoke-environment-before.json",
+      "original_sha256": "1cccb01c3c26ede8f172f8fb494a92e037958a9d56a3906d0924ad02a43e317a",
+      "original_bytes": 98,
+      "compressed_file": "broad-continuation-v3-smoke-environment-before.json.gz",
+      "compressed_sha256": "c18426df2a942154bab51f99001b8f6b51e027745ae11e0e14cd2d85c88561a4",
+      "compressed_bytes": 83,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-smoke-inventory.json",
+      "original_sha256": "5349ca490c8d39b62e9708a41c35f259bf754a459b09eb9163489fc502338848",
+      "original_bytes": 3600187,
+      "compressed_file": "broad-continuation-v3-smoke-inventory.json.gz",
+      "compressed_sha256": "b153cefdc0e0c6c56bf2338f36f63f2b8cea1c8e98fe4177c2861a652ca655d0",
+      "compressed_bytes": 424050,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-smoke-outcomes.jsonl",
+      "original_sha256": "8efae9d7d545921f1bbe193fa84a3da5fcfa5731e394d1868de9ec7bbcd9496f",
+      "original_bytes": 4330,
+      "compressed_file": "broad-continuation-v3-smoke-outcomes.jsonl.gz",
+      "compressed_sha256": "fd273d4589638484cd0e71bedfe5107379cfa4d0099d91d43b6b5cdf10bc4f26",
+      "compressed_bytes": 348,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-smoke-source-after.json",
+      "original_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v3-smoke-source-after.json.gz",
+      "compressed_sha256": "7f3b44f9576d385a40db7239ea9977fee50dda67e71eeb176bf1cd12a53faaf6",
+      "compressed_bytes": 135978,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-smoke-source-before.json",
+      "original_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v3-smoke-source-before.json.gz",
+      "compressed_sha256": "7f3b44f9576d385a40db7239ea9977fee50dda67e71eeb176bf1cd12a53faaf6",
+      "compressed_bytes": 135978,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-smoke-summary.json",
+      "original_sha256": "1ef7dd64ff1232016014bcd6a9b60c52525ff2cc68074047991660816d4dcf1d",
+      "original_bytes": 1861,
+      "compressed_file": "broad-continuation-v3-smoke-summary.json.gz",
+      "compressed_sha256": "63de26c52785d2ddd5de917118318a402e86967087694e7267f64aa40adca388",
+      "compressed_bytes": 976,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-source-after.json",
+      "original_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v3-source-after.json.gz",
+      "compressed_sha256": "7f3b44f9576d385a40db7239ea9977fee50dda67e71eeb176bf1cd12a53faaf6",
+      "compressed_bytes": 135978,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-source-before.json",
+      "original_sha256": "6d243df4263ff191c414d41974b5e9aab2f7a8f12c3e2bdffef549ed915a9edf",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v3-source-before.json.gz",
+      "compressed_sha256": "7f3b44f9576d385a40db7239ea9977fee50dda67e71eeb176bf1cd12a53faaf6",
+      "compressed_bytes": 135978,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3-summary.json",
+      "original_sha256": "998dea26cfc939a9cfa5045f0336148840ec021f4b1f5365b0120f7c5d838209",
+      "original_bytes": 789689,
+      "compressed_file": "broad-continuation-v3-summary.json.gz",
+      "compressed_sha256": "63c212193da4a4c4445ddb8feb50a1f8c0a2cf75c8f37f837651feed1e0caf42",
+      "compressed_bytes": 97378,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v3.log",
+      "original_sha256": "d7a684a1531f1760053b6cf543c21d81d5a1a7815920f481ce5d062e22437044",
+      "original_bytes": 15874,
+      "compressed_file": "broad-continuation-v3.log.gz",
+      "compressed_sha256": "1a885e77cdd2cc9c2a20704ddd105e24cbfb2e6bc83a81b56cfe38e0ebffb1c5",
+      "compressed_bytes": 3973,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v4-collection.jsonl",
+      "original_sha256": "a97170a01f90b1b13f5983608e12050f468363445573e06adc92f167d1a761dc",
+      "original_bytes": 240,
+      "compressed_file": "broad-continuation-v4-collection.jsonl.gz",
+      "compressed_sha256": "ab831bf2606104976d8a581929e752a2c3757ae35026a7537cc9f04d1f96982d",
+      "compressed_bytes": 181,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v4-environment-after.json",
+      "original_sha256": "1cccb01c3c26ede8f172f8fb494a92e037958a9d56a3906d0924ad02a43e317a",
+      "original_bytes": 98,
+      "compressed_file": "broad-continuation-v4-environment-after.json.gz",
+      "compressed_sha256": "c18426df2a942154bab51f99001b8f6b51e027745ae11e0e14cd2d85c88561a4",
+      "compressed_bytes": 83,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v4-environment-before.json",
+      "original_sha256": "1cccb01c3c26ede8f172f8fb494a92e037958a9d56a3906d0924ad02a43e317a",
+      "original_bytes": 98,
+      "compressed_file": "broad-continuation-v4-environment-before.json.gz",
+      "compressed_sha256": "c18426df2a942154bab51f99001b8f6b51e027745ae11e0e14cd2d85c88561a4",
+      "compressed_bytes": 83,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v4-inventory.json",
+      "original_sha256": "6d4fc791ac12c27141924a7cbf268add79dfddc892c0c1062bf3c85138fa9c1e",
+      "original_bytes": 4894457,
+      "compressed_file": "broad-continuation-v4-inventory.json.gz",
+      "compressed_sha256": "7b48c85909422b567576f290e35620eaf51acde59a0fcecb0ab22e1cedb9fadd",
+      "compressed_bytes": 579447,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v4-outcomes.jsonl",
+      "original_sha256": "bc1d53e7aeec8f46201cd08ba49fd6c28e4d374a8ddc415d8f3469f0c25ef196",
+      "original_bytes": 13681,
+      "compressed_file": "broad-continuation-v4-outcomes.jsonl.gz",
+      "compressed_sha256": "3bdfe555f066dceed263d37833c2d28f36a79571f10e3272f10aed5d6c9c5ea8",
+      "compressed_bytes": 1207,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v4-source-after.json",
+      "original_sha256": "fe8e53ec329ba1736a38de942d774dd6ff443ac5eb262da8a536c0a282b01ea0",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v4-source-after.json.gz",
+      "compressed_sha256": "7e1a2bb596d1c525c7a580fa17b42965c7bd9fabe48088086b7bbbb3cab57fbf",
+      "compressed_bytes": 135978,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v4-source-before.json",
+      "original_sha256": "fe8e53ec329ba1736a38de942d774dd6ff443ac5eb262da8a536c0a282b01ea0",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v4-source-before.json.gz",
+      "compressed_sha256": "7e1a2bb596d1c525c7a580fa17b42965c7bd9fabe48088086b7bbbb3cab57fbf",
+      "compressed_bytes": 135978,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v4-summary.json",
+      "original_sha256": "1bcc75550b41f3beee68f290a99f062dbb11d8f718ff4695e196f7784c333552",
+      "original_bytes": 786586,
+      "compressed_file": "broad-continuation-v4-summary.json.gz",
+      "compressed_sha256": "f268c8d9c0ba98ee9710dbc9dbba1116cf08fcdadcb1565be7053c0314d99051",
+      "compressed_bytes": 96832,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v4.log",
+      "original_sha256": "4e57433d9fa15c70dd5b55852d7e363692959e2cf1b5c57b85126791dbed597c",
+      "original_bytes": 8895,
+      "compressed_file": "broad-continuation-v4.log.gz",
+      "compressed_sha256": "ac9136b18085aee2bdd232358e512e1416f40cdc73e0ba8cfa947df4db5c514e",
+      "compressed_bytes": 2812,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v5-collection.jsonl",
+      "original_sha256": "a97170a01f90b1b13f5983608e12050f468363445573e06adc92f167d1a761dc",
+      "original_bytes": 240,
+      "compressed_file": "broad-continuation-v5-collection.jsonl.gz",
+      "compressed_sha256": "ab831bf2606104976d8a581929e752a2c3757ae35026a7537cc9f04d1f96982d",
+      "compressed_bytes": 181,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v5-environment-after.json",
+      "original_sha256": "1cccb01c3c26ede8f172f8fb494a92e037958a9d56a3906d0924ad02a43e317a",
+      "original_bytes": 98,
+      "compressed_file": "broad-continuation-v5-environment-after.json.gz",
+      "compressed_sha256": "c18426df2a942154bab51f99001b8f6b51e027745ae11e0e14cd2d85c88561a4",
+      "compressed_bytes": 83,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v5-environment-before.json",
+      "original_sha256": "1cccb01c3c26ede8f172f8fb494a92e037958a9d56a3906d0924ad02a43e317a",
+      "original_bytes": 98,
+      "compressed_file": "broad-continuation-v5-environment-before.json.gz",
+      "compressed_sha256": "c18426df2a942154bab51f99001b8f6b51e027745ae11e0e14cd2d85c88561a4",
+      "compressed_bytes": 83,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v5-inventory.json",
+      "original_sha256": "a6b313fb019070b428cc6f941e2723ac7a91c8b1f2f21c09eddfb0feca01e864",
+      "original_bytes": 4894987,
+      "compressed_file": "broad-continuation-v5-inventory.json.gz",
+      "compressed_sha256": "3e9b0939ee3fb1856f26aba8b1701d35cdcb0dfbb33e923a7ade9af87c0ffb0a",
+      "compressed_bytes": 579699,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v5-outcomes.jsonl",
+      "original_sha256": "9456bf1215b045fd572b62d15655348badf26dd5bdc0cdf6be1d454b0590ca6c",
+      "original_bytes": 3856399,
+      "compressed_file": "broad-continuation-v5-outcomes.jsonl.gz",
+      "compressed_sha256": "d99805349bfe531960541822245ccc42eb1eaf8a745910a773763d9624cf0056",
+      "compressed_bytes": 173806,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v5-source-after.json",
+      "original_sha256": "3dfc7290d8ec3b49c1fe6b3ee6974a8cc95f161fe78180ff7760b3af1bb4c696",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v5-source-after.json.gz",
+      "compressed_sha256": "d4a31d5ba65dc14c77f1ad7bd1f5290e7d7f7fcd515b4c3e34800ce694074fc2",
+      "compressed_bytes": 135983,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v5-source-before.json",
+      "original_sha256": "e7d74f07ac341cc76f8e5bf0c8954392dc4fc8918ebc4aab2f2bd23e7870ab5d",
+      "original_bytes": 332721,
+      "compressed_file": "broad-continuation-v5-source-before.json.gz",
+      "compressed_sha256": "a1ee6b1653985f69297a07ada422582dd25d2de8105e09826ccb1d30706e1760",
+      "compressed_bytes": 135980,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v5-summary.json",
+      "original_sha256": "ecb81bb4e5e38f93052b36d4dcbc9e925132cab300b899b3ff910da614185cd6",
+      "original_bytes": 2644,
+      "compressed_file": "broad-continuation-v5-summary.json.gz",
+      "compressed_sha256": "cebef5db8199ae0199f0876bd698d9a9e0aebd558735310a0a5070e0084cfcfd",
+      "compressed_bytes": 1377,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation-v5.log",
+      "original_sha256": "a1621bedb5ce38c98fdc8e1e3cfd7e6933b1ee5501d818c28f08b05317672b87",
+      "original_bytes": 1458416,
+      "compressed_file": "broad-continuation-v5.log.gz",
+      "compressed_sha256": "aeec5fd915268b021ca43e3679e006b18ea294bd50d7c740e0e4adf0125a5e64",
+      "compressed_bytes": 64704,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-continuation.log",
+      "original_sha256": "8a65e6fa2dfc32ce6fc005b99d5513c21a6fc393a7914955654d9f4fbcec078c",
+      "original_bytes": 8995,
+      "compressed_file": "broad-continuation.log.gz",
+      "compressed_sha256": "02a76a05f30e201c65230dc882c9b222cef983fe8d6225ded4166d77a461a6d5",
+      "compressed_bytes": 2959,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-final-v2.log",
+      "original_sha256": "56edd261ed6703c2aee1c628202d7fc8a581cdd1d665cf316833293ee53947f3",
+      "original_bytes": 18504,
+      "compressed_file": "broad-final-v2.log.gz",
+      "compressed_sha256": "fdec8bca8ab4870f62c7c2e1c44bb43d482da8ebd4d5bc0b80edcb17ca002d65",
+      "compressed_bytes": 4710,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-final-v3.log",
+      "original_sha256": "a907486addd90ded8ba7bea87ef02bed232c8da28846a5b1238c97e5efa9b83f",
+      "original_bytes": 21062,
+      "compressed_file": "broad-final-v3.log.gz",
+      "compressed_sha256": "ec76d1a2b99aad3b30c70655dda8b9c02214f60c9dfeae1a12f572e8f42aa0fe",
+      "compressed_bytes": 5485,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-final.log",
+      "original_sha256": "b2463a2c163ad3b4bf4c4b8e619eddfa96249b1dc2407e4224624fd560e1bc83",
+      "original_bytes": 24306,
+      "compressed_file": "broad-final.log.gz",
+      "compressed_sha256": "34459607bce5e4b056d18f7cb6297be92eb61b1f0505c80ef15cb8f46624dd69",
+      "compressed_bytes": 6778,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-collection.jsonl",
+      "original_sha256": "a97170a01f90b1b13f5983608e12050f468363445573e06adc92f167d1a761dc",
+      "original_bytes": 240,
+      "compressed_file": "broad-replacement-shape-retention-fork-collection.jsonl.gz",
+      "compressed_sha256": "ab831bf2606104976d8a581929e752a2c3757ae35026a7537cc9f04d1f96982d",
+      "compressed_bytes": 181,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-environment-after.json",
+      "original_sha256": "67a5b1529eb849200501679108e382887f6ba563bf530ff32a11e9677eeea471",
+      "original_bytes": 176,
+      "compressed_file": "broad-replacement-shape-retention-fork-environment-after.json.gz",
+      "compressed_sha256": "ac9ac53770bdb503d1816698362d2140db761386b2b2c97cf4278dafb3f83c3b",
+      "compressed_bytes": 127,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-environment-before.json",
+      "original_sha256": "67a5b1529eb849200501679108e382887f6ba563bf530ff32a11e9677eeea471",
+      "original_bytes": 176,
+      "compressed_file": "broad-replacement-shape-retention-fork-environment-before.json.gz",
+      "compressed_sha256": "ac9ac53770bdb503d1816698362d2140db761386b2b2c97cf4278dafb3f83c3b",
+      "compressed_bytes": 127,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-inventory.json",
+      "original_sha256": "018a90b47c12a248db2024e888df3c3a6a5e7aba66759818cef4fc299a4ceadb",
+      "original_bytes": 3714104,
+      "compressed_file": "broad-replacement-shape-retention-fork-inventory.json.gz",
+      "compressed_sha256": "328c98e6439887bd77a87e56407bdcbf5d6af6906fe0971334efbcca15370c3a",
+      "compressed_bytes": 423058,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-outcomes.jsonl",
+      "original_sha256": "c327e53f177c191c68337c748889e77cc25cde73572525c98eb6f67ce85b0586",
+      "original_bytes": 228821,
+      "compressed_file": "broad-replacement-shape-retention-fork-outcomes.jsonl.gz",
+      "compressed_sha256": "85521b16f03064af228a0d77dcf0f75cd43c8acf55052c0dfeef6fd3d05abb64",
+      "compressed_bytes": 11034,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-runtime-after.json",
+      "original_sha256": "9e09a2ec758621ad722f809e235048ec6a190f5ad8bb238db2fe0e61e5422197",
+      "original_bytes": 2128,
+      "compressed_file": "broad-replacement-shape-retention-fork-runtime-after.json.gz",
+      "compressed_sha256": "9f363de04f4dd78503ff513a8d74787771f495e49a72c11c5800202d46f9860d",
+      "compressed_bytes": 578,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-runtime-before.json",
+      "original_sha256": "9e09a2ec758621ad722f809e235048ec6a190f5ad8bb238db2fe0e61e5422197",
+      "original_bytes": 2128,
+      "compressed_file": "broad-replacement-shape-retention-fork-runtime-before.json.gz",
+      "compressed_sha256": "9f363de04f4dd78503ff513a8d74787771f495e49a72c11c5800202d46f9860d",
+      "compressed_bytes": 578,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-source-after.json",
+      "original_sha256": "4c58acdf39d0ffef185b86b14c0d8d15b60520e902f67bc5ce0cf2e450412100",
+      "original_bytes": 332721,
+      "compressed_file": "broad-replacement-shape-retention-fork-source-after.json.gz",
+      "compressed_sha256": "bdba7b83bec7b7f8e88d199ccf60b4f7ad06317d9ef5a879ee62d8fa08f0958c",
+      "compressed_bytes": 135975,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-source-before.json",
+      "original_sha256": "4c58acdf39d0ffef185b86b14c0d8d15b60520e902f67bc5ce0cf2e450412100",
+      "original_bytes": 332721,
+      "compressed_file": "broad-replacement-shape-retention-fork-source-before.json.gz",
+      "compressed_sha256": "bdba7b83bec7b7f8e88d199ccf60b4f7ad06317d9ef5a879ee62d8fa08f0958c",
+      "compressed_bytes": 135975,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-spec.json",
+      "original_sha256": "d3fe10a3d26e1bb0ed4730af05452f3bf47e0ca27ef2e6193ce5d925f073440f",
+      "original_bytes": 5270,
+      "compressed_file": "broad-replacement-shape-retention-fork-spec.json.gz",
+      "compressed_sha256": "5607f09042e81e75d27c99f667375f698010b79788aef20e39df0348f7214b3d",
+      "compressed_bytes": 2098,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork-summary.json",
+      "original_sha256": "fc4643a0d9833191b8f5377ffee6cfcf5b8bd6e0196d6c68a9f3b94217aefdcb",
+      "original_bytes": 52047,
+      "compressed_file": "broad-replacement-shape-retention-fork-summary.json.gz",
+      "compressed_sha256": "5fb57e0e3f18f32c8c18b3b4d77982e7408bcade7fe2ecf97b3448bdd8362c8a",
+      "compressed_bytes": 6893,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-replacement-shape-retention-fork.log",
+      "original_sha256": "792a012c75f42cf7fce8c891cefaf827bd5086dc45fb7cf1dafb898aa1ba0447",
+      "original_bytes": 5660,
+      "compressed_file": "broad-replacement-shape-retention-fork.log.gz",
+      "compressed_sha256": "294b5b3ca423865513fbccba9f42b7402e30637549325968f2e2160a2ff9e87f",
+      "compressed_bytes": 1806,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad-v2-postexit-source-check.log",
+      "original_sha256": "c295c6344ce112d9aa6cb192adc3425fe6033c0474ab5fa4bf15119d86846ecf",
+      "original_bytes": 2442,
+      "compressed_file": "broad-v2-postexit-source-check.log.gz",
+      "compressed_sha256": "8326b65153b232f58f3c3d108d470409243983d1c463914ad41575ac96dffe21",
+      "compressed_bytes": 1179,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad_evidence_package_spec.final.json",
+      "original_sha256": "8e5e8970ca5ba194d0cfeb4ae750b434b9481d6ceedf319b3bdf5242cc22c0fe",
+      "original_bytes": 7985,
+      "compressed_file": "broad_evidence_package_spec.final.json.gz",
+      "compressed_sha256": "5934a8ecb6b93dc4e35c99d5b0013f460691dccb872fa1353f8f69608eb82261",
+      "compressed_bytes": 916,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad_evidence_tooling_plan.md",
+      "original_sha256": "3b407e58baa00d9d52dc5173b83c66fc48d907172478576e9b7b71b6b3c3d4e6",
+      "original_bytes": 6567,
+      "compressed_file": "broad_evidence_tooling_plan.md.gz",
+      "compressed_sha256": "b991750bf69dcb7a188a691843ba862445ec9f8b6ea0ab998d212f07a0de0e9b",
+      "compressed_bytes": 2879,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad_final_node_evidence.json",
+      "original_sha256": "8c8485d3fbeeaf44199524bc41f8d9ea65cb663c8deb516f83325ebdcfd29b18",
+      "original_bytes": 3347497,
+      "compressed_file": "broad_final_node_evidence.json.gz",
+      "compressed_sha256": "6755d3a4caf9d7c26845d2347ee6da5eb05ddc9327ef8b26b98e22249a18f844",
+      "compressed_bytes": 265937,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad_final_reconciliation.json",
+      "original_sha256": "ad6d4e0a08f724c141d79bffe2f05eb6d1cc385492e455e2a1b8145a6026c408",
+      "original_bytes": 10731,
+      "compressed_file": "broad_final_reconciliation.json.gz",
+      "compressed_sha256": "60772decc2973b1fc8e299a1e2bdfe38598f2e4318d5f8baa1f39a804c476964",
+      "compressed_bytes": 2972,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/broad_replacement_spec.template.json",
+      "original_sha256": "245622cca5017a4ffb48dbe9613f198eb5707d317b0c28a1b55034f54b43cf81",
+      "original_bytes": 647,
+      "compressed_file": "broad_replacement_spec.template.json.gz",
+      "compressed_sha256": "3a78472c4ecbb2834e6b2079e237fedf10e165de361c387d0315fd317bb9355d",
+      "compressed_bytes": 336,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/canonical-prefix-sensitive-modules.json",
+      "original_sha256": "17b3f8fc6156b0429e0d74a529e6b033e6c5f7a8c52c4d767424b9bc3a2666b1",
+      "original_bytes": 71857,
+      "compressed_file": "canonical-prefix-sensitive-modules.json.gz",
+      "compressed_sha256": "bebcb3217f40946a757424df45e1449cf2bac9f20527db368692e1835339f5d8",
+      "compressed_bytes": 8348,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/final-management_sidecar_drift_receipt.json",
+      "original_sha256": "b54531393d32ef41bb63c37c16ba1a4e82db06984f7b7e28aa726680cab4fe87",
+      "original_bytes": 1121,
+      "compressed_file": "final-management_sidecar_drift_receipt.json.gz",
+      "compressed_sha256": "f57e8df16bda13879c5220f5b63fd4c2aa8a047bc6e2589fcb8d4d77fa36b192",
+      "compressed_bytes": 601,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/final-nonshape_failure_class_receipt.json",
+      "original_sha256": "534b9f7f5bebc5df78303996ef76b091fae5a1c77c167b68b8742f1b971ae607",
+      "original_bytes": 17446,
+      "compressed_file": "final-nonshape_failure_class_receipt.json.gz",
+      "compressed_sha256": "3b9f07b1667b1d1e40be7c2964a1515ffe65a8d1e0a35e5bf3ed27bf7f1d3cff",
+      "compressed_bytes": 2756,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/geoparquet-baseline-canonical.log",
+      "original_sha256": "56293c7fadc7ac2013c0f6771eb27cf5e72e5c3ea5f91cdd6d2d8ba3bf225b0f",
+      "original_bytes": 3516,
+      "compressed_file": "geoparquet-baseline-canonical.log.gz",
+      "compressed_sha256": "2d096d0f5350049bbe1b19b0ed82a81037745ea8d9148f075348087008c31f12",
+      "compressed_bytes": 1359,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/geoparquet-existing-image/geoparquet_parser_cli.json",
+      "original_sha256": "2ebee18f9737397a8ab88bc64e03ebbb3209714bfa9b20cf3d647b3f3a99dda8",
+      "original_bytes": 2885,
+      "compressed_file": "geoparquet_parser_cli.json.gz",
+      "compressed_sha256": "63a3742e3bbbfa3dd11d28b9cdb8138c7d4f3e987141f1f7576fd42a90ee2d41",
+      "compressed_bytes": 1319,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/geoparquet-existing-image/inspection.json",
+      "original_sha256": "080bd41443514a6f2c7f22c7dc9052e673c42f6fdefe0c8b8a0eca0b2b98a42f",
+      "original_bytes": 5924,
+      "compressed_file": "inspection.json.gz",
+      "compressed_sha256": "7e48a28c2810cd82c843eefd6da504eae01fa73c04b58e45fbde8439c4361a1c",
+      "compressed_bytes": 1637,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/management-writer-reproduction.log",
+      "original_sha256": "1c71c5727f86e6c2e0885292f8c02de903fcc118d984851af912e349ee1d5a69",
+      "original_bytes": 1796,
+      "compressed_file": "management-writer-reproduction.log.gz",
+      "compressed_sha256": "58f7d680aded98cb46075912f76a600bc718a9667016308454ef90afa8830fa2",
+      "compressed_bytes": 936,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/nonshape-baseline-canonical.log",
+      "original_sha256": "6f33a387de04344168f5d37704e26701e2aad458ab506978abc081da29141a3d",
+      "original_bytes": 43958,
+      "compressed_file": "nonshape-baseline-canonical.log.gz",
+      "compressed_sha256": "097db1f6a7b5332607487da93c6e81859771b13c0a8c1e38d50e8d470e832357",
+      "compressed_bytes": 6274,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/nonshape-baseline-canonical.xml",
+      "original_sha256": "10601e98825dc072f64459b2f33ae44a9ca1a01665edcf992a03fe3c59f38fe8",
+      "original_bytes": 25551,
+      "compressed_file": "nonshape-baseline-canonical.xml.gz",
+      "compressed_sha256": "1742279773f792492b386de845be8661032b7ca0d6b3e0807153ab40640dfa16",
+      "compressed_bytes": 4255,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/nonshape-retention-candidate.log",
+      "original_sha256": "06ec23207c8bda0df0947bdea8aed7c493aa2e14705e433ffe84e48f125f323c",
+      "original_bytes": 4443,
+      "compressed_file": "nonshape-retention-candidate.log.gz",
+      "compressed_sha256": "18471ebe41537ae5794037d6e1a8264747b088e772aaa4d8326b4f70f8e448df",
+      "compressed_bytes": 1588,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/nonshape-retention-candidate.xml",
+      "original_sha256": "8d324e722ab216a0a7bb3335d5c7fb0955a459b66adb1a19c05d7df4263e4b1f",
+      "original_bytes": 7673,
+      "compressed_file": "nonshape-retention-candidate.xml.gz",
+      "compressed_sha256": "3ea38a4fcc322f682e83bd00b5185695c7fea741239e71573a5e9b98d4921f62",
+      "compressed_bytes": 1363,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/package_broad_evidence.py",
+      "original_sha256": "59ec1b7297989465372d8290220ab709696837d76d0f0e90d71af53198ec9b5f",
+      "original_bytes": 4379,
+      "compressed_file": "package_broad_evidence.py.gz",
+      "compressed_sha256": "89c33cd8dc63efcfcae5bb220d23cada4a52203cfd33ff0be2072ebdd61c9258",
+      "compressed_bytes": 1493,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/prefix-canonical-complete-after.json",
+      "original_sha256": "6bbd6a44b9cb773a9ba75f9cf8fbc35c089427f9a0043c7faebf8228733638ec",
+      "original_bytes": 470010,
+      "compressed_file": "prefix-canonical-complete-after.json.gz",
+      "compressed_sha256": "85b8e8351072dee43c3cfb44d75f26c3ae24c5baa2a52132522f9c0f22b1f15a",
+      "compressed_bytes": 41229,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/reconcile_broad_final.py",
+      "original_sha256": "4be982feb913f5eabb8cd63ebab218dd9723f873e2b02eb03d99d22d0795e34a",
+      "original_bytes": 10076,
+      "compressed_file": "reconcile_broad_final.py.gz",
+      "compressed_sha256": "7a35fedc475d77fb11e80eb5267af33a1547082de8a6e2db3c37316c028dae8e",
+      "compressed_bytes": 3380,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/roads_shape_parsers_command.py",
+      "original_sha256": "1e4d598f42324b99f478734900c7e379b95d5ca1cb62a6f2936cbe4dace5ec15",
+      "original_bytes": 1465,
+      "compressed_file": "roads_shape_parsers_command.py.gz",
+      "compressed_sha256": "b1e035172465db88a857e6806d84c15a4d6c6aaf97088c8a21010f65d03ee102",
+      "compressed_bytes": 634,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/run_broad_continuation.py",
+      "original_sha256": "601bbb978e8994385292023196a366380457b353ce1bac010b95802aa952d4ac",
+      "original_bytes": 10860,
+      "compressed_file": "run_broad_continuation.py.gz",
+      "compressed_sha256": "479112d5379cafc249ca81021d0832ec7ccb26175ac21ab38ace2fbc209689b3",
+      "compressed_bytes": 3826,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/run_broad_continuation_v2.py",
+      "original_sha256": "ca4c2eada6dea587c522a1b86ac035473c6eabe95842bea09e1ee21d6d68887e",
+      "original_bytes": 16647,
+      "compressed_file": "run_broad_continuation_v2.py.gz",
+      "compressed_sha256": "4936fea914b54931455a6bd36a8ca71f5cdec4559e562f884621d49a64cba4f4",
+      "compressed_bytes": 5278,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/run_broad_continuation_v3.py",
+      "original_sha256": "80f94084f65d170b94688687e748674062d0e2aeb9ce55fb72c14f525fdcc249",
+      "original_bytes": 22624,
+      "compressed_file": "run_broad_continuation_v3.py.gz",
+      "compressed_sha256": "e283aaf6eca2d67409d47ed8c9ad93faa9b50edd1a34a89cadb92e12cef683c9",
+      "compressed_bytes": 6919,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/run_broad_continuation_v4.py",
+      "original_sha256": "eb388a759bb7df5c4bc2afd4b4f96da8a5a20bde8bd6e060dfa7a907d1175b65",
+      "original_bytes": 28384,
+      "compressed_file": "run_broad_continuation_v4.py.gz",
+      "compressed_sha256": "783b1244b25e0910612f753b8fbdbc06ea6c9f775e0ccebb76ebdd8d677e02e5",
+      "compressed_bytes": 7890,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/run_broad_continuation_v5.py",
+      "original_sha256": "e1baeb2bfcd91c4eb698c8690e65471389e5b2ac6fde353b870264e24b476f2a",
+      "original_bytes": 29506,
+      "compressed_file": "run_broad_continuation_v5.py.gz",
+      "compressed_sha256": "9f41a2f9ad493a4d47ba6a1d8492f4028de30edad3d329c7c9bfcd4511d1bf63",
+      "compressed_bytes": 8218,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/run_broad_module_replacements.py",
+      "original_sha256": "911b289cdb86892907dcaccae93d9044e0df5df2faca1ac8414b89042b2de18b",
+      "original_bytes": 15444,
+      "compressed_file": "run_broad_module_replacements.py.gz",
+      "compressed_sha256": "e64c652576075b336c4e851a81796a86043aaadc2b72b55622a42cec2daba3a5",
+      "compressed_bytes": 4375,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/shape-parser-environment-baseline.json",
+      "original_sha256": "8eeb972f6712c70665eadd691408b9dbc08acb80f9e2eab22c7664d60bab8d37",
+      "original_bytes": 2893,
+      "compressed_file": "shape-parser-environment-baseline.json.gz",
+      "compressed_sha256": "3d83b5296c0d12514170897419dd34f3724ec513dc3ba43408102bdbdeb6a641",
+      "compressed_bytes": 1063,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/shape-parser-environment-candidate.json",
+      "original_sha256": "778fec84ed6cd30113d3cb29a9c80ea4c4765011c378ed5d559212279ce3f76e",
+      "original_bytes": 2894,
+      "compressed_file": "shape-parser-environment-candidate.json.gz",
+      "compressed_sha256": "1b993c751b7359ffb6c40d4eadd254e60d1d91505bbe18095de027ff53b5e6f8",
+      "compressed_bytes": 1064,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/shape-parser-environment-mounted-candidate.json",
+      "original_sha256": "cc2182a58b2885065e0c799925a35c9537fc874fedba7cef41fd33f5c35b1120",
+      "original_bytes": 2863,
+      "compressed_file": "shape-parser-environment-mounted-candidate.json.gz",
+      "compressed_sha256": "e3600b04d1f47d748b0761ad628f6474af02c73c2fc8bb9b77b07aceb4c351cc",
+      "compressed_bytes": 1070,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/shape-parser-existing-artifact-check.json",
+      "original_sha256": "9672bf8ae10fc8e3327d602c08d08ecd0711b1f998c6529e22deb7c9d2e23856",
+      "original_bytes": 4769,
+      "compressed_file": "shape-parser-existing-artifact-check.json.gz",
+      "compressed_sha256": "30187f7744b58784d45d85675723c6acd1c45b2a5d8ed9e32b927daddccbad48",
+      "compressed_bytes": 1404,
+      "decompression_verified": true
+    },
+    {
+      "original_path": "/tmp/roads-refactor-validation/shape-v5-failure-classification.json",
+      "original_sha256": "9e7a537041f51a6d16d17ed1dd41a11a643210b04e145e5d348d33a325ec4c3e",
+      "original_bytes": 70088,
+      "compressed_file": "shape-v5-failure-classification.json.gz",
+      "compressed_sha256": "95e07743cd1bb6df337d68d2eaae231de6725c53c1b7295033414ca8bffe7996",
+      "compressed_bytes": 4231,
+      "decompression_verified": true
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-code-quality:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-cnkpramj 90f89d698c21d48b09d4c312d48957fac884c584369ec7f44f8fc1cc1645e2ca && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m pytest tests/shape_converter/integration/test_abuse_controls_api.py::test_inspect_rate_limit_returns_429_with_retry_after_header -q --tb=short --basetemp=/tmp/roads-refactor-validation/shape-abuse-candidate-20261118a --junitxml=/tmp/roads-refactor-validation/shape-abuse-candidate-canonical.xml'
+time="2026-11-17T17:10:21-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-9f266198c5ae Creating
+ Container docker-weppcloud-run-9f266198c5ae Created
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_inspect_rate_limit_returns_429_with_retry_after_header __________
+tests/shape_converter/integration/test_abuse_controls_api.py:26: in test_inspect_rate_limit_returns_429_with_retry_after_header
+    with TestClient(create_app()) as client:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:694: in __enter__
+    portal.call(self.wait_startup)
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:338: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:729: in wait_startup
+    await receive()
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:720: in receive
+    self.task.result()
+/usr/local/lib/python3.12/concurrent/futures/_base.py:449: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/venv/lib/python3.12/site-packages/anyio/from_thread.py:263: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/starlette/testclient.py:710: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+/opt/venv/lib/python3.12/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/errors.py:151: in __call__
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:49: in __call__
+    await self.app(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:725: in app
+    await self.lifespan(scope, receive, send)
+/opt/venv/lib/python3.12/site-packages/starlette/routing.py:694: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+wepppy/microservices/shape_converter/app.py:1017: in app_lifespan
+    raise RuntimeError(toolchain_failure_reason or "shape-converter parser provenance check failed")
+E   RuntimeError: parser_binary_or_provenance_missing
+=============================== warnings summary ===============================
+tests/shape_converter/integration/test_abuse_controls_api.py::test_inspect_rate_limit_returns_429_with_retry_after_header
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+tests/shape_converter/integration/test_abuse_controls_api.py::test_inspect_rate_limit_returns_429_with_retry_after_header
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/shape_converter/integration/test_abuse_controls_api.py::test_inspect_rate_limit_returns_429_with_retry_after_header
+1 failed, 2 warnings in 10.79s

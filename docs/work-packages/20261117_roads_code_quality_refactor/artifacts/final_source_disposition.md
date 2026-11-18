@@ -19,3 +19,16 @@ both original and normalized digests. Original runtime logs remain available.
 
 The final-format historical publication gate also passed all three tests
 (`publication-format-final.log`, 9.53 seconds), preserving original stale artifacts.
+
+A fresh guarded container also re-read all five retained project outcomes using
+final source. All four successful projects remain current, the oversize negative
+remains unavailable, and every `roads.nodb` digest is unchanged. This readback did
+not regenerate outputs; see `final_project_admission.json` and
+`scripts/final_admission.py`.
+
+The broad run subsequently executed all 516 native profiles using the final
+production bytes. Reusing those emitted files, the strict comparator verified all
+6,192 native inputs/outputs are byte-identical to baseline, even before root-path
+normalization. See `final_source_matrix_comparison.json` and
+`final_native_identity.json`. This supplements the original parsed-analysis and
+project comparisons without rewriting their execution provenance.

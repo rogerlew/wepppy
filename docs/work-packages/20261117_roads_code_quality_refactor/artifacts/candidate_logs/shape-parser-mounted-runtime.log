@@ -1,0 +1,51 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-code-quality:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --volume /home/workdir/wepppy/wepppy/microservices/shape_converter/rust/shape_parser_cli/target/release/shape_parser_cli:/usr/local/bin/shape_parser_cli:ro --volume /home/workdir/wepppy/wepppy/microservices/shape_converter/rust/shape_parser_cli/target/release/shape_parser_cli.json:/usr/local/bin/shape_parser_cli.json:ro --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-ib7d8bf8 c42f5f14e874ce52cf7222a46df4418903c8f4dfc6738fc4306172493c3c45e0 && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python /tmp/roads-refactor-validation/inspect_shape_parser_environment.py mounted-candidate'
+time="2026-11-17T17:14:13-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-f6c8cfbda5ea Creating
+ Container docker-weppcloud-run-f6c8cfbda5ea Created
+{
+  "label": "mounted-candidate",
+  "configured_parser_cli": null,
+  "configured_scratch_root": null,
+  "selected_parser_cli": "/usr/local/bin/shape_parser_cli",
+  "validation": [
+    true,
+    null
+  ],
+  "paths": {
+    "/workdir/wepppy/wepppy/microservices/shape_converter/rust/shape_parser_cli/target/release/shape_parser_cli": {
+      "exists": false,
+      "file": false,
+      "executable": false,
+      "symlink": false
+    },
+    "/workdir/wepppy/wepppy/microservices/shape_converter/rust/shape_parser_cli/target/release/shape_parser_cli.json": {
+      "exists": false,
+      "file": false,
+      "executable": false,
+      "symlink": false
+    },
+    "/usr/local/bin/shape_parser_cli": {
+      "exists": true,
+      "file": true,
+      "executable": true,
+      "symlink": false
+    },
+    "/usr/local/bin/shape_parser_cli.json": {
+      "exists": true,
+      "file": true,
+      "executable": false,
+      "symlink": false
+    }
+  }
+}

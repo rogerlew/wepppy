@@ -1,0 +1,68 @@
+INFO:wctl2:docker compose run --rm --no-deps --pull never -T --volume /home/workdir/wepppy/.git:/home/workdir/wepppy/.git:ro --volume /home/workdir/wepppy-roads-code-quality:/workdir/wepppy --volume /tmp/roads-refactor-validation:/tmp/roads-refactor-validation --entrypoint /bin/bash weppcloud -lc '/opt/venv/bin/python -c '"'"'import pathlib, sys
+probe = pathlib.Path('"'"'"'"'"'"'"'"'/workdir/wepppy'"'"'"'"'"'"'"'"') / sys.argv[1]
+try:
+    matches = probe.read_text(encoding='"'"'"'"'"'"'"'"'ascii'"'"'"'"'"'"'"'"') == sys.argv[2]
+except OSError:
+    matches = False
+if not matches:
+    print('"'"'"'"'"'"'"'"'WCTL_CHECKOUT_MISMATCH: container /workdir/wepppy is not the requested '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'live checkout. Mount the requested checkout before testing, or invoke '"'"'"'"'"'"'"'"'
+          '"'"'"'"'"'"'"'"'wctl from the checkout already mounted. No tests were started.'"'"'"'"'"'"'"'"', file=sys.stderr)
+    raise SystemExit(2)
+'"'"' .wctl-checkout-zk60a5yl f52751086af4bdf78cd41a8f8efc9d2fb5294351c126d0e739385e8f8601db88 && cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python /tmp/roads-refactor-validation/observe_batch_workers.py'
+time="2026-11-17T16:49:40-08:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container docker-weppcloud-run-f38c3c3ceb21 Creating
+ Container docker-weppcloud-run-f38c3c3ceb21 Created
+{
+  "observed_at": "2026-11-18T00:49:41.506470+00:00",
+  "redis_database": 9,
+  "read_commands": [
+    "SMEMBERS rq:workers",
+    "HMGET worker metadata"
+  ],
+  "batch_workers": [
+    {
+      "key": "rq:worker:1a81d58bc32b4a87a8fe365089492569",
+      "name": null,
+      "queues": "batch",
+      "state": "idle",
+      "last_heartbeat": "2026-11-18T00:48:58.813658Z",
+      "birth": "2026-11-17T18:54:31.215247Z",
+      "hostname": "04fef889c868",
+      "pid": "360"
+    },
+    {
+      "key": "rq:worker:333c15fed8bb4d3ba474da278971ea90",
+      "name": null,
+      "queues": "batch",
+      "state": "idle",
+      "last_heartbeat": "2026-11-18T00:48:43.780290Z",
+      "birth": "2026-11-17T18:54:31.161232Z",
+      "hostname": "04fef889c868",
+      "pid": "357"
+    },
+    {
+      "key": "rq:worker:5af160d462e54f62bf53b62817a77f72",
+      "name": null,
+      "queues": "batch",
+      "state": "idle",
+      "last_heartbeat": "2026-11-18T00:49:28.788263Z",
+      "birth": "2026-11-17T18:54:31.179037Z",
+      "hostname": "04fef889c868",
+      "pid": "358"
+    },
+    {
+      "key": "rq:worker:c7dea9a1dfa3476592deacbe35fdb0b5",
+      "name": null,
+      "queues": "batch",
+      "state": "idle",
+      "last_heartbeat": "2026-11-18T00:49:13.818854Z",
+      "birth": "2026-11-17T18:54:31.202257Z",
+      "hostname": "04fef889c868",
+      "pid": "359"
+    }
+  ],
+  "test_source_sha256": "2ea4b9d244889061dad363cd37ff9169a5d5118de6d8c5e349b4b71499f80355",
+  "baseline_sha256": "2ea4b9d244889061dad363cd37ff9169a5d5118de6d8c5e349b4b71499f80355",
+  "baseline_identical": true
+}

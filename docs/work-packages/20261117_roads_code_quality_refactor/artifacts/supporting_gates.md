@@ -1,7 +1,8 @@
 # Supporting candidate gates
 
 Production checkpoint: `5ef264810`; review hashes are retained in the QA and
-security manifests. No production changes followed that checkpoint.
+security manifests. The only later production delta removes two trailing empty
+lines from `_constants.py`, recorded below and in `final_source_disposition.md`.
 
 - Final focused candidate run passed 413 tests, one skipped, in 38.39 seconds
   (`/tmp/roads-refactor-validation/focused-aligned-candidate-final.log`).
@@ -19,6 +20,28 @@ security manifests. No production changes followed that checkpoint.
 - Quality observability against `origin/master` completed with Radon using
   `/usr/bin/python`; reports are `/tmp/roads-quality.origin-master.json` and `.md`.
   Package-only qualified measurements are in `quality_metrics.json` and `.md`.
+
+## Current qualification - 2026-11-18 UTC
+
+Canonical-environment focused validation passes 413 tests, one skipped, in
+38.10 seconds (`focused-canonical-fixture-20261117c.log`). The earlier focused
+receipts below are historical and used a global retention-root override.
+Final-source native execution matches all 6,192 raw files across 516 profiles;
+all five retained full-project outcomes pass final-source admission without
+changing saved state. Native and project evidence is complete.
+
+The complete 6,853-item broad suffix diagnostic reports 6,365 passes, 208
+failures, 272 runtime skips and eight setup errors, plus one collection skip.
+It ran in 967.84 seconds. The run is unsuccessful. Source monitoring also found
+one management JSON fixture rewritten by a test; its original and generated
+bytes are retained for review and restoration. Baseline probes and bounded
+module reruns are recorded separately. Neither diagnostic completion nor
+baseline attribution is a claim that the broad regression gate passed.
+
+Final stub hygiene passes on source checkpoint `5812caa02` using the canonical
+`tools/check_stubs.py` command in a checkout-guarded container. The initial
+invocation used a nonexistent script path and ran no checks; both command logs
+are retained (`final-stub-hygiene.log`, `final-stub-hygiene-corrected.log`).
 
 ## Broad-suite fixture isolation
 
@@ -44,3 +67,18 @@ settings after setup. All 65 route tests pass (`fork-fixture-isolation.log`), an
 independent QA accepted the bounded test-only change. Commit: `43cb4e78f`.
 The third full broad run is `broad-final-v3.log`, with fresh basetemp
 `/tmp/roads-refactor-validation/broad-candidate-20261117c`.
+
+Final formatting checkpoint: `36ce30c1e`. During broad v3, `_constants.py` lost
+only two trailing empty lines; independent AST comparison confirms unchanged
+executable content. The exact pre-formatting native/project source receipts stay
+immutable, with the later delta recorded in `final_source_disposition.md`.
+Final-format focused checks passed 413 tests, one skipped (38.12 seconds), and
+publication checks passed three tests (9.53 seconds). No other Roads source bytes
+changed after the native/project runs.
+
+The final whole-module replay passes all 391 selected tests in 55.79 seconds
+(one separate collection skip). All source, runtime artifact, environment,
+script and selection checks are unchanged. It reruns 17 complete modules with
+read-only existing parser binaries, a short temporary path, and the two reviewed
+retention-fixture corrections. This qualifies those module results; the remaining
+broad failures and the original v5 source-drift rejection remain explicit.
