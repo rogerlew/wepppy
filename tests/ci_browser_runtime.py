@@ -1,7 +1,7 @@
 """Run existing browser suites against a disposable, authenticated CI application.
 
 Only the isolated test Compose runtime may invoke this fixture. Credentials stay
-in process memory; the app and browser share loopback and never expose a host port.
+in memory or private container temporary files; no host port is exposed.
 """
 from __future__ import annotations
 

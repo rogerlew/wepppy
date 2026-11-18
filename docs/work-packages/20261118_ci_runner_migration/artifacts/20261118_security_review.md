@@ -27,9 +27,9 @@ accepted as successful validation.
 
 ## Findings
 
-Initial reviewed source had no unresolved findings. The later runtime-preparation
-addition has one open medium finding, detailed in the incremental review below.
-Current counts: high 0, medium 1, low 0. Earlier correctness findings concerning prefix routing, cookie settings,
+The initial source review and the later runtime-preparation/RQ revisions have no
+unresolved findings after the corrections recorded below. Current counts: high 0,
+medium 0, low 0. Earlier correctness findings concerning prefix routing, cookie settings,
 run configuration, schedule gating and skipped-page coverage were repaired in
 source. Their runtime acceptance remains part of the separate correctness gate.
 
@@ -42,7 +42,8 @@ backend authorization. Missing/false/true display states have regression coverag
 ## Verdict
 
 - Initial security **source review: PASS** for the identified revision and mount addition.
-- Latest uncommitted runtime additions: **HOLD** until SEC-01 below is resolved.
+- Latest uncommitted runtime additions: security **source review PASS**, including
+  the resolved SEC-01 and RQ cleanup/origin corrections documented below.
 - Overall migration/release acceptance: **pending**, not complete.
 - Recommendation: retain the source changes; require remaining real browser,
   supported-runner and failure-cleanup evidence before package closure.
@@ -189,12 +190,12 @@ process exit or directory existence as sufficient proof.
 Reviewed the later uncommitted CAP service, normal-login/storage-state fixture,
 `tests/prepare_ci_runtime.py`, parser additions to `docker/Dockerfile.test`, and
 new preparation steps in affected workflow sources/generated YAML. This review
-supersedes the initial source pass for these additional surfaces; it does not
+extends the initial source pass for these additional surfaces; it does not
 claim actual browser or CI acceptance.
 
 | ID | Severity | Surface | Description and required action | Status |
 | --- | --- | --- | --- | --- |
-| SEC-01 | Medium | `tests/prepare_ci_runtime.py`, existing runtime directories | The helper accepts any existing real `node_modules` or `.playwright-browsers` directory while claiming locked image assets are prepared. Only candidate versus image package manifests are checked; the consumed directory can contain different packages. Direct browser workflows do not subsequently run wctl's browser identity check. Fail explicitly on real directories, or validate the actual installed package/browser identities before accepting them. | Open |
+| SEC-01 | Medium | `tests/prepare_ci_runtime.py`, existing runtime directories | The helper previously accepted existing real asset directories without checking their identity. It now rejects them, verifies candidate/image manifests and allows only absent paths or links to the image-owned directories. The direct browser fixture calls this preparation too; mismatch, foreign-directory and idempotent-link cases have regression coverage. | Resolved |
 
 The added CAP service is the existing pinned owned service, on the internal job
 network without host ports. Its fixed `local-ci-cap-only` credential is confined
@@ -209,8 +210,8 @@ an acceptance requirement.
 The login helper's storage-state and CAP-secret files are protected by a private
 `TemporaryDirectory` and mode 0600, then removed in `finally`; they are outside
 uploaded report paths. At review time its docstring said tmpfs, but browser `/tmp`
-was ordinary container-layer temporary storage. Correct that description or make
-the storage explicitly tmpfs; the ownership and cleanup boundary itself is sound.
+was ordinary container-layer temporary storage. The helper description now names
+container temporary storage; the ownership and cleanup boundary is sound.
 
 The test image now builds shape/geoparquet parsers from locked candidate sources
 and generates adjacent provenance. Existing wctl preflight compares the complete
@@ -219,3 +220,35 @@ The CI/development revision label is not release attestation. Required actual
 parser probes and hostile-input tests remain part of the runtime acceptance.
 No production parser, credential policy or application auth implementation changes
 were introduced by these additions.
+
+### Incremental readback: isolated RQ API and SEC-01 closure
+
+The browser fixture now serves the existing RQ API through an owned pre-bound
+loopback socket and a fixed proxy target. It introduces no worker, host port,
+production mount or replacement authorization path. Startup has a deadline;
+context-manager cleanup requests server shutdown and checks its thread terminates.
+The stale explicit `rq_context.__exit__` call was removed because the `with`
+statement owns cleanup. The RQ proxy preserves the incoming Host and port via
+`host=None`, so actual same-origin validation remains active instead of accepting
+a fabricated origin or disabling CSRF checks.
+
+Read back clean focused receipt `49895803660d498f8af012d5b6d81aa0`: pytest and wrapper
+exit zero, source/runtime changes empty. The reported suite outcome is 295 passed,
+three deselected. This covers asset-preparation regressions; the final removal of
+the dangling cleanup call and proxy Host correction occurred afterward and are
+source-reviewed here. Their real controller execution was still running at review
+time, so the earlier receipt is not presented as validation of those last edits.
+
+The exact incremental source hashes reviewed are:
+
+| Path | SHA-256 |
+| --- | --- |
+| `tests/ci_browser_runtime.py` | `0b860b106c6e3639b93e3e24c8537f12abc2dedb0f9ff1b3e1fa0dd24cf5d4e9` |
+| `tests/prepare_ci_runtime.py` | `79abc4b1b3cb92c2459c392ec2700c7fb1eb9be550ae0967224bd4801ad4b516` |
+| `docker/docker-compose.browser-test.yml` | `674b0dc81fb1cf3b5833e5d807715691c173bbba47b5287da4c23b996c4e2e04` |
+| `docker/Dockerfile.test` | `e40252c15f9e9564e9b07bdeeb8a20cf64883db10c979a4629dbb2790070aea0` |
+| `wepppy/weppcloud/static-src/playwright.config.mjs` | `58062da5c9103e9bb320375a42692e0ebbce2e117e4a5895005532d51e04e9d3` |
+
+This closes SEC-01 at source/regression level and finds no additional source
+security defect. It does not close the still-pending actual browser, generated
+report, supported-runner, failed-job cleanup or overall migration acceptance gates.

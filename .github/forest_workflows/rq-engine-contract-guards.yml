@@ -65,6 +65,8 @@ jobs:
         run: wctl --compose-file docker/docker-compose.test.yml up -d --build --wait
       - name: Prepare locked CI browser assets
         run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud /opt/venv/bin/python tests/prepare_ci_runtime.py
+      - name: Initialize disposable account schema
+        run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud /opt/venv/bin/python tests/bootstrap_ci_database.py
       - name: Run rq-engine contract guard scripts
         run: wctl --compose-file docker/docker-compose.test.yml check-rq-contracts
       - name: Run rq-engine contract guard tests
