@@ -1,6 +1,6 @@
 # ADR-0149: Parquet CSV integration resource envelope
 
-Status: Accepted for integration; runtime acceptance pending
+Status: Accepted; local runtime acceptance passed, deployment pending
 Date: 2026-11-18
 
 ## Context

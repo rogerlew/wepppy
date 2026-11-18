@@ -84,7 +84,17 @@ still requires the canonical deployment gates and separate authorization.
 The operator explicitly approved deleting conversion copies, IPC and CSV after
 serving/failure/recovery while retaining original Parquet and correlated diagnostic
 hashes, sizes, outcomes and resource metrics. The canonical contract's
-"Approved transient-storage exception" records scope and rationale: persistent
+"Temporary representation retention (approved 2026-11-18)" records scope and rationale: persistent
 CSVs could become stale and imply automatic model generation. Actual image logs
 prove success-hash retention. No new project archive member exists to restore;
 archive/restore coverage for temporary CSV is therefore N/A by approved exception.
+
+## Broad receipt disposition
+
+Full pytest passed 14,535 cases. The original wrapper receipt remains
+`source_changed`/exit 3; its sole delta was an existing maintenance script writing
+a tracked sidecar during import discovery. The fixture is restored byte-for-byte.
+A minimal `__main__` guard preserves explicit CLI behavior; the new real
+import/CLI regression and repository import sweep pass in clean receipt
+`70d748eeec06404c85efa91cc7baf47e`. Both reviewers approved this bounded repair
+and scoped follow-up without another full rerun. CSV runtime source is unchanged.

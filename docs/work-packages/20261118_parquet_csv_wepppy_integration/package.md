@@ -1,6 +1,6 @@
 # Integrate the native Parquet CSV exporter
 
-**Status**: Executing M0, 2026-11-18; implementation checkpoint pending
+**Status**: Closed locally, 2026-11-18; production deployment pending
 **Timezone**: UTC
 **Owner**: Roger Lew; implementation integrator: Codex
 
@@ -13,10 +13,9 @@ and concurrent downloads. The operator has authorized package execution.
 
 The operator requires immediate cutover, no environment-variable-facing CSV
 configuration and no fallback to the Python implementation. These decisions and
-their rationale are captured in the draft durable
+their rationale are captured in the ratified durable
 [integration contract](../../schemas/parquet-csv-integration-contract.md#authority-and-cutover-policy).
-Execution does not authorize production deployment. Remaining engineering
-choices are explicit M0 deliverables, not permission to change the cutover policy.
+Execution does not authorize production deployment. The reviewed runtime and retained acceptance evidence implement that policy.
 
 ## Scope
 
@@ -30,7 +29,7 @@ Do not migrate previews, D-Tale, raw/filtered Parquet downloads, unrelated repor
 CSV writers, the dedicated archive-download service, auth policy or model artifact
 schemas. Preserve their behavior when shared helpers change. Do not revive retired
 virtual archives. No publication or production deployment is authorized by this
-scaffold request. The closed standalone package remains immutable history.
+implementation request. The closed standalone package remains immutable history.
 
 ## Complexity budget
 
@@ -60,26 +59,28 @@ is evaluation evidence, not automatic production sizing approval.
 
 ## Acceptance
 
-- [ ] M0 contract matrix, exact settings/error mappings, independent reviews and committed checkpoint.
-- [ ] Required native compatibility and bounded filter/input handling implemented and tested.
-- [ ] Every supported CSV route immediately uses the native path; legacy serialization unreachable/removed.
-- [ ] No environment-facing CSV settings, fallback, feature flag or schema-based backend selector.
-- [ ] Shared-worker admission, real response/disconnect cleanup, worker-death recovery and bounded serving proven.
-- [ ] Exact built image/provenance and authorized real-project HTTP bytes validated under production-equivalent identity.
-- [ ] Focused checks pass; broad suite run after wiring, not at scaffold stage.
-- [ ] Independent final reviews, user/operator/developer docs and rollout/rollback handoff retained.
+- [x] M0 contract matrix, exact settings/error mappings, independent reviews and committed checkpoint.
+- [x] Required native compatibility and bounded filter/input handling implemented and tested.
+- [x] Every supported CSV route immediately uses the native path; legacy serialization unreachable/removed.
+- [x] No environment-facing CSV settings, fallback, feature flag or schema-based backend selector.
+- [x] Shared-worker admission, real response/disconnect cleanup, worker-death recovery and bounded serving proven.
+- [x] Exact built image/provenance and authorized real-project HTTP bytes validated under production-equivalent identity.
+- [x] Focused checks pass; broad suite run after wiring, not at scaffold stage.
+- [x] Independent final reviews, user/operator/developer docs and rollout/rollback handoff retained.
 
 Generated-artifact evidence must connect request/filter intent, authorized source
 identity, staged/consumed bytes, exact binary, finalized CSV and actual downloaded
 bytes. Application persistence is N/A unless implementation introduces it (outside
 the present complexity budget). Define scratch/failure observability explicitly.
 No closeout based solely on mocks, child exit, metadata, file existence or a green
-broad suite. Current completion claim: documentation scaffold only.
+broad suite. Current completion claim: implemented, wired and locally validated against the
+exact service image. Production deployment has not occurred. See
+[validation](artifacts/validation.md) and [release handoff](artifacts/release-handoff.md).
 
 ## Execution map
 
-[Tracker](tracker.md), [active ExecPlan](prompts/active/implementation_execplan.md),
-and [M0 checkpoint draft](artifacts/20261118_contract_decision.md).
+[Tracker](tracker.md), [completed ExecPlan](prompts/completed/implementation_execplan.md),
+and [M0 checkpoint](artifacts/20261118_contract_decision.md).
 Starting revision: `392ee2299d8573e038b2e932fe3bdb7e044d1d35`.
 Accepted standalone source: `fe82d99d5c5ec2bae60733e1c491f0cadebd9c58`.
 

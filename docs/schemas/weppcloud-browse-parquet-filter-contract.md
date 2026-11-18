@@ -76,7 +76,7 @@ Numeric-only behavior:
 
 ## CSV native cutover amendment (2026-11-18)
 
-Status: intended behavior; implementation pending integration checkpoint.
+Status: implemented and locally validated; production deployment pending.
 CSV downloads use the [native integration contract](parquet-csv-integration-contract.md#integration-implementation-checkpoint).
 CSV filters are always available; no environment variable selects their backend,
 enablement or cap. The matched-row cap is fixed at 2,000,000 and applies only to

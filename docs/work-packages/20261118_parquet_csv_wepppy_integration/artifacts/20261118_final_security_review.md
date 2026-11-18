@@ -83,3 +83,13 @@ conversion copies/IPC/CSV are excluded by the explicit operator-approved excepti
 in the canonical integration contract. Actual failure/serving cleanup and success
 hash logging are proven. Archive/restore of new project members is N/A because no
 project artifact is added; neither hidden project outputs nor a CSV cache exists.
+
+## Broad receipt disposition
+
+Full pytest passed 14,535 cases. The original wrapper receipt remains
+`source_changed`/exit 3; its sole delta was an existing maintenance script writing
+a tracked sidecar during import discovery. The fixture is restored byte-for-byte.
+A minimal `__main__` guard preserves explicit CLI behavior; the new real
+import/CLI regression and repository import sweep pass in clean receipt
+`70d748eeec06404c85efa91cc7baf47e`. Both reviewers approved this bounded repair
+and scoped follow-up without another full rerun. CSV runtime source is unchanged.

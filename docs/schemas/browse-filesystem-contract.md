@@ -152,7 +152,7 @@ stale artifacts; it must not certify results on the user's behalf.
 
 ## Native CSV representation amendment (2026-11-18)
 
-Status: intended behavior; integration conformance pending.
+Status: implemented and locally validated; production deployment pending.
 Parquet CSV downloads follow the [integration contract](parquet-csv-integration-contract.md),
 including fixed configuration, no Python fallback, native schema/filter decoding,
 shared bounded admission, strict JSON IPC and correlated failures. Raw authorized

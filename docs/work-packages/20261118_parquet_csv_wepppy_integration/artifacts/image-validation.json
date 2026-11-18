@@ -34,6 +34,7 @@
     "image_http_probe.py": "87455a9328e2483f73a35a7d50cdc8b08e60fd01666c9ba60d9a5a65f197659b",
     "image-readiness.log": "a5631e09213ec346176f3ca3814414ff2994d1685db111573b8edb033fce56f8",
     "image_negative_probe.py": "34e5e406a91f552a2f9c373e485d0bcdc47b5fbfa296ba93be1a716ef7f9603d",
-    "image-http-1002-130.log": "898ac6d6d02698dff9cb33d0ee1284ff45abf564e3ed84f36ecfff26fa1b05ee"
-  }
+    "image-http-1002-130.log.gz": "026fbc702858f31b859de5b5980bfb278bd9eafe78115d6425e2af9f60300ff9"
+  },
+  "raw_service_log_sha256": "898ac6d6d02698dff9cb33d0ee1284ff45abf564e3ed84f36ecfff26fa1b05ee"
 }

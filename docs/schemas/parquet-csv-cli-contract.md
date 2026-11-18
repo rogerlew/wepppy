@@ -207,7 +207,7 @@ change the repository-wide default for other work.
 
 ## WEPPpy integration protocol v2 amendment
 
-Status: intended behavior; implementation pending integration checkpoint.
+Status: implemented and locally validated; production deployment pending.
 The [integration checkpoint](parquet-csv-integration-contract.md#integration-implementation-checkpoint)
 supersedes v1 for the integrated converter: versioned request.json, response
 version 2, native filters, parent-death/wall supervision, inherited admission,

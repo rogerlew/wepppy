@@ -1,7 +1,7 @@
 # WEPPpy Parquet CSV integration contract
 
-Status: ratified; implemented and wired, final integration acceptance in progress.
-Implementation conformance: focused and corpus checks pass; production not deployed. Owner: Roger Lew.
+Status: ratified, implemented and locally validated; production deployment pending.
+Implementation conformance: focused/corpus/image checks pass; broad pytest passed with a resolved import-sidecar warning. Owner: Roger Lew.
 Package: [integration](../work-packages/20261118_parquet_csv_wepppy_integration/package.md).
 
 ## Authority and cutover policy
@@ -177,7 +177,7 @@ to clean up holds capacity and produces an explicit diagnostic.
 ## Integration implementation checkpoint
 
 The following details supersede draft obligations above once the two independent
-reviews are dispositioned and the checkpoint is committed. Conformance is pending.
+reviews are dispositioned and the checkpoint is committed. Conformance is locally validated; deployment remains pending.
 
 ### Fixed runtime ownership and limits
 

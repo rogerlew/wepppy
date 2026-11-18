@@ -1,7 +1,7 @@
 # Cut over WEPPpy CSV exports to the native converter
 
 
-This active ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep
+This completed ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep
 Progress, Surprises & Discoveries, Decision Log and Outcomes & Retrospective
 current together with the package tracker. The operator authorized execution on
 2026-11-18. Production deployment remains outside this request.
@@ -26,8 +26,8 @@ negative security tests against the built service image.
 - [x] M0: Obtain independent contract reviews and commit checkpoint before code edits.
 - [x] (2026-11-18 UTC) M1: Package production CLI/harness and close native compatibility gaps.
 - [x] (2026-11-18 UTC) M2: Wire all supported CSV paths; implement serving ownership and remove old conversion.
-- [ ] M3: Validate focused and exact-image workflows; then run the broad suite.
-- [ ] M4: Close reviews, document release/rollback and hand off validated integration.
+- [x] (2026-11-18 UTC) M3: Validate focused and exact-image workflows; then run the broad suite.
+- [x] (2026-11-18 UTC) M4: Close reviews, document release/rollback and hand off validated integration.
 
 ## Surprises & Discoveries
 
@@ -90,14 +90,29 @@ Immediate cutover does not waive contract, exact-image or deployment safety gate
 
 ## Outcomes & Retrospective
 
+Implementation and wiring are complete. Final native source is `c433c6ee3`;
+remaining route fixture correction is `e2d155da3`. 213 focused, 152 adjacent,
+104 file-route and 13 Rust checks pass; all 46 selected real files match legacy
+bytes. Broad pytest result: 14535 passed, 506 skipped, 99 deselected, 5906 warnings in 3657.80s (1:00:57). The wrapper flagged one existing import-time
+sidecar write; the source fixture was restored and the script guarded. The new regression and the import
+sweep (two tests total) passed cleanly; both reviewers approved this bounded
+disposition without another broad run. Exact image
+`sha256:2f7921df03e1be59f95635fa38488a351e641538c33851529ec10bf9994a9f42`
+passes actual eight-worker HTTP, shared admission, disconnect, raw access,
+filtered/no-match, provenance failure and retained-success diagnostics, including
+UID1002:GID130. Both independent reviewers approve; no medium/high findings remain.
 
-M0 committed at a1f40de48. M1/M2 code is wired and under focused validation;
-208 focused native/route/lifecycle tests and 152 adjacent filter/auth/security
-tests pass. Final common-image build and runtime acceptance are pending. No deployment occurred.
-The accepted standalone implementation is a starting asset, not completed HTTP
-integration. This package cannot close on an adapter stub or mocked route tests.
+Observed files required bounded dictionary and width amendments; each received
+independent review and a documentation ancestor before its threshold edit. The
+first broad run found one older native route fixture, corrected and verified in
+104 focused tests before the passing rerun. Build/preflight identity and successful
+log retention issues were found by actual image checks and fixed before acceptance.
 
-## Context and Orientation
+This closes local implementation scope, not production deployment. The release
+handoff preserves canonical deployment/rollback mechanics and target-host gates.
+Evidence and limitations are in [validation](../../artifacts/validation.md).
+
+## Initial Context and Orientation
 
 
 Work in `/home/workdir/wepppy-parquet-csv-cli-package`, branch
