@@ -1,0 +1,47 @@
+{
+  "weppcloud": {
+    "identity": {
+      "endpoint": "http://soil-api:8080/Tabular/post.rest",
+      "profile": "wepppy-json-v1",
+      "release": "forest-id-20261001-vi-20161013-v1"
+    },
+    "policy": "mirror-first",
+    "ready": true
+  },
+  "rq-engine": {
+    "identity": {
+      "endpoint": "http://soil-api:8080/Tabular/post.rest",
+      "profile": "wepppy-json-v1",
+      "release": "forest-id-20261001-vi-20161013-v1"
+    },
+    "policy": "mirror-first",
+    "ready": true
+  },
+  "rq-worker": {
+    "identity": {
+      "endpoint": "http://soil-api:8080/Tabular/post.rest",
+      "profile": "wepppy-json-v1",
+      "release": "forest-id-20261001-vi-20161013-v1"
+    },
+    "policy": "mirror-first",
+    "ready": true
+  },
+  "rq-worker-batch": {
+    "identity": {
+      "endpoint": "http://soil-api:8080/Tabular/post.rest",
+      "profile": "wepppy-json-v1",
+      "release": "forest-id-20261001-vi-20161013-v1"
+    },
+    "policy": "mirror-first",
+    "ready": true
+  },
+  "rq-worker-fork-archive": {
+    "identity": {
+      "endpoint": "http://soil-api:8080/Tabular/post.rest",
+      "profile": "wepppy-json-v1",
+      "release": "forest-id-20261001-vi-20161013-v1"
+    },
+    "policy": "mirror-first",
+    "ready": true
+  }
+}
