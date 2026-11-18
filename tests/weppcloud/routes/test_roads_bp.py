@@ -240,6 +240,8 @@ def roads_client(
     rq_environment,
 ):
     monkeypatch.setenv("VECTOR_UPLOAD_BINARY_ENABLED", "true")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ID", "roads-route-test")
+    monkeypatch.setenv("VECTOR_UPLOAD_RUN_FILESYSTEM_ROOT", str(tmp_path))
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(roads_module.roads_bp)
