@@ -1,0 +1,38 @@
+{
+  "inventory_files": 156,
+  "inventory_max_columns": 79,
+  "files_above64": [
+    {
+      "path": "/wc1/runs/cl/clogging-starch/wepp/output/interchange/totalwatsed3.parquet",
+      "sha256": "15a7e1de4198fc278816043a0ca9ff619a3fb9781d6ddce6d99cb276c730bf7e",
+      "identity_matches": true,
+      "physical_columns": 79,
+      "rows": 5844,
+      "row_groups": 1,
+      "input_bytes": 967920,
+      "footer_bytes": 52583
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/wepp/roads/history/1edfd5c34c374c3d8662cc87b720b1b9/wepp/roads/output/interchange/totalwatsed3.parquet",
+      "sha256": "fd042da1e4c3ac024a3fce61822bebba18109f7d1273493ac6b62b53f6cfe031",
+      "identity_matches": true,
+      "physical_columns": 79,
+      "rows": 5844,
+      "row_groups": 1,
+      "input_bytes": 747248,
+      "footer_bytes": 41515
+    },
+    {
+      "path": "/wc1/runs/cl/clogging-starch/wepp/roads/output/interchange/totalwatsed3.parquet",
+      "sha256": "7cc0691eccf702ea0381e21d5ddbc62c94a36f4ab1fbfa4f006a3d6dd352b412",
+      "identity_matches": true,
+      "physical_columns": 79,
+      "rows": 5844,
+      "row_groups": 1,
+      "input_bytes": 1127082,
+      "footer_bytes": 41849
+    }
+  ],
+  "proposed_cap": 128,
+  "required_schema_element_cap": 129
+}

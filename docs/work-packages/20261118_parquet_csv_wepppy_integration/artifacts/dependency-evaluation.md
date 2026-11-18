@@ -31,3 +31,13 @@ preflight, cumulative decoded limits and OS ceilings stay mandatory. No codec
 marketing claim substitutes for those tests. A parity/resource failure blocks
 cutover, with no Python fallback. The permanent manifest is unchanged at this
 checkpoint preparation stage.
+
+## Implementation disposition
+
+The locked native graph is integrated. Final Cargo audit reports zero known
+vulnerabilities; the existing Chrono maintenance warning remains explicit.
+All 46 selected real files pass exact legacy CSV byte parity, covering 43 observed
+schema/codec combinations plus affected wide/dictionary files. Focused hostile
+ZSTD, structural boundary and lifecycle checks pass. Evidence is retained in
+real-file-parity.json, focused-validation.json and integration-benchmark.json.
+No additional runtime dependency or fallback is introduced by this disposition.

@@ -1,7 +1,7 @@
 # WEPPpy Parquet CSV integration contract
 
-Status: scaffold; operator-approved cutover policy, detailed M0 checkpoint pending.
-Implementation conformance: not implemented. Owner: Roger Lew.
+Status: ratified; implemented and wired, final integration acceptance in progress.
+Implementation conformance: focused and corpus checks pass; production not deployed. Owner: Roger Lew.
 Package: [integration](../work-packages/20261118_parquet_csv_wepppy_integration/package.md).
 
 ## Authority and cutover policy

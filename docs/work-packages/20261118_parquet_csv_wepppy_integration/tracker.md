@@ -96,3 +96,9 @@ Focused acceptance: 208 native/route/lifecycle checks passed (receipt
 (receipt `8f88d21621874924a12c1cfb6162687b`). Rust: 13 passed, including amended
 dictionary boundary. M1/M2 implemented and wired. M3 exact-image/corpus/broad
 acceptance and M4 final reviews remain in progress.
+
+Column amendment ancestor: `9a4642a01793922c80b4f399cf30d8cd83e94837`; threshold
+edits followed independent approvals. Final native source plus whitespace cast
+regression and successful-outcome log retention committed in `c433c6ee3`.
+Final focused run: 213 passed; all 46 selected real files match legacy bytes.
+Exact-image identity/negative/readback checks and broad acceptance remain open.
