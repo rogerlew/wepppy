@@ -203,8 +203,10 @@ Replicas with separate filesystems each add their own two-slot budget.
 ADR-0149 sets 30 seconds staging, 120 seconds conversion wall time, 100 CPU seconds
 and 600 seconds serving time. Admission does not queue. Preserve the standalone
 512 MiB input, 2 GiB output and 1 GiB address-space ceilings. Structural limits
-remain as standalone except the dictionary-entry cap is131,072 per ADR-0149,
-required by observed valid flowpath/road-event dictionaries up to125,855 entries. Thus two
+remain as standalone except 128 physical columns and 131,072 dictionary entries
+per ADR-0149,
+required by observed 79-column totalwatsed3 files and valid flowpath/road-event
+dictionaries up to 125,855 entries. Thus two
 slots admit at most 5 GiB staged/output payload and 2 GiB child address space,
 plus bounded metadata and web workers. Retained failed scratch occupies its fixed
 slot until safe recovery; it cannot accumulate unbounded request directories.

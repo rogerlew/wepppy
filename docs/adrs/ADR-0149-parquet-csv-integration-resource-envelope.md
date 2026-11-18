@@ -69,3 +69,15 @@ bounded dictionary bookkeeping within those same process/page ceilings. Require
 exact-boundary and limit-plus-one tests plus real flowpath/event byte readback.
 Do not silently route these valid files back to Python. Independent contract
 amendment review and a documentation ancestor precede changing the source limit.
+
+## Observed column-width amendment (2026-11-18)
+
+Three inventoried `totalwatsed3.parquet` files contain 79 physical columns; the
+standalone limit of 64 rejects existing exports. Permit 128 physical columns
+and 129 flat schema elements (including the root). Preserve every other
+structural, page, cumulative decode, process and service limit. Inputs are at
+most 1,127,082 bytes and 5,844 rows, with footer sizes below 53 KiB.
+
+This is a bounded compatibility correction, not an open schema budget. Retain
+exact-cap/plus-one tests and real-file byte parity. Both independent reviewers
+verify the inventory and approve before the source threshold edit.
