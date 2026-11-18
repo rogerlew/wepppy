@@ -35,7 +35,7 @@ geographic/live parity is deferred until SDA recovery, not a prerequisite.
 - [x] Implement collection-level source selection across all six consumers, retaining source-separated caches and failure evidence.
 - [x] Integrate forest dev Compose, import official regional data, and pass bounded queued soil/fallback acceptance.
 - [x] Integrate the protected Compose change after exact-SHA/digest owner approval, then activate the shared forest client default.
-- [ ] Later scope: forest1 and production rollout; comprehensive live validation after SDA recovery.
+- [ ] Deploy the full wepp.cloud release in host order wepp1, wepp2, wepp3, including required application database migrations and national soil service activation. Forest1 is explicitly deferred; comprehensive live SDA validation remains deferred.
 
 ## Context and plan
 
@@ -79,6 +79,8 @@ cover real filesystem/SQLite and local HTTP boundaries, plus real generated outp
 
 ## Surprises & Discoveries
 
+Production discovery: all three hosts are clean at 917708c90dce46bbab920ecf9ce5f315e8611290; wepp1 application database reports f6b8d27a901c. The account migration a7c1106e42b9 exists on committed local master, not remote master b301ff64c. Its precondition rejects duplicate normalized login emails. Release assembly must account for local-master changes rather than assume remote master contains the requested migrations. No production mutation has occurred.
+
 The regional default failed all 22 Colorado keys in cavernous-oxygen while SDA returned HTTP 5xx. National imports contain those keys and both SSURGO/STATSGO2 domains; source/import parity and real queued recovery passed. Treat national loading separately from deferred live geographic parity.
 
 
@@ -96,6 +98,8 @@ mounts in the isolated client container restores all five exact artifacts; this 
 a matched-environment transport result, not proof of deployment-image equivalence.
 
 ## Decision Log
+
+2026-11-18: Operator prioritizes wepp.cloud over forest1 and explicitly requires a full deployment to include other changes and database migrations. Prepare a combined release in an isolated task worktree, preserve shared checkout WIP, and use scripts/deploy-production.sh with installed wctl in wepp1 → wepp2 → wepp3 order. Preserve the independent CILogon registration/credential activation hold. Back up and rehearse application migration against an explicitly asserted disposable database before live migration. Reuse national soil import/parity evidence; activate national SSURGO and STATSGO2 together, then verify generated soil artifacts from production workers.
 
 2026-11-18: Nationwide SSURGO and STATSGO2 are required for the shared default. The regional rollout was insufficient during the SDA outage; loading national data is mandatory while full live parity remains deferred. Canonical scope is now in soil-data-source-provenance-contract.md, Shared default geographic coverage.
 
