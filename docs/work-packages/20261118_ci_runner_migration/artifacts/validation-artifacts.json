@@ -1,6 +1,15 @@
 {
+  "browser-cdn-failure.log.gz": {
+    "raw_sha256": "9d932452643d84d92133c2dc9ef10a5bca7e95d10e125b5979c1d6872758bc89"
+  },
+  "focused-final.log.gz": {
+    "raw_sha256": "ddd77b865bd9964660337a7e6f1abcebe23910e47c8d79f2ff7f8980c652372f"
+  },
   "focused-tests.log.gz": {
     "raw_sha256": "d6e1152c3448ff2674d5bb890a6d3f0fb2cd338017aec0b5077d9f18848a7370"
+  },
+  "native-browser-preflight.log.gz": {
+    "raw_sha256": "5b418fcff577b94c11838fd3ea055f96ff70973a5f0fe508dfdd0aaf7ac253b4"
   },
   "npm-coverage-final.log.gz": {
     "raw_sha256": "e6bdf4b6e07bf5b57956e0ea096736e6a04dbe72eb891bc9cbe91a018417e152"

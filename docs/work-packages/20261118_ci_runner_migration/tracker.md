@@ -50,3 +50,11 @@ Local NPM V8 coverage produced the verified 1.2 MiB LCOV artifact. The earlier
 relative output path passed tests but failed artifact-location validation; the
 workflow now uses the absolute workspace path. Browser login passes real CAPTCHA,
 CSRF and password validation; controller and accessibility acceptance remain open.
+
+The real controller path required the existing RQ session API and public CDN
+scripts. The fixture now preserves Host/origin checks through a private RQ socket;
+only the browser/app container has outbound access. Earlier controller failures
+are retained as fixture diagnostics, not claimed as accepted application tests.
+Focused generator/helper/header validation: 295 passed, 3 deselected, clean source
+receipt 49895803660d498f8af012d5b6d81aa0. Independent source security review has no
+unresolved findings before the final egress amendment (review requested).

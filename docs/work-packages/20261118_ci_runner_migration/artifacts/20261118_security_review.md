@@ -113,12 +113,13 @@ production restart or deployment authority is inferred from this task.
 
 ### 7) Network and External Integrations
 
-Both application and smoke runtime networks render as internal, without host
-ports. The browser reaches its fixture through loopback. Dependency acquisition
-occurs in the declared build/Node/Go contexts using existing package locks and
-pinned image references; outbound download capability is not represented as a
-runtime isolation guarantee. Live Forest URLs and SSH restart orchestration are
-removed from the migrated/retired jobs.
+The original application and smoke runtime networks render as internal, without
+host ports. A later demonstrated browser dependency failure required the narrow
+service attachment described below: only the browser/application container gains
+an outbound bridge. The browser still reaches its fixture through loopback.
+Dependency acquisition uses existing package locks and pinned image references;
+normal bridge egress is not a domain allowlist or an exfiltration boundary. Live
+Forest URLs and SSH restart orchestration are removed from migrated/retired jobs.
 
 ### 8) CI/CD and Supply Chain
 
@@ -252,3 +253,38 @@ The exact incremental source hashes reviewed are:
 This closes SEC-01 at source/regression level and finds no additional source
 security defect. It does not close the still-pending actual browser, generated
 report, supported-runner, failed-job cleanup or overall migration acceptance gates.
+
+### Incremental readback: browser CDN connectivity
+
+Actual authenticated controller execution passed four checks, then outlet checks
+failed because the existing page's external scripts could not resolve on the
+internal-only network. The retained rationale in
+[header-conformance-repair.md](header-conformance-repair.md#browser-runtime-escalation-evidence)
+identifies `ERR_NAME_NOT_RESOLVED` and the missing `deck.gl GeoJsonLayer` dependency.
+This is evidence that the simpler isolated runtime did not preserve the existing
+browser workflow, rather than a speculative request for additional networking.
+
+Reviewed browser Compose SHA-256
+`3b10408b2f573912aca68d4f38793a9755dddfea65edd9644cccf2f2b7f4bb05`.
+Independent `docker compose config --format json` readback confirms:
+
+- Only `weppcloud` attaches to both the internal default network and the new
+  job-scoped `browser-egress` bridge.
+- CAP, PostgreSQL and Redis attach only to the internal default network.
+- No service publishes a host port; no live-secret, host-data or Docker-socket
+  mount was added. The application retains only its candidate-checkout bind and
+  temporary fixture state.
+- Existing project-scoped teardown removes both networks and their containers.
+
+This preserves the actual page's existing external script behavior rather than
+substituting libraries or bypassing application auth. The outbound bridge permits
+general outbound traffic: its name does not imply a CDN-only allowlist. Existing
+public CDN dependency trust therefore remains relevant. Browser sessions and run
+data are disposable CI fixtures, and the persistent self-hosted runner trust
+assumption remains as stated above; this is not a new claim of hostile-code
+containment or zero egress.
+
+Source security review remains PASS with no new unresolved finding. The real
+controller rerun using this attachment was still in progress at review time.
+No successful controller or overall migration acceptance is inferred from the
+Compose readback or from the earlier four passing checks.

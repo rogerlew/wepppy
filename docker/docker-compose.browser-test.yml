@@ -12,6 +12,7 @@ services:
       CAP_ASSET_BASE_URL: /cap/assets
       CAP_SITE_KEY: ci-browser
       CAP_SECRET: local-ci-cap-only
+    networks: [default, browser-egress]
     tmpfs:
       - /wc1/runs:mode=1777
       - /wc1/logs:mode=1777
@@ -47,3 +48,4 @@ services:
 networks:
   default:
     internal: true
+  browser-egress: {}

@@ -817,7 +817,9 @@ challenges; the existing RQ API runs on a second private loopback socket for ses
 tokens. Both use disposable fixture credentials; browser cookies are deleted when
 the helper exits and containers are removed by unconditional job cleanup. The helper
 requires image-owned browser assets prepared by `tests/prepare_ci_runtime.py`;
-foreign asset directories or mismatched package manifests fail explicitly.
+foreign asset directories or mismatched package manifests fail explicitly. Only the
+browser/application container has outbound access for the page's existing public
+CDN scripts; databases and CAP remain on the internal network.
 Recreate the project between suites because
 the fixture refuses an already populated database. Reports live under
 `wepppy/weppcloud/static-src/test-results/` and `playwright-report/`.

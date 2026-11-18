@@ -36,3 +36,12 @@ browser tests still intercept their own build requests; no RQ worker or model
 execution service is introduced. Startup and shutdown are bounded and owned by the
 fixture. This additional API is required by the observed controller authentication
 path, not an attempt to replicate the full production stack.
+
+The next run authenticated and passed the first four controller checks, but both
+outlet checks timed out. Browser diagnostics confirmed ERR_NAME_NOT_RESOLVED for
+the page's existing external scripts and “Outlet GL requires deck.gl GeoJsonLayer.”
+Attach only the browser/application container to a job-local outbound bridge so
+its existing public CDN assets can load. PostgreSQL, Redis and CAP remain on the
+internal network; no host ports, host secrets, production targets or worker are
+introduced. This preserves the existing page's dependencies rather than replacing
+production script libraries with test stubs. Cleanup removes both job-local networks.
