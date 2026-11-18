@@ -48,3 +48,19 @@ match, with 499 valid soils, six preserved non-valid outcomes, 34 HTTP fetch eve
 and 499 verified base sidecars. statsgo-001 remains empty and statsgo-002 remains
 incomplete/excluded. The null-texture failure reproduces the exact reference
 ValueError with the real candidate cache and collection horizon defaults.
+
+## Remote-master integration candidate
+
+The original task branch inherited unrelated unmerged work from local master.
+PR #673 correctly failed the base-owned policy gate on those inherited changes.
+The four soil-only commits were copied onto remote master 2a33c70e8 in the separate
+task/ssurgo-json-merge worktree; original history and shared worktrees were preserved.
+The only conflict was the project tracker: retain remote entries and add only the
+soil entry. No security policy approval or bypass was used.
+
+Candidate 3fb32db7457baa471d1aa9a9c9aa99ffe5718ce2 has byte-identical soil module,
+NoDb controller/stubs and new tests to the validated source. All 75 focused tests
+passed again against its exact isolated checkout with real disposable Redis.
+The base-owned policy checker reports no protected-path changes. Earlier numerical
+reports remain tied to their original source revision; file identity and this
+integration test establish the bounded transfer, not a new full numerical replay.

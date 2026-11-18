@@ -93,3 +93,8 @@ All six corpus cases have been accounted for: five complete (one empty) and one
 incomplete explicitly excluded. Full matched-environment parity passes; evidence
 is retained in soil-data-access/artifacts/wepppy-parity/json-client. Public deployment
 and broader service release gates remain deferred.
+
+Integration follow-up, 2026-11-18 UTC: PR #673 revealed inherited unmerged local
+master changes. Preserve that history and integrate only the four soil commits via
+task/ssurgo-json-merge from remote master. No protected policy paths change; all
+soil source files remain identical and 75 focused tests pass on the new checkout.

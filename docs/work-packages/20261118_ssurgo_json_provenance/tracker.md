@@ -7,3 +7,4 @@
 - Numerical environment: matched frozen reference passes; initial development-image diagnostic-comment mismatch retained, with no relaxed comparison rules.
 - Service evidence: soil-data-access/artifacts/wepppy-parity/json-client; harness 60a699f, runtime 9dc2264.
 - Publication: task/ssurgo-json-provenance and task/wepppy-json-parity; service evidence commit 9227204. No master integration or deployment.
+- Integration candidate: task/ssurgo-json-merge, copied soil-only commits onto remote master; no inherited unrelated security changes. Exact soil sources match the validated branch; 75 focused tests pass again.
