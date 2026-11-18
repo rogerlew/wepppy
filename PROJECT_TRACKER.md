@@ -1,3 +1,5 @@
+In progress: [SSURGO JSON and source provenance](docs/work-packages/20261118_ssurgo_json_provenance/package.md) — explicit server/profile/release, isolated caches, retrieval evidence and fresh-cache soil parity. Contract review pending; no deployment.
+
 Implementation: [CILogon accounts and local email verification](docs/work-packages/20261117_cilogon_oidc/package.md) — separate institutional identities, shared local/verified Google/GitHub accounts, email-first password setup and responsive profile. Independent source reviews closed; local validation retained. CILogon registration approval is pending; production migration/activation and environment acceptance remain deferred.
 
 Completed locally: [Vector upload normalization](docs/work-packages/20261116_vector_upload_normalization/package.md) — Roads, AgFields, Omni contrasts and Batch Runner support Shapefile ZIP and GeoParquet. Public/team copies preserve retained records with copying-principal accounting. Exact-image/downstream checks, source-qualified broad validation and five independent reviews pass. No publication/deployment.
