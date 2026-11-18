@@ -16,7 +16,7 @@ const PAGE_BODY_MAX: u64 = 8 * 1024 * 1024;
 const DECODED_PAGES_MAX: u64 = 4 * 1024 * 1024 * 1024;
 const ROWS_MAX: i64 = 10_000_000;
 const ROW_GROUPS_MAX: usize = 128;
-const COLUMNS_MAX: usize = 64;
+const COLUMNS_MAX: usize = 128;
 const PAGES_MAX: usize = 200_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -70,7 +70,7 @@ pub fn open(
     let schema_children = scan.integer_values.get(&vec![2, 5]);
     let schema_types = scan.integer_values.get(&vec![2, 1]);
     let schema_repetitions = scan.integer_values.get(&vec![2, 3]);
-    if !(2..=65).contains(&schema_count)
+    if !(2..=COLUMNS_MAX + 1).contains(&schema_count)
         || schema_children
             .is_none_or(|values| values.len() != 1 || values[0] != (schema_count - 1) as i64)
         || schema_types.is_none_or(|values| values.len() != schema_count - 1)
@@ -98,7 +98,7 @@ pub fn open(
 
 fn validate_footer_container_limits(scan: &crate::compact::ScanResult) -> Result<(), &'static str> {
     for (path, limit) in [
-        (vec![2], 65_usize),
+        (vec![2], COLUMNS_MAX + 1),
         (vec![4], ROW_GROUPS_MAX),
         (vec![4, 1], COLUMNS_MAX),
         (vec![5], 256_usize),

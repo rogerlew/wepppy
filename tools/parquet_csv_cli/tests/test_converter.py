@@ -773,7 +773,7 @@ def test_rejected_scratch_is_not_deleted(tmp_path, converter):
     assert canary.read_bytes() == b'preserve'
 
 
-@pytest.mark.parametrize('values', [[True, False], [' 2 ', '3'], ['1_000', '1__2']])
+@pytest.mark.parametrize('values', [[True, False], [' 2 ', '3'], ['1_000', '1__2'], ['\x0b1\x0b', '0']])
 def test_filtered_mixed_type_duplicates_match_duckdb(tmp_path, converter, values):
     from wepppy.microservices.parquet_filters import compile_filter, query_export
     table = pa.Table.from_arrays([pa.array(values), pa.array([1, 2])], names=['x', 'x'])
@@ -902,3 +902,17 @@ def test_native_request_is_strict_json(tmp_path, binary, payload):
     assert result.stdout == b''
     assert strict_json(result.stderr) == {'version': 2, 'status': 'error', 'code': 'input_rejected'}
     assert not (root / 'output.csv').exists()
+
+
+@pytest.mark.parametrize('empty', [False, True])
+@pytest.mark.parametrize('width', [128, 129])
+def test_physical_column_budget_exact_and_plus_one(tmp_path, converter, empty, width):
+    table = pa.table({f'v{i}': pa.array([] if empty else [i], type=pa.int32())
+                      for i in range(width)})
+    path = write(tmp_path, table)
+    if width == 129:
+        with pytest.raises(ConversionError, match='input_rejected'):
+            convert(converter, path)
+    else:
+        with convert(converter, path) as artifact:
+            assert artifact.path.read_bytes() == oracle(path)

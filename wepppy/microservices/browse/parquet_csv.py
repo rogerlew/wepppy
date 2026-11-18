@@ -22,6 +22,8 @@ from wepppy.observability.correlation import generate_correlation_id
 from .errors import request_id
 
 LOGGER = logging.getLogger(__name__)
+# Required outcome/hash retention, including successful exports, under Gunicorn.
+LOGGER.setLevel(logging.INFO)
 CONVERTER = Converter(Path('/usr/local/bin/parquet_csv_cli'),
                       Path('/opt/parquet-csv/provenance.json'),
                       Path('/tmp/wepppy-parquet-csv'), Limits())

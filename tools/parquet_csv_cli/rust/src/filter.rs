@@ -213,7 +213,7 @@ fn double(a: &dyn Array, row: usize) -> f64 {
         };
     }
     let text = cell(a, row);
-    let text = text.trim_matches(|c: char| c.is_ascii_whitespace());
+    let text = text.trim_matches(|c: char| c.is_ascii_whitespace() || c == '\u{000b}');
     let bytes = text.as_bytes();
     for (i, b) in bytes.iter().enumerate() {
         if *b == b'_'
