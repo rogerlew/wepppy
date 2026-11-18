@@ -29,7 +29,7 @@ must use PostgreSQL TCP and the API's pinned-release health check.
 
 ## Application migration compatibility
 
-Production currently reports `f6b8d27a901c`. The combined candidate adds
+Production was upgraded from `f6b8d27a901c` to `a7c1106e42b9` on 2026-11-18 UTC. The combined candidate adds
 `a7c1106e42b9`, preserving legacy users while adding account provenance columns and
 a unique normalized-email index. Read-only preflight found zero duplicate normalized
 email groups among 5,482 users. Back up the application database and rehearse upgrade
@@ -50,14 +50,19 @@ deferred. Preserve old images and configuration and use canonical deployment rec
 Migration rehearsal passed on a restored production backup: all pre-existing
 table-column hashes match, including 5,482 user rows. See the retained
 [receipt](../work-packages/20261118_ssurgo_json_provenance/artifacts/production-migration-rehearsal.json).
-Live migration and production activation remain pending; this is not a deployment
-success receipt.
+Live migration passed with 5,482 legacy account defaults verified. All three hosts
+completed canonical activation; see the [production activation receipt](../work-packages/20261118_ssurgo_json_provenance/artifacts/production-activation.json)
+for immutable image identities and generated-output checks.
 
 ## Deploying the same images across hosts
 
 Build once on wepp1 with `--build-retained-candidate`. Preserve its private source
 receipt and SHA-256. Export the exact common and renderer image IDs with Docker
-save, transfer the archives with checksums, and load them on the worker hosts.
+save, transfer the archives with checksums, and load them on the worker hosts. Loading an archive saved by image ID does not
+move Compose tags. Before candidate creation, explicitly tag each verified imported
+ID with its configured Compose image name (for example `docker tag <common-id>
+wepppy:latest`). Preserve the currently running images for rollback. Candidate
+activation rejects tags that still resolve to the old release.
 No registry is required. The worker hosts use the same architecture and runtime
 identity (1002:130); confirm their effective configuration before activation.
 
@@ -73,6 +78,11 @@ Create the local release binding and resume its newly generated receipt through
 part of the canonical script. Do not use an arbitrary `--skip-build` to bypass
 these checks.
 
+Export `COMPOSE_PROFILES=soil-data` when invoking the script on wepp1: retained
+activation calls raw Docker Compose, which does not inherit wctl’s temporary
+env file. Use `WCTL_COMPOSE_TIMEOUT_SECONDS=1800` for the first national import.
+Confirm the raw activation service list includes both soil services.
+
 For the first wepp1 soil installation, include `--new-service soil-db --new-service
 soil-api` on both candidate creation and resume. These declarations are retained
 in deployment options. A missing service without a declaration, a stopped existing
@@ -85,5 +95,29 @@ remove a partially initialized database volume.
 
 The first retained build completed at application source `9a50ccbf7d7ef279c1b13c41d3b72eeff77e7a39`.
 The script-only repair may reuse those images after separately reviewed tooling
-integration; it does not require another application build. Production migration
-and activation are still pending.
+integration; it does not require another application build. Application migration
+and all three host activations completed on 2026-11-18 UTC.
+
+## Local firewall and shared source identity
+
+All hosts retain the same Tailscale endpoint so a saved project can move between
+workers without changing its source identity. On wepp1, Docker bridge traffic to
+its own published Tailscale port reaches host INPUT; UFW initially dropped it.
+The Compose-local API URL works only on wepp1 and must not become the persisted
+project endpoint. Keep the database unpublished and the API bound to Tailscale.
+
+The deployed persistent UFW rule allows only TCP from the production backend
+bridge/subnet to the Tailscale address and port 18080:
+
+    ufw allow in on br-86834dd1c298 from 10.20.0.0/24 to 100.127.248.45 port 18080 proto tcp comment soil-api-local-clients
+
+Verify the actual backend bridge before recreating the Docker network; a recreated
+network can have a different interface name. Rollback removes precisely this rule
+with `ufw delete` and the same arguments. Retain the prior firewall snapshot and
+check the API from actual application/worker containers on all hosts. This rule
+does not allow public-interface clients or expose the soil database. The deployment
+used a temporary root diagnostic container with only NET_ADMIN and SYS_CHROOT;
+host files were read-only except `/etc/ufw` and `/run/ufw.lock` for the UFW update.
+UFW also requires a writable temporary directory; provide ephemeral `/tmp` for
+that command and verify both the active rule and `/etc/ufw/user.rules` afterward.
+No application container privileges or host-wide firewall defaults changed.
