@@ -10,79 +10,51 @@ jobs:
     - self-hosted
     - Linux
     - X64
-    - homelab
+    - remote-ci
     timeout-minutes: 40
     env:
-      RUNNER_DOCKER_ENV: /workdir/wepppy/docker/.env
-      PLAYWRIGHT_REPORT_PATH: test-results/playwright-controller-report
+      COMPOSE_PROJECT_NAME: wepppy-${{ github.run_id }}-${{ github.run_attempt }}-playwright-controllers-nightly
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        clean: false
-    - name: Ensure docker/.env exists
-      shell: bash
+        persist-credentials: false
+        lfs: true
+        fetch-depth: 0
+    - name: Verify materialized inputs
       run: |
-        set -euo pipefail
-        if [ -n "${RUNNER_DOCKER_ENV:-}" ] && [ -f "${RUNNER_DOCKER_ENV}" ]; then
-          cp "${RUNNER_DOCKER_ENV}" docker/.env
-          exit 0
-        fi
-        if [ ! -f docker/.env ]; then
-          printf "%s\n" \
-            "UID=1000" \
-            "GID=993" \
-            "POSTGRES_PASSWORD=localdev" \
-            "SECRET_KEY=localdev" \
-            "SECURITY_PASSWORD_SALT=localdev" \
-            > docker/.env
-        fi
+        git lfs checkout
+        git lfs fsck
+        python3 tools/verify_lfs_materialized.py --tracked
     - name: Install wctl shim
+      id: wctl
       env:
         WCTL_SYMLINK_PATH: ${{ github.workspace }}/.wctl/bin/wctl
       run: |
-        set -euo pipefail
         mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
-        chmod +x wctl/install.sh
         ./wctl/install.sh dev
         echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
-    - name: Install npm dependencies
-      run: |
-        set -euo pipefail
-        wctl run-npm install
-    - name: Run Playwright controller suite
-      run: |
-        set -euo pipefail
-        wctl run-playwright \
-          --suite controllers \
-          --workers 1 \
-          --report-path "$PLAYWRIGHT_REPORT_PATH"
-    - name: Upload Playwright controller report
+    - name: Start isolated test runtime
+      run: wctl --compose-file docker/docker-compose.browser-test.yml up -d --build
+        --wait
+    - name: Build controller assets
+      run: wctl --compose-file docker/docker-compose.browser-test.yml exec -T weppcloud
+        /opt/venv/bin/python wepppy/weppcloud/controllers_js/build_controllers_js.py
+    - name: Run isolated browser checks
+      run: wctl --compose-file docker/docker-compose.browser-test.yml exec -T weppcloud
+        /opt/venv/bin/python tests/ci_browser_runtime.py controllers
+    - name: Upload browser reports
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: playwright-controllers-report
-        path: wepppy/weppcloud/static-src/${{ env.PLAYWRIGHT_REPORT_PATH }}
-        if-no-files-found: warn
-    - name: Remove redis data directory
-      run: |
-        set -euo pipefail
-        REDIS_DIR="${GITHUB_WORKSPACE}/.docker-data/redis"
-        if [ ! -d "${REDIS_DIR}" ]; then
-          echo "Redis data directory not present; nothing to remove."
-          exit 0
-        fi
-
-        echo "Removing ${REDIS_DIR}"
-        if rm -rf "${REDIS_DIR}" 2>/dev/null; then
-          echo "Removed redis data directory without sudo."
-          exit 0
-        fi
-
-        if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
-          sudo -n rm -rf "${REDIS_DIR}"
-          echo "Removed redis data directory with passwordless sudo."
-          exit 0
-        fi
-
-        echo "Warning: unable to remove ${REDIS_DIR} without interactive sudo; continuing." >&2
+        name: playwright-controllers-nightly
+        path: |-
+          wepppy/weppcloud/static-src/test-results/
+          wepppy/weppcloud/static-src/playwright-report/
+        if-no-files-found: error
+    - name: Remove isolated test runtime
+      if: always() && steps.wctl.outcome == 'success'
+      run: wctl --compose-file docker/docker-compose.browser-test.yml down --volumes
+        --remove-orphans --rmi local
+permissions:
+  contents: read

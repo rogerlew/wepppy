@@ -1,0 +1,13 @@
+**
+!services/
+!services/status2/
+!services/status2/**
+!services/streamauth/
+!services/streamauth/**
+!tests/
+!tests/tools/
+!tests/tools/status2_smoke/
+!tests/tools/status2_smoke/**
+!scripts/
+!scripts/ci/
+!scripts/ci/run-status2-smoke.sh

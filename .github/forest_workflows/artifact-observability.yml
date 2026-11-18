@@ -2,96 +2,90 @@ name: Artifact Observability
 on:
   pull_request:
     paths:
-      - AGENTS.md
-      - docs/standards/artifact-observability-standard.md
-      - docs/prompt_templates/*review_template.md
-      - wepppy/nodb/mods/postfire_debris_flow/**
-      - wepppy/rq/postfire_debris_flow_rq.py
-      - wepppy/microservices/rq_engine/postfire_debris_flow_routes.py
-      - wepppy/rq/project_rq_archive.py
-      - wepppy/microservices/browse/**
-      - tests/nodb/mods/test_postfire_debris_flow*.py
-      - tests/microservices/test_rq_engine_postfire_debris_flow.py
-      - tests/rq/test_project_rq_archive.py
-      - .github/forest_workflows/artifact-observability.yml
-      - .github/workflows/artifact-observability.yml
+    - AGENTS.md
+    - docs/standards/artifact-observability-standard.md
+    - docs/prompt_templates/*review_template.md
+    - wepppy/nodb/mods/postfire_debris_flow/**
+    - wepppy/rq/postfire_debris_flow_rq.py
+    - wepppy/microservices/rq_engine/postfire_debris_flow_routes.py
+    - wepppy/rq/project_rq_archive.py
+    - wepppy/microservices/browse/**
+    - tests/nodb/mods/test_postfire_debris_flow*.py
+    - tests/microservices/test_rq_engine_postfire_debris_flow.py
+    - tests/rq/test_project_rq_archive.py
+    - .github/forest_workflows/artifact-observability.yml
+    - .github/workflows/artifact-observability.yml
   push:
-    branches: [master]
+    branches:
+    - master
     paths:
-      - AGENTS.md
-      - docs/standards/artifact-observability-standard.md
-      - docs/prompt_templates/*review_template.md
-      - wepppy/nodb/mods/postfire_debris_flow/**
-      - wepppy/rq/postfire_debris_flow_rq.py
-      - wepppy/microservices/rq_engine/postfire_debris_flow_routes.py
-      - wepppy/rq/project_rq_archive.py
-      - wepppy/microservices/browse/**
-      - tests/nodb/mods/test_postfire_debris_flow*.py
-      - tests/microservices/test_rq_engine_postfire_debris_flow.py
-      - tests/rq/test_project_rq_archive.py
-      - .github/forest_workflows/artifact-observability.yml
-      - .github/workflows/artifact-observability.yml
-  workflow_dispatch:
+    - AGENTS.md
+    - docs/standards/artifact-observability-standard.md
+    - docs/prompt_templates/*review_template.md
+    - wepppy/nodb/mods/postfire_debris_flow/**
+    - wepppy/rq/postfire_debris_flow_rq.py
+    - wepppy/microservices/rq_engine/postfire_debris_flow_routes.py
+    - wepppy/rq/project_rq_archive.py
+    - wepppy/microservices/browse/**
+    - tests/nodb/mods/test_postfire_debris_flow*.py
+    - tests/microservices/test_rq_engine_postfire_debris_flow.py
+    - tests/rq/test_project_rq_archive.py
+    - .github/forest_workflows/artifact-observability.yml
+    - .github/workflows/artifact-observability.yml
+  workflow_dispatch: null
 jobs:
   artifact-observability:
     runs-on:
-      - self-hosted
-      - Linux
-      - X64
-      - homelab
+    - self-hosted
+    - Linux
+    - X64
+    - remote-ci
     timeout-minutes: 20
     steps:
-      - name: Ensure docker secrets exist
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p docker/secrets
-          chmod 700 docker/secrets
-
-          seed_secret() {
-            local name="$1"
-            local fallback="$2"
-            local target="docker/secrets/${name}"
-            if [ -f "${target}" ]; then
-              return 0
-            fi
-            local host_source=""
-            if [ -n "${RUNNER_DOCKER_ENV:-}" ]; then
-              host_source="$(dirname "${RUNNER_DOCKER_ENV}")/secrets/${name}"
-            fi
-            if [ -n "${host_source}" ] && [ -f "${host_source}" ]; then
-              cp "${host_source}" "${target}"
-            else
-              printf "%s\n" "${fallback}" > "${target}"
-            fi
-            chmod 600 "${target}"
-          }
-
-          # Keep Compose secret mounts satisfiable even on fresh runner workspaces.
-          seed_secret redis_password localdev
-          seed_secret postgres_password localdev
-          seed_secret flask_secret_key localdev
-          seed_secret flask_security_password_salt localdev
-          seed_secret wepp_auth_jwt_secrets localdev
-          seed_secret agent_jwt_secret localdev
-          seed_secret cap_secret localdev
-          seed_secret oauth_github_client_secret localdev
-          seed_secret oauth_google_client_secret localdev
-          seed_secret zoho_noreply_email_password localdev
-          seed_secret opentopography_api_key localdev
-          seed_secret climate_engine_api_key localdev
-      - name: Ensure weppcloud service is running
-        run: |
-          set -euo pipefail
-          wctl up -d weppcloud
-      - name: Verify artifact writers, failures, migration and archive restore
-        run: |
-          set -euo pipefail
-          wctl run-pytest \
-            tests/nodb/mods/test_postfire_debris_flow_observability.py \
-            tests/nodb/mods/test_postfire_debris_flow_production.py \
-            tests/nodb/mods/test_postfire_debris_flow_publication.py \
-            tests/nodb/mods/test_postfire_debris_flow_dnbr.py \
-            tests/nodb/mods/test_postfire_debris_flow_soil_thickness.py \
-            tests/microservices/test_rq_engine_postfire_debris_flow.py \
-            tests/rq/test_project_rq_archive.py
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+        lfs: true
+        fetch-depth: 0
+    - name: Verify materialized inputs
+      run: |
+        git lfs checkout
+        git lfs fsck
+        python3 tools/verify_lfs_materialized.py --tracked
+    - name: Install wctl shim
+      id: wctl
+      env:
+        WCTL_SYMLINK_PATH: ${{ github.workspace }}/.wctl/bin/wctl
+      run: |
+        mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
+        ./wctl/install.sh dev
+        echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
+    - name: Start isolated test runtime
+      run: wctl --compose-file docker/docker-compose.test.yml up -d --build --wait
+    - name: Build controller assets
+      run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud /opt/venv/bin/python
+        wepppy/weppcloud/controllers_js/build_controllers_js.py
+    - name: Initialize disposable account schema
+      run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud /opt/venv/bin/python
+        tests/bootstrap_ci_database.py
+    - name: Verify artifact writers, failures, migration and archive restore
+      run: |
+        set -euo pipefail
+        wctl --compose-file docker/docker-compose.test.yml run-pytest \
+          tests/nodb/mods/test_postfire_debris_flow_observability.py \
+          tests/nodb/mods/test_postfire_debris_flow_production.py \
+          tests/nodb/mods/test_postfire_debris_flow_publication.py \
+          tests/nodb/mods/test_postfire_debris_flow_dnbr.py \
+          tests/nodb/mods/test_postfire_debris_flow_soil_thickness.py \
+          tests/microservices/test_rq_engine_postfire_debris_flow.py \
+          tests/rq/test_project_rq_archive.py
+    - name: Remove isolated test runtime
+      if: always() && steps.wctl.outcome == 'success'
+      run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans
+        --rmi local
+    forest_bootstrap: false
+    env:
+      COMPOSE_PROJECT_NAME: wepppy-${{ github.run_id }}-${{ github.run_attempt }}-artifact-observability
+permissions:
+  contents: read

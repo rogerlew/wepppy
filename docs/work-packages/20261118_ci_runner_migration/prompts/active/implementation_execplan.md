@@ -6,7 +6,8 @@ This living ExecPlan follows docs/prompt_templates/codex_exec_plans.md.
 
 Useful CI checks must actually execute on registered runners instead of queuing
 forever. Preserve checks and reports while removing Forest host dependencies.
-Retire the 21 profile schedules explicitly approved by the operator.
+Retire the 21 profile schedules and legacy CI Samurai SSH/restart schedule
+explicitly approved by the operator.
 
 ## Progress
 

@@ -1,0 +1,23 @@
+# Browser-only extension; inherit the isolated runtime without host ports or data.
+services:
+  weppcloud:
+    extends:
+      file: docker-compose.test.yml
+      service: weppcloud
+    environment:
+      WEPPCLOUD_DEPLOYMENT_PROFILE: test
+      TEST_SUPPORT_ENABLED: "true"
+    tmpfs:
+      - /wc1/runs:mode=1777
+      - /wc1/logs:mode=1777
+  postgres:
+    extends:
+      file: docker-compose.test.yml
+      service: postgres
+  redis:
+    extends:
+      file: docker-compose.test.yml
+      service: redis
+networks:
+  default:
+    internal: true

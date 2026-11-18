@@ -3,21 +3,46 @@ on:
   schedule:
   - cron: 0 9 * * *
   workflow_dispatch: null
-env:
-  RUNNER_DOCKER_ENV: /workdir/wepppy/docker/.env
 jobs:
   pytest-coverage:
     runs-on:
     - self-hosted
     - Linux
     - X64
-    - homelab
+    - remote-ci
     timeout-minutes: 120
     steps:
-    - name: Run pytest coverage suite
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+        lfs: true
+        fetch-depth: 0
+    - name: Verify materialized inputs
       run: |
-        set -euo pipefail
-        scripts/run-pytest-coverage.sh
+        git lfs checkout
+        git lfs fsck
+        python3 tools/verify_lfs_materialized.py --tracked
+    - name: Install wctl shim
+      id: wctl
+      env:
+        WCTL_SYMLINK_PATH: ${{ github.workspace }}/.wctl/bin/wctl
+      run: |
+        mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
+        ./wctl/install.sh dev
+        echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
+    - name: Start isolated test runtime
+      run: wctl --compose-file docker/docker-compose.test.yml up -d --build --wait
+    - name: Build controller assets
+      run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud /opt/venv/bin/python
+        wepppy/weppcloud/controllers_js/build_controllers_js.py
+    - name: Initialize disposable account schema
+      run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud /opt/venv/bin/python
+        tests/bootstrap_ci_database.py
+    - name: Run pytest coverage suite
+      run: |-
+        wctl --compose-file docker/docker-compose.test.yml run-pytest tests --cov=wepppy --cov-report=term-missing --cov-report=xml:coverage/coverage.xml
+        test -s coverage/coverage.xml
     - name: Upload coverage artifacts
       if: always()
       uses: actions/upload-artifact@v4
@@ -25,3 +50,12 @@ jobs:
         name: pytest-coverage
         path: coverage
         if-no-files-found: warn
+    - name: Remove isolated test runtime
+      if: always() && steps.wctl.outcome == 'success'
+      run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans
+        --rmi local
+    forest_bootstrap: false
+    env:
+      COMPOSE_PROJECT_NAME: wepppy-${{ github.run_id }}-${{ github.run_attempt }}-pytest-coverage-nightly
+permissions:
+  contents: read

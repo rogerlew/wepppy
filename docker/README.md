@@ -801,3 +801,22 @@ The shared dev profile applies to every service that lazily imports Flask for
 ownership/auth checks, including browse, download, D-Tale, query-engine,
 rq-engine and workers. Production and worker shared environments pin
 production/disabled too; web-only profile configuration is insufficient.
+
+
+### Isolated browser and Status2 CI checks
+
+`docker-compose.browser-test.yml` extends the existing test runtime with explicit
+`test` deployment identity and ephemeral `/wc1/runs` storage. It publishes no ports.
+`tests/ci_browser_runtime.py` initializes an empty account database, creates an
+in-memory disposable account and token, mounts the app at `/weppcloud` on loopback,
+and runs the existing browser suites. Recreate the project between suites because
+the fixture refuses an already populated database. Reports live under
+`wepppy/weppcloud/static-src/test-results/` and `playwright-report/`.
+
+`docker-compose.status-smoke-test.yml` builds the actual Status2 service and its
+existing authenticated smoke client. It uses job-local Redis and signing material,
+no host secrets and no published ports. A successful run reports five delivered
+status frames and a latency summary. Use a unique `COMPOSE_PROJECT_NAME` and run
+`down --volumes --remove-orphans --rmi local` after either runtime, including failures.
+The existing developer `scripts/run-status2-smoke.sh` remains available for deliberate
+checks against a configured development stack.

@@ -5279,3 +5279,16 @@ def test_runs0_observed_shell_requires_own_state(
         tag = re.search(r'<[^>]+ ' + attribute + r'="observed"[^>]*>', html)
         assert tag is not None
         assert ('hidden' in tag.group(0)) is (not visible)
+
+
+@pytest.mark.parametrize("developer_mode", [None, False, True])
+def test_run_header_developer_indicator_uses_current_view_model(jinja_env, developer_mode):
+    # The component gallery supplies only current_ron, unlike run pages.
+    jinja_env.globals.pop("ron", None)
+    view = jinja_env.globals["current_ron"]
+    if developer_mode is not None:
+        view.developer_mode = developer_mode
+    rendered = jinja_env.get_template("header/_run_header_fixed.htm").render()
+    indicator = re.search(r"<span data-project-developer-indicator ([^>]*)>", rendered)
+    assert indicator is not None
+    assert ("hidden" in indicator.group(1)) is (developer_mode is not True)

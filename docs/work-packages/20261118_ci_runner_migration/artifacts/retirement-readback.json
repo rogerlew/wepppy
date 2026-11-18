@@ -1,0 +1,134 @@
+[
+  {
+    "workflow": "profile-archive-us-small.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-double-ash-load.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-fork-rattlesnake-undisturbify.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-fork-us-small.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-legacy-palouse.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-rattlesnake-gridmet-interp-watar10mm-dss_export.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-rattlesnake-remove-rap-daymet-multi-interp-omni.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-10m-mofe.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-australia-disturbed.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-earth-small.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-europe-disturbed.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-nexrad-prism-debrisflow.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-portland-disturbed.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-rattlesnake.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-rhem.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-sbs-noct.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-sbs-wbt-mofe.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-seattle-simfire.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-us-small.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-run-wepp-reveg.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "profile-single-storm.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  },
+  {
+    "workflow": "ci-samurai-nightly-ssh.yml",
+    "state": "disabled_manually",
+    "queued_count": 0,
+    "queued_ids": []
+  }
+]

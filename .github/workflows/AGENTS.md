@@ -60,8 +60,24 @@ preflight exited at 05:10:26 UTC on 2026-11-16, killing concurrent pytest with
 exit 137. Relabeling a Forest job alone does not supply its host dependencies.
 The replacement runtime was validated directly on runner-02: both guard
 scripts and all 15 targeted tests passed on 2026-11-16.
-Other Forest jobs still target `homelab`; migrate their runtime before moving
-them to `remote-ci` rather than applying a blanket runner-label replacement.
+Active Python checks use the isolated test runtime on `remote-ci`. JavaScript
+checks install locked dependencies with Node 20; Go checks use their committed
+module toolchain and run integration-tagged tests. No migrated job inherits Forest
+host configuration, secrets or Redis-directory cleanup. Browser checks extend the
+isolated runtime through `docker/docker-compose.browser-test.yml` and
+`tests/ci_browser_runtime.py`: actual Flask routes, disposable authenticated users,
+short-lived test-support tokens, local loopback only and fresh report validation.
+Status2 smoke builds the actual service and existing authenticated client in
+`docker/docker-compose.status-smoke-test.yml`; Redis and signing keys are job-local.
+
+The operator retired all 21 old profile schedules on 2026-11-18. Their catalog is
+retained in the CI runner migration work package; profile CLI tools remain available.
+Do not recreate those scheduled jobs from archived inputs. Cloc runs on a disposable
+hosted runner and counts the actual checkout plus any available sibling repositories;
+it does not claim full-stack totals when those optional repositories are absent.
+
+Runner migration evidence and outstanding acceptance are tracked in
+`docs/work-packages/20261118_ci_runner_migration/`.
 
 ### Why keep the builder under `scripts/`?
 
