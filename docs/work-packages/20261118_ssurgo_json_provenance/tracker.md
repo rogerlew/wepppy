@@ -19,3 +19,5 @@
 
 - Approved activation: PR #675 merged at 0ae17ad8a393a4fbe250241b2253b77cc475d06b; candidate/merge governance pass. All five shared forest consumers now select mirror-first and reach the pinned release. Unrelated local history/work preserved; source/configuration rollback copies retained.
 - Activation evidence: artifacts/forest-activation; real normal-queue build and soil-preparation canaries validate generated inputs and source sidecars.
+
+- National recovery complete on forest: official nationwide SSURGO and STATSGO2 active; 22,073,263 imported rows; all five source-query families match. cavernous-oxygen rebuilt without SDA fallback, with 21 base provenance hashes and all 32 prepared hillslope inputs verified. National canaries match 152 reference inputs; authenticated routes return 200. Evidence: artifacts/national-activation.json. Full live SDA parity remains deferred.

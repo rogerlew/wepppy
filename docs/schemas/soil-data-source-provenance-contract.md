@@ -212,3 +212,13 @@ cache. Translate selection schema/SQLite/filesystem failures to SoilDataSourceEr
 so existing OSError/ValueError candidate handlers cannot hide provenance failure.
 DNS child exit codes must distinguish remote name resolution failure from local
 process failure. XML DTD/entity rejection must work for UTF-16 as well as UTF-8.
+
+## Shared default geographic coverage
+
+The operator requires nationwide SSURGO and STATSGO2 for the shared mirror-first
+default. A regional import is qualification data, not sufficient outage coverage.
+Comprehensive live SDA parity remains deferred; the actual national data must
+be loaded. This clarifies the acceptance scope after the regional forest default
+failed on all 22 Colorado map units in cavernous-oxygen while SDA remained down.
+Release changes retain immutable identities, source-separated caches, and deliberate
+migration of saved mirror pins; unrelated explicit source overrides are preserved.

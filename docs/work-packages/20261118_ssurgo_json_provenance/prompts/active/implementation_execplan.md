@@ -19,6 +19,8 @@ geographic/live parity is deferred until SDA recovery, not a prerequisite.
 
 ## Progress
 
+- [x] (2026-11-18) Recover nationwide SSURGO and STATSGO2 coverage, transition forest release pins, and verify cavernous-oxygen: 21 base provenance hashes, all 32 prepared inputs, and 152 reference-matching canary files. See service nationwide-recovery-plan.md.
+
 
 - [x] Inspect six collection consumers, legacy transport/cache and frozen service contracts.
 - [x] Author operator-authorized canonical contract and data compatibility plan.
@@ -77,6 +79,8 @@ cover real filesystem/SQLite and local HTTP boundaries, plus real generated outp
 
 ## Surprises & Discoveries
 
+The regional default failed all 22 Colorado keys in cavernous-oxygen while SDA returned HTTP 5xx. National imports contain those keys and both SSURGO/STATSGO2 domains; source/import parity and real queued recovery passed. Treat national loading separately from deferred live geographic parity.
+
 
 The current sidecar hardcodes USDA attribution; old rows do not have verified source
 lineage. Existing _sync does not persist all-empty negative responses. JSON will
@@ -93,6 +97,8 @@ a matched-environment transport result, not proof of deployment-image equivalenc
 
 ## Decision Log
 
+2026-11-18: Nationwide SSURGO and STATSGO2 are required for the shared default. The regional rollout was insufficient during the SDA outage; loading national data is mandatory while full live parity remains deferred. Canonical scope is now in soil-data-source-provenance-contract.md, Shared default geographic coverage.
+
 2026-11-18 follow-up: accept retained SSURGO/STATSGO fixture evidence for broader
 query/builder behavior and move comprehensive geographic/live testing to recovery.
 The operator now prefers the mirror as default with SDA fallback. Keep actual data
@@ -108,6 +114,8 @@ files or silently relabel historical rows. Require an explicit expected release 
 warm-cache reuse needs no metadata request and cannot mix releases.
 
 ## Outcomes & Retrospective
+
+National recovery completed on forest: 22,073,263 imported rows, source-family projection parity, successful real-project build/preparation, 152 reference-matching canary inputs, and authenticated HTTPS checks. Retained evidence is artifacts/national-activation.json. Regional qualification alone was insufficient for the outage-resilience deployment objective.
 
 
 Implementation and independent review complete. Paired ssurgo-004 real-service run
