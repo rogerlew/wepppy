@@ -769,3 +769,51 @@ def test_browse_not_found_breadcrumb_escapes_reflected_path(tmp_path, load_run_b
         links = [a['href'] for a in parsed.links() if a.get('href', '').startswith(href)]
         assert len(links) == 1
         assert parse_qs(urlparse(links[0]).query) == {'diff': ['other&"value']}
+
+
+@pytest.mark.parametrize('route', ['run', 'directory', 'culvert', 'batch'])
+@pytest.mark.parametrize('filter_value,expected', [(None, 200), ('bob', 200), ('missing', 422)])
+def test_native_csv_actual_routes(tmp_path, load_run_browse, monkeypatch, native_csv_converter,
+                                  route, filter_value, expected):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    from types import SimpleNamespace
+    from wepppy.microservices.browse import _download, parquet_csv
+
+    root = tmp_path / 'root'
+    relative = 'landuse/table.PQ' if route == 'directory' else 'table.parquet'
+    path = root / relative
+    path.parent.mkdir(parents=True)
+    pq.write_table(pa.table({'name': ['Alice', 'bob'], 'value': [1., 2.]}), path)
+    browse = load_run_browse({'native-csv': root}, SITE_PREFIX='/weppcloud',
+                             CULVERTS_ROOT=str(tmp_path), BATCH_RUNNER_ROOT=str(tmp_path),
+                             BROWSE_PARQUET_FILTERS_ENABLED='0', BROWSE_PARQUET_EXPORT_MAX_ROWS='1')
+    monkeypatch.setattr(parquet_csv, 'CONVERTER', native_csv_converter)
+    monkeypatch.setattr(_download, 'authorize_run_request', browse.authorize_run_request)
+    monkeypatch.setattr(_download, 'authorize_group_request', browse.authorize_group_request)
+    monkeypatch.setattr(_download, '_resolve_run_context', lambda *args: SimpleNamespace(active_root=root))
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError('CSV path decoded Parquet in the web worker')
+    monkeypatch.setattr(_download, 'compile_filter_payload_for_path', forbidden)
+    monkeypatch.setattr(_download.pq, 'ParquetFile', forbidden)
+    assert not hasattr(_download, '_parquet_to_csv_bytes_with_units')
+    if route in ('run', 'directory'):
+        url = '/weppcloud/runs/native-csv/cfg/download/' + relative
+    else:
+        url = f'/weppcloud/{"culverts" if route == "culvert" else "batch"}/root/download/' + relative
+    params = {'as_csv': '1'}
+    if filter_value is not None:
+        params['pqf'] = _encode_filter_payload({'kind': 'condition', 'field': 'name',
+                                               'operator': 'Equals', 'value': filter_value})
+    with TestClient(browse.create_app()) as client:
+        response = client.get(url, params=params, headers={'Range': 'bytes=invalid'})
+    assert response.status_code == expected, response.text
+    if expected == 200:
+        assert response.content == (b'name,value\nbob,2.0\n' if filter_value else b'name,value\nAlice,1.0\nbob,2.0\n')
+        assert int(response.headers['content-length']) == len(response.content)
+        assert 'content-range' not in response.headers
+        assert response.headers['content-type'].startswith('text/csv')
+    else:
+        assert response.json()['error']['code'] == 'no_rows_matched_filter'
+    assert not list(native_csv_converter.root.glob('slot-[01]'))

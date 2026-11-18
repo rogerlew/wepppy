@@ -4,7 +4,6 @@ use crate::compact::scan_struct;
 use parquet::basic::{Compression, Encoding, Repetition};
 use parquet::file::reader::{FileReader, SerializedFileReader};
 use parquet::schema::types::SchemaDescriptor;
-use std::collections::BTreeSet;
 use std::ffi::CString;
 use std::fs::{File, OpenOptions};
 use std::os::fd::{AsRawFd, FromRawFd};
@@ -239,7 +238,7 @@ fn validate_metadata(
             }
             if !matches!(
                 column.compression(),
-                Compression::UNCOMPRESSED | Compression::SNAPPY
+                Compression::UNCOMPRESSED | Compression::SNAPPY | Compression::ZSTD(_)
             ) {
                 return Err("codec");
             }
@@ -315,12 +314,8 @@ fn validate_schema(schema: &SchemaDescriptor) -> Result<(), &'static str> {
     if fields.len() != schema.num_columns() {
         return Err("nested_schema");
     }
-    let mut names = BTreeSet::new();
     for field in fields {
-        if !field.is_primitive()
-            || field.get_basic_info().repetition() == Repetition::REPEATED
-            || !names.insert(field.name())
-        {
+        if !field.is_primitive() || field.get_basic_info().repetition() == Repetition::REPEATED {
             return Err("schema");
         }
     }
@@ -413,7 +408,7 @@ fn scan_column_pages(
                 let entries = required(&scan.integers, &[7, 1])?;
                 if saw_dictionary
                     || saw_data
-                    || !(0..=100_000).contains(&entries)
+                    || !(0..=131_072).contains(&entries)
                     || (expected.values == 0 && entries != 0)
                     || !matches!(required(&scan.integers, &[7, 2])?, 0 | 2)
                 {
@@ -707,7 +702,7 @@ mod tests {
     #[test]
     fn dictionary_entry_header_accepts_exact_and_rejects_plus_one() {
         let path = temporary("dictionary");
-        for (entries, expected) in [(100_000, "page_range"), (100_001, "dictionary")] {
+        for (entries, expected) in [(131_072, "page_range"), (131_073, "dictionary")] {
             let bytes = dictionary_page(entries);
             fs::write(&path, &bytes).unwrap();
             let file = OpenOptions::new().read(true).open(&path).unwrap();

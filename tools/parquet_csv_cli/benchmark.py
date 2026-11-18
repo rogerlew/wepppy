@@ -14,6 +14,7 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT.parents[1]))
 
 
 def digest(path):
@@ -26,9 +27,9 @@ def digest(path):
 def worker(method, source, output, sidecar):
     source, output = Path(source), Path(output)
     if method == 'rust':
-        from harness import Converter
+        from wepppy.microservices.parquet_csv import Converter
         async def run():
-            converter=Converter(ROOT/'rust/target/release/parquet_csv_cli',Path(sidecar),output.parent/'scratch')
+            converter=Converter(ROOT/'rust/target/release/parquet_csv_cli',Path(sidecar),output.parent/'scratch', source_root=ROOT)
             with await converter.convert(source) as artifact:
                 return {'seconds':artifact.wall_seconds,'child_peak_rss_kib':artifact.peak_rss_kib,'child_cpu_seconds':artifact.cpu_seconds,'output_bytes':artifact.bytes,'output_sha256':digest(artifact.path),'rows':artifact.rows}
         result=asyncio.run(run())
@@ -38,7 +39,7 @@ def worker(method, source, output, sidecar):
         import pyarrow as pa
         import pyarrow.csv as pc
         import pyarrow.parquet as pq
-        spec=importlib.util.spec_from_file_location('oracle',ROOT.parents[1]/'wepppy/microservices/browse/parquet_tables.py')
+        spec=importlib.util.spec_from_file_location('oracle',ROOT/'oracle.py')
         oracle=importlib.util.module_from_spec(spec);spec.loader.exec_module(oracle)
         started=time.monotonic(); f=pq.ParquetFile(source)
         if method=='python':
@@ -72,8 +73,8 @@ def main():
         worker(*sys.argv[2:]);return
     parser=argparse.ArgumentParser();parser.add_argument('--corpus',type=Path,required=True);parser.add_argument('--output',type=Path,required=True);parser.add_argument('--repetitions',type=int,default=3);parser.add_argument('--methods',nargs='+',choices=['python','native','rust'],default=['python','native','rust'])
     args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=True)
-    from harness.provenance import generate
-    binary=ROOT/'rust/target/release/parquet_csv_cli';sidecar=args.output/'binary.json';generate(binary,sidecar)
+    from wepppy.microservices.parquet_csv.provenance import generate
+    binary=ROOT/'rust/target/release/parquet_csv_cli';sidecar=args.output/'binary.json';generate(binary,sidecar,ROOT)
     env={'host':platform.node(),'platform':platform.platform(),'python':sys.version,'binary_sha256':digest(binary),'source_sha':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'cache':'warm repetitions; independent advisory first-touch run recorded separately','cpu_count':os.cpu_count()}
     (args.output/'environment.json').write_text(json.dumps(env,indent=2)+'\n')
     with (args.output/'results.jsonl').open('a') as records:

@@ -1,7 +1,7 @@
 # Parquet CSV integration tracker
 
 **Started / updated**: 2026-11-18 UTC
-**Phase**: M0 ratified; M1 implementation next
+**Phase**: M1/M2 implemented; focused validation and image build in progress
 **Branch**: `codex/parquet-csv-cli-package`
 **Security impact**: high; dedicated reviews required, not yet performed
 **Plan**: [implementation_execplan.md](prompts/active/implementation_execplan.md)
@@ -72,3 +72,27 @@ checkpoint approved; final correctness confirmation pending after dispositions.
 M0: both independent reviews approve the final contract; all medium/high findings
 closed. Documentation checks pass. The next commit is the required standalone
 checkpoint ancestor; its full SHA will be recorded before production edits.
+
+Checkpoint ancestor: `a1f40de48bce439520fd47bb5e8d3f9ae0167bd0`.
+
+
+2026-11-18 UTC implementation: promoted the single supervisor into production,
+wired all CSV routes, removed production Python CSV serialization and retained a
+test-only oracle. Added protocolv2, native filters and required compatibility,
+shared inherited leases, wall/parent-death termination, stream/disconnect cleanup,
+fixed image packaging and a canonical deployment preflight. No live service changed.
+
+Focused runs progressed through113,178 and186 passing checks while identifying
+and closing compatibility/test-fixture issues. Six real compatibility files match
+oracle bytes (initial evidence at /tmp/csv-v2-real-readback.json). Independent
+read-only implementation review is active. Final focused run, exact image,
+full corpus/resource evidence and broad suite remain open; no completion claim.
+
+Dictionary amendment ancestor: `3fefd089d`; both reviewers approved before source
+threshold edit. Exact 131,072/131,073 boundary and real-file parity are next.
+
+Focused acceptance: 208 native/route/lifecycle checks passed (receipt
+`2f719ee5ef6a476fa144608e9c507f91`); 152 adjacent filter/auth/security checks passed
+(receipt `8f88d21621874924a12c1cfb6162687b`). Rust: 13 passed, including amended
+dictionary boundary. M1/M2 implemented and wired. M3 exact-image/corpus/broad
+acceptance and M4 final reviews remain in progress.

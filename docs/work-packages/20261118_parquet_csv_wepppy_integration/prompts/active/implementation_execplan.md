@@ -24,12 +24,20 @@ negative security tests against the built service image.
 - [x] (2026-11-18 UTC) Validate six Markdown files, spelling previews and whitespace; no runtime tests.
 - [x] M0: Inventory valid states/compatibility, resolve settings/errors and ratify contracts.
 - [x] M0: Obtain independent contract reviews and commit checkpoint before code edits.
-- [ ] M1: Package production CLI/harness and close native compatibility gaps.
-- [ ] M2: Wire all supported CSV paths; implement serving ownership and remove old conversion.
+- [x] (2026-11-18 UTC) M1: Package production CLI/harness and close native compatibility gaps.
+- [x] (2026-11-18 UTC) M2: Wire all supported CSV paths; implement serving ownership and remove old conversion.
 - [ ] M3: Validate focused and exact-image workflows; then run the broad suite.
 - [ ] M4: Close reviews, document release/rollback and hand off validated integration.
 
 ## Surprises & Discoveries
+
+2026-11-18 execution:156 real files require timestamp/null/WKB/ZSTD support.
+Filtered duplicate names use DuckDB suffix chaining, and mixed duplicate types
+retain DOUBLE cast behavior. DuckDB1.1.1 simple Unicode lowercase differs from
+Rust's newer tables; freeze the1407 non-ASCII mappings in generated owned source.
+PyArrow timestamp-second fixture writing can wrap values during millisecond
+coercion, so hostile-file tests must verify the encoded timestamp type/value.
+
 
 
 The current exporter already avoids pandas for CSV, but `_download.py` creates
@@ -49,6 +57,11 @@ shared if every worker uses the same root. Worker/proxy timeout semantics and
 parent-crash recovery also require integration evidence.
 
 ## Decision Log
+
+2026-11-18, independent reviewers: dictionary cap amendment approved and committed
+at `3fefd089d` before the threshold edit. Seven observed dictionaries need more
+than 100,000 entries; maximum 125,855. Set 131,072, preserving other limits.
+Exact threshold/plus-one tests pass; real-file acceptance is in progress.
 
 2026-11-18, operator: approve temporary conversion storage. Delete staged input
 copies, completed/partial CSVs and IPC files after serving, failure or crash
@@ -78,7 +91,9 @@ Immediate cutover does not waive contract, exact-image or deployment safety gate
 ## Outcomes & Retrospective
 
 
-M0 execution in progress. No production code, image, route or running service has changed.
+M0 committed at a1f40de48. M1/M2 code is wired and under focused validation;
+208 focused native/route/lifecycle tests and 152 adjacent filter/auth/security
+tests pass. Final common-image build and runtime acceptance are pending. No deployment occurred.
 The accepted standalone implementation is a starting asset, not completed HTTP
 integration. This package cannot close on an adapter stub or mocked route tests.
 

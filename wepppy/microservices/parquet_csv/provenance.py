@@ -1,4 +1,4 @@
-"""Exact source/binary identity for the evaluation CLI."""
+"""Exact installed source/binary identity for the required native CLI."""
 import hashlib
 import json
 import math
@@ -7,7 +7,7 @@ import os
 import stat
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path("/opt/parquet-csv")
 HEX = re.compile(r'[0-9a-f]{64}\Z')
 
 
@@ -83,12 +83,12 @@ def inventory(root: Path = ROOT) -> dict[str, str]:
     return result
 
 
-def generate(binary: Path, sidecar: Path) -> None:
-    result = {'version': 1, 'binary_sha256': digest(binary), 'sources': inventory()}
+def generate(binary: Path, sidecar: Path, root: Path = ROOT) -> None:
+    result = {'version': 1, 'binary_sha256': digest(binary), 'sources': inventory(root)}
     sidecar.write_text(json.dumps(result, indent=2) + '\n')
 
 
-def validate(binary: Path, sidecar: Path) -> str:
+def validate(binary: Path, sidecar: Path, root: Path = ROOT) -> str:
     if sidecar.is_symlink() or binary.is_symlink() or sidecar.stat().st_size > 65536:
         raise ValueError('invalid provenance file')
     value = strict_json(_read_regular(sidecar, 65536)[1])
@@ -96,7 +96,7 @@ def validate(binary: Path, sidecar: Path) -> str:
         raise ValueError('invalid provenance schema')
     if type(value['version']) is not int or value['version'] != 1:
         raise ValueError('invalid provenance version')
-    expected = inventory()
+    expected = inventory(root)
     if value['sources'] != expected or not isinstance(value['binary_sha256'], str) or not HEX.fullmatch(value['binary_sha256']):
         raise ValueError('provenance mismatch')
     actual = _read_regular(binary, 64 * 1024 * 1024, executable=True)[0]
@@ -110,5 +110,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('binary', type=Path)
     parser.add_argument('sidecar', type=Path)
+    parser.add_argument("--source-root", type=Path, default=ROOT)
     args = parser.parse_args()
-    generate(args.binary, args.sidecar)
+    generate(args.binary, args.sidecar, args.source_root)

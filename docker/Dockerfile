@@ -9,6 +9,16 @@ RUN npm ci --legacy-peer-deps
 COPY wepppy/weppcloud/static-src/ ./
 RUN npm run build
 
+
+FROM rust:1.92.0-slim-trixie@sha256:bf3368a992915f128293ac76917ab6e561e4dda883273c8f5c9f6f8ea37a378e AS parquet-csv-builder
+RUN apt-get update && apt-get install -y --no-install-recommends python3 pkg-config && rm -rf /var/lib/apt/lists/*
+WORKDIR /src/parquet-csv
+COPY tools/parquet_csv_cli/rust/Cargo.toml tools/parquet_csv_cli/rust/Cargo.lock ./rust/
+COPY tools/parquet_csv_cli/rust/src ./rust/src
+COPY wepppy/microservices/parquet_csv/provenance.py ./provenance.py
+RUN cargo build --release --locked --manifest-path rust/Cargo.toml && \
+    python3 provenance.py rust/target/release/parquet_csv_cli provenance.json --source-root /src/parquet-csv
+
 FROM ${RUNTIME_BASE_IMAGE} AS base
 
 LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy"
@@ -209,9 +219,18 @@ RUN set -euxo pipefail; \
     fi; \
     chown "${APP_USER}:${GROUP_NAME}" /var/log/wepppy /var/lib/wepppy
 
+
+# Required native CSV backend; fixed installed source identity survives checkout mounts.
+COPY --from=parquet-csv-builder /src/parquet-csv/rust/target/release/parquet_csv_cli /usr/local/bin/parquet_csv_cli
+COPY --from=parquet-csv-builder /src/parquet-csv/provenance.json /opt/parquet-csv/provenance.json
+COPY tools/parquet_csv_cli/rust/Cargo.toml tools/parquet_csv_cli/rust/Cargo.lock /opt/parquet-csv/rust/
+COPY tools/parquet_csv_cli/rust/src /opt/parquet-csv/rust/src
+COPY tools/parquet_csv_cli/fixtures/readiness.parquet tools/parquet_csv_cli/fixtures/readiness.csv /opt/parquet-csv/
+
 USER ${APP_USER}
 
 WORKDIR /workdir/wepppy
+RUN /opt/venv/bin/python -m wepppy.microservices.parquet_csv.preflight
 
 EXPOSE 8000
 
