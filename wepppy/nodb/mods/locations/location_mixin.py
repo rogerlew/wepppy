@@ -100,7 +100,7 @@ class LocationMixin(object):
                 else:
                     if k not in _soils:
                         caller = ':'.join(_split(self._nodb)[-1].split('.')[::-1])
-                        soil_u = WeppSoilUtil(src_fn)
+                        soil_u = WeppSoilUtil(src_fn, max_horizons=soils.soil_input_capacity)
                         mod_soil = soil_u.to_7778disturbed(replacements, hostname='dev.wepp.cloud')
                         mod_soil.write(dst_fn)
                         

@@ -1,0 +1,81 @@
+{
+  "status": "segmented_broad_coverage_passed",
+  "selected": 15059,
+  "unique_passed": 14554,
+  "runtime_skipped": 505,
+  "collection_skipped": 1,
+  "deselected_opt_in": 99,
+  "completed_prefix": {
+    "passed": 6503,
+    "runtime_skipped": 224,
+    "modules": 354
+  },
+  "remainder": {
+    "initial_passed": 8050,
+    "runtime_skipped": 281,
+    "failure_repaired": 1,
+    "selected": 8332
+  },
+  "single_uninterrupted_green_full_run": false,
+  "cross_segment_ordering_reexercised": false,
+  "production_review_hashes_match": true,
+  "receipts": {
+    "prefix": {
+      "path": "/workdir/wepppy-soil-input-capacity-23/.wctl-test-runs/7a6bb7729836498c995b07e269177b48/receipt.json",
+      "sha256": "97009b7d65cada45ebe1ed5e272cc0acdbeca83051e986fe9567234fdc298c42",
+      "status": "failed",
+      "pytest_exitstatus": 1,
+      "source_changes": [],
+      "runtime_changes": []
+    },
+    "remainder": {
+      "path": "/workdir/wepppy-soil-input-capacity-23/.wctl-test-runs/ac2993c89cdc4e86b45dcc2bf1a14191/receipt.json",
+      "sha256": "2eedf172ce7e3a27ba1eb1fbc7cedad6fd269d5dd483f0678ec156e68a899ad0",
+      "status": "source_changed",
+      "pytest_exitstatus": 1,
+      "source_changes": [
+        "wepppy/wepp/management/scripts/man42_5.man.json"
+      ],
+      "runtime_changes": []
+    },
+    "repair": {
+      "path": "/workdir/wepppy-soil-input-capacity-23/.wctl-test-runs/99650b889c0a4f90bcc2ef2574ec0dc4/receipt.json",
+      "sha256": "b855148cd0b47bb0580511c29d8f83fcf8a75feac8e87599c189ea4e477f66d1",
+      "status": "passed",
+      "pytest_exitstatus": 0,
+      "source_changes": [],
+      "runtime_changes": []
+    },
+    "derivatives": {
+      "path": "/workdir/wepppy-soil-input-capacity-23/.wctl-test-runs/d7fe9f8a044c489fa8451ca927fe1ccf/receipt.json",
+      "sha256": "ed85f6c58a18847bee82195d2564a44bfbb0468f1926e4e131d400424831a378",
+      "status": "passed",
+      "pytest_exitstatus": 0,
+      "source_changes": [],
+      "runtime_changes": []
+    },
+    "fixtures": {
+      "path": "/workdir/wepppy-soil-input-capacity-23/.wctl-test-runs/fd249489f69c4ccfa485ce6c62029e37/receipt.json",
+      "sha256": "366e4d3212302b006b29d71e7bc1f4e66d5ad550be5918c31a1dcec8b2aadf8d",
+      "status": "passed",
+      "pytest_exitstatus": 0,
+      "source_changes": [],
+      "runtime_changes": []
+    },
+    "disturbed": {
+      "path": "/workdir/wepppy-soil-input-capacity-23/.wctl-test-runs/b5179e5a74d54a02a13ee8faecd1b100/receipt.json",
+      "sha256": "92f45f35a271e5fe4cfe67f411b997514eb0971e28a03545dbf6bd7f190c82d1",
+      "status": "passed",
+      "pytest_exitstatus": 0,
+      "source_changes": [],
+      "runtime_changes": []
+    }
+  },
+  "logs": {
+    "python-full5.log": "e4d6e8473eb4099f728f811a33f0f57476f8e47abccf351e9c5261865616bbc7",
+    "python-full-remainder.log": "961b14c551f9bb6fdb1150a6253c21613ffbee459dce48f46943dbab35410bd7",
+    "final-publication-imports.log": "cfb685d696f484d736297473a742f667d2dbafda7613e046ce744dec3832bba9",
+    "review-consumers.log": "a778d92f2bc6245c4be956e1cebbddcba58d303c0803e895f67bf5cb6058ccee",
+    "final-fixtures.log": "bae9399063cf622cddd14b46821d6856002bd472246cb6eb150834d3331ac881"
+  }
+}

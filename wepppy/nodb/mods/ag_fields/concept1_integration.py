@@ -23,6 +23,7 @@ from wepp_runner.wepp_runner import (
     make_hillslope_run,
     run_hillslope,
 )
+from wepp_runner.wepp_binary_capabilities import get_soil_input_capacity
 from wepppy.nodb.redis_prep import RedisPrep
 
 from .concept1_inputs import synthesize_concept1_parent_inputs
@@ -255,6 +256,7 @@ class AgFieldsConcept1Integrator(AgFieldsWatershedIntegrator):
                 subfield_runs_dir=self.subfield_runs_dir,
                 target_runs_dir=self.runs_dir,
                 target_width_m=float(summary["residual_width_m"]),
+                max_horizons=get_soil_input_capacity(self.controller.wepp_bin),
             )
 
         years = int(self.controller.climate_instance.input_years)

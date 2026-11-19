@@ -461,7 +461,8 @@ class CapabilityGraph:
         if set(self.wepp_binary_revisions) != set(self.wepp_binaries):
             raise CapabilityGraphError("wepp_binary_revisions keys must exhaust the binary axis")
         role_pattern = re.compile(
-            r"^provider-v1:watershed=[0-9a-f]{64}:hillslope=[0-9a-f]{64}$"
+            r"^provider-v1:watershed=[0-9a-f]{64}:hillslope=[0-9a-f]{64}"
+            r"(?::soil_capacity=(?:[1-9]|1[0-9]|2[0-3]))?$"
         )
         if any(role_pattern.fullmatch(value) is None for value in self.wepp_binary_revisions.values()):
             raise CapabilityGraphError("wepp_binary_revisions contains an invalid role identity")

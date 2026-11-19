@@ -26,6 +26,8 @@ class _FakeProcess:
 def _write_hillslope_inputs(tmp_path, wepp_id):
     for suffix in ("man", "sol", "slp", "cli", "run"):
         (tmp_path / f"p{wepp_id}.{suffix}").write_text("stub\n", encoding="ascii")
+    (tmp_path / f"p{wepp_id}.sol").write_text("7778\ncomment\n1 0\n'profile' 'loam' 1 .2 .75 400000 .00008 2\n400 1.3 36 2 .3 .1 40 20 2 15 5\n1 10000 .01\n", encoding="ascii")
+    (tmp_path / f"p{wepp_id}.run").write_text(f"p{wepp_id}.sol\n", encoding="ascii")
 
 
 @pytest.fixture(autouse=True)
@@ -169,7 +171,7 @@ def test_run_hillslope_waits_for_missing_input_then_succeeds(monkeypatch, tmp_pa
     def _fake_sleep(delay):
         sleep_calls.append(delay)
         if not sol_path.exists():
-            sol_path.write_text("stub\n", encoding="ascii")
+            sol_path.write_text("7778\ncomment\n1 0\n'profile' 'loam' 1 .2 .75 400000 .00008 2\n400 1.3 36 2 .3 .1 40 20 2 15 5\n1 10000 .01\n", encoding="ascii")
 
     monkeypatch.setattr(wepp_runner_module, "sleep", _fake_sleep)
     monkeypatch.setattr(wepp_runner_module.subprocess, "Popen", _fake_popen)

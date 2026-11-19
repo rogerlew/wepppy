@@ -1,0 +1,656 @@
+diff --git a/docs/specs/source/input.for.md b/docs/specs/source/input.for.md
+index 508d8902f..e3ff8179a 100644
+--- a/docs/specs/source/input.for.md
++++ b/docs/specs/source/input.for.md
+@@ -5,3 +5,18 @@
+ 9005 binds seven extension fields per OFE and consumes one restrictive record. SOIL observation reports actual read values.
+ See `docs/contracts/specialized-revegetation-consumer.md`. Actual-consumer
+ and exact-artifact tests establish conformance; no ordinary default change.
++
++## Native input capacity evaluation (not released)
++
++The evaluation branch separates source-horizon arrays and depths (`mxhzin=11`)
++from calculation-layer arrays (`mxnsl=10`). Counts outside 1–11 stop explicitly.
++All existing aggregation operations, the 1800 mm clamp and final-horizon extension
++remain unchanged. Shared calculation depths are populated only by the existing
++calculation-grid loop. No runtime output or pass dimension is expanded.
++
++`tests/test_native_soil_input_capacity.py` compiles the actual reader and its
++native dependencies with bounds checks, then inspects calculation state for
++multiple OFEs, format variants, capacity boundaries and equivalent subdivisions.
++`tools/evaluate_soil_input_capacity.py` compares full three-year runs using
++baseline/candidate binaries and retained source inputs. This prototype does not
++relax WEPPpy's production ten-horizon contract or authorize a release.
+diff --git a/src/input.for b/src/input.for
+index f30729755..ae5f1e3a0 100644
+--- a/src/input.for
++++ b/src/input.for
+@@ -24,6 +24,9 @@ c
+       include 'pmxgrz.inc'
+       include 'pmxhil.inc'
+       include 'pmxnsl.inc'
++c     Evaluation: source horizons are separate from calculation layers.
++      integer mxhzin
++      parameter (mxhzin=11)
+       include 'pmxpln.inc'
+       include 'pmxpnd.inc'
+       include 'pmxelm.inc'
+@@ -173,23 +176,23 @@ c
+ c
+ c     + + + LOCAL VARIABLES + + +
+ c
+-      real rint, ddg(mxnsl), bd2(mxnsl), ssc2(mxnsl), thetf2(mxnsl),
+-     1    thetd2(mxnsl), sand2(mxnsl), clay2(mxnsl), orgma2(mxnsl),
+-     1    cec2(mxnsl), rfg2(mxnsl), del, dep, ksinv(mxnsl), slayth,
++      real rint, ddg(mxhzin), bd2(mxhzin), ssc2(mxhzin), thetf2(mxhzin),
++     1    thetd2(mxhzin), sand2(mxhzin), clay2(mxhzin), orgma2(mxhzin),
++     1    cec2(mxhzin), rfg2(mxhzin), del, dep, ksinv(mxnsl), slayth,
+      1    hslope,sleng,yy(mxslp),avslp,totthk,thkadd,solbtm,
+-     1    ui_ksari(mxnsl), ui_anisrt(mxnsl)
++     1    ui_ksari(mxnsl), ui_anisrt(mxhzin)
+       integer i, j, k, l, iout, ibdf(mxnsl), ithf(mxnsl), ithd(mxnsl),
+      1    issc(mxnsl), iii, iiii, n , km, nslfile
+       character*20 slid, texid
+-      character*512 discard
++      real solinp(mxhzin)
+ c
+ CAS ksat adj
+       character*40 luse, stext
+ CAS
+ c
+ CAS vg parameters 9002 soil format        A. Srivastava
+-      real vgthr2(mxnsl),vgths2(mxnsl),vgalph2(mxnsl),vgnpar2(mxnsl),
+-     1    vgks2(mxnsl),vgwp2(mxnsl), vgfc2(mxnsl)
++      real vgthr2(mxhzin),vgths2(mxhzin),vgalph2(mxhzin),
++     1    vgnpar2(mxhzin),vgks2(mxhzin),vgwp2(mxhzin),vgfc2(mxhzin)
+ c
+ c     + + + LOCAL DEFINITIONS + + +
+ c
+@@ -507,6 +510,10 @@ c       Initialize ddg, ssc2, ..., error reported in SalfordFTN95, sjl
+           issc(i) = 0
+           ithf(i) = 0
+           ithd(i) = 0
++          ksinv(i) = 0.0
++          ui_ksari(i) = 0.0
++   39   continue
++        do 38 i=1,mxhzin
+           thetd2(i) = 0.0
+           orgma2(i) = 0.0
+           cec2(i) = 0.0
+@@ -517,9 +524,8 @@ c       Initialize ddg, ssc2, ..., error reported in SalfordFTN95, sjl
+           ssc2(i) = 0.0
+           rfg2(i) = 0.0
+           ddg(i) = 0.0
+-          ksinv(i) = 0.0
+-          ui_ksari(i) = 0.0
+-   39   continue
++          solinp(i) = 0.0
++   38   continue
+ c       Write soil information to the top of the erosion summary
+ c       output file.
+ c
+@@ -529,12 +535,14 @@ c
+         if (ivers.ne.3) write (iout,1100) iplane, slid, texid
+         if (ivers.eq.3) write (iout,1150) iplane, slid, texid
+ c
+-CAS Commented and modified by A. Srivastava 10/11/2019. This condition was causing error
+-CAS when number of soil layers in .sol file > compiled limit
+-CAS        if (nslorg(iplane).gt.mxnsl-1) nslorg(iplane) = mxnsl - 1
++c       Reject excess input instead of silently discarding horizons.
+         nslfile = nslorg(iplane)
+-        if (nslorg(iplane).gt.mxnsl) nslorg(iplane) = mxnsl
+-        
++        if (nslfile.lt.1.or.nslfile.gt.mxhzin) then
++          write (6,*) 'SOIL INPUT HORIZON COUNT INVALID: OFE ',
++     1      iplane, ' COUNT ', nslfile, ' LIMIT ', mxhzin
++          stop 1
++        endif
++
+         if (ui_run.eq.1) then
+            if (sat(iplane).gt.1.0) sat(iplane) = 1.0
+         else
+@@ -545,35 +553,35 @@ c
+         do 40 i = 1, nslorg(iplane)
+           call eatcom(11)
+           if (solwpv.lt.941.or.solwpv.eq.7777) then
+-            read (11,*) solth1(i,iplane), bd2(i), ssc2(i), thetf2(i),
++            read (11,*) solinp(i), bd2(i), ssc2(i), thetf2(i),
+      1          thetd2(i), sand2(i), clay2(i), orgma2(i), cec2(i),
+      1          rfg2(i)
+           else
+             if (solwpv.ge.7778.and.solwpv.le.9001) then
+-               read (11,*) solth1(i,iplane),bd2(i),ssc2(i),ui_anisrt(i),
++               read (11,*) solinp(i),bd2(i),ssc2(i),ui_anisrt(i),
+      1          thetf2(i),thetd2(i), sand2(i), clay2(i), orgma2(i), 
+      1          cec2(i),rfg2(i)
+             else if (solwpv.gt.9001) then
+-               read (11,*) solth1(i,iplane),bd2(i),ssc2(i),ui_anisrt(i),
++               read (11,*) solinp(i),bd2(i),ssc2(i),ui_anisrt(i),
+      1          thetf2(i),thetd2(i), sand2(i), clay2(i), orgma2(i), 
+      1          cec2(i), rfg2(i), vgthr2(i), vgths2(i), vgalph2(i),
+      1          vgnpar2(i), vgks2(i), vgwp2(i), vgfc2(i)
+             else
+-               read (11,*) solth1(i,iplane), sand2(i), clay2(i),
++               read (11,*) solinp(i), sand2(i), clay2(i),
+      1            orgma2(i), cec2(i), rfg2(i)
+             endif
+           end if
+ 
+ c
+-            totthk=totthk+solth1(i,iplane)
++            totthk=totthk+solinp(i)
+             if(i.eq.nslorg(iplane))then
+                if(totthk.lt.200.0)then
+                 thkadd=200.0 - totthk
+-                write(6,1400)totthk,iplane,i,solth1(i,iplane)
+-                solth1(i,iplane) = solth1(i,iplane) + thkadd
++                write(6,1400)totthk,iplane,i,solinp(i)
++                solinp(i) = solinp(i) + thkadd
+                end if
+ CAS Adding extra soil layer to avoid ignore last layer A. Srivastava 5/4/2022
+-               solth1(i,iplane) = solth1(i,iplane) + 200.0
++               solinp(i) = solinp(i) + 200.0
+ CAS End
+             end if
+  1400       format(/,' *** WARNING ***',/,' INCORRECT SOIL THICKNESS',/,
+@@ -592,7 +600,7 @@ c
+             thetd2(i) = 0.0
+           end if
+ c
+-          if (solth1(i,iplane).gt.1800.0) solth1(i,iplane) = 1800.0
++          if (solinp(i).gt.1800.0) solinp(i) = 1800.0
+ c
+ c         ... INITIALIZE AVAILABLE WATER CONTENT PER SOIL LAYER AT THE
+ c         BEGINNING OF SIMULATIONS ...
+@@ -622,7 +630,7 @@ c
+ c         CONVERT SOIL THICKNESS (SOLTHK) FROM MM TO METERS.
+ c
+           bd2(i) = bd2(i) * 1000.
+-          solth1(i,iplane) = solth1(i,iplane) * .001
++          solinp(i) = solinp(i) * .001
+ c
+ c         CONVERT MM/HR TO M/SEC
+ c
+@@ -635,15 +643,7 @@ c
+           orgma2(i) = orgma2(i) / 100.0
+           rfg2(i) = rfg2(i) / 100.
+    40   continue
+-c       Keep the soil file cursor aligned with the bedrock record when
+-c       the declared layer count exceeds the compiled layer capacity.
+-        if (nslfile.gt.nslorg(iplane)) then
+-          do 41 i = nslorg(iplane)+1, nslfile
+-            call eatcom(11)
+-            read (11,'(a)') discard
+-   41     continue
+-        end if
+-        ddg(1) = solth1(1,iplane)
++        ddg(1) = solinp(1)
+ c
+ c       The follwing code is from WSU to setup the optional
+ c       bedrock restricting layer. This line follows the layer
+@@ -692,16 +692,16 @@ c       soil depth at that point.     dcf   11/25/96
+ c       Additionally changed so that if thaw depth is entered as
+ c       deeper than the soil thickness, both thaw depth and frost
+ c       depth are reset to zero.  dcf  3/17/97
+-        if(frdp(iplane).gt.solth1(nslorg(iplane),iplane))
+-     1    frdp(iplane) = solth1(nslorg(iplane),iplane)
+-        if(thdp(iplane).gt.solth1(nslorg(iplane),iplane))then
++        if(frdp(iplane).gt.solinp(nslfile))
++     1    frdp(iplane) = solinp(nslfile)
++        if(thdp(iplane).gt.solinp(nslfile))then
+           thdp(iplane) = 0.0
+           frdp(iplane) = 0.0
+         endif
+ c       End new section to limit initial frost/thaw depths  dcf
+ c
+         do 50 i = 2, nslorg(iplane)
+-          ddg(i) = solth1(i,iplane) - solth1(i-1,iplane)
++          ddg(i) = solinp(i) - solinp(i-1)
+    50   continue
+ c
+         slayth = 0.20
+@@ -712,7 +712,7 @@ c       separate loops and not combined
+         do 60 i = 1, mxnsl - 1
+           dep = dep + slayth
+           iii = nint(dep*1000.0)
+-          iiii = nint(solth1(nslorg(iplane),iplane)*1000.0)
++          iiii = nint(solinp(nslfile)*1000.0)
+           if (iii.le.iiii) n = i
+    60   continue
+ cd    Added by S. Dun, Jan 27, 2005 - removed 11/24/2009 - bottom layer should end on a 200mm boundary 
+diff --git a/tests/test_native_soil_input_capacity.py b/tests/test_native_soil_input_capacity.py
+new file mode 100644
+index 000000000..8543d1acc
+--- /dev/null
++++ b/tests/test_native_soil_input_capacity.py
+@@ -0,0 +1,177 @@
++"""Execute the real soil reader with bounds checks and inspect calculated state.
++
++No soil physics is substituted: input, profil, eatcom, irinpt and rap_state are
++compiled directly. The driver supplies zero management scenarios and a slope.
++"""
++from pathlib import Path
++import re
++import subprocess
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++@pytest.fixture(scope='session')
++def reader(tmp_path_factory):
++    src = ROOT / 'src'
++    build = tmp_path_factory.mktemp('soil-reader')
++    source = (src / 'input.for').read_text()
++    includes = re.findall(r"^      include '([^']+)'", source, re.M)
++    driver = ['      program probe']
++    driver += [f"      include '{name}'" for name in includes]
++    driver += ['      integer ii,jj,nofe',
++               "      open(11,file='soil.txt',status='old')",
++               '      read(11,*) solwpv,nofe',
++               '      imodel=1', '      ivers=1', '      ui_run=1',
++               "      open(10,file='slope.txt',status='old')",
++               "      open(31,file='reader.log',status='replace')",
++               '      call input(0,nofe,0,0)',
++               '      do ii=1,nofe',
++               "      write(*,*) 'OFE',ii,nslorg(ii),kslast(ii)",
++               '      do jj=1,nslorg(ii)',
++               "      write(*,*) 'LAYER',ii,jj,solth1(jj,ii),",
++               '     1 ssc1(jj,ii),bd1(jj,ii),thetf1(jj,ii),',
++               '     1 thetd1(jj,ii),sand1(jj,ii),clay1(jj,ii),',
++               '     1 ui_ssh1(jj,ii)',
++               '      enddo', '      enddo', '      end']
++    (build/'driver.for').write_text('\n'.join(driver)+'\n')
++    flags = ['-O0','-g','-fcheck=all','-fbacktrace','-fno-align-commons',
++             '-mcmodel=medium','-finit-local-zero','-ffpe-trap=invalid,zero,overflow',
++             '-I'+str(src), '-I'+str(build), '-J'+str(build)]
++    compiler = '/usr/bin/gfortran'
++    subprocess.run([compiler,*flags,'-c',str(src/'rap_state.f90')],cwd=build,check=True,capture_output=True)
++    inputs = [build/'driver.for',src/'input.for',src/'profil.for',src/'eatcom.for',src/'irinpt.for']
++    subprocess.run([compiler,*flags,'-ffixed-line-length-72','-no-pie',
++                    *(str(p) for p in inputs),str(build/'rap_state.o'),'-o',str(build/'reader')],
++                   cwd=build,check=True,capture_output=True)
++    return build/'reader'
++
++
++def soil_body(depths, version=7778, conductivity=None):
++    lines=[]
++    if version in (9001,9002): lines.append("0 'forest' 'sand loam' 1.0 0.3")
++    if version==9003: lines.append("0 'forest' 300 'sand loam' -9999")
++    if version==9005: lines.append("0 'forest' 300 'sand loam' 3 100 -9999")
++    lines.append(f"'test' 'loam' {len(depths)} 0.2 0.75 400000 0.00008 2" + (' 10' if 941<=version<7777 else ''))
++    for i,depth in enumerate(depths):
++        k=36 if conductivity is None else conductivity[i]
++        if version>=7777:
++            props=f'1.3 {k} '+('2 ' if version>=7778 else '')+'0.3 0.1 40 20 2 15 5'
++        else:props='40 20 2 15 5'
++        if version>9001:props+=' 0.05 0.45 0.01 1.5 20 0.1 0.3'
++        lines.append(f'{depth} {props}')
++    if version>=2006:lines.append('1 10000 0.01')
++    return '\n'.join(lines)+'\n'
++
++
++def execute(reader, tmp_path, bodies, version=7778):
++    tmp_path.mkdir(parents=True,exist_ok=True)
++    (tmp_path/'soil.txt').write_text(f'{version} {len(bodies)}\n'+''.join(bodies))
++    (tmp_path/'slope.txt').write_text('180 1\n'+('2 100\n0 0.1 1 0.1\n'*len(bodies)))
++    result=subprocess.run([str(reader)],cwd=tmp_path,text=True,capture_output=True,timeout=15)
++    layers=[[float(x) for x in line.split()[3:]] for line in result.stdout.splitlines() if line.strip().startswith('LAYER')]
++    ofes=[line for line in result.stdout.splitlines() if line.strip().startswith('OFE')]
++    return result,layers,ofes
++
++
++@pytest.mark.parametrize('version',[7777,7778,9001,9002,9003,9005,2006,984])
++@pytest.mark.parametrize('count',[9,10,11])
++def test_capacity_and_multiple_ofe_cursor(reader,tmp_path,version,count):
++    depths=[200]+[200+1400*i/(count-1) for i in range(1,count)]
++    result,layers,ofes=execute(reader,tmp_path,[soil_body(depths,version)]*2,version)
++    assert result.returncode==0,result.stdout+result.stderr
++    assert len(ofes)==2
++    assert len(layers)==18
++    assert [l[0] for l in layers[:9]]==pytest.approx([i/5 for i in range(1,10)],abs=2e-7)
++    assert layers[:9]==layers[9:]
++    if version>=2006:
++        assert float(ofes[0].split()[-1])==pytest.approx(.01/3.6e6,rel=2e-7)
++
++
++def test_eleventh_material_is_used(reader,tmp_path):
++    depths=[200,300,400,500,600,700,800,900,1000,1100,1600]
++    result,layers,_=execute(reader,tmp_path,[soil_body(depths,conductivity=[36]*10+[3.6])])
++    assert result.returncode==0,result.stdout+result.stderr
++    assert len(layers)==9
++    assert layers[5][1]*3.6e6==pytest.approx(200/(100/36+100/3.6),rel=2e-6)
++    assert layers[-1][1]*3.6e6==pytest.approx(3.6,rel=2e-6)
++    assert layers[-1][2:7]==pytest.approx([1300,.3,.1,.4,.2],rel=2e-6)
++    assert layers[-1][7]*3.6e6==pytest.approx(7.2,rel=2e-6)
++
++
++@pytest.mark.parametrize('count',[0,12,100])
++def test_unsupported_count_fails_explicitly(reader,tmp_path,count):
++    body=f"'bad' 'loam' {count} 0.2 0.75 400000 0.00008 2\n"
++    result,_,_=execute(reader,tmp_path,[body])
++    assert result.returncode!=0
++    assert 'SOIL INPUT HORIZON COUNT INVALID' in result.stdout
++
++
++def test_equivalent_subdivision_and_depth_clipping(reader,tmp_path):
++    variants=[[200,1600],[200,300,400,500,600,700,800,900,1000,1100,1600],
++              [200,300,400,500,600,700,800,900,1800,2260,3000]]
++    states=[]
++    for i,depths in enumerate(variants):
++        result,layers,_=execute(reader,tmp_path/str(i),[soil_body(depths)])
++        assert result.returncode==0,result.stdout+result.stderr
++        states.append(layers)
++    for layers in states[1:]:
++        assert len(layers)==len(states[0])
++        for actual,expected in zip(layers,states[0]):
++            assert actual==pytest.approx(expected,rel=2e-6,abs=1e-12)
++
++
++@pytest.mark.parametrize('depths',[[100],[200],[100,200],[80,150,200,300,560,690,890,1170,1900,2260,3000]])
++def test_shallow_and_zepol_topology(reader,tmp_path,depths):
++    result,layers,_=execute(reader,tmp_path,[soil_body(depths)])
++    assert result.returncode==0,result.stdout+result.stderr
++    assert layers
++    assert layers[-1][0]<=1.800001
++
++
++def test_heterogeneous_eleven_horizon_aggregation(reader, tmp_path):
++    depths = [200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1600]
++    rows = []
++    source = []
++    top = 0.0
++    for i, bottom in enumerate(depths):
++        bd, k, anis = 1.1 + .01*i, 36/(i+1), 1 + i
++        fc, wp, sand, clay = .25 + .002*i, .10 + .001*i, 40-i, 20+i
++        rows.append(f'{bottom} {bd} {k} {anis} {fc} {wp} {sand} {clay} 2 15 5')
++        source.append((top, bottom if i<10 else 1800, bd, k, anis, fc, wp, sand, clay))
++        top = bottom
++    body = "'test' 'loam' 11 0.2 0.75 400000 0.00008 2\n" + '\n'.join(rows) + '\n1 10000 .01\n'
++    result, layers, _ = execute(reader, tmp_path, [body])
++    assert result.returncode == 0, result.stdout + result.stderr
++    assert len(layers) == 9
++    for i, actual in enumerate(layers):
++        lo, hi = 200*i, 200*(i+1)
++        overlaps = [(max(0, min(hi, row[1])-max(lo, row[0])), row) for row in source]
++        overlaps = [(d, row) for d, row in overlaps if d]
++        def weighted(index):
++            return sum(d*row[index] for d, row in overlaps)/200
++        vertical = 200 / sum(d/row[3] for d, row in overlaps)
++        horizontal = sum(d*row[3]*row[4] for d, row in overlaps)/200
++        expected = [hi/1000, vertical/3.6e6, weighted(2)*1000,
++                    weighted(5), weighted(6), weighted(7)/100,
++                    weighted(8)/100, horizontal/3.6e6]
++        assert actual == pytest.approx(expected, rel=3e-6, abs=1e-12)
++
++
++@pytest.mark.parametrize('version', [7778, 9002])
++@pytest.mark.parametrize('counts', [(11, 2), (2, 11), (11, 10)])
++def test_mixed_ofe_counts_match_isolated_readers(reader, tmp_path, version, counts):
++    bodies = []
++    isolated = []
++    for index, count in enumerate(counts):
++        depths = [200 + 1400*i/(count-1) for i in range(count)]
++        body = soil_body(depths, version, [3.6*(index+1)]*count)
++        bodies.append(body)
++        result, layers, _ = execute(reader, tmp_path/f'isolated-{index}', [body], version)
++        assert result.returncode == 0, result.stdout + result.stderr
++        isolated.extend(layers)
++    result, layers, ofes = execute(reader, tmp_path/'combined', bodies, version)
++    assert result.returncode == 0, result.stdout + result.stderr
++    assert len(ofes) == 2
++    assert layers == isolated
+diff --git a/tools/evaluate_soil_input_capacity.py b/tools/evaluate_soil_input_capacity.py
+new file mode 100644
+index 000000000..74d7b515a
+--- /dev/null
++++ b/tools/evaluate_soil_input_capacity.py
+@@ -0,0 +1,85 @@
++#!/usr/bin/env python3
++"""Compare isolated baseline/candidate native runs; never edits fixture inputs.
++
++Run with the repository test environment (pytest supplies the shared probe
++fixture generators). Output directories must not exist, preserving evidence.
++"""
++from __future__ import annotations
++import argparse
++import hashlib
++import importlib.util
++import json
++import re
++from pathlib import Path
++import shutil
++import subprocess
++import time
++
++ROOT = Path(__file__).resolve().parents[1]
++spec = importlib.util.spec_from_file_location('capacity_probe', ROOT/'tests/test_native_soil_input_capacity.py')
++probe = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(probe)
++
++
++def digest(path):
++    return hashlib.sha256(path.read_bytes()).hexdigest()
++
++
++def normalize_zepol(path):
++    """Evaluation-only exact-material 200 mm split; production limit unchanged."""
++    lines=[line for line in path.read_text().splitlines() if line.strip() and not line.startswith('#')]
++    assert lines[0]=='7778' and lines[2]=='1 0'
++    assert '\t10\t' in lines[3]
++    lines[3]=lines[3].replace('\t10\t','\t11\t',1)
++    crossing=next(i for i in range(4,len(lines)-1) if float(lines[i].split()[0])>200)
++    assert float(lines[crossing-1].split()[0])<200
++    fields=lines[crossing].split(); fields[0]='200.000'
++    lines.insert(crossing,' '.join(fields))
++    return '\n'.join(lines)+'\n'
++
++
++def run(binary, directory, soil):
++    fixture=ROOT/'tests/fixtures/delicate_game_pw0/runs'
++    runs=directory/'runs'; output=directory/'output'
++    runs.mkdir(parents=True); output.mkdir()
++    for name in ['p1.run','p1.man','p1.slp','p1.cli','p1.sol','chan.inp','chntyp.txt','gwcoeff.txt','pmetpara.txt','snow.txt','wepp_ui.txt']:
++        shutil.copy2(fixture/name,runs/name)
++    if soil is not None:(runs/'p1.sol').write_text(soil)
++    started=time.monotonic()
++    with (runs/'p1.run').open() as stdin, (directory/'stdout.log').open('w') as stdout, (directory/'stderr.log').open('w') as stderr:
++        result=subprocess.run([str(binary)],cwd=runs,stdin=stdin,stdout=stdout,stderr=stderr,timeout=120)
++    elapsed=time.monotonic()-started
++    stdout=(directory/'stdout.log').read_text()
++    success=result.returncode==0 and 'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' in stdout and re.search(r'SIMULATION YEAR\s*=\s*3\b', stdout) is not None
++    artifacts={p.name: {'sha256':digest(p),'bytes':p.stat().st_size} for p in sorted(output.iterdir()) if p.is_file()}
++    return {'success':success,'returncode':result.returncode,'seconds':elapsed,'artifacts':artifacts,'input_sha256':digest(runs/'p1.sol')}
++
++
++def main():
++    parser=argparse.ArgumentParser()
++    parser.add_argument('--baseline',type=Path,required=True)
++    parser.add_argument('--candidate',type=Path,required=True)
++    parser.add_argument('--output',type=Path,required=True)
++    parser.add_argument('--zepol',type=Path,required=True)
++    args=parser.parse_args()
++    args.output.mkdir(parents=True,exist_ok=False)
++    def soil(depths):return '7778\nEvaluation\n1 0\n'+probe.soil_body(depths)
++    cases={'original_fixture':None,'two':soil([200,1600]),
++           'nine':soil([200+175*i for i in range(9)]),
++           'ten':soil([200+1400*i/9 for i in range(10)]),
++           'eleven':soil([200,300,400,500,600,700,800,900,1000,1100,1600]),
++           'zepol':normalize_zepol(args.zepol),
++           'ten_low_k':'7778\nEvaluation\n1 0\n'+probe.soil_body([200+1400*i/9 for i in range(10)],conductivity=[.036]*10),
++           'eleven_low_k':'7778\nEvaluation\n1 0\n'+probe.soil_body([200,300,400,500,600,700,800,900,1000,1100,1600],conductivity=[.036]*11)}
++    report={'binaries':{'baseline':digest(args.baseline),'candidate':digest(args.candidate)},'cases':{}}
++    for name,soil_text in cases.items():
++        results={label:run(binary.resolve(),args.output/name/label,soil_text) for label,binary in [('baseline',args.baseline),('candidate',args.candidate)]}
++        results['byte_identical_outputs']=results['baseline']['artifacts']==results['candidate']['artifacts']
++        report['cases'][name]=results
++        print(name, {k:v['success'] for k,v in results.items() if isinstance(v,dict)}, 'identical',results['byte_identical_outputs'],flush=True)
++    (args.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
++    if not all(v[label]['success'] for v in report['cases'].values() for label in ('baseline','candidate')):raise SystemExit(1)
++    if not all(report['cases'][name]['byte_identical_outputs'] for name in ('original_fixture','two','nine','ten','ten_low_k')):raise SystemExit(2)
++
++
++if __name__=='__main__':main()
+diff --git a/tools/evaluate_soil_input_mofe.py b/tools/evaluate_soil_input_mofe.py
+new file mode 100644
+index 000000000..19e1fecfd
+--- /dev/null
++++ b/tools/evaluate_soil_input_mofe.py
+@@ -0,0 +1,57 @@
++#!/usr/bin/env python3
++"""Exercise eleven horizons on every OFE of the committed 16-year MOFE case."""
++import argparse
++import json
++from pathlib import Path
++import re
++import shutil
++import subprocess
++
++from evaluate_soil_input_capacity import ROOT, digest
++
++
++def subdivide(text):
++    lines=[s for s in text.splitlines() if s.strip() and not s.startswith('#')]
++    assert lines[0]=='9002' and lines[2]=='3 0'
++    cursor=3;out=lines[:3]
++    for _ in range(3):
++        metadata,header=lines[cursor:cursor+2];cursor+=2
++        tokens=list(re.finditer(r"'[^']*'|\S+",header));token=tokens[2]
++        count=int(token.group());horizons=lines[cursor:cursor+count];cursor+=count
++        bottom=float(horizons[-1].split()[0]);top=float(horizons[-2].split()[0])
++        material=horizons[-1].split()[1:];pieces=12-count
++        horizons=horizons[:-1]+[' '.join([str(top+(bottom-top)*i/pieces),*material]) for i in range(1,pieces+1)]
++        assert len(horizons)==11
++        out.extend([metadata,header[:token.start()]+'11'+header[token.end():],*horizons,lines[cursor]])
++        cursor+=1
++    assert cursor==len(lines)
++    return '\n'.join(out)+'\n'
++
++
++def main():
++    p=argparse.ArgumentParser()
++    p.add_argument('--baseline',type=Path,required=True)
++    p.add_argument('--candidate',type=Path,required=True)
++    p.add_argument('--output',type=Path,required=True)
++    args=p.parse_args();args.output.mkdir(parents=True,exist_ok=False)
++    fixture=ROOT/'tests/fixtures/mofe_coefficient_ownership/default'
++    report={}
++    for case in ('original','eleven'):
++        report[case]={}
++        for label,binary in [('baseline',args.baseline),('candidate',args.candidate)]:
++            folder=args.output/case/label;runs=folder/'runs';output=folder/'output'
++            shutil.copytree(fixture,runs);output.mkdir()
++            if case=='eleven':(runs/'p11.sol').write_text(subdivide((runs/'p11.sol').read_text()))
++            with (runs/'p11.run').open() as inp,(folder/'stdout').open('w') as out,(folder/'stderr').open('w') as err:
++                r=subprocess.run([str(binary.resolve())],cwd=runs,stdin=inp,stdout=out,stderr=err,timeout=120)
++            stdout=(folder/'stdout').read_text()
++            success=r.returncode==0 and 'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' in stdout and bool(re.search(r'SIMULATION YEAR\s*=\s*16\b',stdout))
++            report[case][label]={'success':success,'returncode':r.returncode,'sha256':{p.name:digest(p) for p in sorted(output.iterdir()) if p.is_file()}}
++        report[case]['identical']=report[case]['baseline']['sha256']==report[case]['candidate']['sha256']
++    (args.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
++    print({case:{'success':all(r[label]['success'] for label in ('baseline','candidate')),'identical':r['identical']} for case,r in report.items()})
++    assert all(r[label]['success'] for r in report.values() for label in ('baseline','candidate'))
++    assert report['original']['identical']
++
++
++if __name__=='__main__':main()
+diff --git a/tools/evaluate_soil_input_watershed.py b/tools/evaluate_soil_input_watershed.py
+new file mode 100644
+index 000000000..ca7ddeece
+--- /dev/null
++++ b/tools/evaluate_soil_input_watershed.py
+@@ -0,0 +1,56 @@
++#!/usr/bin/env python3
++"""Run complete portable watershed controls with fresh paired hillslope passes."""
++import argparse
++import json
++import math
++from pathlib import Path
++import re
++import subprocess
++
++from evaluate_soil_input_capacity import digest, probe
++from physical_water_case import prepare
++
++
++def main():
++    p=argparse.ArgumentParser()
++    p.add_argument('--evidence',type=Path,required=True,help='Contains baseline/ and candidate/ binary pairs')
++    p.add_argument('--output',type=Path,required=True)
++    args=p.parse_args();args.output.mkdir(parents=True,exist_ok=False)
++    report={}
++    for case,layout in [('original_single','single'),('original_three','three'),('eleven','single')]:
++        for mode in ('daily','hourly'):
++            name=f'{case}_{mode}';report[name]={}
++            for label in ('baseline','candidate'):
++                directory=args.output/name/label
++                runs=prepare(directory,layout,mode,years=2)
++                if case=='eleven':
++                    depths=[200,300,400,500,600,700,800,900,1000,1100,1600]
++                    text='7778\nEvaluation\n1 1\n'+probe.soil_body(depths,conductivity=[3.6]*10+[.36])
++                    for filename in ('p1.sol','pw0.sol'):(runs/filename).write_text(text)
++                steps={}
++                for filename,binary_name,role in [('p1.run','wepp_hill','HILLSLOPE'),('pw0.run','wepp','WATERSHED')]:
++                    with (runs/filename).open() as inp,(directory/f'{filename}.stdout').open('w') as out,(directory/f'{filename}.stderr').open('w') as err:
++                        result=subprocess.run([str((args.evidence/label/binary_name).resolve())],cwd=runs,stdin=inp,stdout=out,stderr=err,timeout=120)
++                    stdout=(directory/f'{filename}.stdout').read_text()
++                    years=[int(value) for value in re.findall(r'SIMULATION YEAR\s*=\s*(\d+)',stdout)]
++                    success=result.returncode==0 and f'WEPP COMPLETED {role} SIMULATION SUCCESSFULLY' in stdout and max(years,default=0)==2
++                    steps[role]={'success':success,'returncode':result.returncode,'last_year':max(years,default=0)}
++                    if not success:
++                        print(name,label,role,'FAILED',str(directory),flush=True)
++                        break
++                rows=[line.split() for line in (directory/'output'/'chnwb.txt').read_text().splitlines() if re.match(r'^\s+1\s+\d+\s+198[01]\s',line)]
++                assert len(rows)==731,(name,label,len(rows))
++                assert all(math.isfinite(float(value)) for row in rows for value in row),(name,label)
++                artifacts={p.name:digest(p) for p in sorted((directory/'output').iterdir()) if p.is_file()}
++                report[name][label]={'steps':steps,'channel_daily_rows':len(rows),'channel_final_date':rows[-1][1:3],'artifacts':artifacts}
++            report[name]['identical']=report[name]['baseline']['artifacts']==report[name]['candidate']['artifacts']
++            print(name,report[name]['identical'],flush=True)
++    (args.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
++    for name,case in report.items():
++        for label in ('baseline','candidate'):
++            assert set(case[label]['steps'])=={'HILLSLOPE','WATERSHED'}
++            assert all(step['success'] for step in case[label]['steps'].values()), (name,label)
++        if name.startswith('original'):assert case['identical'],name
++
++
++if __name__=='__main__':main()
+diff --git a/tools/evaluate_soil_reader_states.py b/tools/evaluate_soil_reader_states.py
+new file mode 100644
+index 000000000..1c2936ff6
+--- /dev/null
++++ b/tools/evaluate_soil_reader_states.py
+@@ -0,0 +1,31 @@
++#!/usr/bin/env python3
++"""Compare generated native reader state on old-capacity heterogeneous inputs."""
++import argparse
++import json
++from pathlib import Path
++from evaluate_soil_input_capacity import probe
++
++
++def main():
++    p=argparse.ArgumentParser()
++    p.add_argument('--baseline',type=Path,required=True)
++    p.add_argument('--candidate',type=Path,required=True)
++    p.add_argument('--output',type=Path,required=True)
++    args=p.parse_args();args.output.mkdir(parents=True,exist_ok=False)
++    results=[]
++    for version in [7777,7778,9001,9002,9003,9005,2006,984]:
++        for count in range(1,11):
++            depths=[1600] if count==1 else [200+1400*i/(count-1) for i in range(count)]
++            body=probe.soil_body(depths,version,[36/(i+1) for i in range(count)])
++            values=[]
++            for label,binary in [('baseline',args.baseline),('candidate',args.candidate)]:
++                run,layers,ofes=probe.execute(binary.resolve(),args.output/f'{version}-{count}'/label,[body,body],version)
++                if run.returncode:raise RuntimeError(run.stdout+run.stderr)
++                values.append({'layers':layers,'ofes':ofes})
++            results.append({'version':version,'count':count,'exact_state_match':values[0]==values[1]})
++    (args.output/'report.json').write_text(json.dumps(results,indent=2)+'\n')
++    print(f'{sum(r["exact_state_match"] for r in results)}/{len(results)} exact state matches')
++    if not all(r['exact_state_match'] for r in results):raise SystemExit(1)
++
++
++if __name__=='__main__':main()

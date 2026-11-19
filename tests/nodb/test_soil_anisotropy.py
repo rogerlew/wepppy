@@ -236,6 +236,7 @@ def test_facade_prep_passes_effective_options_to_real_worker(tmp_path, saved, ho
     if developer_mode and expected == [25, 25, 3]:
         expected = [101, 101, 11]
     context = SimpleNamespace(
+        soil_input_capacity=10,
         ron_instance=SimpleNamespace(developer_mode=developer_mode),
         multi_ofe=True, run_wepp_ui=saved, soil_anisotropy_upper=upper, soil_anisotropy_lower=lower,
         wd=str(tmp_path), logger=logging.getLogger(__name__), kslast=None, kslast_map=None,

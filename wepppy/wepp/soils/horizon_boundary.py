@@ -9,21 +9,33 @@ from __future__ import annotations
 import math
 import re
 
-__all__ = ["ensure_200mm_boundary"]
+__all__ = ["ensure_200mm_boundary", "validate_soil_horizon_capacity"]
 
 _TOKEN = re.compile(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"|\S+")
 _VERSIONS = {94.1, 95.1, 95.3, 97.3, 97.5, 98.4, 2006.0, 2006.2, 7777.0, 7778.0,
              9001.0, 9002.0, 9003.0, 9005.0}
 
 
-def ensure_200mm_boundary(text: str) -> str:
+def ensure_200mm_boundary(text: str, *, max_horizons: int = 10) -> str:
+    """Normalize generated soils within the selected executable's input capacity."""
+    return _process_soil(text, max_horizons=max_horizons, normalize=True)
+
+
+def validate_soil_horizon_capacity(text: str, *, max_horizons: int = 10) -> None:
+    """Check native input counts without rewriting or subdividing uploaded text."""
+    _process_soil(text, max_horizons=max_horizons, normalize=False)
+
+
+def _process_soil(text: str, *, max_horizons: int, normalize: bool) -> str:
     """Insert an identical-material boundary in each generated OFE when needed.
 
     Only a copied horizon's depth and its OFE's declared count change. No I/O
     occurs, and a failure must be handled before opening the destination file.
     Profiles already ending at 200 mm, shallower profiles, and zero-layer legacy
-    water profiles need no insertion. A required eleventh layer fails explicitly.
+    water profiles need no insertion. Counts beyond the selected capacity fail explicitly.
     """
+    if type(max_horizons) is not int or not 1 <= max_horizons <= 23:
+        raise ValueError("Soil input capacity must be an integer from 1 through 23")
     lines = text.splitlines(keepends=True)
     records = [i for i, line in enumerate(lines)
                if line.strip() and not line.lstrip().startswith('#')]
@@ -52,8 +64,8 @@ def ensure_200mm_boundary(text: str) -> str:
             nsl = int(count_token.group())
         except (IndexError, ValueError) as exc:
             raise ValueError(f'Invalid soil layer count for OFE {ofe}') from exc
-        if nsl > 10:
-            raise ValueError(f'OFE {ofe}: generated soil exceeds the native 10-layer limit')
+        if nsl > max_horizons:
+            raise ValueError(f'OFE {ofe}: generated soil exceeds the native {max_horizons}-layer limit')
         if nsl < 0:
             raise ValueError(f'Negative soil layer count for OFE {ofe}')
         cursor += 1
@@ -80,9 +92,9 @@ def ensure_200mm_boundary(text: str) -> str:
             if cursor >= len(records):
                 raise ValueError(f'Missing restrictive layer for OFE {ofe}')
             cursor += 1
-        if crossing is not None:
-            if nsl >= 10:
-                raise ValueError(f'OFE {ofe}: inserting 200 mm boundary would exceed the native 10-layer limit')
+        if normalize and crossing is not None:
+            if nsl >= max_horizons:
+                raise ValueError(f'OFE {ofe}: inserting 200 mm boundary would exceed the native {max_horizons}-layer limit')
             index, match = crossing
             line = lines[index]
             added = line[:match.start(1)] + '200.0' + line[match.end(1):]

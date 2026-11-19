@@ -1,0 +1,521 @@
+{
+  "database": "/home/workdir/soil-data-access/data/national/extracted/All_SSURGO_10_01_2026.gpkg",
+  "bytes": 117836186624,
+  "mtime_ns": 1790613069623552800,
+  "source_unchanged_size_mtime": true,
+  "writer_source": "/home/workdir/wepppy-native-soil-capacity/wepppy/soils/ssurgo/ssurgo.py",
+  "writer_sha256": "19225432c5be0696079ba748ffce0e972df582bc29cf3b374d48967277ec8d4c",
+  "components_total": 1204944,
+  "components_with_horizons": 953134,
+  "horizons": 3855789,
+  "raw_histogram": {
+    "1": 25625,
+    "2": 68013,
+    "3": 260771,
+    "4": 297349,
+    "5": 165368,
+    "6": 86232,
+    "7": 29947,
+    "8": 12653,
+    "9": 5136,
+    "10": 1634,
+    "11": 302,
+    "12": 49,
+    "13": 28,
+    "15": 5,
+    "17": 4,
+    "19": 11,
+    "22": 7
+  },
+  "eligible_upper_bound_histogram": {
+    "1": 32514,
+    "2": 74440,
+    "3": 274310,
+    "4": 299023,
+    "5": 156697,
+    "6": 72486,
+    "7": 20251,
+    "8": 7757,
+    "9": 2266,
+    "10": 278,
+    "11": 74,
+    "12": 42,
+    "13": 1,
+    "14": 5,
+    "16": 4,
+    "17": 11,
+    "20": 7
+  },
+  "eligible_predicate": "coalesce(desgnmaster,'O') NOT GLOB 'O*'\nAND hzdepb_r IS NOT NULL AND coalesce(sandtotal_r,66.8)>0\nAND coalesce(claytotal_r,7.0)>0 AND coalesce(cec7_r,11.3)>0",
+  "maximum_raw": 22,
+  "maximum_eligible": 20,
+  "maximum_generated_proven": 21,
+  "all_source_horizons_plus_split_capacity": 23,
+  "witnesses": [
+    {
+      "mukey": 2371321,
+      "cokey": 29208291,
+      "component": "Puaulu",
+      "percent": 40,
+      "raw_horizons": 22,
+      "valid_mask": [
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "emitted": 20,
+      "normalized": 21,
+      "depths_mm": [
+        80.0,
+        200.0,
+        220.0,
+        300.0,
+        520.0,
+        550.0,
+        610.0,
+        710.0,
+        750.0,
+        780.0,
+        820.0,
+        860.0,
+        890.0,
+        940.0,
+        960.0,
+        1040.0,
+        1100.0,
+        1210.0,
+        1300.0,
+        1350.0,
+        1400.0
+      ],
+      "restrictive_index": null,
+      "location": {
+        "muname": "Puaulu-Hilea-Pekailio complex, 40 to 70 percent slopes",
+        "areasymbol": "HI801",
+        "areaname": "Island of Hawaii Area, Hawaii"
+      },
+      "rejected": [
+        {
+          "chkey": 87810676,
+          "name": "Cd1",
+          "clay": 0.0
+        },
+        {
+          "chkey": 87810677,
+          "name": "Cd2",
+          "clay": 0.0
+        }
+      ]
+    },
+    {
+      "mukey": 2371376,
+      "cokey": 29208432,
+      "component": "Puaulu",
+      "percent": 65,
+      "raw_horizons": 22,
+      "valid_mask": [
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "emitted": 20,
+      "normalized": 21,
+      "depths_mm": [
+        80.0,
+        200.0,
+        220.0,
+        300.0,
+        520.0,
+        550.0,
+        610.0,
+        710.0,
+        750.0,
+        780.0,
+        820.0,
+        860.0,
+        890.0,
+        940.0,
+        960.0,
+        1040.0,
+        1100.0,
+        1210.0,
+        1300.0,
+        1350.0,
+        1400.0
+      ],
+      "restrictive_index": null,
+      "location": {
+        "muname": "Puaulu-Hao complex, 2 to 20 percent slopes",
+        "areasymbol": "HI801",
+        "areaname": "Island of Hawaii Area, Hawaii"
+      },
+      "rejected": [
+        {
+          "chkey": 87810385,
+          "name": "Cd1",
+          "clay": 0.0
+        },
+        {
+          "chkey": 87810386,
+          "name": "Cd2",
+          "clay": 0.0
+        }
+      ]
+    },
+    {
+      "mukey": 2371377,
+      "cokey": 29208436,
+      "component": "Eheuiki",
+      "percent": 60,
+      "raw_horizons": 9,
+      "valid_mask": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "emitted": 8,
+      "normalized": 9,
+      "depths_mm": [
+        90.0,
+        200.0,
+        220.0,
+        320.0,
+        380.0,
+        480.0,
+        580.0,
+        660.0,
+        800.0
+      ],
+      "restrictive_index": null,
+      "location": {
+        "muname": "Eheuiki-Puaulu complex, 2 to 20 percent slopes",
+        "areasymbol": "HI801",
+        "areaname": "Island of Hawaii Area, Hawaii"
+      },
+      "rejected": [
+        {
+          "chkey": 87810365,
+          "name": "4C3/Bw2",
+          "clay": 30.0
+        }
+      ]
+    },
+    {
+      "mukey": 2371879,
+      "cokey": 29209186,
+      "component": "Puaulu",
+      "percent": 90,
+      "raw_horizons": 22,
+      "valid_mask": [
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "emitted": 20,
+      "normalized": 21,
+      "depths_mm": [
+        80.0,
+        200.0,
+        220.0,
+        300.0,
+        520.0,
+        550.0,
+        610.0,
+        710.0,
+        750.0,
+        780.0,
+        820.0,
+        860.0,
+        890.0,
+        940.0,
+        960.0,
+        1040.0,
+        1100.0,
+        1210.0,
+        1300.0,
+        1350.0,
+        1400.0
+      ],
+      "restrictive_index": null,
+      "location": {
+        "muname": "Puaulu hydrous silt loam, 2 to 20 percent slopes",
+        "areasymbol": "HI801",
+        "areaname": "Island of Hawaii Area, Hawaii"
+      },
+      "rejected": [
+        {
+          "chkey": 87813070,
+          "name": "Cd1",
+          "clay": 0.0
+        },
+        {
+          "chkey": 87813049,
+          "name": "Cd2",
+          "clay": 0.0
+        }
+      ]
+    },
+    {
+      "mukey": 2372202,
+      "cokey": 29192803,
+      "component": "Puaulu",
+      "percent": 90,
+      "raw_horizons": 22,
+      "valid_mask": [
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "emitted": 20,
+      "normalized": 21,
+      "depths_mm": [
+        80.0,
+        200.0,
+        220.0,
+        300.0,
+        520.0,
+        550.0,
+        610.0,
+        710.0,
+        750.0,
+        780.0,
+        820.0,
+        860.0,
+        890.0,
+        940.0,
+        960.0,
+        1040.0,
+        1100.0,
+        1210.0,
+        1300.0,
+        1350.0,
+        1400.0
+      ],
+      "restrictive_index": null,
+      "location": {
+        "muname": "Puaulu hydrous silt loam, 2 to 20 percent slopes",
+        "areasymbol": "HI701",
+        "areaname": "Hawaii Volcanoes National Park, Hawaii"
+      },
+      "rejected": [
+        {
+          "chkey": 87765118,
+          "name": "Cd1",
+          "clay": 0.0
+        },
+        {
+          "chkey": 87765097,
+          "name": "Cd2",
+          "clay": 0.0
+        }
+      ]
+    },
+    {
+      "mukey": 2372203,
+      "cokey": 29192805,
+      "component": "Puaulu",
+      "percent": 65,
+      "raw_horizons": 22,
+      "valid_mask": [
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "emitted": 20,
+      "normalized": 21,
+      "depths_mm": [
+        80.0,
+        200.0,
+        220.0,
+        300.0,
+        520.0,
+        550.0,
+        610.0,
+        710.0,
+        750.0,
+        780.0,
+        820.0,
+        860.0,
+        890.0,
+        940.0,
+        960.0,
+        1040.0,
+        1100.0,
+        1210.0,
+        1300.0,
+        1350.0,
+        1400.0
+      ],
+      "restrictive_index": null,
+      "location": {
+        "muname": "Puaulu-Hao complex, 2 to 20 percent slopes",
+        "areasymbol": "HI701",
+        "areaname": "Hawaii Volcanoes National Park, Hawaii"
+      },
+      "rejected": [
+        {
+          "chkey": 87765056,
+          "name": "Cd1",
+          "clay": 0.0
+        },
+        {
+          "chkey": 87765057,
+          "name": "Cd2",
+          "clay": 0.0
+        }
+      ]
+    },
+    {
+      "mukey": 2372204,
+      "cokey": 29192809,
+      "component": "Eheuiki",
+      "percent": 60,
+      "raw_horizons": 9,
+      "valid_mask": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "emitted": 8,
+      "normalized": 9,
+      "depths_mm": [
+        90.0,
+        200.0,
+        220.0,
+        320.0,
+        380.0,
+        480.0,
+        580.0,
+        660.0,
+        800.0
+      ],
+      "restrictive_index": null,
+      "location": {
+        "muname": "Eheuiki-Puaulu complex, 2 to 20 percent slopes",
+        "areasymbol": "HI701",
+        "areaname": "Hawaii Volcanoes National Park, Hawaii"
+      },
+      "rejected": [
+        {
+          "chkey": 87765036,
+          "name": "4C3/Bw2",
+          "clay": 30.0
+        }
+      ]
+    }
+  ],
+  "writer_classes_identical_to_shared_checkout": [
+    "Horizon",
+    "WeppSoil",
+    "SurgoCollectionWorkerViewFactory"
+  ],
+  "shared_writer_sha256": "a384f279102594ae481526aebf0f46ac9be1140f552de47ca1507cc91ca0e744",
+  "identity_check": "AST equality excluding source locations; shared checkout has separate acquisition changes"
+}

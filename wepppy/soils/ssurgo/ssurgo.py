@@ -1352,7 +1352,7 @@ POSSIBILITY OF SUCH DAMAGE."""
         self.log.append("Validity: all checks passed")
         return True
 
-    def _build_urban(self):
+    def _build_urban(self, *, max_horizons=10):
         return ensure_200mm_boundary(
             """7778\n"""
             + self.description
@@ -1361,10 +1361,10 @@ Any comments:
 1  1                                        
 'Urban_1'\t\t'Urban'\t1\t0.16\t0.75\t4649000\t0.0140\t2.648\t0.0000
 210\t1.4\t100.8\t10\t 0.242\t 0.1145\t 66.8\t7\t3\t11.3\t55.5
-1\t10000\t100.8"""
+1\t10000\t100.8""", max_horizons=max_horizons
         )
 
-    def _build_urban_v2006_2(self):
+    def _build_urban_v2006_2(self, *, max_horizons=10):
         return ensure_200mm_boundary(
             """2006.2\n"""
             + self.description
@@ -1373,10 +1373,10 @@ Any comments:
 1  1                                        
 'Urban_1'\t\t'Urban'\t1\t0.16\t0.75\t4649000\t0.0140\t2.648\t100.8
 210\t 66.8\t7\t3\t11.3\t55.5
-1\t10000\t100.8"""
+1\t10000\t100.8""", max_horizons=max_horizons
         )
 
-    def _build_water(self):
+    def _build_water(self, *, max_horizons=10):
         # Updated 8/27/2020 values from Mariana
         return ensure_200mm_boundary(
             """7778\n"""
@@ -1386,10 +1386,10 @@ Any comments:
 1 1
 'water_7778_2'		'Water'	1 	0.1600 	0.7500 	1.0000 	0.0100 	999.0000 	0.1000
 	210.000000 	0.800000 	100.000000 	10.000000 	0.242 	0.115 	66.800 	7.000 	3.000 	11.300	0.00000
-1 10000 100"""
+1 10000 100""", max_horizons=max_horizons
         )
 
-    def _build_water_v2006_2(self):
+    def _build_water_v2006_2(self, *, max_horizons=10):
         return ensure_200mm_boundary(
             """2006.2\n"""
             + self.description
@@ -1397,7 +1397,7 @@ Any comments:
 Any comments:                                   
 1  0                                        
 'Water_1'\t'Water'\t0 0.000000\t0.750000\t0.000000\t0.000000\t0.000000\t0.000000
-0\t0\t0"""
+0\t0\t0""", max_horizons=max_horizons
         )
 
     @property
@@ -1415,7 +1415,7 @@ Any comments:
             fp.write(jsonpickle.encode(self))
 
     def write(
-        self, wd="./", overwrite=True, fname=None, db_build=False, version="7778"
+        self, wd="./", overwrite=True, fname=None, db_build=False, version="7778", *, max_horizons=10
     ) -> SoilSummary:
         assert version in ["7778", "2006.2", "2006.2ag"]
         if getattr(self, "retention_policy", None) is not None:
@@ -1429,13 +1429,13 @@ Any comments:
         assert _exists(wd), wd
 
         if version == "7778":
-            return self._write7778(wd, overwrite, fname, db_build)
+            return self._write7778(wd, overwrite, fname, db_build, max_horizons=max_horizons)
 
         else:
-            return self._write2006_2(wd, overwrite, fname, db_build, ag="ag" in version)
+            return self._write2006_2(wd, overwrite, fname, db_build, ag="ag" in version, max_horizons=max_horizons)
 
-    def _write7778(self, wd, overwrite, fname, db_build):
-        txt = self.build_file_contents()
+    def _write7778(self, wd, overwrite, fname, db_build, *, max_horizons=10):
+        txt = self.build_file_contents(max_horizons=max_horizons)
         txt = txt.replace("\r\n", "\n").replace("\r", "\n")
         txt = "\r\n".join(txt.splitlines())
 
@@ -1474,8 +1474,8 @@ Any comments:
             meta_fn=None,  # self.pickle_fn
         )
 
-    def _write2006_2(self, wd, overwrite, fname, db_build, ag=False):
-        txt = self.build_file_contents_v2006_2(ag)
+    def _write2006_2(self, wd, overwrite, fname, db_build, ag=False, *, max_horizons=10):
+        txt = self.build_file_contents_v2006_2(ag, max_horizons=max_horizons)
         txt = txt.replace("\r\n", "\n").replace("\r", "\n")
         txt = "\r\n".join(txt.splitlines())
 
@@ -1535,16 +1535,16 @@ Any comments:
         with open(fname, "w") as fp:
             fp.write(txt)
 
-    def build_file_contents(self, ag=False):
+    def build_file_contents(self, ag=False, *, max_horizons=10):
         assert self.valid()
 
         ksflag = self.ksflag
 
         if self.is_urban:
-            return self._build_urban()
+            return self._build_urban(max_horizons=max_horizons)
 
         if self.is_water:
-            return self._build_water()
+            return self._build_water(max_horizons=max_horizons)
 
         horizon0 = self.getFirstHorizon()
         s = (
@@ -1644,9 +1644,9 @@ Any comments:
 
         if getattr(self, "retention_policy", None) is not None:
             s[0] = s[0].replace("7778\n", "7778\n# WEPPPY_RETENTION_POLICY=" + self.retention_policy + "\n", 1)
-        return ensure_200mm_boundary("\n".join(s))
+        return ensure_200mm_boundary("\n".join(s), max_horizons=max_horizons)
 
-    def build_file_contents_v2006_2(self, ag=False):
+    def build_file_contents_v2006_2(self, ag=False, *, max_horizons=10):
         if getattr(self, "retention_policy", None) is not None:
             raise ValueError("Experimental retention does not support legacy writers")
         assert self.valid()
@@ -1654,10 +1654,10 @@ Any comments:
         ksflag = self.ksflag
 
         if self.is_urban:
-            return self._build_urban_v2006_2()
+            return self._build_urban_v2006_2(max_horizons=max_horizons)
 
         if self.is_water:
-            return self._build_water_v2006_2()
+            return self._build_water_v2006_2(max_horizons=max_horizons)
 
         h0 = self.getFirstHorizon()
         if ag:
@@ -1749,7 +1749,7 @@ Any comments:
             # Legacy heuristic: downscale restrictive-layer ksat by 1000 for bedrock proxy.
             s.append("1 10000.0 %0.5f" % (res_lyr_ksat_mm_h / 1000.0))
 
-        return ensure_200mm_boundary("\n".join(s))
+        return ensure_200mm_boundary("\n".join(s), max_horizons=max_horizons)
 
 
 def _fetch_components(mukeys, *, client=None):
@@ -2264,6 +2264,7 @@ class SurgoSoilCollection(object):
         db_build: bool = False,
         version: str = "7778",
         pickle: bool = False,
+        *, max_horizons: int = 10,
     ) -> Dict[int, SoilSummary]:
         """Persist every valid `WeppSoil` to disk and return a map of summaries."""
         assert self.weppSoils is not None
@@ -2279,7 +2280,9 @@ class SurgoSoilCollection(object):
             companion = target + ".provenance.json"
             if os.path.lexists(companion):
                 os.unlink(companion)
-            soil = weppSoil.write(wd, overwrite, db_build=db_build, version=version)
+            soil = weppSoil.write(
+                wd, overwrite, db_build=db_build, version=version, max_horizons=max_horizons
+            )
             component = getattr(weppSoil, "majorComponent", None)
             write_artifact_provenance(soil.path, {
                 "schema_version": 1, "mukey": int(weppSoil.mukey),

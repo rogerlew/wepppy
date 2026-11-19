@@ -144,6 +144,7 @@ def test_prep_multi_ofe_wires_configured_clip_value_and_length(
         hillslope_centroid_lnglat=lambda _topaz_id: (0.0, 0.0),
     )
     fake_wepp = SimpleNamespace(
+        soil_input_capacity=10,
         logger=SimpleNamespace(info=lambda *_args: None, warning=lambda *_args: None),
         wd=str(tmp_path),
         climate_instance=SimpleNamespace(input_years=3),

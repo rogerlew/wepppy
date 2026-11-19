@@ -1,0 +1,28 @@
+{
+  "python_base": "d228fe0a5",
+  "python_head": "e5055de1a006f9d407cd52afe60d7f66ce386590",
+  "reviewed_python_sha256": {
+    "wepp_runner/wepp_binary_capabilities.py": "75e7fe3344ab8b3aa44a7edce75030273650019c9d3fe7966e87709a599554a3",
+    "wepp_runner/wepp_runner.py": "7cf08e0a78ed3d2099c0da50c8f27817dcf73bb1c3fc5bc7a05f72d9ac351b38",
+    "wepppy/wepp/soils/horizon_boundary.py": "2ea8581117f960b80c3180a531c03e66bb8f91132e346d889b32d323ddebf684",
+    "wepppy/wepp/soils/utils/wepp_soil_util.py": "b8d8cfa8a82350ada4cfb23c6823062bc6078d0ecc083fce36b6406b3217ff8f",
+    "wepppy/wepp/soils/utils/multi_ofe.py": "b09ecc11cece6d9529ea5c83ced8f291391ace7f99fa104c595ac40dab6aedce",
+    "wepppy/nodb/core/wepp.py": "46ce6ccbc81c935ce0a06315265a21370aa0f60a007a5489b052b093ae67f610",
+    "wepppy/nodb/core/soils.py": "c85599ff5c470443617b0e88877104ad7611cc63be6f8c58216c6dcfcaa06bda",
+    "wepppy/nodb/core/wepp_prep_service.py": "072858aded278e8cfb34a38dc63e8f57e57853865b896e31a22ba99463aa0acb",
+    "wepppy/nodb/mods/disturbed/disturbed.py": "cc2e6b9f8ae0f15e9058492911221b38b538037c1ad137e245cb419540f24611",
+    "wepppy/nodb/mods/locations/general/general.py": "d44456a8be5d56e3b58586fd235f02d72b722950c1cc27f9421d91601bcad3db",
+    "wepppy/soils/ssurgo/ssurgo.py": "00f9a90c678a9f0cd43e69518bb5c5052fc0d23075c0fc210f5e6545d41564ba",
+    "wepppy/wepp/soils/utils/utils.py": "2abe4a28b337c9bbd04ee39f8cba549b7185fd4a44a8a3c00da8bfc8bb1cf8e6",
+    "wepppy/nodb/config_builder/registry.py": "f05156721245c5628fc02d5d23d0b1a21861a09225fdc438df14a4262022cf3e",
+    "wepppy/nodb/locales/capability_graph.py": "5c33f92eb1bdfb6a4dffb73e7f867a2381c06535dca1bc17669ee0d5eb0b1cfd",
+    "wepppy/nodb/mods/treatments/treatments.py": "511e69f05ec6da1a90b8fd7c1e1de60d291a730a52374c27e67c9ee3a97b4cbe",
+    "wepppy/nodb/mods/locations/location_mixin.py": "ab1110254751d0280a46e7215171358b02ab792cb9424736e1a3df081f58f229",
+    "wepppy/nodb/mods/ag_fields/concept1_inputs.py": "1df05402f98d5de82c3b8612b3033b02109247ad8feb74d1e9b9c948be32c030",
+    "wepppy/nodb/mods/ag_fields/concept1_integration.py": "e8d7f56e2a8181db64f3fa1e6aac8e3d9435f99976c85b107709691337c15981",
+    "wepppy/nodb/mods/ag_fields/hybrid_integration.py": "6e49939bfaa5ef51d6e47e03ae812f4427fff08be5a878e83d1c15c954f0cbdf"
+  },
+  "native_commit": "464a5e5e15e1fbcdd4e8232260ecf79ad2645200",
+  "native_input_sha256": "e71535e9bcb971b050e4202da8326512a8512edc55ff77af81250b13d929b545",
+  "followup_review": "2026-11-19 UTC: derivative consumers added; prior reviewed production hashes unchanged"
+}

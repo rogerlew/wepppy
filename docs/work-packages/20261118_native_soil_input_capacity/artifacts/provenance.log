@@ -1,0 +1,26 @@
+
+== /workdir/native-soil-capacity-evidence/candidate/wepp ==
+39cd137f1aa97920e224eb3f7ad6b7ca3ca4d9b58bb33cbad361f4d20c934b17  /workdir/native-soil-capacity-evidence/candidate/wepp
+interpreter=/lib64/ld-linux-x86-64.so.2
+
+String dump of section '.comment':
+  [     0]  GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+	linux-vdso.so.1 (0x00007ffdd6f94000)
+	libgfortran.so.5 => /lib/x86_64-linux-gnu/libgfortran.so.5 (0x00007215fde00000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007215fdd17000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007215fda00000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007215fe1c7000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007215fe214000)
+
+== /workdir/native-soil-capacity-evidence/candidate/wepp_hill ==
+10611cb9cc39d0e161df2b8b0571b792d59b537c8a3912f4772f53f1927bc160  /workdir/native-soil-capacity-evidence/candidate/wepp_hill
+interpreter=/lib64/ld-linux-x86-64.so.2
+
+String dump of section '.comment':
+  [     0]  GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+	linux-vdso.so.1 (0x00007fff535f8000)
+	libgfortran.so.5 => /lib/x86_64-linux-gnu/libgfortran.so.5 (0x00007238b7200000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007238b7605000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007238b6e00000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007238b75d7000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007238b770d000)

@@ -132,6 +132,7 @@ def test_both_orchestrators_use_grid_mean_before_worker_submission(mapped_wepp, 
     }.get((section,option),default)
     w.mods=()
     w.wepp_bin='wepp_260803'
+    w.soil_input_capacity=10
     w.watershed_instance.mofe_buffer=False
     w.class_name='Wepp'
     w.runs_dir=str(Path(w.wd)/'wepp/runs')

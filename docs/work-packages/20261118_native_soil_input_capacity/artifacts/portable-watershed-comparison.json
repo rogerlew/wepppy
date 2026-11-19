@@ -1,0 +1,428 @@
+{
+  "original_single_daily": {
+    "baseline": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "107c4415ff3db2d06173bccff1ed4b2b727e45e76d7866030abfe95ff8cf8099",
+        "H1.element.dat": "61b8521423b5936ead9e4559408289693ba2cf69664778c8c7292a85be03738f",
+        "H1.loss.dat": "123a9f1c7ecf22b819a9a9e2eea1e4d2f7d9a60e9a0a30ec1237fdde7dca25c7",
+        "H1.pass.dat": "3b7fa5b28feb5a5e8bad647357b62c4204c3fdf00528d78d99adef3bb9a4eafd",
+        "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+        "H1.soil.dat": "85614c6b23db2b386763cadff2887f67c24790a261ec15424ce88bf899e8f6c2",
+        "H1.wat.dat": "3873a20df7d67d24e629e2f746a6a516e3b19487e018ddedc14f8360ec63de98",
+        "chnwb.txt": "7a9cd87d7415072eaca7e3333020d987772c541b95ebc6e1e3e6707d953f2d30",
+        "ebe_pw0.txt": "58bb14322924fe3459f9f3cebe5fe7e587b4062fc9bf20c0aec87713ae889803",
+        "loss_pw0.txt": "23e4fe6e2eae4cad57c1996eac74be0aaac2c6277ad74d3f1af8896a86265903",
+        "pass_pw0.txt": "85646aa30eaae550209f10dd46d564917641ca8a591c32bea5f3a80a807e1c31",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "745852bbaac063c7df4d22d3b5ec3145de651509f03ffa98fd75b095e60fd8db"
+      }
+    },
+    "candidate": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "107c4415ff3db2d06173bccff1ed4b2b727e45e76d7866030abfe95ff8cf8099",
+        "H1.element.dat": "61b8521423b5936ead9e4559408289693ba2cf69664778c8c7292a85be03738f",
+        "H1.loss.dat": "123a9f1c7ecf22b819a9a9e2eea1e4d2f7d9a60e9a0a30ec1237fdde7dca25c7",
+        "H1.pass.dat": "3b7fa5b28feb5a5e8bad647357b62c4204c3fdf00528d78d99adef3bb9a4eafd",
+        "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+        "H1.soil.dat": "85614c6b23db2b386763cadff2887f67c24790a261ec15424ce88bf899e8f6c2",
+        "H1.wat.dat": "3873a20df7d67d24e629e2f746a6a516e3b19487e018ddedc14f8360ec63de98",
+        "chnwb.txt": "7a9cd87d7415072eaca7e3333020d987772c541b95ebc6e1e3e6707d953f2d30",
+        "ebe_pw0.txt": "58bb14322924fe3459f9f3cebe5fe7e587b4062fc9bf20c0aec87713ae889803",
+        "loss_pw0.txt": "23e4fe6e2eae4cad57c1996eac74be0aaac2c6277ad74d3f1af8896a86265903",
+        "pass_pw0.txt": "85646aa30eaae550209f10dd46d564917641ca8a591c32bea5f3a80a807e1c31",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "745852bbaac063c7df4d22d3b5ec3145de651509f03ffa98fd75b095e60fd8db"
+      }
+    },
+    "identical": true
+  },
+  "original_single_hourly": {
+    "baseline": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+        "H1.element.dat": "33303948e38b5794d232db40998f03d19c9aa3301630f9f0fcf3c6cc84b80be3",
+        "H1.loss.dat": "3b41d0d231d2d7068473bff3052d930a5bf8caeb0976641f374033740cc7c01c",
+        "H1.pass.dat": "0d2d156ccbe1e7d08da29866bb28516936aa507c9aa38c6cc38f7a967b7c73c8",
+        "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+        "H1.soil.dat": "d1c8ca3e3bee66c8149f913493dccbc8f05a4dfaa218936b5dc7e2135cfeab85",
+        "H1.wat.dat": "dda8fc348c2ff9a0906c50688810c87395937a967a379deb29f5d6ba68e9b82a",
+        "chnwb.txt": "df3547981c73a90b8c77a6f76d663e39c6111ba4821291a76147853e30e2accd",
+        "ebe_pw0.txt": "dc11976fec107e57dcea192749286f5a2a9481927a556f61ef71a0d876a631b0",
+        "loss_pw0.txt": "63cb2a51cf3e70f6b3b948a4278e8fa651d06b965a689f12bd3e8531bbfd2133",
+        "pass_pw0.txt": "2e3cdc203bdab8ffa6937b9fb1e5a18bdaf6f2cac3f1e0288f09b646e09242be",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "167e3eb7724c409174ad876116152fb4422f9943b591772263a77f7330407359"
+      }
+    },
+    "candidate": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+        "H1.element.dat": "33303948e38b5794d232db40998f03d19c9aa3301630f9f0fcf3c6cc84b80be3",
+        "H1.loss.dat": "3b41d0d231d2d7068473bff3052d930a5bf8caeb0976641f374033740cc7c01c",
+        "H1.pass.dat": "0d2d156ccbe1e7d08da29866bb28516936aa507c9aa38c6cc38f7a967b7c73c8",
+        "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+        "H1.soil.dat": "d1c8ca3e3bee66c8149f913493dccbc8f05a4dfaa218936b5dc7e2135cfeab85",
+        "H1.wat.dat": "dda8fc348c2ff9a0906c50688810c87395937a967a379deb29f5d6ba68e9b82a",
+        "chnwb.txt": "df3547981c73a90b8c77a6f76d663e39c6111ba4821291a76147853e30e2accd",
+        "ebe_pw0.txt": "dc11976fec107e57dcea192749286f5a2a9481927a556f61ef71a0d876a631b0",
+        "loss_pw0.txt": "63cb2a51cf3e70f6b3b948a4278e8fa651d06b965a689f12bd3e8531bbfd2133",
+        "pass_pw0.txt": "2e3cdc203bdab8ffa6937b9fb1e5a18bdaf6f2cac3f1e0288f09b646e09242be",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "167e3eb7724c409174ad876116152fb4422f9943b591772263a77f7330407359"
+      }
+    },
+    "identical": true
+  },
+  "original_three_daily": {
+    "baseline": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "e5edde320f677b809053cd62e530e624b8e28d628f6ade876b0aa79e3451df47",
+        "H1.element.dat": "09a73d5d87f7d400e4570647eed7d6c3f4a85ea51a99529ad60aa8bcd1652776",
+        "H1.loss.dat": "69f922d939df9e916ff7ce101343844830fe2c0da5e7e31ebdb42361a7c3c059",
+        "H1.pass.dat": "131fe79268191d2ac94cf1bc58bb6ef69b942aa15fe17e1c59c442befb61aea2",
+        "H1.plot.dat": "631c0e35d8bd96783ada0431fa1d3b52ddd4feac3e8f54041d45f4cdcce03e5f",
+        "H1.soil.dat": "1fd6aa3e3d6642cc18c32c0cb30d22d60e87383201154af1a8bc893cc3d2802b",
+        "H1.wat.dat": "2b6e2c6e65743b946d609842019689aa2a0dace652ada6fdc927dfaf6edaa455",
+        "chnwb.txt": "7821087da5e387290fa8ba58b1ee19a962972664c2887eb071c4495503d5a6f6",
+        "ebe_pw0.txt": "abf2a50328a17241aeec7ae34ef545ae5c28f8bcccde997a756a6513cfc4c5cf",
+        "loss_pw0.txt": "a97717f2f564bc2a2dc8f5bf887982e3ebb978df09c4c2dfbd3d2b3a78913b49",
+        "pass_pw0.txt": "5c96c733175444d9c4fd8185507e097dfb6a3768d67f62564d13ccb9906927bd",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "b029ce56515f4cdf2f51ac5ed071dbb7e7c7230bdc923a1247b1e95335e89a8c"
+      }
+    },
+    "candidate": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "e5edde320f677b809053cd62e530e624b8e28d628f6ade876b0aa79e3451df47",
+        "H1.element.dat": "09a73d5d87f7d400e4570647eed7d6c3f4a85ea51a99529ad60aa8bcd1652776",
+        "H1.loss.dat": "69f922d939df9e916ff7ce101343844830fe2c0da5e7e31ebdb42361a7c3c059",
+        "H1.pass.dat": "131fe79268191d2ac94cf1bc58bb6ef69b942aa15fe17e1c59c442befb61aea2",
+        "H1.plot.dat": "631c0e35d8bd96783ada0431fa1d3b52ddd4feac3e8f54041d45f4cdcce03e5f",
+        "H1.soil.dat": "1fd6aa3e3d6642cc18c32c0cb30d22d60e87383201154af1a8bc893cc3d2802b",
+        "H1.wat.dat": "2b6e2c6e65743b946d609842019689aa2a0dace652ada6fdc927dfaf6edaa455",
+        "chnwb.txt": "7821087da5e387290fa8ba58b1ee19a962972664c2887eb071c4495503d5a6f6",
+        "ebe_pw0.txt": "abf2a50328a17241aeec7ae34ef545ae5c28f8bcccde997a756a6513cfc4c5cf",
+        "loss_pw0.txt": "a97717f2f564bc2a2dc8f5bf887982e3ebb978df09c4c2dfbd3d2b3a78913b49",
+        "pass_pw0.txt": "5c96c733175444d9c4fd8185507e097dfb6a3768d67f62564d13ccb9906927bd",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "b029ce56515f4cdf2f51ac5ed071dbb7e7c7230bdc923a1247b1e95335e89a8c"
+      }
+    },
+    "identical": true
+  },
+  "original_three_hourly": {
+    "baseline": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+        "H1.element.dat": "f6d628d4566c48cc2c4c3797e6aed7ab748ee5ec4864d54f202b730db91660ab",
+        "H1.loss.dat": "b4ea9e912f45e99dfab4e27e4fafd9fac11cf3916115349c6d0c763f10d190ce",
+        "H1.pass.dat": "6f5b56780a312857c9f6871ced474543fe1622525d4366083ad16c0a0c347d6a",
+        "H1.plot.dat": "631c0e35d8bd96783ada0431fa1d3b52ddd4feac3e8f54041d45f4cdcce03e5f",
+        "H1.soil.dat": "ae4f7fcba080896e5f0c2fe4f7011fa8a19c5946bedc6b337ae307d97123ac3f",
+        "H1.wat.dat": "6510b7f14f24ae0cbe9df467191604e597f3a2ee284100e2a0dd1e873e6ad487",
+        "chnwb.txt": "6a40c9f835bcaf3c78e50496f2c01f59a6ecb4fa6d24c5d8804eead5ff06e270",
+        "ebe_pw0.txt": "01211306a2bfea9251b9482138dd9db1f4b1b5eacf370cf0ac09e041dd480e94",
+        "loss_pw0.txt": "3edabfa2c35af043fb52bb7c950430647189bf0cc4368421c35bdda526a5ddd4",
+        "pass_pw0.txt": "01a09886af8214ca5e981190173403281482cb199f324bde249f0c4f7c2dc13b",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "70c9a4a21331d3b21e667a573935ed6a301272dcf532e9b108c866ad127d9f23"
+      }
+    },
+    "candidate": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "277396f53b8507164af27a138608b7de4c871fc619cd24620eb960302bbbfcf6",
+        "H1.element.dat": "f6d628d4566c48cc2c4c3797e6aed7ab748ee5ec4864d54f202b730db91660ab",
+        "H1.loss.dat": "b4ea9e912f45e99dfab4e27e4fafd9fac11cf3916115349c6d0c763f10d190ce",
+        "H1.pass.dat": "6f5b56780a312857c9f6871ced474543fe1622525d4366083ad16c0a0c347d6a",
+        "H1.plot.dat": "631c0e35d8bd96783ada0431fa1d3b52ddd4feac3e8f54041d45f4cdcce03e5f",
+        "H1.soil.dat": "ae4f7fcba080896e5f0c2fe4f7011fa8a19c5946bedc6b337ae307d97123ac3f",
+        "H1.wat.dat": "6510b7f14f24ae0cbe9df467191604e597f3a2ee284100e2a0dd1e873e6ad487",
+        "chnwb.txt": "6a40c9f835bcaf3c78e50496f2c01f59a6ecb4fa6d24c5d8804eead5ff06e270",
+        "ebe_pw0.txt": "01211306a2bfea9251b9482138dd9db1f4b1b5eacf370cf0ac09e041dd480e94",
+        "loss_pw0.txt": "3edabfa2c35af043fb52bb7c950430647189bf0cc4368421c35bdda526a5ddd4",
+        "pass_pw0.txt": "01a09886af8214ca5e981190173403281482cb199f324bde249f0c4f7c2dc13b",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "70c9a4a21331d3b21e667a573935ed6a301272dcf532e9b108c866ad127d9f23"
+      }
+    },
+    "identical": true
+  },
+  "eleven_daily": {
+    "baseline": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "73e183201dff373b7741eed2a7b61407dd446d3ddf1d0a1e25c42007e7b874ad",
+        "H1.element.dat": "d4e6f017862e8a9d8dd285f64209d5afe9342349effc5b01866a5672e9f3a136",
+        "H1.loss.dat": "1c23f56f778f084a454c64f3c145f5723d4faeb261792a3f1db1805578376a14",
+        "H1.pass.dat": "55eb6ba8045de1e4c8705078a1aa40ee8b65ebd57a6c558a6ec22c1d21f43569",
+        "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+        "H1.soil.dat": "9c12fb8fb463b25f91ad47d0bef8361644bb86f4c035d2fd202dd4aad34666db",
+        "H1.wat.dat": "3d173e91a3c6df99c2225b928efa26555dd4771407dee0c62aefb50f15c582b1",
+        "chnwb.txt": "a8d3ff05428f3e1e16ed41cd05533dd39e53185999375fcb2519926ad9e99001",
+        "ebe_pw0.txt": "e4e56329fa8fa89dd98a95faf8b01d2850008cd21dbccda501cde9b2cfc9f2ee",
+        "loss_pw0.txt": "775f3a4c7b485287ee698f78e176abadea7ee23cd215c1f3fbc05a5eb756c6f0",
+        "pass_pw0.txt": "b331e2146bd11096c8a535c4ae7f1cca94c8ca2c9b471e63128796918e8aa199",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "cb7312bfc3035c03c30f7404a2a8135147a8e8cc57d955ed388e90f3c0bdedf1"
+      }
+    },
+    "candidate": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "52c5cdf6a526ccf37c8afe790c0a1117803f521408871281cc06222837c1dfd9",
+        "H1.element.dat": "d1c87b28a5561a4cd27a241026ff586ca867c042c22667d456cb223f5ab19478",
+        "H1.loss.dat": "0c76ee5006452af01cf8e50ce271a828c8d1b3ab8059752c5fad92743deab60a",
+        "H1.pass.dat": "7fa01b3db9b93585d6b703229305d6302eb7cba5524ccf37cbc0779d14521a5a",
+        "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+        "H1.soil.dat": "7036d4f85416b10dee1145526d5b61a90c0dd2b0481959543e1827c8b08ff7aa",
+        "H1.wat.dat": "32cd90470f2605a1a5d2434f45d9c63c28d0c1bb8316ec92f17feb38d01a90ca",
+        "chnwb.txt": "5bd6a40fff446d2d98fafcf7352d673fcb6bac51bfbb161d62b4536246b0e157",
+        "ebe_pw0.txt": "95a91ba6b2e535f0806a401e6a852f2dad17302cf22628cf13d48d69f9aa0df5",
+        "loss_pw0.txt": "a41953b92026bd6e81bce5a48acaf8bc4c27bb8e7df12349b294b0d64f984a30",
+        "pass_pw0.txt": "1745be240e67a491488d206ee1df837bedd82dcae65668dd00a85ffc00b5f9dc",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "435dbbd65e8d83e23a753416df7a30f0687da83486bc524f633ea9d3b4b2f602"
+      }
+    },
+    "identical": false
+  },
+  "eleven_hourly": {
+    "baseline": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "72bbe6b7b69208eea4c49824e7efb3bfd9e2b1e97be5e30fdc5e985c187c244d",
+        "H1.element.dat": "eb39423e450e08b9c9da122c585512fa0f6737efcc5e7dd0f1df7442295e1b50",
+        "H1.loss.dat": "fb77a79e1601c0235fcc94dd5f271f3cc4ac38a6277994f54156ac2bb55d9809",
+        "H1.pass.dat": "9e248abec0ca53e1417b233baffc569a009feae437fd2742dfe0b9903ac7fbc0",
+        "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+        "H1.soil.dat": "23477eabc0654d2509fb601d1614c13be36a643fb416f6d2e3fd027e6280483f",
+        "H1.wat.dat": "5c91e8a92db6b41f58088b251818a68859e9ac61a8d1fa75f360b4f46c46149b",
+        "chnwb.txt": "5976e1836b5681855b5289e2a04c8a08edd36fc6ddaefa9e9674eb525bd6d25a",
+        "ebe_pw0.txt": "246d0e7238601d4e5cb90da5564bc8d3b3bc6af06c26cdf4e6a83bb67719df75",
+        "loss_pw0.txt": "592794f28b3d3a076f607677ee3b67f6f54b6762384a0a5b2b6994b6e4670538",
+        "pass_pw0.txt": "3c81b29d8e145ec699c2f2db2d3e7b1919c5789c6e80fe3b3c5496d26d429e72",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "571b85c495691bbec0eb96ec489ef8bf7b314eb19e3ecd63d963ac39bd58e4e9"
+      }
+    },
+    "candidate": {
+      "steps": {
+        "HILLSLOPE": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        },
+        "WATERSHED": {
+          "success": true,
+          "returncode": 0,
+          "last_year": 2
+        }
+      },
+      "channel_daily_rows": 731,
+      "channel_final_date": [
+        "365",
+        "1981"
+      ],
+      "artifacts": {
+        "H1.ebe.dat": "fd45487e2b3ec489fd9c470a89f34128a3d2d258c5d7d13f75b2cce7e942c156",
+        "H1.element.dat": "2d5af0df500ab41c85da9de685b49148cb949247782a4dcf37cb022436ded4f4",
+        "H1.loss.dat": "6a5676cfeabf134591d5702f0eb530012372ebb9d738ee08d40ace5434200f6e",
+        "H1.pass.dat": "87e2d46dd899863985a8090748d65346843e5f1860e0b5a83a9c0d6eb4a26b0d",
+        "H1.plot.dat": "11d081e98f0a429e603a3c37e6ce83be84aa91ccb8c3f3841b02b4209a73b73a",
+        "H1.soil.dat": "953900a6f5d1ea01d92c63caab7a08e00ca4101be91e0e4e84040969b0b691b4",
+        "H1.wat.dat": "013240c7f54736f4eb932204601c6496992e6671bdbe24750c0d353c14c8c6fd",
+        "chnwb.txt": "6ba6c7e43f3fcc8d02796379217115cfa4952c446e52a902d4ae07a695a633d4",
+        "ebe_pw0.txt": "6b8d7e4ecec49b7b7d8b4902dedbddc571588a5bb7b7be29f4ab7561d086ddcc",
+        "loss_pw0.txt": "779f63a2880f9bc9c1e59413eada3b796e13515ea200fef9b5866d803fb29bfb",
+        "pass_pw0.txt": "638db340986f735568f4e582c658f1678b29e8d875a1949f90385dfb80c7bd49",
+        "plot_pw0.txt": "e50a8150cdf9b3282485decab48cb634def7b314baed951050e6d8598059f4b7",
+        "soil_pw0.txt": "863a6f26c6a025ba9883e649a905b09b6f1c2a7c5500822653bd0abd208c632b"
+      }
+    },
+    "identical": false
+  }
+}

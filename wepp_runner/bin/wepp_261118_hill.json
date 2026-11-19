@@ -1,0 +1,36 @@
+{
+  "binary_name": "wepp_261118_hill",
+  "binary_role": "hillslope",
+  "built_utc": "2026-11-19T03:57:41Z",
+  "features": {
+    "hbp_pass_family": "H*.hbp",
+    "hbp_schema_major": 0,
+    "hbp_schema_minor": 0,
+    "hbp_supported": false,
+    "legacy_ascii_pass_family": "H*.pass.dat",
+    "mode2_direct_hbp_reader": false,
+    "mode2_master_pass_prompt_required": true,
+    "mode3_process_pass_reload": true,
+    "mofe_supported": true,
+    "pass_components_reader_required": true,
+    "pass_components_version": 3,
+    "process_mode_pass_pw0_required": true,
+    "single_user_defined_inputs_supported": true,
+    "soil_input_capacity": 23
+  },
+  "release_tag": "261118",
+  "schema": "wepp-binary-release-metadata-v1",
+  "sha256": "9843f250b25f2f2dab342d2418cd9d5b5b43d9e685b6db1216031c1a0958fa81",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "source_commit": "464a5e5e15e1fbcdd4e8232260ecf79ad2645200",
+  "source_repo": "wepp-in-the-woods/wepp-forest",
+  "validation": {
+    "hillslope_watchlist": "31 passed",
+    "host_smoke": "passed",
+    "legacy_reader_state_parity": "80/80 exact",
+    "native_full_suite": "1824 passed; additional metadata tests 14 passed",
+    "reader_capacity": "72 passed",
+    "same_build_watershed_replay": "20 complete runs; legacy controls byte-identical"
+  },
+  "wepp_banner_version": "2020.500"
+}

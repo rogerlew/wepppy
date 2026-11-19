@@ -32,6 +32,14 @@
       "recorded": null,
       "current": "6a8e9ed608c2d172cb8cd53ce18b3a3b927c153b4eb75a0a90ed12d57827c72d"
     },
+    "wepp_runner/wepp_binary_capabilities.py": {
+      "recorded": "6be8a7b609e123759cc095cd7cd6f0f351e1641479e5c8b8bb2f54f12a3529db",
+      "current": "75e7fe3344ab8b3aa44a7edce75030273650019c9d3fe7966e87709a599554a3"
+    },
+    "wepp_runner/wepp_runner.py": {
+      "recorded": "d87f0615b6ba9201ce70ae17256924555d391bd7e6c294e8dc0500eb1346d718",
+      "current": "7cf08e0a78ed3d2099c0da50c8f27817dcf73bb1c3fc5bc7a05f72d9ac351b38"
+    },
     "wepppy/nodb/mods/roads/_constants.py": {
       "recorded": null,
       "current": "545dc010950acea4dda274fc7cf2f81e78c3fb43f84c34dafda2da9eb7b2ecde"
@@ -130,7 +138,7 @@
     },
     "wepppy/wepp/soils/horizon_boundary.py": {
       "recorded": null,
-      "current": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170"
+      "current": "2ea8581117f960b80c3180a531c03e66bb8f91132e346d889b32d323ddebf684"
     }
   },
   "rationale": "Native WBT tracing and selected-binary forwarding change full-project coverage, not the isolated profile parameterization. Report numbers and execution source hashes remain historical. Test change enforces explicit stale status and exact reviewed source drift; subsequent unreviewed drift fails. Reviewed 2026-10-29: commit 2fff37a75 adds only query_inputs for saved-form rendering without result admission; no model execution, soil parameterization, or output assembly changes. Historical full-project routing results remain stale. The generated-soil boundary change adds the shared normalizer to execution-source hashing; historical reports remain unchanged and explicitly stale.",
@@ -420,6 +428,37 @@
       "current_sha256": "545dc010950acea4dda274fc7cf2f81e78c3fb43f84c34dafda2da9eb7b2ecde",
       "scope": "Remove two empty trailing lines only; AST identical. Native/project receipts retain the exact pre-formatting source identity. No executable token, model input or behavior changed.",
       "evidence": "docs/work-packages/20261117_roads_code_quality_refactor/artifacts/final_source_disposition.md"
+    },
+    {
+      "date": "2026-11-19",
+      "scope": "Selected-executable soil input capacity. Historical Roads binary and profile geometry/materials remain unchanged; bounded matrix still uses ten-input default. Capacity metadata and final launch guard reject unsupported input counts. All 516 native profile cases passed in segmented broad validation. This does not refresh or approve historical full-project routing results; stale status, original results, report and execution provenance remain unchanged.",
+      "changes": {
+        "wepppy/wepp/soils/horizon_boundary.py": {
+          "previous_reviewed": {
+            "recorded": null,
+            "current": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170"
+          },
+          "current_review": {
+            "recorded": null,
+            "current": "2ea8581117f960b80c3180a531c03e66bb8f91132e346d889b32d323ddebf684"
+          }
+        },
+        "wepp_runner/wepp_runner.py": {
+          "previous_reviewed": null,
+          "current_review": {
+            "recorded": "d87f0615b6ba9201ce70ae17256924555d391bd7e6c294e8dc0500eb1346d718",
+            "current": "7cf08e0a78ed3d2099c0da50c8f27817dcf73bb1c3fc5bc7a05f72d9ac351b38"
+          }
+        },
+        "wepp_runner/wepp_binary_capabilities.py": {
+          "previous_reviewed": null,
+          "current_review": {
+            "recorded": "6be8a7b609e123759cc095cd7cd6f0f351e1641479e5c8b8bb2f54f12a3529db",
+            "current": "75e7fe3344ab8b3aa44a7edce75030273650019c9d3fe7966e87709a599554a3"
+          }
+        }
+      },
+      "evidence": "docs/work-packages/20261118_soil_input_capacity_23/artifacts/20261119_qa_review.md"
     }
   ]
 }

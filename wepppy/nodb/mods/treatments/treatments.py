@@ -772,7 +772,7 @@ class Treatments(NoDbBase):
                 mukey=str(mukey),
                 soil_summary_dir=getattr(_soil, "soils_dir", None),
             )
-            soil_u = WeppSoilUtil(source_soil_path)
+            soil_u = WeppSoilUtil(source_soil_path, max_horizons=soils_instance.soil_input_capacity)
             clay = soil_u.clay
             sand = soil_u.sand
         else:
@@ -837,7 +837,7 @@ class Treatments(NoDbBase):
                     mukey=str(mukey),
                     soil_summary_dir=getattr(_soil, "soils_dir", None),
                 )
-                soil_u = WeppSoilUtil(source_soil_path)
+                soil_u = WeppSoilUtil(source_soil_path, max_horizons=soils_instance.soil_input_capacity)
 
             if sol_ver == 7778.0:
                 new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)

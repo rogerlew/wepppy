@@ -1,0 +1,30 @@
+{
+  "native_base": "7d4cf4b5ab24bbc825515d54f25a035062b826bb",
+  "default_branch": "wepp_260430_negmeltfix_comparator",
+  "compiler": "GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "binaries": {
+    "baseline/wepp": {
+      "path": "/workdir/native-soil-capacity-evidence/baseline/wepp",
+      "sha256": "815aa45875493272d74e909eefbb091c3a387a159902247068c12a7af74e7c5b",
+      "bytes": 2827776
+    },
+    "baseline/wepp_hill": {
+      "path": "/workdir/native-soil-capacity-evidence/baseline/wepp_hill",
+      "sha256": "caa4022ebe222a9541bb5d86efde19e47dd1df88ae553b6f681332c381c0dce8",
+      "bytes": 2766808
+    },
+    "candidate/wepp": {
+      "path": "/workdir/native-soil-capacity-evidence/candidate/wepp",
+      "sha256": "39cd137f1aa97920e224eb3f7ad6b7ca3ca4d9b58bb33cbad361f4d20c934b17",
+      "bytes": 2828008
+    },
+    "candidate/wepp_hill": {
+      "path": "/workdir/native-soil-capacity-evidence/candidate/wepp_hill",
+      "sha256": "10611cb9cc39d0e161df2b8b0571b792d59b537c8a3912f4772f53f1927bc160",
+      "bytes": 2767016
+    }
+  },
+  "candidate_reader_sha256": "3aa915a5ae5cf3e8f77a910cf0ea0d39ad5616b55c814ed7462d31b8d258860b",
+  "native_candidate_commit": "fd7e0a5a6526ae217a58eb5bb2c491d75273610d",
+  "watershed_evaluation_tool_commit": "530ffb2be0dbfcd201aee81e4ae4b5fc4a8a40dd"
+}

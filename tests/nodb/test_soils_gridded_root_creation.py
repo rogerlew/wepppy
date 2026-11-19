@@ -10,8 +10,15 @@ import jsonpickle
 import pytest
 
 from wepppy.nodb.core.soils import Soils, SoilsMode
+from wepppy.soils.ssurgo.source import SoilDataSource
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(autouse=True)
+def legacy_soil_capacity(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Detached controller fixtures use the historical executable capacity."""
+    monkeypatch.setattr(Soils, "soil_input_capacity", property(lambda self: 10))
 
 
 class _StopBuild(Exception):
@@ -112,6 +119,7 @@ def test_build_gridded_coverage_uses_hillslope_area_not_wsarea(
     soils = Soils.__new__(Soils)
     soils.wd = str(wd)
     soils.logger = logging.getLogger("tests.nodb.soils_gridded_coverage")
+    soils._soil_data_source = SoilDataSource().identity()
     soils._soils_is_vrt = False
     soils._ssurgo_db = "ssurgo"
     soils._initial_sat = 0.75
@@ -218,6 +226,7 @@ def test_build_gridded_preserves_raw_mukey_for_invalid_fairpoint_fallback(
     soils = Soils.__new__(Soils)
     soils.wd = str(wd)
     soils.logger = logging.getLogger("tests.nodb.soils_gridded_raw_mukey")
+    soils._soil_data_source = SoilDataSource().identity()
     soils._soils_is_vrt = False
     soils._ssurgo_db = "ssurgo"
     soils._initial_sat = 0.75
@@ -361,6 +370,7 @@ def test_intelligent_fallback_selects_and_materializes_only_added_local_donor(
 
     soils = Soils.__new__(Soils)
     soils.logger = logging.getLogger("tests.nodb.local_ssurgo_fallback")
+    soils._soil_data_source = SoilDataSource().identity()
     soils._prepare_project_surgo_cache = lambda **_kwargs: str(tmp_path / "surgo.sqlite")
     profiles = {
         "99": {"horizon_index": 0, "chkey": "raw", "direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
@@ -471,7 +481,8 @@ def test_added_donor_materialization_removes_failed_publication_and_retries(
 
     class _WeppSoil:
         @staticmethod
-        def write(directory: str, overwrite: bool) -> SimpleNamespace:
+        def write(directory: str, overwrite: bool, *, max_horizons: int) -> SimpleNamespace:
+            assert max_horizons == 10
             assert overwrite is True
             (Path(directory) / "20.sol").write_text("candidate", encoding="utf-8")
             return SimpleNamespace(fname="20.sol")

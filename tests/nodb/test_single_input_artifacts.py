@@ -53,6 +53,7 @@ def _prepare_independent_sources(tmp_path, monkeypatch, uploaded_landuse, soil_s
     landuse._build_multiple_ofe(domlc_mofe_override=assignments)
     soils = Soils.__new__(Soils); soils.wd = str(tmp_path); soils._mods = []
     soils.config_get_str = getter
+    monkeypatch.setattr(Soils, 'wepp_instance', property(lambda _: SimpleNamespace(wepp_bin='wepp_260803')))
     soils._mode = SoilsMode.SingleUserDefined if uploaded_soil else SoilsMode.SingleDb
     soils.domsoil_d = {hill: 'source' for hill in segments}
     soils.soils = {'source': SimpleNamespace(fname='source.sol')}

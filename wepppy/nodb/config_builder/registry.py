@@ -47,7 +47,7 @@ from wepp_runner.wepp_runner import (
     get_linux_wepp_bin_opts,
     get_linux_wepp_bin_role_paths,
 )
-from wepp_runner.wepp_binary_capabilities import read_binary_capabilities
+from wepp_runner.wepp_binary_capabilities import read_binary_capabilities, read_soil_input_capacity
 
 __all__ = ["DEFAULT_PROFILES_ROOT", "RegistryError", "load_registry"]
 
@@ -382,10 +382,12 @@ def _provider_wepp_components() -> tuple[ComponentDefinition, ...]:
         hillslope_digest = _executable_sha256(hillslope_path, binary_id, "hillslope")
         try:
             features = read_binary_capabilities(watershed_path, hillslope_path)
+            soil_capacity = read_soil_input_capacity(watershed_path, hillslope_path)
         except ValueError as exc:
             raise RegistryError(str(exc)) from exc
         source_revision = (
             f"provider-v1:watershed={watershed_digest}:hillslope={hillslope_digest}"
+            + (f":soil_capacity={soil_capacity}" if soil_capacity != 10 else "")
         )
         components.append(
             ComponentDefinition(
