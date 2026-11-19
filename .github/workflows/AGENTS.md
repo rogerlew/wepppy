@@ -142,6 +142,6 @@ The complete source code for the `github/codeql-action` repository is available 
 ---
 
 **Document Version:** 1.0.0  
-**Last Updated:** 2025-10-29  
+**Last Updated:** 2026-11-18
 **Maintainer:** AI Agents  
 **Review Cadence:** Update when workflows change or new resources become available

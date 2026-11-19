@@ -1,76 +1,67 @@
 # CI runner migration tracker
 
-Updated: 2026-11-18 UTC. Branch: task/ci-runner-migration.
+Updated: 2026-11-19 UTC. Branch: task/ci-runner-migration. PR: #684.
 
 ## Progress
 
-- [x] Audit live runner labels, workflow state and retained runs.
-- [x] Operator approved migrating nightly checks and retiring 21 profile schedules.
-- [x] Migrate active checks, nightly checks and telemetry; regenerate workflows.
-- [ ] Validate generated workflows and real isolated executions; review boundaries.
-- [ ] Integrate through PR and retain receipt; clean obsolete queued runs.
+- [x] Audit live runner labels and retained workflows/runs.
+- [x] Migrate three active checks, eight nightly suites and Cloc; regenerate YAML.
+- [x] Retire 21 Forest profile schedules and CI Samurai Nightly with explicit approval.
+- [x] Validate isolated runtimes, meaningful reports and independent source security review.
+- [ ] Integrate PR; retain fresh ancestry receipt and final queue/runner readback.
+- [ ] Observe deferred broad baseline and full pytest coverage after integration.
 
 ## Decisions
 
-Preserve coverage; remove dependence on Forest host setup. Profile schedule retirement
-is explicit operator authorization, not inferred from lack of recent successful runs.
+Use remote-ci for general jobs; preserve ghcr-builder isolation. Remove Forest host
+configuration and shared Redis cleanup. Retire only the explicitly approved profile
+and Samurai schedules; keep CLI tooling and archived catalogs. No production deploy.
 
-## Evidence
+Preserve all assertions and report failures. Keep Features Export/PATH findings
+separate from this runner migration. Broad coverage/baseline validation is deferred
+until after integration in accordance with the operator's earlier instruction.
 
-[Runner audit](artifacts/runner-audit.json) records 33 enabled homelab workflows;
-32 latest executions were queued and Cloc's latest was canceled. There is no
-registered homelab runner. Both supported runners are online; only runner-02
-is eligible for general remote-ci workloads.
+## Validation and limits
 
-## Implementation observations
+Executable candidate: 97a82588310dc91a9e3dd2b11547200db0a6dd3a. Later evidence-only
+changes do not change tested workflow/runtime sources.
 
-Status2 isolated smoke built the actual service/client and delivered all five
-samples successfully; cleanup removed its own project. Browser image construction
-and direct browser validation are in progress. Existing already-relabeled docs,
-quality and broad-exception jobs also inherited unused Forest bootstrap; their
-explicit standalone setup removes that same host dependency. Cloc retains optional
-repository behavior but now explicitly anchors its base directory to the checkout.
-The CI Samurai SSH/restart schedule is a separate discovered consumer; the operator explicitly approved retiring it as well. It is disabled on GitHub,
-and the source is archived alongside the profile catalog.
+| Surface | Evidence/outcome |
+| --- | --- |
+| Artifact Observability | Supported-runner pass, 44425293294 |
+| Shape-Converter Gates | Focused and full unit/integration passes, 44425293369 |
+| NPM tests | Supported-runner pass, 44425293043 |
+| Accessibility | Supported-runner pass, 44425329684; 11 passed, one opt-in canary skipped; all seven page reports present |
+| Controller checks | Supported-runner 44425333040 matches local: 16 passed, two failures, zero skipped; report upload and cleanup completed |
+| NPM coverage | Pass, 44423384936; verified 1,192,148-byte LCOV |
+| Theme Metrics | Pass, 44423392936; 14 themes, 1,568 measurements |
+| Status / Preflight / Status2 smoke | Passes, 44422206052 / 44422210831 / 44422215161 |
+| Cloc / exception guard / governance | Passed on candidate; retained final run readback identifies exact revisions |
+| RQ contract guards / docs / code quality | Passed: 44425293131 / 44425293295 / 44425293013 |
+| Local regression | 295 focused Python checks; final nine helper/generator checks; clean receipts retained compressed |
+| Broad coverage / baseline | Explicitly deferred; canceled pre-merge runs are not passing evidence |
 
-## Validation update
+See [remaining controller findings](artifacts/remaining-controller-findings.md).
+Accessibility passes existing suite rules, not full conformance: retained axe and
+non-enforced contrast findings remain. No checks, thresholds or permissions were
+weakened to obtain passing migration evidence.
 
-PR #684 is draft. NPM tests, Cloc, docs, quality, exception guards and both
-required governance checks passed on b53395d36. Manual supported-runner executions
-also passed: Status Tests 44422206052, Preflight Tests 44422210831 and Status2
-Smoke 44422215161. All 22 retired workflows are disabled and their queues cleared.
+## Runtime repairs and cleanup
 
-Initial Artifact Observability and Shape Gates runs failed preflight because the
-common CI image lacked native shape parsers and the checkout could not see locked
-browser assets. Candidate-native builds and explicit asset preparation repair this
-shared assumption, including existing stubtest/RQ/isolation consumers. Local broad
-preflight now passes all five readiness checks; remote reruns remain pending.
+The remote preflight initially found missing native parsers and browser assets.
+The test image now builds candidate parsers with provenance; explicit preparation
+requires candidate-matching image-owned browser assets. The same shared assumption
+is repaired in existing stubtest, isolation and RQ guard consumers. RQ preparation
+also initializes its disposable account schema before broad preflight.
 
-Local NPM V8 coverage produced the verified 1.2 MiB LCOV artifact. The earlier
-relative output path passed tests but failed artifact-location validation; the
-workflow now uses the absolute workspace path. Browser login passes real CAPTCHA,
-CSRF and password validation; controller and accessibility acceptance remain open.
+[Browser runtime evidence](artifacts/header-conformance-repair.md) explains the
+shared header alias repair, actual CAP/password/CSRF login, private RQ API, exact
+Host forwarding, browser outbound bridge for existing CDN scripts, fixture OpenET
+grant and early accessibility project provisioning. Other services stay internal;
+there are no published ports or production credentials/mounts.
 
-The real controller path required the existing RQ session API and public CDN
-scripts. The fixture now preserves Host/origin checks through a private RQ socket;
-only the browser/app container has outbound access. Earlier controller failures
-are retained as fixture diagnostics, not claimed as accepted application tests.
-Focused generator/helper/header validation: 295 passed, 3 deselected, clean source
-receipt 49895803660d498f8af012d5b6d81aa0. Independent source security review has no
-unresolved findings before the final egress amendment (review requested).
-
-## Browser and artifact acceptance update
-
-Local accessibility fixture: 11 passed, one intentionally opt-in mixed-version
-activation canary skipped; all seven required pages are present in the retained
-axe report. Five supporting Python checks and 44 Jest checks also pass. Source
-security review covers the final fixture grants and early project provisioning.
-Theme Metrics passed remotely (44423392936); NPM coverage passed remotely
-(44423384936) with verified 1,192,148-byte LCOV. Eight obsolete homelab runs for
-accepted replacements were canceled, separate from retired profile cleanup.
-
-The controller run before the OpenET fixture grant was 15 passed/3 failed. A final
-run is checking that grant. Features Export selection on an empty run and PATH's
-missing second error-detail line remain visible assertions; no skip or weaker
-expectation has been added. These are follow-up findings outside runner migration.
-Pytest Coverage and remaining PR checks are still running/queued remotely.
+All 22 retired workflows are disabled and their queued runs cleared. Additional
+obsolete homelab runs and superseded task-PR runs are separately recorded; unrelated
+runs were not canceled. Local containers, volumes, networks and job-owned images
+were removed. The canceled remote coverage project's resources were also absent
+on readback. Final integration readback remains required before claiming cutover.

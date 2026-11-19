@@ -1,0 +1,14 @@
+[
+  {
+    "workflow": "playwright-controllers-nightly.yml",
+    "run_id": 44283815368,
+    "head_sha": "d164d711c1d7227c4b55e091e7fdf96885acca88",
+    "reason": "Retire unsupported homelab execution; replacement controller reports verified, full coverage explicitly deferred to after integration."
+  },
+  {
+    "workflow": "pytest-coverage-nightly.yml",
+    "run_id": 44273466429,
+    "head_sha": "d164d711c1d7227c4b55e091e7fdf96885acca88",
+    "reason": "Retire unsupported homelab execution; replacement controller reports verified, full coverage explicitly deferred to after integration."
+  }
+]

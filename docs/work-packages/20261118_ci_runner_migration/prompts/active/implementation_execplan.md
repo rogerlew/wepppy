@@ -13,7 +13,7 @@ explicitly approved by the operator.
 
 - [x] (2026-11-18 UTC) Audit and scope approval retained.
 - [x] M1: Define per-workflow isolated runtime and implement faithful migration.
-- [ ] M2: Generate YAML, validate real commands/reports, inspect security boundaries.
+- [x] M2: Generate YAML, validate real commands/reports, inspect security boundaries (explicit limits below).
 - [ ] M3: Merge approved PR, observe runner execution and clean stale queue entries.
 
 ## Surprises & Discoveries
@@ -35,6 +35,12 @@ The operator chose to migrate nightly checks and retire old profile schedules on
 CI runtime components; no new host credentials, runners or deployment topology.
 
 ## Outcomes & Retrospective
+
+Supported-runner browser acceptance now matches local evidence: accessibility
+11 passed/one opt-in skip with all seven pages, controllers 16 passed/two visible
+assertion failures. Preserve Features Export and PATH assertions as follow-ups;
+see artifacts/remaining-controller-findings.md. Broad baseline/full coverage are
+deferred until after integration per the operator's earlier instruction.
 
 Implementation is on draft PR #684. NPM, Cloc, docs/quality/exception guards and
 Status/Preflight/Status2 smoke passed on supported runners. Native preflight passes locally; accessibility has 11 local passes with all seven

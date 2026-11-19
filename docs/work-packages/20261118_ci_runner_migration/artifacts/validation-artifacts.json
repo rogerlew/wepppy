@@ -8,14 +8,41 @@
   "browser-cdn-failure.log.gz": {
     "raw_sha256": "9d932452643d84d92133c2dc9ef10a5bca7e95d10e125b5979c1d6872758bc89"
   },
+  "browser-cleanup.log.gz": {
+    "raw_sha256": "8c130d5fdf7c40b188741e2b599d539624625f905dd22ea68ac0b7c6d0db96c7"
+  },
+  "browser-image-cleanup.log.gz": {
+    "raw_sha256": "d7ae6f17f7b6db7dd36cef72d625a3dc9ace576f54df4d2c44e97f4b823dc880"
+  },
+  "controller-final.log.gz": {
+    "raw_sha256": "d7b54a80c759a7c4646273eca1a3a5851d90249355202fe689dfd075a628bfc1"
+  },
   "controller-initial-egress.log.gz": {
     "raw_sha256": "e8fbf47fb843f79e47c1346b147099759dc10b34e19d4f025b5de1c0897c7b9d"
+  },
+  "controller-regression-cont-13b01-race-and-preserves-job-hint-runs0.md.gz": {
+    "raw_sha256": "3ef1ec6f794ef3369d71b535e51b21c318fe4e47385421e303a2ff28177cb4b4"
+  },
+  "controller-regression-cont-3a622-race-and-preserves-job-hint-runs0.md.gz": {
+    "raw_sha256": "92e36e3b60d57bc5293c3feac75a5332bbe7693165c550b310584b4d9b2ca1b5"
+  },
+  "coverage-deferred.log.gz": {
+    "raw_sha256": "afd6396e6921731195e71eeeca851ad28fc2b511b87cee8de08c757fb0321aff"
+  },
+  "focused-final-receipt.json.gz": {
+    "raw_sha256": "941e74ec95c92399caf9d579b3421c00fe3e28a850742ef4eec6fb28bba08712"
   },
   "focused-final.log.gz": {
     "raw_sha256": "ddd77b865bd9964660337a7e6f1abcebe23910e47c8d79f2ff7f8980c652372f"
   },
   "focused-tests.log.gz": {
     "raw_sha256": "d6e1152c3448ff2674d5bb890a6d3f0fb2cd338017aec0b5077d9f18848a7370"
+  },
+  "helper-final-receipt.json.gz": {
+    "raw_sha256": "44ecf33f16eed2d2fa0678815c9bce0dab8b046b3fb92528594f575d88bb55e7"
+  },
+  "helper-final.log.gz": {
+    "raw_sha256": "41fd8d66719209ef1ca4d984d757e159f026f95bf5eeec7ed2c318ec61c16cd1"
   },
   "native-browser-preflight.log.gz": {
     "raw_sha256": "5b418fcff577b94c11838fd3ea055f96ff70973a5f0fe508dfdd0aaf7ac253b4"

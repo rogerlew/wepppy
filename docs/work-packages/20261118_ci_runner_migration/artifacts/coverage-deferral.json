@@ -1,0 +1,6 @@
+{
+  "run_id": 44423388732,
+  "reason": "Honor operator preference to defer broad suite until after integration; free runner for focused migration gates.",
+  "observed": "Runtime preparation and broad preflight passed; tests started and reached at least20percent with existing failures. No full-suite or coverage-artifact acceptance claimed.",
+  "next": "Dispatch full pytest coverage on integrated master."
+}

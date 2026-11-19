@@ -1,0 +1,49 @@
+{
+  "run_id": 44425329684,
+  "head_sha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+  "runner": "runner-02",
+  "stats": {
+    "startTime": "2026-11-19T00:05:18.505Z",
+    "duration": 52737.984,
+    "expected": 11,
+    "skipped": 1,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "page_ids": [
+    "runs0-dashboard",
+    "ui-components-report-a11y",
+    "ui-components-theme-lab",
+    "weppcloud-config-builder",
+    "weppcloud-interfaces",
+    "weppcloud-profile",
+    "weppcloud-root"
+  ],
+  "files": [
+    {
+      "path": "ci-browser-result.json",
+      "size_bytes": 19919,
+      "sha256": "a2c7b6d4b24f38f41e86b1576f3ac967acc26128e93dc4ae3856e0017acfdb41"
+    },
+    {
+      "path": "a11y/axe-summary.md",
+      "size_bytes": 1255,
+      "sha256": "e8dc126e70f3dfaa7eddacc831bccfe5d05936eb10837af03d3da27d6b82f0c6"
+    },
+    {
+      "path": "a11y/axe-violations.json",
+      "size_bytes": 4661,
+      "sha256": "0a85daeafab2d6b2df5804ef16e4e7461694dd4d94e3df8065f5b8cfb0f30980"
+    },
+    {
+      "path": "theme-metrics/theme-contrast.json",
+      "size_bytes": 1301760,
+      "sha256": "cc2d352288967a9381d145e6f5d2c018655af00941257f0bc7a052a6d8ff4a45"
+    },
+    {
+      "path": "theme-metrics/theme-contrast.md",
+      "size_bytes": 201090,
+      "sha256": "826385adf1370fd4822282e864f1c88479c58ea69de514c86e91d3f666a31e93"
+    }
+  ]
+}

@@ -8,7 +8,7 @@
 - Source: `b53395d363705bef477d97522045fcded6608cfd`, plus browser Compose's temporary query-coordination mount; reviewed file SHA-256 `4c0c3e4b1e10db92866f378d19997d7108a51ffe979153c29294defba53b2fa9`.
 - Scope: migrated workflow sources/generated YAML, browser fixture, isolated Compose runtimes, authenticated Status2 client, coverage commands, schedule retirement and shared-header conformance repair.
 - Related evidence: [tracker](../tracker.md), [header repair](header-conformance-repair.md), [validation manifest](validation-artifacts.json), [retirement readback](retirement-readback.json).
-- Correctness: interim independent findings were sent to the integrator; final browser/runner acceptance remains pending and is not supplied by this review.
+- Correctness: interim independent findings were sent to the integrator; final local accessibility and cleanup readback is recorded below, while two controller failures and remote acceptance remain unresolved.
 
 ## Security Triage Decision
 
@@ -42,11 +42,13 @@ backend authorization. Missing/false/true display states have regression coverag
 ## Verdict
 
 - Initial security **source review: PASS** for the identified revision and mount addition.
-- Latest uncommitted runtime additions: security **source review PASS**, including
+- Latest reviewed runtime additions: security **source review PASS**, including
   the resolved SEC-01 and RQ cleanup/origin corrections documented below.
+- Local runtime evidence: accessibility 11 passed/one opt-in skip across all seven
+  required pages; controllers 16 passed/two failed; project cleanup verified.
 - Overall migration/release acceptance: **pending**, not complete.
-- Recommendation: retain the source changes; require remaining real browser,
-  supported-runner and failure-cleanup evidence before package closure.
+- Recommendation: retain the source changes and visible controller failures;
+  require their disposition and remaining supported-runner evidence before closure.
 - No risk acceptance or policy bypass is requested by this review.
 
 ## Surface Checks
@@ -57,8 +59,8 @@ The browser fixture retains canonical owned-cookie migration configuration,
 `disturbed9002_wbt`, test-support scope and actual authenticated account creation.
 It mounts the application under `/weppcloud` instead of changing production route
 prefixes. Fresh report validation rejects all-skipped execution and requires the
-seven intended axe page identities. Theme Lab succeeded against the actual app;
-remaining controller/accessibility valid-state checks are still required.
+seven intended axe page identities. Final local accessibility execution and its
+seven-page report passed this coverage check; two controller checks remain failed.
 
 ### 1) Auth, Session, and Authorization
 
@@ -168,8 +170,11 @@ administrative changes.
 ## Residual Risk
 
 The trusted self-hosted runner model and ordinary dependency-download trust remain
-existing assumptions. Real controller/accessibility completion, supported-runner
-execution and unsuccessful-job cleanup evidence are outstanding acceptance work.
+existing assumptions. Two controller failures and supported-runner acceptance
+remain outstanding. Local accessibility coverage and project cleanup are verified
+below; these observations do not prove remote execution or universal accessibility.
+Broad pytest coverage and baseline comparison are deferred until after integration
+under the operator's instruction, with no pass or regression-baseline claim.
 Do not describe this source pass as a completed migration, deployment, exhaustive
 security proof, or accessibility certification.
 
@@ -348,3 +353,48 @@ preceding accessibility run as ten passes, one failure (`Invalid URL`) and one
 expected skip. That result does not validate this provisioning change; the new
 actual run and complete seven-page report were still pending at review time.
 Source review remains PASS; overall migration acceptance remains pending.
+
+### Final local evidence readback
+
+Independently read the retained JSON reports and compressed logs. Their final
+helper source remains SHA-256
+`97233973c7cbb1c1decdad5f0a40d864a0a6b5117216c91d9ed9fb876e7b83af`.
+The decompressed accessibility, controller and helper logs match their raw hashes
+in [validation-artifacts.json](validation-artifacts.json).
+
+| Evidence | Observed result |
+| --- | --- |
+| [Accessibility report](accessibility-final.json) and [log](accessibility-final.log.gz) | 11 passed, one opt-in mixed-version activation skip, zero unexpected/flaky results. The real cookie-authenticated RQ session-token canary passed. |
+| [Axe report](accessibility-final-axe.json) | All seven required page IDs present; two serious findings remain: `link-in-text-block` in Theme Lab and `nested-interactive` in the dashboard. Existing evidence collection does not fail on violations by default. |
+| [Controller report](controller-final.json) and [log](controller-final.log.gz) | 16 passed, two failed, zero skips. OpenET now passes. Features Export cannot select the unavailable layer; PATH omits the expected second stacktrace line. |
+| [Helper/generator log](helper-final.log.gz) | Nine tests passed. Receipt `0725735c30364680a22feadbb4e51e74` has pytest/wrapper exit zero and empty preflight/source/runtime change lists. |
+
+The accessibility run also retained 1,568 contrast measurements across 14 themes
+and 59 non-enforced AA findings. This is successful execution and coverage
+evidence, not a claim of WCAG/AA conformance. The optional coordinated activation
+canary was not exercised.
+
+The reviewed controller spec, cases, and Features Export/PATH implementations have
+no diff against `origin/master`. Their failed assertions remain enabled and return
+failure. This does not establish that both failures predate the migration: a
+baseline comparison is deferred, so their cause/disposition remains a correctness
+follow-up rather than a cleared acceptance condition.
+
+Read `/tmp/ci-migration-final-cleanup.log`: Compose removed all four browser-project
+containers and both networks after the local runs. Independent Docker queries for
+the exact `com.docker.compose.project=wepppy-ci-migration-browser` label returned no
+containers, networks or volumes. This establishes local fixture cleanup, including
+the pre-created run's container tmpfs, without asserting remote failure cleanup.
+
+Report SHA-256 values read back:
+
+- `accessibility-final.json`: `4772911f285e9aec39e8e3d8953614ee51330c5cf28080466e9bc2256fca9fbb`.
+- `accessibility-final-axe.json`: `c7093577c291d44c9aa42a348a495d7f361825807bce8bca5d52c04662245a03`.
+- `controller-final.json`: `e6da7ac27b26cf9a2cc23c50ab2615cb57e7bc6227c1b484d2a8d4272ab08fb2`.
+
+[Coverage deferral](coverage-deferral.json) and
+[baseline deferral](baseline-deferral.json) retain the operator-directed
+post-integration scope. Neither cancelled run supplies a full-suite pass. Remote
+accessibility was still running at this review; no remote acceptance or overall
+package closure is claimed. Security source review remains PASS with no unresolved
+source security finding, subject to the explicit correctness and coverage limits.
