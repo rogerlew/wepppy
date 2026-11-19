@@ -1,0 +1,658 @@
+{
+  "observed_utc": "2026-11-19T00:28:06.493072+00:00",
+  "remote_master_sha": "ef935e559a1cca71ce0862215d80b5074d1aefe0",
+  "runners": [
+    {
+      "id": 27,
+      "name": "runner-01",
+      "os": "Linux",
+      "status": "online",
+      "busy": false,
+      "version": "2.338.2",
+      "labels": [
+        {
+          "id": 0,
+          "name": "self-hosted",
+          "type": "read-only"
+        },
+        {
+          "id": 0,
+          "name": "Linux",
+          "type": "read-only"
+        },
+        {
+          "id": 0,
+          "name": "X64",
+          "type": "read-only"
+        },
+        {
+          "id": 0,
+          "name": "wepppy",
+          "type": "custom"
+        },
+        {
+          "id": 0,
+          "name": "ghcr-builder",
+          "type": "custom"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "runner-02",
+      "os": "Linux",
+      "status": "online",
+      "busy": true,
+      "version": "2.338.2",
+      "labels": [
+        {
+          "id": 0,
+          "name": "self-hosted",
+          "type": "read-only"
+        },
+        {
+          "id": 0,
+          "name": "Linux",
+          "type": "read-only"
+        },
+        {
+          "id": 0,
+          "name": "X64",
+          "type": "read-only"
+        },
+        {
+          "id": 0,
+          "name": "wepppy",
+          "type": "custom"
+        },
+        {
+          "id": 0,
+          "name": "remote-ci",
+          "type": "custom"
+        }
+      ]
+    }
+  ],
+  "workflow_jobs": [
+    {
+      "workflow": ".github/workflows/accessibility-manual.yml",
+      "job": "accessibility-nightly",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/artifact-observability.yml",
+      "job": "artifact-observability",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/broad-exception-guards.yml",
+      "job": "broad-exception-guards",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/cloc-telemetry.yml",
+      "job": "full-cloc",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "matching_registered_runners": []
+    },
+    {
+      "workflow": ".github/workflows/code-quality-observability.yml",
+      "job": "code-quality-observability",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/docs-quality.yml",
+      "job": "docs-quality",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/integration-governance.yml",
+      "job": "integration-governance",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "matching_registered_runners": []
+    },
+    {
+      "workflow": ".github/workflows/integration-policy.yml",
+      "job": "trusted-policy",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "matching_registered_runners": []
+    },
+    {
+      "workflow": ".github/workflows/integration-policy.yml",
+      "job": "report-policy",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "matching_registered_runners": []
+    },
+    {
+      "workflow": ".github/workflows/npm-coverage-nightly.yml",
+      "job": "npm-coverage",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/npm-tests.yml",
+      "job": "npm-tests",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/playwright-controllers-nightly.yml",
+      "job": "playwright-controllers",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/preflight-tests-nightly.yml",
+      "job": "preflight-tests",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/publish-weppcloud-aux-images.yml",
+      "job": "governance",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "matching_registered_runners": []
+    },
+    {
+      "workflow": ".github/workflows/publish-weppcloud-aux-images.yml",
+      "job": "publish",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "matching_registered_runners": []
+    },
+    {
+      "workflow": ".github/workflows/publish-weppcloud-image.yml",
+      "job": "governance",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "matching_registered_runners": []
+    },
+    {
+      "workflow": ".github/workflows/publish-weppcloud-image.yml",
+      "job": "publish",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "ghcr-builder"
+      ],
+      "matching_registered_runners": [
+        "runner-01"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/pytest-coverage-nightly.yml",
+      "job": "pytest-coverage",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/pytest-shape-converter-gates.yml",
+      "job": "pytest-shape-converter-gates",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/rq-engine-contract-guards.yml",
+      "job": "rq-engine-contract-guards",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/status-tests-nightly.yml",
+      "job": "status-tests",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/status2-smoke-nightly.yml",
+      "job": "status2-smoke",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/stubtest.yml",
+      "job": "stubtest",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/stubtest.yml",
+      "job": "test-baseline",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/test-isolation.yml",
+      "job": "test-isolation",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    },
+    {
+      "workflow": ".github/workflows/theme-metrics-nightly.yml",
+      "job": "theme-metrics",
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64",
+        "remote-ci"
+      ],
+      "matching_registered_runners": [
+        "runner-02"
+      ]
+    }
+  ],
+  "retired_workflows": [
+    {
+      "workflow": "profile-archive-us-small.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-double-ash-load.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-fork-rattlesnake-undisturbify.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-fork-us-small.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-legacy-palouse.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-rattlesnake-gridmet-interp-watar10mm-dss_export.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-rattlesnake-remove-rap-daymet-multi-interp-omni.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-10m-mofe.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-australia-disturbed.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-earth-small.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-europe-disturbed.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-nexrad-prism-debrisflow.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-portland-disturbed.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-rattlesnake.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-rhem.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-sbs-noct.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-sbs-wbt-mofe.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-seattle-simfire.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-us-small.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-run-wepp-reveg.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "profile-single-storm.yml",
+      "state": "absent",
+      "source_present": false
+    },
+    {
+      "workflow": "ci-samurai-nightly-ssh.yml",
+      "state": "absent",
+      "source_present": false
+    }
+  ],
+  "queued_runs": [
+    {
+      "run_id": 44429119454,
+      "workflow": ".github/workflows/pytest-coverage-nightly.yml",
+      "head_sha": "ef935e559a1cca71ce0862215d80b5074d1aefe0",
+      "jobs": [
+        {
+          "name": "pytest-coverage",
+          "labels": [
+            "self-hosted",
+            "Linux",
+            "X64",
+            "remote-ci"
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 44429094448,
+      "workflow": ".github/workflows/rq-engine-contract-guards.yml",
+      "head_sha": "ef935e559a1cca71ce0862215d80b5074d1aefe0",
+      "jobs": [
+        {
+          "name": "rq-engine-contract-guards",
+          "labels": [
+            "self-hosted",
+            "Linux",
+            "X64",
+            "remote-ci"
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 44429094546,
+      "workflow": ".github/workflows/stubtest.yml",
+      "head_sha": "ef935e559a1cca71ce0862215d80b5074d1aefe0",
+      "jobs": [
+        {
+          "name": "stubtest",
+          "labels": [
+            "self-hosted",
+            "Linux",
+            "X64",
+            "remote-ci"
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 44429094441,
+      "workflow": ".github/workflows/artifact-observability.yml",
+      "head_sha": "ef935e559a1cca71ce0862215d80b5074d1aefe0",
+      "jobs": [
+        {
+          "name": "artifact-observability",
+          "labels": [
+            "self-hosted",
+            "Linux",
+            "X64",
+            "remote-ci"
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 44429094345,
+      "workflow": ".github/workflows/code-quality-observability.yml",
+      "head_sha": "ef935e559a1cca71ce0862215d80b5074d1aefe0",
+      "jobs": [
+        {
+          "name": "code-quality-observability",
+          "labels": [
+            "self-hosted",
+            "Linux",
+            "X64",
+            "remote-ci"
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 44429094512,
+      "workflow": ".github/workflows/npm-tests.yml",
+      "head_sha": "ef935e559a1cca71ce0862215d80b5074d1aefe0",
+      "jobs": [
+        {
+          "name": "npm-tests",
+          "labels": [
+            "self-hosted",
+            "Linux",
+            "X64",
+            "remote-ci"
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 43096928047,
+      "workflow": ".github/workflows/code-quality-observability.yml",
+      "head_sha": "9dac36239590442cc8d4ff7c5046ac90bc4b3c57",
+      "jobs": []
+    },
+    {
+      "run_id": 43096927924,
+      "workflow": ".github/workflows/stubtest.yml",
+      "head_sha": "9dac36239590442cc8d4ff7c5046ac90bc4b3c57",
+      "jobs": []
+    },
+    {
+      "run_id": 43096928057,
+      "workflow": ".github/workflows/docs-quality.yml",
+      "head_sha": "9dac36239590442cc8d4ff7c5046ac90bc4b3c57",
+      "jobs": []
+    },
+    {
+      "run_id": 43096927970,
+      "workflow": ".github/workflows/publish-weppcloud-image.yml",
+      "head_sha": "9dac36239590442cc8d4ff7c5046ac90bc4b3c57",
+      "jobs": []
+    },
+    {
+      "run_id": 43096927939,
+      "workflow": ".github/workflows/artifact-observability.yml",
+      "head_sha": "9dac36239590442cc8d4ff7c5046ac90bc4b3c57",
+      "jobs": []
+    },
+    {
+      "run_id": 43096927919,
+      "workflow": ".github/workflows/npm-tests.yml",
+      "head_sha": "9dac36239590442cc8d4ff7c5046ac90bc4b3c57",
+      "jobs": []
+    },
+    {
+      "run_id": 43096928077,
+      "workflow": ".github/workflows/pytest-shape-converter-gates.yml",
+      "head_sha": "9dac36239590442cc8d4ff7c5046ac90bc4b3c57",
+      "jobs": []
+    },
+    {
+      "run_id": 43096928007,
+      "workflow": ".github/workflows/broad-exception-guards.yml",
+      "head_sha": "9dac36239590442cc8d4ff7c5046ac90bc4b3c57",
+      "jobs": []
+    },
+    {
+      "run_id": 43096927922,
+      "workflow": ".github/workflows/rq-engine-contract-guards.yml",
+      "head_sha": "9dac36239590442cc8d4ff7c5046ac90bc4b3c57",
+      "jobs": []
+    },
+    {
+      "run_id": 25906822190,
+      "workflow": ".github/workflows/code-quality-observability.yml",
+      "head_sha": "4c16ae3665418bf4066e1aebeb6a1132df8b427c",
+      "jobs": []
+    },
+    {
+      "run_id": 25906822203,
+      "workflow": ".github/workflows/npm-tests.yml",
+      "head_sha": "4c16ae3665418bf4066e1aebeb6a1132df8b427c",
+      "jobs": []
+    }
+  ],
+  "queued_homelab_runs": []
+}

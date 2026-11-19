@@ -8,7 +8,7 @@ Updated: 2026-11-19 UTC. Branch: task/ci-runner-migration. PR: #684.
 - [x] Migrate three active checks, eight nightly suites and Cloc; regenerate YAML.
 - [x] Retire 21 Forest profile schedules and CI Samurai Nightly with explicit approval.
 - [x] Validate isolated runtimes, meaningful reports and independent source security review.
-- [ ] Integrate PR; retain fresh ancestry receipt and final queue/runner readback.
+- [x] Integrate PR; retain fresh ancestry receipt and final queue/runner readback.
 - [ ] Observe deferred broad baseline and full pytest coverage after integration.
 
 ## Decisions
@@ -64,4 +64,17 @@ All 22 retired workflows are disabled and their queued runs cleared. Additional
 obsolete homelab runs and superseded task-PR runs are separately recorded; unrelated
 runs were not canceled. Local containers, volumes, networks and job-owned images
 were removed. The canceled remote coverage project's resources were also absent
-on readback. Final integration readback remains required before claiming cutover.
+on readback. Final readback verifies all 26 workflow jobs target supported labels, all 22
+retired workflow files are absent, and queued homelab jobs are zero.
+
+## Integration receipt
+
+PR #684 merged at ef935e559a1cca71ce0862215d80b5074d1aefe0 on 2026-11-19
+00:27:03 UTC. The fresh receipt proves accepted candidate
+350b565ed501d4533b5f1d60499e30092ddf9c88 is an ancestor of remote master.
+This is remote integration, not a full-suite pass or deployment approval.
+
+Full coverage dispatched on master: 44429119454. Automatic Stubtest/baseline:
+44429094546. Results remain pending. No production deployment was performed.
+Post-integration receipts and readback are retained in a subsequent audit commit
+on the task branch, separately from the accepted source they identify.

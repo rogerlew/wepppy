@@ -14,12 +14,12 @@ explicitly approved by the operator.
 - [x] (2026-11-18 UTC) Audit and scope approval retained.
 - [x] M1: Define per-workflow isolated runtime and implement faithful migration.
 - [x] M2: Generate YAML, validate real commands/reports, inspect security boundaries (explicit limits below).
-- [ ] M3: Merge approved PR, observe runner execution and clean stale queue entries.
+- [x] M3: Merge approved PR, observe runner execution and clean stale queue entries.
 
 ## Surprises & Discoveries
 
-The previous migration covered stubtest and RQ guards only. The generator still
-emits homelab profile jobs; fixing generated YAML alone would be undone.
+The previous migration covered stubtest and RQ guards only. The initial generator
+emitted homelab profile jobs; fixing generated YAML alone would be undone.
 Status2 smoke consumes development Compose secrets; browser accessibility targets
 a retired public Forest URL. Both need real runtime migration rather than relabeling.
 
@@ -36,18 +36,24 @@ CI runtime components; no new host credentials, runners or deployment topology.
 
 ## Outcomes & Retrospective
 
-Supported-runner browser acceptance now matches local evidence: accessibility
-11 passed/one opt-in skip with all seven pages, controllers 16 passed/two visible
-assertion failures. Preserve Features Export and PATH assertions as follow-ups;
-see artifacts/remaining-controller-findings.md. Broad baseline/full coverage are
-deferred until after integration per the operator's earlier instruction.
+PR #684 is integrated at ef935e559a1cca71ce0862215d80b5074d1aefe0. Fresh
+ancestry and label/queue readbacks are retained after the accepted source commit.
+All 22 legacy schedules are retired; zero queued jobs target homelab. All active
+workflow jobs use supported labels. No production deployment was performed.
 
-Implementation is on draft PR #684. NPM, Cloc, docs/quality/exception guards and
-Status/Preflight/Status2 smoke passed on supported runners. Native preflight passes locally; accessibility has 11 local passes with all seven
-required page reports. Theme Metrics and NPM coverage passed remotely. Controller
-assertion failures remain documented and unchanged; remaining runner acceptance
-is in progress; do not claim full migration
-acceptance yet. See tracker and immutable run IDs for each execution.
+Supported-runner focused gates passed. Accessibility passed 11 checks with one
+opt-in skip and all seven required page reports. Controllers passed 16 checks and
+retain two visible failures: Features Export selection and PATH error details.
+See artifacts/remaining-controller-findings.md; no assertions were weakened.
+Existing axe/contrast findings remain explicit, so passing automation is not full
+accessibility conformance. Broad coverage and baseline are dispatched/queued after
+integration under the operator's earlier deferral; their results remain pending.
+
+The confirmed failure class included obsolete labels and missing runtime prerequisites.
+Generator inputs and every confirmed shared prerequisite consumer now carry the
+migration, so regeneration preserves it. Retained diagnostics explain each minimal
+runtime addition and distinguish source review, local tests, runner acceptance,
+integration ancestry, publication and deployment.
 
 ## Context and Orientation
 

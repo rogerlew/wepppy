@@ -5,6 +5,9 @@
   "accessibility-initial.log.gz": {
     "raw_sha256": "4973fe65a0ec184f222e39cc24f210151d3d2dfe3205cf33f85c021ff83e6cb2"
   },
+  "artifact-observability-remote.log.gz": {
+    "raw_sha256": "1e68fc23d78104a4ba76c03681bcfa002c29f6d98d77925b67efa70bd938a462"
+  },
   "browser-cdn-failure.log.gz": {
     "raw_sha256": "9d932452643d84d92133c2dc9ef10a5bca7e95d10e125b5979c1d6872758bc89"
   },
@@ -53,16 +56,25 @@
   "npm-coverage.log.gz": {
     "raw_sha256": "c470b56680a1434f3e8200c2823c2c4c55e70b053aa66ba34a8ccb5701e0973a"
   },
+  "npm-remote-lcov.info.gz": {
+    "raw_sha256": "a506b4551418643419e68c9605589f4c995860bd74ed7c4885b65bd26be12ca6"
+  },
   "npm-tests.log.gz": {
     "raw_sha256": "c81f8fac7f4f6428d4b305624f46bfc719b03b4904616c2a5a1aa6143643fca6"
   },
   "preflight-tests.log.gz": {
     "raw_sha256": "535695ee8f1f75cbebb6d410c46b268fc64ff4a0e2a34e9d19328dcaecacc1f5"
   },
+  "shape-remote.log.gz": {
+    "raw_sha256": "d9cea9a65510da19d2ec0066133557d943166791a35a4eb0072bfea7d69a9355"
+  },
   "status-smoke.log.gz": {
     "raw_sha256": "fd4cdb116f19006bbf24de043e37564126383b09b1b61775e0e99f00b549efb0"
   },
   "status-tests.log.gz": {
     "raw_sha256": "8b469a7337faa43b26ab6790f469e47aba9fdb150a2a8c9a5ec59cfaa6f4cf3a"
+  },
+  "theme-remote-contrast.json.gz": {
+    "raw_sha256": "7b0d19d9af0d8df88b2bca7be01ea12c08f069ae4fc25736e9587d02f496d55e"
   }
 }

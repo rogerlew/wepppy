@@ -1,0 +1,42 @@
+[
+  {
+    "databaseId": 44428493243,
+    "event": "pull_request",
+    "headSha": "350b565ed501d4533b5f1d60499e30092ddf9c88",
+    "name": "Stubtest",
+    "status": "queued",
+    "reason": "Documentation/evidence-only candidate; executable tree equals accepted97a825883. Broad baseline remains deferred until after integration."
+  },
+  {
+    "databaseId": 44428493284,
+    "event": "pull_request",
+    "headSha": "350b565ed501d4533b5f1d60499e30092ddf9c88",
+    "name": "NPM Tests",
+    "status": "queued",
+    "reason": "Documentation/evidence-only candidate; executable tree equals accepted97a825883. Broad baseline remains deferred until after integration."
+  },
+  {
+    "databaseId": 44428493212,
+    "event": "pull_request",
+    "headSha": "350b565ed501d4533b5f1d60499e30092ddf9c88",
+    "name": "Shape-Converter Gates",
+    "status": "queued",
+    "reason": "Documentation/evidence-only candidate; executable tree equals accepted97a825883. Broad baseline remains deferred until after integration."
+  },
+  {
+    "databaseId": 44428493234,
+    "event": "pull_request",
+    "headSha": "350b565ed501d4533b5f1d60499e30092ddf9c88",
+    "name": "RQ-Engine Contract Guards",
+    "status": "queued",
+    "reason": "Documentation/evidence-only candidate; executable tree equals accepted97a825883. Broad baseline remains deferred until after integration."
+  },
+  {
+    "databaseId": 44428493365,
+    "event": "pull_request",
+    "headSha": "350b565ed501d4533b5f1d60499e30092ddf9c88",
+    "name": "Broad Exception Guards",
+    "status": "queued",
+    "reason": "Documentation/evidence-only candidate; executable tree equals accepted97a825883. Broad baseline remains deferred until after integration."
+  }
+]
