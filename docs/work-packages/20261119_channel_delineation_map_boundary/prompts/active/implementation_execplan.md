@@ -12,7 +12,8 @@ A user who selects an extent that fails the configured policy should get immedia
 - [x] Audited supported assets and entry points and committed the canonical contract checkpoint as `77dbafa04`.
 - [x] Implemented admission and worker validation and passed the local policy and native WBT tests.
 - [x] Read back real artifacts and completed correctness and security reviews.
-- [ ] Record the broad regression outcome.
+- [x] Ran broad pytest and reproduced the SSURGO cache fixture failure on the untouched baseline.
+- [ ] Complete broad acceptance after the baseline fixture is repaired.
 
 ## Surprises & Discoveries
 
@@ -26,7 +27,7 @@ The operator requested intersection with the effective config boundary and unres
 
 ## Outcomes & Retrospective
 
-Local validation passed for all policies and the native Upload DEM workflow. The operative boundary uses installed raster bounds for upload mode, with a locked recheck in the worker. Broad regression is in progress.
+Local validation passed for all policies and the native Upload DEM workflow. The operative boundary uses installed raster bounds for upload mode, with a locked recheck in the worker. Broad pytest passed 6,706 tests before stopping on the reproduced baseline SSURGO cache fixture failure. The validation report records the exact test and revisions.
 
 ## Context and orientation
 
@@ -55,3 +56,5 @@ Repeat acceptance with disposable runs and fresh job identities. A rejected requ
 The existing build-channels request and the effective run config carry the inputs. Reuse existing map extent types, server-side geometry tooling and the RQ error envelope. Keep the shared check usable from admission and any direct build consumer that needs it. Record the final interface and concrete test commands as the implementation proceeds.
 
 The execution update records the installed DEM authority and the four-edge projection fixed after review.
+
+The final update records the local pass and the exact baseline blocker for a clean full-suite rerun.

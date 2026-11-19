@@ -2,7 +2,7 @@
 
 ## Status
 
-The scaffold is committed as `3e869bfd9`. The independent contract checkpoint is `77dbafa04`. Implementation and local native WBT validation passed. Broad regression is in progress.
+The scaffold is committed as `3e869bfd9`. The independent contract checkpoint is `77dbafa04`. Implementation and local native WBT validation passed. The final broad run passed 6,706 tests and stopped on a baseline SSURGO fixture.
 
 ## Tasks
 
@@ -12,7 +12,8 @@ The scaffold is committed as `3e869bfd9`. The independent contract checkpoint is
 - [x] Define and review the canonical contract, including geometry and errors.
 - [x] Implement and verify the server-side check through supported entry points.
 - [x] Retain artifact readback and independent correctness and security reviews.
-- [ ] Record the broad regression result and close out the package.
+- [x] Record the broad regression result and reproduce its failure on the baseline.
+- [ ] Complete repository-wide acceptance after the unrelated baseline fixture is repaired.
 
 ## Decisions
 
@@ -23,3 +24,5 @@ The scaffold is committed as `3e869bfd9`. The independent contract checkpoint is
 ## Handoff
 
 No operator input is pending. The independent reviews cleared all medium and high findings. The [correctness review](artifacts/20261119_correctness_review.md) records the native evidence and remaining environment coverage.
+
+The [validation report](artifacts/20261119_validation.md) binds the focused, broad and baseline results to the tested revisions.

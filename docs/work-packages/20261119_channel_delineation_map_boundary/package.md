@@ -1,6 +1,6 @@
 # Enforce configured map boundaries during channel delineation
 
-**Status** Implemented and locally validated 2026-11-19 UTC. Broad validation in progress.
+**Status** Implemented and locally validated 2026-11-19 UTC. Repository-wide acceptance awaits a baseline fixture repair.
 
 ## Objective
 
@@ -20,14 +20,14 @@ Reuse the run config, extent parsing, geospatial stack and existing error delive
 
 ## Acceptance and evidence
 
-- [ ] For a configured boundary, a disjoint request yields actionable feedback. Prior readiness, map settings and channel artifacts survive the rejected request. Verify zero new DEM or channel work for the rejected request.
-- [ ] A partially overlapping extent proceeds at its full size under `intersects` and is rejected under `covers`. Test inside, overlap, disjoint, edge/corner, polygon holes and multipart geometry.
-- [ ] Missing and legacy unset boundaries and explicit `none` bypass asset resolution entirely. A supported config with an invalid asset produces an explicit operator error.
-- [ ] Cover applicable extent modes and both WBT and TOPAZ. Verify the effective extent and subsequent artifacts for the actual channel workflow and cover supported batch or direct entry points identified in discovery.
-- [ ] Retain the request, resolved config and reloaded map state, the DEM actually consumed, and semantic readback of fresh channel raster or vector output and the map/report result. Exercise the real asset resolver and delineation consumer using representative disposable runs. For rejection, compare preexisting artifacts and readiness and inspect the job tree.
-- [ ] Update the canonical contract and affected user/operator guidance. Retain independent correctness and security reviews and run the applicable regression gates before implementation closeout.
+- [x] For a configured boundary, a disjoint request yields actionable feedback. Prior readiness, map settings and channel artifacts survive the rejected request. Verify zero new DEM or channel work for the rejected request.
+- [x] A partially overlapping extent proceeds at its full size under `intersects` and is rejected under `covers`. Test inside, overlap, disjoint, edge/corner, polygon holes and multipart geometry.
+- [x] Missing and legacy unset boundaries and explicit `none` bypass asset resolution entirely. A supported config with an invalid asset produces an explicit operator error.
+- [x] Cover applicable extent modes and both WBT and TOPAZ. Verify the effective extent and subsequent artifacts for the actual channel workflow and cover supported batch or direct entry points identified in discovery.
+- [x] Retain the request, resolved config and reloaded map state, the DEM actually consumed, and semantic readback of fresh channel raster or vector output and the map/report result. Exercise the real asset resolver and delineation consumer using representative disposable runs. For rejection, compare preexisting artifacts and readiness and inspect the job tree.
+- [x] Update the canonical contract and affected user/operator guidance. Retain independent correctness and security reviews and run the applicable regression gates before implementation closeout.
 
-The native WBT Upload DEM path was verified locally through real RQ jobs and channel artifact readback. The broad repository gate is tracked separately.
+The native WBT Upload DEM path was verified locally through real RQ jobs and channel artifact readback. The full pytest run stopped on a reproduced baseline SSURGO fixture failure.
 
 ## Review and ownership
 
@@ -40,6 +40,7 @@ Security impact is provisionally high because the authenticated RQ route would r
 - [Canonical contract](../../schemas/channel-delineation-map-boundary-contract.md)
 - [Implementation ExecPlan](prompts/active/implementation_execplan.md)
 - [Package tracker](tracker.md)
+- [Validation results](artifacts/20261119_validation.md)
 - [Correctness review](artifacts/20261119_correctness_review.md)
 - [Security review](artifacts/20261119_security_review.md)
 - [Contract-first change standard](../../standards/contract-first-change-standard.md)
