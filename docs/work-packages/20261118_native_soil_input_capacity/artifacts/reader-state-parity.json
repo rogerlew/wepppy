@@ -1,0 +1,402 @@
+[
+  {
+    "version": 7777,
+    "count": 1,
+    "exact_state_match": true
+  },
+  {
+    "version": 7777,
+    "count": 2,
+    "exact_state_match": true
+  },
+  {
+    "version": 7777,
+    "count": 3,
+    "exact_state_match": true
+  },
+  {
+    "version": 7777,
+    "count": 4,
+    "exact_state_match": true
+  },
+  {
+    "version": 7777,
+    "count": 5,
+    "exact_state_match": true
+  },
+  {
+    "version": 7777,
+    "count": 6,
+    "exact_state_match": true
+  },
+  {
+    "version": 7777,
+    "count": 7,
+    "exact_state_match": true
+  },
+  {
+    "version": 7777,
+    "count": 8,
+    "exact_state_match": true
+  },
+  {
+    "version": 7777,
+    "count": 9,
+    "exact_state_match": true
+  },
+  {
+    "version": 7777,
+    "count": 10,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 1,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 2,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 3,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 4,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 5,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 6,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 7,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 8,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 9,
+    "exact_state_match": true
+  },
+  {
+    "version": 7778,
+    "count": 10,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 1,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 2,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 3,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 4,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 5,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 6,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 7,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 8,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 9,
+    "exact_state_match": true
+  },
+  {
+    "version": 9001,
+    "count": 10,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 1,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 2,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 3,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 4,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 5,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 6,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 7,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 8,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 9,
+    "exact_state_match": true
+  },
+  {
+    "version": 9002,
+    "count": 10,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 1,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 2,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 3,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 4,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 5,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 6,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 7,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 8,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 9,
+    "exact_state_match": true
+  },
+  {
+    "version": 9003,
+    "count": 10,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 1,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 2,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 3,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 4,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 5,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 6,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 7,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 8,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 9,
+    "exact_state_match": true
+  },
+  {
+    "version": 9005,
+    "count": 10,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 1,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 2,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 3,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 4,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 5,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 6,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 7,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 8,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 9,
+    "exact_state_match": true
+  },
+  {
+    "version": 2006,
+    "count": 10,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 1,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 2,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 3,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 4,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 5,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 6,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 7,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 8,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 9,
+    "exact_state_match": true
+  },
+  {
+    "version": 984,
+    "count": 10,
+    "exact_state_match": true
+  }
+]

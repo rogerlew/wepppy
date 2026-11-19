@@ -1,0 +1,38 @@
+{
+  "ten_low_k/baseline": {
+    "event_rows": 71,
+    "runoff_mm": 193.0,
+    "sediment_delivery_kg_per_m": 73.0,
+    "water_balance_rows": 1095,
+    "profile_depths_mm": [
+      1800.0
+    ]
+  },
+  "ten_low_k/candidate": {
+    "event_rows": 71,
+    "runoff_mm": 193.0,
+    "sediment_delivery_kg_per_m": 73.0,
+    "water_balance_rows": 1095,
+    "profile_depths_mm": [
+      1800.0
+    ]
+  },
+  "eleven_low_k/baseline": {
+    "event_rows": 71,
+    "runoff_mm": 193.0,
+    "sediment_delivery_kg_per_m": 73.0,
+    "water_balance_rows": 1095,
+    "profile_depths_mm": [
+      1200.0
+    ]
+  },
+  "eleven_low_k/candidate": {
+    "event_rows": 71,
+    "runoff_mm": 193.0,
+    "sediment_delivery_kg_per_m": 73.0,
+    "water_balance_rows": 1095,
+    "profile_depths_mm": [
+      1800.0
+    ]
+  }
+}
