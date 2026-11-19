@@ -40,6 +40,17 @@ jobs:
       MARKDOWN_DOC_WORKSPACE: ${{ secrets.MARKDOWN_DOC_WORKSPACE }}
     timeout-minutes: 20
     steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Install wctl shim
+      env:
+        WCTL_SYMLINK_PATH: ${{ github.workspace }}/.wctl/bin/wctl
+      run: |-
+        mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
+        ./wctl/install.sh dev
+        echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
     - name: Enforce ADR titles and recorded dates
       run: python3 tools/check_adr_dates.py
     - name: Verify markdown-doc tooling
@@ -184,3 +195,4 @@ jobs:
       run: |
         echo "markdown-doc lint reported errors (exit code ${LINT_STATUS})." >&2
         exit 1
+    forest_bootstrap: false

@@ -1,0 +1,180 @@
+{
+  "generatedAt": "2026-11-18T23:56:55.299Z",
+  "baseURL": "http://127.0.0.1:45619/weppcloud",
+  "tags": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa"
+  ],
+  "disabledRules": [
+    "color-contrast"
+  ],
+  "totals": {
+    "pagesScanned": 7,
+    "violations": 2,
+    "incomplete": 5,
+    "inapplicable": 233,
+    "passes": 186,
+    "impacts": {
+      "critical": 0,
+      "serious": 2,
+      "moderate": 0,
+      "minor": 0,
+      "unknown": 0
+    }
+  },
+  "scans": [
+    {
+      "pageId": "ui-components-theme-lab",
+      "url": "http://127.0.0.1:45619/weppcloud/ui/components/#theme-lab",
+      "scannedAt": "2026-11-18T23:56:19.451Z",
+      "violations": [
+        {
+          "id": "link-in-text-block",
+          "impact": "serious",
+          "help": "Links must be distinguishable without relying on color",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/link-in-text-block?application=playwright",
+          "nodeCount": 2,
+          "targets": [
+            [
+              "#theme_lab_browse_tree_even_link"
+            ],
+            [
+              "#theme_lab_browse_tree_hover_link"
+            ]
+          ]
+        }
+      ],
+      "violationCount": 1,
+      "impactCounts": {
+        "critical": 0,
+        "serious": 1,
+        "moderate": 0,
+        "minor": 0,
+        "unknown": 0
+      },
+      "incompleteCount": 2,
+      "inapplicableCount": 30,
+      "passCount": 29
+    },
+    {
+      "pageId": "ui-components-report-a11y",
+      "url": "http://127.0.0.1:45619/weppcloud/ui/components/report-a11y",
+      "scannedAt": "2026-11-18T23:56:22.585Z",
+      "violations": [],
+      "violationCount": 0,
+      "impactCounts": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0,
+        "unknown": 0
+      },
+      "incompleteCount": 0,
+      "inapplicableCount": 32,
+      "passCount": 28
+    },
+    {
+      "pageId": "weppcloud-root",
+      "url": "http://127.0.0.1:45619/weppcloud/",
+      "scannedAt": "2026-11-18T23:56:26.259Z",
+      "violations": [],
+      "violationCount": 0,
+      "impactCounts": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0,
+        "unknown": 0
+      },
+      "incompleteCount": 1,
+      "inapplicableCount": 38,
+      "passCount": 22
+    },
+    {
+      "pageId": "weppcloud-interfaces",
+      "url": "http://127.0.0.1:45619/weppcloud/interfaces/",
+      "scannedAt": "2026-11-18T23:56:30.051Z",
+      "violations": [],
+      "violationCount": 0,
+      "impactCounts": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0,
+        "unknown": 0
+      },
+      "incompleteCount": 0,
+      "inapplicableCount": 38,
+      "passCount": 22
+    },
+    {
+      "pageId": "weppcloud-profile",
+      "url": "http://127.0.0.1:45619/weppcloud/profile/",
+      "scannedAt": "2026-11-18T23:56:33.252Z",
+      "violations": [],
+      "violationCount": 0,
+      "impactCounts": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0,
+        "unknown": 0
+      },
+      "incompleteCount": 0,
+      "inapplicableCount": 31,
+      "passCount": 29
+    },
+    {
+      "pageId": "weppcloud-config-builder",
+      "url": "http://127.0.0.1:45619/weppcloud/config-builder/",
+      "scannedAt": "2026-11-18T23:56:40.660Z",
+      "violations": [],
+      "violationCount": 0,
+      "impactCounts": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0,
+        "unknown": 0
+      },
+      "incompleteCount": 1,
+      "inapplicableCount": 36,
+      "passCount": 24
+    },
+    {
+      "pageId": "runs0-dashboard",
+      "url": "http://127.0.0.1:45619/weppcloud/runs/receivable-rooftop/disturbed9002_wbt/?playwright_load_all=true",
+      "scannedAt": "2026-11-18T23:56:55.267Z",
+      "violations": [
+        {
+          "id": "nested-interactive",
+          "impact": "serious",
+          "help": "Interactive controls must not be nested",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/nested-interactive?application=playwright",
+          "nodeCount": 2,
+          "targets": [
+            [
+              "#treatments > .wc-control--collapsible.wc-control > .wc-control__summary"
+            ],
+            [
+              "#ash > .wc-control--collapsible.wc-control[open=\"\"] > .wc-control__summary"
+            ]
+          ]
+        }
+      ],
+      "violationCount": 1,
+      "impactCounts": {
+        "critical": 0,
+        "serious": 1,
+        "moderate": 0,
+        "minor": 0,
+        "unknown": 0
+      },
+      "incompleteCount": 1,
+      "inapplicableCount": 28,
+      "passCount": 32
+    }
+  ]
+}

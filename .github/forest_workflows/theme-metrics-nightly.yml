@@ -1,38 +1,63 @@
 name: Theme Metrics Nightly
 on:
   schedule:
-    # 02:20 AM Pacific ≈ 10:20 UTC during daylight saving
-    - cron: 20 10 * * *
+  - cron: 20 10 * * *
   workflow_dispatch: null
 jobs:
   theme-metrics:
     runs-on:
-      - self-hosted
-      - Linux
-      - X64
-      - homelab
+    - self-hosted
+    - Linux
+    - X64
+    - remote-ci
     timeout-minutes: 40
     steps:
-      - name: Install npm dependencies
-        run: |
-          set -euo pipefail
-          wctl run-npm install
-      - name: Run theme metrics Playwright suite
-        run: |
-          set -euo pipefail
-          wctl run-playwright --suite theme-metrics
-      - name: Upload theme contrast report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: theme-contrast-report
-          path: wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.md
-          if-no-files-found: warn
-      - name: Publish summary
-        if: always()
-        run: |
-          {
-            echo '```text'
-            cat wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.md
-            echo '```'
-          } >> "${GITHUB_STEP_SUMMARY}"
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+        lfs: true
+        fetch-depth: 0
+    - name: Verify materialized inputs
+      run: |
+        git lfs checkout
+        git lfs fsck
+        python3 tools/verify_lfs_materialized.py --tracked
+    - name: Install wctl shim
+      id: wctl
+      env:
+        WCTL_SYMLINK_PATH: ${{ github.workspace }}/.wctl/bin/wctl
+      run: |
+        mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
+        ./wctl/install.sh dev
+        echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
+    - name: Start isolated test runtime
+      run: wctl --compose-file docker/docker-compose.browser-test.yml up -d --build
+        --wait
+    - name: Prepare locked CI browser assets
+      run: wctl --compose-file docker/docker-compose.browser-test.yml exec -T weppcloud
+        /opt/venv/bin/python tests/prepare_ci_runtime.py
+    - name: Build controller assets
+      run: wctl --compose-file docker/docker-compose.browser-test.yml exec -T weppcloud
+        /opt/venv/bin/python wepppy/weppcloud/controllers_js/build_controllers_js.py
+    - name: Run isolated browser checks
+      run: wctl --compose-file docker/docker-compose.browser-test.yml exec -T weppcloud
+        /opt/venv/bin/python tests/ci_browser_runtime.py theme-metrics
+    - name: Upload browser reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: theme-metrics-nightly
+        path: |-
+          wepppy/weppcloud/static-src/test-results/
+          wepppy/weppcloud/static-src/playwright-report/
+        if-no-files-found: error
+    - name: Remove isolated test runtime
+      if: always() && steps.wctl.outcome == 'success'
+      run: wctl --compose-file docker/docker-compose.browser-test.yml down --volumes
+        --remove-orphans --rmi local
+    forest_bootstrap: false
+    env:
+      COMPOSE_PROJECT_NAME: wepppy-${{ github.run_id }}-${{ github.run_attempt }}-theme-metrics-nightly
+permissions:
+  contents: read

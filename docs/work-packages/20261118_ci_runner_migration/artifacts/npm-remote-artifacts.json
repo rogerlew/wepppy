@@ -1,0 +1,11 @@
+{
+  "run_id": 44423384936,
+  "head": "2b3f56727",
+  "lcov": [
+    {
+      "path": "npm-coverage/lcov.info",
+      "size_bytes": 1192148,
+      "sha256": "a506b4551418643419e68c9605589f4c995860bd74ed7c4885b65bd26be12ca6"
+    }
+  ]
+}

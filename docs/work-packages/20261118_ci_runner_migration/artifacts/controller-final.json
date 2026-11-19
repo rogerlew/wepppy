@@ -1,0 +1,758 @@
+{
+  "config": {
+    "configFile": "/workdir/wepppy/wepppy/weppcloud/static-src/playwright.config.mjs",
+    "rootDir": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ],
+      [
+        "html"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/workdir/wepppy/wepppy/weppcloud/static-src/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "runs0",
+        "name": "runs0",
+        "testDir": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "controller-regression.spec.js",
+      "file": "controller-regression.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "controller regression suite",
+          "file": "controller-regression.spec.js",
+          "line": 92,
+          "column": 6,
+          "specs": [
+            {
+              "title": "landuse surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8500,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:58:25.087Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-cbc18e0131c27d9c490f",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "soils surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5434,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:58:34.494Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-c3c8bd6b73f337784822",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "climate surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5171,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:58:39.959Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-5464fca2038805eb8152",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "subcatchments surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4956,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:58:45.161Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-cd4e7d868d798c3f688e",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "set_outlet surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6568,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:58:50.150Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-87eaf3d8d234f3df9bcd",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "set_outlet_entry surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6154,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:58:56.747Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-9479071a9c3a41e02411",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "rap_ts surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4859,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:02.939Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-ffdd0d71a2a563410141",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "openet_ts surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5310,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:07.820Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-8afc97a15933d624a2a5",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "wepp surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4943,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:13.153Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-ae6a1787a24c57f065c7",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "omni surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5609,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:18.123Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-4546c98049ab58513a44",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "observed surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4835,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:23.757Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-d5daba4197d7ed00994c",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "debris_flow surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5104,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:28.621Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-46703a372b07a0254517",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "dss_export surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5031,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:33.751Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-ce882e7b530f19ad9b34",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "features_export surfaces stacktrace and preserves job hint",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5561,
+                      "error": {
+                        "message": "Error: locator.check: Clicking the checkbox did not change its state\nCall log:\n\u001b[2m  - waiting for locator('form#features_export_form [data-features-export-action=\"toggle-layer\"][value=\"watershed.subcatchments\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <input type=\"checkbox\" value=\"watershed.subcatchments\" data-features-export-action=\"toggle-layer\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - forcing action\u001b[22m\n\u001b[2m    - performing click action\u001b[22m\n\u001b[2m    - click action done\u001b[22m\n\u001b[2m    - waiting for scheduled navigations to finish\u001b[22m\n\u001b[2m    - navigations have finished\u001b[22m\n",
+                        "stack": "Error: locator.check: Clicking the checkbox did not change its state\nCall log:\n\u001b[2m  - waiting for locator('form#features_export_form [data-features-export-action=\"toggle-layer\"][value=\"watershed.subcatchments\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <input type=\"checkbox\" value=\"watershed.subcatchments\" data-features-export-action=\"toggle-layer\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - forcing action\u001b[22m\n\u001b[2m    - performing click action\u001b[22m\n\u001b[2m    - click action done\u001b[22m\n\u001b[2m    - waiting for scheduled navigations to finish\u001b[22m\n\u001b[2m    - navigations have finished\u001b[22m\n\n    at Object.prepareFeaturesExport (/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-cases.js:52:23)\n    at runRqJobWorkflow (/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js:218:5)\n    at /workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js:150:9",
+                        "location": {
+                          "file": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-cases.js",
+                          "column": 23,
+                          "line": 52
+                        },
+                        "snippet": "   at controller-cases.js:52\n\n  50 |   }\n  51 |   if (await layerToggle.count()) {\n> 52 |     await layerToggle.check({ force: true });\n     |                       ^\n  53 |   }\n  54 |\n  55 |   const temporalGroup = page"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-cases.js",
+                            "column": 23,
+                            "line": 52
+                          },
+                          "message": "Error: locator.check: Clicking the checkbox did not change its state\nCall log:\n\u001b[2m  - waiting for locator('form#features_export_form [data-features-export-action=\"toggle-layer\"][value=\"watershed.subcatchments\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <input type=\"checkbox\" value=\"watershed.subcatchments\" data-features-export-action=\"toggle-layer\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - forcing action\u001b[22m\n\u001b[2m    - performing click action\u001b[22m\n\u001b[2m    - click action done\u001b[22m\n\u001b[2m    - waiting for scheduled navigations to finish\u001b[22m\n\u001b[2m    - navigations have finished\u001b[22m\n\n\n   at controller-cases.js:52\n\n  50 |   }\n  51 |   if (await layerToggle.count()) {\n> 52 |     await layerToggle.check({ force: true });\n     |                       ^\n  53 |   }\n  54 |\n  55 |   const temporalGroup = page\n    at Object.prepareFeaturesExport (/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-cases.js:52:23)\n    at runRqJobWorkflow (/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js:218:5)\n    at /workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js:150:9"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:38.803Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workdir/wepppy/wepppy/weppcloud/static-src/test-results/controller-regression-cont-3a622-race-and-preserves-job-hint-runs0/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-cases.js",
+                        "column": 23,
+                        "line": 52
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-9813076026c8215452d0",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "ash surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3698,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:45.444Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-64132b3d720369b23290",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "treatments surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3751,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:49.752Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-28cc2201a4686805ccd4",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "rhem surfaces stacktrace and preserves job hint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4765,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:53.536Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-3355de71c5a4fd6ed7a1",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            },
+            {
+              "title": "path_ce surfaces stacktrace and preserves job hint",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "runs0",
+                  "projectName": "runs0",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 10649,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#path_ce_stacktrace_panel [data-stacktrace-body]')\nExpected substring: \u001b[32m\"Test stacktrace line 2\"\u001b[39m\nReceived string:    \u001b[31m\"500Internal Server ErrorInjected landuse failure\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('#path_ce_stacktrace_panel [data-stacktrace-body]')\u001b[22m\n\u001b[2m    9 × locator resolved to <pre tabindex=\"0\" data-stacktrace-body=\"\" id=\"path_ce_stacktrace\" class=\"wc-stacktrace__body\">…</pre>\u001b[22m\n\u001b[2m      - unexpected value \"500Internal Server ErrorInjected landuse failure\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#path_ce_stacktrace_panel [data-stacktrace-body]')\nExpected substring: \u001b[32m\"Test stacktrace line 2\"\u001b[39m\nReceived string:    \u001b[31m\"500Internal Server ErrorInjected landuse failure\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('#path_ce_stacktrace_panel [data-stacktrace-body]')\u001b[22m\n\u001b[2m    9 × locator resolved to <pre tabindex=\"0\" data-stacktrace-body=\"\" id=\"path_ce_stacktrace\" class=\"wc-stacktrace__body\">…</pre>\u001b[22m\n\u001b[2m      - unexpected value \"500Internal Server ErrorInjected landuse failure\"\u001b[22m\n\n    at runRqJobWorkflow (/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js:261:35)\n    at /workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js:150:9",
+                        "location": {
+                          "file": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js",
+                          "column": 35,
+                          "line": 261
+                        },
+                        "snippet": "  259 |   // Verify stacktrace is displayed with both lines\n  260 |   await expect(stacktraceLocator).toContainText('Injected landuse failure', { timeout: 15000 });\n> 261 |   await expect(stacktraceLocator).toContainText('Test stacktrace line 2', { timeout: 5000 });\n      |                                   ^\n  262 |   await expectStacktracePanelOpen(page, controller);\n  263 |   \n  264 |   if (controller.expectJobHint !== false) {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js",
+                            "column": 35,
+                            "line": 261
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#path_ce_stacktrace_panel [data-stacktrace-body]')\nExpected substring: \u001b[32m\"Test stacktrace line 2\"\u001b[39m\nReceived string:    \u001b[31m\"500Internal Server ErrorInjected landuse failure\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('#path_ce_stacktrace_panel [data-stacktrace-body]')\u001b[22m\n\u001b[2m    9 × locator resolved to <pre tabindex=\"0\" data-stacktrace-body=\"\" id=\"path_ce_stacktrace\" class=\"wc-stacktrace__body\">…</pre>\u001b[22m\n\u001b[2m      - unexpected value \"500Internal Server ErrorInjected landuse failure\"\u001b[22m\n\n\n  259 |   // Verify stacktrace is displayed with both lines\n  260 |   await expect(stacktraceLocator).toContainText('Injected landuse failure', { timeout: 15000 });\n> 261 |   await expect(stacktraceLocator).toContainText('Test stacktrace line 2', { timeout: 5000 });\n      |                                   ^\n  262 |   await expectStacktracePanelOpen(page, controller);\n  263 |   \n  264 |   if (controller.expectJobHint !== false) {\n    at runRqJobWorkflow (/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js:261:35)\n    at /workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js:150:9"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-18T23:59:58.333Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workdir/wepppy/wepppy/weppcloud/static-src/test-results/controller-regression-cont-13b01-race-and-preserves-job-hint-runs0/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workdir/wepppy/wepppy/weppcloud/static-src/tests/smoke/controller-regression.spec.js",
+                        "column": 35,
+                        "line": 261
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "69da08e88084d95caf0a-aecfb3cc2e4c06effdd1",
+              "file": "controller-regression.spec.js",
+              "line": 123,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-18T23:58:22.133Z",
+    "duration": 107023.422,
+    "expected": 16,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

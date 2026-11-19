@@ -1,0 +1,1694 @@
+{
+  "observed_utc": "2026-11-19T00:21:57.368992+00:00",
+  "runs": [
+    {
+      "conclusion": "success",
+      "databaseId": 44425293294,
+      "event": "pull_request",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228456035,
+          "name": "artifact-observability",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-19T00:06:30Z",
+          "completedAt": "2026-11-19T00:09:17Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293294/job/135228456035",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:06:33Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:06:32Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:06:41Z",
+              "conclusion": "success",
+              "name": "Checkout repository",
+              "number": 2,
+              "startedAt": "2026-11-19T00:06:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:07:04Z",
+              "conclusion": "success",
+              "name": "Verify materialized inputs",
+              "number": 3,
+              "startedAt": "2026-11-19T00:06:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:07:07Z",
+              "conclusion": "success",
+              "name": "Install wctl shim",
+              "number": 4,
+              "startedAt": "2026-11-19T00:07:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:07:35Z",
+              "conclusion": "success",
+              "name": "Start isolated test runtime",
+              "number": 5,
+              "startedAt": "2026-11-19T00:07:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:07:36Z",
+              "conclusion": "success",
+              "name": "Prepare locked CI browser assets",
+              "number": 6,
+              "startedAt": "2026-11-19T00:07:35Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:07:37Z",
+              "conclusion": "success",
+              "name": "Build controller assets",
+              "number": 7,
+              "startedAt": "2026-11-19T00:07:36Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:07:52Z",
+              "conclusion": "success",
+              "name": "Initialize disposable account schema",
+              "number": 8,
+              "startedAt": "2026-11-19T00:07:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:03Z",
+              "conclusion": "success",
+              "name": "Verify artifact writers, failures, migration and archive restore",
+              "number": 9,
+              "startedAt": "2026-11-19T00:07:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:14Z",
+              "conclusion": "success",
+              "name": "Remove isolated test runtime",
+              "number": 10,
+              "startedAt": "2026-11-19T00:09:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:15Z",
+              "conclusion": "success",
+              "name": "Post Checkout repository",
+              "number": 20,
+              "startedAt": "2026-11-19T00:09:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:15Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 21,
+              "startedAt": "2026-11-19T00:09:15Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Artifact Observability",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293294"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425293369,
+      "event": "pull_request",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228455935,
+          "name": "pytest-shape-converter-gates",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-19T00:09:30Z",
+          "completedAt": "2026-11-19T00:14:05Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293369/job/135228455935",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:09:32Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:09:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:40Z",
+              "conclusion": "success",
+              "name": "Checkout repository",
+              "number": 2,
+              "startedAt": "2026-11-19T00:09:32Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:10:04Z",
+              "conclusion": "success",
+              "name": "Verify materialized inputs",
+              "number": 3,
+              "startedAt": "2026-11-19T00:09:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:10:07Z",
+              "conclusion": "success",
+              "name": "Install wctl shim",
+              "number": 4,
+              "startedAt": "2026-11-19T00:10:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:10:33Z",
+              "conclusion": "success",
+              "name": "Start isolated test runtime",
+              "number": 5,
+              "startedAt": "2026-11-19T00:10:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:10:33Z",
+              "conclusion": "success",
+              "name": "Prepare locked CI browser assets",
+              "number": 6,
+              "startedAt": "2026-11-19T00:10:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:10:34Z",
+              "conclusion": "success",
+              "name": "Build controller assets",
+              "number": 7,
+              "startedAt": "2026-11-19T00:10:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:10:49Z",
+              "conclusion": "success",
+              "name": "Initialize disposable account schema",
+              "number": 8,
+              "startedAt": "2026-11-19T00:10:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:12:23Z",
+              "conclusion": "success",
+              "name": "Run shape-converter focused regression sweep",
+              "number": 9,
+              "startedAt": "2026-11-19T00:10:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:13:50Z",
+              "conclusion": "success",
+              "name": "Run shape-converter full unit and integration gates",
+              "number": 10,
+              "startedAt": "2026-11-19T00:12:23Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:13:51Z",
+              "conclusion": "success",
+              "name": "Run broad exception changed-file enforcement",
+              "number": 11,
+              "startedAt": "2026-11-19T00:13:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:13:51Z",
+              "conclusion": "success",
+              "name": "Verify generated forest workflows are in sync",
+              "number": 12,
+              "startedAt": "2026-11-19T00:13:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:14:02Z",
+              "conclusion": "success",
+              "name": "Remove isolated test runtime",
+              "number": 13,
+              "startedAt": "2026-11-19T00:13:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:14:03Z",
+              "conclusion": "success",
+              "name": "Post Checkout repository",
+              "number": 26,
+              "startedAt": "2026-11-19T00:14:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:14:03Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 27,
+              "startedAt": "2026-11-19T00:14:03Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Shape-Converter Gates",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293369"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425293043,
+      "event": "pull_request",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228455185,
+          "name": "npm-tests",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-19T00:14:06Z",
+          "completedAt": "2026-11-19T00:14:42Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293043/job/135228455185",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:14:08Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:14:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:14:10Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-11-19T00:14:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:14:38Z",
+              "conclusion": "success",
+              "name": "Run JavaScript checks",
+              "number": 3,
+              "startedAt": "2026-11-19T00:14:10Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:14:39Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 6,
+              "startedAt": "2026-11-19T00:14:38Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:14:39Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 7,
+              "startedAt": "2026-11-19T00:14:39Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "NPM Tests",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293043"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425329684,
+      "event": "workflow_dispatch",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228592345,
+          "name": "accessibility-nightly",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-19T00:03:33Z",
+          "completedAt": "2026-11-19T00:06:29Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425329684/job/135228592345",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:03:36Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:03:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:03:36Z",
+              "conclusion": "success",
+              "name": "Determine Pacific run window",
+              "number": 2,
+              "startedAt": "2026-11-19T00:03:36Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:03:45Z",
+              "conclusion": "success",
+              "name": "Checkout repository",
+              "number": 3,
+              "startedAt": "2026-11-19T00:03:36Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:04:08Z",
+              "conclusion": "success",
+              "name": "Verify materialized inputs",
+              "number": 4,
+              "startedAt": "2026-11-19T00:03:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:04:10Z",
+              "conclusion": "success",
+              "name": "Install wctl shim",
+              "number": 5,
+              "startedAt": "2026-11-19T00:04:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:04:39Z",
+              "conclusion": "success",
+              "name": "Start isolated test runtime",
+              "number": 6,
+              "startedAt": "2026-11-19T00:04:10Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:04:39Z",
+              "conclusion": "success",
+              "name": "Prepare locked CI browser assets",
+              "number": 7,
+              "startedAt": "2026-11-19T00:04:39Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:04:40Z",
+              "conclusion": "success",
+              "name": "Build controller assets",
+              "number": 8,
+              "startedAt": "2026-11-19T00:04:39Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:06:12Z",
+              "conclusion": "success",
+              "name": "Run isolated browser checks",
+              "number": 9,
+              "startedAt": "2026-11-19T00:04:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:06:14Z",
+              "conclusion": "success",
+              "name": "Upload browser reports",
+              "number": 10,
+              "startedAt": "2026-11-19T00:06:12Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:06:26Z",
+              "conclusion": "success",
+              "name": "Remove isolated test runtime",
+              "number": 11,
+              "startedAt": "2026-11-19T00:06:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:06:26Z",
+              "conclusion": "success",
+              "name": "Post Checkout repository",
+              "number": 22,
+              "startedAt": "2026-11-19T00:06:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:06:26Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 23,
+              "startedAt": "2026-11-19T00:06:26Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Accessibility Nightly",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425329684"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 44425333040,
+      "event": "workflow_dispatch",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228604167,
+          "name": "playwright-controllers",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-19T00:14:43Z",
+          "completedAt": "2026-11-19T00:18:03Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425333040/job/135228604167",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:14:45Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:14:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:14:56Z",
+              "conclusion": "success",
+              "name": "Checkout repository",
+              "number": 2,
+              "startedAt": "2026-11-19T00:14:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:15:19Z",
+              "conclusion": "success",
+              "name": "Verify materialized inputs",
+              "number": 3,
+              "startedAt": "2026-11-19T00:14:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:15:21Z",
+              "conclusion": "success",
+              "name": "Install wctl shim",
+              "number": 4,
+              "startedAt": "2026-11-19T00:15:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:15:50Z",
+              "conclusion": "success",
+              "name": "Start isolated test runtime",
+              "number": 5,
+              "startedAt": "2026-11-19T00:15:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:15:50Z",
+              "conclusion": "success",
+              "name": "Prepare locked CI browser assets",
+              "number": 6,
+              "startedAt": "2026-11-19T00:15:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:15:51Z",
+              "conclusion": "success",
+              "name": "Build controller assets",
+              "number": 7,
+              "startedAt": "2026-11-19T00:15:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:17:47Z",
+              "conclusion": "failure",
+              "name": "Run isolated browser checks",
+              "number": 8,
+              "startedAt": "2026-11-19T00:15:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:17:49Z",
+              "conclusion": "success",
+              "name": "Upload browser reports",
+              "number": 9,
+              "startedAt": "2026-11-19T00:17:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:18:01Z",
+              "conclusion": "success",
+              "name": "Remove isolated test runtime",
+              "number": 10,
+              "startedAt": "2026-11-19T00:17:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:18:01Z",
+              "conclusion": "success",
+              "name": "Post Checkout repository",
+              "number": 20,
+              "startedAt": "2026-11-19T00:18:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:18:01Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 21,
+              "startedAt": "2026-11-19T00:18:01Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Playwright Controllers Nightly",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425333040"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44423384936,
+      "event": "workflow_dispatch",
+      "headSha": "2b3f56727f1939eac496a65bd1bd213b246debcc",
+      "jobs": [
+        {
+          "databaseId": 135221872834,
+          "name": "npm-coverage",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-18T23:50:33Z",
+          "completedAt": "2026-11-18T23:51:37Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44423384936/job/135221872834",
+          "steps": [
+            {
+              "completedAt": "2026-11-18T23:50:35Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-18T23:50:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:50:37Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-11-18T23:50:35Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:51:31Z",
+              "conclusion": "success",
+              "name": "Run JavaScript checks",
+              "number": 3,
+              "startedAt": "2026-11-18T23:50:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:51:34Z",
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@v4",
+              "number": 4,
+              "startedAt": "2026-11-18T23:51:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:51:34Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 8,
+              "startedAt": "2026-11-18T23:51:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:51:34Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "startedAt": "2026-11-18T23:51:34Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "NPM Coverage Nightly",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44423384936"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44423392936,
+      "event": "workflow_dispatch",
+      "headSha": "2b3f56727f1939eac496a65bd1bd213b246debcc",
+      "jobs": [
+        {
+          "databaseId": 135221900074,
+          "name": "theme-metrics",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-18T23:48:22Z",
+          "completedAt": "2026-11-18T23:50:31Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44423392936/job/135221900074",
+          "steps": [
+            {
+              "completedAt": "2026-11-18T23:48:24Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-18T23:48:23Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:48:33Z",
+              "conclusion": "success",
+              "name": "Checkout repository",
+              "number": 2,
+              "startedAt": "2026-11-18T23:48:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:48:56Z",
+              "conclusion": "success",
+              "name": "Verify materialized inputs",
+              "number": 3,
+              "startedAt": "2026-11-18T23:48:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:48:59Z",
+              "conclusion": "success",
+              "name": "Install wctl shim",
+              "number": 4,
+              "startedAt": "2026-11-18T23:48:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:49:32Z",
+              "conclusion": "success",
+              "name": "Start isolated test runtime",
+              "number": 5,
+              "startedAt": "2026-11-18T23:48:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:49:33Z",
+              "conclusion": "success",
+              "name": "Prepare locked CI browser assets",
+              "number": 6,
+              "startedAt": "2026-11-18T23:49:32Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:49:34Z",
+              "conclusion": "success",
+              "name": "Build controller assets",
+              "number": 7,
+              "startedAt": "2026-11-18T23:49:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:50:15Z",
+              "conclusion": "success",
+              "name": "Run isolated browser checks",
+              "number": 8,
+              "startedAt": "2026-11-18T23:49:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:50:17Z",
+              "conclusion": "success",
+              "name": "Upload browser reports",
+              "number": 9,
+              "startedAt": "2026-11-18T23:50:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:50:28Z",
+              "conclusion": "success",
+              "name": "Remove isolated test runtime",
+              "number": 10,
+              "startedAt": "2026-11-18T23:50:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:50:29Z",
+              "conclusion": "success",
+              "name": "Post Checkout repository",
+              "number": 20,
+              "startedAt": "2026-11-18T23:50:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:50:29Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 21,
+              "startedAt": "2026-11-18T23:50:29Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Theme Metrics Nightly",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44423392936"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44422206052,
+      "event": "workflow_dispatch",
+      "headSha": "b53395d363705bef477d97522045fcded6608cfd",
+      "jobs": [
+        {
+          "databaseId": 135217776470,
+          "name": "status-tests",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-18T23:37:25Z",
+          "completedAt": "2026-11-18T23:38:00Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44422206052/job/135217776470",
+          "steps": [
+            {
+              "completedAt": "2026-11-18T23:37:28Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-18T23:37:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:37:30Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-11-18T23:37:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:37:55Z",
+              "conclusion": "success",
+              "name": "Run service unit and integration tests",
+              "number": 3,
+              "startedAt": "2026-11-18T23:37:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:37:57Z",
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@v4",
+              "number": 4,
+              "startedAt": "2026-11-18T23:37:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:37:57Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 8,
+              "startedAt": "2026-11-18T23:37:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:37:57Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "startedAt": "2026-11-18T23:37:57Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Status Tests Nightly",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44422206052"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44422210831,
+      "event": "workflow_dispatch",
+      "headSha": "b53395d363705bef477d97522045fcded6608cfd",
+      "jobs": [
+        {
+          "databaseId": 135217791718,
+          "name": "preflight-tests",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-18T23:36:41Z",
+          "completedAt": "2026-11-18T23:37:24Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44422210831/job/135217791718",
+          "steps": [
+            {
+              "completedAt": "2026-11-18T23:36:43Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-18T23:36:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:36:46Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-11-18T23:36:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:37:20Z",
+              "conclusion": "success",
+              "name": "Run service unit and integration tests",
+              "number": 3,
+              "startedAt": "2026-11-18T23:36:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:37:21Z",
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@v4",
+              "number": 4,
+              "startedAt": "2026-11-18T23:37:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:37:21Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 8,
+              "startedAt": "2026-11-18T23:37:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:37:21Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "startedAt": "2026-11-18T23:37:21Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Preflight Tests Nightly",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44422210831"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44422215161,
+      "event": "workflow_dispatch",
+      "headSha": "b53395d363705bef477d97522045fcded6608cfd",
+      "jobs": [
+        {
+          "databaseId": 135217807233,
+          "name": "status2-smoke",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-18T23:38:01Z",
+          "completedAt": "2026-11-18T23:38:43Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44422215161/job/135217807233",
+          "steps": [
+            {
+              "completedAt": "2026-11-18T23:38:03Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-18T23:38:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:38:05Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-11-18T23:38:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:38:08Z",
+              "conclusion": "success",
+              "name": "Install wctl shim",
+              "number": 3,
+              "startedAt": "2026-11-18T23:38:05Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:38:37Z",
+              "conclusion": "success",
+              "name": "Run authenticated Status2 smoke",
+              "number": 4,
+              "startedAt": "2026-11-18T23:38:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:38:39Z",
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@v4",
+              "number": 5,
+              "startedAt": "2026-11-18T23:38:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:38:40Z",
+              "conclusion": "success",
+              "name": "Remove isolated smoke runtime",
+              "number": 6,
+              "startedAt": "2026-11-18T23:38:39Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:38:40Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 12,
+              "startedAt": "2026-11-18T23:38:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-18T23:38:40Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 13,
+              "startedAt": "2026-11-18T23:38:40Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Status2 Smoke",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44422215161"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425293076,
+      "event": "pull_request",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228455076,
+          "name": "full-cloc",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-18T23:59:18Z",
+          "completedAt": "2026-11-19T00:01:06Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293076/job/135228455076",
+          "steps": [
+            {
+              "completedAt": "2026-11-18T23:59:20Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-18T23:59:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:03Z",
+              "conclusion": "success",
+              "name": "Checkout repository",
+              "number": 2,
+              "startedAt": "2026-11-18T23:59:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:22Z",
+              "conclusion": "success",
+              "name": "Install telemetry tooling",
+              "number": 3,
+              "startedAt": "2026-11-19T00:00:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:22Z",
+              "conclusion": "success",
+              "name": "Verify tooling",
+              "number": 4,
+              "startedAt": "2026-11-19T00:00:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:01:02Z",
+              "conclusion": "success",
+              "name": "Run full_cloc telemetry",
+              "number": 5,
+              "startedAt": "2026-11-19T00:00:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:01:03Z",
+              "conclusion": "success",
+              "name": "Upload telemetry artifact",
+              "number": 6,
+              "startedAt": "2026-11-19T00:01:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:01:03Z",
+              "conclusion": "success",
+              "name": "Publish summary",
+              "number": 7,
+              "startedAt": "2026-11-19T00:01:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:01:03Z",
+              "conclusion": "success",
+              "name": "Post Checkout repository",
+              "number": 14,
+              "startedAt": "2026-11-19T00:01:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:01:03Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-11-19T00:01:03Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Cloc Telemetry",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293076"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425293182,
+      "event": "pull_request",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228455841,
+          "name": "broad-exception-guards",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-19T00:09:19Z",
+          "completedAt": "2026-11-19T00:09:29Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293182/job/135228455841",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:09:21Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:09:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:23Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-11-19T00:09:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:23Z",
+              "conclusion": "success",
+              "name": "Verify checker runtime",
+              "number": 3,
+              "startedAt": "2026-11-19T00:09:23Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:24Z",
+              "conclusion": "success",
+              "name": "Run broad exception changed-file enforcement",
+              "number": 4,
+              "startedAt": "2026-11-19T00:09:23Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:25Z",
+              "conclusion": "success",
+              "name": "Upload broad exception guard artifact",
+              "number": 5,
+              "startedAt": "2026-11-19T00:09:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:26Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 10,
+              "startedAt": "2026-11-19T00:09:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:09:26Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 11,
+              "startedAt": "2026-11-19T00:09:26Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Broad Exception Guards",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293182"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425293131,
+      "event": "pull_request",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228455369,
+          "name": "rq-engine-contract-guards",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-19T00:18:10Z",
+          "completedAt": "2026-11-19T00:20:27Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293131/job/135228455369",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:18:12Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:18:11Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:18:21Z",
+              "conclusion": "success",
+              "name": "Checkout repository",
+              "number": 2,
+              "startedAt": "2026-11-19T00:18:12Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:18:44Z",
+              "conclusion": "success",
+              "name": "Verify materialized inputs",
+              "number": 3,
+              "startedAt": "2026-11-19T00:18:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:18:47Z",
+              "conclusion": "success",
+              "name": "Install wctl shim",
+              "number": 4,
+              "startedAt": "2026-11-19T00:18:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:19:16Z",
+              "conclusion": "success",
+              "name": "Start isolated test runtime",
+              "number": 5,
+              "startedAt": "2026-11-19T00:18:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:19:16Z",
+              "conclusion": "success",
+              "name": "Prepare locked CI browser assets",
+              "number": 6,
+              "startedAt": "2026-11-19T00:19:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:19:31Z",
+              "conclusion": "success",
+              "name": "Initialize disposable account schema",
+              "number": 7,
+              "startedAt": "2026-11-19T00:19:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:19:32Z",
+              "conclusion": "success",
+              "name": "Run rq-engine contract guard scripts",
+              "number": 8,
+              "startedAt": "2026-11-19T00:19:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:12Z",
+              "conclusion": "success",
+              "name": "Run rq-engine contract guard tests",
+              "number": 9,
+              "startedAt": "2026-11-19T00:19:32Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:24Z",
+              "conclusion": "success",
+              "name": "Remove isolated test runtime",
+              "number": 10,
+              "startedAt": "2026-11-19T00:20:12Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:24Z",
+              "conclusion": "success",
+              "name": "Post Checkout repository",
+              "number": 20,
+              "startedAt": "2026-11-19T00:20:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:24Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 21,
+              "startedAt": "2026-11-19T00:20:24Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "RQ-Engine Contract Guards",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293131"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425293295,
+      "event": "pull_request",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228456393,
+          "name": "docs-quality",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-19T00:20:28Z",
+          "completedAt": "2026-11-19T00:20:55Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293295/job/135228456393",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:20:31Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:20:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:35Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-11-19T00:20:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:38Z",
+              "conclusion": "success",
+              "name": "Install wctl shim",
+              "number": 3,
+              "startedAt": "2026-11-19T00:20:35Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:38Z",
+              "conclusion": "success",
+              "name": "Enforce ADR titles and recorded dates",
+              "number": 4,
+              "startedAt": "2026-11-19T00:20:38Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:38Z",
+              "conclusion": "success",
+              "name": "Verify markdown-doc tooling",
+              "number": 5,
+              "startedAt": "2026-11-19T00:20:38Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:41Z",
+              "conclusion": "success",
+              "name": "Run markdown-doc lint (SARIF + JSON)",
+              "number": 6,
+              "startedAt": "2026-11-19T00:20:38Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:41Z",
+              "conclusion": "success",
+              "name": "Enforce root AGENTS size budget",
+              "number": 7,
+              "startedAt": "2026-11-19T00:20:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:42Z",
+              "conclusion": "success",
+              "name": "Run markdown-doc Rust checks",
+              "number": 8,
+              "startedAt": "2026-11-19T00:20:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:42Z",
+              "conclusion": "success",
+              "name": "Run markdown-doc benchmarks",
+              "number": 9,
+              "startedAt": "2026-11-19T00:20:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:50Z",
+              "conclusion": "success",
+              "name": "Upload SARIF results",
+              "number": 10,
+              "startedAt": "2026-11-19T00:20:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:52Z",
+              "conclusion": "success",
+              "name": "Upload lint JSON artifact",
+              "number": 11,
+              "startedAt": "2026-11-19T00:20:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:52Z",
+              "conclusion": "skipped",
+              "name": "Fail on lint errors",
+              "number": 12,
+              "startedAt": "2026-11-19T00:20:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:52Z",
+              "conclusion": "success",
+              "name": "Post Upload SARIF results",
+              "number": 23,
+              "startedAt": "2026-11-19T00:20:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:52Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 24,
+              "startedAt": "2026-11-19T00:20:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:20:52Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 25,
+              "startedAt": "2026-11-19T00:20:52Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Docs Quality",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293295"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425293013,
+      "event": "pull_request",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228455060,
+          "name": "code-quality-observability",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-19T00:20:57Z",
+          "completedAt": "2026-11-19T00:21:20Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293013/job/135228455060",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:21:00Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:20:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:21:01Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-11-19T00:21:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:21:02Z",
+              "conclusion": "success",
+              "name": "Verify baseline tooling",
+              "number": 3,
+              "startedAt": "2026-11-19T00:21:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:21:14Z",
+              "conclusion": "success",
+              "name": "Generate observe-only report",
+              "number": 4,
+              "startedAt": "2026-11-19T00:21:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:21:14Z",
+              "conclusion": "success",
+              "name": "Publish summary",
+              "number": 5,
+              "startedAt": "2026-11-19T00:21:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:21:16Z",
+              "conclusion": "success",
+              "name": "Upload report artifacts",
+              "number": 6,
+              "startedAt": "2026-11-19T00:21:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:21:17Z",
+              "conclusion": "success",
+              "name": "Post or update PR comment",
+              "number": 7,
+              "startedAt": "2026-11-19T00:21:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:21:17Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 14,
+              "startedAt": "2026-11-19T00:21:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:21:18Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-11-19T00:21:17Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Code Quality Observability",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293013"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425293184,
+      "event": "pull_request",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228456264,
+          "name": "integration-governance",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-18T23:59:18Z",
+          "completedAt": "2026-11-19T00:00:44Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293184/job/135228456264",
+          "steps": [
+            {
+              "completedAt": "2026-11-18T23:59:19Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-18T23:59:18Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:25Z",
+              "conclusion": "success",
+              "name": "Check out exact candidate without credentials",
+              "number": 2,
+              "startedAt": "2026-11-18T23:59:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:25Z",
+              "conclusion": "success",
+              "name": "Load checker from trusted prior revision",
+              "number": 3,
+              "startedAt": "2026-11-19T00:00:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:26Z",
+              "conclusion": "success",
+              "name": "Verify accepted policy against exact candidate",
+              "number": 4,
+              "startedAt": "2026-11-19T00:00:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:42Z",
+              "conclusion": "success",
+              "name": "Build candidate Rust parser with locked dependencies",
+              "number": 5,
+              "startedAt": "2026-11-19T00:00:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:42Z",
+              "conclusion": "success",
+              "name": "Exercise retained parser output and rejection contract",
+              "number": 6,
+              "startedAt": "2026-11-19T00:00:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:42Z",
+              "conclusion": "success",
+              "name": "Post Check out exact candidate without credentials",
+              "number": 12,
+              "startedAt": "2026-11-19T00:00:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:42Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 13,
+              "startedAt": "2026-11-19T00:00:42Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Integration Governance",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425293184"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 44425289648,
+      "event": "pull_request_target",
+      "headSha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+      "jobs": [
+        {
+          "databaseId": 135228447656,
+          "name": "Evaluate base-owned integration policy",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-18T23:59:17Z",
+          "completedAt": "2026-11-19T00:00:43Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425289648/job/135228447656",
+          "steps": [
+            {
+              "completedAt": "2026-11-18T23:59:21Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-18T23:59:18Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:40Z",
+              "conclusion": "success",
+              "name": "Check out trusted base only",
+              "number": 2,
+              "startedAt": "2026-11-18T23:59:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:41Z",
+              "conclusion": "success",
+              "name": "Read candidate Git objects without executing candidate code",
+              "number": 3,
+              "startedAt": "2026-11-19T00:00:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:41Z",
+              "conclusion": "success",
+              "name": "Post Check out trusted base only",
+              "number": 6,
+              "startedAt": "2026-11-19T00:00:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:41Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 7,
+              "startedAt": "2026-11-19T00:00:41Z",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "databaseId": 135229138283,
+          "name": "integration-governance-policy",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-19T00:00:46Z",
+          "completedAt": "2026-11-19T00:00:51Z",
+          "url": "https://github.com/rogerlew/wepppy/actions/runs/44425289648/job/135229138283",
+          "steps": [
+            {
+              "completedAt": "2026-11-19T00:00:47Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-11-19T00:00:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:49Z",
+              "conclusion": "success",
+              "name": "Require successful trusted policy evaluation",
+              "number": 2,
+              "startedAt": "2026-11-19T00:00:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-11-19T00:00:49Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 3,
+              "startedAt": "2026-11-19T00:00:49Z",
+              "status": "completed"
+            }
+          ]
+        }
+      ],
+      "name": "Integration Policy",
+      "status": "completed",
+      "url": "https://github.com/rogerlew/wepppy/actions/runs/44425289648"
+    }
+  ]
+}
