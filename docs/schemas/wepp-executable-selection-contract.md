@@ -145,7 +145,7 @@ includes the effective capacity. The new release declares 23 input horizons,
 while calculation capacity remains ten. No automatic project/default migration.
 Before invocation, validate consumed soil counts against the selected pair.
 Generated writers enforce the same limit before publication. Uploaded-input
-admission/byte-preservation policy remains unchanged. See ADR-0148 and the
+admission/byte-preservation policy remains unchanged. See ADR-0150 and the
 generated-soil boundary contract for propagation and artifact acceptance.
 
 Provider role identities retain their historical form for effective capacity ten.

@@ -5,7 +5,7 @@
 - Reviewer: Codex independent `reviewer` agent, `/root/correctness_review`.
 - Date: 2026-11-19 UTC.
 - Candidate: `/workdir/wepppy-soil-input-capacity-23`, branch `feat/soil-input-capacity-23`, base `d228fe0a5`; committed ADR/contracts plus working changes. Native source: `464a5e5e15e1fbcdd4e8232260ecf79ad2645200` against `7d4cf4b5ab24bbc825515d54f25a035062b826bb`.
-- Authority: ADR-0148, `docs/schemas/soil-horizon-boundary-contract.md` (“Input capacity and consumption”), `docs/schemas/wepp-executable-selection-contract.md` (“Soil input capacity”).
+- Authority: ADR-0150, `docs/schemas/soil-horizon-boundary-contract.md` (“Input capacity and consumption”), `docs/schemas/wepp-executable-selection-contract.md` (“Soil input capacity”).
 - Method: read-only source, call-site, test and retained artifact review. Reviewer did not rerun tests or mutate candidate source. Follow-up source verification and retained targeted receipt completed after implementer fixes. Exact reviewed Python source/test hashes are retained in `independent-correctness-scope.json` beside this artifact.
 
 ## Findings

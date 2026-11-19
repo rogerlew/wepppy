@@ -61,7 +61,7 @@ the selected binary; Soils builds the raw files used by later preparation.
 
 ## Plan of Work
 
-Milestone 1 establishes ADR-0148, updates canonical soil/executable contracts,
+Milestone 1 establishes ADR-0150, updates canonical soil/executable contracts,
 and records a file-level consumer matrix. Trace capacity from saved binary to
 both serialization and execution, including process boundaries and uploaded
 copy paths. Prefer explicit existing interfaces; unknown historical binaries
@@ -177,7 +177,7 @@ Production hashes match independent reviews. See validation.json and the broad
 gate assessment for denominators and source identities.
 
 Six-module stubtest, test-stub completeness, changed broad-exception enforcement
-and documentation lint passed. Durable contracts are ADR-0148, the soil boundary
+and documentation lint passed. Durable contracts are ADR-0150, the soil boundary
 contract and executable selection contract. The user help and binary lifecycle
 ledger explain the opt-in release; rollout retains the compatible pair whenever
 larger inputs exist.

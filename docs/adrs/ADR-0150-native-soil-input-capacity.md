@@ -1,4 +1,4 @@
-# ADR-0148: Separate native soil input capacity from calculation layers
+# ADR-0150: Separate native soil input capacity from calculation layers
 
 Date: 2026-11-18
 Status: Accepted and implemented in Linux release `wepp_261118`.

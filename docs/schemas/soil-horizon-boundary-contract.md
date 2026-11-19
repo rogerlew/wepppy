@@ -78,4 +78,4 @@ Other standalone dataset/converter paths retain ten unless explicitly opted in.
 Compatibility plan: keep old keyword defaults and historical binaries; add only
 an optional integer sidecar field and keyword capacity arguments. No NoDb data
 migration. Verify raw/prepared/consumed counts and depth/property tokens with
-Puaulu and Zepol, matching role binaries and fresh output. See ADR-0148.
+Puaulu and Zepol, matching role binaries and fresh output. See ADR-0150.

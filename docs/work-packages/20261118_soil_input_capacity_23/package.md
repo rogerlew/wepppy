@@ -55,7 +55,7 @@ be obtained in this session.
 
 ## Parameterization and contracts
 
-ADR-0148 will record capacity, scientific invariants, provenance and rejected
+ADR-0150 will record capacity, scientific invariants, provenance and rejected
 alternatives. Update the canonical generated-soil boundary and executable
 selection contracts before implementation. No new production parameter default
 other than the explicitly selected binary's declared input capacity is implied.

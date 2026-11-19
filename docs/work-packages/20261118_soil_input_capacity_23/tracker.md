@@ -5,7 +5,7 @@ Status: Closed 2026-11-19 UTC; implementation and local release preparation comp
 ## Progress
 
 - [x] Native evaluation and national inventory; capacity decision recorded.
-- [x] Dedicated worktrees, package, ADR-0148 and canonical contracts.
+- [x] Dedicated worktrees, package, ADR-0150 and canonical contracts.
 - [x] Native input capacity 23, calculation capacity ten, fixtures and metadata.
 - [x] Native acceptance and legacy parity; matched Linux pair locally vendored.
 - [x] Python raw/prepared/Disturbed/MOFE/channel/derivative propagation and launch guard.
@@ -20,7 +20,7 @@ Use `mxhzin=23`, retain `mxnsl=10`, no merging or conductivity policy change.
 Keep historical/default selections. User authorized nearest CLIGEN station on
 only the disposable clone and independent read-only review agents.
 Production deployment and original-project recovery are separate actions.
-Normative decision: [ADR-0148](../../adrs/ADR-0148-native-soil-input-capacity.md).
+Normative decision: [ADR-0150](../../adrs/ADR-0150-native-soil-input-capacity.md).
 
 ## Evidence
 
