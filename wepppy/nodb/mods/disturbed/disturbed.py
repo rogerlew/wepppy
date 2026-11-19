@@ -573,7 +573,7 @@ def _build_disturbed_mofe_soil(task_args: Dict[str, Any]) -> Tuple[str, float]:
 
     from wepppy.soils.ssurgo.retention import check_treatment_task, finish_treatment_task, write_exclusive
     retention_context = check_treatment_task(task_args)
-    soil_u = WeppSoilUtil(task_args['source_soil_path'])
+    soil_u = WeppSoilUtil(task_args['source_soil_path'], max_horizons=task_args.get('max_horizons', 10))
     if task_args['sol_ver'] == 7778.0:
         new = soil_u.to_7778disturbed(
             replacement_values,
@@ -2385,6 +2385,7 @@ class Disturbed(NoDbBase):
                                 disturbed_mukey=disturbed_mukey,
                                 disturbed_fn=disturbed_fn,
                                 source_soil_path=source_soil_path,
+                                max_horizons=self.wepp_instance.soil_input_capacity,
                                 output_path=output_path,
                                 replacements=dict(replacements) if replacements is not None else None,
                                 sol_ver=sol_ver,
@@ -2558,7 +2559,7 @@ class Disturbed(NoDbBase):
 
         for idx, hillslope_plan in enumerate(hillslope_plans, start=1):
             with self.timed('  Generating MOFE soil file with SoilMultipleOfeSynth'):
-                mofe_synth = SoilMultipleOfeSynth(stack=hillslope_plan['stack'])
+                mofe_synth = SoilMultipleOfeSynth(stack=hillslope_plan['stack'], max_horizons=self.wepp_instance.soil_input_capacity)
                 output_path = _join(soils.soils_dir, hillslope_plan['sol_fn'])
                 base_quality = (
                     _quality_for_topaz(
@@ -2748,7 +2749,8 @@ class Disturbed(NoDbBase):
                         topaz_id=str(topaz_id),
                         mukey=str(mukey),
                         soil_summary_dir=getattr(_soil, 'soils_dir', None),
-                    )
+                    ),
+                    max_horizons=self.wepp_instance.soil_input_capacity,
                 )
                 if sol_ver == 7778.0:
                     new = soil_u.to_7778disturbed(

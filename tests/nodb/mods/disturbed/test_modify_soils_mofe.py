@@ -155,7 +155,8 @@ def test_modify_mofe_soils_uses_base_lookup_class_for_treatments(
     write_paths: list[str] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -170,7 +171,8 @@ def test_modify_mofe_soils_uses_base_lookup_class_for_treatments(
             return _FakeWriter(write_paths)
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             stack_writes.append(list(stack))
 
         def write(self, path: str) -> None:
@@ -234,7 +236,8 @@ def test_modify_mofe_soils_reuses_retained_source_after_mofe_publication(
     stack_paths: list[list[str]] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             source_paths.append(source_path)
 
         def to_over9000(
@@ -247,7 +250,8 @@ def test_modify_mofe_soils_reuses_retained_source_after_mofe_publication(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             stack_paths.append(list(stack))
 
         def write(self, path: str) -> None:
@@ -339,7 +343,8 @@ def test_modify_mofe_soils_9002_lookup_hit_uses_lookup_row_and_class_key(
     stack_paths: list[list[str]] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -355,7 +360,8 @@ def test_modify_mofe_soils_9002_lookup_hit_uses_lookup_row_and_class_key(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             stack_paths.append(list(stack))
 
         def write(self, path: str) -> None:
@@ -409,7 +415,8 @@ def test_modify_mofe_soils_9002_strips_treatment_suffix_for_lookup(
     replacements_seen: list[dict[str, str]] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -424,7 +431,8 @@ def test_modify_mofe_soils_9002_strips_treatment_suffix_for_lookup(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -475,7 +483,8 @@ def test_modify_mofe_soils_9002_lookup_miss_uses_explicit_fallback_replacements(
     versions_seen: list[float | None] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -491,7 +500,8 @@ def test_modify_mofe_soils_9002_lookup_miss_uses_explicit_fallback_replacements(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -547,7 +557,8 @@ def test_modify_mofe_soils_9002_lookup_miss_uses_class_aware_keys(
     stack_paths: list[list[str]] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -562,7 +573,8 @@ def test_modify_mofe_soils_9002_lookup_miss_uses_class_aware_keys(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             stack_paths.append(list(stack))
 
         def write(self, path: str) -> None:
@@ -618,7 +630,8 @@ def test_modify_mofe_soils_9002_recomputes_area_and_pct_coverage(
     watershed = _FakeWatershed({"101": 2.0, "102": 3.0})
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -632,7 +645,8 @@ def test_modify_mofe_soils_9002_recomputes_area_and_pct_coverage(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -681,7 +695,8 @@ def test_modify_mofe_soils_passes_copy_of_lookup_replacements(
     watershed = _FakeWatershed({"101": 1.0})
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -696,7 +711,8 @@ def test_modify_mofe_soils_passes_copy_of_lookup_replacements(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -742,7 +758,8 @@ def test_modify_mofe_soils_sets_zero_pct_when_total_area_is_zero(
     watershed = _FakeWatershed({"101": 0.0})
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -756,7 +773,8 @@ def test_modify_mofe_soils_sets_zero_pct_when_total_area_is_zero(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -803,7 +821,8 @@ def test_modify_mofe_soils_forwards_rosetta_bd_toggle_to_converter(
     forwarded_flags: list[bool] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -818,7 +837,8 @@ def test_modify_mofe_soils_forwards_rosetta_bd_toggle_to_converter(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -865,7 +885,8 @@ def test_modify_mofe_soils_forwards_rosetta_bd_toggle_to_7778_converter(
     forwarded_flags: list[bool] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -882,7 +903,8 @@ def test_modify_mofe_soils_forwards_rosetta_bd_toggle_to_7778_converter(
             raise AssertionError("to_over9000 should not be called for 7778 runs")
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -945,7 +967,8 @@ def test_modify_mofe_soils_uses_process_pool_for_concurrent_generation(
         return _RecordingExecutor()
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -959,7 +982,8 @@ def test_modify_mofe_soils_uses_process_pool_for_concurrent_generation(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -1028,7 +1052,8 @@ def test_modify_mofe_soils_retries_with_fork_after_spawn_pool_failure(
         return _InlineProcessPoolExecutor()
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -1042,7 +1067,8 @@ def test_modify_mofe_soils_retries_with_fork_after_spawn_pool_failure(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -1110,7 +1136,8 @@ def test_modify_mofe_soils_falls_back_to_sequential_after_broken_pools(
         return task_args["disturbed_mukey"], 0.0
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:
@@ -1227,7 +1254,8 @@ def test_modify_mofe_soils_compacts_info_logging_and_keeps_debug_detail(
     watershed = _FakeWatershed({"101": 1.0})
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.source_path = source_path
             self.clay = 30.0
             self.sand = 40.0
@@ -1242,7 +1270,8 @@ def test_modify_mofe_soils_compacts_info_logging_and_keeps_debug_detail(
             return _FakeWriter([])
 
     class _FakeMofeSynth:
-        def __init__(self, stack):
+        def __init__(self, stack, *, max_horizons=10):
+            assert max_horizons == 10
             self.stack = stack
 
         def write(self, path: str) -> None:

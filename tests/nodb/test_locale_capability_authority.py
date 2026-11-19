@@ -1202,3 +1202,15 @@ def test_edde_reader_floor_accepts_additive_graph_without_changing_stored_choice
     old.validate()
     assert old.as_config_sections() == before
     assert "future_edde_v2" not in old.climate_datasets
+
+
+@pytest.mark.parametrize("capacity", [1, 10, 21, 23, 0, 24, "true", "23.0"])
+def test_capacity_provider_identity_bounds(capacity):
+    binary_ids = ("wepp_260803",)
+    revisions = _binary_revisions(binary_ids)
+    revisions = {key: value + f":soil_capacity={capacity}" for key, value in revisions.items()}
+    if type(capacity) is int and 1 <= capacity <= 23:
+        build_continental_us_capability_graph(binary_ids, revisions).validate()
+    else:
+        with pytest.raises(CapabilityGraphError, match="invalid role identity"):
+            build_continental_us_capability_graph(binary_ids, revisions).validate()

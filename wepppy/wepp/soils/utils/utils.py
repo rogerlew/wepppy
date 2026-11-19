@@ -258,7 +258,7 @@ def soil_specialization(src: str, dst: str, replacements: SoilReplacements, call
         f.write(text)
 
 
-def modify_kslast(src: str, dst: str, kslast: float, caller: str = "") -> None:
+def modify_kslast(src: str, dst: str, kslast: float, caller: str = "", *, max_horizons: int = 10) -> None:
     """Write a copy of ``src`` to ``dst`` using ``kslast`` for the restrictive layer.
 
     Args:
@@ -282,7 +282,7 @@ def modify_kslast(src: str, dst: str, kslast: float, caller: str = "") -> None:
     lastline[-1] = f"{kslast}"
     lines[-1] = " ".join(lastline)
 
-    text = ensure_200mm_boundary("".join(header + lines))
+    text = ensure_200mm_boundary("".join(header + lines), max_horizons=max_horizons)
     with open(dst, "w") as fp:
         fp.write(text)
 

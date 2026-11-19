@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Iterator, Tuple
 
 import pytest
@@ -44,6 +45,10 @@ def disturbed_factory(
 ):
     """Create detached Disturbed instances for focused unit tests."""
 
+    monkeypatch.setattr(
+        Disturbed, "wepp_instance",
+        property(lambda self: SimpleNamespace(soil_input_capacity=10)),
+    )
     monkeypatch.setattr(
         Disturbed,
         "locked",

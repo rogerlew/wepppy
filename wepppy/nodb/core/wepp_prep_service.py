@@ -449,6 +449,7 @@ class WeppPrepService:
                     clip_soils_minimum,
                     clip_soils_minimum_depth,
                     single_input_uploads_enabled(wepp) and int(soils.mode) == 5,
+                    wepp.soil_input_capacity,
                 )
             )
 

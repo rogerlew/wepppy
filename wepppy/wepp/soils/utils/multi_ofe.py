@@ -21,13 +21,14 @@ def read_soil_lines(fn: str) -> List[str]:
 class SoilMultipleOfeSynth(object):
     """Compose a multi-OFE WEPP soil file from single-OFE soil definitions."""
 
-    def __init__(self, stack: Optional[Iterable[str]] = None) -> None:
+    def __init__(self, stack: Optional[Iterable[str]] = None, *, max_horizons: int = 10) -> None:
         """
         Parameters
         ----------
         stack:
             Iterable of absolute soil file paths (one per OFE) to combine.
         """
+        self.max_horizons = max_horizons
         self.stack: List[str] = list(stack or [])
 
     @property
@@ -86,7 +87,7 @@ class SoilMultipleOfeSynth(object):
 
         text = ''.join(s)
         if not preserve_input_format:
-            text = ensure_200mm_boundary(text)
+            text = ensure_200mm_boundary(text, max_horizons=self.max_horizons)
         if retention_context is not None:
             text = mark_stack_text(text)
         if retention_context is not None:

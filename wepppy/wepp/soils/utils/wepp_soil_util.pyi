@@ -7,6 +7,7 @@ DISTURBED_BD_MAX_G_CM3: float
 VG_PAR_KEYS: tuple[str, ...]
 
 class WeppSoilUtil:
+    max_horizons: int
     obj: Dict[str, Any]
     fn: str
 
@@ -17,6 +18,7 @@ class WeppSoilUtil:
         compute_conductivity: bool = ...,
         *,
         preserve_input_format: bool = ...,
+        max_horizons: int = ...,
     ) -> None: ...
     def recompute_wepp_parameters(self) -> None: ...
     def modify_anisotropy(self, upper: Optional[float], lower: Optional[float], *, developer_mode: bool = False) -> None: ...

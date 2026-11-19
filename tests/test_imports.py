@@ -5,6 +5,20 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(autouse=True)
+def preserve_import_environment():
+    """Developer modules can change cwd or sys.path during diagnostic imports."""
+    original_cwd = Path.cwd()
+    original_sys_path = sys.path[:]
+    try:
+        yield
+    finally:
+        os.chdir(original_cwd)
+        sys.path[:] = original_sys_path
+
 
 @pytest.fixture
 def base_path() -> str:
@@ -21,7 +35,16 @@ def test_imports_in_directory(base_path: str):
     success_count = 0
     failure_count = 0
 
-    for root, _, files in os.walk(base_path):
+    # These developer utilities write catalog exports/JSON at import time;
+    # they are executable scripts, not runtime library import targets.
+    utility_roots = {
+        Path(base_path) / "wepp/management/scripts",
+        Path(base_path) / "wepp/management/data",
+    }
+    for root, directories, files in os.walk(base_path):
+        if Path(root) in utility_roots:
+            directories.clear()
+            continue
         for file in files:
             if file.endswith(".py") and file != "__init__.py":
                 # Construct the module name

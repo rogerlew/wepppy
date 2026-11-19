@@ -113,6 +113,8 @@ class Wepp(NoDbBase):
     baseflow_dscoeff_map: Incomplete
     baseflow_bfthreshold_map: Incomplete
     def __init__(self, wd: str, cfg_fn: str, run_group: str | None = None, group_name: str | None = None) -> None: ...
+    @property
+    def soil_input_capacity(self) -> int: ...
     if TYPE_CHECKING:
         dss_export_mode: int
     else:

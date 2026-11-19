@@ -95,7 +95,7 @@ def test_channel_soil_writers_emit_normalized_profiles(tmp_path, version, count)
     import logging
 
     context = SimpleNamespace(
-        runs_dir=str(tmp_path), logger=logging.getLogger(__name__),
+        runs_dir=str(tmp_path), logger=logging.getLogger(__name__), soil_input_capacity=10,
         watershed_instance=SimpleNamespace(chn_n=count),
         soils_instance=SimpleNamespace(chn_iter=lambda: [
             (str(i), SimpleNamespace(as_dict=lambda: {'avke': 7}))

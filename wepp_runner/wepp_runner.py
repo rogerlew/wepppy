@@ -1116,6 +1116,21 @@ def make_ss_batch_hillslope_run(wepp_id, runs_dir, ss_batch_key, ss_batch_id,
         fp.write(s)
 
 
+def _validate_run_soil_capacity(run_file, runs_dir, wepp_bin):
+    """Check the actual soil paths in the generated deck without rewriting them."""
+    from .wepp_binary_capabilities import get_soil_input_capacity
+    from wepppy.wepp.soils.horizon_boundary import validate_soil_horizon_capacity
+
+    capacity = get_soil_input_capacity(wepp_bin)
+    with open(run_file, encoding='utf-8') as stream:
+        soil_paths = [line.strip() for line in stream if line.strip().lower().endswith('.sol')]
+    if not soil_paths:
+        raise ValueError(f'WEPP run file does not identify a soil input: {run_file}')
+    for relative_path in soil_paths:
+        with open(os.path.join(runs_dir, relative_path), encoding='utf-8') as stream:
+            validate_soil_horizon_capacity(stream.read(), max_horizons=capacity)
+
+
 def run_ss_batch_hillslope(wepp_id, runs_dir, wepp_bin=None, ss_batch_id=None, status_channel=None, 
                        man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
     if man_relpath != '':
@@ -1138,6 +1153,7 @@ def run_ss_batch_hillslope(wepp_id, runs_dir, wepp_bin=None, ss_batch_id=None, s
     assert _exists(_join(runs_dir, sol_relpath, f'p{wepp_id}.sol'))
 
     _stderr_fn = _join(runs_dir, f'p{wepp_id}.{ss_batch_id}.err')
+    _validate_run_soil_capacity(_join(runs_dir, f'p{wepp_id}.{ss_batch_id}.run'), runs_dir, wepp_bin)
     _run = open(_join(runs_dir, f'p{wepp_id}.{ss_batch_id}.run'))
     _log = open(_stderr_fn, 'w')
     success = False
@@ -1227,6 +1243,7 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
 
     _stderr_fn = _join(runs_dir, f'p{wepp_id}.err')
     _run_fn = _join(runs_dir, f'p{wepp_id}.run')
+    _validate_run_soil_capacity(_run_fn, runs_dir, wepp_bin)
     _log = open(_stderr_fn, 'w')
     success = False
     total_attempts = timeout_retries + 1
@@ -1406,6 +1423,7 @@ def run_flowpath(fp_id, wepp_id, runs_dir, fp_runs_dir, wepp_bin=None, status_ch
     assert _exists(_join(runs_dir, f'p{wepp_id}.sol'))
 
     _stderr_fn = _join(fp_runs_dir, f'{fp_id}.err')
+    _validate_run_soil_capacity(_join(fp_runs_dir, f'{fp_id}.run'), fp_runs_dir, wepp_bin)
     _run = open(_join(fp_runs_dir, f'{fp_id}.run'))
     _log = open(_stderr_fn, 'w')
     success = False
@@ -1635,6 +1653,7 @@ def run_watershed(runs_dir, wepp_bin=None, status_channel=None):
     cmd_text = _cmd_text(cmd)
     runs_dir_abs = os.path.abspath(runs_dir)
     _run_fn = os.path.join(runs_dir, 'pw0.run')
+    _validate_run_soil_capacity(_run_fn, runs_dir, wepp_bin)
     _stderr_fn = os.path.join(runs_dir, 'pw0.err')
     _run = None
     _log = None
@@ -1741,6 +1760,7 @@ def run_ss_batch_watershed(runs_dir, wepp_bin=None, ss_batch_id=None, status_cha
     assert _exists(_join(runs_dir, f'pw0.{ss_batch_id}.run'))
 
     _stderr_fn = _join(runs_dir, f'pw0.{ss_batch_id}.err')
+    _validate_run_soil_capacity(_join(runs_dir, f'pw0.{ss_batch_id}.run'), runs_dir, wepp_bin)
     _run = open(_join(runs_dir, f'pw0.{ss_batch_id}.run'))
     _log = open(_stderr_fn, 'w')
     success = False

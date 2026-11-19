@@ -14,6 +14,12 @@ from wepppy.nodb.core.soils import Soils, SoilsMode
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def legacy_soil_capacity(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Detached controller fixtures use the historical executable capacity."""
+    monkeypatch.setattr(Soils, "soil_input_capacity", property(lambda self: 10))
+
+
 class _StopBuild(Exception):
     """Sentinel used to stop _build_gridded after pre-retrieve assertions."""
 
@@ -471,7 +477,8 @@ def test_added_donor_materialization_removes_failed_publication_and_retries(
 
     class _WeppSoil:
         @staticmethod
-        def write(directory: str, overwrite: bool) -> SimpleNamespace:
+        def write(directory: str, overwrite: bool, *, max_horizons: int) -> SimpleNamespace:
+            assert max_horizons == 10
             assert overwrite is True
             (Path(directory) / "20.sol").write_text("candidate", encoding="utf-8")
             return SimpleNamespace(fname="20.sol")

@@ -1,6 +1,6 @@
 # Support 23 soil input horizons
 
-Status: Open, 2026-11-19 UTC. Owner: operator; implementer: Codex.
+Status: Closed 2026-11-19 UTC (local implementation and release preparation). Owner: operator; implementer: Codex.
 
 ## Purpose and scope
 
@@ -73,7 +73,27 @@ No temporary mitigation is planned.
 
 ## Execution and references
 
-[Active plan](prompts/active/implementation_execplan.md), [tracker](tracker.md).
+[Completed plan](prompts/completed/implementation_execplan.md), [tracker](tracker.md).
 Prior evidence: `docs/work-packages/20261118_native_soil_input_capacity/` and
 `docs/investigations/2026-11-18-ssurgo-input-capacity/assessment.md`.
-Highest current claim: diagnosed and prototype evaluated, not integrated/deployed.
+Highest completion claim: implemented and validated locally, matched Linux pair
+vendored, disposable actual-project workflow and report readback complete.
+Independent correctness/security reviews pass. Broad coverage is reconciled
+across sequential runs: 14,554 passes, 505 runtime skips, one collection skip,
+and 99 opt-in deselections. This is not one uninterrupted green full-suite run;
+see the [gate assessment](artifacts/20261119_broad_gate_assessment.md) and
+[receipt manifest](artifacts/validation.json).
+
+## Deliverables and follow-up
+
+Native source `464a5e5e15e1fbcdd4e8232260ecf79ad2645200`; opt-in Linux pair
+`wepp_261118` / `wepp_261118_hill`. Python integration includes all confirmed
+raw, prepared, treatment, location, AgFields, MOFE and channel consumers, plus
+the final execution guard. [Release identity](artifacts/release-identity.md),
+[real-project evidence](artifacts/project-replay.md), and
+[rollout/rollback](artifacts/rollout.md) document identities and limits.
+
+Remote integration, production deployment and original-project recovery were
+not performed. Those are operator follow-up actions under the canonical deploy
+workflow; this completed package prepares them and does not authorize a default
+switch. The validation climate is not an approved original-project result.

@@ -117,7 +117,8 @@ class GeneralMod(NoDbBase, LocationMixin):
                 _soil_fn = '{dom}.sol'.format(dom=_dom)
                 src_soil_fn = _join(_soil.soils_dir, _soil.fname)
                 dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
-                modify_kslast(src_soil_fn, dst_soil_fn, kslast, caller='nodb.general')
+                modify_kslast(src_soil_fn, dst_soil_fn, kslast, caller='nodb.general',
+                              max_horizons=soils.soil_input_capacity)
 
                 _soil.fname = _soil_fn
                 _soils[_dom] = _soil

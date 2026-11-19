@@ -17,13 +17,14 @@ honest separation of validation, integration and production recovery.
 
 - [x] (2026-11-19 UTC) Read repository/release instructions and prior evidence.
 - [x] Scaffold package and dedicated implementation worktrees.
-- [ ] Establish ADR/contracts and map every affected writer/consumer.
-- [ ] Extend native limit, reader tests, real fixtures and release metadata.
-- [ ] Complete native full suite, smoke/watchlist and paired output comparisons.
-- [ ] Wire Python capacity selection through raw/prepared/channel/upload paths.
-- [ ] Complete focused and full wctl gates, stub checks where applicable.
-- [ ] Complete review artifacts and isolated real-project validation.
-- [ ] Prepare eligible paired release, rollback instructions and final handoff.
+- [x] Establish ADR/contracts and map every affected writer/consumer.
+- [x] Extend native limit, reader tests, real fixtures and release metadata.
+- [x] Complete native full suite, smoke/watchlist and paired output comparisons.
+- [x] Wire Python capacity selection through raw/prepared/channel/upload paths.
+- [x] Complete focused checks, reconciled segmented broad coverage and stub gates.
+- [x] Complete independent review artifacts and isolated real-project validation.
+- [x] Prepare paired Linux release and rollback instructions.
+- [x] Final segmented-coverage receipts, independent assessment and source/evidence handoff.
 
 ## Surprises & Discoveries
 
@@ -99,8 +100,8 @@ gates, `python tools/run_hillslope_watchlist.py`, ablation policy and full pytes
 Retain paired runs of committed physical_water and Puaulu cases with fresh PASS
 files; verify actual completion and finite complete channel records.
 
-WEPPpy tests use `wctl --project-dir /workdir/wepppy-soil-input-capacity-23
-run-pytest <targets>`, then the full required suite. Use explicit project-dir for
+WEPPpy tests use `wctl run-pytest --checkout /workdir/wepppy-soil-input-capacity-23
+--runtime-root /workdir/wepppy <parser options> -- <targets>`, then the full required suite. Use explicit project-dir for
 doc lint too; the installed wrapper otherwise targets the shared checkout.
 Read `wepp_runner/AGENTS.md`, `wepppy/nodb/AGENTS.md`, `tests/AGENTS.md` and
 nearest local instructions before edits. Record exact commands/results in the
@@ -143,6 +144,46 @@ workflow receipts and review artifacts. Closed evaluation history is immutable.
 
 ## Outcomes & Retrospective
 
-Scaffold complete; implementation and acceptance gates remain pending. No
-production behavior changed. Revision 2026-11-19 UTC: initial executable plan
-created from authorized scope and completed capacity inventory.
+Completed 2026-11-19 UTC. Native input capacity is 23 with calculation capacity 10
+and unchanged physics. Matched final Linux pair is locally vendored; defaults
+and saved project selections remain unchanged. No production deployment or
+original-project recovery occurred.
+
+Native full suite 1824 passed, reader 72, metadata 14, watchlist 31; legacy reader
+states 80/80 exact. Twenty native watershed executions completed with legacy
+control output bytes identical. Disturbed matrix/locale authority 186 passed;
+768 native output files match the previous reviewed results.
+
+The operator approved nearest CLIGEN station for the disposable clone. ALCALDE
+NM supplied 100 years. All 355 hillslopes and 144 channels completed; canonical
+post-jobs and frontend report readers passed. Readback verified 5,259,456 finite
+channel daily records against all 36,524 climate days. See project-replay.md for
+identity/cache setup, development-runtime limitations and the repaired manual
+post-processing omission. Original project remained unchanged.
+
+Independent correctness review identified three omitted derivative consumers:
+Treatments, shared location modifiers, and AgFields parent synthesis. All now
+forward selected capacity. Real 21-horizon Puaulu regressions pass through each.
+Correctness and security reviews pass with no unresolved findings.
+
+Broad validation completed in segments, with independent acceptance of exact
+coverage reconciliation: 14,554 passes, 505 runtime skips, one collection skip and
+99 opt-in deselections. Earlier full sweeps exposed detached test fixtures;
+the remainder exposed a Roads stale-evidence review and an import smoke script
+writing a tracked example. Repairs passed focused canonical checks with stable
+source. Preserve the failed and source_changed receipts: this is not a single
+uninterrupted green sweep, and cross-segment ordering was not re-exercised.
+Production hashes match independent reviews. See validation.json and the broad
+gate assessment for denominators and source identities.
+
+Six-module stubtest, test-stub completeness, changed broad-exception enforcement
+and documentation lint passed. Durable contracts are ADR-0148, the soil boundary
+contract and executable selection contract. The user help and binary lifecycle
+ledger explain the opt-in release; rollout retains the compatible pair whenever
+larger inputs exist.
+
+Tooling lessons: wctl doc commands need explicit --project-dir for task
+worktrees; otherwise the installed preset can lint the wrong checkout. The
+import diagnostic must exclude known executable management utilities, which
+change cwd and write at import time. Review only the bounded fixture changes;
+no claim that every diagnostic import succeeds is supported by that test.

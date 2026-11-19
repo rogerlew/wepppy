@@ -96,7 +96,9 @@ def test_prep_soil_applies_minimum_before_maximum_clip(
             fn: str,
             compute_erodibilities: bool = False,
             compute_conductivity: bool = False,
+            max_horizons: int = 10,
         ) -> None:
+            assert max_horizons == 10
             calls.append(("init", fn, compute_erodibilities, compute_conductivity))
 
         def to7778(self) -> "FakeWeppSoilUtil":

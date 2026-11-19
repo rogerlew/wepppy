@@ -964,7 +964,7 @@ class Soils(NoDbBase):
                 cache_db_path=self._prepare_project_surgo_cache(use_statsgo=True),
             )
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
-            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True, max_horizons=self.soil_input_capacity)
             soils = {str(k): v for k, v in soils.items()}
             surgo_c.logInvalidSoils(wd=soils_dir)
 
@@ -1126,7 +1126,7 @@ class Soils(NoDbBase):
             surgo_c = SurgoSoilCollection(mukeys, cache_db_path=ssurgo_cache_db_path)
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
 
-            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True, max_horizons=self.soil_input_capacity)
             soils = {str(k): v for k, v in soils.items()}
             surgo_c.logInvalidSoils(wd=soils_dir)
 
@@ -1149,7 +1149,7 @@ class Soils(NoDbBase):
                     cache_db_path=statsgo_cache_db_path,
                 )
                 surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
-                soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+                soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True, max_horizons=self.soil_input_capacity)
                 soils = {str(k): v for k, v in soils.items()}
                 surgo_c.logInvalidSoils(wd=soils_dir)
 
@@ -1500,6 +1500,12 @@ class Soils(NoDbBase):
             self._soils_is_vrt = False
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
 
+    @property
+    def soil_input_capacity(self) -> int:
+        """Current selected executable's validated input-horizon capacity."""
+        from wepp_runner.wepp_binary_capabilities import get_soil_input_capacity
+        return get_soil_input_capacity(self.wepp_instance.wepp_bin)
+
     def _build_undisturbed_multiple_ofe(self) -> None:
         from wepppy.wepp.soils.utils import SoilMultipleOfeSynth, WeppSoilUtil
         from wepppy.wepp.single_input import validate_soil_text
@@ -1513,21 +1519,21 @@ class Soils(NoDbBase):
                 raise ValueError("Single-input projects support 1–32 OFEs per hillslope.")
             key = self.domsoil_d[str(topaz_id)]
             source = os.path.join(self.soils_dir, self.soils[key].fname)
-            soil = WeppSoilUtil(source, compute_erodibilities=False, compute_conductivity=False)
+            soil = WeppSoilUtil(source, compute_erodibilities=False, compute_conductivity=False, max_horizons=self.soil_input_capacity)
             destination = os.path.join(self.soils_dir, f"hill_{topaz_id}.mofe.sol")
             if self.mode == SoilsMode.SingleUserDefined:
-                SoilMultipleOfeSynth([source] * count).write(
+                SoilMultipleOfeSynth([source] * count, max_horizons=self.soil_input_capacity).write(
                     destination, ksflag=int(soil.obj["ksflag"]), preserve_input_format=True
                 )
             else:
                 # Catalog templates can contain symbolic parameters and trailing
                 # display colors. Normalize through the existing soil consumer.
                 if _soil_has_symbolic_wepp_parameters(soil):
-                    soil = WeppSoilUtil(source, compute_erodibilities=True, compute_conductivity=True).to7778()
+                    soil = WeppSoilUtil(source, compute_erodibilities=True, compute_conductivity=True, max_horizons=self.soil_input_capacity).to7778()
                 with tempfile.TemporaryDirectory(dir=self.soils_dir, prefix=".mofe-source-") as directory:
                     normalized = os.path.join(directory, "source.sol")
                     soil.write(normalized)
-                    SoilMultipleOfeSynth([normalized] * count).write(destination, ksflag=int(soil.obj["ksflag"]))
+                    SoilMultipleOfeSynth([normalized] * count, max_horizons=self.soil_input_capacity).write(destination, ksflag=int(soil.obj["ksflag"]))
             if self.mode == SoilsMode.SingleUserDefined:
                 with open(destination) as stream:
                     validate_soil_text(stream.read(), max_ofes=32)
@@ -1559,7 +1565,7 @@ class Soils(NoDbBase):
             surgo_c.logInvalidSoils(wd=soils_dir)
 
             assert surgo_c.weppSoils[mukey].valid()
-            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True, max_horizons=self.soil_input_capacity)
             soils = {str(k): v for k, v in soils.items()}
 
             domsoil_d = {}
@@ -1725,7 +1731,7 @@ class Soils(NoDbBase):
         destination: Optional[Path] = None
         published = False
         try:
-            summary = wepp_soil.write(temporary_dir, overwrite=True)
+            summary = wepp_soil.write(temporary_dir, overwrite=True, max_horizons=self.soil_input_capacity)
             filename = str(summary.fname)
             if Path(filename).name != filename or not filename.endswith(".sol") or not filename[:-4].isdigit():
                 raise ValueError(f"candidate donor filename is invalid: {filename!r}")
@@ -2055,7 +2061,7 @@ class Soils(NoDbBase):
                 surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag, logger=self.logger,
                                       max_workers=max_workers)
 
-                soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+                soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True, max_horizons=self.soil_input_capacity)
                 soils = {str(k): v for k, v in soils.items()}
                 surgo_c.logInvalidSoils(wd=soils_dir)
 

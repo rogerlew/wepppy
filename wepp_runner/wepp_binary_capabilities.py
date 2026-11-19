@@ -12,14 +12,27 @@ from .wepp_runner import (
     get_linux_wepp_bin_role_paths,
 )
 
-__all__ = ['read_binary_capabilities', 'get_binary_capabilities', 'get_compatible_wepp_bin_opts', 'binary_selection_revision']
+__all__ = ['read_binary_capabilities', 'get_binary_capabilities', 'get_compatible_wepp_bin_opts', 'binary_selection_revision', 'get_soil_input_capacity', 'read_soil_input_capacity']
 FEATURES = ('mofe_supported', 'single_user_defined_inputs_supported')
 
 
 def read_binary_capabilities(watershed_path: str, hillslope_path: str) -> dict[str, bool]:
-    """Validate fresh role sidecars; absent optional declarations mean unknown."""
+    """Validate fresh role sidecars; preserve the boolean selection-feature API."""
+    features, _ = _read_release_capabilities(watershed_path, hillslope_path)
+    return features
+
+
+def read_soil_input_capacity(watershed_path: str, hillslope_path: str) -> int:
+    """Return the validated paired input capacity; legacy declarations mean ten."""
+    _, capacity = _read_release_capabilities(watershed_path, hillslope_path)
+    return capacity
+
+
+def _read_release_capabilities(watershed_path: str, hillslope_path: str):
+    """Validate boolean features and integer input capacity in one metadata read."""
     declarations = []
     releases = []
+    capacities = []
     for role, executable in (('watershed', watershed_path), ('hillslope', hillslope_path)):
         if not Path(executable).is_file() or not os.access(executable, os.X_OK):
             raise ValueError(f'WEPP {role} executable is unavailable: {executable}')
@@ -29,6 +42,7 @@ def read_binary_capabilities(watershed_path: str, hillslope_path: str) -> dict[s
         except FileNotFoundError:
             declarations.append(dict.fromkeys(FEATURES))
             releases.append(None)
+            capacities.append(None)
             continue
         except OSError as exc:
             raise ValueError(f'Cannot read WEPP {role} release capabilities: {sidecar}') from exc
@@ -50,17 +64,23 @@ def read_binary_capabilities(watershed_path: str, hillslope_path: str) -> dict[s
         identity = _collect_binary_identity(executable)
         if identity['binary_identity_status'] != 'ok' or payload.get('sha256') != identity['binary_sha256']:
             raise ValueError(f'WEPP release sidecar sha256 does not match executable: {sidecar}')
+        capacity = features.get('soil_input_capacity')
+        if 'soil_input_capacity' in features and (type(capacity) is not int or not 1 <= capacity <= 23):
+            raise ValueError(f'WEPP soil_input_capacity must be an integer from 1 through 23: {sidecar}')
+        capacities.append(capacity)
         selected = {key: features.get(key) for key in FEATURES}
         if any(key in features and type(features[key]) is not bool for key in FEATURES):
             raise ValueError(f'WEPP release capability declarations must be boolean: {sidecar}')
-        if any(value is True for value in selected.values()) and not all(isinstance(value, str) and value for value in release):
+        if (capacity is not None or any(value is True for value in selected.values())) and not all(isinstance(value, str) and value for value in release):
             raise ValueError(f'WEPP declared capabilities require release/source identity: {sidecar}')
         declarations.append(selected)
+    if capacities[0] != capacities[1]:
+        raise ValueError("WEPP watershed and hillslope soil input capacities disagree.")
     if declarations[0] != declarations[1]:
         raise ValueError('WEPP watershed and hillslope release capability declarations disagree.')
     if all(release is not None for release in releases) and releases[0] != releases[1]:
         raise ValueError('WEPP watershed and hillslope release/source identities disagree.')
-    return {key: value is True for key, value in declarations[0].items()}
+    return {key: value is True for key, value in declarations[0].items()}, capacities[0] or 10
 
 
 def get_binary_capabilities(binary_id: str) -> dict[str, bool]:
@@ -68,6 +88,13 @@ def get_binary_capabilities(binary_id: str) -> dict[str, bool]:
     if binary_id not in get_linux_wepp_bin_opts():
         raise ValueError(f'WEPP executable is not installed: {binary_id!r}')
     return read_binary_capabilities(*get_linux_wepp_bin_role_paths(binary_id))
+
+
+def get_soil_input_capacity(binary_id: str | None) -> int:
+    """Resolve capacity for the same matched role paths used by the runner."""
+    if binary_id is not None and binary_id not in get_linux_wepp_bin_opts():
+        raise ValueError(f'WEPP executable is not installed: {binary_id!r}')
+    return read_soil_input_capacity(*get_linux_wepp_bin_role_paths(binary_id))
 
 
 def get_compatible_wepp_bin_opts(*, multi_ofe: bool = False,
@@ -89,6 +116,7 @@ def binary_selection_revision(binary_ids: tuple[str, ...]) -> str:
     payload = {
         binary_id: {
             'features': get_binary_capabilities(binary_id),
+            'soil_input_capacity': get_soil_input_capacity(binary_id),
             'roles': [_collect_binary_identity(path)['binary_sha256']
                       for path in get_linux_wepp_bin_role_paths(binary_id)],
         }

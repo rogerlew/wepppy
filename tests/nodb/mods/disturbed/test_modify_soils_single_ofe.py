@@ -107,7 +107,8 @@ def test_modify_soil_uses_parent_soil_source_when_local_file_missing(
     writes: list[str] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             calls.append(source_path)
             self.clay = 30.0
             self.sand = 40.0
@@ -153,7 +154,8 @@ def test_modify_soil_strips_treatment_suffix_for_lookup(
     seen_replacements: list[dict[str, str]] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -197,7 +199,8 @@ def test_modify_soil_passes_copy_of_lookup_replacements(
     )
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -245,7 +248,8 @@ def test_modify_soil_forwards_rosetta_bd_toggle_to_converter(
     forwarded_flags: list[bool] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 
@@ -292,7 +296,8 @@ def test_modify_soil_forwards_rosetta_bd_toggle_to_7778_converter(
     forwarded_flags: list[bool] = []
 
     class _FakeWeppSoilUtil:
-        def __init__(self, source_path: str) -> None:
+        def __init__(self, source_path: str, *, max_horizons=10) -> None:
+            assert max_horizons == 10
             self.clay = 30.0
             self.sand = 40.0
 

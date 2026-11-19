@@ -110,3 +110,46 @@ def test_disturbed_insertion_cannot_bypass_native_capacity(tmp_path, conversion)
     with pytest.raises(ValueError, match='10-layer limit'):
         converted.write(str(destination))
     assert destination.read_text() == 'prior successful artifact'
+
+
+@pytest.mark.parametrize('count', [21, 22, 23])
+def test_expanded_capacity_preserves_all_ofes(count):
+    from wepppy.wepp.soils.horizon_boundary import validate_soil_horizon_capacity
+    text = soil_text(depths=[200+50*i for i in range(count)],count=2)
+    assert ensure_200mm_boundary(text,max_horizons=23)==text
+    validate_soil_horizon_capacity(text,max_horizons=23)
+    with pytest.raises(ValueError,match='10-layer limit'):
+        validate_soil_horizon_capacity(text)
+
+
+def test_capacity_boundary_insertion_and_no_overwrite(tmp_path):
+    from wepppy.wepp.soils.horizon_boundary import validate_soil_horizon_capacity
+    text=soil_text(depths=[150]+[250+50*i for i in range(21)])
+    result=ensure_200mm_boundary(text,max_horizons=23)
+    assert "'sand loam' 23 " in result
+    assert ensure_200mm_boundary(result,max_horizons=23)==result
+    source=tmp_path/'source.sol';source.write_text(text)
+    destination=tmp_path/'prepared.sol'
+    WeppSoilUtil(str(source),max_horizons=23).to9002({}).write(str(destination))
+    validate_soil_horizon_capacity(destination.read_text(),max_horizons=23)
+    SoilMultipleOfeSynth([str(destination)]*2,max_horizons=23).write(str(tmp_path/'multi.sol'))
+    assert all(o['nsl']==23 for o in WeppSoilUtil(str(tmp_path/'multi.sol')).obj['ofes'])
+    source.write_text(soil_text(depths=[150]+[250+50*i for i in range(22)]))
+    before=destination.read_bytes()
+    with pytest.raises(ValueError,match='23-layer limit'):
+        WeppSoilUtil(str(source),max_horizons=23).write(str(destination))
+    assert destination.read_bytes()==before
+
+
+@pytest.mark.parametrize('capacity',[True,False,0,24,23.0,'23',None])
+def test_invalid_capacity_is_explicit(capacity):
+    with pytest.raises(ValueError,match='capacity'):
+        ensure_200mm_boundary(soil_text(),max_horizons=capacity)
+
+
+def test_validation_does_not_normalize_uploaded_soil():
+    from wepppy.wepp.soils.horizon_boundary import validate_soil_horizon_capacity
+    text=soil_text(depths=[150,300]).replace('\n','\r\n')
+    before=text.encode()
+    validate_soil_horizon_capacity(text,max_horizons=23)
+    assert text.encode()==before

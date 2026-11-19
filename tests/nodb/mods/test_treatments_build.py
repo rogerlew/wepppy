@@ -470,6 +470,7 @@ def test_modify_soil_does_not_strip_isric_composite_mukey(tmp_path):
             self.sand = sand
 
     class DummySoils:
+        soil_input_capacity = 10
         def __init__(self):
             self._locked = False
             self.domsoil_d = {"101": "Cambisols-clay loam"}
@@ -511,6 +512,7 @@ def test_modify_soil_does_not_strip_isric_composite_mukey(tmp_path):
 @pytest.mark.unit
 def test_modify_soil_uses_parent_soil_file_when_clone_file_missing(monkeypatch, tmp_path):
     class DummySoils:
+        soil_input_capacity = 10
         def __init__(self, base_soil, parent_wd, soils_dir):
             self._locked = False
             self.parent_wd = parent_wd
@@ -571,7 +573,8 @@ def test_modify_soil_uses_parent_soil_file_when_clone_file_missing(monkeypatch, 
     to_over9000_kwargs = {}
 
     class FakeWeppSoilUtil:
-        def __init__(self, fn):
+        def __init__(self, fn, *, max_horizons):
+            assert max_horizons == 10
             call_paths.append(fn)
             self.clay = 30.0
             self.sand = 40.0

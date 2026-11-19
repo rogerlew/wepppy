@@ -20,6 +20,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from wepp_runner.wepp_runner import make_hillslope_run, run_hillslope
+from wepp_runner.wepp_binary_capabilities import get_soil_input_capacity
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.topo.peridot.peridot_runner import (
     get_subfield_channel_connectivity_bin,
@@ -362,6 +363,7 @@ class AgFieldsHybridIntegrator(AgFieldsConcept1Integrator):
                 subfield_runs_dir=self.subfield_runs_dir,
                 target_runs_dir=self.runs_dir,
                 target_width_m=float(summary["residual_width_m"]),
+                max_horizons=get_soil_input_capacity(self.controller.wepp_bin),
             )
 
         branches = {
