@@ -539,6 +539,10 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### Channel delineation map boundary
+
+[Work package](docs/work-packages/20261119_channel_delineation_map_boundary/package.md) scaffolded. Require intersection with the project config's optional map boundary before channel delineation. Canonical contract and implementation are pending.
+
 ### Features Export standalone GeoJSON compatibility
 
 **Status**: Backlog; existing format limitation observed during MOFE validation.
