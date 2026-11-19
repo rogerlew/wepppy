@@ -539,6 +539,10 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### I-CREWS interfaces in WEPPcloud
+
+[Work package](docs/work-packages/20261119_i_crews_interface/package.md) scaffolded for two Idaho presets on one Site Specific Resources card. The launch contract and implementation are pending.
+
 ### Features Export standalone GeoJSON compatibility
 
 **Status**: Backlog; existing format limitation observed during MOFE validation.
