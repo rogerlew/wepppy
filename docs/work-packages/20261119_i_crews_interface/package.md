@@ -41,7 +41,9 @@ checkpoint. [I-CREWS research](https://idahocrews.org/research/) ·
 ## Scope and complexity budget
 
 Reuse the existing card, creation forms, named preset snapshot, static
-boundary overlay and channel validator. Both presets share one static polygon.
+boundary asset delivery and channel validator. Wire the existing map layer
+registry for the Idaho outline. Apply the preset override policy in legacy
+creation as well as through the snapshot writer. Both presets share one static polygon.
 Add one card, two named presets, their registry and preset-policy entries, and
 shared attribution. The budget permits zero new endpoints, permissions,
 services, queues or geospatial dependencies. A partner-only launch or curated
@@ -69,10 +71,9 @@ results page would require a separate scope decision.
 ## Owners and review
 
 WEPPcloud maintainers own launch and runtime integration. The I-CREWS
-operator owns access and attribution decisions. Security impact is
-provisionally low under the existing public creation policy and application
-static asset tree. A dedicated security artifact is optional for this scope.
-Reassess if launch visibility or server-side authorization changes.
+operator owns access and attribution decisions. Security impact is high because the legacy creation handler applies the
+existing override allowlist for these new presets. A dedicated security
+review artifact is required.
 
 ## References
 

@@ -95,7 +95,7 @@ Emitted via `WCEvents.useEventMap`:
 | Outlet marker | CircleMarker | `/query/outlet/` | Outlet | Added to `markerCustomPane`. |
 | Burn Severity Map | ImageOverlay | `/query/baer_wgs_map/` | Baer | Renders legend under `#sbs_legend` (client-side). |
 | Selection overlays | GeoJSON + Rectangle | `/resources/subcatchments.json` | LanduseModify/RangelandCoverModify | For box and click selection. |
-| Boundary overlay | GeoJSON | `context.map.boundary.url` | MapController | Added during bootstrap. |
+| Boundary overlay | GeoJSON | `context.map.boundary.url` | MapController | Enabled on the run map for the [I-CREWS presets](contracts/i-crews-interface-contract.md). |
 ## Run-scoped endpoints used by the map panel
 - Elevation: `/runs/<runid>/<config>/elevationquery/` (POST `{ lat, lng }`).
 - Drilldown: `report/sub_summary/<TopazID>/`, `report/chn_summary/<TopazID>/`.

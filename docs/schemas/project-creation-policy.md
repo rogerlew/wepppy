@@ -28,6 +28,13 @@ Builder locale/capability ownership and creation-token rules remain unchanged.
 
 For anonymous visitors with false, server-rendered `/interfaces/` omits creation forms/buttons, creation context-menu actions, CAPTCHA prompts, and creation-only CAPTCHA scripts. It remains readable and includes a sign-in link. Logged-in visitors retain role-authorized launch actions without CAPTCHA. True retains current UI behavior. Information and feature maturity visibility remain governed by the feature registry; this access policy is an additional launch gate, never a grant of role permission. Stale pages cannot bypass API enforcement.
 
+The two I-CREWS presets validate their inherited named-preset override
+allowlists before allocation through both the flattened writer and legacy
+creation paths. Use the canonical IDs for I-CREWS creation. Unsupported
+overrides and alternate selectors for these presets return HTTP 400 with
+`project_config_validation_failed`. See the
+[I-CREWS interface contract](../ui-docs/contracts/i-crews-interface-contract.md).
+
 ## Compatibility and Rationale
 
 Default true preserves existing deployments. False changes only the named creation surface; CAPTCHA for login, registration, fork, and run/report viewing is independent. Both UI and API gates are required because hiding controls alone cannot prevent direct HTTP creation. Preserving service/mcp access supports existing non-browser operators; rejecting run-scoped session tokens prevents a scope-bearing token from bypassing the human-account policy. No run schemas, model parameters, or queue dependencies change.

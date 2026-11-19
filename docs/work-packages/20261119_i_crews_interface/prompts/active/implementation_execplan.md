@@ -25,6 +25,11 @@ line and is accepted in full when it touches or overlaps Idaho.
 set. A new config without a matching entry in
 `wepppy/nodb/config_builder/preset_policies.toml` causes the shared
 snapshot loader to reject the preset corpus, which can affect other presets.
+The production-compatible legacy create mode accepts inline overrides. Use
+the named-preset resolver for these two IDs in both modes and preserve allowed
+unit and model overrides. The authenticated run map already passes a boundary
+URL to the controller, but the deferred overlay hook has no implementation.
+Use the existing deck.gl layer registry for the Idaho outline on these runs.
 
 ## Decision Log
 
@@ -59,7 +64,10 @@ existing anonymous CAPTCHA flow. Give both visible launch choices their own
 form and preset value. Use the supplied river-and-dam illustration. Preserve
 the card's responsive behavior and keep button labels and funding credit in
 page text. Use the established run title/interface metadata and place the
-credit where either preset's direct run URL can expose it.
+credit where either preset's direct run URL can expose it. Enable Idaho's
+outline on both run pages in the map bootstrap and wire the existing map
+controller layer helper to render it. Test layer visibility and repeated
+bootstrap without duplicate layers.
 
 Copy `disturbed9002_wbt.cfg` to `i-crews.cfg` and `disturbed9002-mofe.cfg`
 to `i-crews-mofe.cfg` under `wepppy/nodb/configs/`. Preserve each source's
@@ -76,7 +84,9 @@ configured site prefix. Register both IDs in
 `wepppy/weppcloud/feature_registry/config_registry.yaml` and in
 `wepppy/nodb/config_builder/preset_policies.toml` together. Mirror each
 source's permitted launch overrides. Keep the boundary and its check mode
-preset-owned. Choose backend metadata matching WBT and TOPAZ respectively.
+preset-owned. Choose backend metadata matching WBT and TOPAZ respectively. Enforce the two
+new presets' allowlists in legacy creation as well as snapshots before run
+allocation. Keep other presets on their current creation path.
 
 Install the verified GeoJSON under `wepppy/weppcloud/static/mods/i-crews/`.
 If the candidate is missing, download the Census 2025 national 1:500,000
@@ -108,7 +118,7 @@ and preserve existing TOPAZ DEM input validation.
 Read the channel artifacts consumed by the map and the exact prepared
 multiple-segment input produced by the MOFE run. Use the WBT and TOPAZ
 executables the two runs actually select. Capture semantic output and
-rejection noninterference evidence. Complete independent correctness review
+rejection noninterference evidence. Complete independent correctness and security reviews
 and document any baseline regression blocker without claiming a green suite.
 
 ## Idempotence and recovery
