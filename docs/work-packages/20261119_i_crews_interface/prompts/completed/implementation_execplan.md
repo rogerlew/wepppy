@@ -1,7 +1,8 @@
 # Launch both I-CREWS presets from Site Specific Resources
 
-Maintain Progress, Surprises & Discoveries, Decision Log, and Outcomes &
-Retrospective under `docs/prompt_templates/codex_exec_plans.md`.
+Local implementation completed on 2026-11-19. The repository gate is
+blocked by the existing SSURGO fixture, documented in the
+[validation record](../../artifacts/20261119_validation.md).
 
 ## Purpose
 
@@ -13,9 +14,10 @@ line and is accepted in full when it touches or overlaps Idaho.
 ## Progress
 
 - [x] 2026-11-19 20:15 UTC. Scaffold the package and trace the assets, launch path and preset lineage.
-- [ ] Ratify the contract and commit its standalone checkpoint.
-- [ ] Implement the card, assets, presets and attribution.
-- [ ] Validate both launches through artifact readback and complete independent review.
+- [x] Ratify the launch contract in `9867163fb` and the corrected WBT-MOFE lineage in `ac1e41236`.
+- [x] Implement the card, assets, presets and attribution.
+- [x] Validate both presets through artifact readback and complete independent review.
+- [x] Record the unchanged SSURGO failure that blocks broad repository acceptance.
 
 ## Surprises & Discoveries
 
@@ -34,14 +36,19 @@ Use the existing deck.gl layer registry for the Idaho outline on these runs.
 
 Use the two requested source presets as written and change their map sections
 to the shared Idaho settings. The card discloses that both choices use WBT and that the second models
-hillslopes with multiple overland flow elements. The proposed default is a public
-Preview card using the existing creation and CAPTCHA behavior. Confirm
-funding disclaimer wording and access at the checkpoint.
+hillslopes with multiple overland flow elements. The two presets use public
+Preview access and the established creation and CAPTCHA behavior. The card
+and run footer use the I-CREWS product acknowledgment and Idaho EPSCoR
+disclaimer. See the [contract decision](../../artifacts/20261119_contract_decision.md).
 
 ## Outcomes & Retrospective
 
-Scaffold complete. The candidate boundary and the WBT snapshot were probed
-locally. Browser launches, backend artifacts and MOFE inputs are pending.
+The interface is implemented and locally validated. Both WBT variants
+produced channel artifacts on each side of the Idaho border. A disjoint
+request preserved the previous artifacts and a retry succeeded. Real WEPP
+preparation retained two overland flow elements from a seeded hillslope.
+See [validation](../../artifacts/20261119_validation.md) for browser,
+creation, artifact evidence and the broad gate.
 
 ## Milestone 1. Ratify the launch and attribution contract
 

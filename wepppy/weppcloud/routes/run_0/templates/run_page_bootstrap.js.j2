@@ -9,7 +9,8 @@
     {% if ron.boundary %}
     {% set boundary = {
         "url": site_prefix ~ "/" ~ ron.boundary,
-        "layerName": ron.boundary_name,
+        "layerName": "Idaho boundary" if is_icrews_run else ron.boundary_name,
+        "showOnLoad": is_icrews_run | default(false),
         "style": {
             "color": ron.boundary_color,
             "opacity": 1,

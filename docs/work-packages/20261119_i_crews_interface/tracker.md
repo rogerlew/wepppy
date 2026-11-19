@@ -2,50 +2,35 @@
 
 ## Status
 
-Scaffolded on 2026-11-19 at 20:15 UTC from `79ab5239d`. The
-[ExecPlan](prompts/active/implementation_execplan.md) records the implementation
-and validation milestones.
+Implemented and locally validated on 2026-11-19. The
+[ExecPlan](prompts/completed/implementation_execplan.md) records the scope and
+[validation](artifacts/20261119_validation.md) records the gate results and
+limits of local verification.
 
 ## Tasks
 
-- [x] Confirm the two source presets, shared boundary design, and proposed card
-  copy and credit.
-- [x] Validate the candidate Idaho GeoJSON and record its provenance.
-- [ ] Ratify the canonical launch and attribution contract.
-- [ ] Wire the card, two presets, application assets and run credit.
-- [ ] Verify project creation, both WBT run variants, and prepared MOFE output.
-- [ ] Complete independent correctness review and run the repository gates.
+- [x] Review the source presets, Idaho asset, card copy and attribution.
+- [x] Ratify the launch contract in `9867163fb` and corrected WBT-MOFE
+  lineage in `ac1e41236`.
+- [x] Install the two presets, add the card and enable the Idaho outline
+  and funding credit on both direct run pages.
+- [x] Verify both creation modes, WBT variants and prepared MOFE inputs.
+- [x] Complete independent correctness and security review.
+- [ ] Rerun the repository suite after the baseline SSURGO fixture is fixed.
 
 ## Decisions
 
-- The operator specified one Site Specific Resources card with two launch
-  choices. The MOFE choice uses `disturbed9002-wbt-mofe.cfg` as its source and is
-  named `i-crews-mofe.cfg`.
-- The operator corrected the MOFE source after the first checkpoint. Both
-  sources explicitly select WBT and use `wepp_261118`. The MOFE source sets
-  a five-element maximum and enables RAP time series. Carry those settings through.
-- Both presets explicitly use `intersects` and share the Idaho polygon.
-  Propose center `[45.6, -114.15]` in latitude/longitude order and zoom 5
-  for orientation. Users zoom in before choosing a delineation extent.
-- Proposed defaults are a public Preview card under the normal creation
-  policy, direct run launches, and an I-CREWS project link. Confirm any
-  partner-only access requirement and final NSF disclaimer wording at the
-  contract checkpoint.
+Both configs default to WBT. The MOFE source is
+`disturbed9002-wbt-mofe.cfg` and retains its five-element maximum,
+`wepp_261118` and RAP time series. Both configs use `intersects`, the same
+Census polygon, center `[45.6, -114.15]` and zoom `5`. The card and two runs
+use public Preview access, normal creation controls and the Idaho EPSCoR
+acknowledgment and disclaimer. See the
+[canonical contract](../../ui-docs/contracts/i-crews-interface-contract.md).
 
-## Evidence and handoff
+## Evidence
 
-The Census 2025 candidate contains one valid WGS 84 polygon with 3,254
-exterior coordinates. It is 90,579 bytes raw and 26,090 bytes gzipped.
-The existing validator admitted an inside extent and a cross-border extent
-and rejected a disjoint extent and an extent outside the polygon but inside
-its bounding box. The WBT preset snapshot probe preserved the map values.
-Both native workflows remain implementation acceptance tests.
-
-The provided 960 by 960 illustration is `/tmp/i-crews-interface.png`
-with SHA-256
-`f8a86060e3df8f542de6ceeca9daae49c305c5dd2c3a6a551a66fa144b9b3569`.
-The candidate is `/tmp/icrews-boundary.pllq3m/idaho-boundary.geojson`
-with SHA-256
-`3561a63bf7e46cb84ead392d2ddfeccf8f2ae7a900bc360f2e0cab7be0dab336`.
-The ExecPlan includes the source and regeneration instructions for the
-boundary. Promote the artwork to a tracked static asset at implementation.
+- [Contract and correction](artifacts/20261119_contract_decision.md).
+- [Validation](artifacts/20261119_validation.md).
+- [Correctness review](artifacts/20261119_correctness_review.md).
+- [Security review](artifacts/20261119_security_review.md).

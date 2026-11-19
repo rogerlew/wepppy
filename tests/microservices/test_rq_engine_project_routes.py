@@ -1270,3 +1270,58 @@ def test_create_preset_policy_failure_hides_private_policy_path(create_client, m
     assert payload["error_id"] in caplog.text
     assert "Traceback" in caplog.text
     assert "/private/policy.toml" in caplog.text
+
+
+@pytest.mark.parametrize("writer_enabled", ["0", "1"])
+@pytest.mark.parametrize("preset", ["i-crews", "i-crews-mofe"])
+def test_i_crews_create_preserves_boundary_and_allowed_units(
+    create_client, monkeypatch, writer_enabled, preset,
+):
+    from wepppy.project_config_serialization import parse_config_text
+
+    client, captured = create_client
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", writer_enabled)
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    monkeypatch.setattr(project_routes, "_creation_idempotency_client", _FakeIdempotencyRedis)
+    response = client.post("/create/", data={
+        "config": preset,
+        "cap_token": "good-token",
+        "creation_idempotency_key": "12345678-1234-4234-9234-123456789abc",
+        "unitizer:is_english": "false",
+    }, follow_redirects=False)
+    assert response.status_code == 303, response.text
+    assert response.headers["Location"].endswith(f"/runs/{RUN_ID}/{preset}")
+    if writer_enabled == "1":
+        assert captured["cfg"] == f"{preset}.cfg"
+        snapshot = parse_config_text((Path(captured["wd"]) / f"{preset}.cfg").read_text())
+        assert snapshot["map"]["boundary_check"] == "intersects"
+        assert snapshot["unitizer"]["is_english"] is False
+    else:
+        assert captured["cfg"] == f"{preset}.cfg?unitizer:is_english=false"
+        assert not (Path(captured["wd"]) / f"{preset}.cfg").exists()
+
+
+@pytest.mark.parametrize("writer_enabled", ["0", "1"])
+@pytest.mark.parametrize("config,overrides", [
+    ("i-crews", {"map:boundary_check": "none"}),
+    ("i-crews-mofe", {"map.boundary": "static/other.geojson"}),
+    ("i-crews", {"general:dem_db": "invalid"}),
+    ("configs/i-crews-mofe", {}),
+    ("i-crews.cfg?invalid", {}),
+    ("i-crews.cfg/?invalid", {}),
+    ("i-crews-mofe.cfg/.?invalid", {}),
+])
+def test_i_crews_create_rejects_unowned_inputs_before_allocation(
+    create_client, monkeypatch, writer_enabled, config, overrides,
+):
+    client, captured = create_client
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", writer_enabled)
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    response = client.post("/create/", data={
+        "config": config,
+        "cap_token": "good-token",
+        **overrides,
+    }, follow_redirects=False)
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "project_config_validation_failed"
+    assert captured == {}

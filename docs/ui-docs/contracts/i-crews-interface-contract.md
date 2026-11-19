@@ -1,7 +1,5 @@
 # I-CREWS WEPPcloud interface
 
-Implementation conformance is pending.
-
 The Interfaces page offers one public **I-CREWS** card in **Site Specific
 Resources**. Its launch actions use the existing project creation endpoint,
 visibility rules, account preferences and anonymous CAPTCHA policy.

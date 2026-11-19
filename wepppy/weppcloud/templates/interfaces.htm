@@ -683,6 +683,54 @@
 
   <section class="wc-panel wc-stack" aria-labelledby="section-site-resources">
     <h2 id="section-site-resources">Site Specific Resources</h2>
+    {% set icrews_launches = [
+      ('i-crews', 'Start I-CREWS WBT Run'),
+      ('i-crews-mofe', 'Start I-CREWS Multiple OFE Run')
+    ] %}
+    {% if visible_config_ids is none or 'i-crews' in visible_config_ids or 'i-crews-mofe' in visible_config_ids %}
+    <article class="wc-feature" aria-labelledby="section-i-crews">
+      <div class="wc-feature__media">
+        <img src="{{ url_for('static', filename='images/interfaces/i-crews-interface.png') }}"
+             alt="" width="960" height="960" loading="lazy">
+      </div>
+      <div class="wc-feature__body">
+        <div class="wc-feature__heading-row">
+          <h3 id="section-i-crews">I-CREWS</h3>
+          {{ maturity_badge('i-crews') }}
+        </div>
+        <p>
+          Use WEPPcloud to explore how wildfire and land management affect runoff, erosion, and sediment delivery in watersheds that overlap Idaho.
+          This interface supports <a href="https://idahocrews.org/">Idaho Community-engaged Resilience for Energy-Water Systems (I-CREWS)</a>,
+          an Idaho NSF EPSCoR project studying how communities can adapt their energy and water systems to changes in climate, population, and technology.
+        </p>
+        <p>Both options use WBT for delineation. The Multiple OFE option can represent each hillslope as multiple overland flow elements.</p>
+        {% include 'shared/i_crews_funding.htm' %}
+        {% if can_create_project and not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("i-crews", "cap-i-crews", cap_base_url, cap_site_key) }}
+        {% endif %}
+        {% if can_create_project %}
+        <div class="wc-feature__actions">
+          {% for config_id, label in icrews_launches if visible_config_ids is none or config_id in visible_config_ids %}
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="i-crews" data-cap-required="true"{% endif %}>
+            <input type="hidden" name="config" value="{{ config_value(config_id) }}">
+            {% if not current_user.is_authenticated %}
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
+                    data-run-menu
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
+              {{ label }}
+            </button>
+          </form>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </article>
+    {% endif %}
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/lake-tahoe.png') }}?v=20251212" alt="Lake Tahoe project" />

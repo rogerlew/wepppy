@@ -1,6 +1,7 @@
 # I-CREWS interfaces in WEPPcloud
 
-**Status** Open, scaffolded on 2026-11-19 at 20:15 UTC.
+**Status** Local implementation closed 2026-11-19. Repository-wide
+acceptance is blocked by the existing SSURGO fixture.
 
 ## Outcome
 
@@ -8,7 +9,7 @@ Add one **I-CREWS** card to **Site Specific Resources** on the WEPPcloud
 Interfaces page. Offer two run launches from that card. Both open on Idaho
 and require the channel delineation extent to intersect the Idaho boundary.
 
-| Preset | Source | Proposed button |
+| Preset | Source | Launch button |
 | --- | --- | --- |
 | `i-crews.cfg` | `disturbed9002_wbt.cfg` | Start I-CREWS WBT Run |
 | `i-crews-mofe.cfg` | `disturbed9002-wbt-mofe.cfg` | Start I-CREWS Multiple OFE Run |
@@ -16,10 +17,9 @@ and require the channel delineation extent to intersect the Idaho boundary.
 The Multiple OFE preset retains the source's WBT delineation and multiple
 overland flow elements, which allow a hillslope to be represented by multiple
 segments. Keep the model executable, scientific parameters and modules from
-each respective source preset. Public Preview under the existing project
-creation policy is the proposed launch posture.
+each respective source preset. Both are public Preview interfaces under the existing project creation policy.
 
-## Proposed card copy and credit
+## Card copy and credit
 
 > Use WEPPcloud to explore how wildfire and land management affect runoff,
 > erosion, and sediment delivery in watersheds that overlap Idaho. This
@@ -32,8 +32,7 @@ creation policy is the proposed launch posture.
 > National Science Foundation under award number OIA-2242769.
 
 Include visible credit on the card and on direct visits to either run
-interface. Confirm the final disclaimer and placement during the contract
-checkpoint. [I-CREWS research](https://idahocrews.org/research/) ·
+interface. The credit includes the Idaho EPSCoR disclaimer on each surface. [I-CREWS research](https://idahocrews.org/research/) ·
 [I-CREWS product acknowledgment](https://idahocrews.org/wp-content/uploads/2024/10/VIP_RFA_Y2_2024.pdf) ·
 [Idaho EPSCoR citation guidance](https://www.idahoepscor.org/cite-epscor) ·
 [NSF publication guidance](https://www.nsf.gov/policies/pappg/24-1/ch-11-other-post-award-requirements)
@@ -51,21 +50,21 @@ results page would require a separate scope decision.
 
 ## Acceptance
 
-- [ ] Each card button creates the intended run through the existing form and
-  lands on the matching run URL. The image and both labels work in the
-  existing card layout. The funding text appears on the card and both run
-  surfaces.
-- [ ] Read back both generated run configs, including the Idaho map settings,
-  WBT on both and the MOFE flag on the second preset. Prove the
-  preset-policy corpus still loads and existing project creation still works.
-- [ ] Both interfaces show the same Idaho polygon. Exercise an inside extent,
-  a cross-border extent, and a disjoint extent on both launch paths. Confirm
-  that accepted jobs keep the full extent and rejected requests preserve
-  existing channel artifacts and readiness.
-- [ ] Read back fresh channel outputs and map layers from both disposable WBT runs. Verify a prepared multi-OFE hillslope input from the second preset
-  retains multiple segments. Record exact candidate and runtime identity.
-- [ ] Complete contract-first, correctness review and regression gates. The
-  highest current claim is scaffolded, with a validated candidate polygon.
+- [x] Verify that each card button submits the intended preset ID and that
+  the creation endpoint redirects to its matching run URL. Verify the
+  image, responsive card and credit on the card and direct run templates.
+- [x] Read the generated snapshots and preserve the full settings of each
+  source outside the Idaho map stanza. Verify WBT on both, the second
+  preset's MOFE flag, and the existing preset and project creation checks.
+- [x] Verify the same Idaho outline in both run-page bootstraps. Check inside,
+  border-crossing and disjoint selections for both configs. Read back both
+  sides of the border in channel output, compare retained bytes after
+  rejection and retry on the same run.
+- [x] Read fresh channel rasters and map GeoJSON for both disposable WBT runs
+  and the two prepared WEPP input files for a seeded MOFE hillslope.
+- [x] Complete the contract checkpoints, independent review and focused
+  regression gates. See [validation](artifacts/20261119_validation.md) for
+  the broad gate and limits of the local evidence.
 
 ## Owners and review
 
@@ -76,7 +75,8 @@ review artifact is required.
 
 ## References
 
-- [Implementation ExecPlan](prompts/active/implementation_execplan.md)
+- [Implementation ExecPlan](prompts/completed/implementation_execplan.md)
 - [Package tracker](tracker.md)
+- [Canonical interface contract](../../ui-docs/contracts/i-crews-interface-contract.md)
 - [Channel boundary contract](../../schemas/channel-delineation-map-boundary-contract.md)
 - [Existing channel boundary work package](../20261119_channel_delineation_map_boundary/package.md)

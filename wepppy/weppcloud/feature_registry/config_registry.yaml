@@ -96,6 +96,22 @@ configs:
     min_role: user
     requires_backend: wbt
 
+  - id: i-crews
+    label: I-CREWS WBT
+    cfg_path: wepppy/nodb/configs/i-crews.cfg
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+
+  - id: i-crews-mofe
+    label: I-CREWS Multiple OFE
+    cfg_path: wepppy/nodb/configs/i-crews-mofe.cfg
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+
   - id: rhem
     label: RHEM
     cfg_path: wepppy/nodb/configs/rhem.cfg

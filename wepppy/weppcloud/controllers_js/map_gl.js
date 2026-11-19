@@ -1662,8 +1662,20 @@ var MapController = (function () {
                     map.setView([DEFAULT_VIEW.lat, DEFAULT_VIEW.lng], zoom !== null ? zoom : state.zoom);
                 }
 
-                if (mapContext && mapContext.boundary) {
-                    warnNotImplemented("boundary overlay");
+                var boundary = mapContext.boundary;
+                if (boundary && boundary.showOnLoad && !overlayNameRegistry.has(boundary.layerName)) {
+                    map.addGeoJsonOverlay({
+                        url: boundary.url,
+                        layerName: boundary.layerName,
+                        layerProps: {
+                            pickable: false,
+                            stroked: true,
+                            filled: false,
+                            lineWidthUnits: "pixels",
+                            lineWidthMinPixels: 2,
+                            getLineColor: hexToRgba(boundary.style.color, boundary.style.opacity)
+                        }
+                    });
                 }
 
                 if (!state.readyEmitted) {
