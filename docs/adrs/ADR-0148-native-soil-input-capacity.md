@@ -1,7 +1,7 @@
 # ADR-0148: Separate native soil input capacity from calculation layers
 
 Date: 2026-11-18
-Status: Accepted and implemented in the opt-in Linux release `wepp_261118`.
+Status: Accepted and implemented in Linux release `wepp_261118`.
 
 ## Context
 
@@ -59,6 +59,21 @@ agreed plan and its work-package execution. Implementer: Codex. Change summary:
 new selected native release supports 23 input records; historical capacity ten
 and calculation capacity ten remain unchanged. No deployment/default migration
 is inferred from accepting this implementation decision.
+
+## Default selection amendment
+
+On 2026-11-18 America/Los_Angeles, the operator directed Codex in this
+conversation to change `[wepp] bin` from `wepp_261029` to `wepp_261118` wherever
+that value was already the checked-in WEPPpy config default. The operator owns
+the decision and Codex implemented it. The five configs are
+`disturbed-mofe.cfg`, `disturbed9002-10-mofe.cfg`, `disturbed9002-10m-wbt.cfg`,
+`disturbed9002-wbt-mofe.cfg`, and `disturbed9002_wbt.cfg`.
+
+This makes the validated 23-horizon reader available by default to users of
+these presets. Scope the change to the five presets because they already
+selected the prior release. Saved project selections remain authoritative.
+Reverting the preset values restores their earlier defaults. The rollback
+constraints above still apply to projects with more than ten input horizons.
 
 ## Evidence
 
