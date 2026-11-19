@@ -14,13 +14,22 @@ from wepppy.soils.ssurgo import (
     STATSGO_PROJECT_CACHE_FILENAME,
     surgo_cache_metadata_path,
 )
+from wepppy.soils.ssurgo.source import JSON_PROFILE, SoilDataSource
 
 pytestmark = pytest.mark.unit
 
+_LEGACY_SOURCE = SoilDataSource()
+_JSON_SOURCE = SoilDataSource(
+    endpoint="http://localhost:18080/Tabular/post.rest",
+    profile=JSON_PROFILE,
+    release="test-release",
+)
 
-def _soils_stub(wd: Path) -> Soils:
+
+def _soils_stub(wd: Path, source: SoilDataSource = _LEGACY_SOURCE) -> Soils:
     soils = Soils.__new__(Soils)
     soils.wd = str(wd)
+    soils._soil_data_source = source.identity()
     return soils
 
 
@@ -35,27 +44,41 @@ def test_project_ssurgo_cache_paths_are_derived_from_soils_dir(tmp_path: Path) -
     )
 
 
-def test_clear_project_surgo_cache_removes_only_sqlite_sidecars(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    ("source", "other_source"),
+    [
+        pytest.param(_LEGACY_SOURCE, _JSON_SOURCE, id="legacy"),
+        pytest.param(_JSON_SOURCE, _LEGACY_SOURCE, id="json"),
+    ],
+)
+def test_clear_project_surgo_cache_removes_only_selected_cache(
+    tmp_path: Path, source: SoilDataSource, other_source: SoilDataSource,
+) -> None:
     wd = tmp_path / "run"
-    soils = _soils_stub(wd)
+    soils = _soils_stub(wd, source)
     soils_dir = wd / "soils"
     soils_dir.mkdir(parents=True)
 
     cache_path = Path(soils.ssurgo_cache_db_path)
-    sidecars = [
+    cache_files = [
         cache_path,
         Path(f"{cache_path}-wal"),
         Path(f"{cache_path}-shm"),
         Path(surgo_cache_metadata_path(str(cache_path))),
+        Path(f"{cache_path}.selection.json"),
     ]
-    for path in sidecars:
+    for path in cache_files:
         path.write_text("stale", encoding="utf-8")
+    other_cache = Path(other_source.cache_path(str(soils_dir / SSURGO_PROJECT_CACHE_FILENAME)))
+    assert other_cache != cache_path
+    other_cache.write_text("other source", encoding="utf-8")
     unrelated = soils_dir / "p1.sol"
     unrelated.write_text("keep", encoding="utf-8")
 
     soils._clear_project_surgo_cache(use_statsgo=False)
 
-    assert all(not path.exists() for path in sidecars)
+    assert all(not path.exists() for path in cache_files)
+    assert other_cache.read_text(encoding="utf-8") == "other source"
     assert unrelated.read_text(encoding="utf-8") == "keep"
 
 
