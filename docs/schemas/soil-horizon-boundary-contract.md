@@ -13,8 +13,10 @@ total depth and restrictive-layer values. Do not replace or average properties.
 Existing 200 mm boundaries and profiles ending at or above that depth are no-ops.
 Boundary normalization is idempotent and does not mutate the source object.
 
-If insertion would exceed the native ten-layer capacity, or an earlier converter
-already produced more than ten layers, fail explicitly before
+Capacity is selected-executable dependent: historical/undeclared binaries permit
+ten input horizons; the new paired release declares 23. Standalone writers
+default to ten unless explicitly given a supported capacity. If insertion would
+exceed that capacity, or an earlier converter already produced more, fail explicitly before
 writing the output. Do not merge layers, discard deeper material or silently
 omit the required boundary. The generated-artifact owner must preserve existing
 files on normalization failure.
@@ -51,3 +53,29 @@ See [ADR-0110](../adrs/ADR-0110-generated-soil-200mm-boundary.md) and the
 [work package](../work-packages/20261029_soil_200mm_boundary_consistency/package.md).
 
 User-facing explanation: [Soil Input File — WEPPcloud normalization at 200 mm](../../wepppy/weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md#weppcloud-normalization-at-200-mm).
+
+## Input capacity and consumption (2026-11-18)
+
+The accepted implementation separates native input capacity `mxhzin=23` from
+calculation capacity `mxnsl=10`. The current national SSURGO writer requires 21;
+23 covers 22 raw horizons plus one boundary without relying on exclusions.
+Calculation depth, aggregation formulas and material values remain unchanged.
+
+Resolve `features.soil_input_capacity` from the selected matched binary pair.
+Missing declarations mean ten. Declarations must be matching integers from 1
+through 23 (booleans are invalid), bound to the existing source/digest identity.
+Malformed or mismatched metadata fails explicitly. No date/name inference or
+automatic executable substitution. No saved project selection/default changes.
+
+Raw SSURGO serialization, prepared/Disturbed writers, multi-OFE assembly and
+channel writers receive this capacity explicitly, including across worker
+processes. A final execution check enforces capacity on the soil actually
+consumed so switching back to a historical executable cannot silently truncate.
+Uploaded soils remain under their existing admission contract and are never
+normalized just to validate capacity. Input validation must not rewrite them.
+Other standalone dataset/converter paths retain ten unless explicitly opted in.
+
+Compatibility plan: keep old keyword defaults and historical binaries; add only
+an optional integer sidecar field and keyword capacity arguments. No NoDb data
+migration. Verify raw/prepared/consumed counts and depth/property tokens with
+Puaulu and Zepol, matching role binaries and fresh output. See ADR-0148.

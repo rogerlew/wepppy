@@ -1,5 +1,7 @@
 Complete locally: [Default isolated tests](docs/work-packages/20261118_default_worktree_tests/package.md) - Promote run-pytest to isolated execution; native Disturbed matrix explicitly opt-in.
 
+Active: [Soil input capacity 23](docs/work-packages/20261118_soil_input_capacity_23/package.md) — native/Python integration and isolated workflow validation.
+
 Completed evaluation: [Native soil input capacity](docs/work-packages/20261118_native_soil_input_capacity/package.md) — separate input horizons from calculation capacity; no production promotion.
 
 Complete locally: [Durable isolated-worktree validation](docs/work-packages/20261118_isolated_worktree_validation/package.md) - Canonical disposable test runner, runtime preflight and source/runtime integrity receipts. Real browser/native/fixture/tooling tests pass; broad execution stops on the preexisting database-schema prerequisite.
