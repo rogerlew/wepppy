@@ -704,8 +704,7 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
     summary="Fetch DEM and build channels",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates the configured map boundary before enqueueing DEM/channel processing. "
-        "Batch settings submissions save shared delineation inputs."
+        "Checks the map boundary before enqueue. Batch saves settings."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("fetch_dem_and_build_channels"),
@@ -713,7 +712,7 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
         success_code=200,
         success_description="Watershed inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
-            400: "Watershed map input or channel extent policy failed. Returns the canonical error payload.",
+            400: "Invalid map input or extent outside the boundary.",
             409: "Run config mismatch. Returns canonical `run_config_mismatch` without mutation.",
         },
     ),
