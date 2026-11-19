@@ -1,6 +1,6 @@
 # I-CREWS interface contract decision
 
-## Authority and delta
+## Original checkpoint authority and delta
 
 The starting revision is `79ab5239d2391eca7a3028e1fe99c5acd691f6da`.
 The operator requested an I-CREWS launch under Site Specific Resources,
@@ -39,7 +39,7 @@ The existing map bootstrap supplies a boundary URL but its deck.gl controller
 does not draw an outline. Enable a line overlay for the two I-CREWS presets
 using the existing static boundary URL and map layer registry.
 
-## Evidence
+## Original evidence plan
 
 Exercise both buttons, existing creation controls, preset snapshots and legacy allowed and denied overrides before allocation, asset
 load and channel acceptance for inside, crossing and disjoint extents.
@@ -60,3 +60,17 @@ Two read-only reviewers reviewed the checkpoint on 2026-11-19 UTC.
   both new presets in both modes, enables the shared outline on the same
   two run surfaces, and requires a dedicated security review. The reviewer
   approved the revision.
+
+## Operator correction
+
+After the first checkpoint `9867163fb`, the operator specified
+`disturbed9002-wbt-mofe.cfg` as the source for `i-crews-mofe.cfg`. Both launch
+buttons now create WBT projects by default. The corrected source uses
+`wepp_261118`, the five-element MOFE limit and its existing modules, including
+RAP time series. The rest of the I-CREWS launch, attribution, Idaho extent
+and override contract continues to apply. Verify both native WBT variants
+and the actual MOFE preparation output against the corrected preset.
+
+Both independent reviewers approved the correction. The corrected source
+preserves the same override allowlist. Their recheck found no changes needed
+to access, static asset ownership, attribution, or extent semantics.

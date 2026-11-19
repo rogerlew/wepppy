@@ -9,7 +9,7 @@ visibility rules, account preferences and anonymous CAPTCHA policy.
 | Launch label | Named preset | Source preset | Default delineation |
 | --- | --- | --- | --- |
 | Start I-CREWS WBT Run | `i-crews` | `disturbed9002_wbt` | WBT |
-| Start I-CREWS Multiple OFE Run | `i-crews-mofe` | `disturbed9002-mofe` | TOPAZ with multiple overland flow elements enabled |
+| Start I-CREWS Multiple OFE Run | `i-crews-mofe` | `disturbed9002-wbt-mofe` | WBT with multiple overland flow elements enabled |
 
 Both presets are Preview interfaces with standard user visibility. Preserve
 the source preset's scientific settings and allowed creation-time overrides.

@@ -11,9 +11,9 @@ and require the channel delineation extent to intersect the Idaho boundary.
 | Preset | Source | Proposed button |
 | --- | --- | --- |
 | `i-crews.cfg` | `disturbed9002_wbt.cfg` | Start I-CREWS WBT Run |
-| `i-crews-mofe.cfg` | `disturbed9002-mofe.cfg` | Start I-CREWS Multiple OFE Run |
+| `i-crews-mofe.cfg` | `disturbed9002-wbt-mofe.cfg` | Start I-CREWS Multiple OFE Run |
 
-The Multiple OFE preset retains the source's TOPAZ delineation and multiple
+The Multiple OFE preset retains the source's WBT delineation and multiple
 overland flow elements, which allow a hillslope to be represented by multiple
 segments. Keep the model executable, scientific parameters and modules from
 each respective source preset. Public Preview under the existing project
@@ -56,14 +56,13 @@ results page would require a separate scope decision.
   existing card layout. The funding text appears on the card and both run
   surfaces.
 - [ ] Read back both generated run configs, including the Idaho map settings,
-  WBT versus TOPAZ, and the MOFE flag on the second preset. Prove the
+  WBT on both and the MOFE flag on the second preset. Prove the
   preset-policy corpus still loads and existing project creation still works.
 - [ ] Both interfaces show the same Idaho polygon. Exercise an inside extent,
   a cross-border extent, and a disjoint extent on both launch paths. Confirm
   that accepted jobs keep the full extent and rejected requests preserve
   existing channel artifacts and readiness.
-- [ ] Read back fresh channel outputs and map layers from disposable WBT and
-  TOPAZ runs. Verify a prepared multi-OFE hillslope input from the TOPAZ preset
+- [ ] Read back fresh channel outputs and map layers from both disposable WBT runs. Verify a prepared multi-OFE hillslope input from the second preset
   retains multiple segments. Record exact candidate and runtime identity.
 - [ ] Complete contract-first, correctness review and regression gates. The
   highest current claim is scaffolded, with a validated candidate polygon.

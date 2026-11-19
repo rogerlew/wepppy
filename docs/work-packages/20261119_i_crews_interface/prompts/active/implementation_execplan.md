@@ -6,7 +6,7 @@ Retrospective under `docs/prompt_templates/codex_exec_plans.md`.
 ## Purpose
 
 A visitor can start either an Idaho-centered WEPPcloud WBT run or an Idaho-centered
-Multiple OFE run from the same card. Both use the same state outline for the
+Multiple OFE run from the same card. Both use WBT and the same state outline for the
 map overlay and for channel admission. A selected extent may cross the state
 line and is accepted in full when it touches or overlaps Idaho.
 
@@ -19,10 +19,9 @@ line and is accepted in full when it touches or overlaps Idaho.
 
 ## Surprises & Discoveries
 
-`wepppy/nodb/configs/disturbed9002-mofe.cfg` inherits TOPAZ from
-`_defaults.cfg` and sets `[wepp] multi_ofe = true`. The distinct
-`disturbed9002-wbt-mofe.cfg` has a different backend, executable and module
-set. A new config without a matching entry in
+The operator corrected the MOFE lineage to
+`wepppy/nodb/configs/disturbed9002-wbt-mofe.cfg`. It explicitly selects WBT,
+sets `[wepp] multi_ofe = true`, uses `wepp_261118`, and includes RAP time series. A new config without a matching entry in
 `wepppy/nodb/config_builder/preset_policies.toml` causes the shared
 snapshot loader to reject the preset corpus, which can affect other presets.
 The production-compatible legacy create mode accepts inline overrides. Use
@@ -34,8 +33,8 @@ Use the existing deck.gl layer registry for the Idaho outline on these runs.
 ## Decision Log
 
 Use the two requested source presets as written and change their map sections
-to the shared Idaho settings. The card discloses that the second choice uses
-TOPAZ and multiple overland flow elements. The proposed default is a public
+to the shared Idaho settings. The card discloses that both choices use WBT and that the second models
+hillslopes with multiple overland flow elements. The proposed default is a public
 Preview card using the existing creation and CAPTCHA behavior. Confirm
 funding disclaimer wording and access at the checkpoint.
 
@@ -69,7 +68,7 @@ outline on both run pages in the map bootstrap and wire the existing map
 controller layer helper to render it. Test layer visibility and repeated
 bootstrap without duplicate layers.
 
-Copy `disturbed9002_wbt.cfg` to `i-crews.cfg` and `disturbed9002-mofe.cfg`
+Copy `disturbed9002_wbt.cfg` to `i-crews.cfg` and `disturbed9002-wbt-mofe.cfg`
 to `i-crews-mofe.cfg` under `wepppy/nodb/configs/`. Preserve each source's
 effective model settings. Set both map sections to:
 
@@ -84,7 +83,7 @@ configured site prefix. Register both IDs in
 `wepppy/weppcloud/feature_registry/config_registry.yaml` and in
 `wepppy/nodb/config_builder/preset_policies.toml` together. Mirror each
 source's permitted launch overrides. Keep the boundary and its check mode
-preset-owned. Choose backend metadata matching WBT and TOPAZ respectively. Enforce the two
+preset-owned. Choose WBT backend metadata for both. Enforce the two
 new presets' allowlists in legacy creation as well as snapshots before run
 allocation. Keep other presets on their current creation path.
 
@@ -112,12 +111,10 @@ Run frontend lint and tests if frontend assets or behavior change. Verify
 the card on desktop and narrow screens and both buttons under the resolved
 creation policy. Create two disposable projects through the UI and reload
 each persisted config and map. Exercise inside, disjoint and cross-border
-requests for both backends. Test Upload DEM where used by the normal run flow
-and preserve existing TOPAZ DEM input validation.
+requests for both presets. Test Upload DEM where used by the normal run flow.
 
 Read the channel artifacts consumed by the map and the exact prepared
-multiple-segment input produced by the MOFE run. Use the WBT and TOPAZ
-executables the two runs actually select. Capture semantic output and
+multiple-segment input produced by the MOFE run. Use the installed WBT executable selected by the two runs. Capture semantic output and
 rejection noninterference evidence. Complete independent correctness and security reviews
 and document any baseline regression blocker without claiming a green suite.
 

@@ -13,26 +13,24 @@ and validation milestones.
 - [x] Validate the candidate Idaho GeoJSON and record its provenance.
 - [ ] Ratify the canonical launch and attribution contract.
 - [ ] Wire the card, two presets, application assets and run credit.
-- [ ] Verify project creation, both channel backends, and prepared MOFE output.
+- [ ] Verify project creation, both WBT run variants, and prepared MOFE output.
 - [ ] Complete independent correctness review and run the repository gates.
 
 ## Decisions
 
 - The operator specified one Site Specific Resources card with two launch
-  choices. The MOFE choice uses `disturbed9002-mofe.cfg` as its source and is
+  choices. The MOFE choice uses `disturbed9002-wbt-mofe.cfg` as its source and is
   named `i-crews-mofe.cfg`.
-- The MOFE source inherits TOPAZ from `_defaults.cfg`, uses
-  `wepp_260714`, and sets the maximum to five overland flow elements.
-  Carry these values through. The other source explicitly selects WBT and
-  uses `wepp_261118`.
+- The operator corrected the MOFE source after the first checkpoint. Both
+  sources explicitly select WBT and use `wepp_261118`. The MOFE source sets
+  a five-element maximum and enables RAP time series. Carry those settings through.
 - Both presets explicitly use `intersects` and share the Idaho polygon.
   Propose center `[45.6, -114.15]` in latitude/longitude order and zoom 5
   for orientation. Users zoom in before choosing a delineation extent.
 - Proposed defaults are a public Preview card under the normal creation
   policy, direct run launches, and an I-CREWS project link. Confirm any
   partner-only access requirement and final NSF disclaimer wording at the
-  contract checkpoint. The specified TOPAZ lineage needs no decision unless
-  the operator wants a WBT-based MOFE preset instead.
+  contract checkpoint.
 
 ## Evidence and handoff
 
