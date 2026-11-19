@@ -615,6 +615,9 @@ Watershed map-input normalization (`fetch-dem-and-build-channels`):
 - The backend derives missing `map_center` (bbox midpoint) and missing
   `map_zoom` (fit zoom from bounds).
 - Explicitly supplied `map_center`/`map_zoom` still override derived values.
+- The effective config can limit channel extents. See the
+  [channel delineation map boundary contract](channel-delineation-map-boundary-contract.md)
+  for extent authority and admission error codes.
 
 ## Internal Admin Debug Endpoints
 These routes are intentionally **internal/admin** and are not part of the

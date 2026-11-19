@@ -541,7 +541,7 @@ Feedback mechanisms:
 
 ### Channel delineation map boundary
 
-[Work package](docs/work-packages/20261119_channel_delineation_map_boundary/package.md) scaffolded. Require intersection with the project config's optional map boundary before channel delineation. Canonical contract and implementation are pending.
+[Work package](docs/work-packages/20261119_channel_delineation_map_boundary/package.md) scaffolded. Support intersection, full inclusion and opt-out for the project config's optional map boundary. Canonical contract review and implementation are underway.
 
 ### Features Export standalone GeoJSON compatibility
 

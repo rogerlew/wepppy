@@ -4,7 +4,7 @@ Keep Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospecti
 
 ## Purpose
 
-A user who selects an extent disjoint from the configured map boundary should get immediate feedback and be able to submit a new extent. Users of configurations with the boundary unset continue through ordinary channel admission without a boundary check.
+A user who selects an extent that fails the configured policy should get immediate feedback and be able to submit a new extent. The project selects intersection, full inclusion, or no check. Users of configurations with the boundary unset continue through ordinary channel admission without a boundary check.
 
 ## Progress
 
@@ -21,7 +21,7 @@ A user who selects an extent disjoint from the configured map boundary should ge
 
 ## Decision Log
 
-The operator requested intersection with the effective config boundary and unrestricted geographic admission when the setting is unset. Partial overlap therefore qualifies, with no extent clipping. The scaffold proposes inclusive edge and corner contact because the standard geometry predicate counts shared points. The operator confirmed that `salvage_logging` is deprecated. The package focuses its asset audit on supported presets.
+The operator requested intersection with the effective config boundary and unrestricted geographic admission when the setting is unset. The operator then requested an opt-in full-inclusion policy as well. Use `intersects` by default for a configured boundary, `covers` for full inclusion, and `none` to bypass the test. Intersection uses inclusive edge and corner contact. Coverage allows the extent's own edge on the polygon edge. Accepted extents are used as submitted. The operator confirmed that `salvage_logging` is deprecated. The package focuses its asset audit on supported presets.
 
 ## Outcomes & Retrospective
 
@@ -39,11 +39,11 @@ Read the applicable subsystem guides. Audit configured references, deployment as
 
 ## Milestone 2. Implement the check
 
-Use the effective project config with the existing unset normalization. Resolve configured assets within supported server-owned locations using the existing geospatial stack. Evaluate intersection on compatible coordinates against the configured geometry, including holes and multiple polygon features. Reuse a small shared check where needed for actual channel-build paths. In the ordinary request, return an actionable disjoint-extent error after decoding and establishing the effective extent and before saving parameters, invalidating readiness or enqueueing work. Validate before mutation on any confirmed direct path that can otherwise bypass admission. Use existing response and status handling.
+Use the effective project config with the existing unset normalization. Resolve configured assets within supported server-owned locations using the existing geospatial stack. Evaluate the configured intersection or coverage predicate on compatible coordinates, including holes and multiple polygon features. Reuse a small shared check where needed for actual channel-build paths. In the ordinary request, return an actionable disjoint-extent error after decoding and establishing the effective extent and before saving parameters, invalidating readiness or enqueueing work. Validate before mutation on any confirmed direct path that can otherwise bypass admission. Use existing response and status handling.
 
 ## Milestone 3. Verify the workflow
 
-From the implementation worktree, run `wctl run-pytest tests/microservices/test_rq_engine_watershed_routes.py` plus focused worker and NoDb tests, then `wctl run-pytest tests --maxfail=1`. Run frontend lint and tests if frontend code changes. Validate in disposable representative projects with one overlapping case, one disjoint case, and one unset-boundary case. Confirm Upload DEM uses the validated footprint even with misleading request bounds. Read the channel artifact and map/report outcome for accepted runs and verify prior state and artifacts survive a rejected resubmission. Retain the exact revision, runtime identity, config, extent, job tree and artifact readbacks under the package. Complete independent reviews using the correctness and security templates.
+From the implementation worktree, run `wctl run-pytest tests/microservices/test_rq_engine_watershed_routes.py` plus focused worker and NoDb tests, then `wctl run-pytest tests --maxfail=1`. Run frontend lint and tests if frontend code changes. Validate in disposable representative projects with overlapping, fully covered, disjoint, explicit opt-out and unset-boundary cases. Confirm Upload DEM uses the validated footprint even with misleading request bounds. Read the channel artifact and map/report outcome for accepted runs and verify prior state and artifacts survive a rejected resubmission. Retain the exact revision, runtime identity, config, extent, job tree and artifact readbacks under the package. Complete independent reviews using the correctness and security templates.
 
 ## Idempotence and recovery
 

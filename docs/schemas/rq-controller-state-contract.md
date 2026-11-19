@@ -428,8 +428,9 @@ For `POST /api/runs/{runid}/{config}/fetch-dem-and-build-channels`:
   `map_bounds` using the canonical map extent zoom helper.
 - When `map_center` and/or `map_zoom` are provided, explicit values MUST take
   precedence over derived values.
-- `set_extent_mode` `2` (`map_object`) and `3` (uploaded DEM mode) semantics
-  remain unchanged.
+- `set_extent_mode` `2` uses `map_object.extent` and `3` uses the map extent
+  established by the uploaded DEM. After normalization, configured spatial checks
+  follow [the channel delineation map boundary contract](channel-delineation-map-boundary-contract.md).
 
 ## Step Execution Semantics
 - Each pipeline step SHOULD include:
