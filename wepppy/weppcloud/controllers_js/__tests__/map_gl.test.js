@@ -228,6 +228,37 @@ describe("Map GL controller", () => {
         }
     });
 
+    test("loads the configured Idaho outline once and displays the fetched polygon", async () => {
+        const map = global.MapController.getInstance();
+        const url = "/weppcloud/static/mods/i-crews/idaho-boundary.geojson";
+        const boundary = { url, layerName: "Idaho boundary", style: { color: "#ff0000", opacity: 1 } };
+        const polygon = {
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: {},
+                geometry: { type: "Polygon", coordinates: [[[-115, 44], [-114, 44], [-114, 45], [-115, 44]]] },
+            }],
+        };
+        global.WCHttp.getJson.mockResolvedValue(polygon);
+
+        map.bootstrap({ map: { boundary } });
+        expect(map.overlayMaps[boundary.layerName]).toBeUndefined();
+
+        boundary.showOnLoad = true;
+        map.bootstrap({ map: { center: [45.6, -114.15], zoom: 5, boundary } });
+        map.bootstrap({ map: { boundary } });
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const layer = map.overlayMaps[boundary.layerName];
+        expect(global.WCHttp.getJson.mock.calls.filter(([path]) => path === url)).toHaveLength(1);
+        expect(layer.props.data).toEqual(polygon);
+        expect(layer.props).toMatchObject({ filled: false, stroked: true, pickable: false, getLineColor: [255, 0, 0, 255] });
+        expect(deckInstance.props.layers.filter((visible) => visible === layer)).toHaveLength(1);
+    });
+
     test("getInstance returns singleton and emits map:ready", () => {
         const mapInstance = global.MapController.getInstance();
         const secondInstance = global.MapController.getInstance();

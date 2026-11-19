@@ -1853,6 +1853,16 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### I-CREWS interfaces in WEPPcloud
+
+[Work package](docs/work-packages/20261119_i_crews_interface/package.md)
+implemented and locally validated on 2026-11-19. One Site Specific Resources
+card offers both WBT presets, including the WBT Multiple OFE variant. Both
+display the shared Idaho outline, enforce extent intersection and display
+Idaho EPSCoR funding credit. See the
+[validation record](docs/work-packages/20261119_i_crews_interface/artifacts/20261119_validation.md)
+for the broad gate and release scope.
+
 ### Status and Preflight WebSocket Run Authorization
 
 **Completed**: 2026-11-11 (forest scope)

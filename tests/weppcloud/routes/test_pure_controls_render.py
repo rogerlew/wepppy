@@ -3659,8 +3659,8 @@ def test_interfaces_template_renders_registry_maturity_badges(jinja_env: Environ
         config_maturity_labels=config_maturity_labels,
     )
 
-    assert rendered.count('aria-label="Interface maturity:') == 9
-    assert rendered.count('href="/mock/usersum.view_markdown#feature-maturity-labels"') == 9
+    assert rendered.count('aria-label="Interface maturity:') == 10
+    assert rendered.count('href="/mock/usersum.view_markdown#feature-maturity-labels"') == 10
     assert 'name="config" value="disturbed9002_wbt"' in rendered
 
     disturbed_section = re.search(
@@ -5062,12 +5062,19 @@ def test_interfaces_creation_policy_renders_all_launch_surfaces(jinja_env, authe
     user = SimpleNamespace(has_role=lambda role: True, roles=[], is_authenticated=authenticated)
     rendered = jinja_env.get_template("interfaces.htm").render(
         current_user=user, user=user, can_create_project=authenticated or allow,
-        url_for=lambda endpoint, **kwargs: f"/mock/{endpoint}",
+        url_for=lambda endpoint, **kwargs: f"/static/{kwargs['filename']}" if endpoint == "static" else f"/mock/{endpoint}",
         static_url=lambda path: f"/static/{path}",
         cap_base_url="/cap", cap_asset_base_url="/cap/assets", cap_site_key="test-key",
     )
+    card = rendered.split('<article class="wc-feature" aria-labelledby="section-i-crews">', 1)[1].split("</article>", 1)[0]
+    assert "OIA-2242769" in card
+    assert "i-crews-interface.png" in card
     if authenticated or allow:
-        assert rendered.count('class="wc-run-form"') == 15
+        assert rendered.count('class="wc-run-form"') == 17
+        for preset in ("i-crews", "i-crews-mofe"):
+            assert f'name="config" value="{preset}"' in card
+        assert card.count('<form class="wc-run-form" method="post" action="/rq-engine/create/"') == 2
+        assert ('data-cap-required="true"' in card) is (not authenticated)
         assert 'id="run-context-menu"' in rendered
     else:
         assert 'class="wc-run-form"' not in rendered
@@ -5082,6 +5089,49 @@ def test_interfaces_creation_policy_renders_all_launch_surfaces(jinja_env, authe
         assert '<cap-widget' not in rendered
         assert '/cap/assets/widget.js' not in rendered
         assert '/cap/assets/floating.js' not in rendered
+
+
+@pytest.mark.parametrize("preset, boundary_path, icrews", [
+    ("i-crews", "static/mods/i-crews/idaho-boundary.geojson", True),
+    ("i-crews-mofe", "static/mods/i-crews/idaho-boundary.geojson", True),
+    ("lt-fire-snow", "static/mods/lt/lt_basin.json", False),
+])
+def test_run_bootstrap_uses_saved_preset_for_i_crews_outline_and_credit(
+    jinja_env, preset, boundary_path, icrews,
+):
+    from jinja2 import ChoiceLoader, DictLoader
+
+    base = DictLoader({
+        "base_pure.htm": "{% block head_extras %}{% endblock %}{% block footer %}{% endblock %}"
+    })
+    env = jinja_env.overlay(loader=ChoiceLoader([base, jinja_env.loader]))
+    ron = SimpleNamespace(
+        mods=[], enable_landuse_change=False, config_stem=preset, runid="test-run",
+        readonly=False, cellsize=30, has_sbs=False, has_dem=False,
+        center0=[45.6, -114.15], zoom0=5, boundary=boundary_path,
+        boundary_name="boundary", boundary_color="#FF0000",
+    )
+    rendered = env.get_template("runs0_pure.htm").render(
+        ron=ron, config="route-alias", site_prefix="/weppcloud",
+        playwright_load_all=False, rq_job_ids={}, toc_task_emojis={},
+        bootstrap_admin_disabled=False, bootstrap_is_anonymous=False,
+        disturbed=None, baer=None,
+        watershed=SimpleNamespace(has_channels=False, has_subcatchments=False, has_outlet=False),
+        landuse=SimpleNamespace(has_landuse=False, mode=0, single_selection=None),
+        soils=SimpleNamespace(has_soils=False, mode=0, single_dbselection=None),
+        climate=SimpleNamespace(has_station=False, has_climate=False, has_observed=False),
+        wepp=SimpleNamespace(
+            has_run=False, dss_export_mode=None, has_dss_zip=False,
+            bootstrap_enabled=False, job_id=None, job_key=None,
+        ),
+    )
+
+    assert ("OIA-2242769" in rendered) is icrews
+    context = json.loads(rendered.split("var runContext = ", 1)[1].split(";", 1)[0])
+    assert context["run"]["config"] == preset
+    assert context["map"]["boundary"]["showOnLoad"] is icrews
+    assert context["map"]["boundary"]["url"] == f"/weppcloud/{boundary_path}"
+    assert context["map"]["boundary"]["layerName"] == ("Idaho boundary" if icrews else "boundary")
 
 
 def test_postfire_model_header_and_conditional_upload_group(jinja_env: Environment):
