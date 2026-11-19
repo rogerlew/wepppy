@@ -1,7 +1,7 @@
 # ADR-0148: Separate native soil input capacity from calculation layers
 
 Date: 2026-11-18
-Status: Accepted for implementation; release validation pending.
+Status: Accepted and implemented in the opt-in Linux release `wepp_261118`.
 
 ## Context
 
@@ -35,14 +35,21 @@ requirement. Future releases beyond 23 fail clearly and require a new evaluation
 
 ## Validation, risk and rollback
 
-Validate 21/22/23 records, reject 24, mixed OFEs, eight native formats, real Puaulu
-and Zepol, bounds checks, analytical aggregation, old-input parity, matched-role
-watershed runs, all native release gates, Python raw/prepared/Disturbed/channel
-paths and uploaded preservation. Run an isolated original project under the real
-workflow and inspect fresh outputs. Test executable downgrade against existing
-oversized soils. Do not confuse source capacity with vertical resolution or a
-new modeled depth. Retain prior executable pair and input/output provenance;
-rollback must regenerate compatible inputs or fail explicitly, never truncate.
+Native reader tests covered 21, 22, and 23 horizons, explicit rejection at 24,
+and mixed OFEs. The Puaulu and Zepol cases completed native runs. Legacy controls
+produced byte-identical outputs. The disposable copy of the original project
+completed 100 years across 355 hillslopes and 144 channels.
+
+Both Linux binaries were built from commit
+`464a5e5e15e1fbcdd4e8232260ecf79ad2645200`, now on the WEPP-Forest default
+branch, `wepp_260430_negmeltfix_comparator`. The sidecars declare capacity 23
+for the matched watershed and hillslope roles. The release ledger records their
+SHA-256 hashes.
+
+Retain the prior executable pair and input/output provenance for rollback.
+A project with more than ten input horizons requires a compatible pair or a
+known-good project snapshot with compatible inputs. The launch guard rejects
+an incompatible selection before the model can truncate a profile.
 
 ## Decision provenance
 
@@ -58,3 +65,5 @@ is inferred from accepting this implementation decision.
 [National inventory](../investigations/2026-11-18-ssurgo-input-capacity/assessment.md),
 [eleven-horizon evaluation](../work-packages/20261118_native_soil_input_capacity/artifacts/evaluation.md),
 and [implementation package](../work-packages/20261118_soil_input_capacity_23/package.md).
+
+[Release ledger](../binary-lifecycle.md) and [project replay](../work-packages/20261118_soil_input_capacity_23/artifacts/project-replay.md).
