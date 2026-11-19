@@ -139,7 +139,7 @@ class SurgoSoilCollection:
     weppSoils: Dict[int, WeppSoil]
     invalidSoils: Dict[int, Optional[WeppSoil]]
 
-    def __init__(self, mukeys: Iterable[int], use_statsgo: bool = ..., cache_db_path: Optional[str] = ...) -> None: ...
+    def __init__(self, mukeys: Iterable[int], use_statsgo: bool = ..., cache_db_path: Optional[str] = ..., *, endpoint: Optional[str] = ..., profile: str = ..., release: Optional[str] = ...) -> None: ...
     def makeWeppSoils(
         self,
         initial_sat: float = ...,

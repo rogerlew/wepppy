@@ -291,7 +291,10 @@ locks use the existing `WEPPCLOUD_RQ_LIFECYCLE_LOCK_DIR` setting under `/tmp`;
 transport authentication tests create fixture-owned account data rather than
 reading deployment accounts.
 
-The CI image is built locally and is not published. `Dockerfile.test` defaults to
+The CI image is built locally and is not published. It builds the required shape,
+GeoParquet and CSV parsers from candidate sources with provenance sidecars.
+`tests/prepare_ci_runtime.py` exposes the locked image browser assets to the checkout
+before the unchanged wctl preflight verifies their identity. `Dockerfile.test` defaults to
 the pinned common-image digest and pins Node by digest. To test a host-local
 candidate, set `WEPPCLOUD_TEST_BASE_IMAGE` to its unique local tag for the test
 Compose build, and retain the resolved image ID before and after building.
@@ -801,3 +804,30 @@ The shared dev profile applies to every service that lazily imports Flask for
 ownership/auth checks, including browse, download, D-Tale, query-engine,
 rq-engine and workers. Production and worker shared environments pin
 production/disabled too; web-only profile configuration is insufficient.
+
+
+### Isolated browser and Status2 CI checks
+
+`docker-compose.browser-test.yml` extends the existing test runtime with explicit
+`test` deployment identity and ephemeral `/wc1/runs` storage. It publishes no ports.
+`tests/ci_browser_runtime.py` initializes an empty account database, creates an
+in-memory disposable account and token, mounts the app at `/weppcloud` on loopback,
+and runs the existing browser suites. The existing CAP service supplies real login
+challenges; the existing RQ API runs on a second private loopback socket for session
+tokens. Both use disposable fixture credentials; browser cookies are deleted when
+the helper exits and containers are removed by unconditional job cleanup. The helper
+requires image-owned browser assets prepared by `tests/prepare_ci_runtime.py`;
+foreign asset directories or mismatched package manifests fail explicitly. Only the
+browser/application container has outbound access for the page's existing public
+CDN scripts; databases and CAP remain on the internal network.
+Recreate the project between suites because
+the fixture refuses an already populated database. Reports live under
+`wepppy/weppcloud/static-src/test-results/` and `playwright-report/`.
+
+`docker-compose.status-smoke-test.yml` builds the actual Status2 service and its
+existing authenticated smoke client. It uses job-local Redis and signing material,
+no host secrets and no published ports. A successful run reports five delivered
+status frames and a latency summary. Use a unique `COMPOSE_PROJECT_NAME` and run
+`down --volumes --remove-orphans --rmi local` after either runtime, including failures.
+The existing developer `scripts/run-status2-smoke.sh` remains available for deliberate
+checks against a configured development stack.

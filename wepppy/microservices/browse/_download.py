@@ -6,7 +6,7 @@ import asyncio
 import logging
 import os
 import uuid
-from io import BytesIO, StringIO
+from io import BytesIO
 from pathlib import Path
 from typing import BinaryIO, Callable
 from urllib.parse import quote, urlsplit
@@ -44,14 +44,11 @@ from wepppy.microservices.browse.sensitive_vectors import (
     is_retained_original,
     is_sensitive_vector_path,
 )
+from wepppy.microservices.browse.parquet_csv import csv_response
 from wepppy.microservices.browse.parquet_tables import (
     current_rss_kb,
     log_parquet_operation,
-    make_csv_writer,
     monotonic_ns,
-    project_table_for_output,
-    table_to_csv_bytes,
-    write_table_to_csv_writer,
 )
 from wepppy.microservices.parquet_filters import (
     ParquetFilterError,
@@ -425,30 +422,10 @@ async def download_with_subpath(request: Request) -> Response:
         ext = os.path.splitext(filename)[1].lower()
         as_csv = request.query_params.get("as_csv")
         if as_csv and ext in {".parquet", ".geoparquet", ".pq"}:
-            try:
-                fp = nodir_open_read(nodir_target)
-            except FileNotFoundError:
-                raise HTTPException(status_code=404)
-            except NoDirError as err:
-                _raise_nodir_error(err)
-            started_ns = monotonic_ns()
-            rss_before_kb = current_rss_kb()
-            try:
-                csv_bytes = await asyncio.to_thread(_parquet_fp_to_csv_bytes_with_units, fp)
-            finally:
-                fp.close()
-            log_parquet_operation(
-                _logger,
-                operation="nodir_csv_export",
-                path=filename,
-                started_ns=started_ns,
-                rss_before_kb=rss_before_kb,
+            return await download_response_file(
+                os.path.join(nodir_target.dir_path, nodir_target.inner_path),
+                request.query_params, request=request,
             )
-            csv_name = os.path.splitext(filename)[0] + ".csv"
-            headers = {
-                "Content-Disposition": f'attachment; filename="{csv_name}"'
-            }
-            return Response(csv_bytes, media_type="text/csv", headers=headers)
         try:
             fp = nodir_open_read(nodir_target)
         except FileNotFoundError:
@@ -470,7 +447,7 @@ async def download_with_subpath(request: Request) -> Response:
         raise HTTPException(status_code=403, detail="Access denied.")
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
-    return await download_response_file(dir_path, query_params=request.query_params)
+    return await download_response_file(dir_path, query_params=request.query_params, request=request)
 
 
 async def download_culvert_with_subpath(request: Request) -> Response:
@@ -505,7 +482,7 @@ async def download_culvert_with_subpath(request: Request) -> Response:
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
-    return await download_response_file(dir_path, query_params=request.query_params)
+    return await download_response_file(dir_path, query_params=request.query_params, request=request)
 
 
 async def download_batch_with_subpath(request: Request) -> Response:
@@ -548,10 +525,10 @@ async def download_batch_with_subpath(request: Request) -> Response:
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
-    return await download_response_file(dir_path, query_params=request.query_params)
+    return await download_response_file(dir_path, query_params=request.query_params, request=request)
 
 
-async def download_response_file(path: str, query_params) -> Response:
+async def download_response_file(path: str, query_params, request=None) -> Response:
     if not os.path.isfile(path):
         raise HTTPException(status_code=404)
     filename = os.path.basename(path)
@@ -567,6 +544,8 @@ async def download_response_file(path: str, query_params) -> Response:
     ext = os.path.splitext(filename)[1].lower()
     as_csv = query_params.get('as_csv') if query_params else False
     raw_pqf = (query_params.get('pqf') or '').strip() if query_params else ''
+    if as_csv and ext in {'.parquet', '.geoparquet', '.pq'}:
+        return await csv_response(path, raw_pqf, request=request)
     parquet_filter_active = (
         BROWSE_PARQUET_FILTERS_ENABLED
         and bool(raw_pqf)
@@ -580,37 +559,6 @@ async def download_response_file(path: str, query_params) -> Response:
         except ParquetFilterError as err:
             _raise_parquet_filter_error(err)
 
-    if as_csv and ext in {'.parquet', '.geoparquet', '.pq'}:
-        started_ns = monotonic_ns()
-        rss_before_kb = current_rss_kb()
-        if compiled_filter is not None:
-            try:
-                filtered_table = await asyncio.to_thread(
-                    query_export,
-                    path,
-                    compiled_filter,
-                    max_rows=BROWSE_PARQUET_EXPORT_MAX_ROWS,
-                )
-            except ParquetFilterError as err:
-                _raise_parquet_filter_error(err)
-            csv_bytes = await asyncio.to_thread(_table_to_csv_bytes_with_units, filtered_table, path)
-            rows = filtered_table.num_rows
-        else:
-            csv_bytes = await asyncio.to_thread(_parquet_to_csv_bytes_with_units, path)
-            rows = None
-        log_parquet_operation(
-            _logger,
-            operation="csv_export",
-            path=path,
-            started_ns=started_ns,
-            rss_before_kb=rss_before_kb,
-            rows=rows,
-        )
-        csv_name = os.path.splitext(filename)[0] + '.csv'
-        headers = {
-            'Content-Disposition': f'attachment; filename="{csv_name}"'
-        }
-        return Response(csv_bytes, media_type='text/csv', headers=headers)
 
     if compiled_filter is not None:
         started_ns = monotonic_ns()
@@ -637,59 +585,6 @@ async def download_response_file(path: str, query_params) -> Response:
         return Response(parquet_bytes, media_type='application/octet-stream', headers=headers)
 
     return FileResponse(path, filename=filename)
-
-
-def _parquet_to_csv_bytes_with_units(path: str) -> bytes:
-    parquet_file = pq.ParquetFile(path)
-    return _parquet_file_to_csv_bytes_with_schema(parquet_file, parquet_file.schema_arrow)
-
-
-def _table_to_csv_bytes_with_units(table: pa.Table, source_path: str) -> bytes:
-    schema = pq.read_schema(source_path)
-    return _table_to_csv_bytes_with_schema(table, schema)
-
-
-def _parquet_fp_to_csv_bytes_with_units(fp: BinaryIO) -> bytes:
-    parquet_file = pq.ParquetFile(fp)
-    return _parquet_file_to_csv_bytes_with_schema(parquet_file, parquet_file.schema_arrow)
-
-
-def _table_to_csv_bytes_with_schema(table: pa.Table, schema: pa.Schema) -> bytes:
-    projected = project_table_for_output(
-        table,
-        source_schema=schema,
-        include_units=True,
-        drop_pandas_index=True,
-    )
-    return table_to_csv_bytes(projected)
-
-
-def _parquet_file_to_csv_bytes_with_schema(parquet_file: pq.ParquetFile, schema: pa.Schema) -> bytes:
-    text_buffer = StringIO()
-    writer = make_csv_writer(text_buffer)
-    wrote_header = False
-    for batch in parquet_file.iter_batches(batch_size=65536):
-        table = pa.Table.from_batches([batch])
-        projected = project_table_for_output(
-            table,
-            source_schema=schema,
-            include_units=True,
-            drop_pandas_index=True,
-        )
-        write_table_to_csv_writer(projected, writer, include_header=not wrote_header)
-        wrote_header = True
-
-    if not wrote_header:
-        empty_table = pa.Table.from_batches([], schema=schema)
-        projected = project_table_for_output(
-            empty_table,
-            source_schema=schema,
-            include_units=True,
-            drop_pandas_index=True,
-        )
-        write_table_to_csv_writer(projected, writer, include_header=True)
-
-    return text_buffer.getvalue().encode("utf-8")
 
 
 def _table_to_parquet_bytes(table: pa.Table) -> bytes:

@@ -1,0 +1,25 @@
+{
+  "pytest_exitstatus": 0,
+  "disposition": "All pytest cases passed. Sole generated sidecar source mutation restored; import-time generator guarded; independent reviewers approve scoped clean follow-up without broad rerun.",
+  "targeted_clean_receipt": "70d748eeec06404c85efa91cc7baf47e",
+  "receipt": "5abcf913b47c409eabf392b9fce5f921",
+  "sha256": "c35fdf51207f228250a1b35e8a0a690efa019b6e78863dce1a9db2264c3e279c",
+  "summary": "14535 passed, 506 skipped, 99 deselected, 5906 warnings in 3657.80s (1:00:57)",
+  "status": "source_changed",
+  "tests_started": true,
+  "pytest_args": [
+    "tests",
+    "--maxfail=1"
+  ],
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "head": "e2d155da3a4eb29c86beb61272446c879d999d1f",
+  "source_changes": [
+    "wepppy/wepp/management/scripts/man42_5.man.json"
+  ],
+  "runtime_changes": [],
+  "exitstatus": 3
+}

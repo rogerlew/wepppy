@@ -1,31 +1,33 @@
 name: Preflight Tests Nightly
 on:
   schedule:
-    # 02:35 AM Pacific ≈ 10:35 UTC
-    - cron: 35 10 * * *
+  - cron: 35 10 * * *
   workflow_dispatch: null
 jobs:
   preflight-tests:
     runs-on:
-      - self-hosted
-      - Linux
-      - X64
-      - homelab
+    - self-hosted
+    - Linux
+    - X64
+    - remote-ci
     timeout-minutes: 30
     steps:
-      - name: Run preflight Go tests
-        run: |
-          set -euo pipefail
-          mkdir -p telemetry
-          LOG=telemetry/preflight-tests.log
-          {
-            echo "=== $(date -Iseconds) :: wctl run-preflight-tests ==="
-            wctl run-preflight-tests
-          } |& tee "${LOG}"
-      - name: Upload preflight test logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: preflight-go-tests
-          path: telemetry/preflight-tests.log
-          if-no-files-found: warn
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    - name: Run service unit and integration tests
+      run: |-
+        set -euo pipefail
+        mkdir -p telemetry
+        docker run --rm --cap-drop ALL --security-opt no-new-privileges \
+          -v "$GITHUB_WORKSPACE:/workspace:ro" -w /workspace/services/preflight2 \
+          golang:1.25-alpine@sha256:3eb6c2b3db8d55e38537302edb510b4417f8a115efbd5906d131ceba9468e29a go test -mod=readonly -tags=integration ./... 2>&1 | tee telemetry/preflight2-tests.log
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: preflight2-tests
+        path: telemetry/preflight2-tests.log
+        if-no-files-found: error
+    forest_bootstrap: false
+permissions:
+  contents: read

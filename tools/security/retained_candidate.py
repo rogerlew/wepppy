@@ -688,10 +688,56 @@ def record_activation(args: argparse.Namespace) -> int:
     return 0
 
 
+def prepare_images(args: argparse.Namespace) -> int:
+    """Bind already-loaded images to a checksum-pinned source-host receipt.
+
+    No host approval is inherited: create and approve a fresh local receipt before
+    activation. Image IDs, rather than mutable tags, are returned to the caller.
+    """
+    raw = private_file(args.source_receipt)
+    if sha256_bytes(raw) != args.source_receipt_sha256:
+        raise CandidateError("source receipt checksum mismatch")
+    source = load_object(raw, "source image receipt")
+    if (set(source) != RECEIPT_FIELDS or source.get("schema_version") != 1
+            or source.get("source_clean") is not True or source.get("exit_status") != 0):
+        raise CandidateError("source image receipt is not a successful clean candidate")
+    root = args.project_root.resolve(strict=True)
+    current_revision = run("git", "rev-parse", "HEAD", cwd=root)
+    require_application_equivalence(root, source["source_revision"], current_revision)
+    if run("git", "status", "--porcelain=v1", "--untracked-files=all", cwd=root):
+        raise CandidateError("source worktree must be clean")
+    image_map: dict[str, str] = {}
+    if not isinstance(source["images"], list) or not source["images"]:
+        raise CandidateError("source receipt has no images")
+    for row in source["images"]:
+        if not isinstance(row, dict) or set(row) != IMAGE_FIELDS:
+            raise CandidateError("invalid source image row")
+        name, image_id = row["source_image"], row["image_id"]
+        if not isinstance(name, str) or not name or not isinstance(image_id, str) or IMAGE_ID_RE.fullmatch(image_id) is None:
+            raise CandidateError("invalid source image identity")
+        if name in image_map and image_map[name] != image_id:
+            raise CandidateError("source receipt has conflicting image identities")
+        image_map[name] = image_id
+    services = compose_config().get("services", {})
+    selected: dict[str, str] = {}
+    for name in args.recreated_service:
+        source_image = services[name]["image"]
+        if source_image not in image_map:
+            raise CandidateError(f"source receipt does not cover image for {name!r}")
+        image_id = image_map[source_image]
+        if immutable_image_id(image_id, root) != image_id:
+            raise CandidateError(f"loaded image for {name!r} does not match source receipt")
+        selected[name] = image_id
+    print(json.dumps({"source_revision": source["source_revision"],
+                      "source_receipt_sha256": args.source_receipt_sha256,
+                      "images": selected}, sort_keys=True))
+    return 0
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     commands = result.add_subparsers(dest="command", required=True)
-    for name in ("create", "validate", "gate"):
+    for name in ("create", "validate", "gate", "prepare-images"):
         command = commands.add_parser(name)
         command.add_argument("--project-root", type=Path, required=True)
         command.add_argument("--deploy-script", type=Path, required=True)
@@ -705,7 +751,10 @@ def parser() -> argparse.ArgumentParser:
         command.add_argument("--recreated-service", action="append", required=True)
         if name == "create":
             command.add_argument("--expected-image", action="append", default=[])
-        if name != "create":
+        if name == "prepare-images":
+            command.add_argument("--source-receipt", type=Path, required=True)
+            command.add_argument("--source-receipt-sha256", required=True)
+        if name in ("validate", "gate"):
             command.add_argument("--receipt", type=Path, required=True)
     approval = commands.add_parser("publish-approval")
     approval.add_argument("--project-root", type=Path, required=True)
@@ -730,6 +779,8 @@ def parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = parser().parse_args()
     try:
+        if args.command == "prepare-images":
+            return prepare_images(args)
         if args.command == "create":
             return create_candidate(args)
         if args.command == "publish-approval":

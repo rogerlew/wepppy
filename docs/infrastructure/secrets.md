@@ -45,6 +45,9 @@ Use stable secret IDs so Compose and Kubernetes mount the same filenames:
 | `oauth_orcid_client_secret` | `weppcloud` | Optional, but treat as secret if enabled. |
 | `dtale_internal_token` | `browse`, `dtale` | Internal service-to-service auth token. |
 | `cap_secret` | `cap` | CAPTCHA secret; do not expose to browser clients. |
+| `soil_import_password` | dev `soil-db` | Import/admin role; file secret readable by UID 999. |
+| `soil_serve_password` | dev `soil-db` initialization | Read-only API role; file secret readable by UID 999. |
+| `soil_database_url` | dev `soil-api` | Serving connection URL; file secret readable by UID 10001. |
 | `zoho_noreply_email_password` | `weppcloud` | SMTP auth secret when Zoho is enabled. |
 | `postgres_password` | `postgres`, app services, `rq-worker`, `rq-worker-batch` | Higher priority if connection strings can surface in logs. |
 | `redis_password` | `redis`, app services | Lower priority if Redis is network-isolated, but still a secret. |

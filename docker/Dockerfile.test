@@ -1,6 +1,32 @@
 # CI-only extension of the accepted common runtime; no image publication.
 ARG WEPPCLOUD_TEST_BASE_IMAGE=ghcr.io/rogerlew/wepppy@sha256:7619a9fc9b3e8adf1e09b65b4a0aa9a995c30fface90561bdc509411074b6cfb
 FROM node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS node_runtime
+FROM rust:1.92.0-slim-trixie@sha256:bf3368a992915f128293ac76917ab6e561e4dda883273c8f5c9f6f8ea37a378e AS parquet-csv-builder
+RUN apt-get update && apt-get install -y --no-install-recommends python3 pkg-config && rm -rf /var/lib/apt/lists/*
+WORKDIR /src/parquet-csv
+COPY tools/parquet_csv_cli/rust/Cargo.toml tools/parquet_csv_cli/rust/Cargo.lock ./rust/
+COPY tools/parquet_csv_cli/rust/src ./rust/src
+COPY wepppy/microservices/parquet_csv/provenance.py ./provenance.py
+RUN cargo build --release --locked --manifest-path rust/Cargo.toml && \
+    python3 provenance.py rust/target/release/parquet_csv_cli provenance.json --source-root /src/parquet-csv
+
+# Build the other required untrusted-input parsers from the candidate sources.
+WORKDIR /src/shape_parser_cli
+COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/Cargo.toml wepppy/microservices/shape_converter/rust/shape_parser_cli/Cargo.lock ./
+COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/src ./src
+COPY wepppy/microservices/shape_converter/rust/shape_parser_cli/tools ./tools
+RUN cargo build --release --locked && python3 tools/generate_provenance.py \
+    --binary target/release/shape_parser_cli --source-root . \
+    --output target/release/shape_parser_cli.json \
+    --source-revision uncommitted-development --release-label ci
+WORKDIR /src/geoparquet_parser_cli
+COPY wepppy/microservices/shape_converter/rust/geoparquet_parser_cli/Cargo.toml wepppy/microservices/shape_converter/rust/geoparquet_parser_cli/Cargo.lock ./
+COPY wepppy/microservices/shape_converter/rust/geoparquet_parser_cli/src ./src
+RUN cargo build --release --locked && python3 /src/shape_parser_cli/tools/generate_provenance.py \
+    --binary target/release/geoparquet_parser_cli --source-root . \
+    --output target/release/geoparquet_parser_cli.json \
+    --source-revision uncommitted-development --release-label ci
+
 FROM ${WEPPCLOUD_TEST_BASE_IMAGE}
 USER root
 COPY --from=node_runtime /usr/local/bin/node /usr/local/bin/node
@@ -12,5 +38,16 @@ ENV NODE_PATH=/opt/wepppy-ci/node_modules \
 RUN cd /opt/wepppy-ci && npm ci --legacy-peer-deps && \
     node node_modules/playwright/cli.js install --with-deps chromium && \
     chmod -R a+rX /opt/wepppy-ci && npm cache clean --force
+
+COPY --from=parquet-csv-builder /src/parquet-csv/rust/target/release/parquet_csv_cli /usr/local/bin/parquet_csv_cli
+COPY --from=parquet-csv-builder /src/parquet-csv/provenance.json /opt/parquet-csv/provenance.json
+COPY tools/parquet_csv_cli/rust/Cargo.toml tools/parquet_csv_cli/rust/Cargo.lock /opt/parquet-csv/rust/
+COPY tools/parquet_csv_cli/rust/src /opt/parquet-csv/rust/src
+COPY tools/parquet_csv_cli/fixtures/readiness.parquet tools/parquet_csv_cli/fixtures/readiness.csv /opt/parquet-csv/
+
+COPY --from=parquet-csv-builder /src/shape_parser_cli/target/release/shape_parser_cli /usr/local/bin/shape_parser_cli
+COPY --from=parquet-csv-builder /src/shape_parser_cli/target/release/shape_parser_cli.json /usr/local/bin/shape_parser_cli.json
+COPY --from=parquet-csv-builder /src/geoparquet_parser_cli/target/release/geoparquet_parser_cli /usr/local/bin/geoparquet_parser_cli
+COPY --from=parquet-csv-builder /src/geoparquet_parser_cli/target/release/geoparquet_parser_cli.json /usr/local/bin/geoparquet_parser_cli.json
 
 USER roger

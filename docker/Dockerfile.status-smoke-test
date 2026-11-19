@@ -1,0 +1,14 @@
+# Build the actual service and existing authenticated smoke client for isolated CI.
+FROM golang:1.25-alpine@sha256:3eb6c2b3db8d55e38537302edb510b4417f8a115efbd5906d131ceba9468e29a AS build
+WORKDIR /src
+COPY services/status2 services/status2
+COPY services/streamauth services/streamauth
+COPY tests/tools/status2_smoke tests/tools/status2_smoke
+RUN cd services/status2 && CGO_ENABLED=0 go build -mod=readonly -o /out/status2 ./cmd/status2
+RUN cd tests/tools/status2_smoke && CGO_ENABLED=0 go build -mod=readonly -o /out/status2-smoke .
+# Existing owned Go image supplies shell tooling; no runtime module downloads.
+FROM golang:1.25-alpine@sha256:3eb6c2b3db8d55e38537302edb510b4417f8a115efbd5906d131ceba9468e29a
+COPY --from=build /out/ /usr/local/bin/
+COPY scripts/ci/run-status2-smoke.sh /usr/local/bin/run-status2-smoke
+USER 65532:65532
+ENTRYPOINT ["/bin/sh", "/usr/local/bin/run-status2-smoke"]

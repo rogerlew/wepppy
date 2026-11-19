@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "binary_sha256": "a86eff4f815359b476e8abe1fad5752c097aa45d47eccc4182a54afbe45b32fc",
+  "sources": {
+    "rust/Cargo.toml": "e20b9028466d402a566d3bc5e2f0847290a51a5f1ab295a4b73a249fdccccf66",
+    "rust/Cargo.lock": "68bdfcb52a58549e9bc9d252aa5d02913a49f38a942fac1659d7d253ef7c53ef",
+    "rust/src/compact.rs": "a26c408f20dac36a23b794675261f1b7fedd1165893871afe531789f3dd406fd",
+    "rust/src/filter.rs": "cd5fac852908ba0a722a56f93602c0aa5b48b19f581f5f0d1072e10374df7911",
+    "rust/src/lowercase.rs": "a0cf2a5262a410a9640ee9f16e00bce9a82a34e4875111916085ef348237e6ae",
+    "rust/src/main.rs": "057829b1d5281412e1157cf736afadc973c537474e52d0d6889c4c9a87965803",
+    "rust/src/preflight.rs": "1415aa9dd5b2b5822bd0655a7c2528dbbfc4e8f3f01c0048b1e177c1e0c58b4f",
+    "rust/src/request.rs": "cda2e2268129004c57c6393b3c87129f51f58279a3b73849e723b90dfbaa7223",
+    "rust/src/sha256.rs": "43d871e94e9332ee742c129e4ecd7d910cdcaced96e6e48904acb5ae991505bd"
+  }
+}

@@ -1,0 +1,20 @@
+   Compiling parquet_csv_cli v0.1.0 (/home/workdir/wepppy-parquet-csv-cli-package/tools/parquet_csv_cli/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.05s
+     Running unittests src/main.rs (tools/parquet_csv_cli/rust/target/debug/deps/parquet_csv_cli-81400bf115a0d004)
+
+running 13 tests
+test compact::tests::captures_page_header_fields ... ok
+test compact::tests::rejects_oversize_container_before_iteration ... ok
+test preflight::tests::exact_count_edges_admit_limit_and_reject_limit_plus_one ... ok
+test preflight::tests::row_group_limit_is_extracted_from_compact_footer ... ok
+test preflight::tests::dictionary_entry_header_accepts_exact_and_rejects_plus_one ... ok
+test tests::disk_full_is_io_error ... ok
+test tests::float_notation ... ok
+test sha256::tests::known_vector ... ok
+test tests::quote_python ... ok
+test compact::tests::byte_budget_accepts_exact_and_rejects_plus_one ... ok
+test preflight::tests::footer_length_accepts_exact_and_rejects_plus_one ... ok
+test preflight::tests::page_body_and_aggregate_ledgers_accept_exact_and_reject_plus_one ... ok
+test preflight::tests::input_length_accepts_exact_budget_and_rejects_plus_one_before_magic ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.84s

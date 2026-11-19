@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import csv
 import html
-import io
 import json
 import os
 import time
@@ -149,14 +147,6 @@ def _format_html_cell(value: Any) -> str:
     return str(value)
 
 
-def _format_csv_cell(value: Any) -> str:
-    if value is None:
-        return ""
-    if isinstance(value, float) and value != value:
-        return ""
-    return str(value)
-
-
 def table_to_html(table: pa.Table) -> str:
     """Render a small Arrow table as pandas-like browse HTML."""
 
@@ -184,25 +174,3 @@ def table_to_html(table: pa.Table) -> str:
         parts.append("    </tr>")
     parts.extend(["  </tbody>", "</table>"])
     return "\n".join(parts)
-
-
-def write_table_to_csv_writer(table: pa.Table, writer: csv.writer, *, include_header: bool) -> None:
-    """Write an Arrow table to an existing CSV writer."""
-
-    if include_header:
-        writer.writerow([str(name) for name in table.column_names])
-    for row in table.to_pylist():
-        writer.writerow([_format_csv_cell(row.get(column_name)) for column_name in table.column_names])
-
-
-def make_csv_writer(text_buffer: io.StringIO) -> csv.writer:
-    return csv.writer(text_buffer, lineterminator="\n")
-
-
-def table_to_csv_bytes(table: pa.Table) -> bytes:
-    """Serialize an Arrow table to CSV bytes."""
-
-    text_buffer = io.StringIO()
-    writer = make_csv_writer(text_buffer)
-    write_table_to_csv_writer(table, writer, include_header=True)
-    return text_buffer.getvalue().encode("utf-8")

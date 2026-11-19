@@ -1,0 +1,10 @@
+{
+  "old_import_writes_sidecar": true,
+  "plants_type": "dict",
+  "plant_keys": [
+    "py/object",
+    "root",
+    "py/seq"
+  ],
+  "nofe": 1
+}

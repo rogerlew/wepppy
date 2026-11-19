@@ -32,49 +32,49 @@ jobs:
     - self-hosted
     - Linux
     - X64
-    - homelab
+    - remote-ci
     timeout-minutes: 90
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        clean: false
-    - name: Ensure docker/.env exists
-      shell: bash
+        persist-credentials: false
+        lfs: true
+        fetch-depth: 0
+    - name: Verify materialized inputs
       run: |
-        set -euo pipefail
-        if [ -n "${RUNNER_DOCKER_ENV:-}" ] && [ -f "${RUNNER_DOCKER_ENV}" ]; then
-          cp "${RUNNER_DOCKER_ENV}" docker/.env
-          exit 0
-        fi
-        if [ ! -f docker/.env ]; then
-          printf "%s\n" \
-            "UID=1000" \
-            "GID=993" \
-            "POSTGRES_PASSWORD=localdev" \
-            "SECRET_KEY=localdev" \
-            "SECURITY_PASSWORD_SALT=localdev" \
-            > docker/.env
-        fi
+        git lfs checkout
+        git lfs fsck
+        python3 tools/verify_lfs_materialized.py --tracked
     - name: Install wctl shim
+      id: wctl
       env:
         WCTL_SYMLINK_PATH: ${{ github.workspace }}/.wctl/bin/wctl
       run: |
-        set -euo pipefail
         mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
-        chmod +x wctl/install.sh
         ./wctl/install.sh dev
         echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
+    - name: Start isolated test runtime
+      run: wctl --compose-file docker/docker-compose.test.yml up -d --build --wait
+    - name: Prepare locked CI browser assets
+      run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud /opt/venv/bin/python
+        tests/prepare_ci_runtime.py
+    - name: Build controller assets
+      run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud /opt/venv/bin/python
+        wepppy/weppcloud/controllers_js/build_controllers_js.py
+    - name: Initialize disposable account schema
+      run: wctl --compose-file docker/docker-compose.test.yml exec -T weppcloud /opt/venv/bin/python
+        tests/bootstrap_ci_database.py
     - name: Run shape-converter focused regression sweep
       run: |
         set -euo pipefail
-        wctl run-pytest tests/shape_converter/unit -k "archive or inspect or convert or cleanup or abuse or hardening or ui or health or crs or serialization" --maxfail=1
-        wctl run-pytest tests/shape_converter/integration -k "inspect or convert or abuse or hardening or ui" --maxfail=1
+        wctl --compose-file docker/docker-compose.test.yml run-pytest tests/shape_converter/unit -k "archive or inspect or convert or cleanup or abuse or hardening or ui or health or crs or serialization" --maxfail=1
+        wctl --compose-file docker/docker-compose.test.yml run-pytest tests/shape_converter/integration -k "inspect or convert or abuse or hardening or ui" --maxfail=1
     - name: Run shape-converter full unit and integration gates
       run: |
         set -euo pipefail
-        wctl run-pytest tests/shape_converter/unit
-        wctl run-pytest tests/shape_converter/integration
+        wctl --compose-file docker/docker-compose.test.yml run-pytest tests/shape_converter/unit
+        wctl --compose-file docker/docker-compose.test.yml run-pytest tests/shape_converter/integration
     - name: Run broad exception changed-file enforcement
       env:
         PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -111,27 +111,11 @@ jobs:
       run: |
         set -euo pipefail
         scripts/build_forest_workflows.py --check
-    - name: Remove redis data directory
-      run: |
-        set -euo pipefail
-        REDIS_DIR="${GITHUB_WORKSPACE}/.docker-data/redis"
-        if [ ! -d "${REDIS_DIR}" ]; then
-          echo "Redis data directory not present; nothing to remove."
-          exit 0
-        fi
-
-        echo "Removing ${REDIS_DIR}"
-        if rm -rf "${REDIS_DIR}" 2>/dev/null; then
-          echo "Removed redis data directory without sudo."
-          exit 0
-        fi
-
-        if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
-          sudo -n rm -rf "${REDIS_DIR}"
-          echo "Removed redis data directory with passwordless sudo."
-          exit 0
-        fi
-
-        echo "Warning: unable to remove ${REDIS_DIR} without interactive sudo; continuing." >&2
+    - name: Remove isolated test runtime
+      if: always() && steps.wctl.outcome == 'success'
+      run: wctl --compose-file docker/docker-compose.test.yml down --volumes --remove-orphans
+        --rmi local
     env:
-      RUNNER_DOCKER_ENV: /workdir/wepppy/docker/.env
+      COMPOSE_PROJECT_NAME: wepppy-${{ github.run_id }}-${{ github.run_attempt }}-pytest-shape-converter-gates
+permissions:
+  contents: read

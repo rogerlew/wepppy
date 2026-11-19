@@ -15,6 +15,10 @@ from wepppy.observability.secret_profiles import WORKER
 
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 import csv
+import json
+from contextvars import ContextVar
+from .source import (SoilDataSource, JsonSoilClient, BoundedXmlSoilClient, ACQUISITION_DEADLINE, SoilDataSourceError, bind_cache,
+                     cache_evidence, record_fetch, response_origin, write_artifact_provenance)
 from pathlib import Path
 from . import retention as _retention
 from wepppy.wepp.soils.horizon_boundary import ensure_200mm_boundary
@@ -269,6 +273,7 @@ def _write_text_atomic(path: str, text: str) -> None:
 
 
 _ssurgo_url = "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest"
+_XML_RESPONSE_OBSERVATION = ContextVar("soil_xml_response_observation", default=None)
 
 _metadata = {
     "dataset": " Soil Survey Geographic Database (SSURGO)/Digital General Soil Map of the United States (STATSGO2)",
@@ -367,6 +372,8 @@ def _make_sda_post_request(query):
                 raise SsurgoRequestError(message)
             if r.status_code != 200:
                 raise SsurgoRequestError((r.content, query))
+            _XML_RESPONSE_OBSERVATION.set({"response_origin": response_origin(getattr(r, "url", None)),
+                                           "response_sha256": hashlib.sha256(r.content).hexdigest()})
             return r.content
         except requests.exceptions.ConnectTimeout as exc:
             last_exc = exc
@@ -1745,7 +1752,7 @@ Any comments:
         return ensure_200mm_boundary("\n".join(s), max_horizons=max_horizons)
 
 
-def _fetch_components(mukeys):
+def _fetch_components(mukeys, *, client=None):
     """
     queries the ssurgo server to get soil component information from map unit
     keys (mukeys)
@@ -1766,11 +1773,13 @@ def _fetch_components(mukeys):
         "WHERE component.mukey IN ( %s ) ORDER BY mukey" % keys
     )
 
+    if client is not None:
+        return client.query(query, "component", mukeys)
     xml = _make_sda_post_request(query)
     return _extract_table(xml)
 
 
-def _fetch_chorizon(cokeys):
+def _fetch_chorizon(cokeys, *, client=None):
     """
     queries the ssurgo server to get soil chorizon information.
     """
@@ -1785,11 +1794,13 @@ def _fetch_chorizon(cokeys):
         "WHERE cokey IN (%s) ORDER BY cokey" % keys
     )
 
+    if client is not None:
+        return client.query(query, "chorizon", cokeys)
     xml = _make_sda_post_request(query)
     return _extract_table(xml)
 
 
-def _fetch_chfrags(chkeys):
+def _fetch_chfrags(chkeys, *, client=None):
     keys = ",".join([str(k) for k in chkeys])
 
     query = (
@@ -1798,11 +1809,13 @@ def _fetch_chfrags(chkeys):
         "WHERE chkey IN (%s) ORDER BY chkey" % keys
     )
 
+    if client is not None:
+        return client.query(query, "chfrags", chkeys)
     xml = _make_sda_post_request(query)
     return _extract_unique(xml)
 
 
-def _fetch_chtexturegrp(chkeys):
+def _fetch_chtexturegrp(chkeys, *, client=None):
     keys = ",".join([str(k) for k in chkeys])
 
     query = (
@@ -1811,11 +1824,13 @@ def _fetch_chtexturegrp(chkeys):
         "WHERE chkey IN (%s) ORDER BY chkey" % keys
     )
 
+    if client is not None:
+        return client.query(query, "chtexturegrp", chkeys)
     xml = _make_sda_post_request(query)
     return _extract_unique(xml)
 
 
-def _fetch_corestrictions(cokeys):
+def _fetch_corestrictions(cokeys, *, client=None):
     keys = ",".join([str(k) for k in cokeys])
 
     query = (
@@ -1824,6 +1839,8 @@ def _fetch_corestrictions(cokeys):
         "WHERE cokey IN (%s) ORDER BY cokey" % keys
     )
 
+    if client is not None:
+        return client.query(query, "corestrictions", cokeys)
     xml = _make_sda_post_request(query)
     return _extract_unique(xml)
 
@@ -2019,6 +2036,10 @@ class SurgoSoilCollection(object):
         mukeys: Iterable[int],
         use_statsgo: bool = False,
         cache_db_path: Optional[str] = None,
+        *,
+        endpoint: Optional[str] = None,
+        profile: str = "legacy-xml",
+        release: Optional[str] = None,
     ) -> None:
         """Preload the necessary SSURGO/STATSGO tables for the supplied mukeys."""
         mukeys = [v for v in mukeys if isint(v)]
@@ -2028,57 +2049,71 @@ class SurgoSoilCollection(object):
         else:
             self.source_data = "Surgo"
 
+        if profile != "legacy-xml" and endpoint is None:
+            raise SoilDataSourceError("JSON soil source requires an explicit endpoint")
+        self.data_source = SoilDataSource(endpoint=_ssurgo_url if endpoint is None else endpoint, profile=profile, release=release)
         self._db_path = cache_db_path
         self.conn = None
         self.cur = None
-        self._connect()
-        cur = self.cur
-        self._initialize_cache_db()
+        try:
+            self._connect()
+            cur = self.cur
+            bind_cache(self.conn, self.data_source)
+            self._initialize_cache_db()
+            self._json_client = None
+            if self.data_source.profile == "wepppy-json-v1" or ACQUISITION_DEADLINE.get() is not None:
+                columns = {table: [row[1] for row in cur.execute(f"PRAGMA table_info({table})")]
+                           for table in ("component", "chorizon", "corestrictions", "chfrags", "chtexturegrp")}
+                client_type = JsonSoilClient if self.data_source.profile == "wepppy-json-v1" else BoundedXmlSoilClient
+                self._json_client = client_type(self.data_source, columns)
 
-        n = 0
+            n = 0
 
-        # component
-        n += self._sync("component", _fetch_components, "mukey", mukeys)
+            # component
+            n += self._sync("component", _fetch_components, "mukey", mukeys)
 
-        # identify cokeys
-        if mukeys:
-            query = "SELECT  cokey FROM component WHERE mukey in (%s)" % ",".join(
-                [str(k) for k in mukeys]
-            )
-            cokeys = [r[0] for r in cur.execute(query)]
-        else:
-            cokeys = []
+            # identify cokeys
+            if mukeys:
+                query = "SELECT  cokey FROM component WHERE mukey in (%s)" % ",".join(
+                    [str(k) for k in mukeys]
+                )
+                cokeys = [r[0] for r in cur.execute(query)]
+            else:
+                cokeys = []
 
-        # chorizon
-        n += self._sync("chorizon", _fetch_chorizon, "cokey", cokeys)
+            # chorizon
+            n += self._sync("chorizon", _fetch_chorizon, "cokey", cokeys)
 
-        # corestrictions
-        n += self._sync("corestrictions", _fetch_corestrictions, "cokey", cokeys, True)
+            # corestrictions
+            n += self._sync("corestrictions", _fetch_corestrictions, "cokey", cokeys, True)
 
-        # identify chkeys
-        if cokeys:
-            query = "SELECT chkey FROM chorizon WHERE cokey in (%s)" % ",".join(
-                [str(k) for k in cokeys]
-            )
-            chkeys = [r[0] for r in cur.execute(query)]
-        else:
-            chkeys = []
+            # identify chkeys
+            if cokeys:
+                query = "SELECT chkey FROM chorizon WHERE cokey in (%s)" % ",".join(
+                    [str(k) for k in cokeys]
+                )
+                chkeys = [r[0] for r in cur.execute(query)]
+            else:
+                chkeys = []
 
-        # chfrags
-        n += self._sync("chfrags", _fetch_chfrags, "chkey", chkeys, True)
+            # chfrags
+            n += self._sync("chfrags", _fetch_chfrags, "chkey", chkeys, True)
 
-        # chtexturegrp
-        n += self._sync("chtexturegrp", _fetch_chtexturegrp, "chkey", chkeys, True)
+            # chtexturegrp
+            n += self._sync("chtexturegrp", _fetch_chtexturegrp, "chkey", chkeys, True)
 
-        # store keys to instance
-        self._sync_n = n
-        self.mukeys = mukeys
-        self.cokeys = cokeys
-        self.chkeys = chkeys
+            # store keys to instance
+            self._sync_n = n
+            self.mukeys = mukeys
+            self.cokeys = cokeys
+            self.chkeys = chkeys
 
-        self.weppSoils = None
-        self.invalidSoils = None
-        self._write_cache_metadata()
+            self.weppSoils = None
+            self.invalidSoils = None
+            self._write_cache_metadata()
+        except (SoilDataSourceError, sqlite3.Error, OSError, ValueError):
+            self._disconnect()
+            raise
 
     def dump(self, table, fname):
         conn, cur = self.conn, self.cur
@@ -2238,7 +2273,24 @@ class SurgoSoilCollection(object):
             if pickle:
                 weppSoil.pickle(wd, overwrite)
 
-            soil = weppSoil.write(wd, overwrite, db_build=db_build, version=version, max_horizons=max_horizons)
+            target_dir = _join(wd, str(weppSoil.mukey)[:3]) if db_build else wd
+            target = _join(target_dir, f"{weppSoil.mukey}.sol")
+            if _exists(target) and not overwrite:
+                continue
+            companion = target + ".provenance.json"
+            if os.path.lexists(companion):
+                os.unlink(companion)
+            soil = weppSoil.write(
+                wd, overwrite, db_build=db_build, version=version, max_horizons=max_horizons
+            )
+            component = getattr(weppSoil, "majorComponent", None)
+            write_artifact_provenance(soil.path, {
+                "schema_version": 1, "mukey": int(weppSoil.mukey),
+                "cokey": int(component.cokey) if component is not None else None,
+                "cache_file": os.path.basename(self._db_path) if self._db_path else None,
+                "source": cache_evidence(self.conn),
+                **({"selection": self.selection_event} if hasattr(self, "selection_event") else {}),
+            })
             soils[soil.mukey] = soil
             if write_logs:
                 weppSoil.write_log(wd, overwrite, db_build=db_build)
@@ -2314,8 +2366,29 @@ class SurgoSoilCollection(object):
         if len(needed) == 0:
             return 0
 
-        data = fetch_func(needed)
+        if self._json_client is not None:
+            ordered = sorted(needed)
+            for offset in range(0, len(ordered), 1000):
+                batch = ordered[offset:offset + 1000]
+                data = fetch_func(batch, client=self._json_client)
+                just_acquired = {row[0] for row in data}
+                with conn:
+                    if data:
+                        placeholders = ",".join("?" for _ in data[0])
+                        cur.executemany(f"INSERT INTO {table} VALUES ({placeholders})", data)
+                    cur.executemany(f"INSERT INTO {bad_tbl} VALUES (?)", [(key,) for key in sorted(set(batch) - just_acquired)])
+                    record_fetch(conn, self.data_source, table, batch, data, self._json_client.last_event)
+            return len(needed)
+
+        token = _XML_RESPONSE_OBSERVATION.set(None)
+        try:
+            data = fetch_func(needed)
+            observation = _XML_RESPONSE_OBSERVATION.get()
+        finally:
+            _XML_RESPONSE_OBSERVATION.reset(token)
         if len(data) == 0:
+            with conn:
+                record_fetch(conn, self.data_source, table, needed, data, observation)
             return 0
 
         if not insert_null_data:
@@ -2356,6 +2429,7 @@ class SurgoSoilCollection(object):
         except sqlite3.Error:
             _LOG.debug("Failed inserting into bad table %s", bad_tbl, exc_info=True)
 
+        record_fetch(conn, self.data_source, table, needed, data, observation)
         conn.commit()
 
         return len(needed)
@@ -2460,6 +2534,8 @@ class SurgoSoilCollection(object):
         generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
         source_label = "STATSGO2" if self.source_data == "StatsGo" else "SSURGO"
         table_counts = self._cache_table_counts()
+        evidence = cache_evidence(self.conn)
+        identity = evidence["binding"]["identity"]
 
         lines = [
             f"# {source_label} SQLite Cache Metadata",
@@ -2479,9 +2555,14 @@ class SurgoSoilCollection(object):
             "",
             "| Field | Value |",
             "| --- | --- |",
-            "| Publisher | USDA Natural Resources Conservation Service (NRCS) |",
+            "| Data publisher | See recorded release manifest; historical origin may be unknown |",
             "| Source service | Soil Data Access Tabular API |",
-            f"| Source endpoint | `{_ssurgo_url}` |",
+            f"| Configured source endpoint | `{identity['endpoint']}` |",
+            f"| Transport profile | `{identity['profile']}` |",
+            f"| Pinned release | `{identity['release'] or 'unknown'}` |",
+            f"| Historical rows of unknown origin | {evidence['binding']['historical_rows_unknown']} |",
+            f"| Recorded successful retrievals | {len(evidence['fetches'])} |",
+            "| Canonical source evidence | SQLite soil_data_source and soil_data_fetch tables |",
             "| Source dataset | Soil Survey Geographic Database (SSURGO) / Digital General Soil Map (STATSGO2) |",
             "| Retrieval implementation | `wepppy.soils.ssurgo.ssurgo` SSURGO fetch helpers |",
             "",

@@ -1,0 +1,221 @@
+{
+  "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1",
+  "project": {
+    "runid": "cavernous-oxygen",
+    "build_job": "a334f0d2-6ab9-420f-b9d1-d4ed397bb07c",
+    "prepare_job": "6b569d94-d1e9-473f-ab4a-0d42f74af2bf",
+    "source": {
+      "endpoint": "http://soil-api:8080/Tabular/post.rest",
+      "profile": "wepppy-json-v1",
+      "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+    },
+    "selection": [
+      {
+        "actual_supplier": {
+          "endpoint": "http://soil-api:8080/Tabular/post.rest",
+          "profile": "wepppy-json-v1",
+          "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+        },
+        "attempts": [
+          {
+            "ended_at": "2026-11-18T04:38:27.083685+00:00",
+            "identity": {
+              "endpoint": "http://soil-api:8080/Tabular/post.rest",
+              "profile": "wepppy-json-v1",
+              "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+            },
+            "outcome": "success",
+            "reason": "selected",
+            "started_at": "2026-11-18T04:38:26.825686+00:00"
+          }
+        ],
+        "configured_primary": {
+          "endpoint": "http://soil-api:8080/Tabular/post.rest",
+          "profile": "wepppy-json-v1",
+          "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+        },
+        "historical_rows_unknown": false,
+        "policy": "mirror-first",
+        "schema_version": 1,
+        "selected_at": "2026-11-18T04:38:27.083699+00:00"
+      }
+    ],
+    "base_provenance_hashes_verified": 21,
+    "prepared_soils_parsed": 32,
+    "complete_hillslope_input_set_verified": true,
+    "full_project_receipt_sha256": "6519aacd2f7e35093fa76b14743fb49812849a17a751c04b410eccdd53225327"
+  },
+  "canaries": [
+    {
+      "runid": "soil-mirror-national-20261118-ssurgo",
+      "mukey": 78905,
+      "build_job": "2a809701-00f1-4e64-aa49-20a287707761",
+      "prepare_job": "49002546-638b-4dff-9cb9-7eb967e2d52b",
+      "build_worker": "f0ba47739509432e895efd3be0de694b",
+      "prepare_worker": "148d54141f4745ac8421c6f62e24d2cc",
+      "policy": "mirror-first",
+      "selection": {
+        "actual_supplier": {
+          "endpoint": "http://soil-api:8080/Tabular/post.rest",
+          "profile": "wepppy-json-v1",
+          "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+        },
+        "attempts": [
+          {
+            "ended_at": "2026-11-18T04:40:03.377858+00:00",
+            "identity": {
+              "endpoint": "http://soil-api:8080/Tabular/post.rest",
+              "profile": "wepppy-json-v1",
+              "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+            },
+            "outcome": "success",
+            "reason": "selected",
+            "started_at": "2026-11-18T04:40:03.141103+00:00"
+          }
+        ],
+        "configured_primary": {
+          "endpoint": "http://soil-api:8080/Tabular/post.rest",
+          "profile": "wepppy-json-v1",
+          "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+        },
+        "historical_rows_unknown": false,
+        "policy": "mirror-first",
+        "schema_version": 1,
+        "selected_at": "2026-11-18T04:40:03.377875+00:00"
+      },
+      "base_hash_verified": true,
+      "exact_reference_parity": true,
+      "prepared_files": 76
+    },
+    {
+      "runid": "soil-mirror-national-20261118-statsgo",
+      "mukey": 1390208,
+      "build_job": "31a341c2-b46b-48b8-b7c4-79a07d9ee6bf",
+      "prepare_job": "b649f9a0-776d-401d-b0e6-82e2ddbe2951",
+      "build_worker": "f6fba02db4904c8b9a2fbc55624b0bb7",
+      "prepare_worker": "5d09cf3dd3e64f738ce3dbab12fa457f",
+      "policy": "mirror-first",
+      "selection": {
+        "actual_supplier": {
+          "endpoint": "http://soil-api:8080/Tabular/post.rest",
+          "profile": "wepppy-json-v1",
+          "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+        },
+        "attempts": [
+          {
+            "ended_at": "2026-11-18T04:40:38.605626+00:00",
+            "identity": {
+              "endpoint": "http://soil-api:8080/Tabular/post.rest",
+              "profile": "wepppy-json-v1",
+              "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+            },
+            "outcome": "success",
+            "reason": "selected",
+            "started_at": "2026-11-18T04:40:38.378393+00:00"
+          }
+        ],
+        "configured_primary": {
+          "endpoint": "http://soil-api:8080/Tabular/post.rest",
+          "profile": "wepppy-json-v1",
+          "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+        },
+        "historical_rows_unknown": false,
+        "policy": "mirror-first",
+        "schema_version": 1,
+        "selected_at": "2026-11-18T04:40:38.605640+00:00"
+      },
+      "base_hash_verified": true,
+      "exact_reference_parity": true,
+      "prepared_files": 76
+    }
+  ],
+  "consumers": [
+    {
+      "service": "weppcloud",
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "user": "1000:993",
+      "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1",
+      "mounts_unchanged": true,
+      "mount_note": null
+    },
+    {
+      "service": "rq-worker-batch",
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "user": "1000:993",
+      "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1",
+      "mounts_unchanged": true,
+      "mount_note": null
+    },
+    {
+      "service": "rq-worker",
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "user": "1000:993",
+      "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1",
+      "mounts_unchanged": true,
+      "mount_note": null
+    },
+    {
+      "service": "rq-worker-fork-archive",
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "user": "1000:993",
+      "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1",
+      "mounts_unchanged": true,
+      "mount_note": null
+    },
+    {
+      "service": "rq-engine",
+      "image": "sha256:659eb59a98ce2e69a74cd36538b9e392c8e33d66de3c8ee5303e02bd243d01a0",
+      "user": "1000:993",
+      "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1",
+      "mounts_unchanged": true,
+      "mount_note": null
+    },
+    {
+      "service": "soil-api",
+      "image": "sha256:4f32140002c67149797cce482fb0170ae7db8303ddf70b279e744f34f338f3c9",
+      "user": "10001:10001",
+      "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1",
+      "mounts_unchanged": false,
+      "mount_note": "API credential mount resolves to canonical shared checkout; bytes, mode and read-only mount preserved."
+    }
+  ],
+  "web": {
+    "authentication": "existing dev-agent server-side session; real HTTPS requests",
+    "routes": [
+      {
+        "path": "/weppcloud/",
+        "status": 200
+      },
+      {
+        "path": "/weppcloud/profile",
+        "status": 200
+      },
+      {
+        "path": "/weppcloud/runs/cavernous-oxygen/disturbed9002_wbt/",
+        "status": 200
+      }
+    ]
+  },
+  "project_migrations": {
+    "migrations": [
+      {
+        "runid": "cavernous-oxygen",
+        "before": {
+          "source": {
+            "endpoint": "http://soil-api:8080/Tabular/post.rest",
+            "profile": "wepppy-json-v1",
+            "release": "forest-id-20261001-vi-20161013-v1"
+          },
+          "policy": "mirror-first"
+        },
+        "after": {
+          "endpoint": "http://soil-api:8080/Tabular/post.rest",
+          "profile": "wepppy-json-v1",
+          "release": "forest-us-ssurgo-20261001-statsgo2-20161013-v1"
+        }
+      }
+    ],
+    "unreadable_inventory_entries": []
+  },
+  "note": "API image unchanged. All five WEPPpy consumer images/users/mounts unchanged. API credential mount uses canonical shared checkout with identical bytes and mode. Historical qualification projects retained."
+}

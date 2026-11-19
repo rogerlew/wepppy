@@ -1,0 +1,77 @@
+{
+  "profile": "broad",
+  "started_utc": "2026-11-18T18:40:35.698200+00:00",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "tests_started": true,
+  "pytest_args": [
+    "tests",
+    "--maxfail=1"
+  ],
+  "head": "bba939a47b499fd6b74327cd6817bdee741a13bb",
+  "checks": [
+    {
+      "name": "controllers",
+      "ready": true,
+      "identity": {
+        "files": {
+          "/workdir/wepppy/wepppy/weppcloud/static/js/controllers-gl.js": "380818af9616abd0fe6e072a87a1c1cafb74df9cb9d3137e8fe94e6a17be97e6"
+        }
+      }
+    },
+    {
+      "name": "browser",
+      "ready": true,
+      "identity": {
+        "files": {
+          "/workdir/wepppy/wepppy/weppcloud/static-src/package.json": "d5753f7af7ebe8920e50c94d3bdb3add97c4100c4a53d61707a5486df54e78b9",
+          "/workdir/wepppy/wepppy/weppcloud/static-src/package-lock.json": "2ddc0117c0bf2c559d2509bded8964801092fe68e4046ec3c8fa3df9c6877a92",
+          "/opt/wctl-runtime/package.json": "d5753f7af7ebe8920e50c94d3bdb3add97c4100c4a53d61707a5486df54e78b9",
+          "/opt/wctl-runtime/package-lock.json": "2ddc0117c0bf2c559d2509bded8964801092fe68e4046ec3c8fa3df9c6877a92",
+          "/opt/wctl-runtime/node_modules/.package-lock.json": "93255d43db28b51d47ed8e69cc0562df8efd94a6397977e8d58513d428bf024c"
+        }
+      }
+    },
+    {
+      "name": "shape_parser_cli",
+      "ready": true,
+      "identity": {
+        "files": {
+          "/usr/local/bin/shape_parser_cli": "1b9b719b9b6633684addd117be01dd7754b648f0a45ab27eea644185a30b70b3",
+          "/usr/local/bin/shape_parser_cli.json": "68025405b8c2a601d2b7f891ebaca428b3b691fa6a3bd1383e661aefbd8d9181"
+        }
+      }
+    },
+    {
+      "name": "geoparquet_parser_cli",
+      "ready": true,
+      "identity": {
+        "files": {
+          "/usr/local/bin/geoparquet_parser_cli": "160854839d237acb4c369bc15f97d5e51ae3841aaaca37777ba2353cfdd79c47",
+          "/usr/local/bin/geoparquet_parser_cli.json": "2f0116d816ff03576cc8503a08db33051de82e0b863cba020a8a19372472551d"
+        }
+      }
+    },
+    {
+      "name": "database",
+      "ready": true,
+      "identity": {
+        "model_columns_present": true,
+        "inspection": "read-only; constraints and migrations still require tests"
+      }
+    }
+  ],
+  "preflight_source_changes": [],
+  "status": "failed",
+  "basetemp": "/tmp/wt-_23_0nh4",
+  "pytest_exitstatus": 1,
+  "runtime_changes": [],
+  "source_changes": [],
+  "exitstatus": 1,
+  "receipt_path": ".wctl-test-runs/167a933af0424a67a9268c42c92392a8/receipt.json",
+  "receipt_sha256": "433c5f4ef170c909f97e74626fa0a7d7bb07e4ed4692633d9bc52d216091abd2",
+  "operator_disposition": "Deferred until after WEPPpy integration; SIGINT caused the recorded test failure."
+}
