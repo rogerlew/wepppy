@@ -66,6 +66,7 @@ from wepppy.runtime_paths.parquet_sidecars import (
     pick_existing_parquet_path as _default_pick_existing_parquet_path,
 )
 from wepppy.nodb.base import createProcessPoolExecutor, nodb_setter
+from wepppy.nodb.core.channel_boundary import validate_channel_extent
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.nodb.duckdb_agents import (
@@ -310,6 +311,9 @@ class WatershedOperationsMixin:
 
         self.logger.info("Building Channels")
 
+        ron = self.ron_instance
+        validate_channel_extent(ron, use_dem_extent=self.set_extent_mode == 3 or ron.dem_is_vrt)
+
         reset_channels_vrt = self.flovec_netful_relief_chnjnt_are_vrt
         if csa is not None or mcl is not None or reset_channels_vrt:
             with self.locked():
@@ -332,7 +336,6 @@ class WatershedOperationsMixin:
             Topaz.getInstance(self.wd).build_channels(csa=self.csa, mcl=self.mcl)
         elif self.delineation_backend_is_wbt:
             self.logger.info(f' delineation_backend_is_wbt')
-            ron = self.ron_instance
             wbt = WhiteboxToolsTopazEmulator(
                 self.wbt_wd,
                 ron.dem_fn,

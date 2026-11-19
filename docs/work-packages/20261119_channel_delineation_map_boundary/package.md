@@ -1,6 +1,6 @@
 # Enforce configured map boundaries during channel delineation
 
-**Status** Open, scaffolded 2026-11-19 16:01 UTC
+**Status** Implemented and locally validated 2026-11-19 UTC. Broad validation in progress.
 
 ## Objective
 
@@ -8,7 +8,7 @@ Use `[map] boundary_check` to select channel extent admission. With a configured
 
 ## Scope and proposed behavior
 
-- Check the extent that the workflow will use. The ordinary map modes use the submitted bounds, the map-object mode uses its decoded extent, and Upload DEM mode uses the saved map extent established by the validated upload.
+- Check the extent that the workflow will use. The ordinary map modes use the submitted bounds, the map-object mode uses its decoded extent, and Upload DEM mode uses the installed raster's geographic bounds.
 - Compare against the geometry itself. A shared point qualifies under intersection. Under coverage the entire extent must be within the boundary, including its edge. The workflow uses the full extent on success.
 - Apply the rule before the build-channels request changes project state, invalidates readiness or enqueues work. Apply the policy to actual batch leaf and direct channel-build extents. Base project settings-only submissions have no processing extent.
 - Use the server-owned effective run config. Treat a missing, unreadable or invalid asset for a set boundary as an operator configuration error with a user-safe response.
@@ -27,7 +27,7 @@ Reuse the run config, extent parsing, geospatial stack and existing error delive
 - [ ] Retain the request, resolved config and reloaded map state, the DEM actually consumed, and semantic readback of fresh channel raster or vector output and the map/report result. Exercise the real asset resolver and delineation consumer using representative disposable runs. For rejection, compare preexisting artifacts and readiness and inspect the job tree.
 - [ ] Update the canonical contract and affected user/operator guidance. Retain independent correctness and security reviews and run the applicable regression gates before implementation closeout.
 
-Current evidence is source inspection. The package is ready for contract work.
+The native WBT Upload DEM path was verified locally through real RQ jobs and channel artifact readback. The broad repository gate is tracked separately.
 
 ## Review and ownership
 
@@ -40,5 +40,7 @@ Security impact is provisionally high because the authenticated RQ route would r
 - [Canonical contract](../../schemas/channel-delineation-map-boundary-contract.md)
 - [Implementation ExecPlan](prompts/active/implementation_execplan.md)
 - [Package tracker](tracker.md)
+- [Correctness review](artifacts/20261119_correctness_review.md)
+- [Security review](artifacts/20261119_security_review.md)
 - [Contract-first change standard](../../standards/contract-first-change-standard.md)
 - [Generated artifact validation standard](../../standards/generated-artifact-validation-standard.md)

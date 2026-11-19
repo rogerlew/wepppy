@@ -1,6 +1,6 @@
 # Channel delineation map boundary
 
-Implementation conformance is pending.
+Implementation is locally validated.
 
 ## Configuration
 
@@ -34,12 +34,14 @@ is a project configuration error when the check applies. The deprecated
 `salvage_logging` preset and its historical asset are outside the supported
 asset inventory.
 
-Use the actual extent supplied for channel processing. Map Bounds and drawn
-extent use `map_bounds`, the map-object mode uses `map_object.extent`, and
-Upload DEM uses the stored map extent established by the validated upload.
+Use the actual extent supplied for channel processing. Use map extent and Specify extent use `map_bounds`, the map-object mode uses `map_object.extent`, and
+Upload DEM uses the geographic bounds of the installed raster, including the
+projection of all four edges. Changing saved map metadata cannot
+change the extent used for that check.
 Bounds are west, south, east, north in longitude/latitude. Accepted requests
 proceed using their full extent. Channel build entry points that operate on a
-stored project map use that map's extent. A Batch Runner leaf uses its own
+stored project map use that map's extent. For Upload DEM and installed DEM VRTs,
+read the bounds of the raster that the build consumes. A Batch Runner leaf uses its own
 effective project config and processing extent. Base project submissions that
 only save shared watershed settings have no channel processing extent.
 
@@ -58,6 +60,9 @@ RQ error envelope carries these outcomes.
 | 500 | `invalid_channel_boundary_config` | Contact support. Internal asset paths and parser details stay out of user-facing errors. |
 
 A direct channel build from persisted state applies the same policy before
-changing channel artifacts. The channel worker rechecks the persisted extent
+changing channel artifacts. The channel worker rechecks the processing extent
 under the same watershed directory lock used by Upload DEM. The check concerns the request geometry. The WBT
 DEM-edge policy independently evaluates the generated watershed against the DEM.
+
+Worker rejection uses the same stable error code and safe message in job info.
+The channel status stream publishes the safe message.

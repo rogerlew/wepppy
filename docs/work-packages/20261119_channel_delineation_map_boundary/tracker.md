@@ -2,16 +2,17 @@
 
 ## Status
 
-Scaffolded on 2026-11-19 at 16:01 UTC. Contract and implementation milestones are queued in the [ExecPlan](prompts/active/implementation_execplan.md).
+The scaffold is committed as `3e869bfd9`. The independent contract checkpoint is `77dbafa04`. Implementation and local native WBT validation passed. Broad regression is in progress.
 
 ## Tasks
 
 - [x] Create the package, map the relevant entry points and review the tracked boundary assets.
 - [x] Confirm the status of `salvage_logging` with the operator.
-- [ ] Verify supported assets and coverage of effective extents, including batch runs and uploaded DEMs.
-- [ ] Define and review the canonical contract, including geometry and errors.
-- [ ] Implement and verify the server-side check through supported entry points.
-- [ ] Retain artifact readback, regression results and independent reviews.
+- [x] Verify supported assets and coverage of effective extents, including batch runs and uploaded DEMs.
+- [x] Define and review the canonical contract, including geometry and errors.
+- [x] Implement and verify the server-side check through supported entry points.
+- [x] Retain artifact readback and independent correctness and security reviews.
+- [ ] Record the broad regression result and close out the package.
 
 ## Decisions
 
@@ -21,4 +22,4 @@ Scaffolded on 2026-11-19 at 16:01 UTC. Contract and implementation milestones ar
 
 ## Handoff
 
-No operator input is pending. Complete independent reviews of the canonical contract and commit the checkpoint before editing runtime code. Record any additional supported preset with an ambiguous boundary asset for operator review if discovered.
+No operator input is pending. The independent reviews cleared all medium and high findings. The [correctness review](artifacts/20261119_correctness_review.md) records the native evidence and remaining environment coverage.

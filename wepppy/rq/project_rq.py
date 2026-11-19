@@ -76,6 +76,7 @@ from wepppy.nodb.core import (
     WatershedCentroidStateError,
     Wepp,
 )
+from wepppy.nodb.core.channel_boundary import ChannelBoundaryError
 from wepppy.nodb.core.climate import ClimateMultipleBuildSupersededError
 from wepppy.nodb.core.watershed_errors import (
     WATERSHED_BOUNDARY_TOUCH_MESSAGE,
@@ -1518,6 +1519,15 @@ def build_channels_rq(
         
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.build_channels)
+    except ChannelBoundaryError as exc:
+        error_id = uuid.uuid4().hex
+        job.meta["error"] = {"code": exc.code, "message": str(exc), "details": {}}
+        job.meta["error_id"] = error_id
+        job.meta.pop("exc_string", None)
+        job.save_meta()
+        _logger.warning("Channel extent rejected [error_id=%s runid=%s code=%s]", error_id, runid, exc.code)
+        StatusMessenger.publish(status_channel, f"rq:{job.id} FAILED {func_name}({runid}) {exc}")
+        raise
     except WbtUnresolvedDepressionsError as exc:
         error_id = __import__("uuid").uuid4().hex
         job.meta["error"] = {

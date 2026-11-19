@@ -13,6 +13,7 @@ from wepppy.request_payload import RequestPayloadError
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from rq import Queue
 from starlette.datastructures import UploadFile
 import utm
@@ -31,6 +32,7 @@ from wepppy.nodb.core import (
     Watershed,
     WatershedBoundaryTouchesEdgeError,
 )
+from wepppy.nodb.core.channel_boundary import ChannelBoundaryError, validate_channel_extent
 from wepppy.nodb.core.watershed import WBT_FILL_OR_BREACH_VALUES
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
@@ -129,10 +131,10 @@ def _normalize_config_token(value: str) -> str:
     return token[:-4] if token.endswith(".cfg") else token
 
 
-def _config_mismatch_response(wd: str, config: str) -> JSONResponse | None:
+def _config_mismatch_response(ron: Ron, config: str) -> JSONResponse | None:
     """Reject a mismatched mutable run/config route before any state change."""
     actual_config = _normalize_config_token(
-        getattr(Ron.getInstance(wd), "config_stem", "")
+        getattr(ron, "config_stem", "")
     )
     requested_config = _normalize_config_token(config)
     if requested_config == "_base":
@@ -702,7 +704,8 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
     summary="Fetch DEM and build channels",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Mutates watershed delineation settings and, outside batch mode, asynchronously enqueues DEM/channel processing."
+        "Validates the configured map boundary before enqueueing DEM/channel processing. "
+        "Batch settings submissions save shared delineation inputs."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("fetch_dem_and_build_channels"),
@@ -710,7 +713,7 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
         success_code=200,
         success_description="Watershed inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
-            400: "Watershed map/change validation failed. Returns the canonical error payload.",
+            400: "Watershed map input or channel extent policy failed. Returns the canonical error payload.",
             409: "Run config mismatch. Returns canonical `run_config_mismatch` without mutation.",
         },
     ),
@@ -752,13 +755,13 @@ async def fetch_dem_and_build_channels(
         ) = args
 
         wd = get_wd(runid)
-        mismatch_response = _config_mismatch_response(wd, config)
+        ron = Ron.getInstance(wd)
+        mismatch_response = _config_mismatch_response(ron, config)
         if mismatch_response is not None:
             return mismatch_response
         _preflight_watershed_mutation_root(wd)
         watershed = Watershed.getInstance(wd)
         if int(set_extent_mode) == 3:
-            ron = Ron.getInstance(wd)
             if ron.map is None or not ron.has_dem:
                 return error_response(
                     "Upload DEM mode requires a validated DEM upload.",
@@ -788,10 +791,13 @@ async def fetch_dem_and_build_channels(
                         watershed._wbt_blc_dist = wbt_blc_dist
 
             if map_object is not None:
-                ron = Ron.getInstance(wd)
                 ron.set_map_object(map_object)
 
             return JSONResponse({"message": "Set watershed inputs for batch processing"})
+
+        await run_in_threadpool(
+            validate_channel_extent, ron, extent, use_dem_extent=int(set_extent_mode) == 3
+        )
 
         prep = RedisPrep.getInstance(wd)
         if int(set_extent_mode) != 3:
@@ -825,6 +831,8 @@ async def fetch_dem_and_build_channels(
                 allowed_workflow_funcs=(fetch_dem_rq, build_channels_rq),
             )
         return JSONResponse({"job_id": job.id})
+    except ChannelBoundaryError as exc:
+        return error_response(str(exc), status_code=exc.status_code, code=exc.code)
     except RqSubmissionConflict as exc:
         return error_response(str(exc), status_code=409, code="job_active")
     except MinimumChannelLengthTooShortError as exc:

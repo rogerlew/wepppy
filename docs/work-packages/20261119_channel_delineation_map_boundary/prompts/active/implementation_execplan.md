@@ -9,9 +9,10 @@ A user who selects an extent that fails the configured policy should get immedia
 ## Progress
 
 - [x] 2026-11-19 16:01 UTC. Scaffolded the package and traced the main admission and execution paths.
-- [ ] Audit supported boundary assets and channel entry points and complete the canonical contract checkpoint.
-- [ ] Implement focused validation and test all affected paths.
-- [ ] Read back real artifacts and complete correctness, security and regression reviews.
+- [x] Audited supported assets and entry points and committed the canonical contract checkpoint as `77dbafa04`.
+- [x] Implemented admission and worker validation and passed the local policy and native WBT tests.
+- [x] Read back real artifacts and completed correctness and security reviews.
+- [ ] Record the broad regression outcome.
 
 ## Surprises & Discoveries
 
@@ -25,11 +26,11 @@ The operator requested intersection with the effective config boundary and unres
 
 ## Outcomes & Retrospective
 
-The package and tracker are ready. Source discovery identified the candidate admission path, channel consumers and the initial asset audit. Contract review and runtime evidence remain implementation milestones.
+Local validation passed for all policies and the native Upload DEM workflow. The operative boundary uses installed raster bounds for upload mode, with a locked recheck in the worker. Broad regression is in progress.
 
 ## Context and orientation
 
-In `wepppy/microservices/rq_engine/watershed_routes.py`, `_parse_map_change` decodes the request and `fetch_dem_and_build_channels` authorizes the run, checks config identity and preflights mutation. Modes 0 and 1 use `map_bounds`, mode 2 uses `Map.from_payload(...).extent`, and mode 3 uses a previously uploaded DEM and its persisted `Ron.map` for actual channel work. The route saves parameters for batch/base projects or sends work to `fetch_dem_and_build_channels_rq` in `wepppy/rq/project_rq.py`. That job normally queues DEM fetch before channel build. In Upload DEM mode it queues channel build directly.
+In `wepppy/microservices/rq_engine/watershed_routes.py`, `_parse_map_change` decodes the request and `fetch_dem_and_build_channels` authorizes the run, checks config identity and preflights mutation. Modes 0 and 1 use `map_bounds`, mode 2 uses `Map.from_payload(...).extent`, and mode 3 uses the geographic bounds of the actual installed DEM for the check and the worker consumes that same raster. The route saves parameters for batch/base projects or sends work to `fetch_dem_and_build_channels_rq` in `wepppy/rq/project_rq.py`. That job normally queues DEM fetch before channel build. In Upload DEM mode it queues channel build directly.
 
 `wepppy/nodb/core/watershed_mixins.py::WatershedOperationsMixin.build_channels` is the channel build method used by the normal worker. `wepppy/nodb/batch_runner.py` and the task chain in `wepppy/rq/project_rq.py` also build channels directly. Trace their effective configs and map extents, including any per-run batch extent established after base-project settings are saved.
 
@@ -52,3 +53,5 @@ Repeat acceptance with disposable runs and fresh job identities. A rejected requ
 ## Interfaces and dependencies
 
 The existing build-channels request and the effective run config carry the inputs. Reuse existing map extent types, server-side geometry tooling and the RQ error envelope. Keep the shared check usable from admission and any direct build consumer that needs it. Record the final interface and concrete test commands as the implementation proceeds.
+
+The execution update records the installed DEM authority and the four-edge projection fixed after review.
