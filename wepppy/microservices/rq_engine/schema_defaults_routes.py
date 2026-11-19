@@ -1688,6 +1688,17 @@ def _build_operation_error_catalog(
                 }
             )
 
+    if operation_id == rq_operation_id("fetch_dem_and_build_channels"):
+        retry = [{"operation_id": operation_id, "required_fields": required_fields}]
+        errors.extend([
+            {"error_code": "channel_extent_outside_boundary", "recoverable": True,
+             "http_statuses": [400], "recovery_actions": retry},
+            {"error_code": "invalid_channel_extent", "recoverable": True,
+             "http_statuses": [400], "recovery_actions": retry},
+            {"error_code": "invalid_channel_boundary_config", "recoverable": False,
+             "http_statuses": [500], "recovery_actions": []},
+        ])
+
     if operation_id == rq_operation_id("build_climate"):
         errors.extend(
             [

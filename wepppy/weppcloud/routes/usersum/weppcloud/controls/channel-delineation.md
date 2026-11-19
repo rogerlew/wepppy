@@ -18,6 +18,14 @@ Channel delineation extracts channels from a DEM using either TOPAZ or Weppcloud
 | Set Map Object | Reuse an exact grid | Map object JSON | Paste the `_map` JSON from `ron.nodb` to reuse the exact grid, cellsize, and UTM metadata. |
 | Upload DEM | You already have a DEM | GeoTIFF or self-contained IMG upload | Validates and installs the uploaded DEM, then uses its extent for delineation. |
 
+## Project map boundary
+
+Some project configurations limit where you can build channels. Your selected
+extent may need to touch or overlap the displayed project boundary, or fit
+entirely inside it. If **Build Channels** rejects the extent, move or resize the
+selection and try again. In **Upload DEM** mode, use a DEM that meets the same
+rule. A project without a configured boundary allows you to try any location.
+
 ## Upload DEM Requirements
 Your DEM must meet all of the following:
 - GeoTIFF (`.tif`/`.tiff`) or self-contained ERDAS Imagine (`.img`) with a valid

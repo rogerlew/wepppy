@@ -888,6 +888,10 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Channel delineation map boundary
+
+[Work package](docs/work-packages/20261119_channel_delineation_map_boundary/package.md) implemented and locally validated. The full suite passed 6,706 tests before a baseline SSURGO cache fixture failure, confirmed on the unchanged starting revision. Repository-wide acceptance is pending.
+
 
 ### Shape-Converter Security Conformance Closure
 

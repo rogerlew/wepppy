@@ -301,6 +301,12 @@ import failures, status aggregation errors, abandoned workers, and retained fail
 jobs after rollback. Implementation and checkpoint are pending;
 do not treat this amendment as deployed redaction.
 
+### Channel extent admission
+
+Configured project boundary checks for channel submissions use the existing
+error envelope. The spatial policy, HTTP statuses and error codes are defined in
+[Channel delineation map boundary](channel-delineation-map-boundary-contract.md).
+
 ### WBT DEM-boundary controlled failure
 
 SURF-14A defines one bounded sanitized job-info failure. When WBT boundary

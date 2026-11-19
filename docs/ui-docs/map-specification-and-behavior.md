@@ -105,6 +105,11 @@ Emitted via `WCEvents.useEventMap`:
 - SBS image: `query/baer_wgs_map/`.
 - Outlet: `query/outlet/`, `report/outlet/`, `rq-engine/api/runs/<runid>/<config>/set-outlet`.
 - Channel build: `rq-engine/api/runs/<runid>/<config>/fetch-dem-and-build-channels`, `query/delineation_pass/`, `query/has_dem/`.
+  A configured project boundary can require the selected extent to touch or
+  overlap the boundary, or fit entirely within it. If the check rejects your
+  extent, move or resize the selection and build channels again. For Upload DEM,
+  choose a DEM that meets the same rule. See the
+  [channel delineation map boundary contract](../schemas/channel-delineation-map-boundary-contract.md).
 - Selection box: `tasks/sub_intersection/`.
 - Landuse/Rangeland modify: `tasks/modify_landuse/`, `tasks/modify_rangeland_cover/`.
 - Subcatchment overlays: `query/landuse/subcatchments/`, `query/rangeland_cover/subcatchments/`, `query/soils/subcatchments/`, `query/landuse/cover/subcatchments`.
