@@ -85,3 +85,7 @@ input replay. The original second-incident upload remains unavailable.
 The focused Python gate passed 532 tests. Frontend lint and all nine
 frontend tests passed. Stub completeness passed. Stubtest reported the
 same 143 diagnostics against the parent and candidate snapshots.
+
+The 99-test Disturbed matrix gate passed. Retained native outputs and the
+regenerated report matched the published benchmark exactly. The generated
+soil inputs differ only in the Build Date comment. [Matrix parity receipt](20261120_esdac_reconciliation_matrix_parity.json)

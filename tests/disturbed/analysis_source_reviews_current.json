@@ -6,7 +6,7 @@
   "reviewed_source_deltas": {
     "wepppy/wepp/management/managements.py": {
       "recorded": "c83275c7b2dd5331f991086158b3a2605a056c9431551d388128391872842664",
-      "current": "cc5a5309f20b6682a12ee544914d7f6e04bdbd53da7e6da25223275ee36432aa"
+      "current": "f76b05cec4acab2de131b8404bdc869f85cfd9d19945d224b5a248a46fb3e459"
     },
     "wepppy/wepp/soils/utils/wepp_soil_util.py": {
       "recorded": "367e94103f75d8746f99fb5c440fe84059534d1efb50ec2d3431fcbfb76243ba",
@@ -21,11 +21,12 @@
       "current": "2abe4a28b337c9bbd04ee39f8cba549b7185fd4a44a8a3c00da8bfc8bb1cf8e6"
     }
   },
-  "rationale": "Prior review verified that the existing capacity defaults retain this benchmark. The additional generic thinning lookup admission is outside the matrix vegetation and mapping selection. A fresh 96-case matrix matched 768 native outputs, 96 management inputs, and 864 other inputs byte for byte. All 96 generated soils differ only in the Build Date comment.",
-  "evidence": "docs/work-packages/20261120_eu_run_recovery/artifacts/20261120_disturbed_matrix_parity.json",
+  "rationale": "Earlier reviews verified native input capacity and generic thinning admission. The exact European ESDAC map selector and selector metadata are outside the benchmark mapping and vegetation classes. A fresh 96-case matrix matched 768 native outputs, 96 management inputs, and 864 other inputs byte for byte. All 96 generated soils differ only in the Build Date comment. The independently generated report matches the published bytes.",
+  "evidence": "docs/work-packages/20261120_eu_run_recovery/artifacts/20261120_esdac_reconciliation_matrix_parity.json",
   "raw_evidence": [
     "/workdir/soil-input-capacity-23-evidence/disturbed-matrix-artifacts.jsonl",
-    "/home/workdir/wepppy-eu-run-recovery/.wctl-test-runs/retained-disturbed-matrix-20261120/disturbed_matrix0"
+    "/home/workdir/wepppy-eu-run-recovery/.wctl-test-runs/retained-esdac-reconciled-final/disturbed_matrix0"
   ],
-  "prior_evidence": "docs/work-packages/20261118_soil_input_capacity_23/artifacts/disturbed-parity.json"
+  "prior_evidence": "docs/work-packages/20261118_soil_input_capacity_23/artifacts/disturbed-parity.json",
+  "earlier_source_review_evidence": "docs/work-packages/20261120_eu_run_recovery/artifacts/20261120_disturbed_matrix_parity.json"
 }
