@@ -532,3 +532,24 @@ A declarative admission marker prohibits ordinary mutation while building and
 after finalization; READONLY cannot be cleared through ordinary calls. Absent
 markers retain existing behavior; malformed markers fail closed for mutation.
 No general NoDb lock or catalog-write exemption is introduced.
+
+## Land-use Parquet backfill eligibility
+
+Implementation conformance is pending. When the canonical land-use Parquet
+and a legacy `landuse.csv` are both absent, derive backfill eligibility from
+the persisted NoDb data that can generate the hillslope summary. Require a
+nonempty set of hillslope assignments and a management summary for every code
+used by those hillslopes. Use the same channel filter as the writer. Channel-only
+assignments cannot produce hillslope Parquet. Support both flat state and the
+`py/state` representation. Existing runtime-generated treatment keys are
+eligible when their summaries are persisted. No current catalog lookup is
+required for historical data.
+
+Assignment-only, summary-only, empty, or mismatched state is incomplete for
+this repair. Neither a dry run nor actual migration may generate Parquet from
+that state. The run-page eligibility check keeps the failed run accessible for
+retry. Preserve existing read and decode diagnostics and their error-state
+routing. A malformed file is distinct from valid but incomplete state. Preserve existing
+legacy CSV handling, normalization of existing Parquet, and schema-version
+migration. This check verifies the inputs required by the backfill writer. It
+does not guarantee that a standalone build or replacement completed all stages.
