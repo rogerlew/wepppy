@@ -68,7 +68,8 @@ class QueryCatalogSettings:
 def catalog_worker_configuration() -> dict[str, Any]:
     from wepppy.query_engine.catalog_refresh import catalog_worker_configuration as configuration
     return {**configuration(), "enabled": QueryCatalogSettings.from_environ().enabled,
-            "inventory_protocol": 1, "admission_protocol": 1, "pilot_protocol": 1, "queue": "default"}
+            "inventory_protocol": 1, "admission_protocol": 1, "pilot_protocol": 1,
+            "browser_prepare_protocol": 1, "queue": "default"}
 
 
 def _configuration_id() -> str:
@@ -96,6 +97,23 @@ def _suspension_key(scope_id: str) -> str:
 
 def _default_queue() -> Queue:
     return Queue("default", connection=redis.Redis(**redis_connection_kwargs(RedisDB.RQ)))
+
+
+def catalog_recovery_registered(scope, *, register: bool) -> bool:
+    """Use bounded Redis I/O to hand HTTP preparation to the scheduler."""
+    from redis.backoff import NoBackoff
+    from redis.retry import Retry
+
+    options = redis_connection_kwargs(RedisDB.RQ)
+    options.update(socket_connect_timeout=1, socket_timeout=1, retry=Retry(NoBackoff(), 0))
+    with redis.Redis(**options) as connection:
+        if connection.exists(_suspension_key(scope.scope_id), WORKERS_SUSPENDED):
+            return False
+        key = 'query-catalog:dirty:' + _configuration_id()
+        if register:
+            connection.sadd(key, str(scope.base))
+            return True
+        return bool(connection.sismember(key, str(scope.base)))
 
 
 def consumer_status(queue: Queue) -> dict[str, Any]:
@@ -231,7 +249,12 @@ def refresh_query_catalog_rq(
     wd: str, *, scope_id: str, incarnation: str, configuration: dict[str, Any], pilot_id: str | None = None
 ) -> None:
     """One finite receipt snapshot; scheduler handles late work and retries."""
-    from wepppy.query_engine.catalog_refresh import refresh_catalog, resolve_scope
+    from contextlib import nullcontext
+
+    from wepppy.query_engine.access_scope import access_scope
+    from wepppy.query_engine.catalog_refresh import (
+        browser_catalog_parent, refresh_catalog, resolve_scope,
+    )
 
     job = get_current_job()
     if job is None:
@@ -252,7 +275,18 @@ def refresh_query_catalog_rq(
         if resolved.scope_id != scope_id or resolved.incarnation != incarnation or not resolved.managed:
             raise ValueError("Queued catalog project identity is no longer current")
         try:
-            refresh_catalog(wd, expected_incarnation=incarnation, strict=True)
+            def checkpoint() -> None:
+                current = resolve_scope(wd)
+                if current != resolved:
+                    raise ValueError("Queued catalog project identity is no longer current")
+
+            parent = browser_catalog_parent(resolved.base)
+            scope_context = (
+                access_scope(resolved.base, parent, checkpoint)
+                if parent is not None else nullcontext()
+            )
+            with scope_context:
+                refresh_catalog(wd, expected_incarnation=incarnation, strict=True)
         except (OSError, ValueError, RuntimeError):
             # Worker boundary: retain core failure evidence/receipts and retry budget.
             attempts = connection.hincrby(_retry_key(scope_id), "attempts", 1)
@@ -513,6 +547,9 @@ def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None
                     item["reconcile"] = False
                 elif not pending_catalog_requests(path):
                     connection.srem(dirty_key, str(path), item["path"])
+                    # A producer may register a new receipt between our read and removal.
+                    if pending_catalog_requests(path, first_only=True):
+                        connection.sadd(dirty_key, str(path))
                     continue
                 result = enqueue_catalog_refresh(path, scope=scope.as_dict(), queue=queue, pilot_id=pilot_id, controller_token=controller_token)
                 if result.get("job_id"):

@@ -16,6 +16,7 @@ class AccessScope:
     root: Path
     parent: Path
     checkpoint: Callable[[], None]
+    catalog_wait: bool = False
 
     def require_path(self, path: Path) -> None:
         resolved = path.resolve()
@@ -101,8 +102,8 @@ def check_source(path: Path) -> None:
 
 
 @contextmanager
-def access_scope(root: Path, parent: Path, checkpoint: Callable[[], None]):
-    token = _CURRENT_SCOPE.set(AccessScope(root, parent, checkpoint))
+def access_scope(root: Path, parent: Path, checkpoint: Callable[[], None], *, catalog_wait: bool = False):
+    token = _CURRENT_SCOPE.set(AccessScope(root, parent, checkpoint, catalog_wait))
     try:
         yield
     finally:

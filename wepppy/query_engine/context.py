@@ -127,6 +127,11 @@ def resolve_run_context(
     try:
         catalog_path.stat()
     except FileNotFoundError:
+        from wepppy.query_engine.access_scope import current_scope
+        access = current_scope()
+        if access is not None and access.catalog_wait:
+            from wepppy.query_engine.catalog_refresh import CatalogNotReady
+            raise CatalogNotReady() from None
         if not auto_activate:
             raise
         from wepppy.query_engine.activate import activate_query_engine

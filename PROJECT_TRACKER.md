@@ -1,4 +1,4 @@
-Contract approved for implementation: [GL Dashboard catalog readiness](docs/work-packages/20261119_gl_catalog_readiness/package.md) — One readiness handshake per target, a visible wait before query fan-out, and scoped admission, race, and browser tests.
+Implemented and locally validated: [GL Dashboard catalog readiness](docs/work-packages/20261119_gl_catalog_readiness/package.md) — One readiness handshake per target, a visible wait before result queries, one RQ admission in the concurrency test, and two served browser tests. Fleet rollout remains pending.
 
 In progress: [CI runner migration](docs/work-packages/20261118_ci_runner_migration/package.md) - Migrate active/nightly checks off homelab; retire approved old profile schedules.
 

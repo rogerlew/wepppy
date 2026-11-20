@@ -36,4 +36,17 @@ Add client cases to `wepppy/weppcloud/static/js/gl-dashboard/__tests__/query-eng
     NODE_OPTIONS=--experimental-vm-modules npm exec -- jest --config jest.config.mjs --testPathPatterns=gl-dashboard/.*/query-engine
     npm run smoke -- tests/smoke/gl-dashboard-catalog-readiness.spec.js
 
-The browser spec is a planned addition. Retain the exact checkout, runtime identity, fixture identity and sanitized request timings alongside artifact readback. Also run repository-required broader gates before a production handoff. Use `wctl check-rq-graph` and inspect a live job tree if implementation changes enqueue wiring.
+For real RQ tests, use an isolated Redis server with TCP disabled and mount its
+Unix socket into the disposable candidate container. Seed the
+`batch-boundary-test-server` key with `disposable` and set
+`BATCH_BOUNDARY_TEST_REDIS_SOCKET` inside that container to the mounted socket
+path. Check that pytest executes the real admission tests.
+
+For the browser spec, set `GL_CATALOG_TEST_URL` to the served disposable run,
+`GL_CATALOG_TEST_TOPAZ_ID` to the fixture hillslope, and
+`GL_CATALOG_TEST_RUNOFF_MM` to its known runoff value. Start with pending
+publication so both tabs observe preparation. The validated fixture used NFS,
+hillslope 11 and 10 mm. Playwright held the status responses until both tabs
+asserted zero result POSTs, then checked the active runoff layer. The companion
+RQ test supplies scheduler and worker evidence. Retain the checkout, runtime
+identity, and sanitized request timing alongside artifact readback. Also run repository-required broader gates before a production handoff. Use `wctl check-rq-graph` and inspect a live job tree if implementation changes enqueue wiring.

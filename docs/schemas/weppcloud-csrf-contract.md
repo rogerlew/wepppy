@@ -269,7 +269,7 @@ Task-branch implementation; deployment deferred: [account verification](weppclou
 
 ### GL catalog preparation
 
-GL-CATALOG-01 implementation conformance pending. Apply the Query Engine
+GL-CATALOG-01 implemented and locally validated. Apply the Query Engine
 same-origin browser guard to readiness prepare POST and to opt-in wait-mode
 query POST for cookie and anonymous requests. Bearer requests retain the
 existing origin and credential checks. Catalog status GET is read-only.

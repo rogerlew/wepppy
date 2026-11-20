@@ -1,6 +1,6 @@
 # GL catalog readiness
 
-GL-CATALOG-01 implementation conformance pending.
+GL-CATALOG-01 implemented and locally validated.
 
 Before sending SQL requests, GL checks catalog readiness through the
 [Query Engine HTTP handshake](../../schemas/query-engine-http-access-contract.md#gl-catalog-readiness-handshake).

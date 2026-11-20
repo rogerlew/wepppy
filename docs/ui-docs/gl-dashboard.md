@@ -19,6 +19,7 @@
 - [Performance Considerations](#performance-considerations)
 - [Testing Strategy](#testing-strategy)
 - [Known Issues and Workarounds](#known-issues-and-workarounds)
+- [Query Catalog Readiness](#query-catalog-readiness)
 
 ## Overview
 
@@ -1599,6 +1600,7 @@ are unchanged; no basemap persistence was added. See FSBASE-01 for use limitatio
 
 ## Query catalog readiness
 
-The [GL catalog readiness contract](contracts/gl-catalog-readiness-contract.md)
-specifies the preparation status, automatic loading, and retry behavior for
-query-backed layers. Implementation conformance is pending.
+GL shows “Preparing watershed results…” when the dataset catalog needs work.
+You can keep using the map. The query-backed layers load automatically when
+results are ready. If preparation takes too long, choose Retry in the Layers
+panel. [Catalog readiness contract](contracts/gl-catalog-readiness-contract.md)

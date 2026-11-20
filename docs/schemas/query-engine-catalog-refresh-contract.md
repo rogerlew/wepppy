@@ -366,7 +366,7 @@ exception is granted. Its final build record path exists before manifest creatio
 
 ## GL catalog readiness handshake
 
-GL-CATALOG-01 implementation conformance pending. The
+GL-CATALOG-01 implemented and locally validated. The
 [HTTP access contract](query-engine-http-access-contract.md#gl-catalog-readiness-handshake)
 defines the browser handshake. The dashboard opts into background preparation
 to prevent parallel layer requests from each collecting catalog metadata.

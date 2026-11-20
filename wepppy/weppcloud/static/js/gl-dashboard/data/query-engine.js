@@ -1,4 +1,5 @@
 import { getValue } from '../state.js';
+import { CATALOG_WAIT_MS, CatalogPreparationError, createCatalogReadiness, pollDelay } from './catalog-readiness.js';
 
 /**
  * Query Engine HTTP helpers. No DOM/deck usage; relies on ctx for run context.
@@ -8,7 +9,9 @@ import { getValue } from '../state.js';
  * URL format: /query-engine/runs/{runid}/{config}/query
  * Scenario is passed in the request body as "scenario" parameter.
  */
-export function createQueryEngine(ctx) {
+export function createQueryEngine(ctx, { onCatalogState } = {}) {
+  const catalog = onCatalogState ? createCatalogReadiness(onCatalogState) : null;
+  let scenarioGeneration = 0;
   let roadsUnavailable = false;
   let roadsUnavailableReason = 'Run Roads to generate current results.';
   let roadsUnavailableCode = 'roads_results_unavailable';
@@ -92,44 +95,85 @@ export function createQueryEngine(ctx) {
     return `${parentRunId};;omni-contrast;;${contrastId}`;
   }
 
-  async function postQueryEngine(payload) {
-    const scenarioPath = getValue('currentScenarioPath');
+  function scenarioTarget(scenarioPath) {
     const contrastRunId = resolveContrastRunId(scenarioPath);
     const scenario = contrastRunId ? null : extractScenarioName(scenarioPath);
-    const runidOverride = contrastRunId || (scenario ? resolveParentRunId(ctx.runid) : null);
-    const targetUrl = getBaseUrl(runidOverride);
-    const body = scenario ? { ...payload, scenario } : payload;
-    const resp = await fetch(targetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(body),
-    });
-    return readResponse(resp, !scenario && !contrastRunId);
+    const runid = contrastRunId || (scenario ? resolveParentRunId(ctx.runid) : null);
+    return [getBaseUrl(runid), scenario];
   }
 
-  async function postBaseQueryEngine(payload) {
-    const targetUrl = getBaseUrl();
-    const resp = await fetch(targetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    return readResponse(resp);
+  async function post(payload, target, currentRun, stillCurrent = () => true) {
+    const [url, scenario] = target;
+    const body = { ...payload };
+    if (scenario) body.scenario = scenario;
+    if (catalog) {
+      if (!scenario) delete body.scenario;
+      body.catalog_mode = 'wait';
+    }
+    const deadline = Date.now() + CATALOG_WAIT_MS;
+    let nextDelay = 0;
+    const ensureCurrent = () => {
+      if (!stillCurrent()) throw new DOMException('Query target changed', 'AbortError');
+    };
+    while (true) {
+      ensureCurrent();
+      const entry = catalog?.start(url, scenario, deadline, nextDelay);
+      await entry?.promise;
+      ensureCurrent();
+      if (entry?.error) throw entry.error;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(body),
+        signal: entry?.controller.signal,
+      });
+      ensureCurrent();
+      if (catalog && [202, 409, 503].includes(response.status)) {
+        const { code } = await response.clone().json().catch(() => ({}));
+        ensureCurrent();
+        const retry = code === 'catalog_preparing' ||
+          (code === 'catalog_refresh_unavailable' && response.headers?.get('Retry-After'));
+        if (retry && Date.now() < deadline) {
+          // Drop a fulfilled readiness check without cancelling other queries
+          // that have already been sent using it.
+          catalog.invalidate(entry);
+          nextDelay = pollDelay(response);
+          continue;
+        }
+        if (['catalog_preparing', 'catalog_readonly', 'catalog_refresh_failed', 'catalog_refresh_unavailable'].includes(code)) {
+          const error = new CatalogPreparationError(retry ? 'Results are taking longer to prepare.' : undefined);
+          catalog.fail(entry, error);
+          throw error;
+        }
+      }
+      const result = await readResponse(response, currentRun);
+      ensureCurrent();
+      return result;
+    }
   }
 
-  async function postQueryEngineForScenario(payload, scenarioPath) {
-    const contrastRunId = resolveContrastRunId(scenarioPath);
-    const scenario = contrastRunId ? null : extractScenarioName(scenarioPath);
-    const runidOverride = contrastRunId || (scenario ? resolveParentRunId(ctx.runid) : null);
-    const targetUrl = getBaseUrl(runidOverride);
-    const body = scenario ? { ...payload, scenario } : payload;
-    const resp = await fetch(targetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(body),
-    });
-    return readResponse(resp, !scenario && !contrastRunId);
+  function postQueryEngine(payload) {
+    const path = getValue('currentScenarioPath');
+    const [url, scenario] = scenarioTarget(path);
+    const generation = scenarioGeneration;
+    return post(payload, [url, scenario], url === getBaseUrl() && !scenario,
+      () => scenarioGeneration === generation && getValue('currentScenarioPath') === path);
   }
 
-  return { postQueryEngine, postBaseQueryEngine, postQueryEngineForScenario };
+  function postBaseQueryEngine(payload) {
+    return post(payload, [getBaseUrl(), null], true);
+  }
+
+  function postQueryEngineForScenario(payload, scenarioPath) {
+    const [url, scenario] = scenarioTarget(scenarioPath);
+    return post(payload, [url, scenario], url === getBaseUrl() && !scenario);
+  }
+
+  function scenarioChanged(scenarioPath) {
+    scenarioGeneration += 1;
+    catalog?.keep([[getBaseUrl(), null], scenarioTarget(scenarioPath)]);
+  }
+
+  return { postQueryEngine, postBaseQueryEngine, postQueryEngineForScenario, scenarioChanged,
+    resetCatalogReadiness: () => catalog?.keep([]), retryCatalogReadiness: () => catalog?.clearFailures() };
 }

@@ -662,3 +662,124 @@ def test_shipped_scheduler_admits_inventory_and_refresh_on_default(catalog_queue
     entries = json.loads((path / "_query_engine/catalog.json").read_text())["files"]
     assert "values.csv" in {entry["path"] for entry in entries}
     assert Queue("batch", connection=queue.connection).count == 0
+
+
+def test_browser_preparation_registers_one_work_item_and_runs_sql(catalog_queue, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from starlette.testclient import TestClient
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from wepppy.query_engine.app import server
+    from wepppy.query_engine.app import access
+    from wepppy.query_engine.app.helpers import QueryTarget
+
+    root, queue, worker = catalog_queue
+    path = project(root, 'ab-run')
+    (path / 'PUBLIC').touch()
+    dataset = path / 'result.parquet'
+    pq.write_table(pa.table({'value': [17]}), dataset)
+    monkeypatch.setattr(access, 'resolve_http_target', lambda _: QueryTarget(
+        'ab-run', 'cfg', path, 'ab-run', path,
+    ))
+    monkeypatch.setattr(tasks, 'redis_connection_kwargs', lambda _: {
+        'unix_socket_path': queue.connection.connection_pool.connection_kwargs['path'],
+    })
+    headers = {'Sec-Fetch-Site': 'same-origin'}
+    prefix = '/runs/ab-run/cfg'
+    with TestClient(server.create_app()) as client:
+        assert client.get(prefix + '/catalog/status').status_code == 503
+        assert not (path / core.REFRESH_PATH).exists()
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            responses = list(executor.map(lambda _: client.post(
+                prefix + '/catalog/prepare', json={}, headers=headers), range(2)))
+        assert all(response.status_code == 202 or (
+            response.status_code == 503 and response.headers['Retry-After'] == '2'
+        ) for response in responses)
+        assert len(core.pending_catalog_requests(path)) == 1
+        status = client.get(prefix + '/catalog/status')
+        assert status.status_code == 202
+        assert status.json() == {'state': 'preparing', 'code': 'catalog_preparing'}
+        assert not queue.get_job_ids()
+        scheduled = tasks.reconcile_query_catalogs(queue=queue)
+        assert scheduled['admitted'] == 1
+        assert len(set(queue.get_job_ids()) - {scheduled['inventory_job_id']}) == 1
+        drain(queue, worker)
+        assert client.get(prefix + '/catalog/status').json() == {'state': 'ready'}
+
+        query = {'catalog_mode': 'wait', 'datasets': ['result.parquet']}
+        result = client.post(prefix + '/query', json=query, headers=headers)
+        assert result.status_code == 200
+        assert result.json()['records'] == [{'value': 17}]
+
+        # Change a required source without recording producer intent. SQL must
+        # return a typed wait and leave publication to background maintenance.
+        pq.write_table(pa.table({'value': [23, 24]}), dataset)
+        stale = client.post(prefix + '/query', json=query, headers=headers)
+        assert stale.status_code == 202
+        assert core.pending_catalog_requests(path)[0]['asset_path'] == 'result.parquet'
+        worker.register_birth()
+        worker.set_state('idle')
+        tasks.reconcile_query_catalogs(queue=queue)
+        drain(queue, worker)
+        result = client.post(prefix + '/query', json=query, headers=headers)
+        assert result.status_code == 200
+        assert result.json()['records'] == [{'value': 23}, {'value': 24}]
+
+
+def test_browser_prepare_worker_must_advertise_source_containment(catalog_queue):
+    root, queue, worker = catalog_queue
+    path = project(root)
+    assert core.prepare_catalog_intent(path) == 'pending'
+    config = tasks.catalog_worker_configuration()
+    config.pop('browser_prepare_protocol')
+    queue.connection.hset(worker.key, tasks.WORKER_FIELD, json.dumps(config))
+    result = tasks.enqueue_catalog_refresh(path, queue=queue)
+    assert result['error_code'] == 'query_catalog_workers_unavailable'
+    assert queue.get_job_ids() == []
+    assert len(core.pending_catalog_requests(path)) == 1
+
+
+def test_catalog_dirty_cleanup_preserves_a_racing_receipt(catalog_queue, monkeypatch):
+    root, queue, _worker = catalog_queue
+    path = project(root)
+    key = 'query-catalog:dirty:' + tasks._configuration_id()
+    queue.connection.sadd(key, str(path))
+    original = queue.connection.srem
+
+    def racing_removal(name, *items):
+        if name == key and str(path) in items:
+            core.record_catalog_refresh(path, 'values.csv')
+            queue.connection.sadd(name, str(path))
+        return original(name, *items)
+
+    monkeypatch.setattr(queue.connection, 'srem', racing_removal)
+    tasks.reconcile_query_catalogs(queue=queue)
+    assert len(core.pending_catalog_requests(path)) == 1
+    assert queue.connection.sismember(key, str(path))
+
+
+@pytest.mark.parametrize('source_dir,should_publish', [('watershed', True), ('private', False)])
+def test_browser_worker_keeps_exact_omni_parent_source_policy(catalog_queue, source_dir, should_publish):
+    root, queue, worker = catalog_queue
+    parent = project(root)
+    source = parent / source_dir / 'values.csv'
+    source.parent.mkdir()
+    source.write_text('value\n9\n')
+    child = parent / '_pups/omni/scenarios/child'
+    child.mkdir(parents=True)
+    (child / 'inherit.csv').symlink_to(source)
+    assert core.browser_catalog_parent(child) == parent
+    assert core.prepare_catalog_intent(child) == 'pending'
+    admission = tasks.enqueue_catalog_refresh(child, queue=queue)
+    assert admission['state'] == 'queued'
+    drain(queue, worker)
+    job = queue.fetch_job(admission['job_id'])
+    if should_publish:
+        assert job.get_status() == JobStatus.FINISHED
+        catalog = json.loads((child / '_query_engine/catalog.json').read_text())
+        assert any(entry['path'] == 'inherit.csv' for entry in catalog['files'])
+    else:
+        assert job.get_status() == JobStatus.FAILED
+        assert not (child / '_query_engine/catalog.json').exists()
+        assert len(core.pending_catalog_requests(child)) == 1

@@ -245,7 +245,7 @@ contracts; this amendment alone does not certify the entire service secure.
 
 ## GL catalog readiness handshake
 
-GL-CATALOG-01 implementation conformance pending. The GL client uses these
+GL-CATALOG-01 implemented and locally validated. The GL client uses these
 run-scoped operations before sending query-backed layer requests.
 
 - `POST .../catalog/prepare` checks readiness and arranges background automatic
@@ -259,7 +259,9 @@ run-scoped operations before sending query-backed layer requests.
   `catalog_refresh_failed`. Those responses use `state: unavailable`. Pending
   work with recoverable dispatch or retry can remain preparing during backoff.
   A missing catalog with no repair in progress is unavailable to a status
-  poll. These responses use `Cache-Control: no-store`.
+  poll. A transient preparation conflict can include `Retry-After` with
+  the unavailable response so the client can try preparation again. These
+  responses use `Cache-Control: no-store`.
 - Resolve the same authorized run and scenario as POST query. The optional
   scenario selector is in the prepare JSON body or status query string. Use
   query authorization for these operations, including public runs already

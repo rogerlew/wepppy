@@ -10,10 +10,11 @@ Open a GL dashboard whose dataset catalog needs preparation. The map loads, the 
 
 - [x] (2026-11-20 00:40 UTC) Draft the contract decision and scoped regression plan.
 - [x] Ratify the HTTP, authorization and UI behavior and record two independent reviews.
-- [ ] Commit the reviewed contract checkpoint.
-- [ ] Implement and validate bounded server admission and query waiting.
-- [ ] Gate GL result requests and connect the UI status and Retry action.
-- [ ] Verify browser and artifact evidence and close review findings.
+- [x] Commit the reviewed contract checkpoint at `fdba3295c`.
+- [x] Implement and validate bounded server admission and query waiting.
+- [x] Gate GL result requests and connect the UI status and Retry action.
+- [x] Verify disposable browser and artifact evidence and close scoped review findings.
+- [ ] Verify fleet readiness before separately authorized production rollout.
 
 ## Surprises & Discoveries
 
@@ -25,7 +26,7 @@ GL queries can enter catalog freshness handling during both run-context preparat
 
 ## Outcomes & Retrospective
 
-The scaffold records an intended behavior change and a testable acceptance target. Runtime code, executable regressions and canonical promotion are pending.
+The checkpoint precedes runtime implementation. A real scheduler and RQ worker verified catalog publication and updated SQL result values. A separate disposable NFS browser replay verified two-tab ordering, a rendered 10 mm WEPP runoff layer, and same-page Retry. The rollout gate remains open.
 
 ## Context and Orientation
 

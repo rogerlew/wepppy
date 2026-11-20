@@ -1,6 +1,6 @@
 # GL Dashboard catalog readiness handshake
 
-**Status:** Contract approved for implementation
+**Status:** Implemented and locally validated. Fleet rollout pending.
 
 **Amendment:** GL-CATALOG-01
 
@@ -19,4 +19,6 @@ Success means two GL tabs share one refresh for the same run, send no result que
 - [Draft contract decision](artifacts/20261120_contract_decision.md)
 - [Scoped test matrix](artifacts/scoped_tests.md)
 - [Execution plan](prompts/active/implementation_execplan.md)
+- [Correctness review](artifacts/20261120_correctness_review.md)
+- [Security review](artifacts/20261120_security_review.md)
 - [Tracker](tracker.md)
