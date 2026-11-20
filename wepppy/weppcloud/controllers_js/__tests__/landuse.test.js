@@ -249,6 +249,35 @@ describe("Landuse controller", () => {
         expect(alert.textContent).toContain("Select a compatible management map.");
     });
 
+    test("batch settings acknowledgement uses status without replacing the report", async () => {
+        httpRequestMock.mockResolvedValueOnce({ body: { message: "Set landuse inputs for batch processing" } });
+
+        landuse.build();
+        await flushPromises();
+
+        expect(document.querySelector("#landuse_form #status").textContent).toBe(
+            "Set landuse inputs for batch processing"
+        );
+        expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+        expect(baseInstance.set_rq_job_id).not.toHaveBeenCalled();
+    });
+
+    test("older rejected upload cannot add an alert over a newer accepted build", async () => {
+        let rejectOld;
+        httpRequestMock.mockImplementationOnce(() => new Promise((resolve, reject) => {
+            rejectOld = reject;
+        })).mockResolvedValueOnce({ body: { job_id: "new-upload" } });
+
+        landuse.build();
+        landuse.build();
+        await flushPromises();
+        rejectOld({ body: { error: { code: "incompatible_landuse_mapping", message: "Old selection" } } });
+        await flushPromises();
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "new-upload");
+        expect(document.querySelector("[data-landuse-build-error]").hidden).toBe(true);
+    });
+
     test("poll failure pushes stacktrace and emits job error", async () => {
         global.WCHttp.getJson.mockResolvedValueOnce({ exc_info: "trace line" });
         landuse.rq_job_id = "job-123";

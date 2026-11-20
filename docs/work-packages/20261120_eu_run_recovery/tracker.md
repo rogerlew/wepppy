@@ -16,7 +16,7 @@ The candidate is deployed on forest. The [deployment and replay receipt](artifac
 - [x] Complete the independent replay correctness review.
 
 - [x] Replay the CORINE/upload mapping switch and false migration prompt with a substitute raster, and run the serialized legacy migration control privately.
-- [ ] Reject incompatible uploads before worker admission and verify on forest.
+- [x] Reject incompatible uploads before worker admission and verify on forest.
 
 - [ ] Complete the [ESDAC management inventory and reconciliation](artifacts/20261120_esdac_management_baseline.md), including a reviewed row-by-row disposition and generated-output validation.
 
@@ -103,3 +103,12 @@ Options with the previous report and raster bytes preserved. The
 [Disturbed matrix parity receipt](artifacts/20261120_disturbed_matrix_parity.json)
 records the unchanged native artifacts and independent published report
 verification. Catalog parameterization decisions are still open.
+
+Staged land-use work `80e2a01cf` passed private replay and signed-in forest
+admission, a real upload worker, and direct Parquet readback. The
+[upload security review](artifacts/20261120_landuse_upload_security_review.md)
+records the retained acceptance evidence and publication boundaries.
+Forest CLIGEN workers loaded `def92f11e` for the isolated native working
+directory. A private failed E-OBS replacement independently reproduced
+loss of the prior valid climate. Next-Run policy and generated publication
+remain in the [climate checkpoint](artifacts/20261120_eobs_publication_checkpoint.md).

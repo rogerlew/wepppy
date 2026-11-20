@@ -24,7 +24,9 @@ A user following the original European project workflow can produce usable clima
 - [x] Restore generic thinning compatibility with generated management and soil readback. [Generic thinning checkpoint](../../artifacts/20261120_legacy_thinning_class_checkpoint.md)
 - [x] Ratify the [uploaded land-use compatibility checkpoint](../../artifacts/20261120_landuse_upload_preflight_checkpoint.md) (`2de953e92`).
 - [x] Reject incompatible Disturbed tables and preserve the applied report in Landuse Options in focused tests and on forest.
-- [ ] Validate uploaded raster codes and bind the admitted artifacts, then replay this rejection on forest.
+- [x] Validate native raster codes, bind admitted artifacts to the RQ job and retest the failure and recovery on forest.
+- [x] Verify no caller directory mutation on failed CLIGEN localization and replay the native E-OBS climate.
+- [ ] Preserve the prior accepted climate through a failed generated replacement and settle the next-Run policy.
 - [ ] Ratify remaining generated climate and scientific management checkpoints.
 - [ ] Implement and verify each confirmed failure class and its peer consumers.
 - [x] Complete the forest deployment and record the runtime revision.

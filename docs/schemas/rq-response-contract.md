@@ -147,7 +147,6 @@ Landuse first-class route notes (2026-04-24):
 Uploaded raster and map incompatibility returns canonical HTTP 400 with
 `error.code="incompatible_landuse_mapping"` under the
 [upload compatibility contract](european-landuse-mapping-contract.md#uploaded-raster-compatibility).
-Implementation conformance is pending.
 - Phase 1 synchronous mutators
   (`set-landuse-mode`, `set-landuse-db`, `modify-landuse-coverage`) return
   HTTP `200` with canonical `{"message": ...}` on success and canonical error

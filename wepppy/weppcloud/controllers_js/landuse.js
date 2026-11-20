@@ -480,7 +480,13 @@ var Landuse = (function () {
         var buildError = dom.qs("[data-landuse-build-error]", formElement);
         var buildErrorText = buildError ? buildError.querySelector(".wc-alert__body") : null;
 
-        function handleBuildError(error) {
+        var buildRequest = 0;
+        var lastAcceptedBuildRequest = 0;
+
+        function handleBuildError(error, requestId) {
+            if (requestId !== buildRequest) {
+                return;
+            }
             var payload = toResponsePayload(http, error);
             if (buildErrorText && payload.error && payload.error.code === "incompatible_landuse_mapping") {
                 buildErrorText.textContent = payload.error.message;
@@ -491,6 +497,7 @@ var Landuse = (function () {
         }
 
         landuse.build = function () {
+            var requestId = ++buildRequest;
             var taskMsg = "Building landuse";
             resetStatus(taskMsg, true);
             if (buildErrorText) {
@@ -525,6 +532,9 @@ var Landuse = (function () {
                 }
             ).then(function (result) {
                 var response = result && result.body ? result.body : null;
+                if (requestId < lastAcceptedBuildRequest) {
+                    return;
+                }
                 if (response && response.result && response.result.single_user_defined_filename) {
                     var filenameNode = dom.qs("#landuse_source_filename");
                     var feedbackNode = dom.qs("#landuse_source_feedback");
@@ -536,13 +546,20 @@ var Landuse = (function () {
                     }
                 }
                 if (response && response.job_id) {
+                    lastAcceptedBuildRequest = requestId;
                     landuse.append_status_message(landuse, "build_landuse job submitted: " + response.job_id);
                     landuse.poll_completion_event = LANDUSE_BUILD_COMPLETION_EVENT;
                     landuse.set_rq_job_id(landuse, response.job_id);
+                } else if (response && response.message && !response.error && !response.errors) {
+                    if (requestId === buildRequest) {
+                        statusAdapter.text(response.message);
+                    }
                 } else if (response) {
-                    handleBuildError({ body: response });
+                    handleBuildError({ body: response }, requestId);
                 }
-            }).catch(handleBuildError);
+            }).catch(function (error) {
+                handleBuildError(error, requestId);
+            });
         };
 
         landuse.modify_coverage = function (domId, cover, value) {

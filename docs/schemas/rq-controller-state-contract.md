@@ -2052,10 +2052,10 @@ explicit build-climate step continues to track the build operation itself.
 
 ## Uploaded landuse attempts
 
-Implementation conformance is pending. Landuse Options displays the
-incompatible source/map error from the build response and keeps the last
+Landuse Options displays the incompatible source/map error from the build response and keeps the last
 usable report accessible during rejection and pending work. Display the
 tracked job only for accepted asynchronous work. A rejected or unaccepted
 attempt does not replace the report or indicate that a build completed.
-Batch input configuration without delineation retains its settings-only
-acknowledgement. Apply the [European land cover and mapping contract](european-landuse-mapping-contract.md#uploaded-raster-compatibility).
+Batch input configuration without delineation returns a settings-only
+acknowledgement, which Landuse Options shows in its status area. An older
+submission rejection cannot replace a newer submission's feedback. Apply the [European land cover and mapping contract](european-landuse-mapping-contract.md#uploaded-raster-compatibility).

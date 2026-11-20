@@ -99,3 +99,44 @@ Independent read-only review verified the two continuous runs, the archived
 event inputs and native outputs, the CORINE recovery artifact and the
 failed-build-to-upload browser transition. The transient NoDb lock remains
 a separate reliability finding.
+
+## Updated uploaded land-use replay
+
+Forest next loaded `80e2a01cf` in the Web, RQ and worker services.
+A signed-in browser on `cleft-jump` tested the retained CORINE source
+through Upload landcover map. Class 999 returned actionable HTTP 400
+before queue admission, while the applied report stayed in the page.
+The matching CORINE upload finished as RQ job
+`83c971a2-4115-4904-ace2-c823bcdb5292`. Readback verified the exact
+submitted raw raster, the aligned TIFF digest from the job's receipt and
+only the compact receipt remaining in its staging directory. The
+current upload produced 58 land-use Parquet rows, including 16 Mixed
+forest assignments for class 25. The browser reported the result. Direct
+artifact and screenshot evidence are in
+`forest-landuse-staged-native-readback.json` and
+`landuse-staged-mixed-forest.png` in the restricted directory.
+
+The related private response and worker controls proved stale receipt
+rejection, exact same-ID retry, cleanup, managed projection containment
+and a fresh batch leaf with its own alignment. Focused land-use tests
+passed 95 cases. Frontend tests passed 127 suites and 1,109 tests,
+plus nine Node tests. The broad test run passed 839 and skipped 32
+before stopping at a browse download diagnostics assertion.
+
+Forest RQ workers then loaded `def92f11e` for the CLIGEN worker-directory
+fix. The next native Es Fangar build and its browser report finished
+with station `SPE00119882` and without the event advisory
+(`ccfda21a-7c03-45ba-9eee-1c6b5b5202a6`). WEPP job
+`84f4863f-1dd6-48b1-9b07-2ba89be55324` and all 17 children finished.
+The second native readback again found 10,957 daily rows, 59 matching
+climate decks, 59 parsed soils, and 635,506 hillslope pass records.
+See the
+[failed generated replacement control](20261120_eobs_publication_checkpoint.md#retained-failure-controls)
+for the outstanding climate retention issue.
+
+The final frontend bundle showed the batch settings acknowledgement as
+status and ignored a late stale rejection in the controller tests. Forest
+served the rebuilt bundle with the same SHA-256 as the candidate. A second
+signed-in invalid/valid upload control finished with RQ job
+`debe1082-2e36-4a09-b97a-92f5e02beac7` and the same 58-row Parquet,
+including 16 Mixed forest assignments.
