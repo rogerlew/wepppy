@@ -51,6 +51,11 @@
   - source file: `/workdir/wepp-forest-release-20261009/change-log.md`
   - vendored file: `wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md`
   - doc id: `usersum.weppcloud.wepp_forest_change_log`
+- Vendor sync follows local Markdown links at the configured Git commit,
+  warns about unresolved edges, and prunes stale copies on default rebuilds.
+  Fix reported source links in their original repositories.
+- Check heading fragments with `PYTHONPATH=. python3 tools/usersum_docs_tool.py lint-links`.
+  The linter uses Usersum's published heading IDs.
 - Preferred rebuild flow after vendor-repo updates:
   - `PYTHONPATH=/workdir/wepppy python3 tools/usersum_docs_tool.py build-index --write --require-vendor-files`
   - `build-index` auto-syncs vendors; use `--skip-vendor-sync` only when intentionally avoiding sync.

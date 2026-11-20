@@ -7,7 +7,11 @@ on:
     - tools/check_agents_size.sh
     - tools/check_adr_dates.py
     - tests/tools/test_check_adr_dates.py
-    - wepppy/weppcloud/usersum_docs/adr_catalog.py
+    - tools/usersum_docs_tool.py
+    - docker/requirements-uv.txt
+    - wepppy/weppcloud/usersum_anchors.py
+    - wepppy/weppcloud/usersum_docs/**
+    - wepppy/weppcloud/routes/usersum/**
     - .github/forest_workflows/docs-quality.yml
     - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
@@ -21,7 +25,11 @@ on:
     - tools/check_agents_size.sh
     - tools/check_adr_dates.py
     - tests/tools/test_check_adr_dates.py
-    - wepppy/weppcloud/usersum_docs/adr_catalog.py
+    - tools/usersum_docs_tool.py
+    - docker/requirements-uv.txt
+    - wepppy/weppcloud/usersum_anchors.py
+    - wepppy/weppcloud/usersum_docs/**
+    - wepppy/weppcloud/routes/usersum/**
     - .github/forest_workflows/docs-quality.yml
     - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
@@ -53,6 +61,15 @@ jobs:
         echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
     - name: Enforce ADR titles and recorded dates
       run: python3 tools/check_adr_dates.py
+    - name: Check Usersum links and heading IDs
+      run: |
+        set -euo pipefail
+        lint_env="$(mktemp -d "${RUNNER_TEMP}/usersum-lint.XXXXXXXX")"
+        trap 'rm -rf "$lint_env"' EXIT
+        python3 -m venv "$lint_env"
+        grep -Ei '^(cmarkgfm|pyyaml)==' docker/requirements-uv.txt > "$lint_env/requirements.txt"
+        "$lint_env/bin/python" -m pip --disable-pip-version-check install -r "$lint_env/requirements.txt"
+        PYTHONPATH=. "$lint_env/bin/python" tools/usersum_docs_tool.py lint-links
     - name: Verify markdown-doc tooling
       run: |
         set -euo pipefail

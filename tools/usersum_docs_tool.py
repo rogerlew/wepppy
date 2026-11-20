@@ -8,6 +8,7 @@ from wepppy.weppcloud.usersum_docs.docs_contracts import (
     load_and_validate_contracts,
 )
 from wepppy.weppcloud.usersum_docs.docs_index import build_generated_index, write_generated_index
+from wepppy.weppcloud.usersum_docs.link_lint import lint_links
 from wepppy.weppcloud.usersum_docs.vendor_sync import sync_vendor_docs
 
 
@@ -27,6 +28,15 @@ def cmd_validate(args: argparse.Namespace) -> int:
         f"OK: manifest/nav/vendors validated. "
         f"docs={len(contracts.docs)}, nav_leaves={len(contracts.nav_key_to_doc_id)}, vendors={len(contracts.vendors)}"
     )
+    return 0
+
+
+def cmd_lint_links(args: argparse.Namespace) -> int:
+    contracts = load_and_validate_contracts(base_dir=USERSUM_DIR, repo_root=REPO_ROOT)
+    warnings = lint_links(contracts, REPO_ROOT)
+    for warning in warnings:
+        print(f"WARNING: {warning}")
+    print(f"Usersum Markdown links checked ({len(warnings)} warning(s)).")
     return 0
 
 
@@ -61,7 +71,7 @@ def cmd_build_index(args: argparse.Namespace) -> int:
             contracts_for_sync,
             repo_root=REPO_ROOT,
             write=args.write,
-            clean=False,
+            clean=True,
             allow_missing_source_repos=True,
         )
         for action, detail in sync_actions:
@@ -100,6 +110,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Require vendored markdown files referenced in manifest to exist on disk.",
     )
     validate_parser.set_defaults(func=cmd_validate)
+
+    lint_parser = subparsers.add_parser(
+        "lint-links", help="Check Usersum links and fragments against published heading IDs."
+    )
+    lint_parser.set_defaults(func=cmd_lint_links)
 
     sync_parser = subparsers.add_parser(
         "sync-vendors",
