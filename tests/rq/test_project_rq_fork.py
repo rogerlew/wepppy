@@ -1122,7 +1122,9 @@ def test_clean_env_for_system_tools_uses_sanitized_path(monkeypatch: pytest.Monk
 def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import wepppy.rq.project_rq as project
 
+    destination = tmp_path / "destination"
     monkeypatch.setattr(project, "get_wd", lambda _runid: str(tmp_path))
+    monkeypatch.setattr(project, "get_primary_wd", lambda _runid: str(destination))
 
     worker_job = SimpleNamespace(
         id="job-fork",
@@ -1136,7 +1138,7 @@ def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setattr(
         project._fork_helpers,
         "prepare_fork_run",
-        lambda *args, **kwargs: "/tmp/forked-run",
+        lambda *args, **kwargs: str(destination),
     )
 
     final_wepp_job = SimpleNamespace(id="wepp-job")
@@ -1280,7 +1282,9 @@ def test_fork_rq_skip_omni_completes_when_controller_is_absent(
 def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import wepppy.rq.project_rq as project
 
+    destination = tmp_path / "destination"
     monkeypatch.setattr(project, "get_wd", lambda _runid: str(tmp_path))
+    monkeypatch.setattr(project, "get_primary_wd", lambda _runid: str(destination))
 
     monkeypatch.setattr(
         project,
@@ -1309,7 +1313,7 @@ def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch, tm
     def _prepare(*_args, **kwargs):
         captured["cmd"] = kwargs["build_rsync_cmd"]("/tmp/target/", False, True)
         captured["env"] = kwargs["clean_env_for_system_tools"]()
-        return "/tmp/forked-run"
+        return str(destination)
 
     monkeypatch.setattr(project._fork_helpers, "prepare_fork_run", _prepare)
 
@@ -1393,7 +1397,9 @@ def test_run_rsync_with_bounded_output_limits_summary_and_failure_tails() -> Non
 def test_fork_rq_invokes_reset_markers_with_new_run_context(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import wepppy.rq.project_rq as project
 
+    destination = tmp_path / "destination"
     monkeypatch.setattr(project, "get_wd", lambda _runid: str(tmp_path))
+    monkeypatch.setattr(project, "get_primary_wd", lambda _runid: str(destination))
 
     reset_calls: list[tuple[str, str, str]] = []
     monkeypatch.setattr(
@@ -1407,7 +1413,7 @@ def test_fork_rq_invokes_reset_markers_with_new_run_context(monkeypatch: pytest.
     monkeypatch.setattr(
         project._fork_helpers,
         "prepare_fork_run",
-        lambda *args, **kwargs: "/tmp/new-run-wd",
+        lambda *args, **kwargs: str(destination),
     )
     monkeypatch.setattr(
         project,
@@ -1417,7 +1423,7 @@ def test_fork_rq_invokes_reset_markers_with_new_run_context(monkeypatch: pytest.
 
     project.fork_rq("source-run", "new-run", undisturbify=False)
 
-    assert reset_calls == [("new-run", "/tmp/new-run-wd", "source-run:fork")]
+    assert reset_calls == [("new-run", str(destination), "source-run:fork")]
 
 
 def test_fork_rq_holds_top_level_config_guard_while_copying_owned_bytes(
@@ -1429,6 +1435,7 @@ def test_fork_rq_holds_top_level_config_guard_while_copying_owned_bytes(
     parent = tmp_path / "source"
     child = parent / "_pups" / "omni" / "scenarios" / "treated"
     target = tmp_path / "target"
+    monkeypatch.setattr(project, "get_primary_wd", lambda _runid: str(target))
     child.mkdir(parents=True)
     config_bytes = b"[project]\nconfig_schema = 1\n"
     manifest_bytes = b'{"schema_version":1}\n'
@@ -1486,7 +1493,9 @@ def test_fork_rq_reset_marker_failure_emits_fork_failed(
 ) -> None:
     import wepppy.rq.project_rq as project
 
+    destination = tmp_path / "destination"
     monkeypatch.setattr(project, "get_wd", lambda _runid: str(tmp_path))
+    monkeypatch.setattr(project, "get_primary_wd", lambda _runid: str(destination))
 
     published: list[str] = []
     monkeypatch.setattr(
@@ -1500,7 +1509,7 @@ def test_fork_rq_reset_marker_failure_emits_fork_failed(
     monkeypatch.setattr(
         project._fork_helpers,
         "prepare_fork_run",
-        lambda *args, **kwargs: "/tmp/new-run-wd",
+        lambda *args, **kwargs: str(destination),
     )
 
     def _raise_reset(*_args, **_kwargs):
