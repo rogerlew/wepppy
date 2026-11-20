@@ -1,3 +1,5 @@
+Implemented and locally validated: [GL Dashboard catalog readiness](docs/work-packages/20261119_gl_catalog_readiness/package.md) — One readiness handshake per target, a visible wait before result queries, one RQ admission in the concurrency test, and two served browser tests. Fleet rollout remains pending.
+
 In progress: [CI runner migration](docs/work-packages/20261118_ci_runner_migration/package.md) - Migrate active/nightly checks off homelab; retire approved old profile schedules.
 
 Closed locally; deployment pending: [Parquet CSV native integration](docs/work-packages/20261118_parquet_csv_wepppy_integration/package.md) - Contract-first immediate cutover for all supported CSV exports; code-owned configuration, no environment knobs and no Python fallback. Compatibility, exact-image HTTP/identity checks and broad tests passed; see retained validation and release handoff.

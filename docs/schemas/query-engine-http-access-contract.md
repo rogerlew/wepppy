@@ -242,3 +242,38 @@ real Caddy/Compose workflow evidence, independently reviewed findings and
 operator-authorized rollout/rollback receipts in the active package. Other
 security findings and SQL expression containment remain under their existing
 contracts; this amendment alone does not certify the entire service secure.
+
+## GL catalog readiness handshake
+
+GL-CATALOG-01 implemented and locally validated. The GL client uses these
+run-scoped operations before sending query-backed layer requests.
+
+- `POST .../catalog/prepare` checks readiness and arranges background automatic
+  preparation if necessary. `GET .../catalog/status` observes the same target
+  without writing, dispatching, or traversing the source tree.
+- Both return `200 {"state":"ready"}` or `202
+  {"state":"preparing","code":"catalog_preparing"}` with `Retry-After` in
+  seconds. Preparation that requires changes to a readonly catalog returns
+  `409` with code `catalog_readonly`. Preparation that cannot progress returns
+  `503` with code `catalog_refresh_unavailable` or
+  `catalog_refresh_failed`. Those responses use `state: unavailable`. Pending
+  work with recoverable dispatch or retry can remain preparing during backoff.
+  A missing catalog with no repair in progress is unavailable to a status
+  poll. A transient preparation conflict can include `Retry-After` with
+  the unavailable response so the client can try preparation again. These
+  responses use `Cache-Control: no-store`.
+- Resolve the same authorized run and scenario as POST query. The optional
+  scenario selector is in the prepare JSON body or status query string. Use
+  query authorization for these operations, including public runs already
+  entitled to automatic query preparation, and enforce the existing origin and
+  cookie POST controls. Anonymous preparation and wait-mode query writes
+  also require the same-origin browser guard. Restrict automatic repair to
+  exact managed runs and recognized Omni scenarios/contrasts, batch and
+  culvert query targets. Legacy query selectors retain their synchronous path.
+  The endpoints accept no paths, job identifiers, force
+  option, or queue controls. Keep internal catalog and worker metadata private.
+- POST query accepts optional `catalog_mode: "wait"`. A wait-mode request
+  encountering required refresh at either freshness barrier returns the same
+  preparing or unavailable response. Its successful SQL response and ordinary
+  authorization, missing-data, and Roads errors retain their existing shapes.
+  Omitting the mode retains synchronous query behavior.

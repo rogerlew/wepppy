@@ -374,7 +374,7 @@ export function createDetectionController({
     }
   }
 
-  async function detectLayers() {
+  async function detectLayers({ includeYearlyChannels = true } = {}) {
     const isBatch =
       ctx && ctx.mode === 'batch' && ctx.batch && Array.isArray(ctx.batch.runs);
 
@@ -383,8 +383,8 @@ export function createDetectionController({
     // Batch mode only supports merged geometry + basic summaries in early phases.
     // Skip run-scoped time-series overlays until a batch fan-out provider exists.
     if (!isBatch) {
+      if (includeYearlyChannels) tasks.push(detectWeppYearlyChannelOverlays());
       tasks.push(
-        detectWeppYearlyChannelOverlays(),
         detectOpenetOverlays(),
         detectWatarOverlays(),
         detectWeppEventOverlays(),

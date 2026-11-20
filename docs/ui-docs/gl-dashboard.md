@@ -19,6 +19,7 @@
 - [Performance Considerations](#performance-considerations)
 - [Testing Strategy](#testing-strategy)
 - [Known Issues and Workarounds](#known-issues-and-workarounds)
+- [Query Catalog Readiness](#query-catalog-readiness)
 
 ## Overview
 
@@ -1596,3 +1597,10 @@ Deck retains the view and all analysis layers. Terrain/Satellite/OSM remain
 raster choices. Credits identify the selected background; unavailable resources
 show a status with instructions to choose another basemap. Existing state hooks
 are unchanged; no basemap persistence was added. See FSBASE-01 for use limitations.
+
+## Query catalog readiness
+
+GL shows “Preparing watershed results…” when the dataset catalog needs work.
+You can keep using the map. The query-backed layers load automatically when
+results are ready. If preparation takes too long, choose Retry in the Layers
+panel. [Catalog readiness contract](contracts/gl-catalog-readiness-contract.md)
