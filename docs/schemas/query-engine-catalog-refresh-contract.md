@@ -363,3 +363,41 @@ See the [bounded DEM contract](declarative-dem-v1-contract.md).
 The DEM v1 consumer is an existing zero-write elevation query. Prepare pending
 catalogs through shared read-only finalization; no post-freeze publication
 exception is granted. Its final build record path exists before manifest creation.
+
+## GL catalog readiness handshake
+
+GL-CATALOG-01 implementation conformance pending. The
+[HTTP access contract](query-engine-http-access-contract.md#gl-catalog-readiness-handshake)
+defines the browser handshake. The dashboard opts into background preparation
+to prevent parallel layer requests from each collecting catalog metadata.
+Legacy synchronous readers and explicit forced activation retain their
+existing contracts.
+
+Preparation first uses bounded catalog and receipt reads. When a catalog is
+missing or unusable, the automatic path may create one repair receipt under
+the existing scope and incarnation guard. Recheck while holding that guard so
+concurrent clients reuse pending intent. Use nonblocking guard acquisition. Register the scope in the existing Redis
+dirty index using bounded Redis I/O and let the scheduler perform
+incarnation-scoped admission. Existing pending receipts retain their scope
+and content. Full tree work runs in a compatible worker. Workers handling
+browser-preparable scopes must derive the exact authorization parent from
+managed layout and apply HTTP-equivalent source containment before reads or
+publication. Revalidate scope and incarnation in the worker. A readonly, unmanaged, or disabled target that needs
+repair receives an explicit unavailable outcome. A usable catalog remains
+queryable in those modes.
+
+Ready requires a readable catalog and no outstanding refresh work for the
+scope. A valid legacy or synchronously published catalog can be ready without
+an async sidecar. Where a publication claim is used, verify its binding to
+catalog bytes and incarnation. An RQ result alone never establishes readiness.
+Status requests only read this state. A failed attempt retains durable intent.
+
+Check freshness at context preparation and again for required sources before
+SQL. Wait-mode checks never perform inline repair. In the artifact-to-receipt
+gap, a query that finds verified stale metadata for an authorized required
+dataset must create or coalesce durable targeted repair intent and register
+the scope for scheduler admission before returning preparing, or return an explicit unavailable
+outcome. Actual absence of an optional dataset follows existing query
+missing-data semantics. Preserve source containment, including canonical
+parent-backed selection. A retry re-enters the current handshake within the
+browser's wait budget.

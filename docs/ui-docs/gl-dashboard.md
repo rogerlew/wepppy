@@ -1596,3 +1596,9 @@ Deck retains the view and all analysis layers. Terrain/Satellite/OSM remain
 raster choices. Credits identify the selected background; unavailable resources
 show a status with instructions to choose another basemap. Existing state hooks
 are unchanged; no basemap persistence was added. See FSBASE-01 for use limitations.
+
+## Query catalog readiness
+
+The [GL catalog readiness contract](contracts/gl-catalog-readiness-contract.md)
+specifies the preparation status, automatic loading, and retry behavior for
+query-backed layers. Implementation conformance is pending.

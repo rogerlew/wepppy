@@ -266,3 +266,11 @@ register these routes. This exception adds no exemption to ordinary run APIs.
 ## Account email verification
 
 Task-branch implementation; deployment deferred: [account verification](weppcloud-account-email-verification-contract.md) send actions MUST use CSRF-protected POST and the authenticated account's stored target address. Token GETs display a form; CSRF-protected POST completes verification/setup after purpose, account, email, expiry, and replay checks. CILogon contact verification MUST NOT install local credentials or merge accounts. Existing registration CAPTCHA/CSRF and recovery CSRF controls remain in force; this amendment adds no CAPTCHA to recovery. These requirements add no broad exemption and prevent mail scanners or cross-site requests from activating credentials.
+
+### GL catalog preparation
+
+GL-CATALOG-01 implementation conformance pending. Apply the Query Engine
+same-origin browser guard to readiness prepare POST and to opt-in wait-mode
+query POST for cookie and anonymous requests. Bearer requests retain the
+existing origin and credential checks. Catalog status GET is read-only.
+See the [Query Engine HTTP contract](query-engine-http-access-contract.md#gl-catalog-readiness-handshake).
