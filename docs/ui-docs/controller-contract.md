@@ -33,6 +33,8 @@
 
 ### Status stream + stacktrace
 
+The Climate panel uses the [climate operation selection contract](../schemas/rq-controller-state-contract.md#climate-operation-selection-on-reload). Its run-scoped status stream accepts tagged events only for the selected job. A message filter runs before display, details, or trigger effects and again before asynchronous detail enrichment. Climate retains its rendered summary while a new operation is pending. These options are opt-in for other controllers.
+
 Traceback content follows the [safe traceback contract](../schemas/safe-traceback-contract.md) (implementation pending). Existing fields and panel behavior stay unchanged; credential material is filtered before publication.
 - Always call `attach_status_stream` with `channel`, `runId`, `spinner`, and `stacktrace: { element, body? }`.
 - StatusStream will enrich stacktraces via `/rq-engine/api/jobinfo/<jobid>` when the channel message includes an RQ job id (`rq:<uuid> ...`). Keep the `data-stacktrace-*` hooks intact or enrichment will fail silently.

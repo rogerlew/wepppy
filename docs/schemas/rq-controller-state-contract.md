@@ -2025,3 +2025,27 @@ When a package is closed, its active ExecPlan SHOULD be archived to
 ## Gridded ESDAC soil build inputs
 
 The Soils panel and build admission share the effective ESDAC source selection. The editor is available before the first build. Profile settings are bound to their admitted job, including retries. The Soils summary shows a persistent warning above coverage when the accepted release used subsoil defaults. Its count describes the actual artifacts consumed by downstream stages. A later failed attempt can show its diagnostics without relabeling those artifacts. [ESDAC source and job input contract](esdac-soil-source-contract.md#project-defaults-for-a-missing-subsoil-material)
+
+## Climate operation selection on reload
+
+Implementation conformance pending. The Climate panel follows the most recent
+verified build or CLI upload using the existing two RedisPrep references. It
+reads RQ records without creating a new receipt or writing run state. For a
+single recorded operation, verify the RQ job's expected function and run before
+following it. For two recorded operations, require two distinct verified jobs
+and select by strictly ordered RQ creation times. If either record expires,
+association cannot be verified, creation times tie, or the RQ lookup is unavailable,
+show that job details are unavailable. Do not restore a surviving older failure
+in that situation. An RQ poll that reports the selected job missing uses the
+same neutral status.
+
+An accepted browser submission selects its returned job ID. Rejected requests
+do not select an ID. Once a job is selected, obsolete tagged messages must not
+change its status, details, or report. Untagged informational messages may still
+be displayed. Keep the current rendered filename and report during submission
+and while the replacement is pending. Refresh them from the report returned
+after the selected job completes. Discard report responses that are older than a
+newer summary request. On reload, request the current climate summary
+independently under its existing climate availability check. This status protocol does not
+provide durable climate publication or rollback. The orchestration endpoint's
+explicit build-climate step continues to track the build operation itself.
