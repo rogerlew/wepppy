@@ -2092,6 +2092,8 @@ def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) 
 
 
 def test_landuse_template_renders_upload_build_fields_and_lifecycle(jinja_env: Environment) -> None:
+    from wepppy.wepp.management.managements import landuse_management_mapping_options
+
     template = jinja_env.get_template("controls/landuse_pure.htm")
     rendered = template.render(
         landuse=SimpleNamespace(
@@ -2103,7 +2105,7 @@ def test_landuse_template_renders_upload_build_fields_and_lifecycle(jinja_env: E
             mapping="disturbed",
         ),
         landuseoptions=[{"Key": "42", "Description": "Forest"}],
-        landuse_management_mapping_options=[{"Key": "disturbed", "Description": "Disturbed"}],
+        landuse_management_mapping_options=landuse_management_mapping_options,
         landcover_datasets=[SimpleNamespace(key="nlcd/2024", label="NLCD", description=None, management_file=None)],
         wepp=SimpleNamespace(multi_ofe=False),
         ron=SimpleNamespace(mods={"disturbed"}),
@@ -2120,6 +2122,7 @@ def test_landuse_template_renders_upload_build_fields_and_lifecycle(jinja_env: E
     assert 'accept=".img,.tif"' in rendered
     assert 'id="landuse_management_mapping_selection"' in rendered
     assert 'name="landuse_management_mapping_selection"' in rendered
+    assert 'value="eu-esdac-disturbed"' in rendered
     assert 'id="checkbox_burn_shrubs"' in rendered
     assert 'name="checkbox_burn_shrubs"' in rendered
     assert 'id="checkbox_burn_grass"' in rendered
@@ -4538,15 +4541,20 @@ def test_dss_export_control_renders_mode_and_enqueue_contract(jinja_env: Environ
 
 
 def test_treatments_control_renders_selection_upload_and_build_contract(jinja_env: Environment) -> None:
+    from wepppy.wepp.management.managements import landuse_management_mapping_options
+
     template = jinja_env.get_template("controls/treatments_pure.htm")
     rendered = template.render(
         treatments=SimpleNamespace(mode=SimpleNamespace(value=4), treatments_lookup={"Thin": 1}),
         treatmentoptions=[{"Key": "thin", "Description": "Thin"}],
-        landuse_management_mapping_options=[{"Key": "map", "Description": "Map"}],
-        landuse=SimpleNamespace(mapping="map"),
+        landuse_management_mapping_options=landuse_management_mapping_options,
+        landuse=SimpleNamespace(mapping="disturbed"),
     )
     for marker in ('name="treatments_mode"', 'name="input_upload_landuse"', 'accept=".tif,.img"', 'name="landuse_management_mapping_selection"', 'data-treatments-action="build"'):
         assert marker in rendered
+    assert 'value="disturbed"' in rendered
+    assert 'value="eu-esdac-disturbed"' not in rendered
+
 
 
 def test_debris_flow_control_renders_override_and_run_contract(jinja_env: Environment) -> None:

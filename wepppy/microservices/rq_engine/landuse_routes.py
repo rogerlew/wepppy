@@ -761,6 +761,15 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                         return error_response("Could not obtain the uploaded raster filename.", status_code=400)
                     assert mapping is not None
 
+                    def selected_upload_buffer(active_landuse):
+                        if raw_buffer not in (None, ""):
+                            return int(raw_buffer)
+                        inherited = active_landuse.mofe_buffer_selection
+                        if inherited is None or active_landuse.multi_ofe or mapping == active_landuse.mapping:
+                            return inherited
+                        selected_table = active_landuse.get_mapping_dict(**requested_source)
+                        return inherited if str(inherited) in selected_table else None
+
                     def stage_source(target):
                         if upload is not None:
                             save_upload_file(
@@ -799,7 +808,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                         watershed = active_landuse.watershed_instance
                         if not watershed.is_abstracted:
                             raise WatershedNotAbstractedError()
-                        selected_buffer = active_landuse.mofe_buffer_selection if raw_buffer in (None, "") else int(raw_buffer)
+                        selected_buffer = selected_upload_buffer(active_landuse)
                         observation, fingerprint = active_landuse.observe_user_defined_upload(
                             mapping=mapping, dataset=requested_runtime_db
                         )
@@ -832,7 +841,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                         watershed = active_landuse.watershed_instance
                         destination = active_landuse.user_defined_raster_destination()
                         destination.mkdir(exist_ok=True)
-                        buffer_code = active_landuse.mofe_buffer_selection if raw_buffer in (None, "") else int(raw_buffer)
+                        buffer_code = selected_upload_buffer(active_landuse)
                         with tempfile.TemporaryDirectory(prefix=".batch-landuse-upload-", dir=destination) as directory:
                             staging = Path(directory)
                             source_path = staging / f"_{filename}"
