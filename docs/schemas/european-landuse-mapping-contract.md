@@ -47,8 +47,7 @@ artifact validation, including the separate European Disturbed ESDAC table.
 
 ### Management reference compatibility
 
-Implementation conformance is pending for the historical thinning reference
-repair. For keys 115, 116, 117 and 124 in the Disturbed ESDAC, Canada,
+For keys 115, 116, 117 and 124 in the Disturbed ESDAC, Canada,
 Palouse and Virgin Islands tables, resolve the exact same management assets
 through their current names. Use `Thinning_40_93.man`, `Thinning_40_90.man`,
 `Thinning_40_85.man` and `Thinning_40_75.man` in `UnDisturbed/`,

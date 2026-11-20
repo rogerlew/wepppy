@@ -46,3 +46,13 @@ The European Commission [ESDB attribute legend](https://esdac.jrc.ec.europa.eu/c
 - **Fire keys 105, 106, 110, 118–122 and 129–132.** Establish one destination per forest, shrub and grass severity, plus the existing prescribed-fire variants. Keys 118 and 120 have a mismatch between the intended moderate labels/templates and low-severity lookup classes. Resolve keys 129–131 against the shared severity-specific managements and soil lookup before publishing the ESDAC catalog or changing the CORINE peer rows.
 - **Treatment keys 108, 109, 111, 115–117, 123 and 124.** Confirm the intended mulch, tilled mulch, skid and thinning behavior in the effective lookup and serialized model deck. Four thinning filenames have exact historical replacements. Do not infer the corresponding lookup class from file existence alone.
 - **Consumer binding.** Keep existing plain ESDAC and CORINE workflows tied to their own source code namespaces. Compare named catalog routing, user upload selection, custom-map path resolution, archive/fork compatibility, disturbed soil lookup and WEPP input preparation. Specify how an existing run with an alias resolves after the change, before using an exact-name resolver to expose the separate Disturbed catalog.
+
+## Post-reference audit
+
+The four legacy filenames have been corrected in the Disturbed ESDAC catalog
+and three peer catalogs. Native readback passed all 16 references. The
+enclosing `ManagementSummary` hydration independently rejects the generic
+class `thinning` for ESDAC keys 115–117, 123 and 124. The two base reference
+catalogs passed hydration for all 23 ESDAC and 80 CORINE rows. Generic
+thinning class values require a parameterization decision and effective
+management and soil readback. Key 123 has a distinct 96% template.

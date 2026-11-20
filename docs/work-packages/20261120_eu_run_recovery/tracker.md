@@ -70,3 +70,8 @@ The [CORINE provider checkpoint](artifacts/20261120_landuse_source_checkpoint.md
 is `59c9e23d7`. The candidate generated 58 land-use Parquet rows from the
 archived classes, including 16 class-25 Mixed forest hillslopes. Incompatible
 upload preflight and the complete forest replay remain open.
+
+The [historical thinning reference checkpoint](artifacts/20261120_management_reference_checkpoint.md)
+is `9402cef2d`. All 16 corrected references across four tables round-tripped
+through the native 98.4 reader. The Disturbed ESDAC generic thinning class
+still prevents full catalog hydration for keys 115–117, 123 and 124.

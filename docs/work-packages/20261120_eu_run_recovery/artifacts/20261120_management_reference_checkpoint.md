@@ -28,3 +28,15 @@ all Tahoe assets. Previously serialized summaries and run-owned copied tables
 retain their references. Land-use rebuild can regenerate summaries from
 a repaired catalog, while run-owned copied tables require their normal
 editing workflow.
+
+## Candidate readback
+
+All 16 catalog references selected the same historical bytes and passed
+native format 98.4 parse, write and reparse. The other table fields stayed
+identical to their checkpoint values. Full summary hydration is still
+blocked by a separate pre-existing classification error. All five
+generic `thinning` entries in Disturbed ESDAC are rejected by
+`ManagementSummary` before it can use the now-valid assets. The four
+affected peer entries share that class. Plain ESDAC (23 rows) and CORINE
+(80 rows) passed full summary hydration. Class-specific soil and management
+validation remains an open audit item, including ESDAC's 96% cover key 123.
