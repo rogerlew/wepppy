@@ -69,6 +69,11 @@ existing tabs, clients, and already-submitted jobs can still request a no-op.
 
 ## Destination readiness
 
+Direct visits to an existing destination URL use the
+[fork destination project page contract](fork-run-page-contract.md). The
+console's normal destination link still follows the readiness checks below.
+
+
 Readiness remains read-only. It must authorize the source and destination,
 bind the exact fork job to them, require that job to be finished, and verify
 the existing core destination files before applying the following Omni rule.

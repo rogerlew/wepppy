@@ -204,3 +204,20 @@ This implementation does not rerun existing failed forks. Operators should
 inspect the reported failing child and verify inputs before recovery. See the
 [incident and operator notes](../infrastructure/ui-rcds-nfs-vs-dev-nfs.md#production-incident-fork-preparation-file-visibility-failures-2026-09-06)
 and [RQ contract](../schemas/rq-response-contract.md#fork-prerequisite-failure-reporting-fork-read-01).
+
+
+## Opening the destination during recovery
+
+The destination URL shows an authorized status page while the core project
+files are being copied. After copying, the owner can open the project and
+see whether the fork is still processing or which step failed. The details
+link opens the specific fork attempt. The source console link is available
+to viewers who can also open the source project.
+
+Query-backed results are unavailable while the fork is incomplete. Once
+the fork finishes, open GL Dashboard from the project header or WEPP Reports.
+If the dataset catalog is still preparing, the dashboard waits and displays a
+status message. If a result cannot load, **Retry** checks the catalog again. Opening the
+destination or retrying catalog readiness does not submit WEPP work.
+
+[Destination project page contract](contracts/fork-run-page-contract.md)

@@ -2471,6 +2471,10 @@ a.wc-maturity-pill:focus-visible {
   font-size: 1rem;
 }
 
+#wepp_binary_selection:has(#wepp_bin option[value="latest"]:not(:checked)) #wepp_bin_latest_hint {
+  display: none;
+}
+
 .wc-field__message {
   margin: 0;
   font-size: var(--wc-font-size-sm);

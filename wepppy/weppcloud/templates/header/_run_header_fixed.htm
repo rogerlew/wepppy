@@ -189,6 +189,9 @@
                  data-open-tab-pref>
                 Browse
               </a>
+              {% if fork_status %}
+              <span class="wc-text-muted">GL Dashboard is unavailable while this fork is incomplete.</span>
+              {% else %}
               <a class="pure-button"
                  href="{{ url_for_run('gl_dashboard.gl_dashboard', runid=view_runid, config=view_config) }}"
                  target="_blank"
@@ -196,6 +199,7 @@
                  data-open-tab-pref>
                 GL Dashboard
               </a>
+              {% endif %}
               {% if run_config_summary %}
               <button type="button"
                       class="pure-button"

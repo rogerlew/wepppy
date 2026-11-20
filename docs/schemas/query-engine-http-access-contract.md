@@ -186,6 +186,14 @@ Collection Admin/Root read policy can differ from private Batch query membership
 this distinction does not grant query authority. Log the resource/status without
 credential material. Backend unavailability remains an explicit failure.
 
+For [fork destination project entry](../ui-docs/contracts/fork-run-page-contract.md).
+The exact query admission conflict `AuthError(409, job_active)` also omits the
+query credential and preserves an independently authorized HTML response.
+Query APIs continue to enforce the fork guard for all credentials and retain
+their conflict response. Other HTTP conflicts and authorization backend failures
+retain their existing handling. The project's query-backed map results use
+the existing GL Dashboard entry and its existing lifecycle handshake.
+
 ## Explicit activation and browser request origin
 
 Forced activation is POST-only and is a cache operation, not a restricted model
