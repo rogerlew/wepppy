@@ -2424,10 +2424,17 @@ def test_download_failures_have_safe_correlated_diagnostics(
     tmp_path, load_secure_browse, monkeypatch, caplog, endpoint, failure,
 ):
     from wepppy.config.secrets import require_secret
+    from wepppy.observability.safe_logging import SafeFormatter
+    from wepppy.observability.safe_traceback import UNAVAILABLE
+    from wepppy.observability.secret_profiles import BROWSE
+
     runid = 'diagnostic-run'
     root = tmp_path / runid
     _touch(root / 'demo.txt', 'successful bytes')
     browse = load_secure_browse({runid: root}, SITE_PREFIX='/weppcloud')
+    # Pytest shares a process across services. Use Browse's production profile
+    # on this capture handler regardless of who installed process logging first.
+    monkeypatch.setattr(caplog.handler, 'formatter', SafeFormatter(None, BROWSE))
     monkeypatch.delenv('SECRET_KEY', raising=False)
     monkeypatch.delenv('SECRET_KEY_FILE', raising=False)
     private_path = tmp_path / 'private-secret-location'
@@ -2451,13 +2458,13 @@ def test_download_failures_have_safe_correlated_diagnostics(
     assert response.headers['x-request-id'] == 'diagnostic-reference'
     assert 'diagnostic-reference' in response.text
     if failure in ('empty', 'unreadable'):
-        from wepppy.observability.safe_traceback import UNAVAILABLE
         assert UNAVAILABLE in caplog.text
         # Caller-provided request IDs are not trusted when sources cannot load.
         assert 'diagnostic-reference' not in caplog.text
     else:
         assert 'diagnostic-reference' in caplog.text
     assert str(private_path) not in response.text
+    assert str(private_path) not in caplog.text
     assert 'diagnostic-token' not in response.text
     assert 'private-exception-sentinel' not in response.text
     if failure != 'unexpected':
