@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -79,8 +80,20 @@ def test_delete_batch_rq_removes_workspace(monkeypatch: pytest.MonkeyPatch, tmp_
     assert any("TRIGGER batch BATCH_DELETE_COMPLETED" in message for message in published)
 
 
-def test_delete_batch_rq_handles_missing_workspace(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_delete_batch_rq_handles_missing_workspace(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     published: list[str] = []
+    batch_root = tmp_path / "batch"
+    batch_root.mkdir()
+    locks = tmp_path / "catalog-locks"
+    monkeypatch.setattr(batch_rq, "get_batch_root_dir", lambda: str(batch_root))
+    monkeypatch.setenv("QUERY_CATALOG_ROOTS_JSON", json.dumps([{
+        "path": str(batch_root),
+        "namespace": "test:batch",
+        "coordination": str(locks),
+        "layout": "batch",
+    }]))
 
     monkeypatch.setattr(batch_rq, "get_current_job", lambda: DummyJob("job-del-2"))
     monkeypatch.setattr(
@@ -98,6 +111,8 @@ def test_delete_batch_rq_handles_missing_workspace(monkeypatch: pytest.MonkeyPat
     result = batch_rq.delete_batch_rq("missing")
 
     assert result == {"batch_name": "missing", "deleted": False, "already_missing": True}
+    assert not (batch_root / "missing").exists()
+    assert len(list(locks.glob("*.lock"))) == 1
     assert any("TRIGGER batch BATCH_DELETE_COMPLETED" in message for message in published)
 
 

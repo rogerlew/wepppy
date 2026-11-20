@@ -119,8 +119,11 @@ def test_incomplete_receipt_state_cannot_rebuild_shared_topology(candidates):
     assert selection.digest(root/'topo/pointer.tif')==before
 
 
-def test_four_to_three_preserves_trunk_and_matches_wbt(tmp_path):
+def test_four_to_three_preserves_trunk_and_matches_wbt(tmp_path, monkeypatch):
     from whitebox_tools import WhiteboxTools
+
+    # Older WhiteboxTools wrappers change the process working directory.
+    monkeypatch.chdir(tmp_path)
     pointer=np.zeros((33,33)); streams=pointer.copy()
     sources=[(1,c) for c in range(2,33,4)]
     while len(sources)>1:
@@ -155,10 +158,12 @@ def test_four_to_three_preserves_trunk_and_matches_wbt(tmp_path):
 
 
 @pytest.fixture
-def original_outlets(tmp_path):
+def original_outlets(tmp_path, monkeypatch):
     """Actual native FindOutlet on the original network; the road point is off-stream."""
     from wepppy.nodb.culverts_runner import CulvertsRunner
     from shapely.geometry import box, mapping
+
+    monkeypatch.chdir(tmp_path)
     root = tmp_path
     pointer = np.full((9, 9), 8.0); streams = np.zeros((9, 9))
     for row in range(1, 9):

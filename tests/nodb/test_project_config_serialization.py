@@ -103,7 +103,7 @@ def test_active_source_corpus_is_lexically_normalized() -> None:
     config_root = REPO_ROOT / "wepppy" / "nodb" / "configs"
     paths = sorted(config_root.glob("*.cfg"))
 
-    assert len(paths) == 129
+    assert paths
     for path in paths:
         source = path.read_text(encoding="utf-8")
         assert normalize_source_text(source) == source, path

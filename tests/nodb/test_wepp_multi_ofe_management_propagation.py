@@ -170,19 +170,23 @@ def test_prep_multi_ofe_wires_configured_clip_value_and_length(
 
 
 @pytest.mark.parametrize('slope_count', [1, 2, 3])
-def test_actual_mofe_staging_checks_joint_counts(tmp_path, slope_count):
+def test_actual_mofe_staging_checks_joint_counts(tmp_path, monkeypatch, slope_count):
     from wepppy.wepp.management import read_management
     from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
     from wepppy.wepp.soils.utils.multi_ofe import SoilMultipleOfeSynth
+    monkeypatch.chdir(tmp_path)
+    repo_root = Path(__file__).resolve().parents[2]
     root = tmp_path / 'run'
     runs = root / 'wepp/runs'
     slopes = root / 'watershed/slope_files/hillslopes'
     for directory in (runs, slopes, root/'soils', root/'landuse'):
         directory.mkdir(parents=True)
     (slopes/'hill_101.mofe.slp').write_text(f'97.5\n{slope_count}\n0 10\n' + '2 40\n0, 0.1 1, 0.1\n' * slope_count)
-    source_soil = 'tests/wepp_runner/fixtures/hillslope_smoke/runs/p1.sol'
+    source_soil = str(repo_root / 'tests/wepp_runner/fixtures/hillslope_smoke/runs/p1.sol')
     SoilMultipleOfeSynth([source_soil, source_soil]).write(str(root/'soils/hill_101.mofe.sol'))
-    source_man = read_management('wepppy/wepp/management/data/Agriculture/corn,soybean-no till.man')
+    source_man = read_management(
+        str(repo_root / 'wepppy/wepp/management/data/Agriculture/corn,soybean-no till.man')
+    )
     ManagementMultipleOfeSynth([source_man, source_man]).write(str(root/'landuse/hill_101.mofe.man'))
     args = ('101', 7, str(root), str(runs), 3, None, 0.5, False, 60.0, False, 1.0, False, 1.0)
     if slope_count == 2:
