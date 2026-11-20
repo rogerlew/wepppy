@@ -2021,3 +2021,7 @@ When a package is closed, its active ExecPlan SHOULD be archived to
   - add route rows to `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
   - update `docs/schemas/rq-engine-agent-api-contract.md`
   - add OpenAPI/contract tests in `tests/microservices/`
+
+## Gridded ESDAC soil build inputs
+
+The Soils panel and build admission share the effective ESDAC source selection. The editor is available before the first build. Profile settings are bound to their admitted job, including retries. The Soils summary shows a persistent warning above coverage when the accepted release used subsoil defaults. Its count describes the actual artifacts consumed by downstream stages. A later failed attempt can show its diagnostics without relabeling those artifacts. [ESDAC source and job input contract](esdac-soil-source-contract.md#project-defaults-for-a-missing-subsoil-material)

@@ -1,3 +1,5 @@
+Contract discovery: [European climate, soils, and WEPP run recovery](docs/work-packages/20261120_eu_run_recovery/package.md) - Climate upload and status repair, single-storm transition, E-OBS climate, ESDAC soils, European land-use mapping, and false migration prompts. Acceptance requires a full forest deployment and original-workflow rebuild of autosomal-vetch, plus the studded-stranglehold replay.
+
 Implemented and locally validated: [GL Dashboard catalog readiness](docs/work-packages/20261119_gl_catalog_readiness/package.md) — One readiness handshake per target, a visible wait before result queries, one RQ admission in the concurrency test, and two served browser tests. Fleet rollout remains pending.
 
 In progress: [CI runner migration](docs/work-packages/20261118_ci_runner_migration/package.md) - Migrate active/nightly checks off homelab; retire approved old profile schedules.

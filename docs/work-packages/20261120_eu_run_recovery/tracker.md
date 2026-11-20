@@ -1,0 +1,41 @@
+# European climate, soils, and WEPP run recovery tracker
+
+## Status
+
+Scaffolded on 2026-11-20 UTC. The [contract decision draft](artifacts/20261120_contract_decision.md) and [active ExecPlan](prompts/active/implementation_execplan.md) are open. Implementation conformance, forest deployment, and replay are pending.
+
+## Progress
+
+- [x] Record the production failure signatures and scope the work package.
+- [x] Preserve the available production baseline inputs and run initial raster and management readbacks.
+- [ ] Reconcile the original operation settings and locate the overwritten land-cover upload or document replay limits.
+- [ ] Resolve climate unit and ESDAC source questions, ratify the contracts, and record the checkpoint ancestor revision.
+- [ ] Implement and validate the climate, WEPP and soil changes.
+- [ ] Complete the full candidate deployment on forest and record runtime identities.
+- [ ] Rebuild the original workflow on forest, verify artifacts and browser behavior, and complete final correctness review.
+
+- [ ] Replay the CORINE/upload mapping switch and false migration prompt from `studded-stranglehold`, with a genuine legacy migration control.
+
+- [ ] Complete the [ESDAC management inventory and reconciliation](artifacts/20261120_esdac_management_baseline.md), including a reviewed row-by-row disposition and generated-output validation.
+
+## Decisions
+
+2026-11-20 UTC. The operator requires a complete local deployment on forest followed by a rebuild of `autosomal-vetch` through the original workflow. Use a fresh forest run derived from the original inputs and preserve the production project as the baseline. Gridded soil acceptance requires ESDAC evidence for the original hillslopes. A single-soil comparison cannot establish that result.
+
+2026-11-20 09:12 UTC. Added `studded-stranglehold`. The latest land-use job failed at 2026-11-19 12:16:03 UTC. Its saved gridded source is CORINE 2018 with the ESDAC management mapping. The deployed Web container's migration dry run reports schema 1000 current and `landuse_parquet` as the only applicable migration. No production state was changed by the investigation.
+
+## Open evidence
+
+The E-OBS raster unit and conversion chain, the supported single-storm execution/report matrix, and whether authoritative data can recover the 37 ESDAC rejects need evidence before contract ratification. If required original inputs are unavailable, record the missing input and its effect on replay fidelity.
+
+## Notes – 2026-11-20 UTC
+
+Preserved both incident baselines on forest and retained [raster readback and fixture evidence](artifacts/20261120_incident_readback.md). The E-OBS failure is reproducible as coastal NoData contamination in cubic interpolation. A real CLIGEN comparison generated 30 years with the alternate sampling probe. Paired ESDAC pixel sampling found six potential recoveries and five potential regressions, with 31 original rejects still missing subsoil fields. Added the full catalog inventory and native template parse results.
+
+The operator authorized a [bounded same-unit soil recovery study](artifacts/20261120_esdac_same_unit_study.md). The authorization covers evaluation. Review of scientific suitability and regressions is required before runtime use.
+
+The operator authorized ESDAC-only subsoil defaults in Soil Options → Advanced options when source-backed recovery cannot be established. The operator subsequently chose a fixed loam preset available before the first soil build. An earlier source-derived profile remains diagnostic comparison evidence. No generic default will replace a valid source profile.
+
+The diagnostic source-backed donor and fallback writer trials generated and parsed 31/31 and 37/37 base soils, respectively. The configured 7778 Disturbed validation rejected its metadata readback, including an unchanged source control. Added the format-specific downstream defect to acceptance.
+
+Drafted [ADR-0151](../../adrs/ADR-0151-esdac-missing-subsoil-defaults.md) for review. It records the six seeded values, eligible missing-data signature and provenance. Application changes, candidate deployment and both incident replays remain open.

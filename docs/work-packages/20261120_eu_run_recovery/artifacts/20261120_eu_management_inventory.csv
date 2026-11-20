@@ -1,0 +1,147 @@
+catalog,key,description,disturbed_class,management_file,template_status,audit_disposition
+esdac_map,0,No information,,GIS/Bare.man,parsed,review required
+esdac_map,1,"Pasture, grassland, grazing land",,GeoWEPP/Mountain Big Sagebrush.man,parsed,review required
+esdac_map,2,Poplars,,GeoWEPP/forest_perrenial.man,parsed,review required
+esdac_map,3,"Arable land, cereals",,"GeoWEPP/winter wheat, Conventional till.man",parsed,review required
+esdac_map,4,"Wasteland, shrub",,GeoWEPP/28% cover-short grass prarie.man,parsed,review required
+esdac_map,5,"Forest, coppice",,GeoWEPP/forest_perrenial.man,parsed,review required
+esdac_map,6,Horticulture,,"GeoWEPP/corn,soybean-fall mulch till.man",parsed,review required
+esdac_map,7,Vineyards,,GeoWEPP/grass.man,parsed,review required
+esdac_map,8,Garrigue,,GIS/Shrubs.man,parsed,review required
+esdac_map,9,"Bush, macchia",,GIS/Shrubs.man,parsed,review required
+esdac_map,10,Moor,,GIS/Poor grass.man,parsed,review required
+esdac_map,11,Halophile grassland,,GIS/Poor grass.man,parsed,review required
+esdac_map,12,"Arboriculture, orchard",,GeoWEPP/grass.man,parsed,review required
+esdac_map,13,Industrial crops,,"Agriculture/corn,soybean,wheat,alfalfa(4yrs)- conv till.man",parsed,review required
+esdac_map,14,Rice,,GIS/Poor grass.man,parsed,review required
+esdac_map,15,Cotton,,"Agriculture/Barley, conventional tillage, Palouse.man",parsed,review required
+esdac_map,16,Vegetables,,"GeoWEPP/corn,soybean-fall mulch till.man",parsed,review required
+esdac_map,17,Olive trees,,GeoWEPP/grass.man,parsed,review required
+esdac_map,18,Recreation,,GeoWEPP/grass.man,parsed,review required
+esdac_map,19,"Extensive pasture, grazing, rough pasture",,GIS/Poor grass.man,parsed,review required
+esdac_map,20,Dehesa (extensive pastoral system in forest parks in Spain),,GIS/Shrubs.man,parsed,review required
+esdac_map,21,Cultivos enarenados (artificial soils for orchards in SE Spain),,GeoWEPP/grass.man,parsed,review required
+esdac_map,22,"Wildlife refuge, land above timberline",,GeoWEPP/forest_perrenial.man,parsed,review required
+eu-esdac-disturbed,0,No information,,GIS/Bare.man,parsed,review required
+eu-esdac-disturbed,1,"Pasture, grassland, grazing land",shrub,Forest/DisturbedWEPPManagement/Shrub perennial.man,parsed,review required
+eu-esdac-disturbed,2,Poplars,forest,UnDisturbed/Old_Forest.man,parsed,review required
+eu-esdac-disturbed,3,"Arable land, cereals",short grass,"GeoWEPP/corn,soybean-fall mulch till.man",parsed,review required
+eu-esdac-disturbed,4,"Wasteland, shrub",shrub,Forest/DisturbedWEPPManagement/Shrub perennial.man,parsed,review required
+eu-esdac-disturbed,5,"Forest, coppice",forest,UnDisturbed/Old_Forest.man,parsed,review required
+eu-esdac-disturbed,6,Horticulture,short grass,"GeoWEPP/corn,soybean-fall mulch till.man",parsed,review required
+eu-esdac-disturbed,7,Vineyards,young forest,GeoWEPP/grass.man,parsed,review required
+eu-esdac-disturbed,8,Garrigue,shrub,GIS/Shrubs.man,parsed,review required
+eu-esdac-disturbed,9,"Bush, macchia",shrub,Forest/DisturbedWEPPManagement/Shrub perennial.man,parsed,review required
+eu-esdac-disturbed,10,Moor,short grass,GIS/Poor grass.man,parsed,review required
+eu-esdac-disturbed,11,Halophile grassland,short grass,GIS/Poor grass.man,parsed,review required
+eu-esdac-disturbed,12,"Arboriculture, orchard",short grass,GeoWEPP/grass.man,parsed,review required
+eu-esdac-disturbed,13,Industrial crops,short grass,"GeoWEPP/corn,soybean-fall mulch till.man",parsed,review required
+eu-esdac-disturbed,14,Rice,short grass,GIS/Poor grass.man,parsed,review required
+eu-esdac-disturbed,15,Cotton,short grass,"Agriculture/Barley, conventional tillage, Palouse.man",parsed,review required
+eu-esdac-disturbed,16,Vegetables,short grass,"GeoWEPP/corn,soybean-fall mulch till.man",parsed,review required
+eu-esdac-disturbed,17,Olive trees,short grass,GeoWEPP/grass.man,parsed,review required
+eu-esdac-disturbed,18,Recreation,short grass,GeoWEPP/grass.man,parsed,review required
+eu-esdac-disturbed,19,"Extensive pasture, grazing, rough pasture",shrub,Forest/DisturbedWEPPManagement/Shrub perennial.man,parsed,review required
+eu-esdac-disturbed,20,Dehesa (extensive pastoral system in forest parks in Spain),shrub,Forest/DisturbedWEPPManagement/Shrub perennial.man,parsed,review required
+eu-esdac-disturbed,21,Cultivos enarenados (artificial soils for orchards in SE Spain),short grass,GeoWEPP/grass.man,parsed,review required
+eu-esdac-disturbed,22,"Wildlife refuge, land above timberline",bare,GeoWEPP/forest_perrenial.man,parsed,review required
+eu-esdac-disturbed,105,High Severity Fire,forest high sev fire,UnDisturbed/High_Severity_Fire.man,parsed,review required
+eu-esdac-disturbed,118,Moderate Severity Fire,forest low sev fire,UnDisturbed/Moderate_Severity_Fire.man,parsed,review required
+eu-esdac-disturbed,106,Low Severity Fire,forest low sev fire,UnDisturbed/Low_Severity_Fire.man,parsed,review required
+eu-esdac-disturbed,110,Prescribed Fire,forest prescribed fire,UnDisturbed/Prescribed_Fire.man,parsed,review required
+eu-esdac-disturbed,108,Mulch,mulch,UnDisturbed/Mulch.man,parsed,review required
+eu-esdac-disturbed,109,Mulch Tilled,mulch,UnDisturbed/Mulch_Tilled.man,parsed,review required
+eu-esdac-disturbed,111,Skid Trail,skid,UnDisturbed/Skid_Trail.man,parsed,review required
+eu-esdac-disturbed,119,Shrub High Severity Fire,shrub high sev fire,UnDisturbed/Shrub_High_Severity_Fire.man,parsed,review required
+eu-esdac-disturbed,120,Shrub Moderate Severity Fire,shrub low sev fire,UnDisturbed/Shrub_Moderate_Severity_Fire.man,parsed,review required
+eu-esdac-disturbed,121,Shrub Low Severity Fire,shrub low sev fire,UnDisturbed/Shrub_Low_Severity_Fire.man,parsed,review required
+eu-esdac-disturbed,122,Shrub Prescribed Fire,shrub prescribed fire,UnDisturbed/Prescribed_Fire.man,parsed,review required
+eu-esdac-disturbed,115,Thinning 93 Cover (Cable),thinning,UnDisturbed/Cable_Thinning_93_Cover.man,missing,review required
+eu-esdac-disturbed,116,Thinning 90 Cover (Forwarder),thinning,UnDisturbed/Forward_Thinning_90_Cover.man,missing,review required
+eu-esdac-disturbed,117,Thinning 85 Cover (Skidder),thinning,UnDisturbed/Skidder_Thinning_85_Cover.man,missing,review required
+eu-esdac-disturbed,123,Thinning 96 Cover,thinning,UnDisturbed/Thinning_96_Cover.man,parsed,review required
+eu-esdac-disturbed,124,Thinning 75 Cover,thinning,UnDisturbed/Thinning_75_Cover.man,missing,review required
+eu-esdac-disturbed,129,Grass Low Severity Fire,grass low sev fire,UnDisturbed/Shrub_Low_Severity_Fire.man,parsed,review required
+eu-esdac-disturbed,130,Grass Low Severity Fire,grass low sev fire,UnDisturbed/Shrub_Low_Severity_Fire.man,parsed,review required
+eu-esdac-disturbed,131,Grass Low Severity Fire,grass low sev fire,UnDisturbed/Shrub_Low_Severity_Fire.man,parsed,review required
+eu-esdac-disturbed,132,Grass Prescribed Fire,grass prescribed fire,UnDisturbed/Prescribed_Fire.man,parsed,review required
+eu-corine-disturbed,1,Continuous urban fabric,developed high intensity,UnDisturbed/Developed_High_Intensity.man,parsed,CORINE comparison
+eu-corine-disturbed,2,Discontinuous urban fabric,developed moderate intensity,UnDisturbed/Developed_Moderate_Intensity.man,parsed,CORINE comparison
+eu-corine-disturbed,3,Industrial or commercial units,developed high intensity,UnDisturbed/Developed_High_Intensity.man,parsed,CORINE comparison
+eu-corine-disturbed,4,Road and rail networks and associated land,developed moderate intensity,UnDisturbed/Developed_Moderate_Intensity.man,parsed,CORINE comparison
+eu-corine-disturbed,5,Port areas,developed high intensity,UnDisturbed/Developed_High_Intensity.man,parsed,CORINE comparison
+eu-corine-disturbed,6,Airports,developed high intensity,UnDisturbed/Developed_High_Intensity.man,parsed,CORINE comparison
+eu-corine-disturbed,7,Mineral extraction sites,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,8,Dump sites,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,9,Construction sites,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,10,Green urban areas,developed low intensity,UnDisturbed/Developed_Low_Intensity.man,parsed,CORINE comparison
+eu-corine-disturbed,11,Sport and leisure facilities,developed low intensity,UnDisturbed/Developed_Low_Intensity.man,parsed,CORINE comparison
+eu-corine-disturbed,12,Non-irrigated arable land,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,13,Permanently irrigated land,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,14,Rice fields,agriculture crops,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,15,Vineyards,agriculture crops,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,16,Fruit trees and berry plantations,young forest,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,17,Olive groves,young forest,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,18,Pastures,agriculture crops,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,19,Annual crops associated with permanent crops,agriculture crops,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,20,Complex cultivation patterns,agriculture crops,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,21,"Land principally occupied by agriculture, with significant areas of natural vegetation",agriculture crops,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,22,Agro-forestry areas,forest,UnDisturbed/Old_Forest.man,parsed,CORINE comparison
+eu-corine-disturbed,23,Broad-leaved forest,forest,UnDisturbed/Old_Forest.man,parsed,CORINE comparison
+eu-corine-disturbed,24,Coniferous forest,forest,UnDisturbed/Old_Forest.man,parsed,CORINE comparison
+eu-corine-disturbed,25,Mixed forest,forest,UnDisturbed/Old_Forest.man,parsed,CORINE comparison
+eu-corine-disturbed,26,Natural grasslands,tall grass,Forest/DisturbedWEPPManagement/Tall grass prarie.man,parsed,CORINE comparison
+eu-corine-disturbed,27,Moors and heathland,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,28,Sclerophyllous vegetation,shrub,UnDisturbed/Shrub.man,parsed,CORINE comparison
+eu-corine-disturbed,29,Transitional woodland-shrub,forest,UnDisturbed/Old_Forest.man,parsed,CORINE comparison
+eu-corine-disturbed,30,"Beaches, dunes, sands",,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,31,Bare rocks,,GIS/Bare.man,parsed,CORINE comparison
+eu-corine-disturbed,32,Sparsely vegetated areas,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,33,Burnt areas,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,34,Glaciers and perpetual snow,,GIS/Bare.man,parsed,CORINE comparison
+eu-corine-disturbed,35,Inland marshes,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,36,Peat bogs,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,37,Salt marshes,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,38,Salines,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,39,Intertidal flats,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,40,Water courses,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,41,Water bodies,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,42,Coastal lagoons,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,43,Estuaries,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,44,Sea and ocean,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,48,NODATA,,GeoWEPP/grass.man,parsed,CORINE comparison
+eu-corine-disturbed,105,High Severity Fire,forest high sev fire,UnDisturbed/High_Severity_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,118,Moderate Severity Fire,forest moderate sev fire,UnDisturbed/Moderate_Severity_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,106,Low Severity Fire,forest low sev fire,UnDisturbed/Low_Severity_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,110,Prescribed Fire,forest prescribed fire,UnDisturbed/Prescribed_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,108,Mulch,mulch,UnDisturbed/Mulch.man,parsed,CORINE comparison
+eu-corine-disturbed,109,Mulch Tilled,mulch,UnDisturbed/Mulch_Tilled.man,parsed,CORINE comparison
+eu-corine-disturbed,111,Skid Trail,skid,UnDisturbed/Skid_Trail.man,parsed,CORINE comparison
+eu-corine-disturbed,119,Shrub High Severity Fire,shrub high sev fire,UnDisturbed/Shrub_High_Severity_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,120,Shrub Moderate Severity Fire,shrub moderate sev fire,UnDisturbed/Shrub_Moderate_Severity_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,121,Shrub Low Severity Fire,shrub low sev fire,UnDisturbed/Shrub_Low_Severity_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,122,Shrub Prescribed Fire,shrub prescribed fire,UnDisturbed/Prescribed_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,115,Thinning 40/93 Cover (Cable),thinning_40_93,UnDisturbed/Thinning_40_93.man,parsed,CORINE comparison
+eu-corine-disturbed,116,Thinning 40/90 Cover (Forwarder),thinning_40_90,UnDisturbed/Thinning_40_90.man,parsed,CORINE comparison
+eu-corine-disturbed,117,Thinning 40/85 Cover (Skidder),thinning_40_85,UnDisturbed/Thinning_40_85.man,parsed,CORINE comparison
+eu-corine-disturbed,124,Thinning 40/75 Cover,thinning_40_75,UnDisturbed/Thinning_40_75.man,parsed,CORINE comparison
+eu-corine-disturbed,129,Grass High Severity Fire,grass high sev fire,UnDisturbed/Shrub_Low_Severity_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,130,Grass Moderate Severity Fire,grass moderate sev fire,UnDisturbed/Shrub_Low_Severity_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,131,Grass Low Severity Fire,grass low sev fire,UnDisturbed/Shrub_Low_Severity_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,132,Grass Prescribed Fire,grass prescribed fire,UnDisturbed/Prescribed_Fire.man,parsed,CORINE comparison
+eu-corine-disturbed,143,Thinning 30/93 Cover (Cable),thinning_30_93,UnDisturbed/Thinning_30_93.man,parsed,CORINE comparison
+eu-corine-disturbed,144,Thinning 30/90 Cover (Forwarder),thinning_30_90,UnDisturbed/Thinning_30_90.man,parsed,CORINE comparison
+eu-corine-disturbed,145,Thinning 30/85 Cover (Skidder),thinning_30_85,UnDisturbed/Thinning_30_85.man,parsed,CORINE comparison
+eu-corine-disturbed,146,Thinning 30/75 Cover,thinning_30_75,UnDisturbed/Thinning_30_75.man,parsed,CORINE comparison
+eu-corine-disturbed,147,Thinning 50/93 Cover (Cable),thinning_50_93,UnDisturbed/Thinning_50_93.man,parsed,CORINE comparison
+eu-corine-disturbed,148,Thinning 50/90 Cover (Forwarder),thinning_50_90,UnDisturbed/Thinning_50_90.man,parsed,CORINE comparison
+eu-corine-disturbed,149,Thinning 50/85 Cover (Skidder),thinning_50_85,UnDisturbed/Thinning_50_85.man,parsed,CORINE comparison
+eu-corine-disturbed,150,Thinning 50/75 Cover,thinning_50_75,UnDisturbed/Thinning_50_75.man,parsed,CORINE comparison
+eu-corine-disturbed,151,Thinning 60/93 Cover (Cable),thinning_60_93,UnDisturbed/Thinning_60_93.man,parsed,CORINE comparison
+eu-corine-disturbed,152,Thinning 60/90 Cover (Forwarder),thinning_60_90,UnDisturbed/Thinning_60_90.man,parsed,CORINE comparison
+eu-corine-disturbed,153,Thinning 60/85 Cover (Skidder),thinning_60_85,UnDisturbed/Thinning_60_85.man,parsed,CORINE comparison
+eu-corine-disturbed,154,Thinning 60/75 Cover,thinning_60_75,UnDisturbed/Thinning_60_75.man,parsed,CORINE comparison
+eu-corine-disturbed,155,Thinning 70/93 Cover (Cable),thinning_70_93,UnDisturbed/Thinning_70_93.man,parsed,CORINE comparison
+eu-corine-disturbed,156,Thinning 70/90 Cover (Forwarder),thinning_70_90,UnDisturbed/Thinning_70_90.man,parsed,CORINE comparison
+eu-corine-disturbed,157,Thinning 70/85 Cover (Skidder),thinning_70_85,UnDisturbed/Thinning_70_85.man,parsed,CORINE comparison
+eu-corine-disturbed,158,Thinning 70/75 Cover,thinning_70_75,UnDisturbed/Thinning_70_75.man,parsed,CORINE comparison

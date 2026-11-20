@@ -1,0 +1,47 @@
+[
+  [
+    "unmodified source control",
+    7778,
+    "rejected",
+    [
+      "disturbed.metadata.luse_mismatch",
+      "disturbed.metadata.stext_mismatch"
+    ]
+  ],
+  [
+    "unmodified source control",
+    9002,
+    "valid",
+    []
+  ],
+  [
+    "donor",
+    7778,
+    "rejected",
+    [
+      "disturbed.metadata.luse_mismatch",
+      "disturbed.metadata.stext_mismatch"
+    ]
+  ],
+  [
+    "donor",
+    9002,
+    "valid",
+    []
+  ],
+  [
+    "defaults",
+    7778,
+    "rejected",
+    [
+      "disturbed.metadata.luse_mismatch",
+      "disturbed.metadata.stext_mismatch"
+    ]
+  ],
+  [
+    "defaults",
+    9002,
+    "valid",
+    []
+  ]
+]
