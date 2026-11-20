@@ -812,3 +812,32 @@ def test_prepare_keeps_receipt_when_dispatch_redis_is_unavailable(boundary, monk
     assert len(catalog_refresh.pending_catalog_requests(run)) == 1
     assert not (run / '_query_engine/catalog.json').exists()
     assert calls == []
+
+
+@pytest.mark.parametrize('state', ['running', 'failed'])
+def test_existing_query_credential_still_honors_fork_guard(boundary, signed_token, session_state, state):
+    import redis
+    from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+
+    client, run, calls = boundary
+    _dataset(run)
+    _mark_session()
+    _session_cookie(client, signed_token)
+    redis.Redis(**redis_connection_kwargs(RedisDB.RQ)).hset('rq:fork:planned:ab-private', 'state', state)
+
+    response = client.post('/runs/ab-private/cfg/query', headers={'Sec-Fetch-Site': 'same-origin'},
+                           json={'datasets': ['data/sample.parquet'], 'catalog_mode': 'wait'})
+    assert response.status_code == 409
+    assert calls == []
+
+
+def test_wrong_config_query_cookie_cannot_prepare_catalog(boundary, signed_token, session_state):
+    client, run, calls = boundary
+    _mark_session()
+    _session_cookie(client, signed_token, config='cfg')
+
+    response = client.post('/runs/ab-private/foreign/catalog/prepare', json={},
+                           headers={'Sec-Fetch-Site': 'same-origin'})
+    assert response.status_code == 401
+    assert calls == []
+    assert not (run / '_query_engine').exists()

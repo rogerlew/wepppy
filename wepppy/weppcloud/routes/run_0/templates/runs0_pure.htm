@@ -78,6 +78,9 @@
 {% endblock %}
 
 {% block body_container %}
+{% if fork_status %}
+  {% include '_fork_run_notice.htm' %}
+{% endif %}
 {% if is_declarative | default(false) %}
 <aside class="wc-alert wc-alert--info" role="status">
   <strong>Declarative project</strong>
