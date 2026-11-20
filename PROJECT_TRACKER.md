@@ -1,3 +1,5 @@
+Implemented and locally validated: [Comrak Markdown migration](docs/work-packages/20261120_comrak_markdown_migration/package.md). Replaced cmarkgfm in Usersum, project README, Browse and docs tooling. Repository-wide tests excluding the slow marker passed.
+
 Implemented and locally validated: [Usersum vendor link graph and heading lint](docs/work-packages/20261120_usersum_link_graph/package.md). Verified 94 committed copies and 123 focused tests. Broad validation and integration remain open.
 
 Deployed and replayed on forest: [European climate, soils, and WEPP run recovery](docs/work-packages/20261120_eu_run_recovery/package.md) — original autosomal-vetch workflow and E-OBS with gridded ESDAC verified through native output. Staged upload recovery verified. The reconciled ESDAC catalog passed browser admission, soil preparation and WEPP output on forest.

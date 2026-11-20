@@ -7,14 +7,13 @@ from wepppy.observability.secret_profiles import WEB
 import os
 import re
 from functools import lru_cache
-from html import escape as html_escape, unescape as html_unescape
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Set, Tuple, TypedDict
 from urllib.parse import quote, urlsplit, urlunsplit
 
-from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # type: ignore[import-not-found]
 from flask import Blueprint, Response, abort, current_app, jsonify, redirect, render_template, request  # type: ignore[import-not-found]
 
+from wepppy.markdown_render import render_markdown
 from wepppy.weppcloud.feature_registry.runtime import load_config_registry, load_feature_registry
 from wepppy.weppcloud.feature_registry.schema import ROLE_AUDIENCES
 from wepppy.weppcloud.usersum_anchors import add_heading_anchors as _add_heading_anchors
@@ -137,10 +136,6 @@ _PARAM_HEADER_RE = re.compile(r"^#### `([^`]+)` —\s*(.+)$")
 _DETAIL_RE = re.compile(r"^- \*\*([^*]+)\*\*: ?(.*)$")
 _WHITESPACE_RE = re.compile(r"\s+")
 _WORD_TOKEN_RE = re.compile(r"[a-z0-9_]+")
-_ANCHOR_HREF_RE = re.compile(
-    r'(<a\b[^>]*?\bhref\s*=\s*)(["\'])(.*?)(\2)',
-    re.IGNORECASE | re.DOTALL,
-)
 
 
 class ParameterDetail(TypedDict):
@@ -447,19 +442,9 @@ def _rewrite_markdown_href(source_path: Path, href: str) -> str:
     return urlunsplit(("", "", routed_path, parsed.query, parsed.fragment))
 
 
-def _rewrite_markdown_links(source_path: Path, content_html: str) -> str:
-    def _replace(match: re.Match[str]) -> str:
-        href_value = html_unescape(match.group(3))
-        rewritten_href = _rewrite_markdown_href(source_path, href_value)
-        if rewritten_href == href_value:
-            return match.group(0)
-        return (
-            f"{match.group(1)}{match.group(2)}"
-            f"{html_escape(rewritten_href, quote=True)}"
-            f"{match.group(4)}"
-        )
-
-    return _ANCHOR_HREF_RE.sub(_replace, content_html)
+def _render_document_html(source_path: Path, source: str) -> str:
+    rendered = render_markdown(source, rewrite_link=lambda href: _rewrite_markdown_href(source_path, href))
+    return _add_heading_anchors(rendered)
 
 
 def _doc_breadcrumbs(doc: RuntimeDoc) -> List[Dict[str, str | None]]:
@@ -529,9 +514,7 @@ def _render_markdown_document(
     breadcrumbs: List[Dict[str, str | None]] | None = None,
 ):
     markdown_source = path.read_text(encoding="utf-8")
-    content_html = markdown_to_html(markdown_source)
-    content_html = _add_heading_anchors(content_html)
-    content_html = _rewrite_markdown_links(path, content_html)
+    content_html = _render_document_html(path, markdown_source)
     repo_rel_path = _repo_relative_markdown_path(path)
     return _render_with_usersum_shell(
         "usersum/view.htm",
@@ -830,7 +813,7 @@ def _render_search_snippet_html(snippet_text: str) -> str:
     normalized = _normalise_spaces(snippet_text)
     if not normalized:
         return ""
-    return markdown_to_html(normalized).strip()
+    return render_markdown(normalized).strip()
 
 
 def _postgres_search_backend() -> PostgresUsersumSearchBackend | None:
