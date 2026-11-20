@@ -261,6 +261,11 @@ Visibility and path guards:
 
 ## Link Resolution and Prefix Safety
 
+WEPPpy's [Markdown rendering contract](../../../../docs/schemas/markdown-rendering-contract.md)
+governs parsing and safe HTML output. Usersum rewrites parsed link
+destinations before rendering and checks fragments with the same heading
+IDs the web viewer emits.
+
 Usersum uses deployment-prefix-safe URL generation with `url_for_run(...)` (not raw static route strings) for rendered navigation and links.
 
 Key behavior:
@@ -356,7 +361,7 @@ Response payload:
   - `rel_path`
   - `min_role`
   - `category`
-  - `snippet` (HTML fragment rendered via `cmarkgfm`)
+  - `snippet` (HTML fragment rendered by the shared Markdown adapter)
   - `score`
   - `breadcrumb[]`
 - paging metadata:
