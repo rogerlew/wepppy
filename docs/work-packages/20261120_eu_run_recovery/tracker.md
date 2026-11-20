@@ -75,3 +75,13 @@ The [historical thinning reference checkpoint](artifacts/20261120_management_ref
 is `9402cef2d`. All 16 corrected references across four tables round-tripped
 through the native 98.4 reader. The Disturbed ESDAC generic thinning class
 still prevents full catalog hydration for keys 115–117, 123 and 124.
+
+Forest preflight found the default, batch and fork/archive queues idle and
+served solely by local containers. The canonical Compose configuration
+resolved 28 services. It mounted the candidate checkout for Web, RQ and
+workers and the rebuilt E-OBS tree read-only in metquery. The full build
+was started. Deployment and the two live replays still require receipts.
+
+A [draft E-OBS publication checkpoint](artifacts/20261120_eobs_publication_checkpoint.md)
+records the outstanding selected-versus-applied generation and orchestration
+issues. It has no implementation authority yet.

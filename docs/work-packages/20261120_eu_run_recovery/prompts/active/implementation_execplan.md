@@ -40,7 +40,7 @@ For `studded-stranglehold`, a failed gridded CORINE build persisted dominant lan
 
 ## Outcomes & Retrospective
 
-The soil slice is implemented and locally validated, including the preset warning and 7778 controls. The E-OBS sampler and future preprocessing correction are implemented, with actual local HTTP and CLIGEN artifact readback. The broader legacy raster rebuild, remaining contract decisions and implementation, deployment and browser replay are open.
+The soil slice is implemented and locally validated, including the preset warning and 7778 controls. The E-OBS sampler and future preprocessing correction are implemented, with actual local HTTP and CLIGEN artifact readback. The private regional raster rebuild is complete. Remaining publication and management contracts, deployment and browser replay are open.
 
 ## Milestones
 
