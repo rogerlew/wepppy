@@ -132,7 +132,7 @@ These routes combine non-file params with optional/conditional upload parts.
 
 | Endpoint | Handler module | Upload field(s) | Allowed extensions/types | Max size | Upload condition |
 | --- | --- | --- | --- | --- | --- |
-| `/api/runs/{runid}/{config}/build-landuse` | `wepppy/microservices/rq_engine/landuse_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img` | `500 * 1024 * 1024` (500 MB) | Restricted format/driver validation; used when `landuse.mode == UserDefined` |
+| `/api/runs/{runid}/{config}/build-landuse` | `wepppy/microservices/rq_engine/landuse_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img` | `500 * 1024 * 1024` (500 MB) | Restricted format/driver validation in UserDefined mode and [applied input preservation and map checks](european-landuse-mapping-contract.md#uploaded-raster-compatibility) (implementation pending) |
 | `/api/runs/{runid}/{config}/build-treatments` | `wepppy/microservices/rq_engine/treatments_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img` | `500 * 1024 * 1024` (500 MB) | Restricted format/driver validation; used when `treatments.mode == UserDefinedMap` |
 | `/api/runs/{runid}/{config}/run-ash` | `wepppy/microservices/rq_engine/ash_routes.py` | `input_upload_ash_load` (required), `input_upload_ash_type_map` (optional) | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation; used when `ash_depth_mode == 2` |
 | `/api/runs/{runid}/{config}/run-omni` | `wepppy/microservices/rq_engine/omni_routes.py` | `scenarios[{idx}][sbs_file]` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation per uploaded SBS scenario |
