@@ -533,7 +533,7 @@ Controls binary selection and whether watershed/channel execution is included.
 
 ### Cautions
 
-- Avoid `latest`. Choose a specific version for reproducible reruns.
+- `latest` is deprecated. Saved projects can still use it. Choose a specific version for reproducible reruns.
 - Multi-OFE workflows require newer binaries.
 - Keep binary choice consistent across scenario comparisons.
 

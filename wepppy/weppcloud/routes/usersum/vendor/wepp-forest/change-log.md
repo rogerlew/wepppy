@@ -2,12 +2,11 @@
 
 Canonical WEPP build/version history for `wepp-forest`.
 
-WEPPcloud's `latest` option is pinned to `wepp_dcc52a6`. It remains available
-because removing it would break projects saved with that setting. The pin stays
-fixed across releases because changing the executable behind a saved setting
-can change rerun results and make it harder to trace which model build produced
-them. Select an explicit version for new projects. To match a run that used the
-current `latest` pin, select `wepp_dcc52a6` explicitly.
+WEPPcloud has deprecated `latest` in WEPP Exec. It is pinned to `wepp_dcc52a6`
+and remains supported for projects saved with that setting. The version picker
+offers explicit versions for new selections. The pin stays fixed because changing
+the executable behind a saved setting can change rerun results and obscure which
+model build produced them. Select `wepp_dcc52a6` to rerun with the same executable.
 
 Required maintenance rule:
 - update this file whenever a new build or rebuild is made (including new

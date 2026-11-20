@@ -1,15 +1,26 @@
 {% import "controls/_pure_macros.html" as ui %}
 {% from "shared/console_macros.htm" import button_row %}
+{% set binary_options = wepp_bin_options | rejectattr('0', 'equalto', 'latest') | list %}
+{% if wepp.wepp_bin == 'latest' %}
+  {# Hidden disabled option presents the saved value and prevents reselection. #}
+  {% set binary_options = [('latest', 'latest')] + binary_options %}
+{% endif %}
 
   {{ ui.select_field(
        "wepp_bin",
        "WEPP binary version",
-       wepp_bin_options,
+       binary_options,
        selected=wepp.wepp_bin,
-       help="Avoid ‘latest’. Choose a specific version for reproducible reruns.",
-       disabled_values=disabled_wepp_bin_options,
+       disabled_values=(disabled_wepp_bin_options | default([], true) | list) + ['latest'],
+       hidden_values=['latest'],
        extra_control_class="disable-readonly"
      ) }}
+
+  {% if wepp.wepp_bin == 'latest' %}
+    <p class="wc-field__help" id="wepp_bin_latest_hint">
+      ‘latest’ is deprecated. Choose a specific version for reproducible reruns.
+    </p>
+  {% endif %}
 
   <p class="wc-text-muted">
     Verify binary lineage and compiler history with

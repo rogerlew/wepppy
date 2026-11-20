@@ -4481,6 +4481,27 @@ def test_wepp_control_renders_core_run_and_lifecycle_contract(jinja_env: Environ
     assert 'id="wepp_stacktrace_panel"' in rendered
 
 
+@pytest.mark.routes
+@pytest.mark.parametrize("saved_version", ["latest", "wepp_dcc52a6", None])
+def test_wepp_exec_latest_only_renders_as_a_saved_value(
+    jinja_env: Environment, saved_version: str | None
+) -> None:
+    template = jinja_env.get_template("controls/wepp_pure_advanced_options/wepp_bin.htm")
+    rendered = template.render(
+        wepp=SimpleNamespace(wepp_bin=saved_version, multi_ofe=False, run_wepp_watershed=True),
+        wepp_bin_options=[("latest", "latest"), ("wepp_dcc52a6", "wepp_dcc52a6")],
+    )
+
+    assert '<option value="wepp_dcc52a6"' in rendered
+    if saved_version == "latest":
+        assert '<option value="latest" selected disabled aria-disabled="true" hidden>' in rendered
+        assert 'id="wepp_bin_latest_hint"' in rendered
+        assert '‘latest’ is deprecated.' in rendered
+    else:
+        assert '<option value="latest"' not in rendered
+        assert 'id="wepp_bin_latest_hint"' not in rendered
+
+
 def test_pmet_advanced_template_renders_payload_and_routine_contract(
     jinja_env: Environment,
 ) -> None:
