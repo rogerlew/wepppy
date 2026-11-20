@@ -28,7 +28,7 @@ The candidate is deployed on forest. The [deployment and replay receipt](artifac
 
 ## Open evidence
 
-Remaining evidence covers generated climate publication and readiness after a failed replacement, incompatible upload admission, batch event output, and the open catalog parameterization decisions. The original second-incident raster is unavailable.
+Remaining work covers European catalog parameterization and reconciliation. The package retains the batch event output limitation. The original second-incident raster is unavailable.
 
 ## Notes – 2026-11-20 UTC
 
@@ -84,9 +84,8 @@ resolved 28 services. It mounted the candidate checkout for Web, RQ and
 workers and the rebuilt E-OBS tree read-only in metquery. The full build
 was started. Deployment and the two live replays still require receipts.
 
-A [draft E-OBS publication checkpoint](artifacts/20261120_eobs_publication_checkpoint.md)
-records the outstanding selected-versus-applied generation and orchestration
-issues. It has no implementation authority yet.
+The [E-OBS publication investigation](artifacts/20261120_eobs_publication_checkpoint.md)
+records the superseded proposal for failed generated climate publication.
 
 The [generic thinning checkpoint](artifacts/20261120_legacy_thinning_class_checkpoint.md)
 is `d85661182`. Restoring the exact existing lookup label made all 146
@@ -110,5 +109,6 @@ admission, a real upload worker, and direct Parquet readback. The
 records the retained acceptance evidence and publication boundaries.
 Forest CLIGEN workers loaded `def92f11e` for the isolated native working
 directory. A private failed E-OBS replacement independently reproduced
-loss of the prior valid climate. Next-Run policy and generated publication
-remain in the [climate checkpoint](artifacts/20261120_eobs_publication_checkpoint.md).
+loss of the prior valid climate. The operator clarified that generated builds
+have no idempotency or prior-climate preservation requirement. The proposed
+rollback and reuse policy is outside acceptance. [Climate investigation](artifacts/20261120_eobs_publication_checkpoint.md)

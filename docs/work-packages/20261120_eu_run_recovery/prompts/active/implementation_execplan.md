@@ -26,8 +26,7 @@ A user following the original European project workflow can produce usable clima
 - [x] Reject incompatible Disturbed tables and preserve the applied report in Landuse Options in focused tests and on forest.
 - [x] Validate native raster codes, bind admitted artifacts to the RQ job and retest the failure and recovery on forest.
 - [x] Verify no caller directory mutation on failed CLIGEN localization and replay the native E-OBS climate.
-- [ ] Preserve the prior accepted climate through a failed generated replacement and settle the next-Run policy.
-- [ ] Ratify remaining generated climate and scientific management checkpoints.
+- [ ] Ratify the remaining scientific management checkpoints.
 - [ ] Implement and verify each confirmed failure class and its peer consumers.
 - [x] Complete the forest deployment and record the runtime revision.
 - [x] Replay the original run and verify native and browser artifacts.
@@ -45,9 +44,11 @@ For `studded-stranglehold`, a failed gridded CORINE build persisted dominant lan
 
 2026-11-20 UTC. Require the real browser and RQ workflow after a complete local deployment to forest. Preserve the original production run as evidence. The replay must attempt the original gridded ESDAC path and retain its disposition, even if it also exercises the original database-soil override.
 
+Operator clarification. Generated E-OBS rebuilds have no idempotency or prior-climate preservation requirement. If a failed rebuild leaves no usable climate, the user must successfully build or upload climate before a new WEPP run.
+
 ## Outcomes & Retrospective
 
-The soil slice is implemented and locally validated, including the preset warning and 7778 controls. The E-OBS sampler and future preprocessing correction are implemented, with actual local HTTP and CLIGEN artifact readback. The private regional raster rebuild is complete. Forest candidate `af514e39c` completed the original browser and RQ workflow and the companion E-OBS plus gridded soil run. The second-incident control verified the normal retry page, gridded CORINE recovery and correct climate status after a newer upload. Original upload fidelity, early land-use rejection and the remaining publication and management contracts are open. [Deployment and native readback](../../artifacts/20261120_forest_deployment_replay.md)
+The soil slice is implemented and locally validated, including the preset warning and 7778 controls. The E-OBS sampler and future preprocessing correction are implemented, with actual local HTTP and CLIGEN artifact readback. The private regional raster rebuild is complete. Forest candidate `af514e39c` completed the original browser and RQ workflow and the companion E-OBS plus gridded soil run. The second-incident control verified the normal retry page, gridded CORINE recovery and correct climate status after a newer upload. The staged upload replay also verified early rejection on forest. The original second-incident upload remains unavailable. European management reconciliation remains open. [Deployment and native readback](../../artifacts/20261120_forest_deployment_replay.md)
 
 ## Milestones
 

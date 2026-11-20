@@ -1,4 +1,4 @@
-Deployed and replayed on forest: [European climate, soils, and WEPP run recovery](docs/work-packages/20261120_eu_run_recovery/package.md) — original autosomal-vetch workflow and E-OBS with gridded ESDAC verified through native output. Staged upload recovery verified. Failed generated climate replacement and catalog reconciliation remain open.
+Deployed and replayed on forest: [European climate, soils, and WEPP run recovery](docs/work-packages/20261120_eu_run_recovery/package.md) — original autosomal-vetch workflow and E-OBS with gridded ESDAC verified through native output. Staged upload recovery verified. European management catalog reconciliation remains open.
 
 Implemented and locally validated: [GL Dashboard catalog readiness](docs/work-packages/20261119_gl_catalog_readiness/package.md) — One readiness handshake per target, a visible wait before result queries, one RQ admission in the concurrency test, and two served browser tests. Fleet rollout remains pending.
 

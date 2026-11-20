@@ -132,7 +132,7 @@ The second native readback again found 10,957 daily rows, 59 matching
 climate decks, 59 parsed soils, and 635,506 hillslope pass records.
 See the
 [failed generated replacement control](20261120_eobs_publication_checkpoint.md#retained-failure-controls)
-for the outstanding climate retention issue.
+for the observed behavior after a failed rebuild and the operator’s scope clarification.
 
 The final frontend bundle showed the batch settings acknowledgement as
 status and ignored a late stale rejection in the controller tests. Forest

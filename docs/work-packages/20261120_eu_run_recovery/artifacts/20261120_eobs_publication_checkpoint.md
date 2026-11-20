@@ -1,4 +1,6 @@
-# E-OBS generated climate publication draft
+# E-OBS generated climate publication investigation
+
+> Superseded proposal. The operator clarified that generated E-OBS rebuilds have no idempotency or prior-climate preservation requirement. The draft below records the options considered. The normal WEPP prerequisite is a usable climate input.
 
 Starting implementation `51cea3b24`. The operator asked to fix the E-OBS
 failure and the competing applied-climate and failed-job state. The
@@ -100,4 +102,4 @@ from the rebuilt HTTP provider matched the previously accepted
 The 39 focused tests include a subprocess cwd assertion and binary-provenance
 checks. Independent native PRISM and AGDC controls each produced and
 parsed 730 daily rows with the same caller directory. This correction does not restore the previous climate generation.
-The selected versus applied publication and next-Run decision remain open.
+The operator clarification removes prior-generation rollback and reuse from package acceptance.

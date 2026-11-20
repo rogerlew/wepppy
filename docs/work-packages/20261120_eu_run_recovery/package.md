@@ -1,6 +1,6 @@
 # European climate, soils, and WEPP run recovery
 
-**Status**: Forest replay verified the original workflow, E-OBS with gridded ESDAC soils, and staged land-use upload recovery. Failed generated climate replacement and European management reconciliation remain open.
+**Status**: Forest replay verified the original workflow, E-OBS with gridded ESDAC soils, and staged land-use upload recovery. European management reconciliation remains open.
 **Opened**: 2026-11-20 UTC
 **Target**: Complete local deployment and end-to-end replay on `forest`
 
@@ -21,7 +21,7 @@ Make the original `autosomal-vetch` workflow usable through the WEPPcloud browse
 1. Each successful climate upload derives saved mode from the active file. Cover both replacement directions, legacy mode/file disagreement, failed replacement, retry, reload, and WEPP consuming the intended file.
 2. Ratify the warning-only deprecation transition requested for genuine single-storm runs. Define supported execution paths and reports and verify the promised subset. Align admission, execution, and copy.
 3. Restore the latest applicable climate operation across builds and uploads after reload, with correlated status, details, and summary. Preserve prior attempts in job history.
-4. Trace E-OBS from the installed raster through the provider and localization into the generated and consumed CLIGEN files. Verify the scientific units and daily output. Provide an actionable failure when inputs or results are unusable.
+4. Trace E-OBS from the installed raster through the provider and localization into the generated and consumed CLIGEN files. Verify the scientific units and daily output. Provide an actionable failure when inputs or results are unusable. If a failed generated E-OBS rebuild leaves the run without usable climate inputs, a successful climate build or upload is required before running WEPP.
 5. Reproduce ESDAC gridded soils for the original hillslopes. If source-backed subsoil recovery cannot be established, add editable subsoil defaults under Soil Options → Advanced options for the ESDAC gridded path. Establish which profiles the authoritative data can support and any defensible recovery, preserve physical validation, and make rejected hillslopes and supported next actions visible in Soil Options. Validate generated soils through Disturbed processing and WEPP input preparation. The current 7778 validator expects metadata fields absent from 7778 readback. Repair that format-specific gate and verify the numeric and provenance checks under the configured format.
 6. Complete a full candidate deployment on `forest` before rebuilding a fresh `eu-disturbed` replay of `autosomal-vetch` through its original workflow. Read back the exact model inputs, fresh outputs, browser state and reports. Closeout requires this replay evidence. A database single-soil override is a comparison and cannot satisfy gridded ESDAC acceptance.
 

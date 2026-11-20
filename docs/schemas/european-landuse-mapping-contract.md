@@ -136,3 +136,22 @@ staged files. A rejected or superseded attempt preserves prior readiness.
 When a worker starts committing verified replacements it removes prior
 land-use and Geneva completion markers. A later worker failure cannot
 certify the new inputs as built.
+
+## Reconciled ESDAC and European fire scenarios
+
+Implementation conformance is pending. The exact name `eu-esdac-disturbed`
+selects the reconciled Disturbed ESDAC catalog and is available in the
+uploaded land cover selector. The Treatments selector retains its existing
+options because the ESDAC table lacks the required treatment markers.
+The `esdac` selection continues to serve plain
+ESDAC, and `eu-disturbed` continues to serve CORINE. Explicit mapping file
+paths keep their existing authority. Existing materialized managements can
+be read without migration. A rebuild uses the selected catalog.
+
+Class 22 in Disturbed ESDAC uses the forest class and its existing
+forest management. Preserve forest albedo and saturation for source key 22
+in the ESDAC soil builder. Apply the nine base-row dispositions and fire
+scenarios in [ADR-0153](../adrs/ADR-0153-european-esdac-management-reconciliation.md).
+Prescribed grass fire retains its own class and uses the same low-severity
+grass management as the default Disturbed table. CORINE and Disturbed ESDAC
+use the matching grass wildfire management at each of the three severities.
