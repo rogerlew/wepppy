@@ -78,3 +78,26 @@ and require the selected E-OBS build to finish before preparing a new deck.
 This checkpoint leaves the prepared-input path untouched. It does not
 claim stable native and postprocessing mode classification for an old
 event deck if the controller selection changed independently.
+
+## Retained failure controls
+
+A private copy of the accepted forest E-OBS run started with
+`SPE00119882.cli` (10,957 daily records, SHA-256
+`69de607b1bd4056f4f80d9a79aad92e8394a8dcf05fb87fec96245df56b8f339`).
+An invalid station through the ordinary Climate build produced
+`Cannot find station`. It removed the previous file and saved CLI
+reference before validation. The source forest project remained usable.
+The disposition is retained in `eobs-failed-replacement-control-r2.log`.
+This is a failed generated replacement after a proven valid generation.
+It is separate from the successfully repaired stale job display on reload.
+
+The failure also left the caller in the Climate output directory.
+The shared CLIGEN localization path now passes the directory to its
+native subprocess and uses explicit output paths. The failure control
+preserves the caller's directory. A successful native E-OBS generation
+from the rebuilt HTTP provider matched the previously accepted
+`SPE00119882.cli`, its PAR and its native response file byte for byte.
+The 39 focused tests include a subprocess cwd assertion and binary-provenance
+checks. Independent native PRISM and AGDC controls each produced and
+parsed 730 daily rows with the same caller directory. This correction does not restore the previous climate generation.
+The selected versus applied publication and next-Run decision remain open.

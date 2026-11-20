@@ -2558,7 +2558,7 @@ def _tail(s: str, n: int = 80) -> str:
 
 
 def _run_cligen_posix(
-    cmd: Sequence[str], clinp_path: str, timeout_sec: int, log_fp
+    cmd: Sequence[str], clinp_path: str, timeout_sec: int, log_fp, *, cwd: str
 ) -> tuple[str, str]:
     """Invoke CLIGEN under Linux with aggressive timeout handling.
 
@@ -2567,6 +2567,7 @@ def _run_cligen_posix(
         clinp_path: Input file path whose contents are piped to stdin.
         timeout_sec: Number of seconds to wait before terminating the process.
         log_fp: File-like object used to append diagnostic information.
+        cwd: Working directory for the native process and its relative output paths.
 
     Returns:
         Tuple of decoded stdout/stderr text produced by the CLIGEN binary.
@@ -2593,6 +2594,7 @@ def _run_cligen_posix(
             text=True,
             start_new_session=True,
             env=env,
+            cwd=cwd,
         )
         try:
             out, err = p.communicate(timeout=timeout_sec)
@@ -2620,7 +2622,7 @@ def _run_cligen_posix(
             log_fp.write(
                 f"\n=== CLIGEN TIMEOUT after {elapsed:.1f}s ===\n"
                 f"cmd: {cmd_str}\n"
-                f"cwd: {os.getcwd()}\n"
+                f"cwd: {cwd}\n"
                 f"PATH={env.get('PATH','')}\n"
                 f"LD_LIBRARY_PATH={env.get('LD_LIBRARY_PATH','')}\n"
                 f"stdout (tail):\n{_tail(out)}\n"
@@ -2694,16 +2696,9 @@ def par_mod(
     if cliver is None:
         cliver = '5.3'
 
-    # change to the working directory
+    wd = os.path.abspath(wd)
     assert _exists(wd)
-
-    try:
-        curdir = os.path.abspath(os.curdir)
-    except FileNotFoundError:
-        curdir = '../'
-
-    os.chdir(wd)
-    with open("cligen.log", "w") as fp_log:
+    with open(_join(wd, "cligen.log"), "w") as fp_log:
 
         stationManager = CligenStationsManager(version=version)
         stationMeta = stationManager.get_station_fromid(par)
@@ -2823,8 +2818,9 @@ def par_mod(
 
         fp_log.write('par_fn = {}\n'.format(par_fn))
 
-        if _exists(par_fn):
-            os.remove(par_fn)
+        par_path = _join(wd, par_fn)
+        if _exists(par_path):
+            os.remove(par_path)
 
         # p_stds = station.pstds * x[3]
 
@@ -2853,9 +2849,9 @@ def par_mod(
             fp_log.write(f'mx_pt5 station (in/hr) = {mx_pt5}\n')
             fp_log.write(f'mx_pt5 adjusted (in/hr) = {mx_pt5_adjusted}\n')
 
-        s2.write(par_fn)
+        s2.write(par_path)
 
-        assert _exists(par_fn)
+        assert _exists(par_path)
 
 
         if logger is not None:
@@ -2863,8 +2859,9 @@ def par_mod(
         # run cligen
         cli_fn = '{}{}.cli'.format(par, suffix)
 
-        if _exists(cli_fn):
-            os.remove(cli_fn)
+        cli_path = _join(wd, cli_fn)
+        if _exists(cli_path):
+            os.remove(cli_path)
 
         # create cligen input file
         _clinp_path = _make_clinp(wd, cliver, years, cli_fn, par_fn, clinp_fn='{}{}.inp'.format(par, suffix))
@@ -2886,16 +2883,17 @@ def par_mod(
             clinp_path=_clinp_path,
             timeout_sec=50,
             log_fp=fp_log,
+            cwd=wd,
         )
         output = stdout_str + stderr_str
 
-        assert _exists(cli_fn), (cli_fn, cmd)
+        assert _exists(cli_path), (cli_fn, cmd)
 
-        if not _exists(cli_fn):
+        if not _exists(cli_path):
             _cmd = "\n".join(cmd)
             raise Exception(f'Cligen failed to produce cli file: {cli_fn}\n{output}\ncmd: {_cmd}')
 
-        cli = ClimateFile(cli_fn)
+        cli = ClimateFile(cli_path)
 
         sim_ppts = cli.header_ppts() * days_in_mo
         if np.any(np.isnan(sim_ppts)):
@@ -2924,8 +2922,6 @@ def par_mod(
                 '%s TMAX (F): %s\n' % (monthly_dataset, _rowfmt(prism_tmaxs)),
                 '%s TMIN (F) : %s\n' % (monthly_dataset, _rowfmt(prism_tmins)),
                 ]))
-
-        os.chdir(curdir)
 
     return cli.calc_monthlies()
 
