@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "batch_outcome": "accepted",
+  "accepted_count": 1,
+  "rejected_count": 0,
+  "profiles": [
+    {
+      "topaz_id": "101",
+      "longitude": -6.3,
+      "latitude": 43.1,
+      "outcome": "degraded",
+      "soil_key": "soil-1",
+      "reason_codes": ["source.stu.subsoil_defaults_applied"],
+      "diagnostics": [
+        {
+          "code": "source.stu.subsoil_defaults_applied",
+          "field": "subsoil",
+          "severity": "warning"
+        }
+      ]
+    }
+  ]
+}
