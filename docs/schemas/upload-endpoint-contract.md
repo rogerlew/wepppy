@@ -83,6 +83,28 @@ contract in `docs/schemas/rq-response-contract.md` and the failed-mutation and
 composite-operation rules in
 `docs/schemas/nodb-persistence-concurrency-contract.md`.
 
+## Uploaded climate mode
+
+Implementation conformance is pending. A successfully applied CLI upload records
+the user-defined catalog identity and derives its mode from the parsed file.
+Use mode 15 for an individual event and mode 12 for continuous climate, including
+replacement in either direction. Obsolete batch result references cannot label
+the new upload. Existing spatial and authorization constraints still apply.
+
+For legacy stored upload modes 12 and 15, the Climate controls and climate
+summary show the type of the current active, readable CLI without mutating the
+run. Require the active run-owned regular CLI to match the recorded upload
+filename. Choosing User-Defined while a prior generated CLI is still active
+does not establish an upload. The form keeps the existing user-defined catalog
+selector. The display calculation does not change the stored mode selectors
+used by the no-preparation pipeline. WEPP preparation reconciles a verified
+mismatch and obsolete batch references before preparing a deck, holding the
+climate root operation and the Climate write lock. Missing or malformed input cannot establish a
+new mode. Generated and batch types are unaffected. Existing no-preparation
+paths keep their prepared inputs and existing mode selection. This correction
+does not change the publication or retention boundary for overlapping uploads
+and failed replacements.
+
 ## Route Prefix Notes
 - FastAPI routes below are served under the rq-engine API prefix (`/rq-engine/api/...`).
 - Flask Roads routes are listed as defined in the blueprint and are mounted by WEPPcloud route registration.

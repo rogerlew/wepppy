@@ -145,8 +145,10 @@ checks, capability restrictions and error handling. New storm authoring stays
 outside this change. Batch execution requires event-specific postprocessing.
 Report that specific limitation for saved batch runs before starting WEPP.
 Validate an uploaded individual event against its active CLI before preparing
-a new deck. A stale mode with continuous or unreadable data is a climate input
-error during preparation. Existing no-preparation paths continue to execute the saved deck
+a new deck. Repair a verified mode mismatch according to the
+[uploaded climate mode contract](upload-endpoint-contract.md#uploaded-climate-mode).
+Unverified or unreadable input remains subject to input validation. Existing
+no-preparation paths continue to execute the saved deck
 with its existing arguments. The normal preparation
 path generates a corrected individual-event deck.
 
