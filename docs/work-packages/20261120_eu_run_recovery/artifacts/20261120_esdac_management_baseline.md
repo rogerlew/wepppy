@@ -24,6 +24,19 @@ Git commit `fc183b0a6` renamed the four missing thinning files. Comparing the bl
 
 Disturbed requires distinct low, moderate and high entries for forest, shrub and grass. The separate ESDAC table lacks forest moderate, shrub moderate, grass moderate and grass high destinations. Keys 118 and 120 already name and reference moderate templates but are labeled low. Keys 129–131 all point to the same shrub template and use the same grass-low label. The shared extended land/soil lookup identifies all three grass severity templates and distinct soil rows. The European CORINE map separates the grass severity labels but still shares a shrub template. Reconciliation therefore has a confirmed peer consumer and a scientific choice for the appropriate grass templates.
 
+The extended land/soil lookup gives explicit class-to-scenario reference candidates for both catalogs. For any changed pair, validate the prepared management and soil files independently. The four texture rows use equal soil parameters across the three grass wildfire severities in that lookup. The severity-specific management files still differ. Grass prescribed fire requires a separate disposition because both European maps use `Prescribed_Fire.man` for key 132, while the extended lookup specifies `Grass_Low_Severity_Fire.man`. Both assignments have the same `grass prescribed fire` class.
+
+| Key | Class in the extended lookup | Management in the extended lookup |
+| --- | --- | --- |
+| 118 | forest moderate sev fire | `UnDisturbed/Moderate_Severity_Fire.man` |
+| 120 | shrub moderate sev fire | `UnDisturbed/Shrub_Moderate_Severity_Fire.man` |
+| 129 | grass high sev fire | `UnDisturbed/Grass_High_Severity_Fire.man` |
+| 130 | grass moderate sev fire | `UnDisturbed/Grass_Moderate_Severity_Fire.man` |
+| 131 | grass low sev fire | `UnDisturbed/Grass_Low_Severity_Fire.man` |
+| 132 | grass prescribed fire | `UnDisturbed/Grass_Low_Severity_Fire.man` |
+
+Keys 108, 115–117, 123, and 124 have no identical numeric key in the extended lookup. CORINE supplies matching reference and class pairs for the four renamed thinning templates. Verify their effective soil parameters under `thinning_40_93`, `thinning_40_90`, `thinning_40_85`, and `thinning_40_75` against the old catalog class `thinning` before any class reassignment. The byte-identical files support a reference-only repair.
+
 The European Commission [ESDB attribute legend](https://esdac.jrc.ec.europa.eu/content/sgdbe-attributes) supplies the source classes. It does not supply WEPP management scenarios. The Commission [derived data notes](https://esdac.jrc.ec.europa.eu/content/european-soil-database-derived-data) also describe scope limits for subsoil organic carbon and bulk density. The [SPADE-2 profile collection](https://esdac.jrc.ec.europa.eu/content/soil-profile-analytical-database-2) is a candidate for evaluating source-backed profiles if the soil decision authorizes that path. Verify linkage, depth, fields, and applicability before using it.
 
 ## Reconciliation review queue

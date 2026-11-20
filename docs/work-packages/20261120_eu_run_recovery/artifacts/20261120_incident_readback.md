@@ -16,6 +16,24 @@ The matching prepared DEM (`MDT5m.tif`) has SHA-256 `f4ed3d5e181e5e3ae89fe766bd6
 
 RQ records show TOPAZ channel mode `ifolp`, followed by outlet selection, subcatchment construction and abstraction with Bieger 2015 widths enabled. The retained final DEM, matching outlet and delineation parameters anchor the spatial replay. The land-use timeline for `studded-stranglehold` records successful CORINE 2018 and uploaded-raster attempts using the CORINE mapping before several ESDAC upload failures and the final CORINE-plus-ESDAC failure.
 
+### Autosomal-vetch replay sequence
+
+Times below are as recorded in the retained application logs on 2026-11-19.
+
+| Time | Action and observed outcome |
+| --- | --- |
+| 13:32, 13:35, 13:36 | Built land use with CORINE 2018, then 2012, then 2018 again. |
+| 13:40, 13:42 | Attempted two gridded ESDAC builds at initial saturation 0.75. The retained quality readback records 37 rejected profiles. |
+| 13:43 | Built using the `Forest-Forest loam` soil database override selected after the gridded failures. |
+| 14:05, 14:48 | Uploaded `FLOOD4.cli` twice. Both upload jobs succeeded. |
+| 15:15 | WEPP rejected the selected single-storm mode before launching the executable. |
+| 15:20, 15:21, 15:21 | Three E-OBS builds failed with the CLIGEN precipitation error. |
+| 15:23 | Uploaded `FLOOD4.cli` again. The upload succeeded and the next WEPP job stopped at the single-storm guard. |
+| 15:42 | Uploaded the continuous `ESFANGAR.cli`. The upload succeeded, but the active climate still reported legacy mode 15. |
+| 15:43 | Two WEPP jobs stopped at the same single-storm guard. The panel continued to show the latest E-OBS build failure. |
+
+Use the final spatial settings for the forest replay and retain the ordered land-use, soils, upload, build, and execution transitions. Record any collapsed identical attempts. The overwritten `LandCover25m.tif` affects fidelity for the `studded-stranglehold` upload replay.
+
 A forest preflight found both E-OBS and ESDAC mounts in the existing RQ worker and the E-OBS mount in metquery. These are baseline observations. The candidate has yet to be deployed.
 
 ## E-OBS coastal interpolation
@@ -24,7 +42,9 @@ The installed E-OBS v19.0e monthly rainfall GeoTIFFs contain daily means in mm, 
 
 The January coastal sampling window contains approximately -999.9 for rainfall and -99.99 for temperature. The TIFF and VRT NoData metadata say -9999. The preprocessing code scales the source sentinel with the data, and passes the unscaled sentinel as output metadata. The cubic interpolator reads raw samples without masking. This explains both the high positive cubic results and why just trusting the declared NoData value is insufficient. The nearest API returned HTTP 500 at the incident location during the probe. Nearest and bilinear still require a coverage and coordinate audit before selecting production behavior.
 
-A diagnostic build in an isolated directory on forest used the real production metquery API in bilinear mode, the original station `SPE00119882`, original centroid, 30-year duration, and the existing CLIGEN binary. It generated all 10,957 daily records with finite monthly precipitation and wet days in every month. This gives a working comparison for contract and regression design. It does not establish bilinear as the production policy or prove output parity at other locations. The cubic interpolator has consumers beyond metquery, including European soil and climate-adjacent paths. Scope any shared change using consumer-specific evidence.
+A diagnostic build in an isolated directory on forest used the real production metquery API in bilinear mode, the original station `SPE00119882`, original centroid, 30-year duration, and the existing CLIGEN binary. It generated all 10,957 daily records with finite monthly precipitation and wet days in every month. The cubic interpolator has consumers beyond metquery, including European soil and climate-adjacent paths. Scope any shared change using consumer-specific evidence.
+
+A second private forest probe masked the declared and historically scaled NoData values, retained the legacy cubic calculation on a complete 5-by-5 neighborhood, and used renormalized bilinear weights over the valid members of the immediate pixel-center 2-by-2 neighborhood where the containing cell had data. That yielded January and July rainfall of 1.223 and 0.124 mm/day for Es Fangar and finite monthly precipitation and 10,957 daily records from the original CLIGEN station. The Paris-area inland control used cubic for all months. The offshore control was rejected for missing data in the containing rainfall pixel. This is candidate-policy evidence from the installed legacy dataset. It does not establish rollout readiness, edge coverage, or compatibility for another dataset version. The probe, log and generated files are retained under `/var/tmp/wepppy-eu-run-recovery-baseline/`.
 
 ## ESDAC subsoil raster sampling
 

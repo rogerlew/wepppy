@@ -1,6 +1,6 @@
 # European climate, soils, and WEPP run recovery
 
-**Status**: Contract discovery and review pending
+**Status**: Soil slice implemented and locally verified. Climate and land-use checkpoints and forest deployment remain open.
 **Opened**: 2026-11-20 UTC
 **Target**: Complete local deployment and end-to-end replay on `forest`
 
@@ -11,8 +11,8 @@ Make the original `autosomal-vetch` workflow usable through the WEPPcloud browse
 ## Confirmed incident evidence
 
 - A successful single-storm `FLOOD4.cli` upload set mode 15. Later, the successful upload of 30-year `ESFANGAR.cli` replaced the active file and left mode 15 in place. WEPP stopped at its application-level guard before starting the executable. [Upload job](https://wepp.cloud/rq-engine/api/jobinfo/3403e578-8029-4acb-a3af-dda7ae851d02) · [WEPP job](https://wepp.cloud/rq-engine/api/jobinfo/cd509426-5abf-4ebd-9e24-99309429b6d3)
-- The Climate panel restored the latest build job even though a newer upload had succeeded. Three E-OBS builds failed. The retained CLIGEN input log recorded about 67–75 inches per month, the output had invalid values in all 12 precipitation header fields, and CLIGEN reported a time-to-peak quality failure. The provider, input units, conversion and generation failure mechanism still need to be traced. [Latest failed build](https://wepp.cloud/rq-engine/api/jobinfo/64a1ea11-db3c-4b44-8cc5-86cda09e0c66)
-- European gridded soils use ESDAC. The batch report accepted 21 of 58 locations and rejected 37 for zero subsoil bulk density and empty texture. A later database single-soil build succeeded. The source sufficiency of the rejected profiles and any defensible recovery remain open. [ESDAC source contract](../../schemas/esdac-soil-source-contract.md)
+- The Climate panel restored the latest build job even though a newer upload had succeeded. Three E-OBS builds failed. Coastal interpolation used scaled NoData values as rainfall and temperature observations. CLIGEN received about 67–75 inches per month in the failed build and returned invalid precipitation headers. [Latest failed build](https://wepp.cloud/rq-engine/api/jobinfo/64a1ea11-db3c-4b44-8cc5-86cda09e0c66) · [Raster readback](artifacts/20261120_incident_readback.md#e-obs-coastal-interpolation)
+- European gridded soils use ESDAC. The batch report accepted 21 of 58 locations and rejected 37 with missing subsoil material. A later database single-soil build succeeded. The candidate gridded build accepted 58 of 58, using the approved editable defaults for the 37 source gaps. [ESDAC source contract](../../schemas/esdac-soil-source-contract.md) · [Candidate evidence](artifacts/20261120_esdac_soil_validation.md)
 
 - A second current-schema `eu-disturbed` project, `studded-stranglehold`, retained the `esdac` management mapping when it returned to gridded CORINE 2018. The CORINE mapping defines class 25 as Mixed forest. The selected ESDAC mapping has no key 25 and lacks `DisturbedClass` metadata, which also caused earlier upload attempts to fail. The last build wrote dominant classes to NoDb and stopped before publishing land-use Parquet. Production dry-run migration reported version 1000 current and flagged `landuse_parquet` because the partial assignment data looked like a completed build. [Land-use job](https://wepp.cloud/rq-engine/api/jobinfo/fe02d15d-b285-4d75-8cfc-8a1284fa277f)
 

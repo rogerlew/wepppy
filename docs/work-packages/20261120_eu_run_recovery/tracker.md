@@ -40,6 +40,8 @@ The diagnostic source-backed donor and fallback writer trials generated and pars
 
 Drafted [ADR-0151](../../adrs/ADR-0151-esdac-missing-subsoil-defaults.md) for review. It records the six seeded values, eligible missing-data signature and provenance. Application changes, candidate deployment and both incident replays remain open.
 
-The standalone [soil contract checkpoint](artifacts/20261120_esdac_soil_checkpoint.md) is `1b388d50b`. Initial soil-slice implementation is in validation. Climate, land-use management reconciliation, forest deployment and the two replays remain open.
+The standalone [soil contract checkpoint](artifacts/20261120_esdac_soil_checkpoint.md) is `1b388d50b`. The soil implementation is `194978f04`. Climate, land-use management reconciliation, forest deployment and the two replays remain open.
 
-The soil slice built all 58 incident profiles through the actual batch writer, with 37 defaults and 21 unchanged native controls, and validated 35 configured 7778 Disturbed rewrites. [Local validation](artifacts/20261120_esdac_soil_validation.md) records focused gates, review, and remaining deployment evidence.
+The soil slice built all 58 incident profiles through the actual batch writer, with 37 defaults and 21 unchanged native controls, and validated 35 configured 7778 Disturbed rewrites. [Local validation](artifacts/20261120_esdac_soil_validation.md) records focused gates, review, and remaining deployment evidence. Broad pytest stopped at a culvert lock conflict reproduced on the unchanged baseline.
+
+The [bounded E-OBS probe](artifacts/20261120_incident_readback.md#e-obs-coastal-interpolation) produced a 30-year Es Fangar CLI with 10,957 daily records, preserved cubic sampling at an inland control, and rejected missing offshore coverage. The [sampling proposal](artifacts/20261120_contract_decision.md#proposed-first-implementation-scope) awaits ratification.

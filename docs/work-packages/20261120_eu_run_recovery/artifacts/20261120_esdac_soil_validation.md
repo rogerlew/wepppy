@@ -8,10 +8,10 @@ The actual Soils Summary template rendered “Subsoil defaults applied,” “37
 
 ## Gates and limits
 
-- Final focused Python validation covered ESDAC, the Disturbed runtime gate, soil API, RQ concurrency, and submission recovery. The isolated receipt is `.wctl-test-runs/b1a99ac5a9e144ee9ea9a32ce3115d22/receipt.json`.
+- All 168 focused Python tests passed. They cover ESDAC, the Disturbed runtime gate, soil API, RQ concurrency, and submission recovery. The isolated receipt is `.wctl-test-runs/b1a99ac5a9e144ee9ea9a32ce3115d22/receipt.json`.
 - Frontend lint and 1,099 Jest tests plus nine Node tests passed. The controller bundle rebuilt from the candidate.
 - The dependency graph and test-stub inventory checks passed.
-- The broad test preflight passed with verified compatible donor binaries and browser dependencies. The broad test run was interrupted to address the reciprocal admitted-mode defect found in review. It does not provide a completed broad result.
+- The final broad test preflight passed with verified compatible donor binaries and browser dependencies. The run stopped at `test_culverts_runner_creates_runs_and_get_wd[initialized]` after 349 passed and 28 skipped. The same lock conflict, including the same lock owner, reproduced on the unchanged base revision `c2e6f4d1a`. The broad candidate receipt is `.wctl-test-runs/e558d3fd07e34afc81b401d177ba08aa/receipt.json`. A complete broad pass remains open.
 - Stubtest stopped before runtime compatibility checks on existing mypy errors in unchanged `wepppy/eu/soils/esdac/quality.py`.
 
 Independent correctness review found and dispositioned queued mode drift, accepted summary timing, persistence failure before job ID replacement, malformed 7778 metadata, and repeated MOFE keys. This is local implementation and artifact evidence. A full forest deployment, browser reload under deployed orchestration, and both incident replays remain part of the parent package.

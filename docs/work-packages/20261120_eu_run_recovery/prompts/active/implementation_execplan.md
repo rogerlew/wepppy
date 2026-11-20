@@ -10,6 +10,7 @@ A user following the original European project workflow can produce usable clima
 - [x] Preserve available production inputs and complete initial raster and management readbacks.
 - [ ] Verify exact original workflow settings and recover the original land-cover upload or record the fidelity gap.
 - [x] Ratify and commit the bounded ESDAC soil contract checkpoint (1b388d50b).
+- [x] Implement the bounded soil slice (194978f04) and retain focused and generated-artifact evidence.
 - [ ] Ratify remaining climate and land-use checkpoints.
 - [ ] Implement and verify each confirmed failure class and its peer consumers.
 - [ ] Complete the forest deployment and record the runtime revision.
@@ -18,6 +19,8 @@ A user following the original European project workflow can produce usable clima
 ## Surprises & Discoveries
 
 One successful upload can coexist with a stale deprecated mode and an older failed climate build displayed in the UI. The E-OBS CLIGEN failure and the ESDAC gridded-soil rejection occurred independently. The [incident readback](../../artifacts/20261120_incident_readback.md) traces the inflated E-OBS values to scaled coastal NoData in the cubic sampling window. A diagnostic CLIGEN comparison produced a finite 30-year climate with bilinear samples. Paired soil-grid sampling also revealed a pixel-selection difference and source gaps that persist under either choice.
+
+A bounded E-OBS probe preserved cubic at an inland control, rejected an offshore control and generated all 10,957 original daily records with masked coastal sampling. The proposed contract records the exact interpolation and coverage rules.
 
 For `studded-stranglehold`, a failed gridded CORINE build persisted dominant land-cover codes under an incompatible ESDAC management mapping. Migration discovery treated that partial output as eligible for land-use Parquet backfill and caused a run-page redirect even though the schema is current.
 
