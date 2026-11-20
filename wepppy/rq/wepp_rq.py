@@ -138,7 +138,6 @@ _extract_channel_topaz_id = _dss_helpers._extract_channel_topaz_id
 _write_dss_channel_geojson = _dss_helpers._write_dss_channel_geojson
 
 
-_SINGLE_STORM_DEPRECATED_MESSAGE = _stage_helpers.SINGLE_STORM_DEPRECATED_MESSAGE
 _NODIR_RECOVERY_ROOTS = _stage_helpers.NODIR_RECOVERY_ROOTS
 
 
@@ -504,9 +503,9 @@ def _recover_mixed_nodir_roots(
     return _stage_helpers.recover_mixed_nodir_roots(wd, roots=roots)
 
 
-def _assert_supported_climate(climate: Climate) -> None:
+def _check_execution_climate(climate: Climate, *, prepared_inputs: bool = False) -> None:
     _sync_stage_helpers_compat()
-    _stage_helpers.assert_supported_climate(climate)
+    _stage_helpers.check_execution_climate(climate, prepared_inputs=prepared_inputs)
 
 
 def _with_stage_read_projections(
@@ -791,6 +790,8 @@ def run_wepp_rq(runid: str) -> Job:
 
         _wait_for_wepp_unlock(wepp, runid=runid)
 
+        climate = Climate.getInstance(wd)
+        _check_execution_climate(climate)
         wepp.ensure_bootstrap_main()
 
         # send feedback to user
@@ -801,9 +802,6 @@ def run_wepp_rq(runid: str) -> Job:
         # quick prep operations that require locking
         wepp._check_and_set_baseflow_map()
         wepp._check_and_set_phosphorus_map()
-
-        climate = Climate.getInstance(wd)
-        _assert_supported_climate(climate)
 
         wepp.logger.info("    wepp_bin:{}".format(wepp.wepp_bin))
         if not wepp.run_wepp_watershed:
@@ -868,7 +866,7 @@ def run_wepp_noprep_rq(runid: str) -> Job:
         wepp.logger.info("Running Wepp (no-prep)\n")
 
         climate = Climate.getInstance(wd)
-        _assert_supported_climate(climate)
+        _check_execution_climate(climate, prepared_inputs=True)
         if not wepp.run_wepp_watershed:
             wepp.logger.info("Skipping WEPP watershed run (wepp.run_wepp_watershed=False)")
 
@@ -964,6 +962,9 @@ def run_wepp_watershed_rq(runid: str) -> Job:
                 )
             return job6_finalfinal
 
+        climate = Climate.getInstance(wd)
+        _check_execution_climate(climate)
+
         # send feedback to user
         wepp.logger.info("Running Wepp Watershed\n")
 
@@ -971,8 +972,6 @@ def run_wepp_watershed_rq(runid: str) -> Job:
         wepp._check_and_set_baseflow_map()
         wepp._check_and_set_phosphorus_map()
 
-        climate = Climate.getInstance(wd)
-        _assert_supported_climate(climate)
         wepp.logger.info("    wepp_bin:{}".format(wepp.wepp_bin))
 
         # everything below here is asynchronous, performed by workers
@@ -1035,6 +1034,8 @@ def prep_wepp_watershed_rq(runid: str) -> Job:
 
         _wait_for_wepp_unlock(wepp, runid=runid)
 
+        climate = Climate.getInstance(wd)
+        _check_execution_climate(climate)
         wepp.ensure_bootstrap_main()
 
         wepp.logger.info("Preparing WEPP inputs only\n")
@@ -1042,9 +1043,6 @@ def prep_wepp_watershed_rq(runid: str) -> Job:
         # quick prep operations that require locking
         wepp._check_and_set_baseflow_map()
         wepp._check_and_set_phosphorus_map()
-
-        climate = Climate.getInstance(wd)
-        _assert_supported_climate(climate)
 
         wepp.logger.info("    wepp_bin:{}".format(wepp.wepp_bin))
 
@@ -1110,7 +1108,7 @@ def run_wepp_watershed_noprep_rq(runid: str) -> Job:
         wepp.logger.info("Running Wepp Watershed (no-prep)\n")
 
         climate = Climate.getInstance(wd)
-        _assert_supported_climate(climate)
+        _check_execution_climate(climate, prepared_inputs=True)
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:

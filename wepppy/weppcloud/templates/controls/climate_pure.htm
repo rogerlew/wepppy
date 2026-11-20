@@ -89,8 +89,12 @@
   {% if climate.is_single_storm %}
   <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
     <p class="wc-alert__body">
-      <strong>Single-storm climates are deprecated and unsupported.</strong>
-      This run will not execute. Choose a continuous climate dataset instead.
+      <strong>Single-storm climates are deprecated.</strong>
+      {% if climate.climate_mode | default(-1) | int == 14 %}
+        Running a storm batch requires per-event processing. Upload a CLI for an individual event or choose a continuous climate.
+      {% else %}
+        WEPP can run saved individual storms with a valid event climate file.
+      {% endif %}
       For event-scale analysis, use the Storm Event Analyzer.
     </p>
   </div>

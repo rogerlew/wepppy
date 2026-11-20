@@ -5229,6 +5229,22 @@ def test_water_interpretation_help_does_not_require_run_readme(jinja_env, single
     assert "Interchange README (schema + preview)" not in rendered
 
 
+@pytest.mark.parametrize(('mode', 'event_description'), [
+    (15, 'These results describe an individual event.'),
+    (14, 'Running a new batch requires per-event processing.'),
+])
+def test_single_storm_results_explain_the_available_event_outputs(jinja_env, mode, event_description):
+    rendered = jinja_env.get_template('controls/wepp_reports.htm').render(
+        climate=SimpleNamespace(is_single_storm=True, climate_mode=mode,
+                                ss_batch_storms=[{'ss_batch_key': 'storm'}] if mode == 14 else None, mods=set()),
+        prep=SimpleNamespace(has_sbs=False), runid='test-run', config='test-config',
+        totalwatsed3_exists=False, totalwatsed2_exists=False,
+    )
+    assert 'Single-storm runs are deprecated.' in rendered
+    assert event_description in rendered
+    assert ('Watershed Event-by-Event Output' in rendered) == (mode == 15)
+
+
 @pytest.mark.parametrize("ready", [False, True])
 def test_roads_water_help_available_with_pending_or_ready_resources(jinja_env, ready):
     rendered = jinja_env.get_template("controls/roads_reports.htm").render(

@@ -456,6 +456,8 @@ def test_make_ss_watershed_run_modern_binary_without_master_pass_prompt(
 
     lines = [line.strip() for line in (runs_dir / "pw0.run").read_text(encoding="ascii").splitlines()]
     assert "../output/pass_pw0.txt" not in lines
+    last_pass = next(index for index, line in enumerate(lines) if line.endswith('.hbp'))
+    assert lines[last_pass + 1] == 'Yes'
 
 
 def test_make_ss_batch_watershed_run_modern_binary_without_master_pass_prompt(
@@ -493,6 +495,24 @@ def test_make_ss_batch_watershed_run_modern_binary_without_master_pass_prompt(
     run_path = runs_dir / "pw0.7.run"
     lines = [line.strip() for line in run_path.read_text(encoding="ascii").splitlines()]
     assert "../output/batch/pass_pw0.txt" not in lines
+    last_pass = next(index for index, line in enumerate(lines) if line.endswith('.hbp'))
+    assert lines[last_pass + 1] == 'Yes'
+
+
+@pytest.mark.parametrize('batch', [False, True])
+def test_legacy_single_storm_deck_includes_the_post_pass_record(tmp_path, monkeypatch, batch):
+    _write_binary(tmp_path / 'wepp_test')
+    monkeypatch.setattr(wepp_runner_module, 'wepp_bin_dir', str(tmp_path))
+    if batch:
+        wepp_runner_module.make_ss_batch_watershed_run([1], str(tmp_path), 'event', 7, wepp_bin='wepp_test')
+        deck = tmp_path / 'pw0.7.run'
+    else:
+        wepp_runner_module.make_ss_watershed_run([1], str(tmp_path), wepp_bin='wepp_test')
+        deck = tmp_path / 'pw0.run'
+
+    lines = deck.read_text(encoding='ascii').splitlines()
+    last_pass = next(index for index, line in enumerate(lines) if line.endswith('/H1.pass.dat'))
+    assert lines[last_pass + 1:last_pass + 3] == ['', 'Yes']
 
 
 @pytest.mark.parametrize("path_id", ["H1.pass", "H1.pass.hbp", "H1.pass.dat.hbp"])

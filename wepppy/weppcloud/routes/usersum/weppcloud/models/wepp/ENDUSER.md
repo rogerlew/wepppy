@@ -115,7 +115,7 @@ Read these as different views of the same run:
 - use `Return Periods Report` for frequency-style interpretation,
 - use the water-balance reports to understand whether a result is being driven by runoff generation, lateral flow, or baseflow.
 
-Single-storm output is explicitly flagged in the UI as deprecated and unsupported. For event-scale work, the page points users to `Storm Event Analyzer` instead.
+Valid existing single-storm inputs can run with a deprecation advisory. The WEPP Results panel links to available event outputs and points users to the Storm Event Analyzer for event-scale work.
 
 ## How To Interpret WEPP Results
 

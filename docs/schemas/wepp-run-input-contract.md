@@ -137,15 +137,17 @@ Implementation conformance is pending the SUDI-01 checkpoint and validation.
 
 ## Deprecated single-storm execution
 
-Implementation conformance is pending. Deprecation is an advisory for existing
+Deprecation is an advisory for existing
 single-storm WEPP inputs. Admit WEPP preparation and execution for valid saved
 individual single-storm inputs, including a single-storm CLI accepted by the
 upload route or a previously generated single event. Continue existing validity
 checks, capability restrictions and error handling. New storm authoring stays
 outside this change. Batch execution requires event-specific postprocessing.
 Report that specific limitation for saved batch runs before starting WEPP.
-Existing no-preparation paths continue
-to execute the saved deck with its existing arguments. The normal preparation
+Validate an uploaded individual event against its active CLI before preparing
+a new deck. A stale mode with continuous or unreadable data is a climate input
+error during preparation. Existing no-preparation paths continue to execute the saved deck
+with its existing arguments. The normal preparation
 path generates a corrected individual-event deck.
 
 In single-storm and single-storm batch mode-2 watershed decks for legacy binaries

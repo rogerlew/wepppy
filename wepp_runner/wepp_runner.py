@@ -1596,6 +1596,9 @@ def make_ss_watershed_run(
 
     _watershed_template = _ss_watershed_template_loader()
     contract_lines = _watershed_prompt_contract_lines(wepp_bin=wepp_bin)
+    if contract_lines["master_pass_file"] != _SKIP_TEMPLATE_LINE:
+        # Legacy mode 2 consumes a record after writing the master pass file.
+        block += "\n"
 
     s = _watershed_template.format(sub_n=len(wepp_ids),
                                    hillslopes_block=block,
@@ -1633,6 +1636,7 @@ def make_ss_batch_watershed_run(
     master_pass_file = _SKIP_TEMPLATE_LINE
     if contract_lines["master_pass_file"] != _SKIP_TEMPLATE_LINE:
         master_pass_file = f"../output/{ss_batch_key}/pass_pw0.txt"
+        block += "\n"
 
     s = _watershed_template.format(sub_n=len(wepp_ids),
                                    hillslopes_block=block,

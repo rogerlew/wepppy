@@ -368,7 +368,7 @@ def test_prep_watershed_enqueue_uses_prep_only_pipeline(
     monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
     monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(wepp_rq, "_recover_mixed_nodir_roots", lambda wd, roots=("watershed",): ())
-    monkeypatch.setattr(wepp_rq, "_assert_supported_climate", lambda climate: None)
+    monkeypatch.setattr(wepp_rq, "_check_execution_climate", lambda climate: None)
 
     wepp_controller = SimpleNamespace(
         islocked=lambda: False,
@@ -496,6 +496,31 @@ def test_noprep_watershed_enqueue_keeps_autocommit_disabled(monkeypatch: pytest.
     assert len(calls) == 1
     assert calls[0]["func"] is wepp_rq._log_complete_rq
     assert calls[0]["kwargs"] is None
+
+
+@pytest.mark.parametrize(('task_name', 'pipeline_name'), [
+    ('run_wepp_noprep_rq', 'enqueue_wepp_noprep_pipeline'),
+    ('run_wepp_watershed_noprep_rq', 'enqueue_watershed_noprep_pipeline'),
+])
+def test_prepared_individual_storm_queues_without_the_upstream_cli(monkeypatch, tmp_path, task_name, pipeline_name):
+    prepared = tmp_path / 'wepp' / 'runs'
+    prepared.mkdir(parents=True)
+    monkeypatch.setattr(wepp_rq.StatusMessenger, 'publish', lambda *_args: None)
+    monkeypatch.setattr(wepp_rq, 'get_current_job', _make_parent_job)
+    monkeypatch.setattr(wepp_rq, 'get_wd', lambda _runid: str(tmp_path))
+    monkeypatch.setattr(wepp_rq, '_recover_mixed_nodir_roots', lambda *_args, **_kwargs: ())
+    climate = SimpleNamespace(is_single_storm=True, climate_mode=wepp_rq.ClimateMode.UserDefinedSingleStorm)
+    monkeypatch.setattr(wepp_rq.Climate, 'getInstance', lambda _wd: climate)
+    monkeypatch.setattr(wepp_rq.Wepp, 'getInstance', lambda _wd: SimpleNamespace(
+        islocked=lambda: False, run_wepp_watershed=True, output_dir=str(tmp_path / 'wepp' / 'output'),
+        logger=SimpleNamespace(info=lambda *_args: None),
+    ))
+    _stub_rq_queue(monkeypatch, wepp_rq)
+    final = SimpleNamespace(id='final')
+    monkeypatch.setattr(wepp_rq._pipeline, pipeline_name, lambda *_args, **_kwargs: final)
+
+    assert getattr(wepp_rq, task_name)('ab-run') is final
+    assert not (tmp_path / 'climate').exists()
 
 
 def test_run_wepp_rq_locked_run_publishes_exception_status(

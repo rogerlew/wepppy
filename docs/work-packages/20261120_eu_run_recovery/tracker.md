@@ -51,3 +51,5 @@ The installed legacy E-OBS grids also contain partially contaminated aggregates 
 The [land-use migration eligibility checkpoint](artifacts/20261120_landuse_migration_checkpoint.md) is `8d20d6897`. The candidate preserved the retry route on a current-schema partial build and generated Parquet for a matching serialized legacy treatment. Land-use mapping and the forest replay remain open.
 
 The [climate status checkpoint](artifacts/20261120_climate_status_checkpoint.md) is `ccb90d394`. The panel now follows the latest verified build or upload and displays neutral unavailable status on expiry. The deployed replay remains open.
+
+The [single-storm execution checkpoint](artifacts/20261120_single_storm_execution_checkpoint.md) is `3b5f6bb5b`. The legacy binary completed 18 hillslopes and the companion watershed using the original storm CLI and regenerated deck. Individual storms now receive an advisory, while the separately diagnosed batch postprocessing limitation and stale uploaded-mode repair remain open.

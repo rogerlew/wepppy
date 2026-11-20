@@ -2,7 +2,7 @@
 
 _See also: [CLIGEN station statistics input file format](cligenparms.md)._
 
-**Single-storm modes are deprecated and unsupported in WEPPcloud.** Treat `itemp=2` as legacy-only; use continuous/multi-year climate inputs for supported runs.
+**Single-storm climates are deprecated in WEPPcloud.** You can run an existing individual storm with a valid uploaded CLI. The Storm Event Analyzer is the preferred tool for event-scale analysis.
 
 - Line 1:
 
@@ -16,7 +16,7 @@ _See also: [CLIGEN station statistics input file format](cligenparms.md)._
 
   a) simulation mode - integer (itemp)
     - 1 - continuous
-    - 2 - single storm (deprecated/unsupported in WEPPcloud)
+    - 2 - single storm (deprecated in WEPPcloud)
 
   b) breakpoint data flag - integer (ibrkpt)
     - 0 - no breakpoint data used
