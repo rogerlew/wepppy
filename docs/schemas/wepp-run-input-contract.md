@@ -135,6 +135,33 @@ controller invariants remain in force. This explicit exception governs where
 earlier unconditional Disturbed statements conflict; no other defaults change.
 Implementation conformance is pending the SUDI-01 checkpoint and validation.
 
+## Deprecated single-storm execution
+
+Implementation conformance is pending. Deprecation is an advisory for existing
+single-storm WEPP inputs. Admit WEPP preparation and execution for valid saved
+individual single-storm inputs, including a single-storm CLI accepted by the
+upload route or a previously generated single event. Continue existing validity
+checks, capability restrictions and error handling. New storm authoring stays
+outside this change. Batch execution requires event-specific postprocessing.
+Report that specific limitation for saved batch runs before starting WEPP.
+Existing no-preparation paths continue
+to execute the saved deck with its existing arguments. The normal preparation
+path generates a corrected individual-event deck.
+
+In single-storm and single-storm batch mode-2 watershed decks for legacy binaries
+that consume the master pass filename prompt, include the empty record after
+the last hillslope pass path. Their watershed code consumes that record after
+writing the master pass and then reads the impoundment response. Binaries whose
+release metadata omits the master pass prompt use the existing direct-reader
+format without that empty record. This does not alter continuous deck prompts.
+
+Display the deprecation warning in Climate and WEPP results, with links to
+existing event output where available. Existing result and report prerequisites
+still apply, and continuous-only annual, interchange and return-period stages
+remain outside the event pipeline. UI copy should identify the Storm Event
+Analyzer as the preferred event analysis surface. Do not describe a valid event
+run as blocked merely because its mode is deprecated.
+
 ## Continuous watershed runtime budget (WRT-01)
 
 Operator approved 2026-09-28. Continuous watershed child
