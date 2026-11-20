@@ -80,6 +80,14 @@ geometry with live compatible tuples, while the executable field enum is
 filtered for the current input requirements. `executable_revision` identifies live role
 bytes and declarations separately from the stored `provider_revision`.
 
+### Run-page deprecation of `latest` (2026-11-20)
+
+WEPP Exec excludes the deprecated `latest` alias from new selections on the
+run page. This is a presentation exception to parity with the schema enum.
+The provider, API and submission validator retain existing acceptance rules.
+The [WEPP Exec version selection contract](../ui-docs/contracts/wepp-exec-version-selection-contract.md)
+defines how the run page displays a saved alias.
+
 ### Backend-independent executable compatibility (2026-11-06)
 
 Selection conformance: 305 scoped tests and wepp1 template/schema checks pass.
