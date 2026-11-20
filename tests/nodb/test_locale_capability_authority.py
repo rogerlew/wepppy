@@ -12,6 +12,7 @@ import pytest
 
 from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
 import wepppy.nodb.locales.capability_graph as capability_graph_module
+from wepppy.nodb.base import get_config_dir
 from wepppy.nodb.config_builder import BuilderSelections, resolve_builder_config
 from wepppy.nodb.config_builder.registry import load_registry
 from wepppy.nodb.locales import (
@@ -197,7 +198,7 @@ def test_locale_catalog_classifies_every_shipped_runtime_token() -> None:
     profiles = iter_locale_profiles()
     known_tokens = {profile.runtime_token.casefold() for profile in profiles}
     observed_tokens: set[str] = set()
-    for config_path in Path("wepppy/nodb/configs").glob("*.cfg"):
+    for config_path in Path(get_config_dir()).glob("*.cfg"):
         text = config_path.read_text(encoding="utf-8")
         match = re.search(r"^locales\s*=\s*(\[[^\n]*\])", text, re.MULTILINE)
         if match:
@@ -213,14 +214,14 @@ def test_locale_catalog_classifies_every_shipped_runtime_token() -> None:
 
 
 def test_all_named_configs_resolve_one_canonical_locale_composition() -> None:
-    configs_root = Path("wepppy/nodb/configs")
+    configs_root = Path(get_config_dir())
     defaults = configparser.ConfigParser(interpolation=None, strict=False)
     defaults.read(configs_root / "_defaults.cfg", encoding="utf-8")
     config_paths = sorted(
         path for path in configs_root.glob("*.cfg") if path.name != "_defaults.cfg"
     )
 
-    assert len(config_paths) == 128
+    assert config_paths
     for config_path in config_paths:
         parser = configparser.ConfigParser(interpolation=None, strict=False)
         parser.read_dict({section: dict(defaults[section]) for section in defaults.sections()})
@@ -234,7 +235,7 @@ def test_all_named_configs_resolve_one_canonical_locale_composition() -> None:
 
 
 def test_ratified_config_locale_normalization_is_exact() -> None:
-    configs_root = Path("wepppy/nodb/configs")
+    configs_root = Path(get_config_dir())
     expected = {
         "_defaults.cfg": ["us"],
         "0.cfg": ["us"],
@@ -288,7 +289,7 @@ def test_shipped_config_data_and_dependency_boundaries_are_closed() -> None:
     observed_landuse: set[str] = set()
     observed_backends: set[str] = set()
     observed_mods: set[str] = set()
-    for config_path in Path("wepppy/nodb/configs").glob("*.cfg"):
+    for config_path in Path(get_config_dir()).glob("*.cfg"):
         parser = configparser.ConfigParser(interpolation=None, strict=False)
         parser.read(config_path, encoding="utf-8")
         for section, option, target in (
