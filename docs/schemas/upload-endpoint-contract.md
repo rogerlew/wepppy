@@ -85,22 +85,23 @@ composite-operation rules in
 
 ## Uploaded climate mode
 
-Implementation conformance is pending. A successfully applied CLI upload records
+A successfully applied CLI upload records
 the user-defined catalog identity and derives its mode from the parsed file.
 Use mode 15 for an individual event and mode 12 for continuous climate, including
 replacement in either direction. Obsolete batch result references cannot label
 the new upload. Existing spatial and authorization constraints still apply.
 
-For legacy stored upload modes 12 and 15, the Climate controls and climate
-summary show the type of the current active, readable CLI without mutating the
-run. Require the active run-owned regular CLI to match the recorded upload
-filename. Choosing User-Defined while a prior generated CLI is still active
-does not establish an upload. The form keeps the existing user-defined catalog
-selector. The display calculation does not change the stored mode selectors
+For legacy stored upload modes 12 and 15, the Climate summary shows the
+type of the current active, readable CLI without mutating the run. The advisory
+lives in the summary so a successful upload refresh updates it on the same page.
+Require a regular active CLI to match the recorded filename and Climate source
+directory, with recorded upload station data. The legacy check cannot verify
+historical ancestry if a generated file reused the exact same recorded upload
+path. The form keeps the existing user-defined catalog selector. The display calculation does not change the stored mode selectors
 used by the no-preparation pipeline. WEPP preparation reconciles a verified
 mismatch and obsolete batch references before preparing a deck, holding the
-climate root operation and the Climate write lock. Missing or malformed input cannot establish a
-new mode. Generated and batch types are unaffected. Existing no-preparation
+climate root operation and the Climate write lock. Reject a missing or malformed
+recorded upload at preparation, including an invalid daily calendar date. Generated and batch types are unaffected. Existing no-preparation
 paths keep their prepared inputs and existing mode selection. This correction
 does not change the publication or retention boundary for overlapping uploads
 and failed replacements.

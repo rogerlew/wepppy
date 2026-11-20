@@ -380,7 +380,7 @@ def test_prep_watershed_enqueue_uses_prep_only_pipeline(
         logger=SimpleNamespace(info=lambda *args, **kwargs: None),
     )
     monkeypatch.setattr(wepp_rq.Wepp, "getInstance", lambda _wd: wepp_controller)
-    monkeypatch.setattr(wepp_rq.Climate, "getInstance", lambda _wd: SimpleNamespace())
+    monkeypatch.setattr(wepp_rq.Climate, "getInstance", lambda _wd: SimpleNamespace(climate_mode=wepp_rq.ClimateMode.Vanilla))
 
     class _DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
@@ -521,6 +521,28 @@ def test_prepared_individual_storm_queues_without_the_upstream_cli(monkeypatch, 
 
     assert getattr(wepp_rq, task_name)('ab-run') is final
     assert not (tmp_path / 'climate').exists()
+
+
+def test_wepp_preparation_reloads_and_repairs_upload_under_the_climate_root(monkeypatch, tmp_path):
+    def repair_mode():
+        calls.append('repair')
+        current.climate_mode = wepp_rq.ClimateMode.UserDefined
+        current.is_single_storm = False
+
+    def under_root(wd, root, callback, *, purpose):
+        calls.append((wd, root))
+        return callback()
+
+    calls = []
+    current = SimpleNamespace(climate_mode=wepp_rq.ClimateMode.UserDefinedSingleStorm,
+                              is_single_storm=True, reconcile_uploaded_cli_mode=repair_mode)
+    states = iter([SimpleNamespace(climate_mode=current.climate_mode), current])
+    monkeypatch.setattr(wepp_rq.Climate, 'getInstance', lambda _wd: next(states))
+    monkeypatch.setattr(wepp_rq, 'mutate_root', under_root)
+
+    assert wepp_rq._climate_for_wepp_preparation(str(tmp_path)) is current
+    assert calls == [(str(tmp_path), 'climate'), 'repair']
+    assert current.climate_mode == wepp_rq.ClimateMode.UserDefined
 
 
 def test_run_wepp_rq_locked_run_publishes_exception_status(

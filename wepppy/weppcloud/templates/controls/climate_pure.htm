@@ -50,7 +50,7 @@
 
 {% set selected_dataset = ns.selected_dataset %}
 {% set selected_catalog_id = ns.selected or '' %}
-{% set selected_mode = climate.climate_mode.value %}
+{% set selected_mode = 12 if selected_catalog_id == 'user_defined_cli' else climate.climate_mode.value %}
 {% set selected_station_mode = climate.climatestation_mode.value %}
 {% set spatial_mode = climate.climate_spatialmode.value %}
 {% set is_tenerife_station_catalog = climate.uses_tenerife_station_catalog %}
@@ -85,20 +85,6 @@
 
   <input type="hidden" id="climate_catalog_id" name="climate_catalog_id" value="{{ selected_catalog_id }}" data-climate-field="catalog-id">
   <input type="hidden" id="climate_mode" name="climate_mode" value="{{ selected_mode }}" data-climate-field="mode">
-
-  {% if climate.is_single_storm %}
-  <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
-    <p class="wc-alert__body">
-      <strong>Single-storm climates are deprecated.</strong>
-      {% if climate.climate_mode | default(-1) | int == 14 %}
-        Running a storm batch requires per-event processing. Upload a CLI for an individual event or choose a continuous climate.
-      {% else %}
-        WEPP can run saved individual storms with a valid event climate file.
-      {% endif %}
-      For event-scale analysis, use the Storm Event Analyzer.
-    </p>
-  </div>
-  {% endif %}
 
   <section class="wc-stack" id="climate_dataset_section" data-climate-element="dataset">
     {# Build grouped options structure #}

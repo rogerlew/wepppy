@@ -39,6 +39,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.io_wait import wait_for_path, wait_for_paths
 from wepppy.runtime_paths.errors import nodir_mixed_state
 from wepppy.runtime_paths.fs import resolve
+from wepppy.runtime_paths.mutations import mutate_root
 from wepppy.runtime_paths.projections import with_root_projection
 from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.query_engine.activate import activate_query_engine
@@ -508,6 +509,21 @@ def _check_execution_climate(climate: Climate, *, prepared_inputs: bool = False)
     _stage_helpers.check_execution_climate(climate, prepared_inputs=prepared_inputs)
 
 
+def _climate_for_wepp_preparation(wd: str) -> Climate:
+    climate = Climate.getInstance(wd)
+    if climate.climate_mode in (ClimateMode.UserDefined, ClimateMode.UserDefinedSingleStorm):
+        def reconcile() -> Climate:
+            current = Climate.getInstance(wd)
+            current.reconcile_uploaded_cli_mode()
+            _check_execution_climate(current)
+            return current
+
+        return mutate_root(wd, 'climate', reconcile, purpose='wepp-uploaded-climate-mode')
+
+    _check_execution_climate(climate)
+    return climate
+
+
 def _with_stage_read_projections(
     wd: str,
     *,
@@ -790,8 +806,7 @@ def run_wepp_rq(runid: str) -> Job:
 
         _wait_for_wepp_unlock(wepp, runid=runid)
 
-        climate = Climate.getInstance(wd)
-        _check_execution_climate(climate)
+        climate = _climate_for_wepp_preparation(wd)
         wepp.ensure_bootstrap_main()
 
         # send feedback to user
@@ -962,8 +977,7 @@ def run_wepp_watershed_rq(runid: str) -> Job:
                 )
             return job6_finalfinal
 
-        climate = Climate.getInstance(wd)
-        _check_execution_climate(climate)
+        climate = _climate_for_wepp_preparation(wd)
 
         # send feedback to user
         wepp.logger.info("Running Wepp Watershed\n")
@@ -1034,8 +1048,7 @@ def prep_wepp_watershed_rq(runid: str) -> Job:
 
         _wait_for_wepp_unlock(wepp, runid=runid)
 
-        climate = Climate.getInstance(wd)
-        _check_execution_climate(climate)
+        climate = _climate_for_wepp_preparation(wd)
         wepp.ensure_bootstrap_main()
 
         wepp.logger.info("Preparing WEPP inputs only\n")

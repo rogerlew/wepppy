@@ -242,6 +242,9 @@ to another model automatically.
 
 **Notes**
 - In this mode, **Upload .cli** is the primary action.
+- The Climate summary shows the single-storm deprecation advisory for a file
+  with one event record. WEPP can run a valid individual event file. A successful
+  replacement refreshes the summary and its advisory.
 - Climate build button behavior differs from other modes (upload-driven flow).
 - If spatial mode is **Multiple**, PRISM revision is applied after upload processing.
 

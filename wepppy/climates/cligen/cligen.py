@@ -1349,7 +1349,7 @@ class ClimateFile(object):
                     for bp_offset in range(1, nbrkpt + 1):
                         x = self.lines[data0line + i + bp_offset].split()
                         if len(x) != 2:
-                            raise Exception(f'Expecting {nbrkpt} breakpoints for {date_str}')
+                            raise ValueError(f'Expecting {nbrkpt} breakpoints for {date_str}')
                         timem, pptcum = x
                         breakpoint_times_hr.append(float(timem))
                         breakpoint_cum_depth_mm.append(float(pptcum))

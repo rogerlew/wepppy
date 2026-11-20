@@ -51,12 +51,13 @@ import time
 from pathlib import Path
 import os
 import inspect
+import stat
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 from typing import Optional, Dict, List, Tuple, Any, Union
 
-from functools import partial
+from functools import lru_cache, partial
 
 from wepppy.all_your_base.geo import read_raster
 
@@ -335,6 +336,32 @@ _SINGLE_STORM_DEPRECATED_MESSAGE = (
     "Single-storm climate modes are deprecated and unsupported in WEPPcloud. "
     "Use continuous or multi-year climate datasets instead."
 )
+
+_UPLOADED_CLIMATE_MODES = (ClimateMode.UserDefined, ClimateMode.UserDefinedSingleStorm)
+
+
+def _classify_uploaded_cli(cli: ClimateFile) -> ClimateMode:
+    days = cli.as_dataframe()
+    if days.empty:
+        raise ValueError('The uploaded climate file has no daily or event records.')
+    for year, month, day in days[['year', 'mo', 'da']].itertuples(index=False, name=None):
+        date(year, month, day)
+    return ClimateMode.UserDefinedSingleStorm if len(days) == 1 else ClimateMode.UserDefined
+
+
+def _uploaded_cli_identity(path: Path) -> tuple[int, int, int, int, int]:
+    info = path.stat(follow_symlinks=False)
+    if not stat.S_ISREG(info.st_mode):
+        raise ValueError('Expected a regular active uploaded climate file')
+    return info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns
+
+
+@lru_cache(maxsize=128)
+def _read_uploaded_cli_mode(path: Path, identity: tuple[int, int, int, int, int]) -> ClimateMode:
+    mode = _classify_uploaded_cli(ClimateFile(str(path)))
+    if _uploaded_cli_identity(path) != identity:
+        raise ValueError('The active uploaded climate changed during classification')
+    return mode
 
 
 def _assert_supported_climate_mode(mode: ClimateMode) -> None:
@@ -1084,6 +1111,53 @@ class Climate(NoDbBase):
     ClimateMode.SingleStormBatch,
     ClimateMode.UserDefinedSingleStorm)
 
+    def _recorded_uploaded_cli(self) -> Optional[str]:
+        if self._climate_mode not in _UPLOADED_CLIMATE_MODES or getattr(self, '_user_station_meta', None) is None:
+            return None
+        cli_fn = getattr(self, 'cli_fn', None)
+        original = getattr(self, '_orig_cli_fn', None)
+        if not isinstance(cli_fn, str) or not isinstance(original, str):
+            return None
+        source = Path(original)
+        # Allow relocated runs while excluding recorded database sources.
+        if source.parent.name == 'climate' and source.name == cli_fn:
+            return cli_fn
+        return None
+
+    @property
+    def active_uploaded_cli_mode(self) -> Optional[ClimateMode]:
+        """Classify an existing, recorded upload for display without saving state."""
+        cli_fn = self._recorded_uploaded_cli()
+        if cli_fn is None:
+            return None
+        directory = Path(self.cli_dir)
+        path = directory / cli_fn
+        try:
+            if directory.is_symlink():
+                return None
+            identity = _uploaded_cli_identity(path)
+            mode = _read_uploaded_cli_mode(path, identity)
+            return mode if _uploaded_cli_identity(path) == identity else None
+        except (AssertionError, IndexError, KeyError, OSError, TypeError, ValueError):
+            return None
+
+    def reconcile_uploaded_cli_mode(self) -> None:
+        """Repair upload metadata while the caller holds the climate root lock."""
+        if self._recorded_uploaded_cli() is None:
+            return
+        mode = self.active_uploaded_cli_mode
+        if mode is None:
+            raise ValueError('The active uploaded climate is missing or invalid. Upload a valid CLIGEN file.')
+        if mode == self._climate_mode and not self.ss_batch_storms:
+            return
+        with self.locked():
+            mode = self.active_uploaded_cli_mode
+            if mode is None:
+                raise ValueError('The active uploaded climate is missing or invalid. Upload a valid CLIGEN file.')
+            self._climate_mode = mode
+            self._ss_batch_storms = None
+
+
 
     #
     # precip_scaling_mode
@@ -1478,27 +1552,34 @@ class Climate(NoDbBase):
 
     def set_user_defined_cli(self, cli_fn: str, verbose: bool = False) -> None:
         with self.locked():
-            self.logger.info('  running set_userdefined_cli... ')
-            self._orig_cli_fn = _join(self.cli_dir, cli_fn)
-#            cli_path = self.cli_path
-            cli = ClimateFile(self.orig_cli_fn)
-
-            if cli.is_single_storm:
-                self._climate_mode = ClimateMode.UserDefinedSingleStorm
-
-            self._input_years = cli.input_years
+            self.logger.info('Applying uploaded climate CLI')
+            source_path = _join(self.cli_dir, cli_fn)
+            cli = ClimateFile(source_path)
+            upload_mode = _classify_uploaded_cli(cli)
             monthlies = cli.calc_monthlies()
-            self.monthlies = monthlies
-            # Avoid nodb_setter recursion while already holding the lock.
-            self._catalog_id = 'user_defined_cli'
-            self._user_station_meta = _CLIMATE_USER_DEFINED_STATION_META_SERVICE.build_station_meta_from_cli(
+            station_meta = _CLIMATE_USER_DEFINED_STATION_META_SERVICE.build_station_meta_from_cli(
                 cli=cli,
                 cli_filename=cli_fn,
                 cli_dir=self.cli_dir,
                 monthlies=monthlies,
             )
-            
-        self._post_defined_climate(verbose=verbose)
+            active_filename = _split(source_path)[1]
+            active_path = _join(self.cli_dir, active_filename)
+            try:
+                copyfile(source_path, active_path)
+            except shutil.SameFileError:
+                pass
+
+            self._orig_cli_fn = source_path
+            self.cli_fn = active_filename
+            self._climate_mode = upload_mode
+            self._input_years = cli.input_years
+            self._catalog_id = 'user_defined_cli'
+            self._user_station_meta = station_meta
+            self._ss_batch_storms = None
+            self.sub_par_fns = None
+            self.sub_cli_fns = None
+            self.monthlies = monthlies
 
         if self.climate_spatialmode == ClimateSpatialMode.Multiple:
             self._prism_revision(verbose=verbose)

@@ -5360,3 +5360,13 @@ def test_run_header_developer_indicator_uses_current_view_model(jinja_env, devel
     indicator = re.search(r"<span data-project-developer-indicator ([^>]*)>", rendered)
     assert indicator is not None
     assert ("hidden" in indicator.group(1)) is (developer_mode is not True)
+
+
+@pytest.mark.parametrize(('stored', 'effective', 'warning'), [(15, 12, False), (12, 15, True)])
+def test_climate_summary_warning_follows_the_active_upload(jinja_env, stored, effective, warning):
+    climate = SimpleNamespace(
+        climate_mode=SimpleNamespace(value=stored), is_single_storm=stored == 15,
+        active_uploaded_cli_mode=effective, cli_fn='user.cli', par_fn=None, monthlies=None,
+    )
+    html = jinja_env.get_template('reports/climate.htm').render(climate=climate, station_meta=None)
+    assert ('Single-storm climates are deprecated.' in html) is warning
