@@ -3480,6 +3480,15 @@ a.wc-maturity-pill:focus-visible {
   flex-shrink: 0;
 }
 
+.wc-interfaces,
+.wc-interfaces > .wc-panel.wc-stack {
+  row-gap: var(--wc-space-2xl);
+}
+
+.wc-interfaces > .wc-panel {
+  margin-block: 0;
+}
+
 .wc-feature {
   display: grid;
   grid-template-columns: 1fr;
