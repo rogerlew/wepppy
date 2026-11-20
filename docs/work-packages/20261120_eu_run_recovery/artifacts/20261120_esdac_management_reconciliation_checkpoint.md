@@ -38,3 +38,11 @@ classes and templates.
 
 Existing forest replay artifacts remain evidence for the earlier
 incident workflow.
+
+A replay of the new upload with the Es Fangar settings exposed a stale
+CORINE buffer selection (42). The single-OFE page hides the buffer
+control, and ESDAC does not define that code. When changing maps on a
+single-OFE upload, validate explicit buffer selections and retain
+compatible inherited selections. Clear an incompatible inherited selection
+only on successful publication. Preserve active multi-OFE validation and
+the last applied selection on admission failure.
