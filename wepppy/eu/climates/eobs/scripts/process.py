@@ -14,11 +14,9 @@ from datetime import date, timedelta
 from os.path import exists as _exists
 from os.path import join as _join
 
-import matplotlib.pyplot as plt
 import numpy as np
 from numpy.ma import masked_values
 from osgeo import gdal, osr
-from scipy.stats import kurtosis
 
 _eobs_dir = '/geodata/eu/E-OBS'
 
@@ -53,15 +51,12 @@ def dump_tif(
         mask: Boolean mask (True marks cells to replace with ``nodata``).
         nodata: Sentinel value that signals missing data to GIS software.
     """
-    if hasattr(data, "mask"):
-        mask = data.mask
-        assert nodata is not None
-
-    elif mask is not False and mask is not None:
-        assert mask.shape == data.shape
-        data[np.where(mask)] = nodata
-
-    data = np.array(data)
+    if mask is not False and mask is not None:
+        data = np.ma.masked_where(mask, data)
+    if np.ma.isMaskedArray(data):
+        if nodata is None:
+            raise ValueError('Masked E-OBS output requires a NoData value')
+        data = data.filled(nodata)
 
     n, m = data.shape
     # initialize raster
@@ -79,7 +74,11 @@ def dump_tif(
 
     dst = None  # Writes and closes file
 
-stats = dict(mean=np.mean, std=np.std) #, skew=kurtosis)
+def _monthly_statistics(
+    daily: Sequence[np.ma.MaskedArray], scale_factor: float,
+) -> dict[str, np.ma.MaskedArray]:
+    observations = np.ma.stack(daily, axis=2) * scale_factor
+    return {'mean': observations.mean(axis=2), 'std': observations.std(axis=2)}
 
 if __name__ == "__main__":
     out_dir = '/geodata/eu/E-OBS'
@@ -121,26 +120,24 @@ if __name__ == "__main__":
 
                 band = ds.GetRasterBand(j)
                 nodata = band.GetNoDataValue()
-                data = masked_values(band.ReadAsArray(), nodata)
+                raw = band.ReadAsArray()
+                data = np.ma.masked_invalid(masked_values(raw, nodata))
                 monthly.append(data)
 
             print(measure, np.mean(monthly[0]) * scale_factor, np.sum(data.mask))
-            x = np.stack(monthly, axis=2) * scale_factor
+            statistics = _monthly_statistics(monthly, scale_factor)
             del monthly
 
-            for stat, agg in stats.items():
+            for stat, grid in statistics.items():
                 stat_dir = _join(measure_dir, stat)
                 if not _exists(stat_dir):
                     os.mkdir(stat_dir)
 
-                grid = agg(x, axis=2)
-                print(measure, month, stat, x.shape, grid.shape)
+                print(measure, month, stat, grid.shape)
                 fn = _join(stat_dir,
                            '{measure}_{stat}_{month:02}.tif'
                            .format(measure=measure, stat=stat, month=month))
 
                 dump_tif(grid.T, fn, _epsg4326_wkt, transform, nodata=nodata)
 
-                del grid
-
-            del x
+            del statistics

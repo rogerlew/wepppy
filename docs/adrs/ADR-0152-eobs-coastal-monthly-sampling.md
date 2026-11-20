@@ -1,6 +1,6 @@
 # ADR-0152: Masked bilinear sampling for coastal E-OBS climate data
 
-Status: Accepted, implementation conformance pending
+Status: Accepted, candidate verified locally
 Date: 2026-11-20
 
 ## Context

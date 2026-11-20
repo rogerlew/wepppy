@@ -1,6 +1,6 @@
 # E-OBS monthly sampling contract
 
-Implementation conformance is pending. This contract applies to the monthly E-OBS rainfall and minimum and maximum temperature means used for CLIGEN localization and served by the metquery monthly endpoint when cubic is requested or omitted. Other datasets and explicit legacy `nearest` and `bilinear` requests retain their current semantics.
+This contract applies to the monthly E-OBS rainfall and minimum and maximum temperature means used for CLIGEN localization and served by the metquery monthly endpoint when cubic is requested or omitted. Other datasets and explicit legacy `nearest` and `bilinear` requests retain their current semantics.
 
 ## Coverage and sampling
 
@@ -12,6 +12,6 @@ The response retains its existing fields and units, including the requested `Met
 
 ## Consumers and operation
 
-The CLIGEN client surfaces known E-OBS failures with variable, location and applicable month, and retains its existing unit conversions. The E-OBS station ranking and parameter localization callers share this client. Unavailable E-OBS data interrupts heuristic ranking before changing the saved station or publishing a new ranking. The station view keeps its existing failure envelope. CLIGEN station data, generated storm behavior and other datasets are outside this decision. The E-OBS cubic client may use the operator-controlled `EOBS_METQUERY_URL` service base. Set it to `http://metquery:8004/` during the forest replay so the candidate worker and web service use the deployed local metquery. When unset or empty, the client keeps its existing public metquery endpoint. Failure at an explicitly configured endpoint does not retry on the public endpoint. Run configuration and request fields cannot override the service address.
+The CLIGEN client surfaces known E-OBS failures with variable, location and applicable month, and retains its existing unit conversions. The E-OBS station ranking and parameter localization callers share this client. Unavailable E-OBS data interrupts heuristic ranking before changing the saved station or publishing a new ranking. The station view keeps its existing failure envelope. CLIGEN station data, generated storm behavior and other datasets are outside this decision. The E-OBS cubic client may use the operator-controlled `EOBS_METQUERY_URL` service base. Set it to `http://metquery:8004/` through the development Compose interpolation environment during the forest replay so the candidate worker and web service use the deployed local metquery. Verify the actual job worker and provider in the replay receipt. When unset or empty, the client keeps its existing public metquery endpoint. Failure at an explicitly configured endpoint does not retry on the public endpoint. Run configuration and request fields cannot override the service address.
 
 When preprocessing new E-OBS rasters, exclude missing source observations from aggregation. Fill missing output cells with the same unscaled value written to GeoTIFF NoData metadata. No existing rasters need rewriting for this fix. See the [parameterization decision](../adrs/ADR-0152-eobs-coastal-monthly-sampling.md).

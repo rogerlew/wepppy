@@ -28,6 +28,7 @@ from wepppy.observability.safe_logging import current_profile
 install_safe_logging(REDIS_ONLY)
 
 import math
+import logging
 import os
 from os.path import join as _join
 from os.path import split as _split
@@ -60,6 +61,7 @@ from wepppy.all_your_base.geo.locationinfo import  RasterDatasetInterpolator
 from wepppy.all_your_base.geo.geo_transformer import GeoTransformer
 
 from wepppy.weppcloud.utils.helpers import exception_factory
+from wepppy.webservices.eobs_sampling import EOBS_LEGACY_NODATA, EobsSampleError, sample_eobs_monthly
 
 from glob import glob
 
@@ -428,6 +430,12 @@ def query_monthly_catalog() -> Response:
     return jsonify(monthly_catalog)
 
 
+def _eobs_monthly_error(message: str, status: int, **details: Any) -> Response:
+    response = jsonify(Error=message, **details)
+    response.status_code = status
+    return response
+
+
 @app.route('/monthly', methods=['GET', 'POST'])
 @app.route('/monthly/', methods=['GET', 'POST'])
 def query_monthly() -> Response:
@@ -447,26 +455,36 @@ def query_monthly() -> Response:
         dataset = d.get('dataset', None)
         method = d.get('method', None)
 
-    if lat is None:
-        return jsonify({'Error': 'lat not supplied'})
-
-    if lng is None:
-        return jsonify({'Error': 'lng not supplied'})
-
-    if dataset is None:
-        return jsonify({'Error': 'dataset not supplied'})
-
-    if method is None:
+    use_eobs_sampling = (
+        isinstance(dataset, str) and dataset in EOBS_LEGACY_NODATA and method in (None, 'cubic')
+    )
+    if use_eobs_sampling:
+        lng = None if isinstance(lng, bool) else safe_float_parse(lng)
+        lat = None if isinstance(lat, bool) else safe_float_parse(lat)
+        if lng is None or lat is None or not (-180 <= lng <= 180 and -90 <= lat <= 90):
+            return _eobs_monthly_error('Provide valid longitude and latitude for E-OBS.', 400)
         method = 'cubic'
-        
-    lat = safe_float_parse(lat)
-    lng = safe_float_parse(lng)
+    else:
+        if lat is None:
+            return jsonify({'Error': 'lat not supplied'})
 
-    if lat is None:
-        return jsonify({'Error': 'could not parse lat'})
+        if lng is None:
+            return jsonify({'Error': 'lng not supplied'})
 
-    if lng is None:
-        return jsonify({'Error': 'could not parse lng'})
+        if dataset is None:
+            return jsonify({'Error': 'dataset not supplied'})
+
+        if method is None:
+            method = 'cubic'
+
+        lat = safe_float_parse(lat)
+        lng = safe_float_parse(lng)
+
+        if lat is None:
+            return jsonify({'Error': 'could not parse lat'})
+
+        if lng is None:
+            return jsonify({'Error': 'could not parse lng'})
 
     if dataset not in monthly_catalog.keys():
         return jsonify({'Error': 'unknown dataset'})
@@ -476,11 +494,22 @@ def query_monthly() -> Response:
                         'expecting bilnear, cubic or nearest ' % method})
     
     fname = _join(geodata_dir, dataset, '.vrt')
-    if not _exists(fname):
-        return jsonify({'Error': 'could not find dataset "%s"' % fname})
-        
-    rds = RasterDatasetInterpolator(fname)
-    data = rds.get_location_info(lng, lat, method)
+    if use_eobs_sampling:
+        try:
+            data = sample_eobs_monthly(fname, dataset, lng, lat)
+        except EobsSampleError as exc:
+            details = dict(Code=exc.code, Dataset=dataset, Longitude=lng, Latitude=lat)
+            if exc.month is not None:
+                details['Month'] = exc.month
+            return _eobs_monthly_error('E-OBS data are unavailable for this sample.', 422, **details)
+        except (RuntimeError, OSError):
+            logging.getLogger(__name__).exception('Unable to read monthly E-OBS dataset %s', dataset)
+            return _eobs_monthly_error('The E-OBS dataset is temporarily unavailable.', 503)
+    else:
+        if not _exists(fname):
+            return jsonify({'Error': 'could not find dataset "%s"' % fname})
+        rds = RasterDatasetInterpolator(fname)
+        data = rds.get_location_info(lng, lat, method)
     
     assert len(data) == 12
     

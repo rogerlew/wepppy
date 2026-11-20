@@ -12,6 +12,7 @@ A user following the original European project workflow can produce usable clima
 - [x] Ratify and commit the bounded ESDAC soil contract checkpoint (1b388d50b).
 - [x] Implement the bounded soil slice (194978f04) and retain focused and generated-artifact evidence.
 - [x] Ratify the standalone E-OBS sampling rule in the [sampling checkpoint](../../artifacts/20261120_eobs_sampling_checkpoint.md).
+- [x] Implement and verify the E-OBS sampling rule against the [candidate HTTP provider and generated CLIGEN artifact](../../artifacts/20261120_eobs_sampling_validation.md).
 - [ ] Ratify remaining climate and land-use checkpoints.
 - [ ] Implement and verify each confirmed failure class and its peer consumers.
 - [ ] Complete the forest deployment and record the runtime revision.
@@ -31,7 +32,7 @@ For `studded-stranglehold`, a failed gridded CORINE build persisted dominant lan
 
 ## Outcomes & Retrospective
 
-The soil slice is implemented and locally validated, including the preset warning and 7778 controls. Remaining contract decisions, broader implementation, deployment and browser replay are open.
+The soil slice is implemented and locally validated, including the preset warning and 7778 controls. The E-OBS sampler and future preprocessing correction are implemented, with actual local HTTP and CLIGEN artifact readback. The broader legacy raster rebuild, remaining contract decisions and implementation, deployment and browser replay are open.
 
 ## Milestones
 
