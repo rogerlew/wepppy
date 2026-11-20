@@ -13,16 +13,10 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.weppcloud.utils.rq_engine_token import issue_user_rq_engine_token
 
 from .._common import *  # noqa: F401,F403
+from ..run_0.fork_status import FORK_DESTINATION_REQUIRED_FILES
 
 
 fork_bp = Blueprint('fork', __name__, template_folder='templates')
-
-_FORK_DESTINATION_REQUIRED_FILES = (
-    'ron.nodb',
-    'wepp.nodb',
-    'landuse.nodb',
-    'soils.nodb',
-)
 
 
 def _issue_rq_engine_token() -> str | None:
@@ -222,7 +216,7 @@ def fork_destination_readiness(runid, config, job_id, destination_runid):
 
     missing = [
         name
-        for name in _FORK_DESTINATION_REQUIRED_FILES
+        for name in FORK_DESTINATION_REQUIRED_FILES
         if not _exists(_join(destination_wd, name))
     ]
     ready = _exists(destination_wd) and not missing

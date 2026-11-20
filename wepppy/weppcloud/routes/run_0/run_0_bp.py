@@ -29,6 +29,7 @@ from itsdangerous import BadSignature, Signer
 from markupsafe import escape
 
 from .._common import *  # noqa: F401,F403
+from .fork_status import finish_fork_page, fork_page_status
 from flask import current_app, session
 from werkzeug.exceptions import HTTPException
 
@@ -2061,7 +2062,7 @@ def _apply_current_dataset_compatibility(
     return landuse_method_modes, disabled_landcover_datasets, current_landcover
 
 
-def _build_runs0_context(runid, config, playwright_load_all):
+def _build_runs0_context(runid, config, playwright_load_all, fork_root=None):
     global VAPID_PUBLIC_KEY
     from wepppy.nodb.mods.revegetation import Revegetation
     from wepppy.wepp.soils import soilsdb
@@ -2069,7 +2070,10 @@ def _build_runs0_context(runid, config, playwright_load_all):
     from wepppy.wepp.management.managements import landuse_management_mapping_options
     from wepppy.weppcloud.app import db, Run
 
-    ctx = load_run_context(runid, config)
+    if fork_root is None:
+        ctx = load_run_context(runid, config)
+    else:
+        ctx = load_run_context(runid, config, get_wd_fn=lambda *_a, **_kw: fork_root)
     wd = str(ctx.active_root)
     base_wd = str(ctx.run_root)
     ron = Ron.getInstance(wd)
@@ -2474,11 +2478,22 @@ def _build_runs0_context(runid, config, playwright_load_all):
 def runs0(runid, config):
     assert config is not None
 
+    fork_status = None
+    verify_roads = str(request.args.get('output_scope', '')).strip().lower() == 'roads'
     try:
-        authorize(runid, config)
+        if verify_roads:
+            authorize(runid, config, guard_output_scope=False)
+        else:
+            authorize(runid, config)
 
-        # Check if migrations are needed (unless skip_migration_check is set)
-        skip_migration_check = _query_arg_is_true("skip_migration_check")
+        fork_status = fork_page_status(runid, config)
+        if not fork_status.show_project or (verify_roads and fork_status.message):
+            return finish_fork_page(runid, config, fork_status)
+        if verify_roads:
+            authorize(runid, config)
+
+        # A protected fork is opened for recovery and inspection.
+        skip_migration_check = bool(fork_status.message) or _query_arg_is_true("skip_migration_check")
         playwright_load_all = _playwright_load_all_enabled()
 
         if not skip_migration_check and not playwright_load_all:
@@ -2499,32 +2514,47 @@ def runs0(runid, config):
                 )
                 if needs_migration:
                     # Redirect to migration page
-                    return redirect(url_for_run('run_0.migration_page', runid=runid, config=config))
+                    response = redirect(url_for_run('run_0.migration_page', runid=runid, config=config))
+                    return finish_fork_page(runid, config, fork_status, response)
 
-        context = _build_runs0_context(runid, config, playwright_load_all)
+        if fork_status.project_root is None:
+            context = _build_runs0_context(runid, config, playwright_load_all)
+        else:
+            context = _build_runs0_context(runid, config, playwright_load_all, fork_status.project_root)
         if 'redirect' in context:
-            return redirect(context['redirect'])
-        return render_template('runs0_pure.htm', **context)
-    except HTTPException:
+            response = redirect(context['redirect'])
+        else:
+            response = render_template(
+                'runs0_pure.htm', fork_status=fork_status if fork_status.message else None, **context,
+            )
+        return finish_fork_page(runid, config, fork_status, response)
+    except HTTPException as exc:
+        if exc.code == 404 and fork_status is not None:
+            response = finish_fork_page(runid, config, fork_status, exc)
+            if response is not exc:
+                return response
         raise
     except PreferenceResolutionError:
-        return preference_resolution_error_response(runid)
+        response = preference_resolution_error_response(runid)
+        return finish_fork_page(runid, config, fork_status, response) if fork_status is not None else response
     except LocaleAuthorityInvalidError as exc:
-        return _render_run_authority_error_page(
+        response = _render_run_authority_error_page(
             runid,
             config,
             status=409,
             code="locale_authority_invalid",
             details=str(exc),
         )
+        return finish_fork_page(runid, config, fork_status, response) if fork_status is not None else response
     except CapabilityAuthorityInvalidError as exc:
-        return _render_run_authority_error_page(
+        response = _render_run_authority_error_page(
             runid,
             config,
             status=409,
             code="capability_authority_invalid",
             details=str(exc),
         )
+        return finish_fork_page(runid, config, fork_status, response) if fork_status is not None else response
     except BuilderRegistryUnavailableError as exc:
         response = _render_run_authority_error_page(
             runid,
@@ -2534,12 +2564,17 @@ def runs0(runid, config):
             details=str(exc),
         )
         response.headers["Retry-After"] = "5"
-        return response
+        return finish_fork_page(runid, config, fork_status, response) if fork_status is not None else response
     except Exception as exc:
         stacktrace = render_current_exception(source_profile=current_profile(WEB))
         # Reuse exception_factory for logging + run exception log side effects.
         exception_factory(msg=exc, stacktrace=stacktrace, runid=runid, details=stacktrace)
-        return _render_run_internal_error_page(runid, config, stacktrace)
+        response = _render_run_internal_error_page(runid, config, stacktrace)
+        return finish_fork_page(runid, config, fork_status, response) if fork_status is not None else response
+
+
+# Fork status must run before the destination directory is resolved.
+runs0._loads_run_context = True
 
 
 @run_0_bp.route('/runs/<string:runid>/<config>/migrate')

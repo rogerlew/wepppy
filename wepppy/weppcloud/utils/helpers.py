@@ -785,7 +785,9 @@ def success_factory(kwds: Any | None = None) -> Response:
     return jsonify({'Content': kwds})
 
 
-def authorize(runid: str, config: str, require_owner: bool = False) -> None:
+def authorize(
+    runid: str, config: str, require_owner: bool = False, *, guard_output_scope: bool = True,
+) -> None:
     """Preserve project access, adding only restricted workflow admission."""
     _authorize_existing(runid, config, require_owner)
     from flask import request
@@ -799,7 +801,7 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
             continue
         require_feature(feature, wd=get_wd(runid, prefer_active=False), operation=operation, protected_read=True)
 
-    if str(request.args.get('output_scope', '')).strip().lower() == 'roads':
+    if guard_output_scope and str(request.args.get('output_scope', '')).strip().lower() == 'roads':
         from wepppy.weppcloud.routes._run_context import load_run_context
         from wepppy.wepp.interchange._roads_lifecycle import protect_flask_response
         protect_flask_response(load_run_context(runid, config).active_root)
