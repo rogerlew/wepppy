@@ -11,3 +11,7 @@ The control does not change file authority or user permissions. Dry-run discover
 ## Independent review disposition
 
 Both reviews identified the writer's channel filter. The contract requires a hillslope row and excludes channel-only associations from coverage. The regression will cover both distinctions. The repair checks the persisted summary associations without decoding arbitrary NoDb objects or validating unrelated saved fields. The writer continues to diagnose corrupt decoded summaries and canopy overrides. Existing check-error routing for invalid JSON or unreadable state is preserved. It differs from valid incomplete data, for which the same dry-run result must leave the retry page accessible. Stale report data and source mapping ownership remain covered by later package changes.
+
+## Candidate validation
+
+The standalone contract ancestor is `8d20d6897`. The 121 focused migration and run-page tests passed, including the current-schema retry route and an actual generated Parquet readback for a serialized treatment summary. The tests also exercised channel-only and mismatched states and normalization of an existing Parquet file. The receipt is `.wctl-test-runs/827805cef6e840ef82998a5b708e1566/receipt.json`. The test rerun updated a route fixture to supply the already deployed candidate contract field `soil_summary_ready`. Full browser replay on forest remains open.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import inspect
+import json
 import os
 import re
 import subprocess
@@ -100,7 +101,7 @@ def _bootstrap_context(user_roles: set[str]) -> dict:
             delineation_backend_is_wbt=True,
         ),
         "landuse": SimpleNamespace(has_landuse=False, mode="none", single_selection=False),
-        "soils": SimpleNamespace(has_soils=False, mode="none", single_dbselection=False),
+        "soils": SimpleNamespace(soil_summary_ready=False, mode="none", single_dbselection=False),
         "climate": SimpleNamespace(
             precip_scaling_mode=None,
             has_station=False,
@@ -210,6 +211,28 @@ def test_run_page_classifies_live_graph_failure_as_registry_503(
     assert "builder_registry_error" in body
     assert "live provider graph failed validation" in body
     assert response.headers["Retry-After"] == "5"
+
+
+def test_partial_landuse_on_current_schema_leaves_run_page_accessible(
+    run0_client, monkeypatch, tmp_path,
+):
+    from wepppy.nodb.version import CURRENT_VERSION, VERSION_FILENAME
+
+    client, module = run0_client
+    (tmp_path / VERSION_FILENAME).write_text(str(CURRENT_VERSION))
+    (tmp_path / 'landuse.nodb').write_text(json.dumps({
+        'domlc_d': {'102': '25', '103': '24'},
+        'managements': {'21': {'py/object': 'ManagementSummary'}},
+    }))
+    monkeypatch.setattr(module, 'get_wd', lambda runid: str(tmp_path))
+    monkeypatch.setattr(module, 'authorize', lambda *_args: None)
+    monkeypatch.setattr(module, '_build_runs0_context', lambda *_args: {})
+    monkeypatch.setattr(module, 'render_template', lambda template, **context: template)
+
+    response = client.get('/runs/run-1/cfg/')
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == 'runs0_pure.htm'
 
 
 def test_run_page_authorization_denial_precedes_summary_context(
