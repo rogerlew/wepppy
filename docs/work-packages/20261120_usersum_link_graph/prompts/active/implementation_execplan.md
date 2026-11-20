@@ -9,9 +9,9 @@ missing files and unresolved fragments so authors can repair upstream links.
 ## Progress
 
 - [x] Audit source links and prototype AST link rewriting.
-- [ ] Complete the contract checkpoint and independent reviews.
-- [ ] Implement traversal and Docs Quality integration.
-- [ ] Exercise real vendor artifacts and render linked routes.
+- [x] Complete the contract checkpoint and independent reviews at `3aae1556e`.
+- [x] Implement traversal and Docs Quality integration.
+- [x] Exercise real vendor artifacts and render linked routes.
 
 ## Surprises & Discoveries
 
@@ -35,4 +35,8 @@ vendor command and inspect a linked WBT artifact and its rendered URL.
 
 ## Outcomes & Retrospective
 
-The initial audit is complete. Implementation results are pending.
+The real build copied 94 pages from three vendors. Blob readback verified
+every page against its authoritative commit. The heading and link check
+reported one missing cross-repository WEPP Forest target. The isolated
+focused test suite passed 123 tests. The full suite requires a runtime
+with both configured native parser artifacts. The borrowed browser runtime passed preflight.

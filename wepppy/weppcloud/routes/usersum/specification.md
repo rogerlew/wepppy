@@ -285,7 +285,9 @@ contextual help link helper. Docs Quality checks local Markdown fragments
 against the same IDs the Usersum renderer emits, comparing fragments exactly after one
 URL percent-decoding pass. It reports the referring
 document, target, and fragment for unresolved links. This check applies to
-the Usersum Markdown corpus and reports existing broken links as warnings.
+the Usersum Markdown corpus and registered documents. Unresolved links are
+warnings. When the normalized fragment resolves, the warning suggests it.
+Run `PYTHONPATH=. python3 tools/usersum_docs_tool.py lint-links` for a local check.
 
 For vendored sources, relative links resolve inside the vendor snapshot.
 A root-relative Markdown link to a file in that snapshot also resolves
@@ -302,8 +304,6 @@ documents use the original canonical route and its role. The build does
 not create a duplicate for those links. Source and raw requests for a
 copied path may never bypass the original document's role.
 
-
-Implementation conformance is pending.
 
 ## Layout and UI Contract
 
@@ -557,6 +557,9 @@ write runs.
 Reachable committed files are eligible for publication because the
 configured sources are open source. Discovery alone adds no navigation or
 search entry. Existing manifest roles continue to govern registered pages.
+The historical 260727 release notes show the WEPPpy withdrawal and
+pass-format migration guidance from the [binary lifecycle policy](../../../../docs/binary-lifecycle.md#withdrawn-releases)
+in the rendered page. Its vendored Markdown is the upstream artifact.
 
 
 Vendor docs are generated/synced content.

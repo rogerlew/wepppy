@@ -927,3 +927,80 @@ def test_adr_link_rewrite_keeps_manifest_precedence(usersum_client, monkeypatch)
     monkeypatch.setitem(catalog.docs_by_rel_path, 'docs/adrs/' + path.name, doc)
     with usersum_client.application.test_request_context():
         assert usersum_routes._route_for_repo_markdown(path) == usersum_routes._doc_route_url(doc)
+
+
+def test_usersum_vendored_ifolp_links_open_copied_pages(usersum_client) -> None:
+    page = usersum_client.get("/usersum/doc/vendor.weppcloud_wbt.iterative_first_order_link_prune_enduser")
+    assert page.status_code == 200
+    for filename in ("specification.md", "implementation-plan.md"):
+        href = (
+            "/usersum/src/wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt/"
+            f"docs/iterative-first-order-link-prune/{filename}"
+        )
+        assert f'href="{href}"' in page.get_data(as_text=True)
+        linked = usersum_client.get(href)
+        assert linked.status_code == 200
+        assert "<h1 id=" in linked.get_data(as_text=True)
+        usersum_client.application.config["USERSUM_REQUIRE_MANIFEST_FOR_SRC"] = "true"
+        assert usersum_client.get(href).status_code == 404
+        usersum_client.application.config["USERSUM_REQUIRE_MANIFEST_FOR_SRC"] = "false"
+
+
+def test_usersum_self_vendor_does_not_override_original_role(
+    usersum_client, set_usersum_current_user, monkeypatch, tmp_path,
+) -> None:
+    catalog = usersum_routes._catalog()
+    doc = next(doc for doc in catalog.docs if doc["source"] == "local" and doc["min_role"] != "user")
+    vendor = usersum_routes._vendor_specs()["wepppy-roads"]
+    root = tmp_path / "data"
+    original = root / doc["rel_path"]
+    copied = root / vendor["target_root"] / doc["rel_path"]
+    origin = root / vendor["target_root"] / "nested/start.md"
+    staged = root / vendor["target_root"] / ".vendor-sync-test/new/example.md"
+    for path in (original, copied, origin, staged):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# Test\n", encoding="utf-8")
+    origin.write_text(f'[Link](/{doc["rel_path"]})\n', encoding="utf-8")
+    monkeypatch.setattr(usersum_routes, "_REPO_ROOT", root)
+    copied_rel = copied.relative_to(root).as_posix()
+    duplicate = dict(
+        doc, source="vendor", vendor_id="wepppy-roads", min_role="user",
+        doc_id="test.duplicate", rel_path=copied_rel, body_text="veryprivatecopiedsnippet",
+    )
+    alias = "/usersum/vendor/wepppy-roads/nested/duplicate.md"
+    legacy = "/usersum/view/weppcloud/duplicate.md"
+    monkeypatch.setattr(
+        usersum_routes, "_catalog", lambda: replace(
+            catalog,
+            docs=[*catalog.docs, duplicate],
+            docs_by_id={**catalog.docs_by_id, "test.duplicate": duplicate},
+            docs_by_rel_path={**catalog.docs_by_rel_path, copied_rel: duplicate},
+            docs_by_vendor_route_path={**catalog.docs_by_vendor_route_path, alias: duplicate},
+            docs_by_legacy_route_path={**catalog.docs_by_legacy_route_path, legacy: duplicate},
+        ),
+    )
+    set_usersum_current_user(is_authenticated=False)
+    usersum_client.application.config["USERSUM_SEARCH_DISABLE_POSTGRES"] = "true"
+    search = usersum_client.get("/usersum/api/search?q=veryprivatecopiedsnippet")
+    assert search.status_code == 200
+    assert "test.duplicate" not in search.get_data(as_text=True)
+    for endpoint in (alias, legacy, "/usersum/doc/test.duplicate"):
+        assert usersum_client.get(endpoint).status_code == 404
+    for kind in ("src", "raw"):
+        assert usersum_client.get(f"/usersum/{kind}/{staged.relative_to(root).as_posix()}").status_code == 404
+
+    assert usersum_client.get(f"/usersum/src/{copied_rel}").status_code == 404
+    assert usersum_client.get(f"/usersum/raw/{copied_rel}").status_code == 404
+    page = usersum_client.get(f"/usersum/src/{origin.relative_to(root).as_posix()}")
+    assert page.status_code == 200
+    assert f'href="/usersum/doc/{doc["doc_id"]}"' in page.get_data(as_text=True)
+
+
+def test_historical_260727_release_keeps_local_withdrawal_notice(usersum_client) -> None:
+    path = "wepppy/weppcloud/routes/usersum/vendor/wepp-forest/release/wepp_260727_release_notes.md"
+    response = usersum_client.get(f"/usersum/src/{path}")
+    assert response.status_code == 200
+    assert "Withdrawn from WEPPpy on August 5, 2026." in response.get_data(as_text=True)
+    raw = usersum_client.get(f"/usersum/raw/{path}")
+    assert raw.status_code == 200
+    assert "Withdrawn from WEPPpy" not in raw.get_data(as_text=True)

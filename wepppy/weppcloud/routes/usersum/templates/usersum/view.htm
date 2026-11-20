@@ -16,6 +16,12 @@
 {% if active_doc and active_doc.min_role %}
   <p class="wc-usersum-doc-role" aria-label="Document role">Role: <code>{{ active_doc.min_role }}</code></p>
 {% endif %}
+{% if is_withdrawn_260727 %}
+<aside aria-label="WEPPpy release status">
+  <p><strong>Withdrawn from WEPPpy on August 5, 2026.</strong> This release writes HBP files that cannot be merged with legacy flat-file pass inputs, including in AgFields integrated watersheds. If your project uses this release, select a compatible installed binary and regenerate the hillslope pass files before watershed integration.</p>
+  <p><a href="{{ url_for_run('usersum.view_src_markdown', rel_path='docs/binary-lifecycle.md') }}#withdrawn-releases">WEPPpy withdrawn releases</a></p>
+</aside>
+{% endif %}
 {{ content_html|safe }}
 <footer class="wc-usersum-doc-footer" aria-label="Document source links">
   <span class="wc-usersum-doc-path">{{ doc_path_label }}</span>

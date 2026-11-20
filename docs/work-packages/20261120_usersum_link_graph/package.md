@@ -15,3 +15,7 @@ Security impact is high because vendoring publishes additional files. The
 security review checks commit provenance, symlinks, path boundaries, and
 manifest access. Acceptance requires reading generated files and following
 rendered links through Usersum as well as checking the build diagnostics.
+
+Local implementation and focused acceptance are complete. The feature
+branch retains both reviews and the original source commits for generated
+content. The broad runtime gate and integration remain open.

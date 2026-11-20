@@ -564,7 +564,7 @@ def index_usersum_docs_rq(
                 contracts_for_sync,
                 repo_root=repo_root_path,
                 write=write_vendors,
-                clean=False,
+                clean=True,
                 allow_missing_source_repos=True,
             )
         else:
