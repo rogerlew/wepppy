@@ -89,3 +89,9 @@ same 143 diagnostics against the parent and candidate snapshots.
 The 99-test Disturbed matrix gate passed. Retained native outputs and the
 regenerated report matched the published benchmark exactly. The generated
 soil inputs differ only in the Build Date comment. [Matrix parity receipt](20261120_esdac_reconciliation_matrix_parity.json)
+
+All ten Disturbed publication contracts passed. The broad suite stopped
+after 839 passes at the same empty `aria2c.spec` browse-auth fixture
+failure as the preceding recovery revision. The broad gate receipt is
+retained under `.wctl-test-runs/c2638ea8c23d448ebc30ec4d065ac3fe` in the
+land-use implementation checkout.
