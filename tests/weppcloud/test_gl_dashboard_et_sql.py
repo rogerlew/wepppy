@@ -18,10 +18,10 @@ const {createWeppDataManager} = await import('data:text/javascript;base64,' + fs
 const payloads = [];
 const state = {weppEventSelectedDate:'2001-01-01', comparisonMode:true, currentScenarioPath:'scenario', baseSummaryCache:{}};
 const response = {records:[{topaz_id:101,value:null}]};
-globalThis.fetch = async (url, options) => { payloads.push(JSON.parse(options.body)); return {ok:true,json:async()=>response}; };
-const manager = createWeppDataManager({ctx:{runid:'test',config:'cfg'},getState:()=>state,
+const manager = createWeppDataManager({getState:()=>state,
  setValue:(k,v)=>{state[k]=v;},setState:v=>Object.assign(state,v),
- postQueryEngine:async p=>{payloads.push(p);return response;},
+ postQueryEngine:async p=>{payloads.push({target:'selected',payload:p});return response;},
+ postBaseQueryEngine:async p=>{payloads.push({target:'base',payload:p});return response;},
  pickActiveWeppEventLayer:()=>({mode:process.argv[2]}),WEPP_EVENT_WAT_PATH:'H.wat.parquet'});
 await manager.refreshWeppEventData();
 const ranges = manager.computeWeppEventRanges({'1':{event_ET:null},'2':{event_ET:5}});
@@ -32,7 +32,11 @@ console.log(JSON.stringify({payloads,ranges,diffs}));
 '''
     result = subprocess.run(['node', '--input-type=module', '-e', script, str(module), mode],
                             capture_output=True, text=True, check=True)
-    return json.loads(result.stdout)
+    output = json.loads(result.stdout)
+    calls = output["payloads"]
+    assert [call["target"] for call in calls] == ["selected", "base"]
+    output["payloads"] = [call["payload"] for call in calls]
+    return output
 
 
 @pytest.fixture(scope='module')
@@ -44,7 +48,6 @@ def payloads():
 def test_selected_and_comparison_sql_use_local_area(payloads, area, expected):
     wat = pd.DataFrame({'wepp_id':[1,1], 'Area':[area,750.], 'Ep':[1.,4.], 'Es':[.5,1.], 'Er':[.5,1.]})
     hill = pd.DataFrame({'wepp_id':[1], 'topaz_id':[101]})
-    assert len(payloads['payloads']) == 2
     with duckdb.connect() as conn:
         conn.register('wat',wat); conn.register('hill',hill)
         for payload in payloads['payloads']:
