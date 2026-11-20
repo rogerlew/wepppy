@@ -4,7 +4,7 @@ from _typeshed import Incomplete
 from collections.abc import Generator
 from enum import IntEnum
 from pathlib import Path
-from typing import Callable, Collection, Any, ClassVar, Dict, List, Mapping, Tuple
+from typing import Callable, Collection, Any, ClassVar, Dict, List, Mapping, Optional, Tuple
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.locales import LanduseDataset
 
