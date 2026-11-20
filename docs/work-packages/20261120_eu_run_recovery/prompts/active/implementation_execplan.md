@@ -8,7 +8,7 @@ A user following the original European project workflow can produce usable clima
 
 - [x] 2026-11-20 UTC: Created the package, tracker and draft contract decision.
 - [x] Preserve available production inputs and complete initial raster and management readbacks.
-- [ ] Verify exact original workflow settings and recover the original land-cover upload or record the fidelity gap.
+- [x] Verify original workflow settings and record the original land-cover upload fidelity gap.
 - [x] Ratify and commit the bounded ESDAC soil contract checkpoint (1b388d50b).
 - [x] Implement the bounded soil slice (194978f04) and retain focused and generated-artifact evidence.
 - [x] Ratify the standalone E-OBS sampling rule in the [sampling checkpoint](../../artifacts/20261120_eobs_sampling_checkpoint.md).
@@ -24,8 +24,9 @@ A user following the original European project workflow can produce usable clima
 - [x] Restore generic thinning compatibility with generated management and soil readback. [Generic thinning checkpoint](../../artifacts/20261120_legacy_thinning_class_checkpoint.md)
 - [ ] Ratify remaining climate and land-use checkpoints.
 - [ ] Implement and verify each confirmed failure class and its peer consumers.
-- [ ] Complete the forest deployment and record the runtime revision.
-- [ ] Replay the original run and complete generated-artifact and correctness review.
+- [x] Complete the forest deployment and record the runtime revision.
+- [x] Replay the original run and verify native and browser artifacts.
+- [x] Complete independent replay correctness review. [Replay receipt](../../artifacts/20261120_forest_deployment_replay.md)
 
 ## Surprises & Discoveries
 
@@ -41,7 +42,7 @@ For `studded-stranglehold`, a failed gridded CORINE build persisted dominant lan
 
 ## Outcomes & Retrospective
 
-The soil slice is implemented and locally validated, including the preset warning and 7778 controls. The E-OBS sampler and future preprocessing correction are implemented, with actual local HTTP and CLIGEN artifact readback. The private regional raster rebuild is complete. Remaining publication and management contracts, deployment and browser replay are open.
+The soil slice is implemented and locally validated, including the preset warning and 7778 controls. The E-OBS sampler and future preprocessing correction are implemented, with actual local HTTP and CLIGEN artifact readback. The private regional raster rebuild is complete. Forest candidate `af514e39c` completed the original browser and RQ workflow and the companion E-OBS plus gridded soil run. The second-incident control verified the normal retry page, gridded CORINE recovery and correct climate status after a newer upload. Original upload fidelity, early land-use rejection and the remaining publication and management contracts are open. [Deployment and native readback](../../artifacts/20261120_forest_deployment_replay.md)
 
 ## Milestones
 

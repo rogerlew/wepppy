@@ -1,6 +1,6 @@
 # European climate, soils, and WEPP run recovery
 
-**Status**: Soil slice implemented and locally verified. Climate and land-use checkpoints and forest deployment remain open.
+**Status**: Candidate deployed and the original watershed, climate and soils workflow replayed on forest. Incompatible upload admission, generated climate publication and management reconciliation remain open.
 **Opened**: 2026-11-20 UTC
 **Target**: Complete local deployment and end-to-end replay on `forest`
 

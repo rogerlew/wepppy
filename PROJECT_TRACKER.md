@@ -1,4 +1,4 @@
-Contract discovery: [European climate, soils, and WEPP run recovery](docs/work-packages/20261120_eu_run_recovery/package.md) - Climate upload and status repair, single-storm transition, E-OBS climate, ESDAC soils, European land-use mapping, and false migration prompts. Acceptance requires a full forest deployment and original-workflow rebuild of autosomal-vetch, plus the studded-stranglehold replay.
+Deployed and replayed on forest: [European climate, soils, and WEPP run recovery](docs/work-packages/20261120_eu_run_recovery/package.md) — original autosomal-vetch workflow and E-OBS with gridded ESDAC verified through native output. Incompatible upload admission, failed climate replacement and catalog reconciliation remain open.
 
 Implemented and locally validated: [GL Dashboard catalog readiness](docs/work-packages/20261119_gl_catalog_readiness/package.md) — One readiness handshake per target, a visible wait before result queries, one RQ admission in the concurrency test, and two served browser tests. Fleet rollout remains pending.
 

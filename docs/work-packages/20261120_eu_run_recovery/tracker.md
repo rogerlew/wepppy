@@ -2,19 +2,21 @@
 
 ## Status
 
-Scaffolded on 2026-11-20 UTC. The [contract decision draft](artifacts/20261120_contract_decision.md) and [active ExecPlan](prompts/active/implementation_execplan.md) are open. Implementation conformance, forest deployment, and replay are pending.
+The candidate is deployed on forest. The [deployment and replay receipt](artifacts/20261120_forest_deployment_replay.md) records the original workflow, native outputs and controlled second incident. The [ExecPlan](prompts/active/implementation_execplan.md) remains active.
 
 ## Progress
 
 - [x] Record the production failure signatures and scope the work package.
 - [x] Preserve the available production baseline inputs and run initial raster and management readbacks.
-- [ ] Reconcile the original operation settings and locate the overwritten land-cover upload or document replay limits.
+- [x] Reconcile the original operation settings and document the overwritten upload and replay limits.
 - [ ] Resolve climate unit and ESDAC source questions, ratify the contracts, and record the checkpoint ancestor revision.
 - [ ] Implement and validate the climate, WEPP and soil changes.
-- [ ] Complete the full candidate deployment on forest and record runtime identities.
-- [ ] Rebuild the original workflow on forest, verify artifacts and browser behavior, and complete final correctness review.
+- [x] Complete the full candidate deployment on forest and record runtime identities.
+- [x] Rebuild the original workflow on forest and verify artifacts and browser behavior.
+- [x] Complete the independent replay correctness review.
 
-- [ ] Replay the CORINE/upload mapping switch and false migration prompt from `studded-stranglehold`, with a genuine legacy migration control.
+- [x] Replay the CORINE/upload mapping switch and false migration prompt with a substitute raster, and run the serialized legacy migration control privately.
+- [ ] Reject incompatible uploads before worker admission and verify on forest.
 
 - [ ] Complete the [ESDAC management inventory and reconciliation](artifacts/20261120_esdac_management_baseline.md), including a reviewed row-by-row disposition and generated-output validation.
 
@@ -26,7 +28,7 @@ Scaffolded on 2026-11-20 UTC. The [contract decision draft](artifacts/20261120_c
 
 ## Open evidence
 
-The E-OBS raster unit and conversion chain, the supported single-storm execution/report matrix, and whether authoritative data can recover the 37 ESDAC rejects need evidence before contract ratification. If required original inputs are unavailable, record the missing input and its effect on replay fidelity.
+Remaining evidence covers generated climate publication and readiness after a failed replacement, incompatible upload admission, batch event output, and the open catalog parameterization decisions. The original second-incident raster is unavailable.
 
 ## Notes – 2026-11-20 UTC
 
