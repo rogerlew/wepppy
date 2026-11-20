@@ -62,10 +62,11 @@ from concurrent.futures.process import BrokenProcessPool
 
 import logging
 import os
+from pathlib import Path
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
-from typing import Optional, Dict, List, Any, Tuple, Mapping, Callable
+from typing import Optional, Dict, List, Any, Tuple, Mapping, Callable, Collection
 import shutil
 from enum import IntEnum
 import time
@@ -115,7 +116,12 @@ from wepppy.nodb.core.management_overrides import (
 
 from wepppy.landcover.rap import RAP_Band
 
-from wepppy.nodb.locales import LanduseDataset, available_landuse_datasets
+from wepppy.nodb.locales import (
+    LanduseDataset,
+    available_landuse_datasets,
+    get_landcover_entry,
+    landcover_catalog_id,
+)
 from wepppy.io_wait import get_peridot_input_wait_s, get_peridot_input_poll_s
 
 __all__ = [
@@ -535,6 +541,16 @@ def read_cover_defaults(fn: str) -> Dict[str, Dict]:
     return d
 
 
+def _corine_catalog_id(dataset: Optional[str]) -> Optional[str]:
+    if not dataset or not dataset.lower().startswith("eu/corine_landcover/"):
+        return None
+    try:
+        catalog_id = landcover_catalog_id(dataset)
+    except ValueError:
+        return None
+    return catalog_id if get_landcover_entry(catalog_id) is not None else None
+
+
 class Landuse(NoDbBase):
     """
     Manager that keeps track of project details
@@ -636,6 +652,30 @@ class Landuse(NoDbBase):
             _mapping = 'lu10v5ua'
 
         return _mapping
+
+    def _corine_source_id(self, mode=None, dataset=None) -> Optional[str]:
+        if (getattr(self, '_mode', None) if mode is None else mode) != LanduseMode.Gridded:
+            return None
+        if dataset is None:
+            dataset = self._nlcd_db if hasattr(self, '_nlcd_db') else self.config_get_str('landuse', 'nlcd_db')
+        return _corine_catalog_id(dataset)
+
+    def _source_mapping_for(self, *, mode=None, dataset=None, upload_mapping=None) -> Optional[str]:
+        source = self._corine_source_id(mode, dataset)
+        if source is None:
+            return self.mapping if upload_mapping is None else upload_mapping
+
+        configured_source = _corine_catalog_id(self.config_get_str('landuse', 'nlcd_db'))
+        if configured_source == source:
+            configured_map = self.config_get_str('landuse', 'mapping')
+            if configured_map and (configured_map.lower().endswith('.json') or '/' in configured_map or '\\' in configured_map):
+                return configured_map
+        return 'eu-disturbed'
+
+    @property
+    def source_mapping(self) -> Optional[str]:
+        """Base management table for the selected land-cover source."""
+        return self._source_mapping_for()
 
     @property
     def landuse_is_vrt(self) -> bool:
@@ -772,11 +812,13 @@ class Landuse(NoDbBase):
             details=details,
         )
 
-    def get_mapping_dict(self) -> dict[str, dict]:
+    def get_mapping_dict(self, *, mode=None, dataset=None, upload_mapping=None) -> dict[str, dict]:
         """
         Returns the management mapping dictionary
         """
-        mapping = self._resolve_effective_mapping_reference(self.mapping)
+        mapping = self._resolve_effective_mapping_reference(
+            self._source_mapping_for(mode=mode, dataset=dataset, upload_mapping=upload_mapping)
+        )
         try:
             return load_map(mapping)
         except ManagementMapLoadError as exc:
@@ -952,9 +994,11 @@ class Landuse(NoDbBase):
         self._mofe_buffer_selection = parsed
         self._buffer_man = summary
 
-    def validate_mofe_buffer_selection(self, value):
+    def validate_mofe_buffer_selection(self, value, *, mode=None, dataset=None, upload_mapping=None):
         """Resolve a supplied selection before any input/source mutation."""
-        mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
+        mapping_reference = self._resolve_effective_mapping_reference(
+            self._source_mapping_for(mode=mode, dataset=dataset, upload_mapping=upload_mapping)
+        )
         return get_management_summary(int(value), mapping_reference)
 
     def parse_inputs(self, payload: Mapping[str, Any]) -> None:
@@ -998,10 +1042,23 @@ class Landuse(NoDbBase):
     def clean(self) -> None:
 
         lc_dir = self.lc_dir
-        _clear_directory_preserving_symlink_mount(
-            lc_dir,
-            preserve_names={"user-defined", "landuse_user_defined_mapping.json", "single-user-defined"},
-        )
+        preserve_names = {"user-defined", "landuse_user_defined_mapping.json", "single-user-defined"}
+        custom_map = self.custom_mapping_relpath
+        if custom_map:
+            try:
+                relative_map = normalize_relpath(custom_map)
+            except ValueError:
+                relative_map = ''
+            if relative_map.startswith(_CUSTOM_MAPPING_RELPATH_PREFIX):
+                preserve_names.add(relative_map.split("/", 2)[1])
+        if self._corine_source_id() is not None:
+            mapping = self.source_mapping
+            if mapping and mapping != "eu-disturbed":
+                map_path = Path(os.path.abspath(os.path.expanduser(mapping)))
+                directory = Path(os.path.abspath(lc_dir))
+                if directory in map_path.parents:
+                    preserve_names.add(map_path.relative_to(directory).parts[0])
+        _clear_directory_preserving_symlink_mount(lc_dir, preserve_names=preserve_names)
         os.makedirs(lc_dir, exist_ok=True)
         mutation = self.mutation_state() if self._owns_mutation_scope() else self.locked()
         with mutation:
@@ -1237,7 +1294,7 @@ class Landuse(NoDbBase):
         doms = sorted(doms)
 
         managements = {}
-        mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
+        mapping_reference = self._resolve_effective_mapping_reference(self.source_mapping)
         for dom in doms:
             man = managements[dom] = get_management_summary(dom, mapping_reference, **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}))
 
@@ -1504,10 +1561,25 @@ class Landuse(NoDbBase):
                 for k2 in sorted(v.keys()):
                     domlc_d[k][k2] = str(v[k2])
 
-        mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
-        managements = self.managements
-        if managements is None:
-            managements = {}
+        mapping_reference = self._resolve_effective_mapping_reference(self.source_mapping)
+        cached_managements = self.managements or {}
+        refresh_provider = domlc_mofe_override is None and self._corine_source_id() is not None
+        managements = {} if refresh_provider else dict(cached_managements)
+
+        def resolve_segment_management(dom):
+            summary = get_management_summary(
+                dom, mapping_reference,
+                **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}),
+            )
+            cached = cached_managements.get(dom)
+            if cached is not None and (cached.man_fn, cached.disturbed_class) == (summary.man_fn, summary.disturbed_class):
+                for cover in ("cancov", "inrcov", "rilcov"):
+                    setattr(summary, f"{cover}_override", getattr(cached, f"{cover}_override", None))
+            return summary
+
+        if refresh_provider:
+            base_classes = {code for topaz_id, code in (self.domlc_d or {}).items() if not is_channel(topaz_id)}
+            managements.update({code: resolve_segment_management(code) for code in base_classes})
 
         if disturbed is not None and domlc_mofe_override is None:
             disturbed_key_lookup = disturbed.get_disturbed_key_lookup()
@@ -1540,7 +1612,7 @@ class Landuse(NoDbBase):
                     for mofe_id, val in hill_sbs_d.items():
                         dom = domlc_d[topaz_id][mofe_id]
                         if dom not in managements:
-                            managements[dom] = get_management_summary(dom, mapping_reference)
+                            managements[dom] = resolve_segment_management(dom)
                         man = managements[dom]
 
                         burn_class = val if val in ('130', '131', '132', '133') else '130'
@@ -1614,7 +1686,7 @@ class Landuse(NoDbBase):
                 mofe_id = str(i + 1)
 
                 if dom not in managements:
-                    managements[dom] = get_management_summary(dom, mapping_reference, **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}))
+                    managements[dom] = resolve_segment_management(dom)
 
                 summary = managements[dom]
                 disturbed_class = summary.disturbed_class
@@ -1992,7 +2064,7 @@ class Landuse(NoDbBase):
 
     @property
     def available_datasets(self) -> List[LanduseDataset]:
-        mapping = self._resolve_effective_mapping_reference(self.mapping)
+        mapping = self._resolve_effective_mapping_reference(self.source_mapping)
         from wepppy.nodb.project_config_capabilities import (
             resolve_run_capability_authority,
         )
@@ -2064,9 +2136,9 @@ class Landuse(NoDbBase):
         if had_cache:
             self.logger.debug('Invalidated MOFE pair-count cache (%s)', reason)
 
-    def build_managements(self, _map: Optional[str] = None) -> None:
+    def build_managements(self, _map: Optional[str] = None, *, applied_treatments: Collection[str] = ()) -> None:
         if _map is None:
-            _map = self._resolve_effective_mapping_reference(self.mapping)
+            _map = self._resolve_effective_mapping_reference(self.source_mapping)
 
         effective_map: Optional[dict[str, dict[str, Any]]] = None
         base_map: Optional[dict[str, dict[str, Any]]] = None
@@ -2076,7 +2148,7 @@ class Landuse(NoDbBase):
             except ManagementMapLoadError as exc:
                 raise self._coerce_custom_mapping_load_error(exc) from exc
             try:
-                base_map = load_map(self.mapping)
+                base_map = load_map(self.source_mapping)
             except ManagementMapLoadError:
                 base_map = None
 
@@ -2088,6 +2160,8 @@ class Landuse(NoDbBase):
             existing_managements: Dict[str, Any] = dict(getattr(self, "managements", {}) or {})
 
             def _resolve_management_summary(dom_key: str) -> Any:
+                if dom_key in applied_treatments:
+                    return deepcopy(existing_managements[dom_key])
                 try:
                     man = get_management_summary(dom_key, _map, **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}))
                 except InvalidManagementKey:
@@ -2221,7 +2295,7 @@ class Landuse(NoDbBase):
     def modify(self, topaz_ids: List[str], landuse: str) -> None:
         topaz_ids = [str(topaz_id) for topaz_id in topaz_ids]
         landuse = str(int(landuse))
-        mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
+        mapping_reference = self._resolve_effective_mapping_reference(self.source_mapping)
         try:
             get_management_summary(landuse, mapping_reference, **({"native_scenario_references": True} if single_input_uploads_enabled(self) else {}))
         except InvalidManagementKey as exc:

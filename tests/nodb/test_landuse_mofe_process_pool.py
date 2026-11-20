@@ -535,3 +535,31 @@ def test_build_multiple_ofe_concurrent_output_matches_sequential_parity_fixture(
         "overrides=ini.data.cancov=0.95,plant.data.decfct=1.0,plant.data.rdmax=0.33,plant.data.xmxlai=5.7\n"
         "2|dom=999|rdmax=[]|xmxlai=[]|cancov=[]|overrides=\n"
     )
+
+
+def test_corine_mofe_synthesis_does_not_reuse_an_upload_management_with_the_same_class(tmp_path, monkeypatch):
+    from wepppy.nodb.core.landuse import LanduseMode
+    from wepppy.wepp.management import get_management_summary
+
+    previous = get_management_summary(23, "disturbed")
+    landuse, run_dir = _make_landuse_fixture(
+        tmp_path, monkeypatch, run_name="corine-provider-mofe",
+        domlc_d={"101": {"1": "23"}}, managements={"23": previous},
+    )
+    landuse._mode = LanduseMode.Gridded
+    landuse._nlcd_db = "eu/CORINE_LandCover/2018"
+    landuse._mapping = "disturbed"
+    landuse.domlc_d = {"101": "25"}
+
+    def read_deck_plan(task):
+        topaz_id, path, nsegments, plans = task
+        assert nsegments == 1
+        Path(path).write_text(plans[0]["desc"])
+        return topaz_id, 0.0
+
+    monkeypatch.setattr(landuse_module, "_write_mofe_management_file_task", read_deck_plan)
+    landuse._build_multiple_ofe()
+
+    assert "Broad-leaved forest" in (run_dir / "landuse" / "hill_101.mofe.man").read_text()
+    assert previous.desc != landuse.managements["23"].desc
+    assert landuse.managements["25"].desc == "Mixed forest"

@@ -65,3 +65,8 @@ The E-OBS v19.0e data rebuild completed off the shared dataset. The private
 staging tree contains 96 WGS84 rasters and eight relocatable VRTs. Candidate
 metquery and CLIGEN produced 10,957 valid rows from the rebuilt source at Es
 Fangar. Forest has yet to use these data through the full deployed stack.
+
+The [CORINE provider checkpoint](artifacts/20261120_landuse_source_checkpoint.md)
+is `59c9e23d7`. The candidate generated 58 land-use Parquet rows from the
+archived classes, including 16 class-25 Mixed forest hillslopes. Incompatible
+upload preflight and the complete forest replay remain open.

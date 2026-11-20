@@ -51,3 +51,26 @@ dataset, including its alias. Current gridded cleanup can remove the
 previous raw upload while retaining its selection. An arbitrary custom
 map path under the cleanup root needs the applicable override retention
 rules and its own regression test.
+
+## Candidate readback
+
+On a private copy of `studded-stranglehold`, the retained CORINE raster
+contained every archived dominant code. Existing management generation used
+those 58 assignments and the archived hillslope and channel Parquet instead
+of extracting new assignments. The normal writer produced 58 land-use Parquet
+rows. Sixteen hillslopes used management key 25, Mixed forest, with
+`Old_Forest.man`. The constructor used the saved project configuration to
+initialize the otherwise unretained WEPP metadata, and a companion archived
+Climate state satisfied its initialization dependency. The original ESDAC
+selector value stayed available. No original run was changed.
+
+Review found shared numeric keys in MOFE management generation. The candidate
+resolves base CORINE templates before classifying fire or composing management.
+A regression fixture starts with the previous map's class 23 and verifies
+that the segment writer is passed the CORINE Broad-leaved forest template.
+Additional focused cases cover both provider spellings, every exposed year,
+requested buffer validation, and retaining case-sensitive override paths.
+An explicit treatment raster keeps its selected map for treatment templates,
+including 65% thinning from the Disturbed map. Untreated base classes retain
+their CORINE source map. Focused validation passed 140 cases. The deployed workflow and exact original
+user upload replay remain open.

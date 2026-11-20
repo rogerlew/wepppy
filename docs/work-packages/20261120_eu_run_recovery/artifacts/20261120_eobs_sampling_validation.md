@@ -33,3 +33,8 @@ uncovered. The previous mixed-record rainfall control passes January and fails
 in August where the rebuilding and sampling still cannot supply coverage.
 The resumed fixture used the original pinned station. The private data are
 ready for full forest deployment verification.
+
+An independent NetCDF masked read reproduced the January and August mean and
+standard deviation at four coastal, inland, offshore and mixed-record
+controls for all four measures. At the mixed-record rainfall control, January
+had 83 valid daily observations and August had zero.

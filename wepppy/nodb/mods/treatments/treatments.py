@@ -30,6 +30,7 @@ from wepppy.wepp.management import ManagementSummary, Management, get_management
 
 from wepppy.nodb.core import (
     Landuse,
+    LanduseMode,
     Soils,
     Watershed,
 )
@@ -223,9 +224,23 @@ class Treatments(NoDbBase):
         except FileNotFoundError:
             pass
 
+    def _treatment_input_mapping(self, landuse, *, raster=False):
+        if raster or getattr(self, '_mode', None) == TreatmentsMode.UserDefinedMap:
+            return landuse.get_mapping_dict(mode=LanduseMode.UserDefined)
+        return landuse.get_mapping_dict()
+
+    def _treatment_management_mapping(self, landuse):
+        mapping = landuse.mapping if getattr(self, '_mode', None) == TreatmentsMode.UserDefinedMap else landuse.source_mapping
+        return landuse._resolve_effective_mapping_reference(mapping)
+
+    def _treatment_destination_lookup(self, disturbed, landuse):
+        if getattr(self, '_mode', None) == TreatmentsMode.UserDefinedMap:
+            return disturbed.get_disturbed_key_lookup(mapping_dict=self._treatment_input_mapping(landuse))
+        return disturbed.get_disturbed_key_lookup()
+
     def get_valid_treatment_keys(self):
         landuse = Landuse.getInstance(self.wd)
-        mapping = landuse.get_mapping_dict()
+        mapping = self._treatment_input_mapping(landuse, raster=True)
 
         valid_keys = []
         for k, v in mapping.items():
@@ -242,7 +257,7 @@ class Treatments(NoDbBase):
         for viewmodel templates/controls/treatments_pure.htm
         """
         landuse = Landuse.getInstance(self.wd)
-        mapping = landuse.get_mapping_dict()
+        mapping = self._treatment_input_mapping(landuse)
 
         valid_treatments = {}
         for k, v in mapping.items():
@@ -275,7 +290,7 @@ class Treatments(NoDbBase):
             return
 
         landuse = Landuse.getInstance(self.wd)
-        mapping = landuse.get_mapping_dict()
+        mapping = self._treatment_input_mapping(landuse)
         self.logger.info(f'self.wd: {self.wd}')
         self.logger.info(f'Applying treatments to {len(treatments_domlc_d)} hillslopes')
         disturbed = Disturbed.getInstance(self.wd)
@@ -290,6 +305,8 @@ class Treatments(NoDbBase):
             base = dom_int // 1000
             return str(base) if base > 0 else None
 
+        applied_treatments = set()
+        explicit_mapping = getattr(self, '_mode', None) == TreatmentsMode.UserDefinedMap
         with landuse.locked():
             domlc_d = dict(landuse.domlc_d or {})
             domlc_mofe_d = getattr(landuse, 'domlc_mofe_d', None)
@@ -319,6 +336,7 @@ class Treatments(NoDbBase):
                     disturbed_class,
                 )
                 if new_dom is not None:
+                    applied_treatments.add(str(new_dom))
                     domlc_d[str(topaz_id)] = str(new_dom)
 
                 if not has_mofe_assignments:
@@ -350,17 +368,19 @@ class Treatments(NoDbBase):
                     else:
                         mofe_new_dom = self._resolve_mofe_treatment_dom(
                             disturbed,
+                            landuse,
                             treatment,
                             mofe_disturbed_class,
                         )
                     if mofe_new_dom is None:
                         continue
                     mofe_new_dom = str(mofe_new_dom)
+                    applied_treatments.add(mofe_new_dom)
                     topaz_mofe_d[mofe_id] = mofe_new_dom
-                    if mofe_new_dom not in landuse.managements:
+                    if explicit_mapping or mofe_new_dom not in landuse.managements:
                         landuse.managements[mofe_new_dom] = get_management_summary(
                             mofe_new_dom,
-                            landuse.mapping,
+                            self._treatment_management_mapping(landuse),
                         )
             landuse.domlc_d = domlc_d
             missing_dom_keys = sorted(
@@ -415,7 +435,10 @@ class Treatments(NoDbBase):
             landuse = Landuse.getInstance(self.wd)
             landuse._build_multiple_ofe(domlc_mofe_override=landuse.domlc_mofe_d)
             landuse = Landuse.getInstance(self.wd)
-            landuse.build_managements()
+            if explicit_mapping and applied_treatments:
+                landuse.build_managements(applied_treatments=applied_treatments)
+            else:
+                landuse.build_managements()
 
         land_soil_replacements_d = disturbed.land_soil_replacements_d
 
@@ -428,9 +451,10 @@ class Treatments(NoDbBase):
             for topaz_id, treatment_dom in treatments_domlc_d.items():
                 self._modify_soil(landuse, soils, disturbed, topaz_id)
 
-    @staticmethod
     def _resolve_mofe_treatment_dom(
+        self,
         disturbed_instance: Disturbed,
+        landuse_instance: Landuse,
         treatment: str,
         disturbed_class: Optional[str],
     ) -> Optional[str]:
@@ -438,7 +462,7 @@ class Treatments(NoDbBase):
         if not isinstance(disturbed_class, str):
             return None
 
-        disturbed_key_lookup = disturbed_instance.get_disturbed_key_lookup()
+        disturbed_key_lookup = self._treatment_destination_lookup(disturbed_instance, landuse_instance)
         if 'prescribed_fire' in treatment:
             if 'forest' in disturbed_class:
                 return str(disturbed_key_lookup['forest_prescribed_fire'])
@@ -619,7 +643,7 @@ class Treatments(NoDbBase):
         if not landuse_instance.islocked():
             raise RuntimeError("Treatments.nodb is not locked!")
 
-        disturbed_key_lookup = disturbed_instance.get_disturbed_key_lookup()
+        disturbed_key_lookup = self._treatment_destination_lookup(disturbed_instance, landuse_instance)
 
         prescribed_dom = None
         if 'forest' in disturbed_class:
@@ -640,8 +664,10 @@ class Treatments(NoDbBase):
             landuse_instance.domlc_d[topaz_id] = prescribed_dom
             self.logger.info(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
 
-        if prescribed_dom is not None and prescribed_dom not in landuse_instance.managements:
-            man = get_management_summary(prescribed_dom, landuse_instance.mapping)
+        if prescribed_dom is not None and (
+            getattr(self, '_mode', None) == TreatmentsMode.UserDefinedMap or prescribed_dom not in landuse_instance.managements
+        ):
+            man = get_management_summary(prescribed_dom, self._treatment_management_mapping(landuse_instance))
             landuse_instance.managements[prescribed_dom] = man
 
         return prescribed_dom
@@ -660,7 +686,7 @@ class Treatments(NoDbBase):
         if not landuse_instance.islocked():
             raise RuntimeError("landuse.nodb is not locked!")
 
-        disturbed_key_lookup = disturbed_instance.get_disturbed_key_lookup()
+        disturbed_key_lookup = self._treatment_destination_lookup(disturbed_instance, landuse_instance)
         treatment_dom = disturbed_key_lookup[treatment]
 
         applies_to_forest = disturbed_class in {"forest", "deciduous forest", "mixed forest"}
@@ -670,8 +696,10 @@ class Treatments(NoDbBase):
             landuse_instance.domlc_d[topaz_id] = treatment_dom
             self.logger.info(f'  _apply_thinning: {topaz_id} -> {treatment_dom}\n')
 
-        if treatment_dom is not None and treatment_dom not in landuse_instance.managements:
-            man = get_management_summary(treatment_dom, landuse_instance.mapping)
+        if treatment_dom is not None and (
+            getattr(self, '_mode', None) == TreatmentsMode.UserDefinedMap or treatment_dom not in landuse_instance.managements
+        ):
+            man = get_management_summary(treatment_dom, self._treatment_management_mapping(landuse_instance))
             landuse_instance.managements[treatment_dom] = man
 
         return treatment_dom if applies_to_forest else None
@@ -805,7 +833,7 @@ class Treatments(NoDbBase):
             elif 'thinning' in dom:
                 disturbed_class = 'thinning'
             else:
-                man = get_management_summary(dom, landuse_instance.mapping)
+                man = get_management_summary(dom, self._treatment_management_mapping(landuse_instance))
                 disturbed_class = man.disturbed_class
 
         key = (texid, disturbed_class)

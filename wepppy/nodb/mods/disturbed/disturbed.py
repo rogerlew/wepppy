@@ -1617,8 +1617,9 @@ class Disturbed(NoDbBase):
         sbs.export_4class_map(self.sbs_4class_path)
         return SoilBurnSeverityMap(self.sbs_4class_path)
     
-    def get_disturbed_key_lookup(self) -> Dict[str, str]:
-        mapping_dict = self.landuse_instance.get_mapping_dict()
+    def get_disturbed_key_lookup(self, *, mapping_dict=None) -> Dict[str, str]:
+        if mapping_dict is None:
+            mapping_dict = self.landuse_instance.get_mapping_dict()
         d = {}
         for key in mapping_dict:
             disturbed_class = mapping_dict[key]['DisturbedClass'].replace(' ', '_')
@@ -1825,7 +1826,8 @@ class Disturbed(NoDbBase):
             'plant.data.xmxlai', 'plant.data.yld']
                 
                 
-        mapping = Landuse.getInstance(self.wd).mapping
+        landuse = Landuse.getInstance(self.wd)
+        mapping = landuse._resolve_effective_mapping_reference(landuse.source_mapping)
         d = load_map(mapping)
 
         man_d = {}

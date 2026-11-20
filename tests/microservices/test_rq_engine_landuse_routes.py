@@ -259,7 +259,7 @@ def test_build_landuse_rejects_invalid_custom_mapping(monkeypatch: pytest.Monkey
         def parse_inputs(self, payload) -> None:
             return None
 
-        def get_mapping_dict(self):
+        def get_mapping_dict(self, **_source):
             raise landuse_routes.LanduseCustomMappingError(
                 "Configured landuse custom mapping file is missing: landuse/landuse_user_defined_mapping.json",
                 code="LANDUSE_CUSTOM_MAP_MISSING",
@@ -387,7 +387,7 @@ def test_build_landuse_parses_multipart_mofe_and_disturbance_fields(monkeypatch:
         def __init__(self) -> None:
             self.payloads: list[object] = []
 
-        def validate_mofe_buffer_selection(self, value):
+        def validate_mofe_buffer_selection(self, value, **_source):
             assert value == 42
 
         def parse_inputs(self, payload) -> None:
@@ -438,7 +438,7 @@ def test_build_landuse_maps_nodb_lock_conflict_from_parse_inputs(
         lc_dir = "/tmp"
         lc_fn = "/tmp/lc.tif"
 
-        def validate_mofe_buffer_selection(self, value):
+        def validate_mofe_buffer_selection(self, value, **_source):
             assert value == 42
 
         def parse_inputs(self, payload) -> None:
@@ -1989,6 +1989,10 @@ class _DummyLandusePhase3:
     @contextmanager
     def locked(self):
         yield
+
+    @property
+    def source_mapping(self):
+        return self.mapping
 
     def _resolve_effective_mapping_reference(self, mapping_reference: str | None = None):
         return mapping_reference

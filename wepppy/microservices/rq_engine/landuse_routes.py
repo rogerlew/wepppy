@@ -504,12 +504,12 @@ def _normalize_landuse_mapping_edits(payload: dict[str, Any]) -> list[dict[str, 
     return [collapsed[dom] for dom in order]
 
 
-def _validate_effective_mapping(landuse: Landuse) -> JSONResponse | None:
+def _validate_effective_mapping(landuse: Landuse, **source) -> JSONResponse | None:
     getter = getattr(landuse, "get_mapping_dict", None)
     if not callable(getter):
         return None
     try:
-        getter()
+        getter(**source)
     except LanduseCustomMappingError as exc:
         return error_response(
             str(exc),
@@ -665,7 +665,13 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
 
             if single_input_uploads_enabled(landuse) and "mofe_buffer_selection" in payload:
                 return error_response("Buffer OFEs are disabled for this project.", status_code=400, code="unsupported_capability")
-            mapping_error = _validate_effective_mapping(landuse)
+            requested_source = {}
+            if requested_mode != landuse.mode or requested_runtime_db is not None or mapping is not None:
+                requested_source = {
+                    "mode": requested_mode, "dataset": requested_runtime_db,
+                    "upload_mapping": mapping if requested_mode == LanduseMode.UserDefined else None,
+                }
+            mapping_error = _validate_effective_mapping(landuse, **requested_source)
             if mapping_error is not None:
                 return mapping_error
             if requested_mode == LanduseMode.UserDefined and mapping is None:
@@ -676,7 +682,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
             if raw_buffer not in (None, ""):
                 try:
                     buffer_code = int(raw_buffer)
-                    landuse.validate_mofe_buffer_selection(buffer_code)
+                    landuse.validate_mofe_buffer_selection(buffer_code, **requested_source)
                 except (ValueError, TypeError, OverflowError, KeyError, InvalidManagementKey) as exc:
                     raise RequestPayloadError("mofe_buffer_selection") from exc
 
@@ -717,11 +723,6 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
 
             with input_submission(landuse, "landuse", runid):
                 await accept_input(landuse, "landuse", upload_form, requested_mode)
-                try:
-                    landuse.parse_inputs(payload)
-                except ValueError as exc:
-                    return error_response(str(exc), status_code=400)
-
                 if "disturbed" in landuse.mods:
                     disturbed = Disturbed.getInstance(wd)
                     burn_shrubs_value = payload.get("checkbox_burn_shrubs")
@@ -826,7 +827,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                     except RuntimeError as exc:
                         return error_response(str(exc), status_code=400)
 
-                mapping_error = _validate_effective_mapping(landuse)
+                mapping_error = _validate_effective_mapping(landuse, **requested_source)
                 if mapping_error is not None:
                     return mapping_error
 
@@ -840,6 +841,11 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                         nlcd_db=requested_runtime_db,
                         mode=requested_mode,
                     )
+
+                try:
+                    landuse.parse_inputs(payload)
+                except ValueError as exc:
+                    return error_response(str(exc), status_code=400)
 
                 if landuse.run_group == "batch":
                     return JSONResponse({"message": "Set landuse inputs for batch processing"})

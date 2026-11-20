@@ -2,7 +2,7 @@
 
 ## CORINE provider mapping
 
-Implementation conformance is pending. A shipped CORINE gridded source uses
+A shipped CORINE gridded source uses
 the European CORINE management table (`eu-disturbed`) for each supported year
 and existing runtime spelling. Provider identity comes from the land-cover
 catalog, without guessing from a class number or the run's locale. Class 25
@@ -27,6 +27,16 @@ A successfully rebuilt CORINE run produces management summaries and
 Parquet from its actual raster assignments. Existing non-CORINE builds,
 edited custom mapping tables, and legacy projects retain their modes
 and map semantics.
+
+Validate a requested build's MOFE buffer against its requested dataset and
+mode before setting the selection. MOFE base managements must be resolved
+before burn classification and deck synthesis. A same-number class from an
+earlier source cannot supply its management. Preserve compatible cover
+overrides when the management template and disturbance class match.
+An uploaded treatment raster uses its explicit mapping to interpret treatment
+codes and resolve applied treatment templates. Keep the provider map for the
+unmodified base classes. Treatment selection on the active land cover resolves
+its destination and template through the same effective provider map.
 
 ## Separate source catalogs
 

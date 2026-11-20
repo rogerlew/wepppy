@@ -420,7 +420,7 @@ def _candidate_management_index(
 
 
 def _build_landuse_map_snapshot_payload(landuse: Landuse, wd: str) -> dict[str, Any]:
-    mapping_reference = landuse._resolve_effective_mapping_reference(landuse.mapping)  # type: ignore[attr-defined]
+    mapping_reference = landuse._resolve_effective_mapping_reference(landuse.source_mapping)  # type: ignore[attr-defined]
     mapping_dict = load_map(mapping_reference)
     catalog_dir = _landuse_user_defined_dir(wd)
     catalog_items = _catalog_items_with_file_fingerprints(wd)
