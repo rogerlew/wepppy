@@ -38,7 +38,7 @@
     },
     "wepp_runner/wepp_runner.py": {
       "recorded": "d87f0615b6ba9201ce70ae17256924555d391bd7e6c294e8dc0500eb1346d718",
-      "current": "7cf08e0a78ed3d2099c0da50c8f27817dcf73bb1c3fc5bc7a05f72d9ac351b38"
+      "current": "bbf1ddc6ac3e3c0cd2326208d324ff21c46a2df8a4b1c88497f3be38e49aa441"
     },
     "wepppy/nodb/mods/roads/_constants.py": {
       "recorded": null,
@@ -134,7 +134,7 @@
     },
     "wepppy/wepp/management/managements.py": {
       "recorded": null,
-      "current": "7b2d0624eba784313052721a4e50b2dc27104fcdcdee5fb4f9fe9960f0ff1f9d"
+      "current": "f76b05cec4acab2de131b8404bdc869f85cfd9d19945d224b5a248a46fb3e459"
     },
     "wepppy/wepp/soils/horizon_boundary.py": {
       "recorded": null,
@@ -459,6 +459,35 @@
         }
       },
       "evidence": "docs/work-packages/20261118_soil_input_capacity_23/artifacts/20261119_qa_review.md"
+    },
+    {
+      "date": "2026-11-20",
+      "scope": "European run recovery. All 516 native fixed-profile Roads cases passed on 93008d56f. Historic full-project routing evidence retains its stale status and original report and execution provenance.",
+      "changes": {
+        "wepp_runner/wepp_runner.py": {
+          "previous_reviewed": {
+            "recorded": "d87f0615b6ba9201ce70ae17256924555d391bd7e6c294e8dc0500eb1346d718",
+            "current": "7cf08e0a78ed3d2099c0da50c8f27817dcf73bb1c3fc5bc7a05f72d9ac351b38"
+          },
+          "current_review": {
+            "recorded": "d87f0615b6ba9201ce70ae17256924555d391bd7e6c294e8dc0500eb1346d718",
+            "current": "bbf1ddc6ac3e3c0cd2326208d324ff21c46a2df8a4b1c88497f3be38e49aa441"
+          },
+          "scope": "Only the legacy single-storm watershed deck builders add a blank record. Roads calls the unchanged hillslope deck builder."
+        },
+        "wepppy/wepp/management/managements.py": {
+          "previous_reviewed": {
+            "recorded": null,
+            "current": "7b2d0624eba784313052721a4e50b2dc27104fcdcdee5fb4f9fe9960f0ff1f9d"
+          },
+          "current_review": {
+            "recorded": null,
+            "current": "f76b05cec4acab2de131b8404bdc869f85cfd9d19945d224b5a248a46fb3e459"
+          },
+          "scope": "Accept the existing generic thinning class, resolve the exact Disturbed ESDAC selector, and add selector metadata. The Roads profile matrix uses fixed legacy management templates. Management parsing is unchanged."
+        }
+      },
+      "evidence": "docs/work-packages/20261120_eu_run_recovery/artifacts/20261120_esdac_management_reconciliation_checkpoint.md"
     }
   ]
 }

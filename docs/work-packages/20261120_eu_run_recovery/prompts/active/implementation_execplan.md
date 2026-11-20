@@ -46,11 +46,22 @@ For `studded-stranglehold`, a failed gridded CORINE build persisted dominant lan
 
 Operator clarification. Generated E-OBS rebuilds have no idempotency or prior-climate preservation requirement. If a failed rebuild leaves no usable climate, the user must successfully build or upload climate before a new WEPP run.
 
+The private forest Compose overlay selects the rebuilt E-OBS provider for
+the replay. The shared Compose file retains the default provider configuration.
+[Forest provider override](../../artifacts/20261120_eobs_sampling_validation.md#forest-provider-override)
+
 ## Outcomes & Retrospective
 
 The soil slice is implemented and locally validated, including the preset warning and 7778 controls. The E-OBS sampler and future preprocessing correction are implemented, with actual local HTTP and CLIGEN artifact readback. The private regional raster rebuild is complete. Forest candidate `af514e39c` completed the original browser and RQ workflow and the companion E-OBS plus gridded soil run. The second-incident control verified the normal retry page, gridded CORINE recovery and correct climate status after a newer upload. The staged upload replay also verified early rejection on forest. The original second-incident upload remains unavailable. The reconciled ESDAC catalog passed the signed-in forest upload, the native soil build, and WEPP hillslope and watershed output. [Catalog replay](../../artifacts/20261120_esdac_management_reconciliation_checkpoint.md) [Deployment and native readback](../../artifacts/20261120_forest_deployment_replay.md)
 
 ## Milestones
+
+The full regression replay on `93008d56f` verified the browse-auth fix and
+all 516 native Roads profile cases. It identified three outdated regression
+fixtures and one Roads publication source-drift assertion. The fixtures
+were repaired in `f32a226dc` and passed the 168-test focused gate. The
+Roads source review preserves the published routing evidence as historical.
+[Regression evidence](../../artifacts/20261120_esdac_management_reconciliation_checkpoint.md)
 
 ### 1. Capture the baseline and ratify contracts
 

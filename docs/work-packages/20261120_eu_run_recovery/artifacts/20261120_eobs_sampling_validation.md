@@ -38,3 +38,13 @@ An independent NetCDF masked read reproduced the January and August mean and
 standard deviation at four coastal, inland, offshore and mixed-record
 controls for all four measures. At the mixed-record rainfall control, January
 had 83 valid daily observations and August had zero.
+
+## Forest provider override
+
+The forest replay's private Compose overlay supplies
+`EOBS_METQUERY_URL=http://metquery:8004/` to `weppcloud`, `rq-engine`,
+`rq-worker`, `rq-worker-batch`, and `rq-worker-fork-archive`. It also mounts
+the rebuilt E-OBS tree read-only at `/geodata/eu/e-obs` in metquery.
+Select the retained `forest-eobs-verified.compose.yml` overlay with
+`WCTL_COMPOSE_FILE_EXTRAS` when reproducing the forest validation.
+The shared Compose configuration uses the application's default provider.

@@ -30,6 +30,11 @@ The candidate is deployed on forest. The [deployment and replay receipt](artifac
 
 The package retains the batch event output limitation. The original second-incident raster is unavailable. The [reconciled catalog replay](artifacts/20261120_esdac_management_reconciliation_checkpoint.md) used a synthetic ESDAC-coded upload on the original watershed geometry.
 
+The full regression run on `93008d56f` completed with 14,829 passes and
+four failures. The three fixture repairs are committed in `f32a226dc` and
+passed 168 focused tests. The fourth failure prompted a review of the two
+shared Roads source changes. [Regression and publication evidence](artifacts/20261120_esdac_management_reconciliation_checkpoint.md)
+
 ## Notes – 2026-11-20 UTC
 
 Preserved both incident baselines on forest and retained [raster readback and fixture evidence](artifacts/20261120_incident_readback.md). The E-OBS failure is reproducible as coastal NoData contamination in cubic interpolation. A real CLIGEN comparison generated 30 years with the alternate sampling probe. Paired ESDAC pixel sampling found six potential recoveries and five potential regressions, with 31 original rejects still missing subsoil fields. Added the full catalog inventory and native template parse results.

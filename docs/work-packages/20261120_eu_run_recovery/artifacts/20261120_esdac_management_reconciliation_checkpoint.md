@@ -95,3 +95,22 @@ after 839 passes at the same empty `aria2c.spec` browse-auth fixture
 failure as the preceding recovery revision. The broad gate receipt is
 retained under `.wctl-test-runs/c2638ea8c23d448ebc30ec4d065ac3fe` in the
 land-use implementation checkout.
+
+## Full regression follow-up
+
+The full standard suite ran to completion on `93008d56f` with 14,829
+passes, four failures, 516 skips and 99 opt-in tests deselected. Browse
+auth and all 516 native Roads profile cases passed. The Disturbed lookup
+and two soil fixture failures were corrected in `f32a226dc`, which passed
+168 focused tests. The full and focused gate receipts are retained under
+`.wctl-test-runs/afe7ff008640470ba3da8c7ef1475373` and
+`.wctl-test-runs/a002b7d4c27a479ea8f3500c1a89c475`, respectively.
+
+The Roads publication check detected two shared source changes. The native
+Roads profile builder uses the unchanged hillslope deck generator and
+fixed legacy management templates. The changes affect two single-storm
+watershed deck builders, the named Disturbed ESDAC mapping and recognition
+of the existing generic thinning class. The source review records the
+exact two digests. The historical full-project routing results remain
+explicitly stale, with the published report and execution provenance
+preserved.
