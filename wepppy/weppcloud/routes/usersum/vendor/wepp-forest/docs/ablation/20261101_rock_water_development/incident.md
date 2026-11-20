@@ -120,8 +120,10 @@ user-authorized program after independent actual science/implementation review.
 [Snow cohort admission](../../../../wepppy/docs/work-packages/20261101_rock_water_development/artifacts/R05-snow-cap-cohort-science-admission.json)
 binds all 21 histories and six response cases; positive runoff/sediment and
 retained ET-policy consequences remain explicit.
-[B04 actual disposition](../../../../wepppy/docs/work-packages/20261101_rock_water_development/artifacts/B04-restoration-science-actual-v1.md)
-admits the bounded existing-ice donor cap, not universal thermal validity.
+The B04 review admitted the bounded existing-ice donor cap. The earlier link
+pointed to a detailed review retained privately. WEPPpy ADR-0131 summarizes
+the public evidence under **Executed isolated evidence** and records the
+limits of that admission.
 
 Canonical integration changes FRZNG, MELT and SNOWD with permanent fixtures and
 source specifications. All 98 targeted actual-routine checks pass with zero
