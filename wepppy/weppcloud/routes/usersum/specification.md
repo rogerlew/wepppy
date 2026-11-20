@@ -289,7 +289,8 @@ the Usersum Markdown corpus and reports existing broken links as warnings.
 
 For vendored sources, relative links resolve inside the vendor snapshot.
 A root-relative Markdown link to a file in that snapshot also resolves
-inside the snapshot when it exists there. Existing explicit links to WEPPpy
+inside the snapshot when it exists there. A link prefixed by the configured
+source checkout path resolves against that same source tree. Existing explicit links to WEPPpy
 documents retain their normal resolution when there is no vendor match.
 Canonical manifest routing takes precedence for registered targets. Linked
 copies outside the manifest are reachable by the source route under the
@@ -301,7 +302,8 @@ documents use the original canonical route and its role. The build does
 not create a duplicate for those links. Source and raw requests for a
 copied path may never bypass the original document's role.
 
-Implementation conformance for these additions is pending.
+
+Implementation conformance is pending.
 
 ## Layout and UI Contract
 
@@ -525,7 +527,12 @@ Scheduler runtime wiring:
 
 Resolve each configured source ref locally to one Git commit and read its
 Git tree and blobs. Use the regular
-committed Markdown files selected by its include globs as seeds. Follow
+committed Markdown files selected by its include globs as seeds. A vendor may
+pin an archive commit and explicitly name historical seeds that must retain
+their published URLs. Use the active commit for paths it contains and the
+archive commit for historical paths absent from the active commit. This gives
+each output path one authoritative source. Follow links from archived seeds
+under the same rules. Follow
 local Markdown links recursively in that commit and copy the reachable
 files using their source-relative paths. Use the configured excludes at
 every step. Include reference-style links, handle cycles once per file,
@@ -535,12 +542,14 @@ uncommitted file, a Git symlink, a submodule, or a path outside the source tree.
 
 Report a warning for each unresolved local Markdown edge with the vendor,
 referring file, original destination and reason. Continue with other
-reachable files. An unavailable configured ref is a build error when
+reachable files. An unavailable configured active or archive ref is a build error when
 the source repository is present. The existing skip behavior for an
 unavailable checkout during index builds still applies. Discover the
 graph before writing or cleaning that vendor directory. Vendor destinations
 must be disjoint children of the Usersum vendor directory. Existing symlinks
-in destination paths are errors before writes or cleanup. Default rebuilds
+in destination paths are errors before writes or cleanup. Reject noncanonical
+Git tree paths. Temporary snapshot directories are unavailable through
+Usersum, and same-repository original roles apply across every route. Default rebuilds
 remove stale generated copies. The explicit `sync-vendors --no-clean`
 operator option retains existing copies. Dry runs report the same graph as
 write runs.
@@ -548,7 +557,7 @@ write runs.
 Reachable committed files are eligible for publication because the
 configured sources are open source. Discovery alone adds no navigation or
 search entry. Existing manifest roles continue to govern registered pages.
-Implementation conformance is pending.
+
 
 Vendor docs are generated/synced content.
 
