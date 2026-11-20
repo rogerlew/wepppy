@@ -14,3 +14,22 @@ The isolated focused suite passed 61 tests, including the normal configured HTTP
 The broad run passed 369 tests and skipped 28 before stopping at the same culvert lock conflict reproduced on the unchanged baseline. The receipt is `.wctl-test-runs/29141fc7a6e444e987eb679d86977f21/receipt.json`.
 
 The candidate Compose configuration resolves the opt-in address into the web, default worker, and batch worker environments. The private readback used a loopback service. A full forest deployment and browser/RQ replay must still establish the running worker and provider identities. Keep the replay pinned to the original station. The existing global latitude-based heuristic returned duplicate U.S. candidates at the Es Fangar centroid in the probe. That result verifies that the new provider works in ranking and exposes a separate station-selection issue. Previously installed mixed-observation monthly rasters still need a validated regional rebuild to recover plausible-looking contaminated variables.
+
+## Private regional rebuild on forest
+
+Rebuilt 96 monthly mean and population-standard-deviation GeoTIFFs and eight
+relocatable VRTs from the four original E-OBS v19.0e series. Each has 25,202
+days from 1950-01-01. A bounded streaming read used NetCDF fill values, tracked
+per-cell valid counts, applied each variable's stored scale, preserved the
+original affine coordinates and wrote EPSG 4326 explicitly. Confirmed all
+written pixels against the calculated masks and statistics and checked that the
+new VRTs use relative source filenames. The published raster tree was left
+alone. The private rebuilt tree and scripts are retained under
+`/var/tmp/wepppy-eu-run-recovery-baseline/`.
+
+The candidate HTTP provider and regular CLIGEN client again generated all
+10,957 valid daily rows for the original station. The offshore control remained
+uncovered. The previous mixed-record rainfall control passes January and fails
+in August where the rebuilding and sampling still cannot supply coverage.
+The resumed fixture used the original pinned station. The private data are
+ready for full forest deployment verification.

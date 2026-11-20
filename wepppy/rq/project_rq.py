@@ -48,6 +48,7 @@ from wepppy.config.redis_settings import (
     redis_connection_kwargs,
     redis_host,
 )
+from wepppy.rq.climate_upload_attempt import ClimateUploadAttempt, validate_cli_basename
 from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.job_dependencies import release_deferred_job_if_ready
 from wepppy.rq.submission_recovery import RqEnqueueVerificationError
@@ -99,7 +100,7 @@ from wepppy.nodb.mods.rusle import Rusle
 from wepppy.nodb.mods.treatments import Treatments
 from wepppy.nodb.project_config_update import project_config_lifecycle_guard
 
-from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.redis_prep import RedisPrep, RedisPrepSnapshotError, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.wepp.interchange import run_totalwatsed3
 from wepppy.io_wait import wait_for_path, wait_for_paths
@@ -2477,7 +2478,7 @@ def build_climate_rq(runid: str) -> None:
 
 
 @with_exception_logging
-def upload_cli_rq(runid: str, cli_filename: str) -> None:
+def upload_cli_rq(runid: str, cli_filename: str, *, staged: bool = False) -> None:
     """Apply a user-uploaded CLI file to the run climate state."""
     try:
         job = get_current_job()
@@ -2486,8 +2487,51 @@ def upload_cli_rq(runid: str, cli_filename: str) -> None:
         status_channel = f'{runid}:climate'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         def _set_user_defined_cli() -> None:
+            validate_cli_basename(cli_filename)
+            prep = RedisPrep.getInstance(wd)
             clear_nodb_file_cache(runid, pup_relpath="climate.nodb")
-            Climate.getInstance(wd).set_user_defined_cli(cli_filename)
+            climate = Climate.getInstance(wd)
+            climate_dir = Path(climate.cli_dir)
+            if climate_dir.is_symlink() or not climate_dir.resolve().is_relative_to(Path(wd).resolve()):
+                raise ValueError("Expected a contained Climate directory")
+            if not staged:
+                source = climate_dir / cli_filename
+                if source.is_symlink() or not source.is_file():
+                    raise ValueError("The uploaded climate is missing or invalid.")
+                climate.set_user_defined_cli(cli_filename)
+                prep.timestamp(TaskEnum.build_climate)
+                return
+
+            attempt = ClimateUploadAttempt(Path(wd), runid, job.id, cli_filename)
+            receipt = attempt.read_receipt()
+            if receipt["state"] == "applied":
+                return
+            if (prep.get_rq_job_id("upload_cli_rq") != job.id
+                    or prep.get_rq_job_id("build_climate_rq") != receipt["build_job_id"]):
+                raise ValueError("A newer Climate operation superseded this upload.")
+            digest = receipt["sha256"]
+            build_job_id = receipt["build_job_id"]
+            completed = False
+            try:
+                with attempt.snapshot(digest) as source:
+                    climate.set_user_defined_cli(cli_filename, staged_path=source)
+                    completed = True
+            finally:
+                # Cleanup and telemetry follow the applied artifact.
+                try:
+                    attempt.record("applied" if completed else "failed", digest, build_job_id)
+                    if completed:
+                        attempt.remove_consumed_source(digest)
+                except (OSError, ValueError):
+                    logging.getLogger(__name__).warning(
+                        "Could not update climate upload evidence",
+                        extra={"runid": runid, "job_id": job.id},
+                        exc_info=True,
+                    )
+            try:
+                prep.timestamp(TaskEnum.build_climate)
+            except (OSError, redis.RedisError, RedisPrepSnapshotError):
+                logging.getLogger(__name__).warning("Could not timestamp applied climate upload", exc_info=True)
 
         _run_with_directory_root_lock(
             wd,
@@ -2495,11 +2539,11 @@ def upload_cli_rq(runid: str, cli_filename: str) -> None:
             _set_user_defined_cli,
             purpose="upload-cli-rq",
         )
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   climate CLIMATE_BUILD_TASK_COMPLETED')
-
-        prep = RedisPrep.getInstance(wd)
-        prep.timestamp(TaskEnum.build_climate)
+        try:
+            StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   climate CLIMATE_BUILD_TASK_COMPLETED')
+        except redis.RedisError:
+            logging.getLogger(__name__).warning("Could not publish climate upload completion", exc_info=True)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:941", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

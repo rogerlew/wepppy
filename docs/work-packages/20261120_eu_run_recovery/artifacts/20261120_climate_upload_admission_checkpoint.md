@@ -61,3 +61,25 @@ an indeterminate enqueue outcome. A failed admission cannot restore over a
 newer tracked reference. An admitted parse failure is still the latest job
 outcome. The existing applied artifacts stay intact on pre-admission conflict
 and on parse failure. The full replacement rollback remains an open obligation.
+
+## Candidate readback
+
+The private HTTP test used real RQ and Redis, the regular Climate worker, and
+the archived event and continuous CLIs under the same `ESFANGAR.cli` filename.
+An active-job conflict preserved the tracked identifier, submitted bytes and
+completed Climate timestamp. The worker applied the accepted event. A later
+malformed upload kept that event and its timestamp and retained its failed
+candidate. The continuous replacement generated a fresh 10,957-row
+`wepp_cli.parquet`; requeuing the older failed upload then left it intact.
+A ZIP round trip through the archive member filters and restore collector
+retained the failed input and its receipt. This was an isolated application
+probe, with authorization and run discovery supplied by the fixture.
+
+Review added a pinned checksummed file snapshot, directory-descriptor
+containment, an exact worker receipt fence across both operations, and specific
+handling for a timestamp or notification failure after successful application.
+The focused suite covers an absent active directory, replacement of staged
+bytes during application, the legacy queue signature and post-success cleanup.
+Multiple still uses the existing PRISM revision path. The isolated archived
+replay used Single spatial mode. The complete forest replay and
+whole-generation publication recovery remain open.

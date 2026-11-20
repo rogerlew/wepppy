@@ -135,6 +135,8 @@ class ClimateUserDefinedStationMetaService:
         years: Optional[int],
         monthlies_override: Optional[Dict[str, List[float]]],
     ) -> None:
+        if par_path.is_symlink():
+            raise ValueError("The uploaded climate station parameter file is a symlink.")
         if par_path.exists():
             return
 

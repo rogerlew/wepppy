@@ -55,3 +55,13 @@ The [climate status checkpoint](artifacts/20261120_climate_status_checkpoint.md)
 The [single-storm execution checkpoint](artifacts/20261120_single_storm_execution_checkpoint.md) is `3b5f6bb5b`. The legacy binary completed 18 hillslopes and the companion watershed using the original storm CLI and regenerated deck. Individual storms now receive an advisory, while the separately diagnosed batch postprocessing limitation remains open.
 
 The [uploaded climate checkpoint](artifacts/20261120_uploaded_climate_mode_checkpoint.md) is `a94869bbd`. A private copy of the archived continuous climate rendered without the storm warning and corrected saved mode 15 to mode 12 during WEPP preparation. Upload admission and publication isolation remain open.
+
+The [climate upload admission checkpoint](artifacts/20261120_climate_upload_admission_checkpoint.md)
+is `38ea8f51b`. Private HTTP and RQ verification used both archived CLIs and
+preserved the applied climate across a rejected same-name submission and an
+admitted malformed upload. Whole-generation publication recovery remains open.
+
+The E-OBS v19.0e data rebuild completed off the shared dataset. The private
+staging tree contains 96 WGS84 rasters and eight relocatable VRTs. Candidate
+metquery and CLIGEN produced 10,957 valid rows from the rebuilt source at Es
+Fangar. Forest has yet to use these data through the full deployed stack.

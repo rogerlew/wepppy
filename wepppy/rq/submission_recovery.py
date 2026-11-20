@@ -428,10 +428,12 @@ def enqueue_tracked_rq_job(
             if committed is not None:
                 return committed
             if before_enqueue is not None:
-                if prior_job_id:
-                    prep.set_rq_job_id(job_key, prior_job_id)
-                else:
-                    prep.update_metadata(remove=(f"rq:{job_key}",))
+                lease.checkpoint()
+                if prep.get_rq_job_id(job_key) == replacement_job_id:
+                    if prior_job_id:
+                        prep.set_rq_job_id(job_key, prior_job_id)
+                    else:
+                        prep.update_metadata(remove=(f"rq:{job_key}",))
             raise
 
 

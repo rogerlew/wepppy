@@ -64,6 +64,7 @@ from wepppy.all_your_base.geo import read_raster
 from datetime import datetime, date
 
 from subprocess import Popen, PIPE
+from tempfile import TemporaryDirectory
 
 from concurrent.futures import (
     ThreadPoolExecutor, wait, FIRST_COMPLETED, ProcessPoolExecutor
@@ -1550,27 +1551,34 @@ class Climate(NoDbBase):
     def _build_climate_mod(self, mod_function: Any, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         run_mod_build(self, mod_function, verbose=verbose, attrs=attrs)
 
-    def set_user_defined_cli(self, cli_fn: str, verbose: bool = False) -> None:
+    def set_user_defined_cli(
+        self, cli_fn: str, verbose: bool = False, *, staged_path: Optional[Path] = None
+    ) -> None:
         with self.locked():
             self.logger.info('Applying uploaded climate CLI')
-            source_path = _join(self.cli_dir, cli_fn)
-            cli = ClimateFile(source_path)
-            upload_mode = _classify_uploaded_cli(cli)
+            source_path = staged_path if staged_path is not None else Path(self.cli_dir) / cli_fn
+            try:
+                cli = ClimateFile(str(source_path))
+                upload_mode = _classify_uploaded_cli(cli)
+            except (AssertionError, IndexError, KeyError, OSError, TypeError, ValueError) as exc:
+                raise ValueError('Upload a valid CLIGEN file with at least one daily or event record.') from exc
             monthlies = cli.calc_monthlies()
+            Path(self.cli_dir).mkdir(exist_ok=True)
             station_meta = _CLIMATE_USER_DEFINED_STATION_META_SERVICE.build_station_meta_from_cli(
                 cli=cli,
                 cli_filename=cli_fn,
                 cli_dir=self.cli_dir,
                 monthlies=monthlies,
             )
-            active_filename = _split(source_path)[1]
-            active_path = _join(self.cli_dir, active_filename)
-            try:
-                copyfile(source_path, active_path)
-            except shutil.SameFileError:
-                pass
+            active_filename = source_path.name
+            active_path = Path(self.cli_dir) / active_filename
+            if source_path != active_path:
+                with TemporaryDirectory(prefix=".cli-upload-", dir=self.cli_dir) as staged_dir:
+                    candidate = Path(staged_dir) / active_filename
+                    copyfile(source_path, candidate)
+                    os.replace(candidate, active_path)
 
-            self._orig_cli_fn = source_path
+            self._orig_cli_fn = str(active_path)
             self.cli_fn = active_filename
             self._climate_mode = upload_mode
             self._input_years = cli.input_years
@@ -1589,11 +1597,12 @@ class Climate(NoDbBase):
         # and will not regenerate it if an older copy exists.
         _CLIMATE_ARTIFACT_EXPORT_SERVICE.export_post_build_artifacts(self)
 
-        try:
-            prep = RedisPrep.getInstance(self.wd)
-            prep.timestamp(TaskEnum.build_climate)
-        except FileNotFoundError:
-            pass
+        if staged_path is None:
+            try:
+                prep = RedisPrep.getInstance(self.wd)
+                prep.timestamp(TaskEnum.build_climate)
+            except FileNotFoundError:
+                pass
 
     def _build_climate_vanilla(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         with self.locked():

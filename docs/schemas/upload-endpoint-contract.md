@@ -220,9 +220,8 @@ the existing key is retained, and its value describes this admission behavior.
 
 ### Climate upload admission isolation
 
-Implementation conformance is pending. The upload endpoint keeps the existing
-authorization, multipart field, extension, size limit, response and Climate
-job family. Each admitted upload gets a run-owned staging directory outside
+The upload endpoint keeps the existing authorization, multipart field,
+extension, size limit, response and Climate job family. Each admitted upload gets a run-owned staging directory outside
 the active Climate outputs. The HTTP request stages the candidate and records
 the run, RQ job identifier and CLI basename only after the tracked submission
 conflict check. It may not change the active climate files, Climate NoDb
@@ -233,13 +232,15 @@ applied file.
 New jobs receive the exact server-generated attempt identifier and the sanitized
 CLI basename. The worker verifies their binding to the owning run and job and
 requires a regular input under the contained, nonsymlink attempt directory.
+Reject a retry once a later Climate job has superseded its receipt.
+An already applied upload can be retried without republishing its bytes.
 The existing two-argument worker form remains valid for already-enqueued jobs.
 Workers capable of both forms must serve the queue before the new route admits
-jobs. The worker validates and classifies the staged input before replacing an
-active directory entry. Preserve the active basename and path in Climate
-metadata, and retain Single and Multiple spatial modes. The worker checks the active Climate directory and the legacy source are
-contained in the run and replaces the destination without following an
-existing symlink.
+jobs. The worker validates and classifies a private snapshot matching the
+admitted checksum. It publishes those exact bytes. Preserve the active basename
+and path in Climate metadata and retain Single and Multiple spatial modes. The
+worker verifies the active Climate directory and legacy source stay within the
+run and replaces the destination without following an existing symlink.
 
 Expose the attempt and its status under `climate_artifacts/climate_upload/attempts/`
 through ordinary authorized run browsing and project archive/restore.
@@ -249,8 +250,8 @@ retains inspectable evidence for that attempt. Cleanup errors after a successful
 application are secondary to its result. A proven enqueue follows the existing
 tracked submission recovery. A conclusively absent enqueue uses the existing
 tracked receipt restoration where available. If preallocation, lease
-verification or enqueue fails with an uncertain outcome, leave the candidate and receipt
-available and never overwrite a potentially newer tracked job reference. The
+verification or enqueue fails with an uncertain outcome, leave the candidate
+and receipt available and never overwrite a potentially newer tracked job reference. The
 Climate panel's existing verified-job rule handles unconfirmed status.
 Rollback after an upload passes file validation and generated-build retention
 remain separate publication obligations.
