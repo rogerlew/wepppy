@@ -191,9 +191,8 @@ The exact query admission conflict `AuthError(409, job_active)` also omits the
 query credential and preserves an independently authorized HTML response.
 Query APIs continue to enforce the fork guard for all credentials and retain
 their conflict response. Other HTTP conflicts and authorization backend failures
-retain their existing handling. Eligible run-page result controls may use the
-same catalog handshake and wait mode as GL under the same authorization, origin,
-and lifecycle controls.
+retain their existing handling. The project's query-backed map results use
+the existing GL Dashboard entry and its existing lifecycle handshake.
 
 ## Explicit activation and browser request origin
 
