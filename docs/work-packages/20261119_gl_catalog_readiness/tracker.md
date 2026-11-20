@@ -17,3 +17,14 @@
 ## Handoff
 
 The active plan is [implementation_execplan.md](prompts/active/implementation_execplan.md). The handshake and scoped tests passed locally, including a disposable NFS browser replay. The production rollout and affected-run verification are pending.
+
+## Broad validation
+
+The full-suite attempt passed 912 tests before the Browse native CSV fixture
+reported a missing converter. A converter with matching source provenance was
+borrowed from the existing local test image. The continuation passed the
+Browse native CSV fixture and the API groups. It was stopped during the
+unrelated Disturbed treatment-soil matrix after 2,374 passes and 124 skips.
+The two runs overlap. This is partial broad coverage, alongside the completed
+scoped validation. Local WCTL receipts are
+`63eb1afe0e84406d9ce00d546cd2d04b` and `c6f8a69002a842dea6bca33493ab8d2c`.

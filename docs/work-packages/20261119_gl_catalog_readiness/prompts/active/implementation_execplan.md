@@ -49,3 +49,11 @@ Run commands from the task worktree using the paths and fixture requirements in 
 ## Idempotence and Recovery
 
 Repeated prepares join existing work. Polling reads state. A late receipt survives an earlier job, and Retry rechecks the current scope. Legacy synchronous APIs remain available through their existing contract. Keep authored runtime changes independently revertible from producer and worker fleet changes. Rerun acceptance with fresh disposable fixtures. Production runs are outside replay scope.
+
+## Broad validation receipt
+
+The scoped gates completed. The full-suite attempt stopped on a missing native
+CSV converter after 912 passes. The source-matched converter repaired that
+fixture, and the continuation passed 2,374 tests before being stopped during
+the Disturbed soil matrix. See the [tracker](../../tracker.md#broad-validation)
+for the two local receipts. Full-suite and fleet validation remain open.
