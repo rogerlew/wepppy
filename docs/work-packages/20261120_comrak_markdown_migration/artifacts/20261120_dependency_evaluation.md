@@ -41,5 +41,14 @@ normalizer to both outputs. This is compatibility evidence, not a live
 latency claim. Use direct rendering for paths that do not need the AST
 and test the actual application workflow before rollout.
 
+A lock audit flagged two high-severity `quick-xml` 0.38.4 DoS findings
+(RUSTSEC-2026-0194 and RUSTSEC-2026-0195). The route to that crate is
+Comrak's Syntect theme support through `plist`. The installed Python
+binding does not expose highlighter or theme loading, and the adapter
+does not construct Comrak plugins. The reviewed entry points do not
+supply attacker-controlled XML to the affected functionality. Reassess
+this disposition if the binding or exposed options change. Rust panics
+can terminate a worker because the wheel uses `panic=abort`.
+
 Candidate outcome is conditional on direct route validation and
 installation and provenance evidence for the platform wheel.

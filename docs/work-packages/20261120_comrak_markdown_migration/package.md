@@ -14,3 +14,6 @@ rendered responses, authorization, raw HTML, unsafe URLs and the image
 dependency. No deployment is included.
 
 See the [tracker](tracker.md) and [execution plan](prompts/active/implementation_execplan.md).
+
+Local implementation and validation are complete. The scoped Docker test
+image and recorded wheel provenance are the validation baseline.

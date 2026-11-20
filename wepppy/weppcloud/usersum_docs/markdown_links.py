@@ -1,39 +1,43 @@
 """Markdown link extraction and source-relative path resolution for Usersum."""
 
 from collections.abc import Collection, Mapping
+from dataclasses import dataclass
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 import posixpath
 from urllib.parse import unquote, urlsplit
 
-from cmarkgfm import github_flavored_markdown_to_html
+from wepppy.markdown_render import markdown_link_destinations, render_markdown
 
 from wepppy.weppcloud.usersum_anchors import add_heading_anchors
 
 from .docs_contracts import VendorSpec
 
 
-class _LinkParser(HTMLParser):
+@dataclass
+class ParsedMarkdownLinks:
+    links: list[str]
+    anchors: set[str]
+
+
+class _HeadingParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
-        self.links: list[str] = []
         self.anchors: set[str] = set()
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag == "a":
-            self.links.extend(value for key, value in attrs if key == "href" and value)
         if tag in {"h1", "h2", "h3", "h4", "h5", "h6"}:
             self.anchors.update(value for key, value in attrs if key == "id" and value)
 
 
-def parse_markdown_links(source: str, *, include_heading_ids: bool = False) -> _LinkParser:
-    rendered = github_flavored_markdown_to_html(source)
-    if include_heading_ids:
-        rendered = add_heading_anchors(rendered)
-    parser = _LinkParser()
-    parser.feed(rendered)
+def parse_markdown_links(source: str, *, include_heading_ids: bool = False) -> ParsedMarkdownLinks:
+    links = markdown_link_destinations(source)
+    if not include_heading_ids:
+        return ParsedMarkdownLinks(links, set())
+    parser = _HeadingParser()
+    parser.feed(add_heading_anchors(render_markdown(source)))
     parser.close()
-    return parser
+    return ParsedMarkdownLinks(links, parser.anchors)
 
 
 def markdown_link_path(href: str) -> str | None:

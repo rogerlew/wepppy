@@ -890,7 +890,7 @@ def test_adr_catalog_renders_every_repository_record(usersum_client):
         response = usersum_client.get('/usersum/adrs/' + path.name)
         assert response.status_code == 200, path.name
         with usersum_client.application.test_request_context():
-            expected = usersum_routes._rewrite_markdown_links(path, usersum_routes._add_heading_anchors(usersum_routes.markdown_to_html(path.read_text())))
+            expected = usersum_routes._render_document_html(path, path.read_text(encoding="utf-8"))
         assert expected in response.get_data(as_text=True), path.name
 
 

@@ -9,15 +9,18 @@ and headings, project README preview, and Browse documentation usable.
 ## Progress
 
 - [x] Inventory renderer use and inspect published Python sources and wheels.
-- [ ] Review and commit the durable contract.
-- [ ] Implement the adapter, AST link integration, and complete dependency cutover.
-- [ ] Follow the migrated routes and inspect rendered artifacts.
+- [x] Review and commit the durable contract at `4d9d7416b`.
+- [x] Implement the adapter, AST link integration, and complete dependency cutover.
+- [x] Follow the migrated routes and inspect rendered artifacts.
 
 ## Surprises & Discoveries
 
 The plain Python binding bundles the vulnerable Comrak 0.54 release.
 The extended binding bundles 0.59 and exposes editable links.
 The two Python packages use the same import name.
+Ordinary repeated renders exposed an AST retention issue in the extended
+binding. The adapter releases native parent references before callback
+execution and matches direct HTML output after doing so.
 
 ## Decision Log
 
@@ -36,4 +39,6 @@ candidate runtime.
 
 ## Outcomes & Retrospective
 
-Dependency discovery is complete. Implementation conformance is pending.
+The focused container run passed 363 tests. All 152 manual pages retain
+their published heading IDs and link sequence. A 1,000-render and
+inspection run showed stable memory after warm-up. The repository-wide run excluding slow-marked tests passed 14,033 tests.

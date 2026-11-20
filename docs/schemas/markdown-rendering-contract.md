@@ -1,7 +1,5 @@
 # WEPPpy Markdown rendering contract
 
-Implementation conformance is pending.
-
 The Usersum viewer and search snippets, Usersum vendor and link tools,
 project README preview and viewer, and Browse Markdown previews use one
 Python rendering adapter backed by Comrak. The runtime and Docs Quality
@@ -23,7 +21,9 @@ enable options or supply rendering callbacks. The adapter owns render options an
 or arbitrary AST mutations. It supports structured link inspection and
 a narrow destination callback on parsed link nodes. No callback or
 extension can return raw markup. Browse and project README use direct
-rendering without a Python AST round trip. Link URL rewrites run before
+rendering without a Python AST round trip. The adapter clears native
+parent references after parsing to release each document tree, including
+when a destination callback fails. Link URL rewrites run before
 Comrak applies its URL rendering policy. A rewrite changes the
 destination while retaining the parsed link label and title. Images
 and literal code retain their existing treatment.
@@ -38,3 +38,14 @@ Dependency evaluation must identify the native Comrak crate bundled in
 the wheel. The Rust crate and Python distribution have independent
 versions. Maintain one mandatory renderer so fixes and safe defaults
 apply consistently across entry points.
+
+For example, a trusted Python caller can enable alerts for one render.
+
+```python
+from wepppy.markdown_render import MarkdownExtension, render_markdown
+
+html = render_markdown(
+    "> [!NOTE]\n> Example",
+    extensions=(MarkdownExtension.ALERTS,),
+)
+```

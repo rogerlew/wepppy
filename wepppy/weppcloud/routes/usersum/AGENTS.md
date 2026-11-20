@@ -19,7 +19,7 @@
     - `wepppy/weppcloud/routes/usersum/vendor/`
 
 ## Link Resolution Contract (Required)
-- Usersum renders markdown via `cmarkgfm`, then rewrites markdown anchor `href` values for in-repo `.md` links.
+- Usersum uses the shared Comrak adapter to rewrite parsed in-repo Markdown links before rendering.
 - Canonical source-doc route:
   - `GET /usersum/src/<path:rel_path>`
 - Legacy compatibility route:

@@ -30,7 +30,7 @@ certifi==2026.10.18
 cdo==1.5.6
 cffi==2.0.0
 cftime==1.6.3
-cmarkgfm==0.8.0
+comrak-ext==0.2.8
 chardet==4.0.0
 charset-normalizer==3.4.0
 click==8.1.7
