@@ -1,0 +1,15 @@
+<aside class="wc-alert {{ 'wc-alert--warning' if fork_status.failed else 'wc-alert--info' }}" role="status">
+  <strong>{{ fork_status.message }}</strong>
+  {% if fork_status.detail or fork_status.simulation_finished %}
+  <p>{% if fork_status.simulation_finished %}The WEPP simulation finished. {% endif %}{{ fork_status.detail }}</p>
+  {% endif %}
+  {% if fork_status.show_project %}
+  <p>Query-backed results are unavailable while this fork is incomplete.</p>
+  {% endif %}
+  {% if fork_status.details_url or fork_status.console_url %}
+  <p>
+    {% if fork_status.details_url %}<a href="{{ fork_status.details_url }}">View fork details</a>{% endif %}
+    {% if fork_status.console_url %}<a href="{{ fork_status.console_url }}">Open fork console</a>{% endif %}
+  </p>
+  {% endif %}
+</aside>

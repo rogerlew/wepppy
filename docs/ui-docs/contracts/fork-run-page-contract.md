@@ -1,6 +1,6 @@
 # Fork destination project page
 
-Status: Accepted after independent review on 2026-11-20. Implementation conformance pending.
+Status: Accepted after independent review on 2026-11-20. Implementation verified locally.
 
 ## Project entry and recovery
 

@@ -186,7 +186,7 @@ Collection Admin/Root read policy can differ from private Batch query membership
 this distinction does not grant query authority. Log the resource/status without
 credential material. Backend unavailability remains an explicit failure.
 
-Pending implementation for [fork destination project entry](../ui-docs/contracts/fork-run-page-contract.md).
+For [fork destination project entry](../ui-docs/contracts/fork-run-page-contract.md).
 The exact query admission conflict `AuthError(409, job_active)` also omits the
 query credential and preserves an independently authorized HTML response.
 Query APIs continue to enforce the fork guard for all credentials and retain

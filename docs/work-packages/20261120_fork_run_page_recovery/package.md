@@ -1,6 +1,6 @@
 # Fork destination project page recovery
 
-Status: Contract accepted. Implementation pending.
+Status: Implemented and verified locally. Production verification pending.
 
 A fork that reached WEPP postprocessing returned a project-page HTTP 500
 because the after-request query credential hook propagated the existing fork
@@ -19,3 +19,5 @@ Independent security and correctness artifacts are required before closure.
 - [Contract checkpoint](artifacts/20261120_contract_decision.md)
 - [Tracker](tracker.md)
 - [Execution plan](prompts/active/implementation_execplan.md)
+- [Correctness review](artifacts/20261120_correctness_review.md)
+- [Security review](artifacts/20261120_security_review.md)

@@ -136,7 +136,7 @@ def _install_redis_stub():
             return self.store.get(key)
 
         def exists(self, key):
-            return int(key in self.store)
+            return int(key in self.store or key in self.hashes)
 
         def delete(self, key):
             self.store.pop(key, None)
@@ -154,6 +154,9 @@ def _install_redis_stub():
 
         def hgetall(self, name):
             return dict(self.hashes.get(name, {}))
+
+        def hmget(self, name, fields):
+            return [self.hget(name, field) for field in fields]
 
         def hdel(self, name, *keys):
             bucket = self.hashes.get(name, {})
@@ -181,13 +184,22 @@ def _install_redis_stub():
                     self.watching = False
                 def hgetall(self, key):
                     return client.hgetall(key)
+                def get(self, key):
+                    self.commands.append(('get', (key,), {}))
+                    return self
+                def exists(self, key):
+                    self.commands.append(('exists', (key,), {}))
+                    return self
+                def hmget(self, key, fields):
+                    self.commands.append(('hmget', (key, fields), {}))
+                    return self
                 def hset(self, *args, **kwargs):
                     self.commands.append(('hset', args, kwargs))
                     return self
                 def hdel(self, *args, **kwargs):
                     self.commands.append(('hdel', args, kwargs))
                     return self
-                def execute(self):
+                def execute(self, raise_on_error=True):
                     result = [getattr(client, method)(*args, **kwargs)
                               for method, args, kwargs in self.commands]
                     self.commands.clear()
