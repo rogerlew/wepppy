@@ -221,7 +221,13 @@ var Soil = (function () {
         };
 
         function resetStatus(taskMsg) {
+            var retained = infoElement && dom.qs("#soil_esdac_subsoil_defaults", formElement)
+                ? Array.from(infoElement.childNodes)
+                : null;
             soil.reset_panel_state(soil, { taskMessage: taskMsg });
+            if (retained) {
+                infoElement.replaceChildren(...retained);
+            }
         }
 
         function handleError(error) {
@@ -276,6 +282,9 @@ var Soil = (function () {
                         }
                     }
                     if (response && response.job_id) {
+                        if (infoElement && dom.qs("#soil_esdac_subsoil_defaults", formElement)) {
+                            infoElement.replaceChildren();
+                        }
                         soil.append_status_message(soil, "build_soils_rq job submitted: " + response.job_id);
                         soil.poll_completion_event = "SOILS_BUILD_TASK_COMPLETED";
                         soil.set_rq_job_id(soil, response.job_id);
@@ -368,6 +377,14 @@ var Soil = (function () {
 
         soil.showHideControls = function (mode) {
             var numericMode = parseInteger(mode, -1);
+            var subsoilDefaults = dom.qs("#soil_esdac_subsoil_defaults", formElement);
+            if (subsoilDefaults) {
+                subsoilDefaults.hidden = numericMode !== 0;
+                var disableSubsoil = numericMode !== 0 || subsoilDefaults.hasAttribute("data-readonly");
+                subsoilDefaults.querySelectorAll("input").forEach(function (input) {
+                    input.disabled = disableSubsoil;
+                });
+            }
 
             if (numericMode === -1) {
                 modePanels.forEach(function (panel) {

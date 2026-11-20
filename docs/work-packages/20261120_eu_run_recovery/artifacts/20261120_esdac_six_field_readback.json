@@ -1,0 +1,814 @@
+[
+  {
+    "topaz_id": 81,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 221,
+    "original_outcome": "rejected",
+    "col": 2220,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 113,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 223,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 62,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 73,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 42,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 82,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 112,
+    "original_outcome": "rejected",
+    "col": 2218,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 143,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 192,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 103,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 121,
+    "original_outcome": "rejected",
+    "col": 2218,
+    "row": 3612,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 183,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 91,
+    "original_outcome": "rejected",
+    "col": 2218,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 22,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 182,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 102,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 131,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3612,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 152,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 43,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 193,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 63,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 242,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 132,
+    "original_outcome": "rejected",
+    "col": 2218,
+    "row": 3612,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 213,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 232,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 122,
+    "original_outcome": "rejected",
+    "col": 2218,
+    "row": 3612,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 123,
+    "original_outcome": "rejected",
+    "col": 2218,
+    "row": 3612,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 202,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 72,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 32,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 53,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 23,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 52,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 163,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 142,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 93,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 153,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 243,
+    "original_outcome": "rejected",
+    "col": 2218,
+    "row": 3615,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 162,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 181,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 83,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 212,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 31,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 33,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 241,
+    "original_outcome": "rejected",
+    "col": 2218,
+    "row": 3615,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 172,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 173,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 201,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 171,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 233,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 133,
+    "original_outcome": "rejected",
+    "col": 2218,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 222,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 231,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 203,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3613,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  },
+  {
+    "topaz_id": 92,
+    "original_outcome": "valid",
+    "col": 2218,
+    "row": 3614,
+    "values": {
+      "BD": 1.3799999952316284,
+      "CLAY": 23.0,
+      "SAND": 34.0,
+      "SILT": 43.0,
+      "OC": 0.4300000071525574,
+      "GRAVEL": 10
+    }
+  },
+  {
+    "topaz_id": 211,
+    "original_outcome": "rejected",
+    "col": 2219,
+    "row": 3614,
+    "values": {
+      "BD": 0.0,
+      "CLAY": 0.0,
+      "SAND": 0.0,
+      "SILT": 0.0,
+      "OC": 0.0,
+      "GRAVEL": 0
+    }
+  }
+]

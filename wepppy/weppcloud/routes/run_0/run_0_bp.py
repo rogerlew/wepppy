@@ -2174,6 +2174,10 @@ def _build_runs0_context(runid, config, playwright_load_all):
     else:
         rq_job_ids = {}
 
+    from wepppy.rq.climate_attempt import resolve_climate_attempt
+
+    climate_job_id, climate_job_unavailable = resolve_climate_attempt(runid, rq_job_ids)
+
     landuseoptions = _call_landuse_with_stale_mapping_recovery(
         landuse,
         lambda: landuse.landuseoptions,
@@ -2385,6 +2389,8 @@ def _build_runs0_context(runid, config, playwright_load_all):
         swat_print_prt_rows=swat_print_prt_rows,
         swat_print_prt_meta=swat_print_prt_meta,
         rq_job_ids=rq_job_ids,
+        climate_job_id=climate_job_id,
+        climate_job_unavailable=climate_job_unavailable,
         landuseoptions=landuseoptions,
         landcover_datasets=landcover_datasets,
         disabled_landcover_datasets=disabled_landcover_datasets,

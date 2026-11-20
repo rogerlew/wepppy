@@ -6,7 +6,7 @@
 
 > **Important Update (12/11/2008):** The units for wind velocity and wind velocity standard deviation were incorrect (mph) in the previous version of the documentation. The correct units for wind velocity and wind velocity standard deviation are **m/s**.
 
-**WEPPcloud note:** Single-storm modes are deprecated and unsupported. `itype` single-storm settings are legacy-only; use continuous/multi-year climate inputs for supported runs.
+**WEPPcloud note:** New single-storm climate generation is deprecated. A valid existing individual storm CLI can still run in WEPP.
 
 ---
 

@@ -305,7 +305,7 @@ class Management:
 def merge_managements(mans: Sequence[Management]) -> Management: ...
 
 
-landuse_management_mapping_options: List[Dict[str, str]]
+landuse_management_mapping_options: List[Dict[str, str | bool]]
 
 
 class ManagementMapLoadError(ValueError):

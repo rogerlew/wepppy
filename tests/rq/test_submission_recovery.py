@@ -370,3 +370,68 @@ def test_http_middleware_uses_fresh_admission_context(monkeypatch):
     result = inherited.run(asyncio.run, engine.run_mutation_lifecycle_middleware(request, next_handler))
     assert result == "accepted"
     assert not connection.owners
+
+
+def test_rejected_input_persistence_leaves_previous_job_reference(monkeypatch):
+    events = []
+
+    class Prep:
+        def get_rq_job_id(self, key):
+            return "prior-job"
+
+        def set_rq_job_id(self, key, job_id):
+            events.append((key, job_id))
+
+    monkeypatch.setattr(
+        submission_recovery,
+        "reconcile_deferred_workflow",
+        lambda *args, **kwargs: SimpleNamespace(state="terminal"),
+    )
+
+    def reject_inputs():
+        raise ValueError("invalid update")
+
+    with pytest.raises(ValueError, match="invalid update"):
+        submission_recovery.prepare_redisprep_job_id(
+            Prep(),
+            job_key="build_soils_rq",
+            replacement_job_id="new-job",
+            connection=None,
+            runid="run-1",
+            before_preallocate=reject_inputs,
+        )
+    assert events == []
+
+
+@pytest.mark.parametrize("current_id", ["replacement", "newer"])
+def test_enqueue_restores_receipt_only_if_its_preallocation_is_current(monkeypatch, current_id):
+    events = []
+    pointer = {"id": "previous"}
+
+    class Queue:
+        connection = SimpleNamespace(lock=lambda *_args, **_kwargs: _Lock(events))
+
+        def enqueue_call(self, *_args, **_kwargs):
+            pointer["id"] = current_id
+            raise submission_recovery.RedisError("enqueue disconnected")
+
+    def prepare(*_args, **options):
+        options["before_preallocate"]()
+        pointer["id"] = options["replacement_job_id"]
+
+    prep = SimpleNamespace(
+        get_rq_job_id=lambda _key: pointer["id"],
+        set_rq_job_id=lambda _key, value: pointer.update(id=value),
+    )
+    monkeypatch.setattr(submission_recovery, "new_rq_job_id", lambda: "replacement")
+    monkeypatch.setattr(submission_recovery, "prepare_redisprep_job_id", prepare)
+    monkeypatch.setattr(submission_recovery, "recover_committed_enqueue", lambda *_a, **_k: None)
+
+    with pytest.raises(submission_recovery.RedisError, match="enqueue disconnected"):
+        submission_recovery.enqueue_tracked_rq_job(
+            Queue(), _job_func, prep=prep, job_key="upload", runid="run-1",
+            args=("run-1",), before_enqueue=lambda: events.append("staged"),
+        )
+
+    assert "staged" in events
+    assert pointer["id"] == ("previous" if current_id == "replacement" else "newer")

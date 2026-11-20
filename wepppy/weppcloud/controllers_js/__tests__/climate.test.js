@@ -155,6 +155,7 @@ describe("Climate controller", () => {
                 <div id="hint_upload_cli"></div>
                 <div id="hint_build_climate"></div>
                 <input id="input_upload_cli" name="input_upload_cli" type="file">
+                <div data-climate-current-cli><code>previous.cli</code></div>
             </form>
         `;
 
@@ -624,7 +625,8 @@ describe("Climate controller", () => {
         });
 
         climate.bootstrap({
-            jobIds: { build_climate_rq: "climate-job" },
+            jobIds: { build_climate_rq: "old-build", upload_cli_rq: "climate-job" },
+            controllers: { climate: { job_id: "climate-job" } },
             data: { climate: { hasStation: true, hasClimate: true, precipScalingMode: "model" } }
         });
 
@@ -634,5 +636,57 @@ describe("Climate controller", () => {
         expect(refreshSpy).toHaveBeenCalled();
         expect(monthliesSpy).toHaveBeenCalled();
         expect(climate.report).toHaveBeenCalled();
+    });
+
+    test("unavailable job leaves previous failure unselected and still requests the report", () => {
+        climate.report = jest.fn();
+        climate.bootstrap({
+            jobIds: { build_climate_rq: "old-build" },
+            controllers: { climate: { jobDetailsUnavailable: true } },
+            data: { climate: { hasClimate: true } }
+        });
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(climate, null);
+        expect(document.getElementById("rq_job").textContent).toBe("Climate job details are unavailable.");
+        expect(climate.report).toHaveBeenCalled();
+    });
+
+    test("pending upload preserves the previous report and filename", async () => {
+        document.getElementById("info").textContent = "Previous climate report";
+        climate.upload_cli();
+        await Promise.resolve();
+
+        expect(controlBaseInstance.reset_panel_state).toHaveBeenCalledWith(climate, expect.objectContaining({ preserveSummary: true }));
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(climate, "job-456");
+        expect(document.getElementById("info").textContent).toBe("Previous climate report");
+        expect(document.querySelector("[data-climate-current-cli] code").textContent).toBe("previous.cli");
+    });
+
+    test("a delayed report cannot replace newer summary or filename", async () => {
+        let finishOlder;
+        requestMock.mockImplementationOnce(() => new Promise(resolve => { finishOlder = resolve; }));
+        requestMock.mockResolvedValueOnce({ body: '<a data-climate-active-filename>new&amp;safe.cli</a>' });
+        climate.report();
+        climate.report();
+        await Promise.resolve();
+        finishOlder({ body: '<a data-climate-active-filename>stale.cli</a>' });
+        await Promise.resolve();
+
+        expect(document.getElementById("info").textContent).toBe("new&safe.cli");
+        expect(document.querySelector("[data-climate-current-cli] code").textContent).toBe("new&safe.cli");
+    });
+
+    test("accepted upload invalidates the report from a previous completion", async () => {
+        let finishOlder;
+        document.getElementById("info").textContent = "Previous accepted climate";
+        requestMock.mockImplementationOnce(() => new Promise(resolve => { finishOlder = resolve; }));
+        climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED");
+        climate.upload_cli();
+        await Promise.resolve();
+        finishOlder({ body: '<a data-climate-active-filename>outdated.cli</a>' });
+        await Promise.resolve();
+
+        expect(document.getElementById("info").textContent).toBe("Previous accepted climate");
+        expect(document.querySelector("[data-climate-current-cli] code").textContent).toBe("previous.cli");
     });
 });

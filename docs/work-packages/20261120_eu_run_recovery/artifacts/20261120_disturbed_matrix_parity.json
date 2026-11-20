@@ -1,0 +1,11 @@
+{
+  "cases": 96,
+  "native_output_files_byte_identical": 768,
+  "other_model_input_files_byte_identical": 864,
+  "management_files_byte_identical": 96,
+  "soil_files_equal_except_build_date": 96,
+  "prior_artifact_capture_sha256": "a18ee759691645ab9f71e5c66eb9fc6fbc813c09504c4f2bcd8421be61257fe4",
+  "published_provenance_sha256": "8928a034a2dce03ad0efd5b4285407830f92664879019c5ad577b36ceb951220",
+  "published_report_sha256": "31cbd80b8996db905a9bdb4b20666132af8a124c93abbbeebb75a98ba770b947",
+  "management_source_current_sha256": "cc5a5309f20b6682a12ee544914d7f6e04bdbd53da7e6da25223275ee36432aa"
+}

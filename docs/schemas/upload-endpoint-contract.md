@@ -83,6 +83,29 @@ contract in `docs/schemas/rq-response-contract.md` and the failed-mutation and
 composite-operation rules in
 `docs/schemas/nodb-persistence-concurrency-contract.md`.
 
+## Uploaded climate mode
+
+A successfully applied CLI upload records
+the user-defined catalog identity and derives its mode from the parsed file.
+Use mode 15 for an individual event and mode 12 for continuous climate, including
+replacement in either direction. Obsolete batch result references cannot label
+the new upload. Existing spatial and authorization constraints still apply.
+
+For legacy stored upload modes 12 and 15, the Climate summary shows the
+type of the current active, readable CLI without mutating the run. The advisory
+lives in the summary so a successful upload refresh updates it on the same page.
+Require a regular active CLI to match the recorded filename and Climate source
+directory, with recorded upload station data. The legacy check cannot verify
+historical ancestry if a generated file reused the exact same recorded upload
+path. The form keeps the existing user-defined catalog selector. The display calculation does not change the stored mode selectors
+used by the no-preparation pipeline. WEPP preparation reconciles a verified
+mismatch and obsolete batch references before preparing a deck, holding the
+climate root operation and the Climate write lock. Reject a missing or malformed
+recorded upload at preparation, including an invalid daily calendar date. Generated and batch types are unaffected. Existing no-preparation
+paths keep their prepared inputs and existing mode selection. This correction
+does not change the publication or retention boundary for overlapping uploads
+and failed replacements.
+
 ## Route Prefix Notes
 - FastAPI routes below are served under the rq-engine API prefix (`/rq-engine/api/...`).
 - Flask Roads routes are listed as defined in the blueprint and are mounted by WEPPcloud route registration.
@@ -109,7 +132,7 @@ These routes combine non-file params with optional/conditional upload parts.
 
 | Endpoint | Handler module | Upload field(s) | Allowed extensions/types | Max size | Upload condition |
 | --- | --- | --- | --- | --- | --- |
-| `/api/runs/{runid}/{config}/build-landuse` | `wepppy/microservices/rq_engine/landuse_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img` | `500 * 1024 * 1024` (500 MB) | Restricted format/driver validation; used when `landuse.mode == UserDefined` |
+| `/api/runs/{runid}/{config}/build-landuse` | `wepppy/microservices/rq_engine/landuse_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img` | `500 * 1024 * 1024` (500 MB) | Restricted format/driver validation in UserDefined mode and [applied input preservation and map checks](european-landuse-mapping-contract.md#uploaded-raster-compatibility) |
 | `/api/runs/{runid}/{config}/build-treatments` | `wepppy/microservices/rq_engine/treatments_routes.py` | `input_upload_landuse` | `.tif`, `.tiff`, `.img` | `500 * 1024 * 1024` (500 MB) | Restricted format/driver validation; used when `treatments.mode == UserDefinedMap` |
 | `/api/runs/{runid}/{config}/run-ash` | `wepppy/microservices/rq_engine/ash_routes.py` | `input_upload_ash_load` (required), `input_upload_ash_type_map` (optional) | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation; used when `ash_depth_mode == 2` |
 | `/api/runs/{runid}/{config}/run-omni` | `wepppy/microservices/rq_engine/omni_routes.py` | `scenarios[{idx}][sbs_file]` | `.tif`, `.tiff`, `.img` | `100 * 1024 * 1024` (100 MB) | Restricted format/driver validation per uploaded SBS scenario |
@@ -194,3 +217,41 @@ error requirements. Implemented and regression-checked 2026-10-13.
 
 Schema discovery reports `color_table_mode: optional_unknown_colors_unassigned`;
 the existing key is retained, and its value describes this admission behavior.
+
+### Climate upload admission isolation
+
+The upload endpoint keeps the existing authorization, multipart field,
+extension, size limit, response and Climate job family. Each admitted upload gets a run-owned staging directory outside
+the active Climate outputs. The HTTP request stages the candidate and records
+the run, RQ job identifier and CLI basename only after the tracked submission
+conflict check. It may not change the active climate files, Climate NoDb
+metadata or completed Climate timestamp. An active job can reject a second
+upload of the same filename without changing either its bytes or the previously
+applied file.
+
+New jobs receive the exact server-generated attempt identifier and the sanitized
+CLI basename. The worker verifies their binding to the owning run and job and
+requires a regular input under the contained, nonsymlink attempt directory.
+Reject a retry once a later Climate job has superseded its receipt.
+An already applied upload can be retried without republishing its bytes.
+The existing two-argument worker form remains valid for already-enqueued jobs.
+Workers capable of both forms must serve the queue before the new route admits
+jobs. The worker validates and classifies a private snapshot matching the
+admitted checksum. It publishes those exact bytes. Preserve the active basename
+and path in Climate metadata and retain Single and Multiple spatial modes. The
+worker verifies the active Climate directory and legacy source stay within the
+run and replaces the destination without following an existing symlink.
+
+Expose the attempt and its status under `climate_artifacts/climate_upload/attempts/`
+through ordinary authorized run browsing and project archive/restore.
+Only the current applied file appears in the Climate summary. A successful
+application records completion and removes the consumed candidate. Failure
+retains inspectable evidence for that attempt. Cleanup errors after a successful
+application are secondary to its result. A proven enqueue follows the existing
+tracked submission recovery. A conclusively absent enqueue uses the existing
+tracked receipt restoration where available. If preallocation, lease
+verification or enqueue fails with an uncertain outcome, leave the candidate
+and receipt available and never overwrite a potentially newer tracked job reference. The
+Climate panel's existing verified-job rule handles unconfirmed status.
+Rollback after an upload passes file validation and generated-build retention
+remain separate publication obligations.

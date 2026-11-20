@@ -228,6 +228,9 @@
       Build Landuse
     </button>
   {% endcall %}
+  <div class="wc-alert wc-alert--error" role="alert" hidden data-landuse-build-error>
+    <p class="wc-alert__body"></p>
+  </div>
   {{ ui.job_hint("hint_build_landuse") }}
 
 {% endcall %}

@@ -2091,11 +2091,15 @@ def test_upload_cli_rq_clears_climate_cache_before_hydration(
     tmp_path: Path,
 ) -> None:
     run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    climate_dir = run_wd / "climate"
+    climate_dir.mkdir(exist_ok=True)
+    (climate_dir / "user.cli").write_text("user input")
     events: list[tuple] = []
     _record_cache_clears(monkeypatch, events)
     _record_prep_timestamps(monkeypatch, events)
 
     class DummyClimate:
+        cli_dir = str(climate_dir)
         def set_user_defined_cli(self, cli_filename: str) -> None:
             events.append(("set_user_defined_cli", cli_filename))
 
@@ -2115,6 +2119,50 @@ def test_upload_cli_rq_clears_climate_cache_before_hydration(
         ("set_user_defined_cli", "user.cli"),
         ("timestamp", project_rq.TaskEnum.build_climate),
     ]
+
+
+@pytest.mark.parametrize("outcome", ["success", "invalid", "replace", "superseded"])
+def test_upload_cli_rq_retains_the_exact_attempt_on_failure(monkeypatch, tmp_path, outcome):
+    run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    job_id = "5951fa06-7888-4e90-b709-1a28a6831848"
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: SimpleNamespace(id=job_id))
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: SimpleNamespace(
+        timestamp=lambda task: events.append(("timestamp", task)),
+        get_rq_job_id=lambda key: (
+            ("newer-job" if outcome == "superseded" else job_id) if key == "upload_cli_rq" else None
+        ),
+    ))
+    active_dir = run_wd / "climate"
+    active_dir.mkdir(exist_ok=True)
+    attempt = project_rq.ClimateUploadAttempt(run_wd, "demo", job_id, "ESFANGAR.cli")
+    attempt.create()
+    attempt.source.write_bytes(b"candidate")
+    attempt.record("staged", attempt.source_digest(), None)
+
+    def apply(filename, *, staged_path):
+        assert filename == attempt.filename
+        assert staged_path != attempt.source
+        assert staged_path.read_bytes() == b"candidate"
+        if outcome == "invalid":
+            raise ValueError("invalid CLI")
+        if outcome == "replace":
+            attempt.source.write_bytes(b"replacement")
+            assert staged_path.read_bytes() == b"candidate"
+
+    climate = SimpleNamespace(cli_dir=active_dir, set_user_defined_cli=apply)
+    monkeypatch.setattr(project_rq.Climate, "getInstance", lambda _wd: climate)
+    succeeds = outcome in ("success", "replace")
+    if succeeds:
+        project_rq.upload_cli_rq("demo", attempt.filename, staged=True)
+    else:
+        with pytest.raises(ValueError, match="superseded" if outcome == "superseded" else "invalid CLI"):
+            project_rq.upload_cli_rq("demo", attempt.filename, staged=True)
+    assert attempt.source.exists() is (outcome != "success")
+    expected_state = {"success": "applied", "invalid": "failed", "replace": "applied", "superseded": "staged"}[outcome]
+    assert attempt.read_receipt()["state"] == expected_state
+    assert (("timestamp", project_rq.TaskEnum.build_climate) in events) is succeeds
 
 
 @pytest.mark.parametrize(

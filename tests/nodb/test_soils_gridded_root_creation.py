@@ -4,6 +4,7 @@ import importlib
 import logging
 from contextlib import nullcontext
 from pathlib import Path
+from shutil import copyfile
 from types import SimpleNamespace
 
 import jsonpickle
@@ -29,6 +30,8 @@ def test_stored_australia_runtime_token_overrides_incongruent_soils_locales(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from wepppy.au.soils import build_asris_soils
+
     class _AustralianDispatch(Exception):
         pass
 
@@ -44,13 +47,15 @@ def test_stored_australia_runtime_token_overrides_incongruent_soils_locales(
         soils_map = None
         config_stem = "builder"
         ssurgo_db = "asris"
+        uses_esdac = Soils.uses_esdac
 
         @staticmethod
         def locked():
             return nullcontext()
 
         @staticmethod
-        def _build_by_identify(_builder) -> None:
+        def _build_by_identify(builder) -> None:
+            assert builder is build_asris_soils
             raise _AustralianDispatch()
 
         @staticmethod
@@ -710,8 +715,14 @@ def test_identify_builder_records_and_persists_soil_source(
         def hillslope_area(_topaz_id: str) -> float:
             return 1.0
 
-    def _build(_orders, _soils_dir, *, status_channel):
+    def _build(orders, soils_dir, *, status_channel):
+        assert orders == [["101", (-6.3, 43.1)]]
         assert status_channel is None
+        if expected_source == "esdac":
+            quality_fixture = Path(__file__).resolve().parents[1] / "data/esdac/accepted_with_subsoil_defaults.json"
+            output_dir = Path(soils_dir)
+            output_dir.mkdir(parents=True, exist_ok=True)
+            copyfile(quality_fixture, output_dir / "soil_quality.json")
         return {"soil-1": _Summary()}, {"101": "soil-1"}
 
     _build.__module__ = module_name
@@ -721,6 +732,7 @@ def test_identify_builder_records_and_persists_soil_source(
     soils = Soils.__new__(Soils)
     soils.wd = str(tmp_path / "run")
     soils.logger = logging.getLogger("tests.nodb.soils_source")
+    soils._mode = SoilsMode.Gridded
     soils.locked = lambda: nullcontext()
     soils.trigger = lambda *_args, **_kwargs: None
 
@@ -730,13 +742,18 @@ def test_identify_builder_records_and_persists_soil_source(
 
     soils._build_by_identify(_build)
 
+    expected_fallback_count = (1, 1) if expected_source == "esdac" else None
     assert soils.soil_source == expected_source
+    assert soils.soil_summary_ready
+    assert soils.esdac_fallback_count == expected_fallback_count
 
     soils_nodb = Path(soils.wd) / Soils.filename
     soils_nodb.parent.mkdir(parents=True, exist_ok=True)
     soils_nodb.write_text(jsonpickle.encode(soils), encoding="utf-8")
     restored = jsonpickle.decode(soils_nodb.read_text(encoding="utf-8"))
     assert restored.soil_source == expected_source
+    assert restored.soil_summary_ready
+    assert restored.esdac_fallback_count == expected_fallback_count
 
 
 def test_build_from_map_db_refreshes_existing_run_local_sol_from_db(

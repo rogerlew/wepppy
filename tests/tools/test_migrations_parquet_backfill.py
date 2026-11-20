@@ -4,7 +4,9 @@ import json
 import os
 import stat
 from pathlib import Path
+from types import SimpleNamespace
 
+import jsonpickle
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -66,6 +68,61 @@ def test_landuse_parquet_dry_run_when_built(tmp_path: Path) -> None:
 
     assert applied is True
     assert "Would generate landuse parquet" in message
+
+
+@pytest.mark.parametrize(('assignments', 'summaries'), [
+    ({'102': '25'}, {}),
+    ({}, {'25': {'py/object': 'ManagementSummary'}}),
+    ({'102': '12', '103': '25'}, {'12': {'py/object': 'ManagementSummary'}}),
+    ({'102': '25'}, {'25': None}),
+    ({'104': '25'}, {'25': {'py/object': 'ManagementSummary'}}),
+])
+def test_incomplete_landuse_has_no_backfill_in_discovery_or_apply(tmp_path, assignments, summaries):
+    (tmp_path / 'landuse.nodb').write_text(json.dumps({
+        'py/state': {'domlc_d': assignments, 'managements': summaries},
+    }))
+
+    result = check_migrations_needed(str(tmp_path))
+    entry = next(item for item in result['migrations'] if item['name'] == 'landuse_parquet')
+    assert entry['would_apply'] is False
+    assert migrate_landuse_parquet(str(tmp_path)) == (True, entry['message'])
+    assert not (tmp_path / 'landuse' / 'landuse.parquet').exists()
+
+
+def test_matching_legacy_snapshot_generates_hillslope_parquet(tmp_path, monkeypatch):
+    from wepppy.nodb.core import Landuse
+    from wepppy.nodb.core import landuse as landuse_module
+    from wepppy.wepp.management.managements import get_management_summary
+
+    (tmp_path / 'landuse').mkdir()
+    snapshot = tmp_path / 'landuse.nodb'
+    code = '25-mulch_15'
+    summary = get_management_summary('25', 'eu-disturbed')
+    summary.key = code
+    snapshot.write_text(jsonpickle.encode({
+        'domlc_d': {'102': code, '104': 'unused-channel-code'},
+        'managements': {code: summary},
+    }))
+
+    def load_landuse(wd):
+        instance = object.__new__(Landuse)
+        instance.wd = wd
+        instance.__dict__.update(jsonpickle.decode(snapshot.read_text()))
+        return instance
+
+    monkeypatch.setattr(Landuse, 'getInstance', staticmethod(load_landuse))
+    monkeypatch.setattr(Landuse, 'watershed_instance', property(lambda self: SimpleNamespace(
+        translator_factory=lambda: SimpleNamespace(wepp=lambda top: 1),
+    )))
+    monkeypatch.setattr(landuse_module, 'request_catalog_refresh', lambda *_args: None)
+
+    eligible, message = migrate_landuse_parquet(str(tmp_path), dry_run=True)
+    assert eligible and 'Would generate landuse parquet' in message
+    assert migrate_landuse_parquet(str(tmp_path)) == (True, 'Generated landuse parquet from landuse.nodb')
+    data = pd.read_parquet(tmp_path / 'landuse' / 'landuse.parquet')
+    assert data['topaz_id'].tolist() == [102]
+    assert data['wepp_id'].tolist() == [1]
+    assert data['key'].tolist() == [code]
 
 
 def test_soils_parquet_skips_unbuilt_nodb(tmp_path: Path) -> None:

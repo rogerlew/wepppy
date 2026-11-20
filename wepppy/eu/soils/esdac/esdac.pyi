@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from collections.abc import Sequence
 
 from wepppy.wepp.soils import HorizonMixin
@@ -74,4 +76,6 @@ class ESDAC:
         soils_dir: str = ...,
         res_lyr_ksat_threshold: float = ...,
         ksflag: int = ...,
+        *,
+        subsoil_defaults: Mapping[str, object] | None = ...,
     ) -> tuple[str, Horizon, str]: ...

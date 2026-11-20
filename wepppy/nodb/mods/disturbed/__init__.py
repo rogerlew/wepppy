@@ -1,6 +1,8 @@
 from .disturbed import (
     Disturbed,
     DisturbedNoDbLockedException,
+    IncompatibleDisturbedMapping,
+    build_disturbed_key_lookup,
     TREATMENT_SUFFIXES,
     get_disturbed_land_soil_lookup_sha256,
     get_disturbed_land_soil_lookup_snapshot,
@@ -15,6 +17,8 @@ from .disturbed import (
 __all__ = [
     'Disturbed',
     'DisturbedNoDbLockedException',
+    'IncompatibleDisturbedMapping',
+    'build_disturbed_key_lookup',
     'TREATMENT_SUFFIXES',
     'get_disturbed_land_soil_lookup_sha256',
     'get_disturbed_land_soil_lookup_snapshot',

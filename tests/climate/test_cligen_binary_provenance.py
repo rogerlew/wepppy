@@ -182,16 +182,18 @@ def test_identity_rehashes_binary_after_in_place_change(tmp_path):
 
 
 def test_run_cligen_posix_logs_verified_identity_before_child_output(tmp_path):
-    binary, _ = _write_release_pair(tmp_path)
+    binary, _ = _write_release_pair(tmp_path, binary_bytes=b"#!/bin/sh\npwd\n")
+    output_directory = tmp_path / "native"
+    output_directory.mkdir()
     clinp = tmp_path / "cligen.inp"
     clinp.write_text("", encoding="ascii")
     log = io.StringIO()
 
     stdout, stderr = cligen_module._run_cligen_posix(
-        [str(binary)], str(clinp), timeout_sec=2, log_fp=log
+        [str(binary)], str(clinp), timeout_sec=2, log_fp=log, cwd=str(output_directory)
     )
 
-    assert stdout.strip() == "child-output"
+    assert stdout.strip() == str(output_directory)
     assert stderr == ""
     text = log.getvalue()
     assert text.index("binary_identity_status=verified") < text.index("CLIGEN OK")
@@ -213,7 +215,7 @@ def test_run_cligen_posix_does_not_start_child_when_sidecar_is_missing(
 
     with pytest.raises(CligenProvenanceError, match="required sidecar is missing"):
         cligen_module._run_cligen_posix(
-            [str(binary)], str(clinp), timeout_sec=2, log_fp=io.StringIO()
+            [str(binary)], str(clinp), timeout_sec=2, log_fp=io.StringIO(), cwd=str(tmp_path)
         )
 
     assert popen_calls == []

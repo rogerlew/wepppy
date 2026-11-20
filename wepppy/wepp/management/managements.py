@@ -136,6 +136,7 @@ _au_disturbed_map_fn = _join(_management_dir, "au-disturbed.json")
 _ca_disturbed_map_fn = _join(_management_dir, "ca-disturbed.json")
 _vi_disturbed_map_fn = _join(_management_dir, "vi-disturbed.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
+_eu_esdac_disturbed_map_fn = _join(_management_dir, "eu-esdac-disturbed.json")
 _lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
 _turkey_map_fn = _join(_management_dir, "turkey_map.json")
 _palouse_map_fn = _join(_management_dir, "palouse_map.json")
@@ -2194,7 +2195,7 @@ loops:{loops}
 
 def get_disturbed_classes() -> Set[Optional[str]]:
     """
-    Return the set of disturbed class identifiers referenced by management maps.
+    Return supported disturbed class identifiers, including the legacy soil lookup key.
 
     Empty strings in the source JSON are normalized to ``None`` for ease of
     comparison when downstream callers need to distinguish between unset and
@@ -2203,7 +2204,8 @@ def get_disturbed_classes() -> Set[Optional[str]]:
     with open(_join(_thisdir, 'data', 'disturbed.json')) as fp:
         js = json.load(fp)
 
-    disturbed_classes = set()
+    # Historical regional thinning templates share the existing generic soil row.
+    disturbed_classes = {'thinning'}
     for k, _d in js.items():
         _c = _d['DisturbedClass']
         if _c == '':
@@ -3126,6 +3128,7 @@ landuse_management_mapping_options = [
     dict(Key='rred', Description='RRED'),
     dict(Key='palouse', Description='palouse'),
     dict(Key='esdac', Description='esdac'),
+    dict(Key='eu-esdac-disturbed', Description='ESDAC land cover (Disturbed)', LandcoverOnly=True),
     dict(Key='lu10v5ua', Description='lu10v5ua'),
     dict(Key='c3s-disturbed-nigeria', Description='Nigeria-c3s-disturbed'),
     dict(Key='c3s-disturbed', Description='Earth-cs3-disturbed'),
@@ -3192,6 +3195,9 @@ def load_map(_map: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
             d = json.load(fp)
     elif 'palouse' in _map.lower():
         with open(_palouse_map_fn) as fp:
+            d = json.load(fp)
+    elif _map.strip().lower() == 'eu-esdac-disturbed':
+        with open(_eu_esdac_disturbed_map_fn) as fp:
             d = json.load(fp)
     elif 'esdac' in _map.lower():
         with open(_esdac_map_fn) as fp:

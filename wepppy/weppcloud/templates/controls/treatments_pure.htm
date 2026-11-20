@@ -51,7 +51,7 @@
 {% endfor %}
 {% set mapping_ns = namespace(options=[]) %}
 {% if landuse_management_mapping_options %}
-  {% for option in landuse_management_mapping_options %}
+  {% for option in landuse_management_mapping_options if not option.get('LandcoverOnly', false) %}
     {% set mapping_ns.options = mapping_ns.options + [(option['Key'], option['Key'] ~ ' — ' ~ option['Description'])] %}
   {% endfor %}
 {% endif %}

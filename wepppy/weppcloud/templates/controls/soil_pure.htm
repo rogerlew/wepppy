@@ -144,6 +144,31 @@
          ) }}
     </div>
 
+    {% if soils.uses_esdac(0) and (soil_capability_modes is not defined or soil_capability_modes is none or 0 in soil_capability_modes) %}
+    {% set subsoil = soils.esdac_subsoil_defaults %}
+    <fieldset id="soil_esdac_subsoil_defaults" class="wc-stack"
+              {% if current_mode != 0 %}hidden{% endif %}
+              {% if ron.readonly %}data-readonly="true"{% endif %}>
+      <legend>ESDAC subsoil defaults</legend>
+      <p class="wc-text-muted">These values apply only where ESDAC is missing the required subsoil material.</p>
+      {% for field, label in (
+        ('clay', 'Clay (%)'),
+        ('sand', 'Sand (%)'),
+        ('silt', 'Silt (%)'),
+        ('bulk_density', 'Bulk density (g/cm³)'),
+        ('organic_carbon', 'Organic carbon (%)'),
+        ('gravel', 'Gravel (%)')
+      ) %}
+        {% set attrs = {'step': 'any'} %}
+        {% if current_mode != 0 or ron.readonly %}
+          {% set attrs = {'step': 'any', 'disabled': true} %}
+        {% endif %}
+        {{ ui.text_field('esdac_subsoil_' ~ field, label, value=subsoil[field],
+                         type='number', attrs=attrs, extra_control_class='disable-readonly') }}
+      {% endfor %}
+    </fieldset>
+    {% endif %}
+
     {% if disturbed %}
     <div class="wc-stack">
       <h4 class="wc-heading wc-heading--sm">Specify disturbed soil version (sol_ver)</h4>

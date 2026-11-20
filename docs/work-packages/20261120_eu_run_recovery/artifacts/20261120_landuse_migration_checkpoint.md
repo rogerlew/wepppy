@@ -1,0 +1,17 @@
+# Land-use Parquet migration checkpoint
+
+Starting revision `868003fc9`. The operator asked to repair the false migration prompted by `studded-stranglehold` and directed continued execution of this work package. This checkpoint covers backfill eligibility only. Source-specific land-use admission and mapping remain in scope for the parent package.
+
+The retained NoDb state in `studded-stranglehold` has assignments for 58 hillslopes. It references classes 12, 20, 23, 24 and 25, while its saved management summaries are for classes 21 and 31. The control run `autosomal-vetch` has the same assigned classes and matching summaries for all five. The [NoDb persistence contract](../../../schemas/nodb-persistence-concurrency-contract.md#land-use-parquet-backfill-eligibility) defines the required coverage in the actual inputs to the backfill writer. Prior summaries need not be rebuilt from present-day mapping tables. Existing schema migrations, CSV handling, and real Parquet normalization retain their current behavior.
+
+Missing, empty, assignment-only and summary-only state need no backfill. State with at least one hillslope and all hillslope assignments covered by stored summaries is eligible, including generated treatment codes. Ignore channels exactly as the writer does. A partially matching or invalid entry cannot establish coverage. Unreadable or malformed state retains an explicit diagnostic. Newly built and legacy runs use the same required inputs. Extra saved summaries are permitted because eligibility is established by the summaries used by hillslope assignments. Matching historic inputs alone do not prove all stages of the most recent job completed.
+
+The control does not change file authority or user permissions. Dry-run discovery only inspects existing metadata, and actual migration retains the existing writer and catalog publication. Security impact is low. Validate the fresh failed-run signature in discovery and apply, matching legacy fixture through actual serialization, nested and flat state, and existing Parquet normalization.
+
+## Independent review disposition
+
+Both reviews identified the writer's channel filter. The contract requires a hillslope row and excludes channel-only associations from coverage. The regression will cover both distinctions. The repair checks the persisted summary associations without decoding arbitrary NoDb objects or validating unrelated saved fields. The writer continues to diagnose corrupt decoded summaries and canopy overrides. Existing check-error routing for invalid JSON or unreadable state is preserved. It differs from valid incomplete data, for which the same dry-run result must leave the retry page accessible. Stale report data and source mapping ownership remain covered by later package changes.
+
+## Candidate validation
+
+The standalone contract ancestor is `8d20d6897`. The 121 focused migration and run-page tests passed, including the current-schema retry route and an actual generated Parquet readback for a serialized treatment summary. The tests also exercised channel-only and mismatched states and normalization of an existing Parquet file. The receipt is `.wctl-test-runs/827805cef6e840ef82998a5b708e1566/receipt.json`. The test rerun updated a route fixture to supply the already deployed candidate contract field `soil_summary_ready`. Full browser replay on forest remains open.

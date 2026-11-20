@@ -85,6 +85,20 @@ describe("controlBase job status error handling", () => {
         expect(button.disabled).toBe(false);
     });
 
+    test("controller with neutral expiry does not dispatch a job failure", () => {
+        base.rq_job_id = "expired-job";
+        base.on_job_details_unavailable = jest.fn();
+        base.pushResponseStacktrace = jest.fn();
+        base.triggerEvent = jest.fn();
+
+        base.handle_job_status_error(base, { status: 404 });
+
+        expect(base.on_job_details_unavailable).toHaveBeenCalledTimes(1);
+        expect(base.pushResponseStacktrace).not.toHaveBeenCalled();
+        expect(base.triggerEvent).not.toHaveBeenCalled();
+        expect(button.disabled).toBe(false);
+    });
+
     test("keeps command button disabled for non-502 job status errors", () => {
         base.rq_job_id = "job-1";
 
@@ -269,6 +283,18 @@ describe("controlBase job status error handling", () => {
         expect(document.getElementById("stacktrace").textContent).toContain(
             "wepppy.soils.ssurgo.ssurgo.SsurgoRequestError"
         );
+    });
+
+    test("submission errors can keep the report while exposing their details", () => {
+        const summary = document.getElementById("info");
+        summary.innerHTML = "<table><tbody><tr><td>Applied land use</td></tr></tbody></table>";
+
+        base.pushResponseStacktrace(base, { error: { message: "Retry submission." } }, {
+            preserveSummary: true
+        });
+
+        expect(summary.querySelector("td").textContent).toBe("Applied land use");
+        expect(document.getElementById("stacktrace").textContent).toContain("Retry submission.");
     });
 
     test("poll failure surfaces the complete ESDAC batch reason in the interface", async () => {

@@ -556,6 +556,59 @@ def _validate_ofe(
         )
 
 
+def _validate_7778_writer_metadata(
+    diagnostics: list[SoilQualityDiagnostic],
+    lines: Sequence[str],
+    *,
+    expected_luse: str | None,
+    expected_stext: str | None,
+) -> None:
+    """Check provenance in the last 7778 Disturbed writer block before the body."""
+    marker = "wepppy.wepp.soils.utils.WeppSoilUtil::7778disturbed_migration"
+    block: list[str] = []
+    in_block = False
+    seen_version = False
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line:
+            continue
+        if not line.startswith("#"):
+            if seen_version:
+                break
+            seen_version = True
+            continue
+        comment = line[1:].strip()
+        if comment == marker:
+            block.clear()
+            in_block = True
+        elif in_block:
+            block.append(comment)
+
+    values: dict[str, list[str]] = {"luse": [], "stext": []}
+    if block.count("Replacements") == 1:
+        start = block.index("Replacements") + 1
+        if start < len(block) and block[start] == "--------------------------":
+            replacements = block[start + 1:]
+            if "" in replacements:
+                for entry in replacements[:replacements.index("")]:
+                    field, separator, value = entry.partition("->")
+                    name = field.strip().split()
+                    if name and name[0] in values:
+                        well_formed = separator and field == f"{name[0]} " and value.startswith(" ")
+                        values[name[0]].append(value.strip() if well_formed else "")
+
+    for field, expected in (("luse", expected_luse), ("stext", expected_stext)):
+        if expected is not None and values[field] != [expected]:
+            diagnostics.append(
+                SoilQualityDiagnostic(
+                    f"disturbed.metadata.{field}_mismatch",
+                    f"writer_metadata.{field}",
+                    "error",
+                    raw_value=values[field],
+                )
+            )
+
+
 def validate_disturbed_soil_artifact(
     soil_path: str | Path,
     *,
@@ -643,6 +696,15 @@ def validate_disturbed_soil_artifact(
                 raw_value=soil.obj.get("datver"),
             )
         )
+
+    if actual_datver == 7778 and (expected_luse is not None or expected_stext is not None):
+        _validate_7778_writer_metadata(
+            diagnostics,
+            soil._source_lines,
+            expected_luse=expected_luse,
+            expected_stext=expected_stext,
+        )
+        expected_luse = expected_stext = None
 
     ofes = soil.obj.get("ofes")
     if (

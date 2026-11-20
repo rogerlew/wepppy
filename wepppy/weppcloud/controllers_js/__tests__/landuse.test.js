@@ -43,6 +43,9 @@ describe("Landuse controller", () => {
                 <input id="checkbox_burn_shrubs" name="checkbox_burn_shrubs" type="checkbox" checked>
                 <input id="checkbox_burn_grass" name="checkbox_burn_grass" type="checkbox">
                 <button type="button" id="btn_build_landuse" data-landuse-action="build">Build</button>
+                <div class="wc-alert wc-alert--error" role="alert" hidden data-landuse-build-error>
+                    <p class="wc-alert__body"></p>
+                </div>
             </form>
             <div id="hint_build_landuse"></div>
         `;
@@ -225,6 +228,54 @@ describe("Landuse controller", () => {
             expect.any(Object),
             expect.stringContaining("build_landuse job submitted")
         );
+    });
+
+    test("selecting an upload and rejecting its map preserves the applied summary", async () => {
+        landuse.setMode(4);
+        await flushPromises();
+        httpRequestMock.mockRejectedValueOnce({
+            body: { error: { code: "incompatible_landuse_mapping", message: "Select a compatible management map." } }
+        });
+
+        landuse.build();
+        await flushPromises();
+
+        const resets = baseInstance.reset_panel_state.mock.calls.slice(-2);
+        expect(resets.map(([, options]) => options.preserveSummary)).toEqual([true, true]);
+        expect(baseInstance.set_rq_job_id).not.toHaveBeenCalled();
+        expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+        const alert = document.querySelector("[data-landuse-build-error]");
+        expect(alert.hidden).toBe(false);
+        expect(alert.textContent).toContain("Select a compatible management map.");
+    });
+
+    test("batch settings acknowledgement uses status without replacing the report", async () => {
+        httpRequestMock.mockResolvedValueOnce({ body: { message: "Set landuse inputs for batch processing" } });
+
+        landuse.build();
+        await flushPromises();
+
+        expect(document.querySelector("#landuse_form #status").textContent).toBe(
+            "Set landuse inputs for batch processing"
+        );
+        expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+        expect(baseInstance.set_rq_job_id).not.toHaveBeenCalled();
+    });
+
+    test("older rejected upload cannot add an alert over a newer accepted build", async () => {
+        let rejectOld;
+        httpRequestMock.mockImplementationOnce(() => new Promise((resolve, reject) => {
+            rejectOld = reject;
+        })).mockResolvedValueOnce({ body: { job_id: "new-upload" } });
+
+        landuse.build();
+        landuse.build();
+        await flushPromises();
+        rejectOld({ body: { error: { code: "incompatible_landuse_mapping", message: "Old selection" } } });
+        await flushPromises();
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "new-upload");
+        expect(document.querySelector("[data-landuse-build-error]").hidden).toBe(true);
     });
 
     test("poll failure pushes stacktrace and emits job error", async () => {

@@ -10,6 +10,12 @@ from wepppy.runtime_paths.errors import NoDirError
 pytestmark = pytest.mark.microservice
 
 
+class _NonEsdacSoils:
+    def uses_esdac(self, _mode: object) -> bool:
+        return False
+
+
+
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(soils_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(soils_routes, "authorize_run_access", lambda claims, runid: None)
@@ -59,6 +65,7 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> dict[str, list[object]]:
 
     class DummyPrep:
         def get_rq_job_id(self, key): return None
+        def __getitem__(self, task): return None
         def remove_timestamp(self, task, *args, **kwargs) -> None:
             state["removed"].append(task)
 
@@ -87,7 +94,7 @@ def test_build_soils_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     prep_state = _stub_prep(monkeypatch)
     monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
 
-    class DummySoils:
+    class DummySoils(_NonEsdacSoils):
         mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
@@ -133,7 +140,7 @@ def test_build_soils_rejects_invalid_capability_authority_before_mutation(
         lambda soils: (_ for _ in ()).throw(ValueError("missing capability relation")),
     )
 
-    class DummySoils:
+    class DummySoils(_NonEsdacSoils):
         mode = soils_routes.SoilsMode.Gridded
         initial_sat = "unchanged"
         clear_ssurgo_cache_on_rebuild = "unchanged"
@@ -167,7 +174,7 @@ def test_build_soils_rejects_hostile_native_mode_before_mutation(
         soils_routes, "soil_capability_modes", lambda _soils: frozenset({0})
     )
 
-    class DummySoils:
+    class DummySoils(_NonEsdacSoils):
         mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
@@ -202,7 +209,7 @@ def test_build_soils_allows_exact_current_mode_outside_live_axis(
         soils_routes, "soil_capability_modes", lambda _soils: frozenset({0})
     )
 
-    class DummySoils:
+    class DummySoils(_NonEsdacSoils):
         mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
@@ -235,7 +242,7 @@ def test_build_soils_persists_authorized_different_mode(
         soils_routes, "soil_capability_modes", lambda _soils: frozenset({0, 2})
     )
 
-    class DummySoils:
+    class DummySoils(_NonEsdacSoils):
         mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
@@ -267,7 +274,7 @@ def test_build_soils_rejects_disagreeing_mode_aliases_before_mutation(
         soils_routes, "soil_capability_modes", lambda _soils: frozenset({0, 2})
     )
 
-    class DummySoils:
+    class DummySoils(_NonEsdacSoils):
         mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
@@ -304,7 +311,7 @@ def test_build_soils_persists_cache_clear_option_for_batch(
     prep_state = _stub_prep(monkeypatch)
     monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
 
-    class DummySoils:
+    class DummySoils(_NonEsdacSoils):
         mode = soils_routes.SoilsMode.Gridded
         run_group = "batch"
         mods: set[str] = set()
@@ -366,7 +373,7 @@ def test_build_soils_rejects_mismatched_config_before_mutation(
         lambda wd: type("RonStub", (), {"config_stem": "disturbed9002.cfg"})(),
     )
 
-    class DummySoils:
+    class DummySoils(_NonEsdacSoils):
         mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
@@ -400,7 +407,7 @@ def test_build_soils_accepts_normalized_matching_config(monkeypatch: pytest.Monk
         lambda wd: type("RonStub", (), {"config_stem": "disturbed9002.cfg"})(),
     )
 
-    class DummySoils:
+    class DummySoils(_NonEsdacSoils):
         mode = soils_routes.SoilsMode.Gridded
         run_group = "default"
         mods: set[str] = set()
@@ -418,3 +425,61 @@ def test_build_soils_accepts_normalized_matching_config(monkeypatch: pytest.Monk
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-88"
+
+
+def test_esdac_admission_snapshots_profile_and_preserves_settings_on_conflict(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from contextlib import nullcontext
+    from types import SimpleNamespace
+
+    from wepppy.eu.soils.esdac.subsoil import DEFAULT_SUBSOIL
+
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(soils_routes, "maintenance_lock", lambda *args, **kwargs: nullcontext())
+    soils = SimpleNamespace(
+        mode=soils_routes.SoilsMode.Gridded,
+        mods=set(),
+        run_group="default",
+        initial_sat=0.75,
+        esdac_subsoil_defaults=dict(DEFAULT_SUBSOIL),
+        uses_esdac=lambda mode: mode == soils_routes.SoilsMode.Gridded,
+    )
+    monkeypatch.setattr(soils_routes.Soils, "getInstance", lambda wd: soils)
+    admitted = []
+
+    def enqueue(*args, **kwargs):
+        if admitted:
+            raise soils_routes.RqSubmissionConflict("already active")
+        kwargs["before_enqueue"]()
+        assert kwargs["kwargs"]["admitted_soil_mode"] == int(soils_routes.SoilsMode.Gridded)
+        admitted.append(kwargs["kwargs"]["esdac_subsoil_defaults"])
+        return SimpleNamespace(id="esdac-job")
+
+    monkeypatch.setattr(soils_routes, "enqueue_tracked_rq_job", enqueue)
+    profile = {f"esdac_subsoil_{field}": v for field, v in DEFAULT_SUBSOIL.items()}
+    profile["esdac_subsoil_bulk_density"] = 1.45
+    endpoint = "/api/runs/run-1/cfg/build-soils"
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={"initial_sat": 0.42, **profile})
+        conflict = client.post(endpoint, json={"initial_sat": 0.5, **dict(profile, esdac_subsoil_bulk_density=1.6)})
+        cross_mode = client.post(endpoint, json={"initial_sat": 0.5, "soil_mode": 2})
+        invalid = client.post(endpoint, json={"initial_sat": 0.5, **dict(profile, esdac_subsoil_organic_carbon=False)})
+        duplicate = client.post(
+            endpoint,
+            content='{"initial_sat":0.5,"esdac_subsoil_bulk_density":1.4,"esdac_subsoil_bulk_density":1.5}',
+            headers={"content-type": "application/json"},
+        )
+    assert response.status_code == 200
+    assert conflict.status_code == cross_mode.status_code == 409
+    assert soils.mode == soils_routes.SoilsMode.Gridded
+    assert invalid.status_code == duplicate.status_code == 400
+    assert admitted == [dict(DEFAULT_SUBSOIL, bulk_density=1.45)]
+    assert soils.esdac_subsoil_defaults == admitted[0]
+    assert soils.initial_sat == 0.42
+    assert prep_state["removed"] == [
+        soils_routes.TaskEnum.build_soils, soils_routes.TaskEnum.run_geneva,
+    ]

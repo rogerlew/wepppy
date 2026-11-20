@@ -55,8 +55,9 @@ passed unchanged through every applicable Climate-owned CLIGEN path: vanilla
 multi-year, PRISM/E-OBS/AGDC modified stochastic, observed Daymet/GridMET/PRISM,
 future, multiple-interpolated workers, and the dormant single-storm helper
 interface. The native command MUST contain exactly one argv element formatted
-`-r<seed>`. This contract does not re-enable currently unsupported single-storm
-Climate modes.
+`-r<seed>`. This contract does not enable new single-storm climate authoring.
+Execution of saved event inputs is governed by the
+[WEPP run-input contract](../../schemas/wepp-run-input-contract.md#deprecated-single-storm-execution).
 
 Every child in a multiple-climate build MUST receive the same captured explicit
 override. Collect/finalize observed builds MUST include the override in their

@@ -370,8 +370,8 @@ var Landuse = (function () {
             }
         };
 
-        function resetStatus(taskMsg) {
-            landuse.reset_panel_state(landuse, { taskMessage: taskMsg });
+        function resetStatus(taskMsg, preserveSummary) {
+            landuse.reset_panel_state(landuse, { taskMessage: taskMsg, preserveSummary: preserveSummary === true });
         }
 
         function handleError(error) {
@@ -477,9 +477,33 @@ var Landuse = (function () {
             }));
         }
 
+        var buildError = dom.qs("[data-landuse-build-error]", formElement);
+        var buildErrorText = buildError ? buildError.querySelector(".wc-alert__body") : null;
+
+        var buildRequest = 0;
+        var lastAcceptedBuildRequest = 0;
+
+        function handleBuildError(error, requestId) {
+            if (requestId !== buildRequest) {
+                return;
+            }
+            var payload = toResponsePayload(http, error);
+            if (buildErrorText && payload.error && payload.error.code === "incompatible_landuse_mapping") {
+                buildErrorText.textContent = payload.error.message;
+                buildError.hidden = false;
+                return;
+            }
+            landuse.pushResponseStacktrace(landuse, payload, { preserveSummary: true });
+        }
+
         landuse.build = function () {
+            var requestId = ++buildRequest;
             var taskMsg = "Building landuse";
-            resetStatus(taskMsg);
+            resetStatus(taskMsg, true);
+            if (buildErrorText) {
+                buildError.hidden = true;
+                buildErrorText.textContent = "";
+            }
             resetBuildCompletionSeen();
 
             if (landuseEvents && typeof landuseEvents.emit === "function") {
@@ -508,6 +532,9 @@ var Landuse = (function () {
                 }
             ).then(function (result) {
                 var response = result && result.body ? result.body : null;
+                if (requestId < lastAcceptedBuildRequest) {
+                    return;
+                }
                 if (response && response.result && response.result.single_user_defined_filename) {
                     var filenameNode = dom.qs("#landuse_source_filename");
                     var feedbackNode = dom.qs("#landuse_source_feedback");
@@ -519,13 +546,20 @@ var Landuse = (function () {
                     }
                 }
                 if (response && response.job_id) {
+                    lastAcceptedBuildRequest = requestId;
                     landuse.append_status_message(landuse, "build_landuse job submitted: " + response.job_id);
                     landuse.poll_completion_event = LANDUSE_BUILD_COMPLETION_EVENT;
                     landuse.set_rq_job_id(landuse, response.job_id);
+                } else if (response && response.message && !response.error && !response.errors) {
+                    if (requestId === buildRequest) {
+                        statusAdapter.text(response.message);
+                    }
                 } else if (response) {
-                    landuse.pushResponseStacktrace(landuse, response);
+                    handleBuildError({ body: response }, requestId);
                 }
-            }).catch(handleError);
+            }).catch(function (error) {
+                handleBuildError(error, requestId);
+            });
         };
 
         landuse.modify_coverage = function (domId, cover, value) {
@@ -854,7 +888,7 @@ var Landuse = (function () {
             landuse.mode = mode;
 
             var taskMsg = "Setting Mode to " + mode + " (" + (singleSelection || "") + ")";
-            resetStatus(taskMsg);
+            resetStatus(taskMsg, true);
 
             http.requestWithSessionToken(
                 url_for_run("set-landuse-mode", { prefix: "/rq-engine/api" }),
@@ -898,7 +932,7 @@ var Landuse = (function () {
             }
 
             var taskMsg = "Setting Landuse Db to " + value;
-            resetStatus(taskMsg);
+            resetStatus(taskMsg, true);
 
             http.requestWithSessionToken(
                 url_for_run("set-landuse-db", { prefix: "/rq-engine/api" }),

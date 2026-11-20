@@ -52,6 +52,7 @@ def prepare_redisprep_job_id(
     excluded_dependency_job_ids: Callable[[Job], Iterable[str]] | None = ...,
     workflow_root_meta_key: str | None = ...,
     lease_checkpoint: Callable[[], None] | None = ...,
+    before_preallocate: Callable[[], None] | None = ...,
 ) -> None: ...
 def enqueue_tracked_rq_job(
     queue: Any,
@@ -63,6 +64,7 @@ def enqueue_tracked_rq_job(
     args: tuple[Any, ...],
     kwargs: dict[str, Any] | None = ...,
     on_job_id: Callable[[str], None] | None = ...,
+    before_enqueue: Callable[[], None] | None = ...,
     timeout: Any = ...,
     meta: dict[str, Any] | None = ...,
     conflict_keys: Iterable[str] | None = ...,

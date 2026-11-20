@@ -6,10 +6,11 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-import requests
+import os
 from posixpath import join as urljoin
 
 import numpy as np
+import requests
 
 from wepppy.all_your_base import c_to_f
 
@@ -17,14 +18,46 @@ from wepppy.all_your_base import c_to_f
 _metquery_url = "https://wepp.cloud/webservices/metquery/"
 
 
+def _raise_eobs_sample_error(response, dataset, lng, lat):
+    fields = {'rr': 'rainfall', 'tn': 'minimum temperature', 'tx': 'maximum temperature'}
+    field = fields[dataset.split('/')[2]]
+    location = f'longitude {lng}, latitude {lat}'
+    if response.status_code == 503:
+        raise RuntimeError(f'The E-OBS provider is temporarily unavailable for {field} at {location}.')
+    if response.status_code != 422:
+        return
+
+    try:
+        payload = response.json()
+    except ValueError:
+        return
+    if not isinstance(payload, dict) or payload.get('Dataset') != dataset:
+        return
+    code = payload.get('Code')
+    month = payload.get('Month')
+    when = f', month {month}' if type(month) is int and 1 <= month <= 12 else ''
+    if code == 'eobs_coverage_unavailable':
+        raise ValueError(
+            f'E-OBS has no coverage for {field} at {location}{when}. '
+            'Choose another available climate dataset for this watershed.'
+        )
+    if code == 'eobs_invalid_sample':
+        raise ValueError(f'E-OBS returned an invalid {field} sample at {location}{when}.')
+
+
 def _metquery_retrieve_monthly(dataset, lng, lat, method):
-    global _metquery_url
-    query = urljoin(_metquery_url, 'monthly') + \
+    eobs_cubic = method == 'cubic' and dataset in {
+        'eu/e-obs/rr/mean', 'eu/e-obs/tn/mean', 'eu/e-obs/tx/mean',
+    }
+    base_url = (os.environ.get('EOBS_METQUERY_URL') or _metquery_url) if eobs_cubic else _metquery_url
+    query = urljoin(base_url, 'monthly') + \
                     '?lat={lat}&lng={lng}&dataset={dataset}&method={method}'\
                     .format(dataset=dataset, lat=lat, lng=lng, method=method)
     r = requests.get(query)
 
     if r.status_code != 200:
+        if eobs_cubic:
+            _raise_eobs_sample_error(r, dataset, lng, lat)
         raise Exception("Encountered error retrieving from metquery")
 
     # noinspection PyBroadException

@@ -698,6 +698,7 @@ def test_soil_pure_template_renders_ssurgo_cache_checkbox(jinja_env: Environment
             single_dbselection=None,
             ksflag=True,
             clear_ssurgo_cache_on_rebuild=True,
+            uses_esdac=lambda _mode: False,
         ),
         soildboptions=["DB1"],
         disturbed=None,
@@ -2091,6 +2092,8 @@ def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) 
 
 
 def test_landuse_template_renders_upload_build_fields_and_lifecycle(jinja_env: Environment) -> None:
+    from wepppy.wepp.management.managements import landuse_management_mapping_options
+
     template = jinja_env.get_template("controls/landuse_pure.htm")
     rendered = template.render(
         landuse=SimpleNamespace(
@@ -2102,7 +2105,7 @@ def test_landuse_template_renders_upload_build_fields_and_lifecycle(jinja_env: E
             mapping="disturbed",
         ),
         landuseoptions=[{"Key": "42", "Description": "Forest"}],
-        landuse_management_mapping_options=[{"Key": "disturbed", "Description": "Disturbed"}],
+        landuse_management_mapping_options=landuse_management_mapping_options,
         landcover_datasets=[SimpleNamespace(key="nlcd/2024", label="NLCD", description=None, management_file=None)],
         wepp=SimpleNamespace(multi_ofe=False),
         ron=SimpleNamespace(mods={"disturbed"}),
@@ -2119,6 +2122,7 @@ def test_landuse_template_renders_upload_build_fields_and_lifecycle(jinja_env: E
     assert 'accept=".img,.tif"' in rendered
     assert 'id="landuse_management_mapping_selection"' in rendered
     assert 'name="landuse_management_mapping_selection"' in rendered
+    assert 'value="eu-esdac-disturbed"' in rendered
     assert 'id="checkbox_burn_shrubs"' in rendered
     assert 'name="checkbox_burn_shrubs"' in rendered
     assert 'id="checkbox_burn_grass"' in rendered
@@ -4537,15 +4541,20 @@ def test_dss_export_control_renders_mode_and_enqueue_contract(jinja_env: Environ
 
 
 def test_treatments_control_renders_selection_upload_and_build_contract(jinja_env: Environment) -> None:
+    from wepppy.wepp.management.managements import landuse_management_mapping_options
+
     template = jinja_env.get_template("controls/treatments_pure.htm")
     rendered = template.render(
         treatments=SimpleNamespace(mode=SimpleNamespace(value=4), treatments_lookup={"Thin": 1}),
         treatmentoptions=[{"Key": "thin", "Description": "Thin"}],
-        landuse_management_mapping_options=[{"Key": "map", "Description": "Map"}],
-        landuse=SimpleNamespace(mapping="map"),
+        landuse_management_mapping_options=landuse_management_mapping_options,
+        landuse=SimpleNamespace(mapping="disturbed"),
     )
     for marker in ('name="treatments_mode"', 'name="input_upload_landuse"', 'accept=".tif,.img"', 'name="landuse_management_mapping_selection"', 'data-treatments-action="build"'):
         assert marker in rendered
+    assert 'value="disturbed"' in rendered
+    assert 'value="eu-esdac-disturbed"' not in rendered
+
 
 
 def test_debris_flow_control_renders_override_and_run_contract(jinja_env: Environment) -> None:
@@ -5118,7 +5127,7 @@ def test_run_bootstrap_uses_saved_preset_for_i_crews_outline_and_credit(
         disturbed=None, baer=None,
         watershed=SimpleNamespace(has_channels=False, has_subcatchments=False, has_outlet=False),
         landuse=SimpleNamespace(has_landuse=False, mode=0, single_selection=None),
-        soils=SimpleNamespace(has_soils=False, mode=0, single_dbselection=None),
+        soils=SimpleNamespace(soil_summary_ready=False, mode=0, single_dbselection=None),
         climate=SimpleNamespace(has_station=False, has_climate=False, has_observed=False),
         wepp=SimpleNamespace(
             has_run=False, dss_export_mode=None, has_dss_zip=False,
@@ -5167,6 +5176,7 @@ def test_single_source_controls_use_sbs_feedback_and_escape_names(jinja_env, kin
     controller = SimpleNamespace(mode=SimpleNamespace(value=5), nlcd_db='nlcd/2019',
                                  single_selection=0, single_dbselection=None, initial_sat=0.75,
                                  ksflag=False, clear_ssurgo_cache_on_rebuild=False,
+                                 uses_esdac=lambda _mode: False,
                                  single_user_defined_filename='<unsafe>.MAN' if kind == 'landuse' else '<unsafe>.SOL')
     common['landuse' if kind == 'landuse' else 'soils'] = controller
     html = jinja_env.get_template(f'controls/{kind}_pure.htm').render(**common)
@@ -5225,6 +5235,22 @@ def test_water_interpretation_help_does_not_require_run_readme(jinja_env, single
     assert "Understanding water balance and runoff" in rendered
     assert ("Output files, columns, and sample data" in rendered) == has_readme
     assert "Interchange README (schema + preview)" not in rendered
+
+
+@pytest.mark.parametrize(('mode', 'event_description'), [
+    (15, 'These results describe an individual event.'),
+    (14, 'Running a new batch requires per-event processing.'),
+])
+def test_single_storm_results_explain_the_available_event_outputs(jinja_env, mode, event_description):
+    rendered = jinja_env.get_template('controls/wepp_reports.htm').render(
+        climate=SimpleNamespace(is_single_storm=True, climate_mode=mode,
+                                ss_batch_storms=[{'ss_batch_key': 'storm'}] if mode == 14 else None, mods=set()),
+        prep=SimpleNamespace(has_sbs=False), runid='test-run', config='test-config',
+        totalwatsed3_exists=False, totalwatsed2_exists=False,
+    )
+    assert 'Single-storm runs are deprecated.' in rendered
+    assert event_description in rendered
+    assert ('Watershed Event-by-Event Output' in rendered) == (mode == 15)
 
 
 @pytest.mark.parametrize("ready", [False, True])
@@ -5342,3 +5368,13 @@ def test_run_header_developer_indicator_uses_current_view_model(jinja_env, devel
     indicator = re.search(r"<span data-project-developer-indicator ([^>]*)>", rendered)
     assert indicator is not None
     assert ("hidden" in indicator.group(1)) is (developer_mode is not True)
+
+
+@pytest.mark.parametrize(('stored', 'effective', 'warning'), [(15, 12, False), (12, 15, True)])
+def test_climate_summary_warning_follows_the_active_upload(jinja_env, stored, effective, warning):
+    climate = SimpleNamespace(
+        climate_mode=SimpleNamespace(value=stored), is_single_storm=stored == 15,
+        active_uploaded_cli_mode=effective, cli_fn='user.cli', par_fn=None, monthlies=None,
+    )
+    html = jinja_env.get_template('reports/climate.htm').render(climate=climate, station_meta=None)
+    assert ('Single-storm climates are deprecated.' in html) is warning

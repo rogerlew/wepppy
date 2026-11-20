@@ -24,13 +24,18 @@
          collapsible=True,
          description=card_description | trim) %}
       {% set is_single_storm = climate.is_single_storm %}
+      {% set is_single_storm_batch = climate.climate_mode | default(-1) | int == 14 %}
       <section class="wc-stack">
         <h4 class="wc-heading wc-heading--sm">WEPP Results</h4>
         {% if is_single_storm %}
           <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
             <p class="wc-alert__body">
-              <strong>Single-storm runs are deprecated and unsupported.</strong>
-              Legacy outputs may be incomplete or unreliable. Choose a continuous climate dataset to run WEPP.
+              <strong>Single-storm runs are deprecated.</strong>
+              {% if is_single_storm_batch %}
+                These results are from a saved storm batch. Running a new batch requires per-event processing.
+              {% else %}
+                These results describe an individual event.
+              {% endif %}
               For event-scale analysis, use the Storm Event Analyzer.
             </p>
             {% if storm_event_analyzer_ready|default(false) %}
@@ -45,12 +50,14 @@
             {% endif %}
           </div>
           <div class="wc-stack">
+            {% if not is_single_storm_batch %}
             <a class="wc-link wc-link--file"
                href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config) }}"
                target="_blank"
                rel="noopener">
               Watershed Loss Summary
             </a>
+            {% endif %}
             <a class="wc-link wc-link--file"
                href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/') }}"
                target="_blank"
@@ -65,7 +72,7 @@
               Output files, columns, and sample data
             </a>
             {% endif %}
-            {% if not climate.ss_batch_storms %}
+            {% if not is_single_storm_batch and not climate.ss_batch_storms %}
             <a class="wc-link wc-link--file"
                href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/loss_pw0.txt') }}"
                target="_blank"

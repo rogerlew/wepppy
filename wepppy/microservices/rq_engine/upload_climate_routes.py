@@ -20,18 +20,20 @@ from wepppy.nodb.project_config_capabilities import (
     LocaleAuthorityInvalidError,
     resolve_run_capability_authority,
 )
-from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.microservices.upload_boundary import UploadBoundaryError, prepare_filename
+from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
+from wepppy.rq.climate_upload_attempt import ClimateUploadAttempt
 from wepppy.rq.project_rq import build_climate_rq, upload_cli_rq
-from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
+from wepppy.rq.submission_recovery import RqEnqueueVerificationError, RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback
-from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success
+from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success, validate_upload_file
 from .webhooks import reject_unsupported_payload
 
 logger = logging.getLogger(__name__)
@@ -159,20 +161,9 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         if upload is None:
             return upload_failure("input_upload_cli must be provided")
 
-        saved_path = mutate_root(
-            wd,
-            "climate",
-            lambda: save_upload_file(
-                upload,
-                allowed_extensions=UPLOAD_CLI_ALLOWED_EXTENSIONS,
-                dest_dir=Path(climate.cli_dir),
-                filename_transform=lambda value: value,
-                overwrite=True,
-                max_bytes=UPLOAD_CLI_MAX_BYTES,
-            ),
-            purpose="rq-upload-cli-save",
-        )
-    except UploadError as exc:
+        validate_upload_file(upload, allowed_extensions=UPLOAD_CLI_ALLOWED_EXTENSIONS, max_bytes=UPLOAD_CLI_MAX_BYTES)
+        filename = prepare_filename(upload.filename, lowercase_by_default=False)
+    except UploadBoundaryError as exc:
         return upload_failure(str(exc), status=int(getattr(exc, "status_code", 400)))
     except RequestPayloadError:
         raise
@@ -183,10 +174,38 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         logger.exception("rq-engine upload-cli save failed")
         return error_response_with_traceback("Could not save file", status_code=500)
 
+    attempt: ClimateUploadAttempt
+    staging = False
+
+    def capture_job(job_id: str) -> None:
+        nonlocal attempt
+        attempt = ClimateUploadAttempt(Path(wd), runid, job_id, filename)
+
+    def stage_candidate() -> None:
+        nonlocal staging
+        staging = True
+
+        def save_candidate() -> None:
+            attempt.create()
+            try:
+                save_upload_file(
+                    upload,
+                    allowed_extensions=UPLOAD_CLI_ALLOWED_EXTENSIONS,
+                    dest_dir=attempt.directory,
+                    filename_transform=lambda value: value,
+                    max_bytes=UPLOAD_CLI_MAX_BYTES,
+                )
+            except UploadError:
+                # No job can have this attempt while the admission callback runs.
+                attempt.directory.rmdir()
+                raise
+            attempt.record("staged", attempt.source_digest(), prep.get_rq_job_id("build_climate_rq"))
+
+        mutate_root(wd, "climate", save_candidate, purpose="rq-upload-cli-stage")
+        staging = False
+
     try:
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.build_climate)
-
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
@@ -196,7 +215,10 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
                 prep=prep,
                 job_key="upload_cli_rq",
                 runid=runid,
-                args=(runid, saved_path.name),
+                args=(runid, filename),
+                kwargs={"staged": True},
+                on_job_id=capture_job,
+                before_enqueue=stage_candidate,
                 timeout=RQ_TIMEOUT,
                 conflict_keys=("build_climate_rq", "upload_cli_rq"),
                 allowed_root_funcs=(build_climate_rq, upload_cli_rq),
@@ -206,9 +228,20 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response(str(exc), status_code=409, code="job_active")
     except UploadError as exc:
         return upload_failure(str(exc), status=int(getattr(exc, "status_code", 400)))
-    except Exception:  # broad-except: boundary contract
+    except RqEnqueueVerificationError:
+        logger.exception("rq-engine could not confirm climate upload enqueue")
+        return error_response_with_traceback(
+            "Could not confirm the climate upload job. The submitted file was retained.", status_code=500,
+        )
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        if staging:
+            logger.exception("rq-engine upload-cli save failed")
+            return error_response_with_traceback("Could not save file", status_code=500)
         logger.exception("rq-engine upload-cli enqueue failed")
-        return error_response_with_traceback("Failed validating file", status_code=500)
+        return error_response_with_traceback("Could not queue the climate upload", status_code=500)
 
 
 __all__ = ["router"]
