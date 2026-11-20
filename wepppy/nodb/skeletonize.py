@@ -31,6 +31,7 @@ RUN_SKELETON_ALLOWLIST: tuple[str, ...] = (
     "wepp.nodb",
     "climate/*",
     "climate_artifacts",
+    "landuse_artifacts",
     "dem/wbt/*.geojson",
     "disturbed/disturbed_land_soil_lookup.csv",
     # Canonical directory parquet locations.

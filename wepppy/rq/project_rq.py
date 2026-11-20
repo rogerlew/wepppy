@@ -49,6 +49,7 @@ from wepppy.config.redis_settings import (
     redis_host,
 )
 from wepppy.rq.climate_upload_attempt import ClimateUploadAttempt, validate_cli_basename
+from wepppy.rq.landuse_upload_attempt import LanduseUploadAttempt, apply_landuse_upload
 from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.job_dependencies import release_deferred_job_if_ready
 from wepppy.rq.submission_recovery import RqEnqueueVerificationError
@@ -2100,11 +2101,15 @@ def build_rangeland_cover_rq(
 
 
 @with_exception_logging
-def build_landuse_rq(runid: str) -> None:
+def build_landuse_rq(
+    runid: str, *, uploaded_filename: str | None = None, upload_receipt_sha256: str | None = None,
+) -> None:
     """Construct landuse layers for the watershed.
 
     Args:
         runid: Identifier used to locate the working directory.
+        uploaded_filename: Sanitized source name for a staged upload.
+        upload_receipt_sha256: Bound digest of the accepted upload's receipt.
 
     Raises:
         Exception: Propagates errors from landuse controller build routines.
@@ -2122,7 +2127,37 @@ def build_landuse_rq(runid: str) -> None:
 
         def _build_landuse() -> None:
             clear_nodb_file_cache(runid, pup_relpath="landuse.nodb")
-            Landuse.getInstance(wd).build()
+            landuse = Landuse.getInstance(wd)
+            if uploaded_filename is None:
+                landuse.build()
+                return
+
+            def apply_and_build() -> None:
+                prep = RedisPrep.getInstance(wd)
+                if prep.get_rq_job_id("build_landuse_rq") != job_id:
+                    raise ValueError("A newer land-use operation superseded this upload.")
+                attempt = LanduseUploadAttempt(Path(wd), runid, job_id, uploaded_filename)
+                applied = None
+                if upload_receipt_sha256 and getattr(landuse, "_user_defined_upload_receipt", None) == upload_receipt_sha256:
+                    applied = landuse.user_defined_raster_destination()
+                with attempt.snapshot(upload_receipt_sha256, applied=applied) as snapshot:
+                    def invalidate_build():
+                        prep.update_metadata(remove=(
+                            f"timestamps:{TaskEnum.build_landuse}", f"timestamps:{TaskEnum.run_geneva}",
+                        ))
+
+                    apply_landuse_upload(
+                        landuse, snapshot, uploaded_filename, upload_receipt_sha256, invalidate_build,
+                    )
+                    landuse.build()
+                try:
+                    attempt.remove_completed_rasters()
+                except OSError:
+                    landuse.logger.warning("Could not remove completed land-use staging rasters", exc_info=True)
+
+            _run_with_directory_root_lock(
+                wd, "watershed", apply_and_build, purpose="build-uploaded-landuse-rq",
+            )
 
         _run_with_directory_root_lock(
             wd,

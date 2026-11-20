@@ -1,5 +1,5 @@
 import copy
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 import json
 from io import BytesIO
 from pathlib import Path
@@ -51,6 +51,10 @@ class _DummySubmissionLock:
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
     from wepppy.rq import submission_recovery
+    # The queue stand-in replaces the shared Redis client. Directory lease
+    # behavior is exercised by the upload persistence and contention controls.
+    monkeypatch.setattr(landuse_routes, "nodir_maintenance_lock", lambda *args, **kwargs: nullcontext())
+
 
     class DummyLock:
         def acquire(self, **kwargs):

@@ -3,13 +3,15 @@ from __future__ import annotations
 from _typeshed import Incomplete
 from collections.abc import Generator
 from enum import IntEnum
-from typing import Collection, Any, ClassVar, Dict, List, Mapping, Tuple
+from pathlib import Path
+from typing import Callable, Collection, Any, ClassVar, Dict, List, Mapping, Tuple
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.locales import LanduseDataset
 
 __all__ = [
     'LanduseNoDbLockedException',
     'LanduseCustomMappingError',
+    'UserDefinedLanduseIncompatible',
     'LanduseMode',
     'read_cover_defaults',
     'Landuse',
@@ -30,6 +32,8 @@ class LanduseCustomMappingError(ValueError):
         details: Dict[str, Any] | None = ...,
     ) -> None: ...
 
+
+class UserDefinedLanduseIncompatible(ValueError): ...
 
 class LanduseMode(IntEnum):
     Undefined = -1
@@ -134,6 +138,17 @@ class Landuse(NoDbBase):
     def nlcd_db(self) -> str | None: ...
     @nlcd_db.setter
     def nlcd_db(self, value: str) -> None: ...
+    def user_defined_raster_destination(self) -> Path: ...
+    @staticmethod
+    def align_user_defined_raster(source: Path, grid: str, aligned: Path) -> None: ...
+    def inspect_user_defined_raster(self, aligned_path: Path, *, mapping: str, dataset: str | None, buffer_code: int | None) -> list[str]: ...
+    def observe_user_defined_upload(self, *, mapping: str, dataset: str | None) -> tuple[Any, str]: ...
+    def user_defined_selection_identity(self) -> list: ...
+    def publish_user_defined_raster(
+        self, staging: Path, *, filename: str, mapping: str, dataset: str | None,
+        buffer_code: int | None, expected_inputs: dict | None = ..., receipt_digest: str | None = ...,
+        invalidate_build: Callable[[], None] | None = ..., batch_raw_digest: str | None = ...,
+    ) -> None: ...
     def build(self, retrieve_nlcd: bool = True) -> None: ...
     def identify_disturbed_class(self, topaz_id: str, mofe_id: str | None = None) -> str | None: ...
     def identify_burn_class(self, topaz_id: str, mofe_id: str | None = None) -> str | None: ...

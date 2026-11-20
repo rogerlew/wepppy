@@ -110,3 +110,31 @@ failures and overlapping submissions remain part of staged worker
 acceptance. Screenshot `landuse-preflight-retained-report.png` and response
 receipt `forest-landuse-preflight-browser-r6.log` are in the restricted
 forest evidence directory.
+
+## Staged worker validation
+
+The staged receipt and native raster compatibility path were exercised on
+a private copy of the controlled forest project. Actual FastAPI request
+handling, Redis admission and an RQ worker used the retained CORINE source.
+Class 999 returned an actionable HTTP 400 before queue admission. A same-name
+competing upload could not change the accepted bytes. Fault injection after
+publication proved the completion marker was cleared. An actual same-ID
+requeue generated all 58 expected management rows, including 16 class-25
+Mixed forest rows. Valid admission switched the previous VRT path to the
+verified TIFF. A later selection edit made a pending upload ineligible
+without changing its predecessor's active files or completion marker.
+
+A private batch control used the same effective-path lease as the batch
+worker. Holding that lease produced a conflict before raw publication. The
+base accepted its tested source with delineation unavailable and returned
+settings-only acknowledgement. A fresh leaf copy then aligned the retained
+raw source and generated all 58 rows through `Landuse.build()` with the
+leaf geometry. Existing leaves keep their copied settings until the normal
+reset workflow. Existing queued calls without an upload receipt are
+supported.
+
+The independent reviews prompted controls for native missing-coverage
+fallback, explicit aligned NoData, template writer serialization, modern
+NoDir projections and current-job recovery. [Security review](20261120_landuse_upload_security_review.md)
+records these findings. The old original `LandCover25m.tif` is unavailable.
+The native and browser incident controls use the retained CORINE raster.

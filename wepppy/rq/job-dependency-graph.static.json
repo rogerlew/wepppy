@@ -228,9 +228,19 @@
     "enqueue_target": "build_landuse_rq",
     "job_meta_stage": null,
     "notes": [],
+    "queue_name": "unknown",
+    "source_function": "build_landuse",
+    "source_lineno": 885,
+    "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "build_landuse_rq",
+    "job_meta_stage": null,
+    "notes": [],
     "queue_name": "default",
     "source_function": "build_landuse",
-    "source_lineno": 860,
+    "source_lineno": 949,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -240,7 +250,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "modify_landuse_mapping",
-    "source_lineno": 1174,
+    "source_lineno": 1266,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -672,7 +682,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 786,
+    "source_lineno": 787,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -684,7 +694,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 794,
+    "source_lineno": 795,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -694,7 +704,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1651,
+    "source_lineno": 1652,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -704,7 +714,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1667,
+    "source_lineno": 1668,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -716,7 +726,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1675,
+    "source_lineno": 1676,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -728,7 +738,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 3098,
+    "source_lineno": 3133,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

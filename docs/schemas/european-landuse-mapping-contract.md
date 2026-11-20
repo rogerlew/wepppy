@@ -70,8 +70,7 @@ percentage-specific soil scenario from a management filename.
 
 ### Uploaded raster compatibility
 
-The Disturbed table check is implemented. Aligned-raster compatibility,
-admitted worker publication and batch replay remain pending. Use the normal upload authorization,
+The upload compatibility checks use the normal upload authorization,
 raster validation, and selected base or run-owned override map. For a
 delineated run, validate a private new or reused raw raster and its aligned
 TIFF against the current watershed. Use the same classification and NoData
@@ -115,8 +114,10 @@ there and run the same full raster compatibility check when the batch
 workflow has all watershed inputs, before its active build. Each batch leaf
 aligns retained raw bytes to its own delineation. Where all watershed
 dependencies are already available, batch configuration can validate
-synchronously. Existing direct and legacy queued builds with a usable
-prealigned input can build without a raw receipt. This legacy behavior
+synchronously. New and reset batch leaves receive the new raw source from
+the normal base-project copy. Existing leaves continue to use their copied
+settings until the operator selects the existing reset workflow. Ordinary
+legacy builds with a usable prealigned input can run without a raw receipt. This legacy behavior
 does not apply to a newly admitted raster or pending batch association. Job-bound evidence and private attempts follow the
 existing climate upload receipt and archive visibility conventions.
 
@@ -124,3 +125,14 @@ Apply the [raster driver and upload contract](upload-endpoint-contract.md#raster
 [RQ response envelope](rq-response-contract.md#job-submission-responses),
 [controller state contract](rq-controller-state-contract.md#uploaded-landuse-attempts),
 and [NoDb derived byte verification](nodb-persistence-concurrency-contract.md#derived-input-byte-verification-implemented).
+
+An admitted job rechecks its receipt, raster bytes, live geometry and
+effective map before publication. Map editors and selection writers acquire
+the same land-use root used through worker consumption. An interrupted
+same-ID job can retry when the previously applied state and files match
+its receipt. A successful job retains the receipt and removes the duplicate
+staged rasters. Definite pre-admission rejections remove their private
+staged files. A rejected or superseded attempt preserves prior readiness.
+When a worker starts committing verified replacements it removes prior
+land-use and Geneva completion markers. A later worker failure cannot
+certify the new inputs as built.

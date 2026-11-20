@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import copy
+from contextlib import contextmanager, nullcontext
 import hashlib
 import json
 import logging
 import os
 import re
+import shutil
 import tempfile
 from os.path import exists as _exists
 from os.path import join as _join
@@ -22,6 +24,7 @@ from rq import Queue
 from starlette.datastructures import UploadFile
 from werkzeug.utils import secure_filename
 
+from wepppy.all_your_base.file_digest import sha256_file
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core import (
@@ -31,7 +34,7 @@ from wepppy.nodb.core import (
     Watershed,
     WatershedNotAbstractedError,
 )
-from wepppy.nodb.core.landuse import MOFE_SINGLE_LANDUSE_MESSAGE
+from wepppy.nodb.core.landuse import MOFE_SINGLE_LANDUSE_MESSAGE, UserDefinedLanduseIncompatible
 from wepppy.nodb.mods.disturbed import Disturbed, IncompatibleDisturbedMapping, build_disturbed_key_lookup
 from wepppy.nodb.locales.landuse_catalog import get_landcover_entry, landcover_catalog_id
 from wepppy.nodb.locales.capability_graph import CapabilityGraph
@@ -46,6 +49,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
+from wepppy.rq.landuse_upload_attempt import LanduseUploadAttempt
 from wepppy.rq.project_rq import build_landuse_rq, modify_landuse_mapping_rq
 from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.wepp.management import ManagementMapLoadError
@@ -253,6 +257,16 @@ def mutate_root(
     with nodir_maintenance_lock(wd, root, purpose=purpose):
         _require_directory_root(wd, root)
         return callback()
+
+
+@contextmanager
+def _lock_landuse_configuration(wd, landuse):
+    """Serialize settings and map files with the uploaded-raster worker."""
+    scope = "effective_root_path" if getattr(landuse, "run_group", None) == "batch" else "legacy_runid"
+    _require_directory_root(wd, "landuse")
+    with nodir_maintenance_lock(wd, "landuse", scope=scope, purpose="rq-landuse-configuration"):
+        _require_directory_root(wd, "landuse")
+        yield
 
 
 def _require_directory_root(wd: str, root: str) -> None:
@@ -739,132 +753,191 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
 
             with input_submission(landuse, "landuse", runid):
                 await accept_input(landuse, "landuse", upload_form, requested_mode)
-                if "disturbed" in landuse.mods:
-                    disturbed = Disturbed.getInstance(wd)
-                    burn_shrubs_value = payload.get("checkbox_burn_shrubs")
-                    if burn_shrubs_value is None:
-                        burn_shrubs_value = payload.get("burn_shrubs")
-
-                    burn_grass_value = payload.get("checkbox_burn_grass")
-                    if burn_grass_value is None:
-                        burn_grass_value = payload.get("burn_grass")
-                    disturbed.apply_build_landuse_updates(
-                        burn_shrubs=bool(burn_shrubs_value),
-                        burn_grass=bool(burn_grass_value),
-                    )
-
                 if requested_mode == LanduseMode.UserDefined:
-                    from wepppy.all_your_base.geo import raster_stacker
+                    filename = secure_filename(
+                        upload.filename if upload is not None else landuse.user_defined_landcover_fn or ""
+                    )
+                    if not filename:
+                        return error_response("Could not obtain the uploaded raster filename.", status_code=400)
+                    assert mapping is not None
 
-                    watershed = Watershed.getInstance(wd)
-                    if mapping is None:
-                        return error_response(
-                            "landuse_management_mapping_selection must be provided",
-                            status_code=400,
-                        )
-                    landuse.mapping = mapping
-
-                    form = await request_form(request)
-                    upload = _extract_upload(form, "input_upload_landuse")
-                    filename: str | None = None
-                    user_defined_fn: str | None = None
-
-                    def _mutate_landuse_user_defined() -> None:
-                        nonlocal filename
-                        nonlocal user_defined_fn
-
+                    def stage_source(target):
                         if upload is not None:
-                            if not upload.filename:
-                                raise ValueError("no filename specified")
-
-                            filename = secure_filename(upload.filename)
-                            if not filename:
-                                raise ValueError("Could not obtain filename")
-
-                            try:
-                                saved_path = save_upload_file(
-                                    upload,
-                                    allowed_extensions=LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS,
-                                    dest_dir=Path(landuse.lc_dir),
-                                    filename_transform=lambda _value: f"_{filename}",
-                                    overwrite=True,
-                                    max_bytes=LANDUSE_USER_DEFINED_MAX_BYTES,
-                                    post_save=validate_raster_upload,
-                                    isolated_post_save=True,
-                                )
-                            except UploadError as exc:
-                                raise ValueError(str(exc)) from exc
-                            user_defined_fn = str(saved_path)
-                        else:
-                            filename = landuse.user_defined_landcover_fn
-                            if existing_source_path is not None:
-                                user_defined_fn = str(existing_source_path)
-                            if not filename or not user_defined_fn or existing_source_identity is None:
-                                raise FileNotFoundError(
-                                    "input_upload_landuse is required when no existing user-defined landuse file is available."
-                                )
-
-                        source_path = resolve_run_owned_raster_path(
-                            Path(user_defined_fn),
-                            Path(landuse.lc_dir),
-                            trusted_run_root=Path(wd),
-                        )
-                        if existing_source_identity is not None:
-                            assert_validated_raster_identity(
-                                source_path, existing_source_identity
+                            save_upload_file(
+                                upload,
+                                allowed_extensions=LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS,
+                                dest_dir=target.parent,
+                                filename_transform=lambda _value: target.name,
+                                max_bytes=LANDUSE_USER_DEFINED_MAX_BYTES,
+                                post_save=validate_raster_upload,
+                                isolated_post_save=True,
                             )
                         else:
-                            validate_raster_upload(source_path)
-                        raster_stacker(str(source_path), watershed.subwta, landuse.lc_fn)
+                            assert existing_source_path is not None and existing_source_identity is not None
+                            assert_validated_raster_identity(existing_source_path, existing_source_identity)
+                            shutil.copyfile(existing_source_path, target)
+                            assert_validated_raster_identity(existing_source_path, existing_source_identity)
+                        validate_raster_upload(target)
 
-                        if not _exists(landuse.lc_fn):
-                            raise RuntimeError("Failed creating landuse file")
-                        if filename:
-                            landuse.user_defined_landcover_fn = filename
+                    burn_shrubs = _first(payload.get("checkbox_burn_shrubs"))
+                    burn_grass = _first(payload.get("checkbox_burn_grass"))
+                    if burn_shrubs is None:
+                        burn_shrubs = _first(payload.get("burn_shrubs"))
+                    if burn_grass is None:
+                        burn_grass = _first(payload.get("burn_grass"))
+
+                    attempt = None
+                    job_inputs = {"uploaded_filename": filename}
+
+                    def bind_attempt(job_id):
+                        nonlocal attempt
+                        attempt = LanduseUploadAttempt(Path(wd), runid, job_id, filename)
+
+                    def stage_raster():
+                        assert attempt is not None
+                        active_landuse = Landuse.getInstance(wd)
+                        watershed = active_landuse.watershed_instance
+                        if not watershed.is_abstracted:
+                            raise WatershedNotAbstractedError()
+                        selected_buffer = active_landuse.mofe_buffer_selection if raw_buffer in (None, "") else int(raw_buffer)
+                        observation, fingerprint = active_landuse.observe_user_defined_upload(
+                            mapping=mapping, dataset=requested_runtime_db
+                        )
+                        selection = active_landuse.user_defined_selection_identity()
+                        attempt.create()
+                        try:
+                            stage_source(attempt.raw)
+                            active_landuse.align_user_defined_raster(attempt.raw, watershed.subwta, attempt.aligned)
+                            codes = active_landuse.inspect_user_defined_raster(
+                                attempt.aligned, mapping=mapping, dataset=requested_runtime_db,
+                                buffer_code=selected_buffer,
+                            )
+                            observation.check_unchanged()
+                            job_inputs["upload_receipt_sha256"] = attempt.record({
+                                "mapping": mapping,
+                                "dataset": requested_runtime_db,
+                                "buffer": selected_buffer,
+                                "fingerprint": fingerprint,
+                                "selection": selection,
+                                "codes": codes,
+                                "burn_shrubs": bool(burn_shrubs),
+                                "burn_grass": bool(burn_grass),
+                            })
+                        except BaseException:  # broad-except: clean a private stage before propagating admission errors
+                            shutil.rmtree(attempt.directory)
+                            raise
+
+                    def configure_batch():
+                        active_landuse = Landuse.getInstance(wd)
+                        watershed = active_landuse.watershed_instance
+                        destination = active_landuse.user_defined_raster_destination()
+                        destination.mkdir(exist_ok=True)
+                        buffer_code = active_landuse.mofe_buffer_selection if raw_buffer in (None, "") else int(raw_buffer)
+                        with tempfile.TemporaryDirectory(prefix=".batch-landuse-upload-", dir=destination) as directory:
+                            staging = Path(directory)
+                            source_path = staging / f"_{filename}"
+                            stage_source(source_path)
+                            digest = sha256_file(source_path, use_cache=False)
+                            if watershed.is_abstracted:
+                                aligned = staging / "nlcd.tif"
+                                active_landuse.align_user_defined_raster(source_path, watershed.subwta, aligned)
+                                active_landuse.inspect_user_defined_raster(
+                                    aligned, mapping=mapping, dataset=requested_runtime_db, buffer_code=buffer_code,
+                                )
+                            active_landuse.publish_user_defined_raster(
+                                staging, filename=filename, mapping=mapping, dataset=requested_runtime_db,
+                                buffer_code=buffer_code, batch_raw_digest=digest,
+                            )
+                        if "disturbed" in active_landuse.mods:
+                            Disturbed.getInstance(wd).apply_build_landuse_updates(
+                                burn_shrubs=bool(burn_shrubs), burn_grass=bool(burn_grass),
+                            )
+
+                    def guard_upload(action):
+                        batch = landuse.run_group == "batch"
+                        scope = "effective_root_path" if batch else "legacy_runid"
+
+                        def stage_with_watershed_lock():
+                            _require_directory_root(wd, "watershed")
+                            with nodir_maintenance_lock(
+                                wd, "watershed", scope=scope, purpose="rq-build-landuse-upload-read",
+                            ):
+                                _require_directory_root(wd, "watershed")
+                                action()
+
+                        if batch:
+                            with nodir_maintenance_lock(
+                                wd, "landuse", scope=scope, purpose="rq-configure-batch-landuse",
+                            ):
+                                _require_directory_root(wd, "landuse")
+                                stage_with_watershed_lock()
+                        elif single_input_uploads_enabled(landuse):
+                            stage_with_watershed_lock()
+                        else:
+                            mutate_root(wd, "landuse", stage_with_watershed_lock, purpose="rq-build-landuse-upload")
 
                     try:
-                        if single_input_uploads_enabled(landuse):
-                            # input_submission already holds this module lock.
-                            _mutate_landuse_user_defined()
-                        else:
-                            mutate_root(
-                                wd,
-                                "landuse",
-                                _mutate_landuse_user_defined,
-                                purpose="rq-build-landuse-user-defined",
+                        if landuse.run_group == "batch":
+                            guard_upload(configure_batch)
+                            return JSONResponse({"message": "Set landuse inputs for batch processing"})
+                        prep = RedisPrep.getInstance(wd)
+                        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+                            job = enqueue_tracked_rq_job(
+                                Queue(connection=redis_conn), build_landuse_rq,
+                                prep=prep, job_key="build_landuse_rq", runid=runid,
+                                args=(runid,), kwargs=job_inputs, timeout=RQ_TIMEOUT,
+                                on_job_id=bind_attempt, before_enqueue=lambda: guard_upload(stage_raster),
                             )
-                    except ValueError as exc:
+                    except (UserDefinedLanduseIncompatible, IncompatibleDisturbedMapping) as exc:
                         return error_response(
-                            str(exc),
-                            status_code=_upload_status_from_message(str(exc)),
+                            f'Cannot use management map "{mapping}" with "{filename}". '
+                            f'{exc} Select a compatible management map or replace the raster.',
+                            status_code=400, code="incompatible_landuse_mapping",
                         )
-                    except FileNotFoundError as exc:
+                    except UploadError as exc:
+                        return error_response(str(exc), status_code=_upload_status_from_message(str(exc)))
+                    except (LanduseCustomMappingError, ManagementMapLoadError) as exc:
+                        return _landuse_mapping_error_response(exc)
+                    return JSONResponse({"job_id": job.id})
+
+                owns_root = single_input_uploads_enabled(landuse) and getattr(landuse, "run_group", None) != "batch"
+                with nullcontext() if owns_root else _lock_landuse_configuration(wd, landuse):
+                    if "disturbed" in landuse.mods:
+                        disturbed = Disturbed.getInstance(wd)
+                        burn_shrubs_value = payload.get("checkbox_burn_shrubs")
+                        if burn_shrubs_value is None:
+                            burn_shrubs_value = payload.get("burn_shrubs")
+
+                        burn_grass_value = payload.get("checkbox_burn_grass")
+                        if burn_grass_value is None:
+                            burn_grass_value = payload.get("burn_grass")
+                        disturbed.apply_build_landuse_updates(
+                            burn_shrubs=bool(burn_shrubs_value),
+                            burn_grass=bool(burn_grass_value),
+                        )
+
+                    mapping_error = _validate_effective_mapping(landuse, **requested_source)
+                    if mapping_error is not None:
+                        return mapping_error
+
+                    selection_changed = (
+                        requested_runtime_db is not None
+                        and requested_runtime_db
+                        != str(getattr(landuse, "nlcd_db", "") or "")
+                    ) or requested_mode != landuse.mode
+                    if selection_changed:
+                        landuse.apply_build_landuse_selection_updates(
+                            nlcd_db=requested_runtime_db,
+                            mode=requested_mode,
+                        )
+
+                    try:
+                        landuse.parse_inputs(payload)
+                    except ValueError as exc:
                         return error_response(str(exc), status_code=400)
-                    except RuntimeError as exc:
-                        return error_response(str(exc), status_code=400)
 
-                mapping_error = _validate_effective_mapping(landuse, **requested_source)
-                if mapping_error is not None:
-                    return mapping_error
-
-                selection_changed = (
-                    requested_runtime_db is not None
-                    and requested_runtime_db
-                    != str(getattr(landuse, "nlcd_db", "") or "")
-                ) or requested_mode != landuse.mode
-                if selection_changed:
-                    landuse.apply_build_landuse_selection_updates(
-                        nlcd_db=requested_runtime_db,
-                        mode=requested_mode,
-                    )
-
-                try:
-                    landuse.parse_inputs(payload)
-                except ValueError as exc:
-                    return error_response(str(exc), status_code=400)
-
-                if landuse.run_group == "batch":
-                    return JSONResponse({"message": "Set landuse inputs for batch processing"})
+                    if landuse.run_group == "batch":
+                        return JSONResponse({"message": "Set landuse inputs for batch processing"})
 
                 prep = RedisPrep.getInstance(wd)
                 prep.remove_timestamp(TaskEnum.build_landuse)
@@ -965,10 +1038,12 @@ async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONRes
                 return error_response(MOFE_SINGLE_LANDUSE_MESSAGE, status_code=400, code="invalid_landuse_mode")
             if mode == LanduseMode.Single and single_selection is None:
                 return error_response("mode and landuse_single_selection must be provided", status_code=400)
-            landuse.apply_set_landuse_mode_updates(
-                mode=mode,
-                single_selection=str(single_selection) if single_selection is not None else None,
-            )
+            owns_root = single_input_uploads_enabled(landuse) and getattr(landuse, "run_group", None) != "batch"
+            with nullcontext() if owns_root else _lock_landuse_configuration(wd, landuse):
+                landuse.apply_set_landuse_mode_updates(
+                    mode=mode,
+                    single_selection=str(single_selection) if single_selection is not None else None,
+                )
             return JSONResponse({"message": "Landuse mode updated"})
     except SingleInputError as exc:
         return error_response(str(exc), status_code=exc.status_code, code=exc.code)
@@ -1034,7 +1109,8 @@ async def set_landuse_db(runid: str, config: str, request: Request) -> JSONRespo
         runtime_db = _requested_landuse_runtime(landuse, db, authority)
         if runtime_db is None:
             return error_response("Landuse dataset is not supported by this project.", status_code=400, code="unsupported_capability")
-        landuse.nlcd_db = runtime_db
+        with _lock_landuse_configuration(wd, landuse):
+            landuse.nlcd_db = runtime_db
         return JSONResponse({"message": "Landuse database updated"})
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
@@ -1377,7 +1453,7 @@ async def upload_landuse_user_defined_managements(runid: str, config: str, reque
                 return error_response(str(exc), status_code=400)
 
             landuse = Landuse.getInstance(wd)
-            with landuse.locked():
+            with _lock_landuse_configuration(wd, landuse), landuse.locked():
                 try:
                     installed_filenames = landuse_flask._install_uploaded_managements(
                         target_dir=catalog_dir,
@@ -1466,7 +1542,7 @@ async def delete_landuse_user_defined_management(runid: str, config: str, reques
             return error_response(str(exc), status_code=400)
 
         landuse = Landuse.getInstance(wd)
-        with landuse.locked():
+        with _lock_landuse_configuration(wd, landuse), landuse.locked():
             target_path = landuse_flask._landuse_user_defined_dir(wd) / filename
             if not target_path.exists():
                 return error_response(
@@ -1556,7 +1632,7 @@ async def update_landuse_user_defined_management_description(
             return error_response("description must be provided", status_code=400)
 
         landuse = Landuse.getInstance(wd)
-        with landuse.locked():
+        with _lock_landuse_configuration(wd, landuse), landuse.locked():
             target_path = landuse_flask._landuse_user_defined_dir(wd) / filename
             if not target_path.exists():
                 return error_response(
@@ -1729,7 +1805,7 @@ async def save_landuse_map(runid: str, config: str, request: Request) -> JSONRes
         return error_response(str(exc), status_code=400, code="INVALID_RUN_PATH")
 
     try:
-        with landuse.locked():
+        with _lock_landuse_configuration(wd, landuse), landuse.locked():
             try:
                 snapshot = landuse_flask._build_landuse_map_snapshot_payload(landuse, wd)
             except ValueError as exc:
@@ -1896,11 +1972,11 @@ async def clear_landuse_map_override(runid: str, config: str, request: Request) 
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
 
-        with landuse.locked():
-            landuse._custom_mapping_relpath = None
-
-        landuse_flask._landuse_mapping_override_path(wd).unlink(missing_ok=True)
-        landuse.build_managements()
+        with _lock_landuse_configuration(wd, landuse):
+            with landuse.locked():
+                landuse._custom_mapping_relpath = None
+            landuse_flask._landuse_mapping_override_path(wd).unlink(missing_ok=True)
+            landuse.build_managements()
 
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.landuse_map)

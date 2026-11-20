@@ -127,6 +127,7 @@ from wepppy.io_wait import get_peridot_input_wait_s, get_peridot_input_poll_s
 __all__ = [
     'LanduseNoDbLockedException',
     'LanduseCustomMappingError',
+    'UserDefinedLanduseIncompatible',
     'LanduseMode',
     'read_cover_defaults',
     'Landuse',
@@ -375,6 +376,10 @@ class LanduseNoDbLockedException(Exception):
     pass
 
 
+class UserDefinedLanduseIncompatible(ValueError):
+    """An aligned upload cannot supply the current watershed and mapping."""
+
+
 class LanduseCustomMappingError(ValueError):
     """Raised when a configured run-scoped custom mapping is invalid."""
 
@@ -467,6 +472,12 @@ def _normalize_custom_mapping_relpath_for_comparison(value: Any) -> Optional[str
     return lowered or None
 
 
+def _is_managed_landuse_projection(path: Path) -> bool:
+    resolved = path.resolve()
+    nodir = path.absolute().parent / ".nodir"
+    return any(resolved.is_relative_to(nodir / layer / "landuse") for layer in ("upper", "lower"))
+
+
 def _clear_directory_preserving_symlink_mount(
     path: str,
     *,
@@ -482,23 +493,7 @@ def _clear_directory_preserving_symlink_mount(
         resolved = os.path.realpath(path)
         if not os.path.isdir(resolved):
             raise NotADirectoryError(f"Expected directory symlink target for landuse root: {path}")
-        run_root = os.path.dirname(os.path.abspath(path))
-        managed_projection_roots = (
-            os.path.join(run_root, ".nodir", "lower", "landuse"),
-            os.path.join(run_root, ".nodir", "upper", "landuse"),
-        )
-
-        def _is_managed_projection_target() -> bool:
-            for managed_root in managed_projection_roots:
-                managed_abs = os.path.abspath(managed_root)
-                try:
-                    if os.path.commonpath([resolved, managed_abs]) == managed_abs:
-                        return True
-                except ValueError:
-                    continue
-            return False
-
-        if not _is_managed_projection_target():
+        if not _is_managed_landuse_projection(Path(path)):
             # Unmanaged symlink: drop only the link and preserve target contents.
             os.unlink(path)
             return
@@ -1207,25 +1202,7 @@ class Landuse(NoDbBase):
     def nlcd_db(self, value: str) -> None:
         self._nlcd_db = value
 
-    def _build_NLCD(self, retrieve_nlcd: bool = True) -> None:
-        global wepppyo3
-
-        _map = self.ron_instance.map
-
-        # Get NLCD 2011 from wmesque webservice
-        if retrieve_nlcd:
-            self._landuse_is_vrt = False
-        lc_fn = self.lc_fn
-
-        if retrieve_nlcd:
-            wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize, 
-                             v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
-            request_catalog_refresh(self.wd, lc_fn)
-        elif not _exists(lc_fn):
-            raise FileNotFoundError(f"'{lc_fn}' not found!")
-            
-        subwta_fn = self.watershed_instance.subwta
-
+    def _classify_hillslope_landcover(self, lc_fn: str, subwta_fn: str) -> dict[str, str]:
         if wepppyo3 is None:
             self.logger.info('Building landcover grid from NLCD raster using LandcoverMap.build_lcgrid')
             # create LandcoverMap instance
@@ -1243,8 +1220,258 @@ class Landuse(NoDbBase):
             _wait_for_gdal_openable_raster(lc_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
             domlc_d = identify_mode_single_raster_key(
                 key_fn=subwta_fn, parameter_fn=lc_fn, ignore_channels=True, ignore_keys=set())
-        domlc_d = {str(k): str(v) for k, v in domlc_d.items()}
-        self.domlc_d = domlc_d
+        return {str(k): str(v) for k, v in domlc_d.items()}
+
+    def _build_NLCD(self, retrieve_nlcd: bool = True) -> None:
+        _map = self.ron_instance.map
+
+        # Get NLCD 2011 from wmesque webservice
+        if retrieve_nlcd:
+            self._landuse_is_vrt = False
+        lc_fn = self.lc_fn
+
+        if retrieve_nlcd:
+            wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize,
+                             v=self.wmesque_version, wmesque_endpoint=self.wmesque_endpoint)
+            request_catalog_refresh(self.wd, lc_fn)
+        elif not _exists(lc_fn):
+            raise FileNotFoundError(f"'{lc_fn}' not found!")
+
+        subwta_fn = self.watershed_instance.subwta
+
+        self.domlc_d = self._classify_hillslope_landcover(lc_fn, subwta_fn)
+
+    def user_defined_raster_destination(self) -> Path:
+        destination = Path(self.lc_dir)
+        if (not destination.resolve().is_relative_to(Path(self.wd).resolve())
+                or (destination.is_symlink() and not _is_managed_landuse_projection(destination))):
+            raise UserDefinedLanduseIncompatible("Expected a run-owned land-use directory.")
+        return destination
+
+    @staticmethod
+    def align_user_defined_raster(source: Path, grid: str, aligned: Path) -> None:
+        """Preserve genuine code zero while marking cells outside upload coverage."""
+        from rasterio.errors import CRSError, WarpOperationError
+        from wepppy.all_your_base.geo import raster_stacker
+
+        try:
+            raster_stacker(
+                str(source), grid, str(aligned),
+                dst_nodata=float(np.iinfo(np.int32).min), dst_dtype="float64",
+            )
+        except (ValueError, CRSError, WarpOperationError) as exc:
+            raise UserDefinedLanduseIncompatible(
+                "The raster could not be aligned to the watershed. Check its projection and class values."
+            ) from exc
+
+    @staticmethod
+    def _covered_upload_segments(aligned_path: Path, subwta_fn: str, mofe_map_fn: str):
+        import rasterio
+
+        covered = {}
+        with rasterio.open(aligned_path) as raster, rasterio.open(subwta_fn) as subwta, rasterio.open(mofe_map_fn) as mofe:
+            if (raster.shape != subwta.shape or raster.shape != mofe.shape
+                    or raster.transform != subwta.transform or raster.transform != mofe.transform):
+                raise UserDefinedLanduseIncompatible("The land-use and watershed grids do not match.")
+            for _, window in raster.block_windows(1):
+                valid = raster.read_masks(1, window=window) != 0
+                hills = subwta.read(1, window=window, masked=True)
+                segments = mofe.read(1, window=window, masked=True)
+                valid &= ~np.ma.getmaskarray(hills) & ~np.ma.getmaskarray(segments)
+                pairs = np.column_stack((hills.data[valid], segments.data[valid]))
+                for topaz_id, segment_id in np.unique(pairs, axis=0):
+                    if not is_channel(topaz_id):
+                        covered.setdefault(str(topaz_id), set()).add(str(segment_id))
+        return covered
+
+    def inspect_user_defined_raster(
+        self, aligned_path: Path, *, mapping: str, dataset: str | None, buffer_code: int | None,
+    ) -> list[str]:
+        """Check that the ordinary builder can classify every modeled unit."""
+        watershed = self.watershed_instance
+        if not watershed.is_abstracted:
+            from wepppy.nodb.core.watershed import WatershedNotAbstractedError
+
+            raise WatershedNotAbstractedError()
+
+        hillslope_ids = {str(key) for key in watershed.subs_summary if not is_channel(key)}
+        if not hillslope_ids:
+            raise UserDefinedLanduseIncompatible("The watershed has no modeled hillslopes.")
+        coverage = count_intersecting_raster_key_pairs(
+            key_fn=watershed.subwta, key2_fn=str(aligned_path), ignore_channels=True,
+            ignore_keys=set(), ignore_keys2=set(),
+        )
+        missing_hillslopes = hillslope_ids - coverage.keys()
+        if missing_hillslopes:
+            raise UserDefinedLanduseIncompatible(
+                f"The raster does not cover {len(missing_hillslopes)} modeled hillslopes."
+            )
+        assignments = self._classify_hillslope_landcover(str(aligned_path), watershed.subwta)
+        classified_ids = {key for key in assignments if not is_channel(key)}
+        if classified_ids != hillslope_ids:
+            raise UserDefinedLanduseIncompatible(
+                f"The raster does not align with the modeled hillslopes "
+                f"({len(hillslope_ids - classified_ids)} missing, {len(classified_ids - hillslope_ids)} extra)."
+            )
+        codes = {assignments[key] for key in hillslope_ids}
+
+        if self.multi_ofe:
+            model_segments = watershed.mofe_nsegments or {}
+            expected = {str(key): {str(i) for i in range(1, int(count) + 1)}
+                        for key, count in model_segments.items() if not is_channel(key)}
+            if expected.keys() != hillslope_ids or not all(expected.values()):
+                raise UserDefinedLanduseIncompatible("The watershed has incomplete modeled OFE segments.")
+            covered = self._covered_upload_segments(aligned_path, watershed.subwta, watershed.mofe_map)
+            missing_segments = {key for key, segments in expected.items() if segments - covered.get(key, set())}
+            if missing_segments:
+                raise UserDefinedLanduseIncompatible(
+                    f"The raster does not cover the modeled OFE segments on {len(missing_segments)} hillslopes."
+                )
+            segment_assignments = {
+                str(key): {str(i): str(code) for i, code in segments.items()}
+                for key, segments in self._classify_mofe_landcover(
+                    str(aligned_path), watershed.subwta, watershed.mofe_map
+                ).items() if not is_channel(key)
+            }
+            actual = {key: set(segments) for key, segments in segment_assignments.items()}
+            if actual != expected:
+                mismatched = {key for key in expected.keys() | actual.keys()
+                              if expected.get(key) != actual.get(key)}
+                raise UserDefinedLanduseIncompatible(
+                    f"The raster does not cover the modeled OFE segments on {len(mismatched)} hillslopes."
+                )
+            codes.update(code for segments in segment_assignments.values() for code in segments.values())
+
+        source = dict(mode=LanduseMode.UserDefined, dataset=dataset, upload_mapping=mapping)
+        table = self.get_mapping_dict(**source)
+        if buffer_code is not None:
+            codes.add(str(buffer_code))
+        if "disturbed" in self.mods:
+            from wepppy.nodb.mods.disturbed import build_disturbed_key_lookup
+
+            wildfire_keys = build_disturbed_key_lookup(table)
+            for vegetation in ("forest", "shrub", "grass"):
+                for severity in ("low", "moderate", "high"):
+                    codes.add(wildfire_keys[f"{vegetation}_{severity}_sev_fire"])
+
+        missing = sorted(codes - table.keys())
+        if missing:
+            detail = ", ".join(missing[:20])
+            if len(missing) > 20:
+                detail += f" and {len(missing) - 20} more"
+            raise UserDefinedLanduseIncompatible(f"Unmapped land-use codes: {detail}.")
+
+        self._verify_upload_management_files(codes, **source)
+        return sorted(codes)
+
+    def _verify_upload_management_files(self, codes, *, mode, dataset, upload_mapping):
+        mapping_reference = self._resolve_effective_mapping_reference(
+            self._source_mapping_for(mode=mode, dataset=dataset, upload_mapping=upload_mapping)
+        )
+        for code in sorted(codes):
+            try:
+                get_management_summary(code, mapping_reference).get_management()
+            except (AssertionError, IndexError, OSError, TypeError, ValueError) as exc:
+                raise UserDefinedLanduseIncompatible(
+                    f"Cannot read the management file for code {code}."
+                ) from exc
+
+    def observe_user_defined_upload(self, *, mapping: str, dataset: str | None):
+        """Bind ordered map records, relevant selections, and current watershed inputs."""
+        watershed = self.watershed_instance
+        paths = (watershed.subwta, watershed.mofe_map) if self.multi_ofe else (watershed.subwta,)
+        observation = observe_raster_dependencies(paths)
+        if observation is None:
+            raise UserDefinedLanduseIncompatible(
+                "The watershed raster identity could not be verified. Rebuild the watershed."
+            )
+        table = self.get_mapping_dict(mode=LanduseMode.UserDefined, dataset=dataset, upload_mapping=mapping)
+        signatures = {
+            "geometry": observation.signature,
+            "hillslopes": sorted(map(str, watershed.subs_summary)),
+            "segments": watershed.mofe_nsegments if self.multi_ofe else None,
+            "mapping": list(table.items()),
+            "buffer_active": getattr(watershed, "mofe_buffer", None) is not None and bool(watershed.mofe_buffer),
+        }
+        fingerprint = hashlib.sha256(json.dumps(signatures, sort_keys=True).encode()).hexdigest()
+        return observation, fingerprint
+
+    def user_defined_selection_identity(self) -> list:
+        return [int(self.mode), self.nlcd_db, self.mapping, self.mofe_buffer_selection, self.landuse_is_vrt]
+
+    def publish_user_defined_raster(
+        self, staging: Path, *, filename: str, mapping: str, dataset: str | None,
+        buffer_code: int | None, expected_inputs: dict | None = None,
+        receipt_digest: str | None = None, invalidate_build: Callable[[], None] | None = None,
+        batch_raw_digest: str | None = None,
+    ) -> None:
+        """Publish admitted uploads and their matching land-use selections."""
+        from wepppy.all_your_base.file_digest import sha256_file
+        from wepppy.nodb._derived_build import finalize, publish_files
+
+        with finalize(self) as files:
+            if expected_inputs is not None:
+                observation, fingerprint = self.observe_user_defined_upload(mapping=mapping, dataset=dataset)
+                if fingerprint != expected_inputs["fingerprint"]:
+                    raise ValueError("Land-use inputs changed after admission. Submit the raster again.")
+                self._verify_upload_management_files(
+                    expected_inputs["codes"], mode=LanduseMode.UserDefined, dataset=dataset, upload_mapping=mapping,
+                )
+                observation.check_unchanged()
+
+                if getattr(self, "_user_defined_upload_receipt", None) == receipt_digest:
+                    accepted_dataset = dataset if dataset is not None else expected_inputs["selection"][1]
+                    accepted = [int(LanduseMode.UserDefined), accepted_dataset, mapping, buffer_code, False]
+                    if (self.user_defined_selection_identity() != accepted
+                            or self.user_defined_landcover_fn != filename):
+                        raise ValueError("Applied land-use settings changed after admission. Submit the raster again.")
+                    for candidate in staging.iterdir():
+                        applied = Path(self.lc_dir) / candidate.name
+                        if applied.is_symlink() or sha256_file(applied) != sha256_file(candidate):
+                            raise ValueError("The applied land-use upload changed. Submit the raster again.")
+                elif self.user_defined_selection_identity() != expected_inputs["selection"]:
+                    raise ValueError("Land-use settings changed after admission. Submit the raster again.")
+
+            files.enter_context(publish_files(staging, self.lc_dir, self))
+            self._set_mode_value(LanduseMode.UserDefined)
+            self._mapping = mapping
+            self._user_defined_landcover_fn = filename
+            self._landuse_is_vrt = False
+            self._batch_user_defined_raw_digest = batch_raw_digest
+            self._user_defined_upload_receipt = receipt_digest
+            if dataset is not None:
+                self._nlcd_db = dataset
+            self._mofe_buffer_selection = buffer_code
+            self._buffer_man = None if buffer_code is None else self.validate_mofe_buffer_selection(buffer_code)
+            if invalidate_build is not None:
+                invalidate_build()
+
+    def _align_batch_user_defined_raster(self, expected_digest: str) -> None:
+        """Align a copied batch source to the leaf watershed before accepting it."""
+        from tempfile import TemporaryDirectory
+        from wepppy.all_your_base.file_digest import sha256_file
+        from wepppy.nodb._derived_build import finalize, publish_files
+
+        source_name = self.user_defined_landcover_fn
+        if not source_name or Path(source_name).name != source_name:
+            raise UserDefinedLanduseIncompatible("The batch land-use upload is unavailable.")
+        destination = self.user_defined_raster_destination()
+        source = destination / f"_{source_name}"
+        if (source.is_symlink() or not source.resolve().is_relative_to(Path(self.wd).resolve())
+                or sha256_file(source, use_cache=False) != expected_digest):
+            raise UserDefinedLanduseIncompatible("The batch land-use upload changed. Upload it again.")
+        with TemporaryDirectory(prefix=".align-batch-landuse-", dir=destination) as staging:
+            aligned = Path(staging) / "nlcd.tif"
+            self.align_user_defined_raster(source, self.watershed_instance.subwta, aligned)
+            if sha256_file(source, use_cache=False) != expected_digest:
+                raise UserDefinedLanduseIncompatible("The batch land-use upload changed during alignment.")
+            self.inspect_user_defined_raster(
+                aligned, mapping=self.mapping, dataset=self.nlcd_db,
+                buffer_code=self.mofe_buffer_selection,
+            )
+            with finalize(self) as files:
+                files.enter_context(publish_files(staging, destination, self))
+                self._landuse_is_vrt = False
 
     @property
     def single_user_defined_filename(self) -> Optional[str]:
@@ -1339,6 +1566,10 @@ class Landuse(NoDbBase):
             self = self.getInstance(wd)  # reload instance from .nodb
             self.build_managements()
             return
+
+        batch_raw_digest = getattr(self, "_batch_user_defined_raw_digest", None)
+        if self._mode == LanduseMode.UserDefined and batch_raw_digest:
+            self._align_batch_user_defined_raster(batch_raw_digest)
 
         with self.locked():
             if self._mode != LanduseMode.UserDefined and retrieve_nlcd:
@@ -1517,6 +1748,24 @@ class Landuse(NoDbBase):
         with open(_join(frac_dir, 'fractionals.json'), 'w') as fp:
             json.dump(frac_d, fp, indent=2)
 
+    def _classify_mofe_landcover(
+        self, lc_fn: str, subwta_fn: str, mofe_map_fn: str,
+    ) -> dict[str, dict[str, str]]:
+        if wepppyo3 is None:
+            return LandcoverMap(lc_fn).build_lcgrid(subwta_fn, mofe_map_fn)
+
+        wait_s = get_peridot_input_wait_s()
+        poll_s = get_peridot_input_poll_s()
+        for path in (subwta_fn, mofe_map_fn, lc_fn):
+            _wait_for_gdal_openable_raster(path, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+        assignments = identify_mode_intersecting_raster_keys(
+            key_fn=subwta_fn, key2_fn=mofe_map_fn, parameter_fn=lc_fn,
+        )
+        return {
+            topaz_id: {segment_id: str(code) for segment_id, code in segments.items()}
+            for topaz_id, segments in assignments.items()
+        }
+
     def _build_multiple_ofe(
         self,
         *,
@@ -1542,28 +1791,14 @@ class Landuse(NoDbBase):
                 }
                 for topaz_id, ofe_map in domlc_mofe_override.items()
             }
-        elif wepppyo3 is None:
-            lc = LandcoverMap(self.lc_fn)
-            domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
         else:
-            wait_s = get_peridot_input_wait_s()
-            poll_s = get_peridot_input_poll_s()
-            _wait_for_gdal_openable_raster(watershed.subwta, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
-            _wait_for_gdal_openable_raster(watershed.mofe_map, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
-            _wait_for_gdal_openable_raster(self.lc_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
-            domlc_d = identify_mode_intersecting_raster_keys(
-                key_fn=watershed.subwta,
-                key2_fn=watershed.mofe_map,
-                parameter_fn=self.lc_fn
-            )
-
-            for k, v in domlc_d.items():
-                for k2 in sorted(v.keys()):
-                    domlc_d[k][k2] = str(v[k2])
+            domlc_d = self._classify_mofe_landcover(self.lc_fn, watershed.subwta, watershed.mofe_map)
 
         mapping_reference = self._resolve_effective_mapping_reference(self.source_mapping)
         cached_managements = self.managements or {}
-        refresh_provider = domlc_mofe_override is None and self._corine_source_id() is not None
+        refresh_provider = domlc_mofe_override is None and (
+            getattr(self, "_mode", None) == LanduseMode.UserDefined or self._corine_source_id() is not None
+        )
         managements = {} if refresh_provider else dict(cached_managements)
 
         def resolve_segment_management(dom):
