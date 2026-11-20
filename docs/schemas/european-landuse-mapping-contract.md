@@ -70,7 +70,8 @@ percentage-specific soil scenario from a management filename.
 
 ### Uploaded raster compatibility
 
-Implementation conformance is pending. Use the normal upload authorization,
+The Disturbed table check is implemented. Aligned-raster compatibility,
+admitted worker publication and batch replay remain pending. Use the normal upload authorization,
 raster validation, and selected base or run-owned override map. For a
 delineated run, validate a private new or reused raw raster and its aligned
 TIFF against the current watershed. Use the same classification and NoData
@@ -111,9 +112,12 @@ synthesis, even where numeric codes match prior summaries.
 Keep the legacy RQ worker arguments valid. Keep authenticated batch
 configuration usable before delineation. Validate the table at admission
 there and run the same full raster compatibility check when the batch
-workflow has all watershed inputs, before its active build. Where all
-watershed dependencies are already available, batch configuration can
-validate synchronously. Job-bound evidence and private attempts follow the
+workflow has all watershed inputs, before its active build. Each batch leaf
+aligns retained raw bytes to its own delineation. Where all watershed
+dependencies are already available, batch configuration can validate
+synchronously. Existing direct and legacy queued builds with a usable
+prealigned input can build without a raw receipt. This legacy behavior
+does not apply to a newly admitted raster or pending batch association. Job-bound evidence and private attempts follow the
 existing climate upload receipt and archive visibility conventions.
 
 Apply the [raster driver and upload contract](upload-endpoint-contract.md#raster-content-and-driver-boundary),

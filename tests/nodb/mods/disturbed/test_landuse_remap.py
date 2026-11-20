@@ -504,6 +504,21 @@ def test_mofe_effective_mapping_and_generated_managements(
     assert run_output.stat().st_size > 0
 
 
+def test_disturbed_lookup_uses_first_management_key_and_ignores_blank_class():
+    from wepppy.nodb.mods.disturbed import build_disturbed_key_lookup
+    from wepppy.wepp.management import load_map
+
+    table = {
+        "blank": {"DisturbedClass": ""},
+        "first": {"DisturbedClass": "grass high sev fire"},
+        **load_map("eu-disturbed"),
+    }
+    lookup = build_disturbed_key_lookup(table)
+
+    assert lookup["grass_high_sev_fire"] == "first"
+    assert "blank" not in lookup.values()
+
+
 @pytest.mark.parametrize("custom_state,error", [
     ("incomplete", AssertionError), ("malformed", LanduseCustomMappingError),
     ("missing", LanduseCustomMappingError),

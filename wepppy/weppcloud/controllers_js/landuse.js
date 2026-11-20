@@ -370,8 +370,8 @@ var Landuse = (function () {
             }
         };
 
-        function resetStatus(taskMsg) {
-            landuse.reset_panel_state(landuse, { taskMessage: taskMsg });
+        function resetStatus(taskMsg, preserveSummary) {
+            landuse.reset_panel_state(landuse, { taskMessage: taskMsg, preserveSummary: preserveSummary === true });
         }
 
         function handleError(error) {
@@ -479,7 +479,7 @@ var Landuse = (function () {
 
         landuse.build = function () {
             var taskMsg = "Building landuse";
-            resetStatus(taskMsg);
+            resetStatus(taskMsg, true);
             resetBuildCompletionSeen();
 
             if (landuseEvents && typeof landuseEvents.emit === "function") {
@@ -854,7 +854,7 @@ var Landuse = (function () {
             landuse.mode = mode;
 
             var taskMsg = "Setting Mode to " + mode + " (" + (singleSelection || "") + ")";
-            resetStatus(taskMsg);
+            resetStatus(taskMsg, true);
 
             http.requestWithSessionToken(
                 url_for_run("set-landuse-mode", { prefix: "/rq-engine/api" }),
@@ -898,7 +898,7 @@ var Landuse = (function () {
             }
 
             var taskMsg = "Setting Landuse Db to " + value;
-            resetStatus(taskMsg);
+            resetStatus(taskMsg, true);
 
             http.requestWithSessionToken(
                 url_for_run("set-landuse-db", { prefix: "/rq-engine/api" }),

@@ -92,3 +92,8 @@ The [generic thinning checkpoint](artifacts/20261120_legacy_thinning_class_check
 is `d85661182`. Restoring the exact existing lookup label made all 146
 European inventory rows resolve. The key-123 readback kept 0.96 cover and
 the existing generic loam parameters in a parsed 7778 soil.
+
+The [land-use upload compatibility checkpoint](artifacts/20261120_landuse_upload_preflight_checkpoint.md)
+is `2de953e92`. Early Disturbed table validation and the Landuse report
+retention changes passed focused checks. Raster-code admission, staged
+worker publication and direct batch leaf validation remain open.

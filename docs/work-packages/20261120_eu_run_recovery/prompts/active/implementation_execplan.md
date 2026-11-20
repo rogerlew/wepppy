@@ -22,7 +22,10 @@ A user following the original European project workflow can produce usable clima
 - [x] Resolve the gridded CORINE source and regenerate archived assignment summaries. [CORINE provider checkpoint](../../artifacts/20261120_landuse_source_checkpoint.md)
 - [x] Repair byte-identical renamed management file references. [Historical thinning checkpoint](../../artifacts/20261120_management_reference_checkpoint.md)
 - [x] Restore generic thinning compatibility with generated management and soil readback. [Generic thinning checkpoint](../../artifacts/20261120_legacy_thinning_class_checkpoint.md)
-- [ ] Ratify remaining climate and land-use checkpoints.
+- [x] Ratify the [uploaded land-use compatibility checkpoint](../../artifacts/20261120_landuse_upload_preflight_checkpoint.md) (`2de953e92`).
+- [x] Reject incompatible Disturbed tables and preserve the applied report in Landuse Options in focused tests.
+- [ ] Validate uploaded raster codes and bind the admitted artifacts, then replay this rejection on forest.
+- [ ] Ratify remaining generated climate and scientific management checkpoints.
 - [ ] Implement and verify each confirmed failure class and its peer consumers.
 - [x] Complete the forest deployment and record the runtime revision.
 - [x] Replay the original run and verify native and browser artifacts.

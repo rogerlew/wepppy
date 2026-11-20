@@ -56,7 +56,7 @@ from copy import deepcopy
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, wait
 from concurrent.futures.process import BrokenProcessPool
-from typing import Optional, Dict, List, Tuple, Any, Union, Sequence
+from typing import Optional, Dict, List, Tuple, Any, Union, Sequence, Mapping
 
 import rasterio
 from rasterio.warp import reproject, Resampling
@@ -93,6 +93,8 @@ from .route_coefficients import (
 )
 
 __all__ = [
+    "IncompatibleDisturbedMapping",
+    "build_disturbed_key_lookup",
     'disturbed_class_aliases',
     'TREATMENT_SUFFIXES',
     'lookup_disturbed_class',
@@ -960,6 +962,42 @@ class InvalidProjection(Exception):
     __name__ = 'Invalid Projection'
 
 
+class IncompatibleDisturbedMapping(AssertionError):
+    """The management map cannot supply the required disturbance classes."""
+
+
+def build_disturbed_key_lookup(mapping_dict: Mapping[str, Mapping[str, Any]]) -> Dict[str, str]:
+    """Use the first management key for each disturbance class in map order."""
+    lookup = {}
+    missing_metadata = []
+    for key, row in mapping_dict.items():
+        disturbed_class = row.get('DisturbedClass')
+        if not isinstance(disturbed_class, str):
+            missing_metadata.append(key)
+        elif disturbed_class:
+            lookup.setdefault(disturbed_class.replace(' ', '_'), key)
+
+    if missing_metadata:
+        keys = ', '.join(missing_metadata[:10])
+        if len(missing_metadata) > 10:
+            keys += f' and {len(missing_metadata) - 10} more'
+        raise IncompatibleDisturbedMapping(
+            f'DisturbedClass is missing or invalid for management keys {keys}.'
+        )
+
+    missing_destinations = [
+        name.replace('_', ' ')
+        for vegetation in ('forest', 'shrub', 'grass')
+        for severity in ('low', 'moderate', 'high')
+        if (name := f'{vegetation}_{severity}_sev_fire') not in lookup
+    ]
+    if missing_destinations:
+        raise IncompatibleDisturbedMapping(
+            f"Missing wildfire management classes: {', '.join(missing_destinations)}."
+        )
+    return lookup
+
+
 class Disturbed(NoDbBase):
     __name__ = 'Disturbed'
     LOOKUP_VARIANT_BASE = 'base'
@@ -1620,27 +1658,7 @@ class Disturbed(NoDbBase):
     def get_disturbed_key_lookup(self, *, mapping_dict=None) -> Dict[str, str]:
         if mapping_dict is None:
             mapping_dict = self.landuse_instance.get_mapping_dict()
-        d = {}
-        for key in mapping_dict:
-            disturbed_class = mapping_dict[key]['DisturbedClass'].replace(' ', '_')
-            if not disturbed_class:  # filter '' and None
-                continue
-            if disturbed_class not in d:
-                d[disturbed_class] = key
-
-        assert 'forest_low_sev_fire' in d
-        assert 'forest_moderate_sev_fire' in d
-        assert 'forest_high_sev_fire' in d
-
-        assert 'shrub_low_sev_fire' in d
-        assert 'shrub_moderate_sev_fire' in d
-        assert 'shrub_high_sev_fire' in d
-
-        assert 'grass_low_sev_fire' in d
-        assert 'grass_moderate_sev_fire' in d
-        assert 'grass_high_sev_fire' in d
-
-        return d
+        return build_disturbed_key_lookup(mapping_dict)
 
     def remap_landuse(self, *, rebuild_managements: bool = True) -> None:
         func_name = inspect.currentframe().f_code.co_name

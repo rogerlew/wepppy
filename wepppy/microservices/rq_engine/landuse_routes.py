@@ -32,7 +32,7 @@ from wepppy.nodb.core import (
     WatershedNotAbstractedError,
 )
 from wepppy.nodb.core.landuse import MOFE_SINGLE_LANDUSE_MESSAGE
-from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.mods.disturbed import Disturbed, IncompatibleDisturbedMapping, build_disturbed_key_lookup
 from wepppy.nodb.locales.landuse_catalog import get_landcover_entry, landcover_catalog_id
 from wepppy.nodb.locales.capability_graph import CapabilityGraph
 from wepppy.nodb.project_config_capabilities import (
@@ -676,15 +676,6 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                 return mapping_error
             if requested_mode == LanduseMode.UserDefined and mapping is None:
                 return error_response("landuse_management_mapping_selection must be provided", status_code=400)
-            raw_buffer = payload.get("mofe_buffer_selection")
-            if isinstance(raw_buffer, (list, tuple, set)):
-                raw_buffer = next((item for item in raw_buffer if item not in (None, "")), None)
-            if raw_buffer not in (None, ""):
-                try:
-                    buffer_code = int(raw_buffer)
-                    landuse.validate_mofe_buffer_selection(buffer_code, **requested_source)
-                except (ValueError, TypeError, OverflowError, KeyError, InvalidManagementKey) as exc:
-                    raise RequestPayloadError("mofe_buffer_selection") from exc
 
             if requested_mode == LanduseMode.UserDefined:
                 form = await request_form(request)
@@ -720,6 +711,31 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                         )
                     except UploadError as exc:
                         return error_response(str(exc), status_code=_upload_status_from_message(str(exc)))
+
+            if requested_mode == LanduseMode.UserDefined and "disturbed" in landuse.mods:
+                try:
+                    build_disturbed_key_lookup(landuse.get_mapping_dict(**requested_source))
+                except IncompatibleDisturbedMapping as exc:
+                    filename = upload.filename if upload is not None else landuse.user_defined_landcover_fn
+                    source_name = secure_filename(filename or "") or "uploaded land cover"
+                    return error_response(
+                        f'Cannot use management map "{mapping}" with "{source_name}". '
+                        f'{exc} Select a compatible management map or replace the raster.',
+                        status_code=400,
+                        code="incompatible_landuse_mapping",
+                    )
+                except (LanduseCustomMappingError, ManagementMapLoadError) as exc:
+                    return _landuse_mapping_error_response(exc)
+
+            raw_buffer = payload.get("mofe_buffer_selection")
+            if isinstance(raw_buffer, (list, tuple, set)):
+                raw_buffer = next((item for item in raw_buffer if item not in (None, "")), None)
+            if raw_buffer not in (None, ""):
+                try:
+                    buffer_code = int(raw_buffer)
+                    landuse.validate_mofe_buffer_selection(buffer_code, **requested_source)
+                except (ValueError, TypeError, OverflowError, KeyError, InvalidManagementKey) as exc:
+                    raise RequestPayloadError("mofe_buffer_selection") from exc
 
             with input_submission(landuse, "landuse", runid):
                 await accept_input(landuse, "landuse", upload_form, requested_mode)

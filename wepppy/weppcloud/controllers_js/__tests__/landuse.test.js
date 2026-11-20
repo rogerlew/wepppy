@@ -227,6 +227,22 @@ describe("Landuse controller", () => {
         );
     });
 
+    test("selecting an upload and rejecting its map preserves the applied summary", async () => {
+        landuse.setMode(4);
+        await flushPromises();
+        httpRequestMock.mockRejectedValueOnce({
+            body: { error: { code: "incompatible_landuse_mapping", message: "Select a compatible management map." } }
+        });
+
+        landuse.build();
+        await flushPromises();
+
+        const resets = baseInstance.reset_panel_state.mock.calls.slice(-2);
+        expect(resets.map(([, options]) => options.preserveSummary)).toEqual([true, true]);
+        expect(baseInstance.set_rq_job_id).not.toHaveBeenCalled();
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
+    });
+
     test("poll failure pushes stacktrace and emits job error", async () => {
         global.WCHttp.getJson.mockResolvedValueOnce({ exc_info: "trace line" });
         landuse.rq_job_id = "job-123";

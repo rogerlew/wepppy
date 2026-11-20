@@ -1678,6 +1678,67 @@ def test_build_landuse_requires_mapping_for_user_defined(
     assert payload["error"]["message"] == "landuse_management_mapping_selection must be provided"
 
 
+@pytest.mark.parametrize(
+    ("mapping_name", "expected_issue"),
+    [
+        ("esdac", "DisturbedClass is missing or invalid"),
+        ("incomplete-corine", "grass high sev fire"),
+    ],
+)
+def test_disturbed_upload_rejects_incompatible_table_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    mapping_name: str,
+    expected_issue: str,
+) -> None:
+    from tests.factories.raster import raster_bytes
+    from wepppy.wepp.management import load_map
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: str(tmp_path))
+    landuse_dir = tmp_path / "landuse"
+    landuse_dir.mkdir()
+    raw_path = landuse_dir / "_existing.tif"
+    raster_bytes(raw_path, driver="GTiff")
+    original = raw_path.read_bytes()
+
+    if mapping_name == "esdac":
+        table = load_map("esdac")
+    else:
+        table = {key: row for key, row in load_map("eu-disturbed").items()
+                 if row["DisturbedClass"] != "grass high sev fire"}
+
+    landuse = SimpleNamespace(
+        wd=str(tmp_path),
+        mode=landuse_routes.LanduseMode.UserDefined,
+        run_group="default",
+        mods={"disturbed"},
+        lc_dir=str(landuse_dir),
+        user_defined_landcover_fn="existing.tif",
+        get_mapping_dict=lambda **source: table,
+    )
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: landuse)
+    monkeypatch.setattr(
+        landuse_routes, "input_submission",
+        lambda *args: pytest.fail("incompatible upload reached mutation"),
+    )
+    selection = "esdac" if mapping_name == "esdac" else "eu-disturbed"
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={"landuse_management_mapping_selection": selection, "mofe_buffer_selection": 25},
+        )
+
+    assert response.status_code == 400
+    error = response.json()["error"]
+    assert error["code"] == "incompatible_landuse_mapping"
+    assert selection in error["message"]
+    assert "existing.tif" in error["message"]
+    assert expected_issue in error["message"]
+    assert raw_path.read_bytes() == original
+
+
 def test_build_landuse_rejects_path_like_mapping_selection(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

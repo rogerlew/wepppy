@@ -1,4 +1,4 @@
-# Uploaded land-use raster compatibility draft
+# Uploaded land-use raster compatibility checkpoint
 
 Starting implementation `af514e39c`. The operator requested that the
 incompatible raster and management-map failures be corrected and that the
@@ -51,11 +51,10 @@ Landuse feedback, prior files and timestamps under concurrency, and normal
 archive/fork behavior without activating superseded attempts.
 
 The operator requested actionable upload failure correction and preservation
-of the European run workflow. This draft chooses private staging and named
+of the European run workflow. This checkpoint chooses private staging and named
 worker receipts to apply that request with the existing upload authorization
 and queue contracts. It changes neither accepted user inputs nor provider
-class numbering. No implementation authority is claimed before review and
-the standalone contract commit.
+class numbering. The standalone contract ancestor is `2de953e92`.
 
 ## Independent review disposition
 
@@ -71,3 +70,24 @@ malformed and symlinked paths through the established boundary.
 Implement and validate table checks first, including normal UI feedback for
 plain ESDAC in a Disturbed project. Then add the aligned-raster and admitted
 worker evidence path. A table rejection alone is partial conformance.
+
+## First implementation and controls
+
+Shared Disturbed lookup validates all table rows and the nine wildfire
+destinations before resolving an uploaded-raster buffer, mutating project
+settings or enqueuing work. Existing first-match grouping and blank
+class values remain valid. Landuse Options keeps the applied report
+visible through mode and dataset selection and build rejection.
+
+The first correctness review found that mode and dataset selection could
+clear the report before Build, and that buffer validation could mask
+incompatible-table feedback. Tests cover the corrected order and the
+selected-mode-to-rejection controller path. Focused Python passed 99 tests.
+The frontend passed all 127 Jest suites and nine Node tests. The live
+verification and full raster compatibility phase remain open.
+
+Private alignment of the retained CORINE raster to the controlled forest
+watershed returned all 58 expected hillslopes with the ordinary native
+classifier and flags. The 16 class-25 assignments match the live gridded
+CORINE result. This traces the fixture through the actual classification
+boundary. It does not certify HTTP admission or worker consumption.
