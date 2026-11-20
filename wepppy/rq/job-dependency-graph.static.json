@@ -414,7 +414,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_soils",
-    "source_lineno": 257,
+    "source_lineno": 334,
     "source_module": "wepppy/microservices/rq_engine/soils_routes.py"
   },
   {
@@ -728,7 +728,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 3042,
+    "source_lineno": 3054,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

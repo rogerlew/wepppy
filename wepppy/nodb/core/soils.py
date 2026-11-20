@@ -74,6 +74,9 @@ from copy import deepcopy
 from concurrent.futures import wait, FIRST_COMPLETED
 
 from collections import Counter
+from collections.abc import Mapping
+
+from wepppy.eu.soils.esdac.subsoil import DEFAULT_SUBSOIL, FALLBACK_DIAGNOSTIC, validate_subsoil_profile
 
 # non-standard
 import pandas as pd
@@ -543,6 +546,45 @@ class Soils(NoDbBase):
             return False
         else:
             return self.domsoil_d is not None
+
+    def uses_esdac(self, mode: SoilsMode | None = None) -> bool:
+        """Whether the candidate soil build dispatches to the ESDAC source."""
+        mode = self.mode if mode is None else mode
+        if (
+            mode != SoilsMode.Gridded
+            or self.soils_map is not None
+            or self.config_stem.startswith("ak")
+            or self.ssurgo_db == "isric"
+        ):
+            return False
+        from wepppy.nodb.project_config_capabilities import resolve_run_capability_authority
+
+        authority = resolve_run_capability_authority(self)
+        locales = authority.runtime_tokens or tuple(self.locales or ())
+        return "eu" in locales and "ChileCayumanque" not in locales
+
+    @property
+    def esdac_subsoil_defaults(self) -> dict[str, float]:
+        saved = getattr(self, "_esdac_subsoil_defaults", None)
+        if saved is None or saved == {}:
+            return dict(DEFAULT_SUBSOIL)
+        return validate_subsoil_profile(saved)
+
+    @esdac_subsoil_defaults.setter
+    @nodb_setter
+    def esdac_subsoil_defaults(self, values: Mapping[str, object]) -> None:
+        self._esdac_subsoil_defaults = validate_subsoil_profile(values)
+
+    @property
+    def soil_summary_ready(self) -> bool:
+        return self.has_soils and not getattr(self, "_esdac_release_pending", False)
+
+    @property
+    def esdac_fallback_count(self) -> tuple[int, int] | None:
+        """Counts for the published ESDAC build, when defaults were used."""
+        if self.soil_source != "esdac" or not self.soil_summary_ready:
+            return None
+        return getattr(self, "_esdac_fallback_count", None)
 
     @property
     def soil_source(self) -> Optional[str]:
@@ -1053,7 +1095,7 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
-    def _build_by_identify(self, build_func: Any) -> None:
+    def _build_by_identify(self, build_func: Any, **build_options: Any) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(build_func={build_func})')
 
@@ -1066,7 +1108,7 @@ class Soils(NoDbBase):
             for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
                 orders.append([topaz_id, (lng, lat)])
 
-            soils, domsoil_d = build_func(orders, soils_dir, status_channel=self._status_channel)
+            soils, domsoil_d = build_func(orders, soils_dir, status_channel=self._status_channel, **build_options)
             for topaz_id, k in domsoil_d.items():
                 soils[k].area += watershed.hillslope_area(topaz_id)
 
@@ -1086,10 +1128,20 @@ class Soils(NoDbBase):
                 and function_name == "build_esdac_soils"
                 else None
             )
+            self._esdac_release_pending = self._soil_source == 'esdac'
 
         self.logger.info('triggering SOILS_BUILD_COMPLETE')
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
+        if self.soil_source == "esdac":
+            from wepppy.eu.soils.esdac import load_soil_quality_report
+
+            quality = load_soil_quality_report(Path(soils_dir) / "soil_quality.json")
+            count = sum(FALLBACK_DIAGNOSTIC in profile.reason_codes for profile in quality.values())
+            with self.locked():
+                self._esdac_fallback_count = (count, len(quality)) if count else None
+                self._esdac_release_pending = False
+
 
     def _build_from_map_db(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
@@ -1218,26 +1270,34 @@ class Soils(NoDbBase):
         ksflag: Optional[bool] = None, 
         max_workers: Optional[int] = None,
         retrieve_gridded_ssurgo: bool = True,
+        *,
+        admitted_soil_mode: int | None = None,
+        esdac_subsoil_defaults: Mapping[str, object] | None = None,
     ) -> None:
+        mode = self.mode if admitted_soil_mode is None else SoilsMode(admitted_soil_mode)
+        if esdac_subsoil_defaults is not None and not self.uses_esdac(mode):
+            raise ValueError("The admitted ESDAC profile requires a gridded ESDAC build.")
         upload_policy = single_input_uploads_enabled(self)
         require_single_input_policy(
             self, watershed=self.watershed_instance if upload_policy else None,
-            require_enabled=self.mode == SoilsMode.SingleUserDefined,
+            require_enabled=mode == SoilsMode.SingleUserDefined,
         )
         self.logger.info(f'='*100)
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
-        self.logger.info(f' SoilsMode: {self._mode}')
+        self.logger.info(f' SoilsMode: {mode}')
         os.makedirs(self.soils_dir, exist_ok=True)
         with self.locked():
             self.domsoil_d = None
             self.ssurgo_domsoil_d = None
             self.raw_ssurgo_domsoil_d = None
             self._soil_source = None
+            self._esdac_fallback_count = None
+            self._esdac_release_pending = False
             self.ssurgo_substitution_d = {}
             self.ssurgo_candidate_preparation = {"status": "not_attempted", "affected_hillslopes": 0}
 
-        if self._mode == SoilsMode.SpatialAPI:
+        if mode == SoilsMode.SpatialAPI:
             self._build_spatial_api()
             return
 
@@ -1254,7 +1314,7 @@ class Soils(NoDbBase):
         run_authority = resolve_run_capability_authority(self)
         effective_locales = run_authority.runtime_tokens or tuple(self.locales or ())
 
-        if self.mode == SoilsMode.SingleUserDefined:
+        if mode == SoilsMode.SingleUserDefined:
             self._build_single_user_defined()
         elif 'ChileCayumanque' in effective_locales:
             self.logger.info('  Locale: ChileCayumanque')
@@ -1265,15 +1325,16 @@ class Soils(NoDbBase):
         elif self.config_stem.startswith('ak'):
             self.logger.info('  Locale: Alaska')
             self._build_ak()
-        elif self.mode == SoilsMode.Gridded:
+        elif mode == SoilsMode.Gridded:
             self.logger.info('  Gridded Soils Mode')
             if self.ssurgo_db == 'isric':
                 self.logger.info('    Using ISRIC database')
                 self.build_isric(initial_sat=initial_sat, ksflag=ksflag)
-            elif 'eu' in effective_locales:
+            elif self.uses_esdac(mode):
                 self.logger.info('    Using ESDAC database')
                 from wepppy.eu.soils import build_esdac_soils
-                self._build_by_identify(build_esdac_soils)
+                profile = self.esdac_subsoil_defaults if esdac_subsoil_defaults is None else esdac_subsoil_defaults
+                self._build_by_identify(build_esdac_soils, subsoil_defaults=profile)
             elif 'au' in effective_locales:
                 self.logger.info('    Using ASRIS database')
                 from wepppy.au.soils import build_asris_soils
@@ -1286,17 +1347,17 @@ class Soils(NoDbBase):
                     max_workers=max_workers,
                     retrieve_gridded_ssurgo=retrieve_gridded_ssurgo,
                 )
-        elif self.mode == SoilsMode.Single:
+        elif mode == SoilsMode.Single:
             self.logger.info('  Single Soil Mode')
             self._build_single(initial_sat=initial_sat, ksflag=ksflag)
-        elif self.mode == SoilsMode.SingleDb:
+        elif mode == SoilsMode.SingleDb:
             self.logger.info('  Single Soil from Database Mode')
             self._build_singledb()
-        elif self._mode in [SoilsMode.RRED_Burned, SoilsMode.RRED_Unburned]:
+        elif mode in [SoilsMode.RRED_Burned, SoilsMode.RRED_Unburned]:
             self.logger.info('  RRED Soils Mode')
             import wepppy
             rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
-            rred.build_soils(self._mode)
+            rred.build_soils(mode)
             return
 
         if single_input_uploads_enabled(self) and self.multi_ofe:

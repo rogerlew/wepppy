@@ -370,3 +370,34 @@ def test_http_middleware_uses_fresh_admission_context(monkeypatch):
     result = inherited.run(asyncio.run, engine.run_mutation_lifecycle_middleware(request, next_handler))
     assert result == "accepted"
     assert not connection.owners
+
+
+def test_rejected_input_persistence_leaves_previous_job_reference(monkeypatch):
+    events = []
+
+    class Prep:
+        def get_rq_job_id(self, key):
+            return "prior-job"
+
+        def set_rq_job_id(self, key, job_id):
+            events.append((key, job_id))
+
+    monkeypatch.setattr(
+        submission_recovery,
+        "reconcile_deferred_workflow",
+        lambda *args, **kwargs: SimpleNamespace(state="terminal"),
+    )
+
+    def reject_inputs():
+        raise ValueError("invalid update")
+
+    with pytest.raises(ValueError, match="invalid update"):
+        submission_recovery.prepare_redisprep_job_id(
+            Prep(),
+            job_key="build_soils_rq",
+            replacement_job_id="new-job",
+            connection=None,
+            runid="run-1",
+            before_preallocate=reject_inputs,
+        )
+    assert events == []

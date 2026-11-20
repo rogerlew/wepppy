@@ -270,6 +270,7 @@ def prepare_redisprep_job_id(
     workflow_root_meta_key: str | None = None,
     excluded_dependency_job_ids: Callable[[Job], Iterable[str]] | None = None,
     lease_checkpoint: Callable[[], None] | None = None,
+    before_preallocate: Callable[[], None] | None = None,
 ) -> None:
     """Reap deferred prior receipts, then persist a preallocated replacement ID."""
     origins = {str(origin) for origin in allowed_origins or ()}
@@ -339,6 +340,8 @@ def prepare_redisprep_job_id(
             raise RqSubmissionConflict(
                 f"Recorded {candidate_key} workflow association could not be verified."
             )
+    if before_preallocate is not None:
+        before_preallocate()
     if lease_checkpoint is not None:
         lease_checkpoint()
     prep.set_rq_job_id(job_key, replacement_job_id)
@@ -354,6 +357,7 @@ def enqueue_tracked_rq_job(
     args: tuple[Any, ...],
     kwargs: dict[str, Any] | None = None,
     on_job_id: Callable[[str], None] | None = None,
+    before_enqueue: Callable[[], None] | None = None,
     timeout: Any = None,
     meta: dict[str, Any] | None = None,
     conflict_keys: Iterable[str] | None = None,
@@ -373,6 +377,7 @@ def enqueue_tracked_rq_job(
         replacement_job_id = new_rq_job_id()
         if on_job_id is not None:
             on_job_id(replacement_job_id)
+        prior_job_id = prep.get_rq_job_id(job_key) if before_enqueue is not None else None
         prepare_redisprep_job_id(
             prep,
             job_key=job_key,
@@ -395,6 +400,7 @@ def enqueue_tracked_rq_job(
             excluded_dependency_job_ids=excluded_dependency_job_ids,
             workflow_root_meta_key=workflow_root_meta_key,
             lease_checkpoint=lease.checkpoint,
+            **({"before_preallocate": before_enqueue} if before_enqueue is not None else {}),
         )
         lease.checkpoint()
         enqueue_kwargs: dict[str, Any] = {
@@ -421,6 +427,11 @@ def enqueue_tracked_rq_job(
             )
             if committed is not None:
                 return committed
+            if before_enqueue is not None:
+                if prior_job_id:
+                    prep.set_rq_job_id(job_key, prior_job_id)
+                else:
+                    prep.update_metadata(remove=(f"rq:{job_key}",))
             raise
 
 

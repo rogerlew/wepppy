@@ -39,3 +39,7 @@ The operator authorized ESDAC-only subsoil defaults in Soil Options → Advanced
 The diagnostic source-backed donor and fallback writer trials generated and parsed 31/31 and 37/37 base soils, respectively. The configured 7778 Disturbed validation rejected its metadata readback, including an unchanged source control. Added the format-specific downstream defect to acceptance.
 
 Drafted [ADR-0151](../../adrs/ADR-0151-esdac-missing-subsoil-defaults.md) for review. It records the six seeded values, eligible missing-data signature and provenance. Application changes, candidate deployment and both incident replays remain open.
+
+The standalone [soil contract checkpoint](artifacts/20261120_esdac_soil_checkpoint.md) is `1b388d50b`. Initial soil-slice implementation is in validation. Climate, land-use management reconciliation, forest deployment and the two replays remain open.
+
+The soil slice built all 58 incident profiles through the actual batch writer, with 37 defaults and 21 unchanged native controls, and validated 35 configured 7778 Disturbed rewrites. [Local validation](artifacts/20261120_esdac_soil_validation.md) records focused gates, review, and remaining deployment evidence.

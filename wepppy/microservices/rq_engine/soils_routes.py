@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
+import json
 import logging
 import math
 import os
@@ -21,9 +23,11 @@ from wepppy.nodb.project_config_capabilities import (
     LocaleAuthorityInvalidError,
     soil_capability_modes,
 )
+from wepppy.eu.soils.esdac.subsoil import validate_subsoil_profile
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
+from wepppy.runtime_paths.thaw_freeze import maintenance_lock
 from wepppy.rq.project_rq import build_soils_rq
 from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.soils.ssurgo import NoValidSoilsException
@@ -46,6 +50,31 @@ router = APIRouter(route_class=PayloadRoute)
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
+
+
+_ESDAC_SUBSOIL_PREFIX = "esdac_subsoil_"
+
+
+async def _esdac_profile_input(request: Request, payload: dict[str, Any]) -> dict[str, float] | None:
+    values = {key.removeprefix(_ESDAC_SUBSOIL_PREFIX): value for key, value in payload.items()
+              if key.startswith(_ESDAC_SUBSOIL_PREFIX)}
+    if not values:
+        return None
+    if isinstance(getattr(request, "_json", None), dict):
+        seen: set[str] = set()
+
+        def reject_repeated_fields(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+            for key, _ in pairs:
+                if key.startswith(_ESDAC_SUBSOIL_PREFIX):
+                    if key in seen:
+                        raise ValueError("Repeat ESDAC subsoil fields are not allowed.")
+                    seen.add(key)
+            return dict(pairs)
+
+        json.loads(await request.body(), object_pairs_hook=reject_repeated_fields)
+        if any(isinstance(value, str) for value in values.values()):
+            raise ValueError("JSON ESDAC subsoil fields must be numbers.")
+    return validate_subsoil_profile(values)
 
 
 def _soil_modes_or_error(
@@ -231,38 +260,97 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
                     return error_response("sol_ver must be numeric", status_code=400)
 
 
-            with input_submission(soils, "soils", runid):
-                await accept_input(soils, "soils", upload_form, (requested_mode if requested_mode is not None else soils.mode))
-                prep = RedisPrep.getInstance(wd)
-                prep.remove_timestamp(TaskEnum.build_soils)
-                prep.remove_timestamp(TaskEnum.run_geneva)
-
-                if requested_mode is not None:
-                    soils.mode = requested_mode
-                soils.initial_sat = initial_sat
-                soils.clear_ssurgo_cache_on_rebuild = bool(
-                    payload.get("clear_ssurgo_cache_on_rebuild", False)
+            effective_mode = requested_mode if requested_mode is not None else soils.mode
+            esdac_project = soils.uses_esdac(SoilsMode.Gridded)
+            esdac = esdac_project and effective_mode == SoilsMode.Gridded
+            try:
+                profile_input = await _esdac_profile_input(request, payload)
+            except ValueError as exc:
+                return error_response(str(exc), status_code=400, code="invalid_esdac_subsoil")
+            if profile_input is not None and not esdac:
+                return error_response(
+                    "Subsoil defaults apply only to gridded ESDAC soils.",
+                    status_code=400,
+                    code="invalid_esdac_subsoil",
                 )
 
+            esdac_lock = (
+                maintenance_lock(wd, "soils", purpose="admit-esdac-soils")
+                if esdac_project and not is_single_input_project
+                else nullcontext()
+            )
+            with esdac_lock, input_submission(soils, "soils", runid):
+                await accept_input(soils, "soils", upload_form, effective_mode)
+                prep = RedisPrep.getInstance(wd)
+                try:
+                    profile = (profile_input or soils.esdac_subsoil_defaults) if esdac else None
+                except ValueError as exc:
+                    return error_response(str(exc), status_code=400, code="invalid_esdac_subsoil")
+
+                changes: list[tuple[Any, str, Any]] = [
+                    (soils, "initial_sat", initial_sat),
+                    (soils, "clear_ssurgo_cache_on_rebuild", bool(payload.get("clear_ssurgo_cache_on_rebuild", False))),
+                ]
+                if requested_mode is not None:
+                    changes.append((soils, "mode", requested_mode))
                 if disturbed is not None:
                     assert sol_ver is not None
-                    disturbed.sol_ver = sol_ver
+                    changes.append((disturbed, "sol_ver", sol_ver))
+                if profile_input is not None:
+                    changes.append((soils, "esdac_subsoil_defaults", profile_input))
 
+                removed_tasks = (TaskEnum.build_soils, TaskEnum.run_geneva)
+                applied: list[tuple[Any, str, Any]] = []
+                removed: dict[str, int] = {}
+
+                def persist_inputs() -> None:
+                    for controller, field, value in changes:
+                        if esdac_project:
+                            saved_field = "_esdac_subsoil_defaults" if field == "esdac_subsoil_defaults" else field
+                            applied.append((controller, saved_field, getattr(controller, saved_field, None)))
+                        setattr(controller, field, value)
+                    for task in removed_tasks:
+                        if esdac_project:
+                            previous = prep[str(task)]
+                            if previous is not None:
+                                removed[str(task)] = previous
+                        prep.remove_timestamp(task)
+
+                if not esdac_project or soils.run_group == "batch":
+                    persist_inputs()
                 if soils.run_group == "batch":
                     return JSONResponse({"message": "Set soils inputs for batch processing"})
 
                 conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-                with redis.Redis(**conn_kwargs) as redis_conn:
-                    q = Queue(connection=redis_conn)
-                    job = enqueue_tracked_rq_job(
-                        q,
-                        build_soils_rq,
-                        prep=prep,
-                        job_key="build_soils_rq",
-                        runid=runid,
-                        args=(runid,),
-                        timeout=RQ_TIMEOUT,
-                    )
+                tracked_options: dict[str, Any] = {}
+                if esdac_project:
+                    admitted: dict[str, Any] = {"admitted_soil_mode": int(effective_mode)}
+                    if esdac:
+                        admitted["esdac_subsoil_defaults"] = profile
+                    tracked_options = {"kwargs": admitted, "before_enqueue": persist_inputs}
+                try:
+                    with redis.Redis(**conn_kwargs) as redis_conn:
+                        q = Queue(connection=redis_conn)
+                        job = enqueue_tracked_rq_job(
+                            q,
+                            build_soils_rq,
+                            prep=prep,
+                            job_key="build_soils_rq",
+                            runid=runid,
+                            args=(runid,),
+                            timeout=RQ_TIMEOUT,
+                            **tracked_options,
+                        )
+                except Exception:  # broad-except: restore run inputs across admission failures
+                    for controller, field, previous in reversed(applied):
+                        if field == "_esdac_subsoil_defaults":
+                            with controller.locked():
+                                controller._esdac_subsoil_defaults = previous
+                        else:
+                            setattr(controller, field, previous)
+                    for task, previous in removed.items():
+                        prep[task] = previous
+                    raise
                 response = {"job_id": job.id}
                 if int(soils.mode) == 5:
                     response["result"] = {"single_user_defined_filename": soils.single_user_defined_filename}

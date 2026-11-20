@@ -52,3 +52,9 @@ there is no subsoil interval: subsoil data are not required and the report
 records `source.profile.single_horizon`. The 200 mm subdivision still preserves
 the material properties. Required data for every emitted material remain
 validated; the builder does not fabricate deeper soil where data are missing.
+
+## Missing subsoil defaults
+
+In gridded ESDAC projects, **Soil Options → Advanced options** shows one editable subsoil profile. A new project starts with the fixed loam profile documented in [ADR-0151](../../../../docs/adrs/ADR-0151-esdac-missing-subsoil-defaults.md). The builder uses it only when the required six ESDAC subsoil material fields are all zero. Valid native subsoil and profiles that use only topsoil retain their normal behavior.
+
+When a successful build uses defaults, the Soils summary shows a **Subsoil defaults applied** warning with the number of affected hillslopes. Soil Quality Details records the locations and values used. Changes to the editable profile take effect on the next admitted build.

@@ -2354,7 +2354,12 @@ def build_treatments_rq(runid: str) -> None:
 
 
 @with_exception_logging
-def build_soils_rq(runid: str) -> None:
+def build_soils_rq(
+    runid: str,
+    *,
+    admitted_soil_mode: int | None = None,
+    esdac_subsoil_defaults: dict[str, float] | None = None,
+) -> None:
     """Build soil layers for the watershed.
 
     Args:
@@ -2372,7 +2377,14 @@ def build_soils_rq(runid: str) -> None:
 
         def _build_soils() -> None:
             clear_nodb_file_cache(runid, pup_relpath="soils.nodb")
-            Soils.getInstance(wd).build()
+            soils = Soils.getInstance(wd)
+            if admitted_soil_mode is None and esdac_subsoil_defaults is None:
+                soils.build()
+            else:
+                soils.build(
+                    admitted_soil_mode=admitted_soil_mode,
+                    esdac_subsoil_defaults=esdac_subsoil_defaults,
+                )
 
         _run_with_directory_root_lock(
             wd,

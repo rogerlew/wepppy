@@ -6,7 +6,7 @@ from wepppy.observability.safe_traceback import safe_text
 from wepppy.observability.safe_logging import current_profile
 from wepppy.observability.secret_profiles import WORKER
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from datetime import datetime
 import hashlib
@@ -27,6 +27,7 @@ from wepppy.eu.soils.esdac.quality import (
     SoilQualityDiagnostic,
     SoilQualityResult,
 )
+from wepppy.eu.soils.esdac.subsoil import FALLBACK_DIAGNOSTIC
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.soils.ssurgo import SoilSummary
 
@@ -156,7 +157,8 @@ def _build_esdac_soil(kwargs: dict[str, Any]) -> SoilBuildWorkerResult:
     context = SoilQualityContext(longitude=lng, latitude=lat, topaz_id=topaz_id)
     try:
         key, horizon, desc = esd.build_wepp_soil(
-            lng, lat, soils_dir, res_lyr_ksat_threshold
+            lng, lat, soils_dir, res_lyr_ksat_threshold,
+            **({"subsoil_defaults": kwargs["subsoil_defaults"]} if kwargs.get("subsoil_defaults") is not None else {}),
         )
     except ESDACSoilBuildError as exc:
         quality = replace(exc.result, context=context)
@@ -285,14 +287,19 @@ def _resolve_artifact_keys(
         if result.key is None:
             raise RuntimeError("accepted ESDAC result is missing its soil key")
         path = staging_dir / str(index) / f"{result.key}.sol"
-        contents.setdefault(str(result.key), set()).add(_artifact_content(path))
+        if FALLBACK_DIAGNOSTIC not in result.quality.reason_codes:
+            contents.setdefault(str(result.key), set()).add(_artifact_content(path))
     resolved = []
     for index, result in enumerate(results):
         key = str(result.key)
         path = staging_dir / str(index) / f"{key}.sol"
         content = _artifact_content(path)
         existing = final_dir / f"{key}.sol"
-        if len(contents[key]) > 1 or (existing.exists() and _artifact_content(existing) != content):
+        if (
+            FALLBACK_DIAGNOSTIC in result.quality.reason_codes
+            or len(contents[key]) > 1
+            or (existing.exists() and _artifact_content(existing) != content)
+        ):
             key = f"{key}-{hashlib.sha256(content).hexdigest()}"
             path.rename(path.with_name(f"{key}.sol"))
             result = replace(result, key=key, quality=replace(result.quality, soil_key=key))
@@ -305,6 +312,8 @@ def build_esdac_soils(
     soils_dir: str,
     res_lyr_ksat_threshold: float = 2.0,
     status_channel: str | None = None,
+    *,
+    subsoil_defaults: Mapping[str, object] | None = None,
 ) -> tuple[dict[str, SoilSummary], dict[str, str]]:
     """Build WEPP-ready soils for a collection of hillslopes.
 
@@ -344,6 +353,7 @@ def build_esdac_soils(
                     soils_dir=str(worker_dir),
                     res_lyr_ksat_threshold=res_lyr_ksat_threshold,
                     status_channel=status_channel,
+                    subsoil_defaults=subsoil_defaults,
                 )
             )
 

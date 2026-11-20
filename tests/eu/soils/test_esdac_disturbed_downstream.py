@@ -225,3 +225,61 @@ def test_rejected_base_diagnostics_are_not_replaced_by_generic_disturbed_soil(
     assert "disturbed.base.rejected" in result.reason_codes
     assert "disturbed.artifact.parse_error" not in result.reason_codes
     assert not (tmp_path / "not-generated.sol").exists()
+
+
+def test_missing_subsoil_uses_project_profile_and_validates_7778_provenance(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from wepppy.eu.soils.esdac.subsoil import DEFAULT_SUBSOIL, FALLBACK_DIAGNOSTIC, SOURCE_FIELDS
+
+    fixture = _load_fixture()["cases"][0]
+    fixture["stu"].update({f"STU_EU_S_{field}": 0.0 for field in SOURCE_FIELDS.values()})
+    _patch_source_provider(monkeypatch, fixture)
+    lng, lat = (fixture["provenance"][field] for field in ("lng", "lat"))
+    profile = dict(DEFAULT_SUBSOIL, bulk_density=1.45)
+    key, horizon, _ = ESDAC().build_wepp_soil(lng, lat, str(tmp_path), subsoil_defaults=profile)
+    base = tmp_path / f"{key}.sol"
+    diagnostic, = [d for d in horizon.quality_result.diagnostics if d.code == FALLBACK_DIAGNOSTIC]
+    assert horizon.quality_result.outcome == "degraded"
+    assert diagnostic.raw_value["applied"] == profile
+    assert "# ESDAC project subsoil defaults:" in base.read_text()
+    soil = WeppSoilUtil(str(base))
+    assert soil.obj["ofes"][0]["horizons"][-1]["bd"] == pytest.approx(1.45)
+
+    landuse = "forest low sev fire"
+    texture = simple_texture(clay=soil.clay, sand=soil.sand)
+    assert texture is not None
+    replacements = _lookup_row(texture, landuse)
+    output = tmp_path / "disturbed.sol"
+    soil.to_7778disturbed(replacements).write(str(output))
+    expected = dict(context=horizon.quality_result.context, expected_datver=7778,
+                    expected_luse=landuse, expected_stext=texture)
+    assert validate_disturbed_soil_artifact(output, **expected).accepted
+
+    prefix = "# wepppy.wepp.soils.utils.WeppSoilUtil::7778disturbed_migration"
+    text = output.read_text()
+    valid_entry = f"#   luse -> {landuse}"
+    assert valid_entry in text
+    for malformed in ("#   luse ->", "#   luse-> unexpected"):
+        output.write_text(text.replace(valid_entry, valid_entry + "\n" + malformed, 1))
+        assert not validate_disturbed_soil_artifact(output, **expected).accepted
+    header_end = text.index("#   h0_max_om")
+    next_line = text.index("\n", header_end)
+    output.write_text(text[:next_line] + "\n" + prefix + text[next_line:])
+    assert not validate_disturbed_soil_artifact(output, **expected).accepted
+
+
+@pytest.mark.parametrize('native_field', ('STU_EU_T_BD', 'STU_EU_S_OC', 'STU_EU_S_GRAVEL'))
+def test_missing_subsoil_preserves_independent_source_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, native_field: str
+) -> None:
+    from wepppy.eu.soils.esdac.subsoil import SOURCE_FIELDS
+
+    fixture = _load_fixture()["cases"][0]
+    fixture["stu"].update({f"STU_EU_S_{field}": 0.0 for field in SOURCE_FIELDS.values()})
+    fixture["stu"][native_field] = 0.0 if native_field.startswith("STU_EU_T") else 1.0
+    _patch_source_provider(monkeypatch, fixture)
+    lng, lat = (fixture["provenance"][field] for field in ("lng", "lat"))
+    with pytest.raises(ESDACSoilBuildError):
+        ESDAC().build_wepp_soil(lng, lat, str(tmp_path))
+    assert not list(tmp_path.glob("*.sol"))

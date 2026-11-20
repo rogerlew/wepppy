@@ -58,6 +58,7 @@ class _Soils:
     def __init__(self, *, key: str, soils_dir: Path) -> None:
         base = WeppSoilUtil(str(soils_dir / f"{key}.sol"))
         self.domsoil_d = {"101": key}
+        self.ssurgo_domsoil_d = dict(self.domsoil_d)
         self.soils = {
             key: _Soil(
                 key=key,
@@ -190,14 +191,17 @@ def test_eu_single_ofe_gate_publishes_only_validated_artifact(
     )
 
 
+@pytest.mark.parametrize('sol_ver', (7778.0, 9002.0))
 def test_eu_mofe_gate_validates_segment_and_synthesized_artifacts(
     disturbed_factory,
     monkeypatch: pytest.MonkeyPatch,
+    sol_ver: float,
 ) -> None:
     disturbed, run_dir = disturbed_factory("eu-runtime-mofe")
-    disturbed._sol_ver = 9002.0
+    disturbed._sol_ver = sol_ver
     soils, _base_quality, replacements = _prepare_eu_run(monkeypatch, run_dir)
     landuse = _Landuse(management=_Management("forest low sev fire"))
+    landuse.domlc_mofe_d["101"]["2"] = "dom-1"
 
     monkeypatch.setattr(disturbed_module, "Ron", type("_Ron", (), {"getInstance": staticmethod(lambda _wd: object())}))
     monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
@@ -215,8 +219,10 @@ def test_eu_mofe_gate_validates_segment_and_synthesized_artifacts(
     assert output.exists()
     assert not list((run_dir / "soils").glob(".*.sol"))
     parsed = WeppSoilUtil(str(output))
-    assert parsed.datver == 9002.0
-    assert parsed.obj["ofes"]
+    assert parsed.datver == sol_ver
+    assert len(parsed.obj["ofes"]) == 2
+    disturbed.modify_mofe_soils()
+    assert len(WeppSoilUtil(str(output)).obj["ofes"]) == 2
 
 
 def test_rejected_eu_base_cannot_publish_single_ofe_replacement(

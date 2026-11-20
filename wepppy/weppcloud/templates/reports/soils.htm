@@ -1,4 +1,15 @@
 <div class="wc-soil-report">
+  {% if esdac_fallback %}
+  <div class="wc-alert wc-alert--warning" role="status" aria-live="polite">
+    <p class="wc-alert__body">
+      <strong>Subsoil defaults applied</strong><br>
+      WEPPcloud used this project’s default subsoil values for {{ esdac_fallback[0] }} of {{ esdac_fallback[1] }}
+      hillslopes because ESDAC lacked usable subsoil data.
+      <a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/soil_quality.json') }}">Soil Quality Details</a>
+      lists the affected hillslopes. You can edit the values under Soil Options → Advanced options.
+    </p>
+  </div>
+  {% endif %}
   <table class="wc-table wc-soil-report__table">
     <thead>
       <tr>

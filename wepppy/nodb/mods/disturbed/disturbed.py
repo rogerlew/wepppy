@@ -2299,7 +2299,8 @@ class Disturbed(NoDbBase):
         processed_segments = 0
 
         with soils.locked():
-            planned_soil_keys = set(soils.soils.keys())
+            existing_soil_keys = set(soils.soils)
+            planned_soil_keys = set(existing_soil_keys)
 
             for topaz_id, mukey in source_soil_keys.items():
                 processed_hillslopes += 1
@@ -2400,7 +2401,7 @@ class Disturbed(NoDbBase):
                             )
                         )
                         planned_soil_keys.add(disturbed_mukey)
-                    elif base_quality is not None:
+                    elif base_quality is not None and disturbed_mukey in existing_soil_keys:
                         _validate_existing_eu_soil_artifact(
                             output_path,
                             base_quality=base_quality,

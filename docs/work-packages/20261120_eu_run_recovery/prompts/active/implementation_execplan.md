@@ -9,7 +9,8 @@ A user following the original European project workflow can produce usable clima
 - [x] 2026-11-20 UTC: Created the package, tracker and draft contract decision.
 - [x] Preserve available production inputs and complete initial raster and management readbacks.
 - [ ] Verify exact original workflow settings and recover the original land-cover upload or record the fidelity gap.
-- [ ] Ratify and commit the contract checkpoint.
+- [x] Ratify and commit the bounded ESDAC soil contract checkpoint (1b388d50b).
+- [ ] Ratify remaining climate and land-use checkpoints.
 - [ ] Implement and verify each confirmed failure class and its peer consumers.
 - [ ] Complete the forest deployment and record the runtime revision.
 - [ ] Replay the original run and complete generated-artifact and correctness review.
@@ -26,7 +27,7 @@ For `studded-stranglehold`, a failed gridded CORINE build persisted dominant lan
 
 ## Outcomes & Retrospective
 
-Package scaffolded. Contract decisions, implementation, deployment and replay evidence remain open.
+The soil slice is implemented and locally validated, including the preset warning and 7778 controls. Remaining contract decisions, broader implementation, deployment and browser replay are open.
 
 ## Milestones
 
