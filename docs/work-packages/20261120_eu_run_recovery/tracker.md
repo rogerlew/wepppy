@@ -9,8 +9,8 @@ The candidate is deployed on forest. The [deployment and replay receipt](artifac
 - [x] Record the production failure signatures and scope the work package.
 - [x] Preserve the available production baseline inputs and run initial raster and management readbacks.
 - [x] Reconcile the original operation settings and document the overwritten upload and replay limits.
-- [ ] Resolve climate unit and ESDAC source questions, ratify the contracts, and record the checkpoint ancestor revision.
-- [ ] Implement and validate the climate, WEPP and soil changes.
+- [x] Resolve climate unit and ESDAC source questions, ratify the contracts, and record the checkpoint ancestor revision.
+- [x] Implement and validate the climate, WEPP and soil changes.
 - [x] Complete the full candidate deployment on forest and record runtime identities.
 - [x] Rebuild the original workflow on forest and verify artifacts and browser behavior.
 - [x] Complete the independent replay correctness review.
@@ -18,7 +18,7 @@ The candidate is deployed on forest. The [deployment and replay receipt](artifac
 - [x] Replay the CORINE/upload mapping switch and false migration prompt with a substitute raster, and run the serialized legacy migration control privately.
 - [x] Reject incompatible uploads before worker admission and verify on forest.
 
-- [ ] Complete the [ESDAC management inventory and reconciliation](artifacts/20261120_esdac_management_baseline.md), including a reviewed row-by-row disposition and generated-output validation.
+- [x] Complete the [ESDAC management inventory and reconciliation](artifacts/20261120_esdac_management_baseline.md), including a reviewed row-by-row disposition and generated-output validation.
 
 ## Decisions
 
@@ -28,7 +28,7 @@ The candidate is deployed on forest. The [deployment and replay receipt](artifac
 
 ## Open evidence
 
-Remaining work covers European catalog parameterization and reconciliation. The package retains the batch event output limitation. The original second-incident raster is unavailable.
+The package retains the batch event output limitation. The original second-incident raster is unavailable. The [reconciled catalog replay](artifacts/20261120_esdac_management_reconciliation_checkpoint.md) used a synthetic ESDAC-coded upload on the original watershed geometry.
 
 ## Notes – 2026-11-20 UTC
 

@@ -46,3 +46,42 @@ single-OFE upload, validate explicit buffer selections and retain
 compatible inherited selections. Clear an incompatible inherited selection
 only on successful publication. Preserve active multi-OFE validation and
 the last applied selection on admission failure.
+
+## Verified candidate
+
+The [final inventory](20261120_eu_management_reconciled_inventory.csv)
+records the disposition of all 146 rows. Each management summary resolved,
+serialized to a native WEPP file, and could be read back. Each Disturbed
+catalog has one destination per forest, shrub and grass wildfire severity.
+
+Forest restarted the Web, RQ engine and three RQ worker services with
+`00c81ee0a` after checking that all queues were idle. The full earlier
+development deployment and original replay are recorded in the
+[deployment receipt](20261120_forest_deployment_replay.md).
+
+A signed-in browser selected the named ESDAC map and uploaded a synthetic
+20-code raster on the original 58-hillslope geometry. The separate
+[forest verification run](https://forest.tail305ec9.ts.net/weppcloud/runs/unsinkable-succinylcholine/eu-disturbed/)
+started from the earlier E-OBS and gridded-soil replay. The single-OFE
+buffer control was hidden. The browser showed applied class 132, and the
+published state cleared the incompatible inherited CORINE code. Actual
+land-use Parquet agreed with the catalog for all hillslopes.
+
+The soil rebuild accepted 58 profiles, including 37 using the approved
+project subsoil defaults. Readback verified forest at key 22 and the
+expected canopy, interrill and rill cover in the prepared WEPP files for all
+13 hillslopes assigned keys 22 and 129–132. Key 132 selected its distinct prescribed grass soil lookup.
+The prepared soils were format 7778. The WEPP parent and 17 descendants
+finished. Native output includes 58 hillslope pass files and a 619,126-byte
+watershed loss file. Watershed event Parquet has 10,957 rows, and hillslope
+pass Parquet has 635,506 rows. [Job IDs, artifact hashes and model input readback](20261120_esdac_reconciled_forest_artifacts.json)
+
+The synthetic fixture verifies the chosen ESDAC classes under the real
+workflow. The previous original-workflow CORINE runs provide the historical
+input replay. The original second-incident upload remains unavailable.
+
+## Quality gates
+
+The focused Python gate passed 532 tests. Frontend lint and all nine
+frontend tests passed. Stub completeness passed. Stubtest reported the
+same 143 diagnostics against the parent and candidate snapshots.

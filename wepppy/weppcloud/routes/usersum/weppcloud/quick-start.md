@@ -197,7 +197,9 @@ WEPPcloud assigns landuse or management classes to each hillslope using the sele
 
 With gridded CORINE, WEPPcloud uses the CORINE management table for the
 selected year. When you upload a land-cover raster, choose a management
-mapping that matches the codes in that file.
+mapping that matches the codes in that file. For a raster encoded with ESDAC
+land-cover classes in a Disturbed project, choose **ESDAC land cover (Disturbed)**.
+Use the CORINE mapping for a raster encoded with CORINE classes.
 
 - **Determine per hillslope** is the usual starting point
 - Select the `ever_forest` layer when you want WEPPcloud to model landuse as forest anywhere that has ever historically been forested

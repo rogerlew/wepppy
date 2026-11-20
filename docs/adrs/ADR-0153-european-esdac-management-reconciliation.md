@@ -1,6 +1,6 @@
 # ADR-0153: Reconcile European ESDAC management scenarios
 
-Status: Accepted, implementation verification pending
+Status: Accepted and verified on forest
 Date: 2026-11-20
 
 ## Context

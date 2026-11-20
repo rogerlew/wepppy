@@ -102,3 +102,10 @@ canonical vegetation matrix does not select the added generic thinning
 class and reproduced the original report byte for byte with the analyzer.
 The original report and provenance are preserved and the source
 review records the new source hash. [Artifact comparison](20261120_disturbed_matrix_parity.json)
+
+## Completed disposition
+
+The [final inventory](20261120_eu_management_reconciled_inventory.csv)
+records each European catalog row after the reference and class audit.
+The [reconciliation checkpoint](20261120_esdac_management_reconciliation_checkpoint.md)
+records the forest upload, soil build and native WEPP verification.

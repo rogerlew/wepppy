@@ -139,7 +139,7 @@ certify the new inputs as built.
 
 ## Reconciled ESDAC and European fire scenarios
 
-Implementation conformance is pending. The exact name `eu-esdac-disturbed`
+The exact name `eu-esdac-disturbed`
 selects the reconciled Disturbed ESDAC catalog and is available in the
 uploaded land cover selector. The Treatments selector retains its existing
 options because the ESDAC table lacks the required treatment markers.
@@ -155,3 +155,8 @@ scenarios in [ADR-0153](../adrs/ADR-0153-european-esdac-management-reconciliatio
 Prescribed grass fire retains its own class and uses the same low-severity
 grass management as the default Disturbed table. CORINE and Disturbed ESDAC
 use the matching grass wildfire management at each of the three severities.
+
+When a single-OFE upload changes maps, admission preserves compatible
+inherited buffer codes and validates any explicit buffer selection. An
+incompatible inherited code is cleared when the new inputs are published.
+Multi-OFE uploads continue to validate the effective buffer selection.
