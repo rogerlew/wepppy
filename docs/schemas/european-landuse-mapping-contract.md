@@ -44,3 +44,16 @@ Use the plain ESDAC ESDB USE-DOM table only for the ESDAC code namespace.
 Its class numbers do not identify CORINE classes. Keep audited management
 template and scenario changes under their own compatibility and generated
 artifact validation, including the separate European Disturbed ESDAC table.
+
+### Management reference compatibility
+
+Implementation conformance is pending for the historical thinning reference
+repair. For keys 115, 116, 117 and 124 in the Disturbed ESDAC, Canada,
+Palouse and Virgin Islands tables, resolve the exact same management assets
+through their current names. Use `Thinning_40_93.man`, `Thinning_40_90.man`,
+`Thinning_40_85.man` and `Thinning_40_75.man` in `UnDisturbed/`,
+respectively. Existing class identifiers, names, Disturbed classifications
+and model parameters retain their meaning. These four assets moved with
+byte identity in revision `fc183b0a6`. Keep the exact-name routing and
+scenario choices for the currently separate ESDAC tables under independent
+audit and ratification.
