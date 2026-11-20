@@ -698,6 +698,7 @@ def test_soil_pure_template_renders_ssurgo_cache_checkbox(jinja_env: Environment
             single_dbselection=None,
             ksflag=True,
             clear_ssurgo_cache_on_rebuild=True,
+            uses_esdac=lambda _mode: False,
         ),
         soildboptions=["DB1"],
         disturbed=None,
@@ -5118,7 +5119,7 @@ def test_run_bootstrap_uses_saved_preset_for_i_crews_outline_and_credit(
         disturbed=None, baer=None,
         watershed=SimpleNamespace(has_channels=False, has_subcatchments=False, has_outlet=False),
         landuse=SimpleNamespace(has_landuse=False, mode=0, single_selection=None),
-        soils=SimpleNamespace(has_soils=False, mode=0, single_dbselection=None),
+        soils=SimpleNamespace(soil_summary_ready=False, mode=0, single_dbselection=None),
         climate=SimpleNamespace(has_station=False, has_climate=False, has_observed=False),
         wepp=SimpleNamespace(
             has_run=False, dss_export_mode=None, has_dss_zip=False,
@@ -5167,6 +5168,7 @@ def test_single_source_controls_use_sbs_feedback_and_escape_names(jinja_env, kin
     controller = SimpleNamespace(mode=SimpleNamespace(value=5), nlcd_db='nlcd/2019',
                                  single_selection=0, single_dbselection=None, initial_sat=0.75,
                                  ksflag=False, clear_ssurgo_cache_on_rebuild=False,
+                                 uses_esdac=lambda _mode: False,
                                  single_user_defined_filename='<unsafe>.MAN' if kind == 'landuse' else '<unsafe>.SOL')
     common['landuse' if kind == 'landuse' else 'soils'] = controller
     html = jinja_env.get_template(f'controls/{kind}_pure.htm').render(**common)

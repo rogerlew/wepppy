@@ -14,6 +14,7 @@ A user following the original European project workflow can produce usable clima
 - [x] Ratify the standalone E-OBS sampling rule in the [sampling checkpoint](../../artifacts/20261120_eobs_sampling_checkpoint.md).
 - [x] Implement and verify the E-OBS sampling rule against the [candidate HTTP provider and generated CLIGEN artifact](../../artifacts/20261120_eobs_sampling_validation.md).
 - [x] Repair land-use backfill eligibility for partial builds and verify the retry route and generated legacy Parquet. [Migration checkpoint and validation](../../artifacts/20261120_landuse_migration_checkpoint.md)
+- [x] Restore the latest verified climate job and preserve displayed artifacts during replacement. [Climate status checkpoint and validation](../../artifacts/20261120_climate_status_checkpoint.md)
 - [ ] Ratify remaining climate and land-use checkpoints.
 - [ ] Implement and verify each confirmed failure class and its peer consumers.
 - [ ] Complete the forest deployment and record the runtime revision.

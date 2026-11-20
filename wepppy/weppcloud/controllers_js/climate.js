@@ -265,6 +265,14 @@ var Climate = (function () {
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
         var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var reportRequest = 0;
+
+        climate.on_job_details_unavailable = function () {
+            if (rqJobElement) {
+                rqJobElement.textContent = "Climate job details are unavailable.";
+            }
+            stacktraceAdapter.text("");
+        };
         var rqJobAdapter = createLegacyAdapter(rqJobElement);
         var uploadHintAdapter = createLegacyAdapter(hintUploadElement);
         var buildHintAdapter = createLegacyAdapter(hintBuildElement);
@@ -484,6 +492,17 @@ var Climate = (function () {
                 runId: window.runid || window.runId || null,
                 logLimit: 400,
                 stacktrace: stacktraceConfig,
+                filterMessage: function (message) {
+                    if (typeof message !== "string") {
+                        return true;
+                    }
+                    var job = /^\s*(?:rq:|JID)(\S+)/.exec(message);
+                    if (!job) {
+                        return !/\b(?:EXCEPTION|TRIGGER)\b/.test(message);
+                    }
+                    var jobStatus = climate.rq_job_status && climate.rq_job_status.status;
+                    return job[1] === climate.rq_job_id && jobStatus !== "not_found";
+                },
                 spinner: climate.statusSpinnerEl,
                 autoConnect: autoConnect
             }, opts);
@@ -610,17 +629,13 @@ var Climate = (function () {
         };
 
         function updateCurrentCliFilename(filename) {
-            if (!filename || !formElement) {
-                return;
-            }
-            var displays = formElement.querySelectorAll(".wc-field--display .wc-text-display");
-            for (var i = 0; i < displays.length; i += 1) {
-                var display = displays[i];
-                var label = display.parentElement ? display.parentElement.querySelector(".wc-field__label") : null;
-                if (label && label.textContent && label.textContent.indexOf("Current CLI file") !== -1) {
-                    display.innerHTML = "<code>" + filename + "</code>";
-                    break;
+            var display = formElement.querySelector("[data-climate-current-cli]");
+            if (display) {
+                var code = display.querySelector("code");
+                if (code) {
+                    code.textContent = filename || "";
                 }
+                display.hidden = !filename;
             }
         }
 
@@ -998,21 +1013,29 @@ var Climate = (function () {
         };
 
         climate.report = function () {
+            var requestId = ++reportRequest;
             var project = window.Project && typeof window.Project.getInstance === "function" ? window.Project.getInstance() : null;
             http.request(url_for_run("report/climate/"), { params: {}, method: "GET" })
                 .then(function (response) {
+                    if (requestId !== reportRequest) {
+                        return;
+                    }
                     var body = response.body;
                     if (infoAdapter && typeof infoAdapter.html === "function") {
                         infoAdapter.html(typeof body === "string" ? body : "");
                     } else if (infoElement) {
                         infoElement.innerHTML = typeof body === "string" ? body : "";
                     }
+                    var activeFile = infoElement && infoElement.querySelector("[data-climate-active-filename]");
+                    updateCurrentCliFilename(activeFile ? activeFile.textContent : null);
                     if (project && typeof project.set_preferred_units === "function") {
                         project.set_preferred_units();
                     }
                 })
                 .catch(function (error) {
-                    handleError(error);
+                    if (requestId === reportRequest) {
+                        handleError(error);
+                    }
                 });
         };
 
@@ -1075,11 +1098,10 @@ var Climate = (function () {
             if (!climate._statusStreamHandle) {
                 climate.attachStatusStream({ autoConnect: false });
             }
-            resetCompletionSeen();
             climate.connect_status_stream(climate);
 
             var taskMsg = "Building climate";
-            climate.reset_panel_state(climate, { taskMessage: taskMsg });
+            climate.reset_panel_state(climate, { taskMessage: taskMsg, preserveSummary: true });
 
             var payload = climate.mergeYearBoundsPayload(forms.serializeForm(formElement, { format: "json" }));
             climate.events.emit("climate:build:started", { payload: payload });
@@ -1092,6 +1114,8 @@ var Climate = (function () {
                 .then(function (response) {
                     var body = response.body || {};
                     if (body.job_id) {
+                        resetCompletionSeen();
+                        reportRequest += 1;
                         var message = "build_climate job submitted: " + body.job_id;
                         statusAdapter.html(message);
                         climate.appendStatus(message);
@@ -1113,19 +1137,10 @@ var Climate = (function () {
             if (!climate._statusStreamHandle) {
                 climate.attachStatusStream({ autoConnect: false });
             }
-            resetCompletionSeen();
             climate.connect_status_stream(climate);
 
             var taskMsg = "Uploading climate CLI";
-            climate.reset_panel_state(climate, { taskMessage: taskMsg, hintTarget: climate.hintUpload });
-
-            infoAdapter.text("");
-            stacktraceAdapter.text("");
-
-            var uploadedFilename = null;
-            if (climate.uploadInput && climate.uploadInput.files && climate.uploadInput.files.length > 0) {
-                uploadedFilename = climate.uploadInput.files[0].name;
-            }
+            climate.reset_panel_state(climate, { taskMessage: taskMsg, hintTarget: climate.hintUpload, preserveSummary: true });
             var formData = new FormData(formElement);
             http.requestWithSessionToken(url_for_run("tasks/upload-cli/", { prefix: "/rq-engine/api" }), {
                 method: "POST",
@@ -1133,7 +1148,9 @@ var Climate = (function () {
                 form: formElement
             }).then(function (response) {
                 var body = response.body || {};
+                resetCompletionSeen();
                 if (body.job_id) {
+                    reportRequest += 1;
                     var message = "upload_cli job submitted: " + body.job_id;
                     statusAdapter.html(message);
                     climate.appendStatus(message);
@@ -1144,12 +1161,10 @@ var Climate = (function () {
                     }
                     climate.set_rq_job_id(climate, body.job_id);
                     climate.hint = previousHint;
-                    updateCurrentCliFilename(uploadedFilename);
                     climate.events.emit("climate:upload:completed", { job_id: body.job_id });
                     return;
                 }
                 climate.appendStatus("User-defined climate uploaded successfully.");
-                updateCurrentCliFilename(uploadedFilename);
                 climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED", body);
                 climate.events.emit("climate:upload:completed", body);
             }).catch(function (error) {
@@ -1399,29 +1414,18 @@ var Climate = (function () {
             var helper = window.WCControllerBootstrap || null;
             var controllerContext = helper && typeof helper.getControllerContext === "function"
                 ? helper.getControllerContext(ctx, "climate")
-                : {};
+                : ((ctx.controllers && ctx.controllers.climate) || {});
 
-            var jobId = helper && typeof helper.resolveJobId === "function"
-                ? helper.resolveJobId(ctx, "build_climate_rq")
-                : null;
-            if (!jobId && controllerContext.job_id) {
-                jobId = controllerContext.job_id;
-            }
-            if (!jobId) {
-                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
-                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "build_climate_rq")) {
-                    var value = jobIds.build_climate_rq;
-                    if (value !== undefined && value !== null) {
-                        jobId = String(value);
-                    }
-                }
-            }
+            var jobId = controllerContext.job_id || null;
 
             if (typeof climate.set_rq_job_id === "function") {
                 if (jobId) {
                     climate.poll_completion_event = "CLIMATE_BUILD_TASK_COMPLETED";
                 }
                 climate.set_rq_job_id(climate, jobId);
+            }
+            if (controllerContext.jobDetailsUnavailable) {
+                climate.on_job_details_unavailable();
             }
 
             var precipMode = controllerContext.precipScalingMode;

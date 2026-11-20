@@ -11,3 +11,9 @@ Validate failure followed by upload success, reverse order, first and only attem
 ## Independent review disposition
 
 The paired-receipt proposal would have required additional rollback after ambiguous RedisPrep publication and lost admission leases. The agreed incident repair instead reads existing receipts, verifies their RQ ownership, and uses neutral unavailable status whenever ordering is ambiguous. Reviews also distinguished the currently rendered summary from durable build artifacts. The latter needs its own publication fix. The panel preserves its rendered summary, uses only server-confirmed filenames, and filters stale job messages and their asynchronous error details. Report responses use request ordering to keep a delayed load from replacing the newer summary. Lookup outages refer to RQ after RedisPrep references were read.
+
+## Candidate validation
+
+The ancestor is `ccb90d394`. A private Redis instance with real RQ records selected the newer successful upload and returned unavailable after it expired while the older failure remained. The 457 focused Python tests passed, including mismatched, missing and malformed raw RQ records and route/template controls. A missing RQ creation timestamp must be rejected before RQ can hydrate it with the current time. The receipt is `.wctl-test-runs/da9b3e926d1540f6a996189b4fb5da67/receipt.json`.
+
+Frontend lint, all 1,105 Jest tests and nine Node tests passed. Rebuilt the controller bundle and checked the published StatusStream asset. The controller reuses its existing filename display and report. Regression tests cover a pending upload, obsolete report response, job expiry and an in-flight traceback for a superseded job. The forest browser and RQ replay remain part of package acceptance.

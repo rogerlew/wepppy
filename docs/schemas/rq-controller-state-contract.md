@@ -2028,7 +2028,7 @@ The Soils panel and build admission share the effective ESDAC source selection. 
 
 ## Climate operation selection on reload
 
-Implementation conformance pending. The Climate panel follows the most recent
+The Climate panel follows the most recent
 verified build or CLI upload using the existing two RedisPrep references. It
 reads RQ records without creating a new receipt or writing run state. For a
 single recorded operation, verify the RQ job's expected function and run before

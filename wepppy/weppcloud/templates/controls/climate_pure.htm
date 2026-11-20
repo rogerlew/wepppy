@@ -431,13 +431,13 @@
         class="wc-field__control file disable-readonly">
     </div>
     {% set current_cli_fn = climate.cli_fn or climate.orig_cli_fn %}
-    {% if selected_catalog_id == 'user_defined_cli' and current_cli_fn %}
-      {% set current_cli_display %}<code>{{ current_cli_fn.rsplit('/', 1)[-1] }}</code>{% endset %}
+    <div data-climate-current-cli{% if selected_catalog_id != 'user_defined_cli' or not current_cli_fn %} hidden{% endif %}>
+      {% set current_cli_display %}<code>{{ current_cli_fn.rsplit('/', 1)[-1] if current_cli_fn else '' }}</code>{% endset %}
       {{ ui.text_display(
            label="Current CLI file",
            content=current_cli_display
       ) }}
-    {% endif %}
+    </div>
     <div class="wc-field">
       {% call button_row() %}
         <button

@@ -47,7 +47,7 @@ Traceback content follows the [safe traceback contract](../schemas/safe-tracebac
   - Reset `_completion_seen = false` to allow the next completion to fire once.
 - `controlBase` dispatches:
   - `poll_completion_event` + `job:completed` once on `finished` (guarded by `_job_completion_dispatched`).
-  - `job:error` once on `failed`/`stopped`/`canceled`/`not_found` (guarded by `_job_failure_dispatched`), after fetching `/rq-engine/api/jobinfo/<job_id>` to push stacktraces (child `exc_info` preferred).
+  - `job:error` once on `failed`/`stopped`/`canceled`/`not_found` (guarded by `_job_failure_dispatched`), after fetching `/rq-engine/api/jobinfo/<job_id>` to push stacktraces (child `exc_info` preferred). A controller with `on_job_details_unavailable` uses that handler for `not_found`.
 - Custom `onTrigger` handlers must **not** call `triggerEvent` again; `attach_status_stream` already does this. Use guarded handlers for CustomEvents to avoid recursion.
 - **See also:** [trigger-refactor.md](../mini-work-packages/completed/trigger-refactor.md) for the per-controller trigger inventory and completion event names.
 

@@ -380,6 +380,11 @@ function controlBase() {
 
         self._job_failure_dispatched = true;
 
+        if (status === "not_found" && typeof self.on_job_details_unavailable === "function") {
+            self.on_job_details_unavailable();
+            return;
+        }
+
         const jobId = self.rq_job_id || (statusObj && statusObj.job_id) || null;
         const errorPayload = { error: { message: `Job ${status}.` } };
 
@@ -1603,6 +1608,7 @@ function controlBase() {
                 runId: config.runId || self.runId || window.runid || window.runId || null,
                 logLimit: typeof config.logLimit === "number" ? config.logLimit : undefined,
                 formatter: config.formatter,
+                filterMessage: config.filterMessage,
                 reconnectBaseMs: config.reconnectBaseMs,
                 reconnectMaxMs: config.reconnectMaxMs,
                 stacktrace: resolvedStacktrace,
@@ -1900,12 +1906,14 @@ function controlBase() {
                 /* ignore */
             }
 
-            try {
-                summaryTargets.forEach(function (target) {
-                    clearContent(target);
-                });
-            } catch (err) {
-                /* ignore */
+            if (opts.preserveSummary !== true) {
+                try {
+                    summaryTargets.forEach(function (target) {
+                        clearContent(target);
+                    });
+                } catch (err) {
+                    /* ignore */
+                }
             }
 
             if (opts.clearStatus !== false && typeof self.clear_status_messages === "function") {

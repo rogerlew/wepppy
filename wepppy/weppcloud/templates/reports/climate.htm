@@ -52,7 +52,7 @@
     <h5>Global Climate</h5>
     <dl class="dl-horizontal">
       <dd><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/' ~ climate.par_fn) }}" target="_blank">{{ climate.par_fn }}</a></dd>
-      <dd><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/' ~ climate.cli_fn) }}" target="_blank">{{ climate.cli_fn }}</a></dd>
+      <dd><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/' ~ climate.cli_fn) }}" target="_blank"{% if climate.cli_fn %} data-climate-active-filename{% endif %}>{{ climate.cli_fn }}</a></dd>
     </dl>
   {% endif %}
   <h5>Climate Build Log</h5>
