@@ -56,3 +56,10 @@ class `thinning` for ESDAC keys 115–117, 123 and 124. The two base reference
 catalogs passed hydration for all 23 ESDAC and 80 CORINE rows. Generic
 thinning class values require a parameterization decision and effective
 management and soil readback. Key 123 has a distinct 96% template.
+
+The follow-up [generic thinning compatibility checkpoint](20261120_legacy_thinning_class_checkpoint.md)
+retains the existing model scenarios and soil lookup. All 146 European
+inventory rows now hydrate. The candidate key 123 readback retains 0.96
+cover and generates a valid historical-format soil using the generic row.
+The complete Disturbed severity matrix and affected source choices are
+still open.

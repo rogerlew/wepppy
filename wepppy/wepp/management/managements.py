@@ -2194,7 +2194,7 @@ loops:{loops}
 
 def get_disturbed_classes() -> Set[Optional[str]]:
     """
-    Return the set of disturbed class identifiers referenced by management maps.
+    Return supported disturbed class identifiers, including the legacy soil lookup key.
 
     Empty strings in the source JSON are normalized to ``None`` for ease of
     comparison when downstream callers need to distinguish between unset and
@@ -2203,7 +2203,8 @@ def get_disturbed_classes() -> Set[Optional[str]]:
     with open(_join(_thisdir, 'data', 'disturbed.json')) as fp:
         js = json.load(fp)
 
-    disturbed_classes = set()
+    # Historical regional thinning templates share the existing generic soil row.
+    disturbed_classes = {'thinning'}
     for k, _d in js.items():
         _c = _d['DisturbedClass']
         if _c == '':

@@ -85,3 +85,8 @@ was started. Deployment and the two live replays still require receipts.
 A [draft E-OBS publication checkpoint](artifacts/20261120_eobs_publication_checkpoint.md)
 records the outstanding selected-versus-applied generation and orchestration
 issues. It has no implementation authority yet.
+
+The [generic thinning checkpoint](artifacts/20261120_legacy_thinning_class_checkpoint.md)
+is `d85661182`. Restoring the exact existing lookup label made all 146
+European inventory rows resolve. The key-123 readback kept 0.96 cover and
+the existing generic loam parameters in a parsed 7778 soil.

@@ -21,6 +21,7 @@ A user following the original European project workflow can produce usable clima
 - [x] Rebuild the E-OBS v19.0e monthly data privately and run the original station against the rebuilt provider.
 - [x] Resolve the gridded CORINE source and regenerate archived assignment summaries. [CORINE provider checkpoint](../../artifacts/20261120_landuse_source_checkpoint.md)
 - [x] Repair byte-identical renamed management file references. [Historical thinning checkpoint](../../artifacts/20261120_management_reference_checkpoint.md)
+- [x] Restore generic thinning compatibility with generated management and soil readback. [Generic thinning checkpoint](../../artifacts/20261120_legacy_thinning_class_checkpoint.md)
 - [ ] Ratify remaining climate and land-use checkpoints.
 - [ ] Implement and verify each confirmed failure class and its peer consumers.
 - [ ] Complete the forest deployment and record the runtime revision.

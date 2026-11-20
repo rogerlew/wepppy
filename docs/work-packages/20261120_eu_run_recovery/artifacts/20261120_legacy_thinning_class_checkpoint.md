@@ -28,3 +28,14 @@ that the current Disturbed paths preserve that class. Keep the existing
 active lookup, run base lookup and bundled lookup precedence. Test that
 unrecognized labels still fail. Use the class 123 scenario for the native
 management and generated-soil control.
+
+## Candidate results
+
+The public summary resolver hydrated and parsed all 20 generic thinning rows
+across the four catalogs. All 146 European inventory rows now constructed
+management summaries. A misspelled class continued to raise a validation
+error. Native management readback at key 123 preserved 0.96 interrill and
+rill cover. The generated 7778 soil from an Es Fangar source profile used
+the existing generic loam row with interrill erodibility 400,000 and rill
+erodibility 0.00004. The default lookup still contains exactly the
+four pre-existing generic texture rows.

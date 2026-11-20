@@ -59,7 +59,7 @@ audit and ratification.
 
 ### Existing generic thinning classification
 
-Implementation conformance is pending. Retain the exact `thinning`
+Retain the exact `thinning`
 classification for the historical catalog rows that already use it.
 Management summary validation must accept this existing default Disturbed
 soil-lookup key. Keep each row's management file and treatment type,
