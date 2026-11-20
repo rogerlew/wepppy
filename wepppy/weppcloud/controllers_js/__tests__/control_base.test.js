@@ -285,6 +285,18 @@ describe("controlBase job status error handling", () => {
         );
     });
 
+    test("submission errors can keep the report while exposing their details", () => {
+        const summary = document.getElementById("info");
+        summary.innerHTML = "<table><tbody><tr><td>Applied land use</td></tr></tbody></table>";
+
+        base.pushResponseStacktrace(base, { error: { message: "Retry submission." } }, {
+            preserveSummary: true
+        });
+
+        expect(summary.querySelector("td").textContent).toBe("Applied land use");
+        expect(document.getElementById("stacktrace").textContent).toContain("Retry submission.");
+    });
+
     test("poll failure surfaces the complete ESDAC batch reason in the interface", async () => {
         const diagnostic = "ESDAC soil batch rejected 21 location(s) (TopoAZ: 73, 72, 22, 62, 23, 31, 52, 61, 91, 43, +11 more); reasons: source.categorical.empty[field=fao90lev1, count=21, raw_value=[\"24\",\"\",\"No information\"]]; report: soil_quality.json";
         window.WCHttp = {

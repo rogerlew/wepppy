@@ -43,6 +43,9 @@ describe("Landuse controller", () => {
                 <input id="checkbox_burn_shrubs" name="checkbox_burn_shrubs" type="checkbox" checked>
                 <input id="checkbox_burn_grass" name="checkbox_burn_grass" type="checkbox">
                 <button type="button" id="btn_build_landuse" data-landuse-action="build">Build</button>
+                <div class="wc-alert wc-alert--error" role="alert" hidden data-landuse-build-error>
+                    <p class="wc-alert__body"></p>
+                </div>
             </form>
             <div id="hint_build_landuse"></div>
         `;
@@ -240,7 +243,10 @@ describe("Landuse controller", () => {
         const resets = baseInstance.reset_panel_state.mock.calls.slice(-2);
         expect(resets.map(([, options]) => options.preserveSummary)).toEqual([true, true]);
         expect(baseInstance.set_rq_job_id).not.toHaveBeenCalled();
-        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
+        expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+        const alert = document.querySelector("[data-landuse-build-error]");
+        expect(alert.hidden).toBe(false);
+        expect(alert.textContent).toContain("Select a compatible management map.");
     });
 
     test("poll failure pushes stacktrace and emits job error", async () => {

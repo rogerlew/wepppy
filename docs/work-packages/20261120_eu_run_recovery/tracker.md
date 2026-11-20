@@ -97,3 +97,9 @@ The [land-use upload compatibility checkpoint](artifacts/20261120_landuse_upload
 is `2de953e92`. Early Disturbed table validation and the Landuse report
 retention changes passed focused checks. Raster-code admission, staged
 worker publication and direct batch leaf validation remain open.
+
+The forest browser verified the incompatible-table HTTP 400 in Landuse
+Options with the previous report and raster bytes preserved. The
+[Disturbed matrix parity receipt](artifacts/20261120_disturbed_matrix_parity.json)
+records the unchanged native artifacts and independent published report
+verification. Catalog parameterization decisions are still open.

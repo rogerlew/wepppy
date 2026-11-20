@@ -1,12 +1,12 @@
 {
   "status": "unchanged_outputs_after_source_review",
-  "date": "2026-11-18",
+  "date": "2026-11-20",
   "provenance_sha256": "8928a034a2dce03ad0efd5b4285407830f92664879019c5ad577b36ceb951220",
   "report_sha256": "31cbd80b8996db905a9bdb4b20666132af8a124c93abbbeebb75a98ba770b947",
   "reviewed_source_deltas": {
     "wepppy/wepp/management/managements.py": {
       "recorded": "c83275c7b2dd5331f991086158b3a2605a056c9431551d388128391872842664",
-      "current": "7b2d0624eba784313052721a4e50b2dc27104fcdcdee5fb4f9fe9960f0ff1f9d"
+      "current": "cc5a5309f20b6682a12ee544914d7f6e04bdbd53da7e6da25223275ee36432aa"
     },
     "wepppy/wepp/soils/utils/wepp_soil_util.py": {
       "recorded": "367e94103f75d8746f99fb5c440fe84059534d1efb50ec2d3431fcbfb76243ba",
@@ -21,9 +21,11 @@
       "current": "2abe4a28b337c9bbd04ee39f8cba549b7185fd4a44a8a3c00da8bfc8bb1cf8e6"
     }
   },
-  "rationale": "Capacity propagation retains the ten-horizon default for this benchmark. All 96 fresh simulations passed; 768 outputs and 96 management files match published hashes. Soils match the prior reviewed run except Build Date comments. The optional general kslast capacity argument is unused by this benchmark; its default remains ten.",
-  "evidence": "docs/work-packages/20261118_soil_input_capacity_23/artifacts/disturbed-parity.json",
+  "rationale": "Prior review verified that the existing capacity defaults retain this benchmark. The additional generic thinning lookup admission is outside the matrix vegetation and mapping selection. A fresh 96-case matrix matched 768 native outputs, 96 management inputs, and 864 other inputs byte for byte. All 96 generated soils differ only in the Build Date comment.",
+  "evidence": "docs/work-packages/20261120_eu_run_recovery/artifacts/20261120_disturbed_matrix_parity.json",
   "raw_evidence": [
-    "/workdir/soil-input-capacity-23-evidence/disturbed-matrix-artifacts.jsonl"
-  ]
+    "/workdir/soil-input-capacity-23-evidence/disturbed-matrix-artifacts.jsonl",
+    "/home/workdir/wepppy-eu-run-recovery/.wctl-test-runs/retained-disturbed-matrix-20261120/disturbed_matrix0"
+  ],
+  "prior_evidence": "docs/work-packages/20261118_soil_input_capacity_23/artifacts/disturbed-parity.json"
 }

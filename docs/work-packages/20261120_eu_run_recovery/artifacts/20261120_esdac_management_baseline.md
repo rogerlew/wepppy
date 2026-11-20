@@ -63,3 +63,42 @@ inventory rows now hydrate. The candidate key 123 readback retains 0.96
 cover and generates a valid historical-format soil using the generic row.
 The complete Disturbed severity matrix and affected source choices are
 still open.
+
+## Native management readback of open comparisons
+
+The current native parser returned the following first-OFE fractions.
+Triples are canopy, interrill and rill cover. Equal initial fractions
+alone do not establish equivalence of plant and operation rotations.
+
+| ESDAC key | Plain | Separate Disturbed |
+| --- | --- | --- |
+| 1 | 0.60 / 0.30 / 0.30 | 0.40 / 0.85 / 0.85 |
+| 2 | 0.90 / 1.00 / 1.00 | 0.90 / 1.00 / 1.00 |
+| 3 | 0.20 / 0.90 / 0.90 | 0.00 / 0.90 / 0.90 |
+| 4 | 0.28 / 0.28 / 0.28 | 0.40 / 0.85 / 0.85 |
+| 5 | 0.90 / 1.00 / 1.00 | 0.90 / 1.00 / 1.00 |
+| 9 | 0.70 / 0.80 / 0.80 | 0.40 / 0.85 / 0.85 |
+| 13 | 0.50 / 0.50 / 0.50 | 0.00 / 0.90 / 0.90 |
+| 19 | 0.60 / 0.40 / 0.40 | 0.40 / 0.85 / 0.85 |
+| 20 | 0.70 / 0.80 / 0.80 | 0.40 / 0.85 / 0.85 |
+
+Key 22 has 0.90 / 1.00 / 1.00 in both current management tables.
+The bare comparison has 0.05 / 0.20 / 0.20. Applying that comparison
+would change modeled cover alongside the classification and soil switches.
+
+Both European Disturbed tables use 0.33 / 0.80 / 0.80 for grass
+wildfire keys 129–131. The extended-lookup grass templates read back
+0.041 / 0.10 / 0.10 for high, 0.25 / 0.35 / 0.35 for moderate, and
+0.30 / 0.60 / 0.60 for low severity. The prescribed-fire row 132
+currently uses 0.85 / 0.85 / 0.85. The candidate grass-low template
+would also change that row. These are comparisons for scientific approval.
+
+The generic thinning compatibility change also triggered the published
+Disturbed matrix source-review gate. A fresh 96-case matrix produced
+768 byte-identical native outputs, 96 byte-identical management files and
+864 byte-identical other input comparisons. All 96 native soils matched
+apart from a Build Date comment. Independent review confirmed that the
+canonical vegetation matrix does not select the added generic thinning
+class and reproduced the original report byte for byte with the analyzer.
+The original report and provenance are preserved and the source
+review records the new source hash. [Artifact comparison](20261120_disturbed_matrix_parity.json)

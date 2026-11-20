@@ -477,9 +477,26 @@ var Landuse = (function () {
             }));
         }
 
+        var buildError = dom.qs("[data-landuse-build-error]", formElement);
+        var buildErrorText = buildError ? buildError.querySelector(".wc-alert__body") : null;
+
+        function handleBuildError(error) {
+            var payload = toResponsePayload(http, error);
+            if (buildErrorText && payload.error && payload.error.code === "incompatible_landuse_mapping") {
+                buildErrorText.textContent = payload.error.message;
+                buildError.hidden = false;
+                return;
+            }
+            landuse.pushResponseStacktrace(landuse, payload, { preserveSummary: true });
+        }
+
         landuse.build = function () {
             var taskMsg = "Building landuse";
             resetStatus(taskMsg, true);
+            if (buildErrorText) {
+                buildError.hidden = true;
+                buildErrorText.textContent = "";
+            }
             resetBuildCompletionSeen();
 
             if (landuseEvents && typeof landuseEvents.emit === "function") {
@@ -523,9 +540,9 @@ var Landuse = (function () {
                     landuse.poll_completion_event = LANDUSE_BUILD_COMPLETION_EVENT;
                     landuse.set_rq_job_id(landuse, response.job_id);
                 } else if (response) {
-                    landuse.pushResponseStacktrace(landuse, response);
+                    handleBuildError({ body: response });
                 }
-            }).catch(handleError);
+            }).catch(handleBuildError);
         };
 
         landuse.modify_coverage = function (domId, cover, value) {

@@ -83,11 +83,30 @@ The first correctness review found that mode and dataset selection could
 clear the report before Build, and that buffer validation could mask
 incompatible-table feedback. Tests cover the corrected order and the
 selected-mode-to-rejection controller path. Focused Python passed 99 tests.
-The frontend passed all 127 Jest suites and nine Node tests. The live
-verification and full raster compatibility phase remain open.
+The frontend passed all 127 Jest suites and nine Node tests. Full raster compatibility remains open.
 
 Private alignment of the retained CORINE raster to the controlled forest
 watershed returned all 58 expected hillslopes with the ordinary native
 classifier and flags. The 16 class-25 assignments match the live gridded
 CORINE result. This traces the fixture through the actual classification
 boundary. It does not certify HTTP admission or worker consumption.
+
+## Forest browser verification
+
+After restarting the candidate RQ engine and web services and rebuilding the
+controller bundle, the signed-in browser verified the real Landuse Options
+workflow in `cleft-jump`. The retained CORINE test raster with the plain
+ESDAC map returned HTTP 400 and no job ID. The dedicated alert displayed the
+map, filename, missing metadata and corrective action. The actual applied
+Mixed forest table stayed visible. Byte checks confirmed that the existing
+`nlcd.tif` and `landuse.parquet` survived unchanged. The control restored
+gridded mode when it finished.
+
+An initial browser attempt caught the generic stacktrace handler replacing
+the table even when the panel reset preserved it. The new alert bypasses
+that handler for mapping feedback. Other immediate build errors retain
+their existing Details panel while keeping the summary visible. Later RQ
+failures and overlapping submissions remain part of staged worker
+acceptance. Screenshot `landuse-preflight-retained-report.png` and response
+receipt `forest-landuse-preflight-browser-r6.log` are in the restricted
+forest evidence directory.

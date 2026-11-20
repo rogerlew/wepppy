@@ -1058,7 +1058,7 @@ function controlBase() {
         statusStream: null,
         _statusStreamHandle: null,
 
-        pushResponseStacktrace: function pushResponseStacktrace(self, response) {
+        pushResponseStacktrace: function pushResponseStacktrace(self, response, options) {
             showTarget(self.stacktrace);
             setTextContent(self.stacktrace, "");
 
@@ -1093,7 +1093,9 @@ function controlBase() {
             }
 
             revealStacktracePanel(self.stacktrace);
-            updateErrorSummary(self, response);
+            if (!options || options.preserveSummary !== true) {
+                updateErrorSummary(self, response);
+            }
         },
 
         pushErrorStacktrace: function pushErrorStacktrace(self, error, textStatus, errorThrown) {
