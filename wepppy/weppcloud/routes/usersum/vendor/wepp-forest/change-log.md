@@ -2,6 +2,12 @@
 
 Canonical WEPP build/version history for `wepp-forest`.
 
+WEPPcloud has deprecated `latest` in WEPP Exec. It is pinned to `wepp_dcc52a6`
+and remains supported for projects saved with that setting. The version picker
+offers explicit versions for new selections. The pin stays fixed because changing
+the executable behind a saved setting can change rerun results and obscure which
+model build produced them. Select `wepp_dcc52a6` to rerun with the same executable.
+
 Required maintenance rule:
 - update this file whenever a new build or rebuild is made (including new
   release-tagged binaries and version-affecting commits).
@@ -78,6 +84,7 @@ burned-event peak/sediment consequences remain disclosed; see the release notes.
 | 09/15/2025 | `08e8872` | `ifx` | `wepp_250915` | IFX 50k makefile and release refresh (`wepp_250915`). |
 | 08/08/2025 | `f63fcf5` | `ifort` | `wepp_50k` | `wepp_50k` revision. |
 | 08/05/2025 | `f48e495` | `ifort` | `wepp_50k` | Initial `wepp_50k` release commit. |
+| 07/02/2025 | `dcc52a6` | `ifort` 2021.9.0 | `wepp_dcc52a6` / `wepp_dcc52a6_hill` | Updated the topsoil saturation fraction reported in `soil.dat` to use porosity without the `cpm` adjustment in both daily and hourly water balances. This Linux build pair serves as the legacy reference for reproducing historical results. |
 | 03/12/2025 | `a557997` | `ifort` | `-` | Watershed pass-file parsing updated for longer first-table hillslope filenames. |
 | 03/12/2025 | `726fbd5` | `ifort` | `-` | Increased WEPP pass-file name size. |
 | 03/11/2025 | `bcf2ac5` | `ifort` | `-` | Updated `cwshed.inc` release content. |
