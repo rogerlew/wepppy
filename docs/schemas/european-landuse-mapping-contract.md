@@ -56,3 +56,14 @@ and model parameters retain their meaning. These four assets moved with
 byte identity in revision `fc183b0a6`. Keep the exact-name routing and
 scenario choices for the currently separate ESDAC tables under independent
 audit and ratification.
+
+### Existing generic thinning classification
+
+Implementation conformance is pending. Retain the exact `thinning`
+classification for the historical catalog rows that already use it.
+Management summary validation must accept this existing default Disturbed
+soil-lookup key. Keep each row's management file and treatment type,
+including the distinct 96% cover scenario. Continue resolving the soil
+parameters from the selected run lookup. The default lookup has one generic
+thinning row for each of its four supported textures. Do not infer a
+percentage-specific soil scenario from a management filename.
