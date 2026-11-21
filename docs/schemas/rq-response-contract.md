@@ -564,7 +564,8 @@ validated, deployment separate.
   the first `errors` entry. If the validator provides no explanation and the
   field cannot be identified, include the exception type. Log the original
   secret-filtered traceback with the response's `error_id` so operators can
-  diagnose rejected submissions before a job exists.
+  diagnose rejected submissions before a job exists. Unexpected preparation
+  failures return HTTP 500 with the secret-filtered traceback in `error.details`.
 - Validation error list:
 ```json
 {
