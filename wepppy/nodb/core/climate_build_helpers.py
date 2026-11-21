@@ -804,12 +804,15 @@ def cli_revision(
     hill_lng: float,
     hill_lat: float,
     new_cli_path: str,
+    *,
+    raw_tdmean_c: tuple[np.ndarray, np.ndarray] | None = None,
 ) -> str:
     hill_ppts = get_monthlies(ppt_fn, hill_lng, hill_lat)
     hill_tmins = get_monthlies(tmin_fn, hill_lng, hill_lat)
     hill_tmaxs = get_monthlies(tmax_fn, hill_lng, hill_lat)
 
     if not is_breakpoint:
+        options = {} if raw_tdmean_c is None else {"raw_tdmean_c": raw_tdmean_c}
         pyo3_cli_revision(
             cli_fn,
             new_cli_path,
@@ -819,9 +822,13 @@ def cli_revision(
             hill_ppts,
             hill_tmaxs,
             hill_tmins,
+            **options,
         )
         assert _exists(new_cli_path), "wepppyo3.climate.cli_revision failed"
         return new_cli_path
+
+    if raw_tdmean_c is not None:
+        raise ValueError("PRISM 800 m dewpoint revision requires a daily CLI")
 
     diagnostic_path = start_temperature_revision(cli_fn, new_cli_path)
     cli2 = ClimateFile(cli_fn)
@@ -1061,11 +1068,14 @@ def _submit_prism_revision_futures(
     ppt_fn: str,
     tmin_fn: str,
     tmax_fn: str,
+    *,
+    raw_tdmean_c: tuple[np.ndarray, np.ndarray] | None = None,
 ) -> tuple[dict[Any, str], dict[str, str], dict[str, str]]:
     future_map: dict[Any, str] = {}
     sub_par_fns: dict[str, str] = {}
     sub_cli_fns: dict[str, str] = {}
 
+    options = {} if raw_tdmean_c is None else {"raw_tdmean_c": raw_tdmean_c}
     for topaz_id, (hill_lng, hill_lat) in watershed.centroid_hillslope_iter():
         climate.logger.info(f"submitting climate build for {topaz_id} to thread pool... ")
         hill_lng, hill_lat = watershed.hillslope_centroid_lnglat(topaz_id)
@@ -1088,7 +1098,7 @@ def _submit_prism_revision_futures(
             new_cli_path,
         )
 
-        future = executor.submit(cli_revision, *args)
+        future = executor.submit(cli_revision, *args, **options)
         future_map[future] = topaz_id
         sub_par_fns[topaz_id] = ".par"
         sub_cli_fns[topaz_id] = new_cli_fn

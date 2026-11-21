@@ -159,9 +159,9 @@ observed storm duration or intensity.
 | Multiple | Revises centroid daily forcing with existing monthly PRISM hillslope precipitation ratios and temperature offsets. |
 | Multiple climates (nearest PRISM cell) | Uses each hillslope's nearest native cell, with no neighboring-cell averaging or monthly revision. Hillslopes in one cell share unscaled daily weather. |
 
-Existing precipitation scaling options still apply. The observed dewpoint floor
-is retained and recomputed after monthly temperature revision; raw dewpoint stays
-unchanged in source records. The existing PRN format rounds rainfall to0.254mm
+Existing precipitation scaling options still apply. With Multiple climates, each hillslope file uses the higher of the raw PRISM dew point
+and the hillslope’s revised daily minimum temperature. The per-hillslope
+`-dewpoint.csv` records both inputs and the resulting dew point. The existing PRN format rounds rainfall to0.254mm
 and temperature to whole Fahrenheit degrees, so trace rain can round to zero.
 The CLIGEN quality guard and any convergence warnings remain applicable.
 
