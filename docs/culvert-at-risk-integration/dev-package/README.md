@@ -707,14 +707,16 @@ Each `runs/{point_id}/` directory contains:
     atlas14_intensity_pds_mean_metric.csv
 
   dem/wbt/
-    outlet.geojson            # Detected outlet point
-    channels.geojson          # Channel network (UTM)
-    channels.WGS.geojson      # Channel network (WGS84)
-    subcatchments.geojson     # Subcatchment polygons (UTM)
-    subcatchments.WGS.geojson # Subcatchment polygons (WGS84)
-    netful.geojson            # Full stream network
-    netful.WGS.geojson        # Full stream network (WGS84)
-    subwta.geojson            # Subcatchment attributes
+    outlet.geojson            # Selected outlet point (detected or retained original)
+    bound.geojson             # Canonical watershed boundary polygons (project CRS)
+    bound.WGS.geojson         # Canonical watershed boundary polygons (WGS84)
+    channels.geojson          # Channel-cell footprint polygons (project CRS)
+    channels.WGS.geojson      # Channel-cell footprint polygons (WGS84)
+    subcatchments.geojson     # Hillslope polygon parts (project CRS)
+    subcatchments.WGS.geojson # Hillslope polygon parts (WGS84)
+    netful.geojson            # Selected stream-mask polygons (project CRS)
+    netful.WGS.geojson        # Selected stream-mask polygons (WGS84)
+    subwta.geojson            # Polygonized hillslope and channel cells with TOPAZ IDs
     *.vrt                     # Virtual raster references
 
   watershed/
@@ -764,8 +766,9 @@ Each `runs/{point_id}/` directory contains:
 | File | Description |
 |------|-------------|
 | `run_metadata.json` | Run status (`success`/`failed`), timing, error details |
-| `dem/wbt/channels.geojson` | Channel network geometry for visualization |
-| `dem/wbt/subcatchments.geojson` | Subcatchment boundaries for visualization |
+| `dem/wbt/bound.WGS.geojson` | Canonical footprint for displaying a run’s watershed or mapping its outlet metrics. Preserve all parts and holes. |
+| `dem/wbt/channels.geojson` | Channel footprint polygons with run-local `TopazID`, `WeppID`, and stream `Order`. A reach may span multiple features. |
+| `dem/wbt/subcatchments.geojson` | Hillslope polygons with run-local `TopazID` and `WeppID`. Keep every polygon part for each hillslope. |
 | `watershed/channels.parquet` | Channel attributes (length, slope, contributing area) |
 | `watershed/hillslopes.parquet` | Hillslope attributes (area, slope, aspect) |
 | `wepp/output/interchange/loss_pw0.out.parquet` | Annual sediment/runoff at watershed outlet |
