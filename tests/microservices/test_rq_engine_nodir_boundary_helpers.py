@@ -6,7 +6,6 @@ import pytest
 
 from wepppy.microservices.rq_engine import (
     ash_routes,
-    climate_routes,
     debris_flow_routes,
     export_routes,
     landuse_routes,
@@ -31,7 +30,6 @@ class _AttrShapedError(RuntimeError):
 
 _ROUTES_WITH_HELPER = [
     ash_routes,
-    climate_routes,
     debris_flow_routes,
     export_routes,
     landuse_routes,
