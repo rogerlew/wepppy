@@ -756,8 +756,7 @@ def test_prism800m_publishes_native_dewpoint_artifacts(controllers, monkeypatch)
     filename, = current.sub_cli_fns.values()
     attempt, = root.glob('prism800m-build-revision-*')
     assert json.loads((attempt / 'build-status.json').read_text())['state'] == 'complete'
-    for name in [filename, filename + '-dewpoint.csv', filename + '.temperature-ordering.log']:
-        assert (root / name).read_bytes() == (attempt / name).read_bytes()
+    assert (root / filename).read_bytes() == (attempt / filename).read_bytes()
     cli = read_cli(root / filename)
     np.testing.assert_allclose(cli.tdew, np.maximum(raw.tdmean, cli.tmin), atol=.051)
     pd.testing.assert_frame_equal(raw, pd.read_parquet(attempt / 'prism800m-source-ws.parquet'))

@@ -1,4 +1,4 @@
-[Retire PRISM analysis sidecars](docs/work-packages/20261121_retire_prism_sidecars/package.md) — contract review.
+[Retire PRISM analysis sidecars](docs/work-packages/20261121_retire_prism_sidecars/package.md) — implemented and locally validated.
 
 Implemented and locally validated: [Native PRISM hillslope dew point](docs/work-packages/20261121_prism_native_dewpoint/package.md).
 
