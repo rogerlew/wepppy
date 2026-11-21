@@ -1,0 +1,6 @@
+# Retire routine PRISM analysis products
+
+WEPPpy baseline 9145a8684, native baseline 3f6764d45. The operator confirmed the analysis has no users and requested removal of both files and the tests that mandate them. Reducing artifact count and disk traffic is the intended behavior change. The historic PRISM schema and the spatialization temperature schema govern this delta. ADR-0092 is amended for retention only.
+
+All writers of the standalone temperature-ordering file and dew-point CSV will stop creating those files. Keep regular log channels, published climate mappings, existing EDDE JSON, other provenance and weather calculations. Do not replace the files with a new report. Existing artifacts are compatible and outside the source change. A historical work-package validator explicitly expects the superseded log and remains historical. Remove tests solely for those sidecars and assertions about them from mixed tests. Verify actual artifacts and byte parity against the local read-only production replay. No new test is required. Implementation pending.
+Two independent read-only reviewers approved the checkpoint. Both confirmed staged failure semantics and weather compatibility. The reviews identified a stale user guide reference and whitespace, addressed in this change set.
