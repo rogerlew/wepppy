@@ -7,9 +7,9 @@ Generate final hillslope weather directly in the native daily writer and retain 
 ## Progress
 
 - [x] Trace the existing build and specify the keyword and generated output contract.
-- [ ] Commit the reviewed contract.
-- [ ] Implement native derivation and connect the PRISM Multiple caller.
-- [ ] Build the extension and compare real CLI and diagnostic outputs using scoped tests.
+- [x] Commit the reviewed contract.
+- [x] Implement native derivation and connect the PRISM Multiple caller.
+- [x] Build the extension and compare real CLI and diagnostic outputs using scoped tests.
 
 ## Surprises & Discoveries
 
@@ -25,4 +25,4 @@ Extend cli_revision/src/lib.rs in wepppyo3. Pass dated forcing through the exist
 
 ## Outcomes & Retrospective
 
-Implementation pending.
+Implemented in both task checkouts. Scoped validation passed 111 pytest and 23 Rust tests. A real project replay produced byte-identical CLI and diagnostic files. It exposed a signed-zero tie that numeric comparison alone missed. See the package correctness review for exact scope and timings.
