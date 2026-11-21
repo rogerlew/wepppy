@@ -753,21 +753,18 @@ For AI agents performing deployments:
 - [ ] Static assets accessible (404s resolved)
 - [ ] Monitoring established
 
-### CI Comrak runtime alignment (2026-11-21)
+### CI Comrak and PRISM runtime alignment (2026-11-21)
 
-The [common-image build for `b951c5b79`](https://github.com/rogerlew/wepppy/actions/runs/44933644846)
-supplies the pinned `comrak-ext` package used by the Markdown routes.
-`Dockerfile.test` uses that build's digest. With the previous image,
-[`test-baseline`](https://github.com/rogerlew/wepppy/actions/runs/44933644862/job/136937190372)
-failed while importing the Flask app during database bootstrap because its Python
-environment lacked `comrak`. The stubtest job had already passed.
+The [baseline job](https://github.com/rogerlew/wepppy/actions/runs/44933644862/job/136937190372)
+failed during database bootstrap because its Python environment lacked
+`comrak`. The stubtest job had already passed. The next common image cleared
+bootstrap but still lacked the native `raw_tdmean_c` API required by PRISM.
 
-The PRISM baseline also needs the WEPPpyo3 climate extension that accepts
-`raw_tdmean_c` and omits the retired analysis sidecars. The publishing workflow
-pins WEPPpyo3 `af3b5c977bbdae576fadec929620412732824ad1`. After the trusted build
-publishes that revision, advance `Dockerfile.test` to its digest and rerun CI.
-The Comrak-only image above clears database bootstrap but still has the old
-climate extension.
+`Dockerfile.test` uses the digest published by the
+[common-image build for `2dfde16fb`](https://github.com/rogerlew/wepppy/actions/runs/44942315781).
+That revision includes the pinned `comrak-ext` dependency and WEPPpyo3
+`af3b5c977bbdae576fadec929620412732824ad1`, which supplies the updated climate
+extension without the retired PRISM analysis sidecars.
 
 ### CI native alignment acceptance (2026-10-29)
 
