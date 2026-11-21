@@ -90,6 +90,14 @@ refreshed. Active work is separated into one panel per requested queue; the
 default view shows `default` first and `batch` second. Recently completed and
 failed jobs remain combined tables with a Queue column.
 
+**Catalog admission** shows pause ownership and expiry, worker compatibility,
+queue priority and uncertain reservations. Several conditions can block refresh
+at once. **Catalog health** shows the time and progress of the last scheduler
+tick, pending and dirty locator counts, and reconciliation errors. Compare two
+snapshots to check progress. A missing summary can occur before the first tick
+or while the scheduler runs an older version. For an individual run, check its
+published catalog and refresh status.
+
 ## Common User Workflows
 ### 1. Standard WEPPcloud UI run
 1. Configure controls in the UI.

@@ -10,6 +10,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 
 ## Progress
 
+- 2026-11-21 UTC. Implemented the Admin/Root RQ catalog panels against reviewed checkpoint `2dacc6b57`. The route and real-Redis catalog suites passed 58 tests.
+
 - [x] October 28 default-queue contract checkpoint `0e6302905`, independent reviews, runtime wiring and 129 focused real-Redis/artifact regressions; local normal-worker live job-tree readback passed.
 - [x] October 28 broad sweep attempted: 6,810 passed/61 skipped, stopped by preexisting Roads provenance mismatch; explicitly not a full-suite pass. Final bounded implementation handoff complete; production migration/general enablement remain excluded.
 
@@ -28,6 +30,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 - [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
 ## Surprises & Discoveries
+
+- The general cursor contains a fleet-sized pending list. The page can avoid transferring it by reading a compact summary written in the existing cursor transaction.
 
 November 6: scheduler direct reconciliation required the same host storage mappings
 as workers; the reviewed one-line wepp1 volume anchor repair restored all namespace
@@ -98,6 +102,8 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 
 ## Decision Log
 
+- Show simultaneous admission blockers and scheduler health separately on manual refresh. See the current catalog refresh contract under “Admin admission and health snapshot”.
+
 November 6: the operator authorized combined notifications/catalog production
 deployment. Preserve observation 01 as failed and use independently reviewed
 paired supervision for observation 02, retaining the original deadline and requiring
@@ -138,6 +144,8 @@ state, shortening reconciliation spacing or weakening global acceptance.
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+- Admin monitoring is implemented on the task branch. Missing summaries on mixed-version deployments render explicitly. Production panel rollout remains pending.
 
 November 6 09:44 UTC: all three production deployments and the fresh default-worker
 pilot passed. General async is live under bounded machine supervision. Observation

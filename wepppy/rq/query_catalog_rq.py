@@ -579,6 +579,16 @@ def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None
             pipeline.multi()
             # Batch acknowledgment and durable pending publication are one commit.
             pipeline.set(key, json.dumps(scan))
+            if not pilot_id:
+                # Keep the admin snapshot independent of the fleet-sized pending list.
+                pipeline.set(key + ":health", json.dumps({
+                    "tick": now, "started": scan.get("cycle_started_at"),
+                    "completed": scan.get("completed_at"), "visited": scan["visited"],
+                    "pending": len(pending), "admitted": admitted,
+                    "failures": len(failures) + len(scan["cycle_errors"]),
+                    "unavailable": len(unavailable_namespaces),
+                    "discovery_unavailable": discovery.get("state") == "unavailable",
+                }))
             if records:
                 pipeline.xdel(key + ":stream", *(identifier for identifier, _ in records))
             try:
