@@ -112,7 +112,9 @@ def error_response_with_traceback(
     )
 
 
-def validation_error_response(errors: list[dict[str, Any]]) -> JSONResponse:
+def validation_error_response(
+    errors: list[dict[str, Any]], *, log_exception: bool = False
+) -> JSONResponse:
     detail = "Validation failed."
     if errors:
         first_error = errors[0]
@@ -124,6 +126,7 @@ def validation_error_response(errors: list[dict[str, Any]]) -> JSONResponse:
         code="validation_error",
         details=detail,
         errors=errors,
+        log_exception=log_exception,
     )
 
 

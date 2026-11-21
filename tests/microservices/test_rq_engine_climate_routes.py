@@ -129,7 +129,7 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch):
     return state
 
 
-def test_build_climate_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_build_climate_parse_error(monkeypatch: pytest.MonkeyPatch, caplog) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
 
@@ -152,7 +152,10 @@ def test_build_climate_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
     payload = response.json()
     assert payload["error"]["code"] == "validation_error"
     assert payload["error"]["message"] == "Validation failed"
-    assert payload["errors"][0]["message"] == "Invalid climate field values."
+    assert payload["errors"][0]["message"] == payload["error"]["details"] == "bad payload"
+    assert payload["error_id"] in caplog.text
+    assert "Traceback (most recent call last)" in caplog.text
+    assert "ValueError: bad payload" in caplog.text
 
 
 def test_build_climate_invalid_seed_returns_field_validation(
@@ -622,7 +625,7 @@ def test_build_climate_rejects_archive_form_root(monkeypatch: pytest.MonkeyPatch
     assert response.json()["error"]["code"] == "NODIR_ARCHIVE_ACTIVE"
 
 
-def test_build_climate_runtime_preflight_error_uses_generic_parse_boundary(
+def test_build_climate_runtime_preflight_error_preserves_traceback(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch)
@@ -636,8 +639,8 @@ def test_build_climate_runtime_preflight_error_uses_generic_parse_boundary(
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/build-climate", json={})
 
-    assert response.status_code == 400
-    assert response.json()["error"]["message"] == "Error parsing climate inputs"
+    assert response.status_code == 500
+    assert "RuntimeError: boom" in response.json()["error"]["details"]
 
 
 @pytest.mark.parametrize('mode', [climate_routes.ClimateMode.ObservedPRISM, climate_routes.ClimateMode.Prism800m])
