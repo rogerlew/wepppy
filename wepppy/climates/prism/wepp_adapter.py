@@ -72,9 +72,6 @@ def build_cell(cligen, frame, wind, directory, stem, *, seed=None,
     adjusted = np.maximum(frame.tdmean.to_numpy(), weather.tmin.to_numpy())
     cli.replace_var('tdew', weather.index, adjusted)
     cli.write(str(path))
-    pd.DataFrame({'raw_tdmean_C': frame.tdmean.to_numpy(), 'final_tmin_C': weather.tmin.to_numpy(),
-                  'derived_tdmean_C': adjusted}, index=weather.index).to_csv(
-        directory / (stem + '-dewpoint.csv'), index_label='date')
     actual = validate_cli(path, frame.index)
     expected_ppt = np.round(frame.ppt / 25.4 * 100) * 0.254
     expected = {'prcp': expected_ppt,

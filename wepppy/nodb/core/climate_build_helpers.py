@@ -52,7 +52,7 @@ from wepppy.nodb.core.climate_multiple_build import (
 
 from wepppy.climates.prism.temperature import (
     validate_source_temperatures, repair_temperature_ordering,
-    start_temperature_revision, complete_temperature_revision,
+    log_temperature_revision,
 )
 
 if TYPE_CHECKING:
@@ -830,7 +830,6 @@ def cli_revision(
     if raw_tdmean_c is not None:
         raise ValueError("PRISM 800 m dewpoint revision requires a daily CLI")
 
-    diagnostic_path = start_temperature_revision(cli_fn, new_cli_path)
     cli2 = ClimateFile(cli_fn)
 
     df = cli2.as_dataframe()
@@ -852,7 +851,7 @@ def cli_revision(
     cli2.replace_var("tmax", dates, rev_tmax)
     cli2.replace_var("tmin", dates, rev_tmin)
     cli2.write(new_cli_path)
-    complete_temperature_revision(diagnostic_path, diagnostics)
+    log_temperature_revision(cli_fn, new_cli_path, diagnostics)
     del cli2
 
     assert _exists(new_cli_path), "ClimateFile.revision failed"

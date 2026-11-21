@@ -1,4 +1,4 @@
-"""Exact PRISM writers, shared numerical rule, and visible repair records."""
+"""PRISM climate writers and temperature-ordering behavior."""
 from pathlib import Path
 
 import numpy as np
@@ -82,8 +82,6 @@ def test_real_writers_repair_and_preserve_weather(tmp_path, monkeypatch, writer)
     for name in ['prcp', 'dur', 'rad', 'w-vl', 'w-dir', 'tdew']:
         np.testing.assert_array_equal(revised[name], original[name])
     assert revised.index.equals(original.index)
-    log = Path(str(output) + '.temperature-ordering.log').read_text()
-    assert 'status=working' in log and 'status=complete' in log and 'corrected_days=2' in log
     if writer == 'breakpoint':
         # Existing breakpoint serialization normalizes spacing and depth precision.
         assert [tuple(map(float, line.split())) for line in output.read_text().splitlines() if len(line.split()) == 2] == [
@@ -103,7 +101,6 @@ def test_invalid_source_is_not_repaired(tmp_path, value):
                 cli_revision(str(source), str(output), ref['ppt'], ref['tmax'], ref['tmin'], ref['ppt'], ref['tmax'], ref['tmin'])
             else:
                 revise_prism(source, output, ref, ref)
-        assert 'status=complete' not in Path(str(output) + '.temperature-ordering.log').read_text()
 
 
 @pytest.mark.integration
@@ -119,32 +116,6 @@ def test_historic_dewpoint_floor_uses_repaired_minimum(tmp_path):
     before = read_cli(output)
     np.testing.assert_array_equal(read_cli(output).tdew, np.maximum(raw, before.tmin))
     assert read_cli(output).tdew.iloc[0] < -.5  # The unrepaired Tmin must not survive downstream.
-
-
-@pytest.mark.unit
-def test_edde_preserves_existing_repair_log(tmp_path):
-    output = tmp_path / 'out.cli'
-    log = Path(str(output) + '.temperature-ordering.log')
-    log.write_text('prior evidence')
-    with pytest.raises(ValueError, match='new file'):
-        revise_prism('unused', output, normals(), normals())
-    assert log.read_text() == 'prior evidence'
-
-
-@pytest.mark.unit
-def test_edde_diagnostic_failure_does_not_publish_complete_manifest(tmp_path, monkeypatch):
-    import wepppy.climates.edde.cligen as module
-    source = write_source(tmp_path / 'source.cli')
-    output = tmp_path / 'out.cli'
-
-    def fail_diagnostic(*args):
-        raise OSError('diagnostic write failed')
-
-    monkeypatch.setattr(module, 'complete_temperature_revision', fail_diagnostic)
-    with pytest.raises(OSError, match='diagnostic write failed'):
-        revise_prism(source, output, normals(), normals(True))
-    assert not output.with_suffix('.prism.json').exists()
-    assert 'status=complete' not in Path(str(output) + '.temperature-ordering.log').read_text()
 
 
 @pytest.mark.unit
@@ -172,7 +143,6 @@ def test_nonrepresentable_diagnostics_fail_before_completion(tmp_path, writer):
         else:
             revise_prism(source, output, reference, target)
     assert not output.with_suffix('.prism.json').exists()
-    assert 'status=complete' not in Path(str(output) + '.temperature-ordering.log').read_text()
 
 
 @pytest.mark.integration
@@ -192,7 +162,6 @@ def test_native_dated_dewpoint_matches_full_python_revision(tmp_path):
     dates = raw.index.strftime('%Y%m%d').to_numpy(dtype=np.int32)
     old, new = tmp_path / 'old.cli', tmp_path / 'new.cli'
     cli_revision(str(source), str(old), *args)
-    assert not Path(str(old) + '-dewpoint.csv').exists()
     assert (read_cli(old).tdew == 5.).all()
     tmin = read_cli(old).tmin
     derived = np.maximum(raw, tmin)
@@ -201,11 +170,6 @@ def test_native_dated_dewpoint_matches_full_python_revision(tmp_path):
     legacy.write(str(old))
     cli_revision(str(source), str(new), *args, raw_tdmean_c=(dates, raw.to_numpy()))
     pd.testing.assert_frame_equal(read_cli(old), read_cli(new))
-    expected = pd.DataFrame({'date': raw.index.strftime('%Y-%m-%d'), 'raw_tdmean_C': raw.to_numpy(),
-                             'final_tmin_C': tmin.to_numpy(), 'derived_tdmean_C': derived.to_numpy()})
-    pd.testing.assert_frame_equal(expected, pd.read_csv(str(new) + '-dewpoint.csv'))
-    log = Path(str(new) + '.temperature-ordering.log').read_text()
-    assert f'dewpoint_changed_days={(expected.raw_tdmean_C < expected.final_tmin_C).sum()}' in log
     with pytest.raises(TypeError):
         cli_revision(str(source), str(new), *args, (dates, raw.to_numpy()))
 
@@ -235,7 +199,6 @@ def test_native_dated_dewpoint_rejects_invalid_candidate(tmp_path, fault):
     out = tmp_path / 'candidate.cli'
     with pytest.raises(OSError):
         cli_revision(str(source), str(out), *([[1.] * 12] * 6), raw_tdmean_c=(dates, values))
-    assert 'status=complete' not in Path(str(out) + '.temperature-ordering.log').read_text()
 
 
 @pytest.mark.integration
@@ -248,4 +211,3 @@ def test_native_dewpoint_signed_zero_matches_serialized_minimum(tmp_path):
     cli_revision(str(source), str(output), *([[0.] * 12] * 6),
                  raw_tdmean_c=(days, np.full(4, -0.0)))
     assert all(row.split()[-1] == '0.0' for row in output.read_text().splitlines()[15:])
-    assert ',0.0,0.0' in Path(str(output) + '-dewpoint.csv').read_text()
