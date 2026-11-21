@@ -401,3 +401,22 @@ outcome. Actual absence of an optional dataset follows existing query
 missing-data semantics. Preserve source containment, including canonical
 parent-backed selection. A retry re-enters the current handshake within the
 browser's wait budget.
+
+## Admin admission and health snapshot
+
+The Admin/Root page at `/rq/info-details` shows two read-only catalog panels on
+each manual refresh, independent of the selected job queues. Catalog admission
+shows the enable flag, observed pause owner and remaining TTL (including no
+expiry), worker compatibility and suspension, ordinary default backlog,
+outstanding permits and uncertain reservations. Show simultaneous blockers,
+including an expired RQ job under a pause. A clear snapshot describes the
+observed gates and gives no guarantee of future admission.
+
+Catalog health shows the last committed general scheduler tick in UTC, cycle
+progress and completion, inventory visits, pending locator count, known dirty
+locator count and reconciliation failures. Publish a compact, configuration-bound
+summary alongside the normal cursor so page loads avoid the fleet-sized cursor,
+directory scans and job payloads. Report missing, unsupported or malformed
+telemetry as unavailable. Preserve queue tables when catalog telemetry alone
+fails. A scheduler tick or cycle completion cannot certify per-run publication.
+This distinction matters when admission is paused while the scheduler still runs.

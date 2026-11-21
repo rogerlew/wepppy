@@ -73,6 +73,15 @@ distinct while sharing their top-level owner's lifecycle guard.
 
 ## Inspecting progress and failures
 
+Admin and Root operators can open `/weppcloud/rq/info-details` and refresh the
+snapshot. **Catalog admission** shows concurrent blockers. A pause with no
+expiry and an uncertain reservation both need investigation. **Catalog health**
+shows the timestamp and age of the last committed scheduler tick, cycle
+timestamps, locator counts and errors. The summary first appears when an
+updated scheduler commits a general reconciliation tick for the same
+configuration. Check project publication evidence below for run-specific
+freshness.
+
 Use existing authorized project browse/download paths:
 
 - `_query_engine/catalog.json`: last published asset catalog.
