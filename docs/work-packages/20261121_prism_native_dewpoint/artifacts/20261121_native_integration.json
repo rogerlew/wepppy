@@ -1,0 +1,12 @@
+{
+  "accepted_sha": "771bdd6093a3581138af80adc56d97eb48deb095",
+  "branch": "main",
+  "claim": "remote_integration_snapshot",
+  "integration_mode": "merge-preserving",
+  "observed_at": "2026-11-21T10:19:31.833100+00:00",
+  "observed_remote_sha": "3f6764d45e06fa1d5cea04d5e87be363b62ce054",
+  "remote": "origin",
+  "repository": "https://github.com/wepp-in-the-woods/wepppyo3",
+  "schema_version": 1,
+  "validation_scope": "ancestry-only; not behavioral acceptance or release approval"
+}
