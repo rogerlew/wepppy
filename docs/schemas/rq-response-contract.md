@@ -559,6 +559,12 @@ validated, deployment separate.
 - `error_id` is optional for generic 4xx responses, but **required** for upload-facing errors (see `docs/schemas/upload-endpoint-contract.md`).
 - Job polling not-found:
   - `/rq-engine/api/jobstatus/<job_id>` and `/rq-engine/api/jobinfo/<job_id>` return HTTP 404 with the canonical error payload and `error.code="not_found"`.
+- For Build Climate input exceptions, return the field-specific validation issue
+  or the validator's secret-filtered explanation in both `error.details` and
+  the first `errors` entry. If the validator provides no explanation and the
+  field cannot be identified, include the exception type. Log the original
+  secret-filtered traceback with the response's `error_id` so operators can
+  diagnose rejected submissions before a job exists.
 - Validation error list:
 ```json
 {
