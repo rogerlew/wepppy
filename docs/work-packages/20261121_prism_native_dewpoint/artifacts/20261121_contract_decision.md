@@ -1,0 +1,7 @@
+# Contract decision
+
+2026-11-21 UTC. Operator approved keyword-controlled ownership by cli_revision and authorized implementation with scoped validation. Starting WEPPpy revision 504037b31 and wepppyo3 revision 5e3540f. The historic PRISM and spatialization temperature schemas own the forcing and repair rules. ADR-0082 remains the parameterization authority. The intended interface change is specified in the historic contract under Native hillslope dew-point revision. Implementation conformance pending.
+
+This is an execution and compatibility change. Current Python reserialization also sets daily column precision. Compare final complete weather rows and the dated diagnostic against that pipeline. Exercise order repair, serialized Tmin, cold hillslope from raw forcing, calendar mismatch, missing/extra/nonfinite forcing, absence of the keyword and rollback. Existing Single and nearest-cell paths derive watershed/cell dew points in Python. Breakpoint CLI is outside the generated PRISM 800 m daily format. Security scope is limited to validated numeric inputs and existing staged output paths.
+
+Two independent read-only reviewers approved the revised checkpoint. The first identified ambiguity in signature compatibility and auxiliary-field preservation. The second requested precise count location, predicate and diagnostic precision. Both confirmed closure after amendments. Native conformance is pending and existing centroid publication semantics apply.

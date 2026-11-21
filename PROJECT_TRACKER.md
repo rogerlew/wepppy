@@ -1,3 +1,5 @@
+In progress: [Native PRISM hillslope dew point](docs/work-packages/20261121_prism_native_dewpoint/package.md).
+
 Implemented and locally validated: [Comrak Markdown migration](docs/work-packages/20261120_comrak_markdown_migration/package.md). Replaced cmarkgfm in Usersum, project README, Browse and docs tooling. Repository-wide tests excluding the slow marker passed.
 
 Implemented and locally validated: [Usersum vendor link graph and heading lint](docs/work-packages/20261120_usersum_link_graph/package.md). Verified 94 committed copies and 123 focused tests. Broad validation and integration remain open.
