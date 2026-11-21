@@ -32,23 +32,39 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
     ResourceDefinition(
         filename="relief.tif",
         summary="Hydrologically conditioned DEM.",
-        description="Depressions are filled or breached to enforce drainage prior to flow routing.",
+        description="Elevation surface used for D8 routing after the selected conditioning method.",
         units="meters (elevation)",
-        tool="WhiteboxTools `fill_depressions`, `breach_depressions`, or `breach_depressions_least_cost`.",
+        tool="WhiteboxTools `fill_depressions`, `breach_depressions`, `breach_depressions_least_cost`, or `topaz_condition_dem`.",
+        inputs=("DEM",),
+    ),
+    ResourceDefinition(
+        filename="relief.diagnostics.json",
+        summary="DEM conditioning diagnostics.",
+        description="Records the operation ID, tool, parameters, status, and terrain-change measurements.",
+        units="field-specific units recorded in the JSON",
+        tool="Diagnostics written by the selected DEM conditioning tool.",
         inputs=("DEM",),
     ),
     ResourceDefinition(
         filename="flovec.tif",
         summary="D8 flow direction raster.",
-        description="Each cell stores the primary flow direction using D8 pointer codes.",
-        units="direction code (1, 2, 4, … 128)",
+        description="Whitebox D8 pointer codes encode downslope direction. A cell with no lower neighbor has code 0.",
+        units="direction code (powers of two from 1 to 128), 0 for no flow, or NoData",
         tool="WhiteboxTools `d8_pointer`.",
         inputs=("relief.tif",),
     ),
     ResourceDefinition(
+        filename="flovec.wgs.tif",
+        summary="WGS84 copy of the D8 pointer grid.",
+        description="Nearest-neighbor reprojection preserves the original grid's pointer codes.",
+        units="same codes as flovec.tif",
+        tool="GDAL `Warp`.",
+        inputs=("flovec.tif",),
+    ),
+    ResourceDefinition(
         filename="floaccum.tif",
         summary="D8 flow accumulation (cells).",
-        description="Counts upslope contributing cells derived from the D8 pointer grid.",
+        description="Counts contributing cells, including the cell itself, using the D8 pointer grid.",
         units="number of cells (dimensionless)",
         tool="WhiteboxTools `d8_flow_accumulation` (`out_type=cells`).",
         inputs=("flovec.tif",),
@@ -57,7 +73,7 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
         filename="netful0.tif",
         summary="Initial stream network mask.",
         description="Binary channel raster extracted from the accumulation grid before short reach filtering.",
-        units="1 for channel cell, 0 elsewhere",
+        units="1 for stream cells, NoData for background",
         tool="WhiteboxTools `extract_streams` (threshold based on CSA).",
         inputs=("floaccum.tif",),
     ),
@@ -65,66 +81,106 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
         filename="netful.tif",
         summary="Stream network mask (filtered).",
         description=(
-            "Binary channel raster after stream pruning. "
-            "Default method is Iterative First-Order Link Prune (IFOLP); "
-            "legacy RemoveShortStreams remains selectable."
+            "The default iterative first-order link prune reads flovec.tif and floaccum.tif. "
+            "The legacy short-stream filter reads flovec.tif and netful0.tif."
         ),
-        units="1 for channel cell, 0 elsewhere",
+        units=(
+            "1 for retained streams. IFOLP writes 0 on other active cells and NoData outside its domain. "
+            "Legacy pruning uses the input background convention (0 or NoData)."
+        ),
         tool="WhiteboxTools `iterative_first_order_link_prune` or `remove_short_streams`.",
-        inputs=("netful0.tif", "floaccum.tif", "flovec.tif"),
+        inputs=("flovec.tif",),  # Both pruning methods use this input.
     ),
     ResourceDefinition(
         filename="chnjnt.tif",
-        summary="Stream junction raster.",
-        description="Identifies confluence cells within the stream network.",
-        units="1 at junction cells, background elsewhere",
+        summary="Upstream stream-neighbor count.",
+        description="Counts upstream stream cells that drain directly into each stream cell.",
+        units="0 at headwaters, 1 along single-inflow reaches, 2 or more at confluences, NoData off-stream",
         tool="WhiteboxTools `stream_junction_identifier`.",
         inputs=("flovec.tif", "netful.tif"),
     ),
     ResourceDefinition(
-        filename="netful.json",
+        filename="relief.vrt",
+        summary="Windowed conditioned elevation raster.",
+        description="Reads the run's crop window from the shared conditioned elevation raster. Opening the VRT requires its source.",
+        units="meters (elevation)",
+        tool="`build_windowed_vrt_from_window`.",
+    ),
+    ResourceDefinition(
+        filename="flovec.vrt",
+        summary="Windowed D8 flow direction raster.",
+        description="Reads the run's crop window from the shared D8 flow direction raster. Opening the VRT requires its source.",
+        units="Whitebox D8 pointer codes",
+        tool="`build_windowed_vrt_from_window`.",
+    ),
+    ResourceDefinition(
+        filename="netful.vrt",
+        summary="Run-specific stream mask raster reference.",
+        description=(
+            "The VRT references the selected stream mask. Culvert runs can use the unpruned input "
+            "when the filtered crop has no streams, or netful.seeded.tif after outlet seeding."
+        ),
+        units="stream-mask codes from the source raster",
+        tool="`build_windowed_vrt_from_window` or `gdal.Translate` after outlet seeding.",
+    ),
+    ResourceDefinition(
+        filename="chnjnt.vrt",
+        summary="Windowed upstream stream-neighbor count raster.",
+        description="Reads the run's crop window from the shared upstream stream-neighbor count raster. Opening the VRT requires its source.",
+        units="number of directly inflowing stream cells",
+        tool="`build_windowed_vrt_from_window`.",
+    ),
+    ResourceDefinition(
+        filename="netful.geojson",
         summary="Stream network polygons (project CRS).",
-        description="Vectorized representation of the filtered stream network in the DEM projection.",
+        description="Polygons cover cells with value 1 in the stream mask selected at polygonization time (netful.tif or netful.vrt). TopazID carries the mask value 1 across these features.",
         units="planar coordinates (EPSG of the DEM)",
         tool="`polygonize_netful` utility (GDAL polygonize).",
         inputs=("netful.tif",),
     ),
     ResourceDefinition(
-        filename="netful.WGS.json",
+        filename="netful.WGS.geojson",
         summary="Stream network polygons (WGS84).",
-        description="Reprojected copy of `netful.json` for web and GIS clients requiring latitude/longitude.",
+        description="Longitude/latitude polygons of the selected stream-mask cells, with TopazID equal to 1.",
         units="degrees (EPSG:4326)",
         tool="`json_to_wgs` utility.",
-        inputs=("netful.json",),
+        inputs=("netful.geojson",),
     ),
     ResourceDefinition(
         filename="outlet.geojson",
         summary="Watershed outlet point(s).",
-        description="Outlet snapped to the channel network with metadata about the requested location.",
-        units="planar coordinates (EPSG of the DEM)",
-        tool="WhiteboxTools `find_outlet`.",
+        description=(
+            "The outlet finder can use a watershed mask and record the requested location. "
+            "Culvert runs may retain the original selected outlet. TerrainProcessor writes longitude/latitude "
+            "for its explicitly requested single outlet."
+        ),
+        units="project coordinates for native finder output, degrees for TerrainProcessor's explicit outlet",
+        tool="WhiteboxTools `find_outlet` or the workflow's outlet writer.",
         inputs=("flovec.tif", "netful.tif", "Outlet request"),
     ),
     ResourceDefinition(
         filename="bound.tif",
         summary="Watershed raster mask.",
-        description="Binary watershed extent derived from the outlet and flow directions.",
-        units="1 inside watershed, nodata outside",
+        description="Cells draining to each outlet carry its positive label. A single GeoJSON outlet has label 1.",
+        units="outlet label inside, NoData outside",
         tool="WhiteboxTools `watershed`.",
         inputs=("flovec.tif", "outlet.geojson"),
     ),
     ResourceDefinition(
         filename="bound.geojson",
-        summary="Watershed boundary contour (project CRS).",
-        description="Contour line(s) extracted from the watershed mask at value 1 in the DEM projection.",
-        units="planar coordinates (EPSG of the DEM)",
+        summary="Canonical watershed boundary polygons.",
+        description=(
+            "The emulator contours bound.tif in the DEM projection. TerrainProcessor's single-outlet "
+            "workflow publishes its WGS84 boundary here when available. Preserve all parts and holes."
+        ),
+        units="use the file CRS (project coordinates or longitude/latitude)",
         tool="`gdal_contour -p -fl 1`.",
         inputs=("bound.tif",),
     ),
     ResourceDefinition(
         filename="bound.WGS.geojson",
-        summary="Watershed boundary contour (WGS84).",
-        description="Reprojected contour lines for web delivery.",
+        summary="Canonical watershed boundary (WGS84).",
+        description="Longitude/latitude version of the watershed polygons from bound.geojson, including multipart geometry and holes.",
         units="degrees (EPSG:4326)",
         tool="`json_to_wgs` utility.",
         inputs=("bound.geojson",),
@@ -133,30 +189,30 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
         filename="taspec.tif",
         summary="Aspect raster.",
         description="Cell aspect measured clockwise from north.",
-        units="degrees (0–360)",
+        units="degrees (0–360), or -1 for undefined aspect",
         tool="WhiteboxTools `aspect`.",
         inputs=("DEM",),
     ),
     ResourceDefinition(
         filename="fvslop.tif",
         summary="Slope raster.",
-        description="Slope magnitude derived from the conditioned DEM.",
+        description="Rise/run along the D8 flow direction on the conditioned elevation surface. Negative gradients are clamped to zero.",
         units="rise/run (dimensionless ratio)",
-        tool="WhiteboxTools `slope` (`units=ratio`).",
-        inputs=("DEM",),
+        tool="WhiteboxTools `fvslope` (`units=ratio`).",
+        inputs=("relief.tif", "flovec.tif"),
     ),
     ResourceDefinition(
         filename="netw0.tif",
         summary="Stream mask clipped to watershed.",
         description="Stream network limited to the watershed extent.",
-        units="1 for channel cell, 0 elsewhere",
+        units="1 for stream cells, 0 or NoData for background, NoData outside the watershed",
         tool="WhiteboxTools `clip_raster_to_raster`.",
         inputs=("netful.tif", "bound.tif"),
     ),
     ResourceDefinition(
         filename="discha.tif",
         summary="Distance-to-channel raster.",
-        description="Downslope distance from each cell to the nearest channel.",
+        description="Distance to a stream cell in netw0.tif along the D8 path computed from the DEM.",
         units="meters",
         tool="WhiteboxTools `downslope_distance_to_stream`.",
         inputs=("DEM", "netw0.tif"),
@@ -165,15 +221,15 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
         filename="strahler.tif",
         summary="Strahler stream order raster.",
         description="Stream order value for each channel cell.",
-        units="Strahler order (integer)",
+        units="Strahler order (integer), NoData off-stream",
         tool="WhiteboxTools `strahler_stream_order`.",
         inputs=("flovec.tif", "netw0.tif"),
     ),
     ResourceDefinition(
         filename="subwta.tif",
-        summary="Subcatchment identifier raster.",
-        description="Topaz subcatchment IDs assigned to each hillslope area.",
-        units="TopazID (integer)",
+        summary="Hillslope and channel identifier raster.",
+        description="Run-local TOPAZ IDs label hillslope and channel cells. Channel IDs end in 4.",
+        units="integer-valued TOPAZ IDs stored in a Float32 raster",
         tool="WhiteboxTools `hillslopes_topaz`.",
         inputs=(
             "relief.tif",
@@ -188,8 +244,15 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
     ResourceDefinition(
         filename="netw.tsv",
         summary="Channel network attributes table.",
-        description="Topaz network summary table including connectivity and geometry metrics.",
-        units="mixed units (meters, booleans, identifiers)",
+        description=(
+            "Each row describes one link. Inflow IDs reference the link id column (-1 for absent inflows). "
+            "Join topaz_id to channel geometry within the same run. The areaup field sums cell area "
+            "for hillslope IDs topaz_id minus 1 and minus 2."
+        ),
+        units=(
+            "ds_x/us_x are zero-based raster rows and ds_y/us_y are zero-based columns. "
+            "Length, elevation and drop are in meters. areaup is in square meters."
+        ),
         tool="WhiteboxTools `hillslopes_topaz`.",
         inputs=(
             "relief.tif",
@@ -203,8 +266,8 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
     ),
     ResourceDefinition(
         filename="subwta.geojson",
-        summary="Subcatchment polygons (Topaz IDs).",
-        description="Polygonized subcatchment extents with original Topaz identifiers.",
+        summary="Hillslope and channel cell polygons (TOPAZ IDs).",
+        description="Polygonized positive regions of subwta.tif. Multiple features can share a TopazID.",
         units="planar coordinates (EPSG of the DEM)",
         tool="`polygonize_subcatchments` utility.",
         inputs=("subwta.tif",),
@@ -212,31 +275,31 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
     ResourceDefinition(
         filename="subcatchments.geojson",
         summary="Subcatchment polygons (WEPP IDs).",
-        description="Subcatchments filtered to hillslopes and annotated with WEPP identifiers.",
+        description="Hillslope polygons carry run-local TopazID and WeppID. One hillslope may span multiple polygon features.",
         units="planar coordinates (EPSG of the DEM)",
         tool="`polygonize_subcatchments` utility with `WeppTopTranslator` mapping.",
-        inputs=("subwta.geojson",),
+        inputs=("subwta.tif", "subwta.geojson"),
     ),
     ResourceDefinition(
         filename="subcatchments.WGS.geojson",
         summary="Subcatchment polygons (WGS84).",
-        description="Reprojected copy of `subcatchments.geojson` for web use.",
+        description="Longitude/latitude hillslope polygons retain TopazID and WeppID on every part.",
         units="degrees (EPSG:4326)",
         tool="`json_to_wgs` utility.",
         inputs=("subcatchments.geojson",),
     ),
     ResourceDefinition(
         filename="channels.geojson",
-        summary="Channel centerlines (project CRS).",
-        description="Channel geometries annotated with WEPP IDs and stream order.",
+        summary="Channel-cell footprints (project CRS).",
+        description="Polygon parts for channel cells carry run-local TopazID, WeppID, and stream Order. A reach may have many parts.",
         units="planar coordinates (EPSG of the DEM)",
         tool="`_polygonize_channels` helper (GDAL) with `WeppTopTranslator`.",
-        inputs=("subwta.geojson", "netw.tsv"),
+        inputs=("subwta.tif", "subwta.geojson", "netw.tsv"),
     ),
     ResourceDefinition(
         filename="channels.WGS.geojson",
-        summary="Channel centerlines (WGS84).",
-        description="Reprojected channel geometries for web and mapping clients.",
+        summary="Channel-cell footprints (WGS84).",
+        description="Longitude/latitude channel polygons retain each part and its TopazID, WeppID, and Order.",
         units="degrees (EPSG:4326)",
         tool="`json_to_wgs` utility.",
         inputs=("channels.geojson",),
@@ -275,7 +338,7 @@ def _format_resource(defn: ResourceDefinition, path: Path) -> str:
         "",
         f"- Units: {defn.units}",
         f"- Generated by: {defn.tool}",
-        f"- Created: {_format_timestamp(path)}",
+        f"- Last modified: {_format_timestamp(path)}",
     ]
     if defn.notes:
         lines.append(f"- Notes: {defn.notes}")
@@ -321,6 +384,12 @@ def _build_dependency_graph(existing_files: Dict[str, Path]) -> Tuple[
     node_keys: Dict[str, str] = {}
     filtered_defs: List[ResourceDefinition] = []
 
+    raster_inputs = {}
+    for stem in ("relief", "flovec", "netful"):
+        tif, vrt = f"{stem}.tif", f"{stem}.vrt"
+        if vrt in existing:
+            raster_inputs[tif] = f"{tif} or {vrt}" if tif in existing else vrt
+
     for defn in RESOURCE_SEQUENCE:
         if defn.filename not in existing:
             continue
@@ -329,10 +398,10 @@ def _build_dependency_graph(existing_files: Dict[str, Path]) -> Tuple[
         target_id = _node_id(defn.filename)
         nodes[target_id] = defn.filename
         label_to_node[defn.filename] = target_id
-        resource_inputs[defn.filename] = defn.inputs
+        resource_inputs[defn.filename] = tuple(raster_inputs.get(name, name) for name in defn.inputs)
         node_keys[target_id] = defn.filename
 
-        for input_name in defn.inputs:
+        for input_name in resource_inputs[defn.filename]:
             if input_name in STATIC_INPUTS:
                 node_id = _node_id(input_name)
                 nodes.setdefault(node_id, STATIC_INPUTS[input_name])
@@ -356,7 +425,7 @@ def _build_dependency_graph(existing_files: Dict[str, Path]) -> Tuple[
 
     for defn in filtered_defs:
         target_id = label_to_node[defn.filename]
-        for input_name in defn.inputs:
+        for input_name in resource_inputs[defn.filename]:
             if input_name in STATIC_INPUTS:
                 source_id = label_to_node[input_name]
             elif input_name in existing:
@@ -386,7 +455,11 @@ def _ascii_dependency_tree(existing_files: Dict[str, Path]) -> str:
         roots = list(nodes.keys())
     roots.sort(key=lambda node_id: nodes[node_id])
 
-    lines: List[str] = ["## Dependency Tree", "```text"]
+    lines: List[str] = [
+        "## Dependency Tree", "",
+        "Dependencies are inferred from workspace filenames. When both TIFF and VRT variants exist, "
+        "the filenames alone cannot identify which input the workflow used.", "", "```text",
+    ]
     rendered: set[str] = set()
 
     def format_extras(target_key: str, source_key: str) -> str:
@@ -518,7 +591,7 @@ def generate_wbt_documentation(
             [
                 "## Additional Files",
                 "",
-                "The following files are present but not part of the standard workflow:",
+                "These workspace files have no catalog description.",
                 "",
             ]
         )
