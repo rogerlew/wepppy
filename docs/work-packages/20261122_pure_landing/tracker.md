@@ -41,3 +41,7 @@ records the new contract and local review scope.
 
 The CSS-map preview was declined. The operator requested the existing Deck.gl
 map, no year controls and the original section order.
+
+CARTO's raster endpoint returned API-key watermark images with HTTP 200.
+The operator asked to remove the project browser. The Deck.gl preview uses
+WEPPcloud's existing Google Terrain basemap and drops the disclosure.

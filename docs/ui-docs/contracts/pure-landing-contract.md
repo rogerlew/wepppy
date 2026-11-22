@@ -51,79 +51,65 @@ unchanged. This lets maintainers update text without rebuilding frontend assets.
 
 The Run Atlas is the landing's main visual and follows About as it did
 on the original light landing. Reuse the existing Deck.gl 9 runtime and
-WEPPcloud Deck.gl map and tile helpers. Keep the light Atlas's CARTO
-basemap provider and the Deck.gl centroid and label layers, general initial
-view, map navigation and marker semantics. Use CARTO raster tiles with the
-existing Deck tile helper, including a theme-appropriate map palette. This
-allows retirement of the UI Lab package without adding a React mount, a
-MapLibre runtime to this page, or a separate map implementation.
-Credit CARTO and OpenStreetMap for this map. The fixed HTTPS tile templates
-are `https://basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png` and its
-`dark_nolabels` counterpart. Allow only bounded integer XYZ indexes.
-Cross-origin requests omit application credentials and preview referrers.
-No proxy or CSP relaxation is required. Theme changes retain the camera
-and overlays. Use the current palette's tile status only.
+WEPPcloud map and tile helpers. Preserve centroid and label layers,
+map navigation and marker meaning. Use and credit the existing Google
+Terrain provider already used by WEPPcloud's Deck.gl maps. The endpoint
+is the fixed HTTPS Google Terrain template in the shared map configuration.
+Allow only bounded integer tile indexes. Cross-origin requests omit
+application credentials and preview referrers. CARTO attribution remains
+with the legacy light landing. Neither a CARTO key nor a new frontend
+configuration is required for the preview.
 
-Use the full existing compiled public snapshot via its existing path resolver.
-Keep unique runs, total hillslopes and latest recorded access. The Atlas
-provides no access-year selector. Previously entered preview `year`
-parameters have no effect. Pagination moves through the accessible project
-table without changing the displayed map.
+Use the existing compiled public snapshot. Keep unique runs, total
+hillslopes and latest recorded access. The Atlas has no access-year
+controls or browse-project disclosure and table. Former year and page
+parameters have no effect.
 
-Keep the text equivalent in a native disclosure next to the map. List
-geographic quadrant totals, project locations, soil burn severity presence,
-run name and ID, config, hill count, access count and last access. Keep a
-recent-first table with at most 25 rows per page. A page link returns to the
-results heading and keeps the disclosure open, including page one. Map
-tooltips use plain text and repeat information available in the disclosure.
-Native zoom and reset controls and a named focusable map region with
-arrow-key panning provide keyboard access. Tab exits normally. The canvas
-has no separate tab stop. Wheel scrolling remains page scrolling.
-Marker size shows access count, with a visual key and a text equivalent for
-soil burn severity and other marker attributes.
+Provide a concise nonvisual geographic summary and a readable failure
+message in the rendered HTML. Keep the marker legend, named keyboard
+panning, native zoom and reset controls, and a normal Tab exit. On the
+focused map, Enter reads the next mapped project and Shift+Enter reads
+the previous one. Visible keyboard instructions and a polite, atomic
+live text region provide the current project position in newest-first
+order. Map tooltips present the same project fields as plain text.
+Marker size shows access count, and both an outline and fill distinguish
+soil burn severity data. The canvas has no separate tab stop. Wheel
+scrolling remains page scrolling.
 
-The HTML fallback remains readable if scripts fail. Loading is announced
-after initialization starts and cleared only when the current visible tiles
-are ready. A renderer or tile failure produces a readable status and keeps
-the native details available. For Web Mercator, coordinates above the
-projection's latitude limit remain in the table and are omitted from the
-plot. Both antimeridian coordinates retain the same dateline location.
+Loading starts after the map script initializes and clears on visible tile
+readiness. Script, renderer or tile failure leaves readable status,
+summary and metrics. Geodetically valid polar locations remain in the
+summary and metrics. Web Mercator only plots eligible coordinates and
+uses the same dateline location for +180 and −180.
 
-The existing project authorization, public snapshot, and cache generation
-continue to apply. Render only the named public fields and derive coordinates
-from validated numbers. Serialize values with Jinja's JSON encoding and put
-only plain text into tooltips. Use fixed provider URLs. No project links,
-raw access log, identity data, or user-controlled tile URLs are part of
-this surface.
+The existing public snapshot, authorization and cache generation remain
+in scope as-is. Serialize only public marker fields with Jinja JSON
+encoding. No project links, raw access log, identity data, or user-controlled
+tile URLs are part of this surface.
 
 | Input or runtime state | Required outcome |
 | --- | --- |
 | Anonymous or authenticated session | Shared header and relevant Login or My Runs action |
-| Fresh or stored theme | Existing shared theme behavior with light or dark CARTO basemap and themed layout |
-| Missing, empty, invalid or out-of-range page | First table page. Invalid input leaves the disclosure collapsed |
-| Valid page request | Keep the disclosure open and preserve the same full map snapshot |
+| Fresh or stored theme | Shared themed shell and controls with the existing Terrain basemap |
+| Former year or page parameters | Full Atlas uses the same snapshot |
 | Missing, empty or invalid snapshot | Readable Atlas status and usable landing |
-| Populated snapshot | Full Deck.gl map, overall totals and accessible project details |
-| Script, renderer or tile failure | Readable status and working text equivalent when project data is available |
-| Supported row with missing optional text or counters | Keep valid coordinates and identify missing details |
-| Invalid coordinates or hostile text | Skip invalid rows. No executable tooltip content or provider URL construction from data |
+| Populated snapshot | Deck.gl map, overall metrics and geographic summary |
+| Script, renderer or tile failure | Readable status, geographic summary and metrics when data is available |
+| Supported row with absent optional text or counters | Keep valid coordinates, identify unknown details |
+| Invalid coordinates or hostile text | Skip invalid rows and keep tooltip values inert |
 | Archived, removed or restored runs | Reflect the compiled snapshot and retain existing access rules |
 
 ## Accessibility acceptance
 
 Apply the Revised Section 508 web baseline, including WCAG 2.0 A and AA,
 and the repository's existing AA theme baseline. Include a skip link, one
-main landmark and H1, logical headings, labeled controls, table headers,
+main landmark and H1, logical headings, labeled controls,
 descriptive links, visible keyboard focus, readable text at 200% zoom,
 usable narrow layouts with and without scripts, and no reliance on color or mouse hover.
 Verify desktop and narrow screenshots show the map as the main visual after About.
-Check the real Deck.gl canvas and visible tiles, keyboard map navigation,
-pagination and disclosure focus
+Check rendered geographic features, keyboard navigation and project readout
 in served output. Verify with keyboard and axe across default,
 light-high-contrast, ayu-mirage, ayu-mirage-bordered and cursor-dark-midnight.
-Keep any horizontal table overflow contained, with a named focusable
-scroll region and keyboard guidance when scripts are disabled. Verify the
-shared overflow disclosure and keyboard behavior when scripts are enabled.
 Review text and non-text contrast and perform manual assistive technology
 checks against the [Access Board web testing baseline](https://ictbaseline.access-board.gov/web-baselines/)
 before claiming conformance or approving cutover.
