@@ -64,8 +64,10 @@ has been approved. Use plain link labels without decorative arrows. Follow the
 same shared link color and decoration across landing destinations, including
 resource and organization links, with no persistent underline and visible hover and
 keyboard focus. Distinguish links in running text by weight. Present resources as action links, contacts as a
-directory and affiliates as linked logos with visible names. Omit slogans,
-retain every contact and funding acknowledgment, keep sponsor roles distinct
+directory and affiliates as individual themed cards with a linked logo and visible name.
+Display the nine original light landing captions, including mottos, verbatim
+and in source order. A shared card surface groups each logo with its attribution.
+Retain every contact and funding acknowledgment, keep sponsor roles distinct
 and display each funding acknowledgment beside its sponsor. Show map credits,
 Forest Service use limitations, regional documentation and all legal paragraphs
 in normal document flow. Stack reference columns on narrow screens. Provide footer
