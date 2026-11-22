@@ -420,3 +420,15 @@ directory scans and job payloads. Report missing, unsupported or malformed
 telemetry as unavailable. Preserve queue tables when catalog telemetry alone
 fails. A scheduler tick or cycle completion cannot certify per-run publication.
 This distinction matters when admission is paused while the scheduler still runs.
+
+## Rocket batch-owner admission
+
+On shared default, refresh producers watch the optional RQ Redis string
+`query-catalog:batch-admission:v1:batch-owner-namespace` alongside the admission
+ledger. Its value selects a configured batch namespace. Within that namespace
+the first relative path component identifies the filesystem guard owner across
+root aliases. Two outstanding refresh reservations for that owner defer a new
+refresh with `query_catalog_owner_capacity_pending`. Terminal evidence releases
+capacity under the existing execution-accounting rules. Deferred scopes keep
+their receipts and the scheduler continues its bounded rotation. The global
+permit ceiling, ordinary queue priority and inventory admission still apply.

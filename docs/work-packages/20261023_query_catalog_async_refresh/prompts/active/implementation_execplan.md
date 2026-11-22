@@ -10,6 +10,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 
 ## Progress
 
+- [ ] November 21: implement and validate the temporary Rocket batch-owner admission pilot described below.
+
 - 2026-11-21 UTC. Implemented the Admin/Root RQ catalog panels against reviewed checkpoint `2dacc6b57`. The route and real-Redis catalog suites passed 58 tests.
 
 - [x] October 28 default-queue contract checkpoint `0e6302905`, independent reviews, runtime wiring and 129 focused real-Redis/artifact regressions; local normal-worker live job-tree readback passed.
@@ -30,6 +32,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 - [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
 ## Surprises & Discoveries
+
+- Seven same-owner arrivals behaved differently when synchronized and when replayed at the tightest observed production offsets. Limiting admission to two saved active worker time in all eight pairs.
 
 - The general cursor contains a fleet-sized pending list. The page can avoid transferring it by reading a compact summary written in the existing cursor transaction.
 
@@ -102,6 +106,8 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 
 ## Decision Log
 
+- November 21: target worker capacity on Rocket with a reversible, deployment-selected owner limit. Re-evaluate at wpc1 cutover. Four paced trials do not establish a general batch latency improvement.
+
 - Show simultaneous admission blockers and scheduler health separately on manual refresh. See the current catalog refresh contract under “Admin admission and health snapshot”.
 
 November 6: the operator authorized combined notifications/catalog production
@@ -144,6 +150,8 @@ state, shortening reconciliation spacing or weakening global acceptance.
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+- November 21: experimental evidence is complete for the six-file sibling fixture. Real RQ admission, operator visibility, rollback and the large-child workload remain pilot gates.
 
 - Admin monitoring is implemented on the task branch. Missing summaries on mixed-version deployments render explicitly. Production panel rollout remains pending.
 
@@ -353,3 +361,27 @@ admission pause and scheduler hold preserve the transition boundary. General-cyc
 acceptance remains open; reviewed monitoring must start only after convergence.
 See the combined package tracker and independent security/correctness reviews
 for the live execution and recovery evidence.
+
+
+## Temporary Rocket batch-owner admission pilot
+
+Use the Rocket NFS study `/wc1/query-catalog-validation/batch-owner-qh05IUvH/evidence` as the baseline. Under production arrival offsets, limiting two children reduced median active worker time from 24.3 to 15.9 worker-seconds but won only two of four burst-completion pairs. Simultaneous arrivals favored two in all four pairs. All 224 timed receipts and their catalogs passed peer readback. The fixture contained six Parquet inputs per child. The live flat-project study observed second protected sections up to 76 seconds, so large children still need coverage.
+
+1. Specify the temporary policy in the query-catalog refresh and pilot contracts. Record two as a pilot parameter with its rationale and retirement condition in an ADR. Enable it explicitly for selected Rocket batch roots, initially off. Keep blocking filesystem guards and the existing global cap of seven subject to compatible-worker capacity and ordinary-work priority.
+2. Apply it in the existing watched admission transaction before RQ enqueue. Count outstanding refresh bindings for the canonical filesystem guard owner (namespace plus relative owner path) across workers, path aliases and child scopes. Count reservations as well as started jobs. Resolve owner identity before the watched section and reuse existing binding scope/configuration for legacy entries. Exercise a mixed-version ledger and stage activation only after all enqueue participants enforce the rule. Use the existing terminal and uncertain-execution accounting.
+3. Return an owner-capacity pending reason on saturation. Preserve the receipt and retry path; let the scheduler consider eligible work from other owners. Derive availability from outstanding jobs so completion opens a slot. Avoid a separate semaphore, persistent pause, retry-budget debit or a worker waiting for admission. Disabling the pilot restores ordinary admission on the next admission decision; existing jobs drain normally.
+4. Extend the catalog panel in rq/info-details with the effective policy, per-owner outstanding count and capacity deferrals. Validate concurrent enqueuers on both hosts, alias identity, independent owners, retry after completion/failure, cancellation while execution is uncertain, scheduler progress past a saturated owner, and rollback with in-flight jobs. Test the real default-queue scheduler and workers on test batches with small and large children. Verify every receipt and query each published catalog from the peer.
+5. Compare disabled/enabled matched windows. Primary measures are occupied worker-seconds per seven verified child refreshes and ordinary-job queue delay. Also record batch completion, oldest pending receipt, other-owner progress and worker compatibility. Require repeatable capacity savings and complete receipt drainage; roll back if receipts strand, ordinary work suffers or batch tails regress beyond the operator's accepted tradeoff. Retain permit, job and artifact evidence.
+6. At migration, start wpc1 with its normal blocking policy and the Rocket limit disabled. Replay the same sibling schedules and larger children through the real queue on wpc1. Retire the override, parameter and temporary monitoring specific to the pilot once Rocket is drained unless wpc1 evidence justifies a new policy.
+
+### Worker continuity during rollout
+
+Land the admission code disabled and stage it with the next routine deployment that covers every admission producer. Model jobs can call request_catalog_refresh on default or batch workers, independently of scheduler reconciliation. Updating the scheduler alone cannot enforce a fleet-wide limit. Keep the activation setting in admission policy, outside the exact-match worker compatibility advertisement and serialized job configuration. Read it at admission time so activation and rollback require only a policy change.
+
+Before activating, verify the deployed admission implementation on every producer, including both worker pools that run model jobs. Verify queued legacy jobs can execute across revisions. Account for existing outstanding refreshes and let an owner already above two drain through normal completion. Rehearse activation and rollback with ordinary default and batch jobs in flight. Verify the same workers remain registered, the in-flight jobs finish with their artifacts, the default and batch queues continue serving work, and receipt drainage resumes for deferred owners. Avoid a dedicated worker rollout for this temporary optimization. If routine deployment cannot preserve in-flight work, leave the pilot disabled until a suitable window or the wpc1 reevaluation.
+
+Implementation checkpoint on November 21. The watched cap and admin monitoring
+are implemented. Independent correctness and security reviews closed the
+malformed selector and retained-scope findings. Disposable Redis and real RQ
+scheduler/worker tests demonstrated cross-alias admission, other-owner progress,
+receipt drainage and catalog readback. Fleet rollout and Rocket acceptance remain open.

@@ -279,3 +279,12 @@ Contract checkpoint `2dacc6b57` adds the Admin/Root snapshot. Dedicated panels
 show simultaneous admission blockers and the latest committed reconciliation
 summary. Route and real-Redis suites passed 58 tests. See the
 [decision and reviews](artifacts/20261121_contract_decision.md).
+
+## November 21 Rocket batch-owner admission pilot
+
+The [implementation and retirement plan](prompts/active/implementation_execplan.md#temporary-rocket-batch-owner-admission-pilot) targets worker capacity during the remaining Rocket deployment. Implementation, live RQ validation and rollout are pending. The wpc1 migration triggers a fresh baseline with the override disabled.
+
+The [worker continuity gate](prompts/active/implementation_execplan.md#worker-continuity-during-rollout) stages the disabled code with a routine deployment and verifies live activation and rollback with both worker pools serving jobs.
+
+The candidate implements the optional watched namespace policy, owner counts
+and last-tick deferral telemetry. Deployment and matched-window acceptance are pending.
