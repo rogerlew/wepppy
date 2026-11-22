@@ -48,8 +48,10 @@ unchanged. This lets maintainers update text without rebuilding frontend assets.
 
 ## Reviewed presentation
 
-Use a compact responsive navigation disclosure, shared theme picker and
-prominent account action. A borderless introduction pairs an outcome-led
+Inherit the standard site masthead from `base_pure.htm`, including its
+text brand, notification and theme controls, and responsive layout. Place
+the landing destinations and account link in the header navigation slot
+using the same `wc-nav__link` treatment as Interfaces. Keep the skip link. A borderless introduction pairs an outcome-led
 headline with existing WEPPcloud landscape imagery. About describes the
 three modeling tasks. Present resources as action links, contacts as a
 directory and affiliates as linked logos with visible names. Omit slogans,
