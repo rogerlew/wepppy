@@ -58,7 +58,7 @@ Packaging rules:
   - Remove redundant alias columns after coalescing.
 
 ## 3. Layer Catalog And Discoverability
-The backend owns an authoritative, versioned export layer catalog.
+The backend owns an authoritative, versioned export layer catalog. The proposed [shared project asset declarations](../../../../docs/schemas/shared-project-asset-declarations-contract.md) cover producer-owned locations for the first shadow comparison. This specification retains authority over layer, plan, dependency and cache behavior.
 GL Dashboard taxonomy and discoverability are used as a blueprint, but export contracts are backend-defined and independent of frontend module internals.
 
 Catalog source of truth:

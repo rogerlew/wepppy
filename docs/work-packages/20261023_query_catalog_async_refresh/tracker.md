@@ -1,5 +1,7 @@
 # Query catalog refresh tracker
 
+The [shared asset declarations work package](../20261122_shared_project_asset_declarations/package.md) now owns the contract, implementation plan and actual-project comparison. Fleet-capacity acceptance stays in this package.
+
 ## November 22 shared declarations decision
 
 Use one producer-owned asset definition across writers, Feature Export and the query engine. Retain consumer-specific layer and catalog semantics. Start with a fixed watershed dataset and a scope-dependent loss table; compare both consumers before changing live discovery. [Shared declaration plan](prompts/active/implementation_execplan.md#shared-project-asset-declarations)

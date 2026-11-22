@@ -12,6 +12,8 @@ Use existing Redis/RQ, default workers and scheduler infrastructure. No new queu
 
 The WMesque and Runs catalog queue implementations are precedents for transactional admission and concurrent invalidation handling, not a shared catalog data model. Mere duplicate suppression does not establish eventual consistency.
 
+The proposed [shared asset declaration contract](shared-project-asset-declarations-contract.md) governs the first shadow comparison of producer-owned names. Existing publication, reader and scope contracts govern production pending validation.
+
 ## Migration policy and interfaces
 
 Introduce explicit `request_catalog_refresh(wd, asset_path=None)` for migrated producers. `asset_path=None` requests full reconciliation. The receipt describes durable intent and admission separately: scope, request identifier, `pending|queued|running|failed|current` state, optional canonical `job_id`, and safe error code. It MUST NOT claim an RQ job exists when enqueue has failed or coalesced without a known job.
