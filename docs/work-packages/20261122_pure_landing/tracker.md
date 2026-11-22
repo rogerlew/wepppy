@@ -52,3 +52,7 @@ It uses Forest's compiled public atlas snapshot. The original section order,
 Deck.gl reuse, absence of year controls, and removal of the disclosure are
 covered in the focused suite. Checkpoints `5e6688462` and `6e4295d88`
 precede the implementation. [Verification](artifacts/20261122_deck_atlas_validation.md).
+
+The operator asked to remove the inspection paragraph, draw run IDs on the
+map, and restore the production landing basemap. Production rendered CARTO
+Positron vector tiles successfully. This supersedes the Terrain preview.

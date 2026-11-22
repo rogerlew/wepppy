@@ -51,33 +51,42 @@ unchanged. This lets maintainers update text without rebuilding frontend assets.
 
 The Run Atlas is the landing's main visual and follows About as it did
 on the original light landing. Reuse the existing Deck.gl 9 runtime and
-WEPPcloud map and tile helpers. Preserve centroid and label layers,
-map navigation and marker meaning. Use and credit the existing Google
-Terrain provider already used by WEPPcloud's Deck.gl maps. The endpoint
-is the fixed HTTPS Google Terrain template in the shared map configuration.
-Allow only bounded integer tile indexes. Cross-origin requests omit
-application credentials and preview referrers. CARTO attribution remains
-with the legacy light landing. Neither a CARTO key nor a new frontend
-configuration is required for the preview.
+WEPPcloud map helper. Use the live light landing's CARTO Positron
+vector style with the existing MapLibre runtime under the Deck.gl
+centroids and labels. Use
+`https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json`
+and its versioned vector tiles, fonts and sprites from
+`tiles.basemaps.cartocdn.com`. Accept only the style URL and the versioned
+`vectortiles/carto.streets/v2`, `fonts`, and `gl/positron-gl-style/sprite`
+resources used by that style. Disallow arbitrary style resource origins
+and provider attribution markup. Reuse the local locked MapLibre assets
+already shipped with WEPPcloud. When UI Lab is retired, preserve those
+shared assets under the WEPPcloud-owned static vendor path. The preview
+needs no new configuration, proxy or CSP relaxation. Cross-origin
+requests omit application credentials and preview referrers. Credit
+OpenStreetMap and CARTO for the preview map. The shell follows the selected
+theme and the basemap uses the same palette as the original light landing.
 
 Use the existing compiled public snapshot. Keep unique runs, total
-hillslopes and latest recorded access. The Atlas has no access-year
+hillslopes and latest recorded access in shared `wc-landing__card` cards
+above the map. Restore the original compact lower-left zoom-in, zoom-out
+and reset map buttons with accessible names and focus indicators. The Atlas has no access-year
 controls or browse-project disclosure and table. Former year and page
 parameters have no effect.
 
 Provide a concise nonvisual geographic summary and a readable failure
 message in the rendered HTML. Keep the marker legend, named keyboard
-panning, native zoom and reset controls, and a normal Tab exit. On the
-focused map, Enter reads the next mapped project and Shift+Enter reads
-the previous one. Visible keyboard instructions and a polite, atomic
-live text region provide the current project position in newest-first
-order. Map tooltips present the same project fields as plain text.
+panning, native zoom and reset controls, and a normal Tab exit. Render
+run ID labels directly on the map, with the original zoom-dependent
+label size. Keep the inspection paragraph and project-cycle controls out
+of the page. Plain-text hover tooltips retain the existing project fields.
 Marker size shows access count, and both an outline and fill distinguish
 soil burn severity data. The canvas has no separate tab stop. Wheel
 scrolling remains page scrolling.
 
-Loading starts after the map script initializes and clears on visible tile
-readiness. Script, renderer or tile failure leaves readable status,
+Synchronize Deck.gl overlays and the vector basemap through the Atlas
+camera for pan, zoom, reset and resize. Loading starts after the map
+initializes and clears on visible tile readiness. Script, renderer or tile failure leaves readable status,
 summary and metrics. Geodetically valid polar locations remain in the
 summary and metrics. Web Mercator only plots eligible coordinates and
 uses the same dateline location for +180 and −180.
@@ -90,7 +99,7 @@ tile URLs are part of this surface.
 | Input or runtime state | Required outcome |
 | --- | --- |
 | Anonymous or authenticated session | Shared header and relevant Login or My Runs action |
-| Fresh or stored theme | Shared themed shell and controls with the existing Terrain basemap |
+| Fresh or stored theme | Shared themed shell and controls with the existing Positron vector basemap |
 | Former year or page parameters | Full Atlas uses the same snapshot |
 | Missing, empty or invalid snapshot | Readable Atlas status and usable landing |
 | Populated snapshot | Deck.gl map, overall metrics and geographic summary |
@@ -105,9 +114,12 @@ Apply the Revised Section 508 web baseline, including WCAG 2.0 A and AA,
 and the repository's existing AA theme baseline. Include a skip link, one
 main landmark and H1, logical headings, labeled controls,
 descriptive links, visible keyboard focus, readable text at 200% zoom,
-usable narrow layouts with and without scripts, and no reliance on color or mouse hover.
+and usable narrow layouts with and without scripts. Keep the requested
+visual-only presentation of individual run IDs and hover details during
+review. Their keyboard and nonvisual equivalence remains an open
+manual Section 508 acceptance item before cutover.
 Verify desktop and narrow screenshots show the map as the main visual after About.
-Check rendered geographic features, keyboard navigation and project readout
+Check rendered geographic features, run ID labels and keyboard navigation
 in served output. Verify with keyboard and axe across default,
 light-high-contrast, ayu-mirage, ayu-mirage-bordered and cursor-dark-midnight.
 Review text and non-text contrast and perform manual assistive technology
