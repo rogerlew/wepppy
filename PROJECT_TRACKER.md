@@ -1869,6 +1869,13 @@ the remaining-run controller plan has no next controller milestone.
 ## ✅ Done
 
 
+### Project RQ code quality refactor (2026-11-21)
+
+Extracted WBT subcatchment job-state validation from the project worker.
+Focused mutation-guard and real Redis tests passed.
+[Work package](docs/work-packages/20261121_project_rq_code_quality/package.md)
+
+
 ### Features Export service refactor (2026-11-21)
 
 Extracted carrier identity alignment and cached artifact checks from the export
