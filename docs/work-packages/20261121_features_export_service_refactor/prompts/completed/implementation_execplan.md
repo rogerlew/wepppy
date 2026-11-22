@@ -12,8 +12,8 @@ reuse or regeneration outcomes.
 ## Progress
 
 - [x] Identify the identity-alignment block and cached artifact checks in the service.
-- [ ] Extract both blocks and connect them to their current call sites.
-- [ ] Run focused validation, record evidence, and integrate the approved work.
+- [x] Extract both blocks and connect them to their current call sites.
+- [x] Run focused validation and record evidence.
 
 ## Surprises & Discoveries
 
@@ -28,7 +28,10 @@ values. Their column lookup functions differ in handling the label `None`.
 
 ## Outcomes & Retrospective
 
-Validation and integration are pending.
+The service now calls the carrier identity and cached artifact validation modules.
+The NoDb, RQ, and route slices passed 231 tests, including generated GeoPackage
+readback. See [validation evidence](../../artifacts/validation.md) for the
+runtime adjustment used to collect the route tests.
 
 ## Context and Implementation
 

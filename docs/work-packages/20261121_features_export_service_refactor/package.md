@@ -1,6 +1,6 @@
 # Features Export service refactor
 
-**Status** Open 2026-11-21
+**Status** Closed 2026-11-21
 **Timezone** UTC
 
 ## Scope
@@ -38,3 +38,10 @@ The maintainer owns execution and integration. Acceptance requires the
 extractions to be wired into the existing service, focused tests and artifact
 readback to pass, and a commit-preserving PR merge to master. The operator
 waived the full test suite.
+
+## Outcome
+
+The service delegates carrier identity alignment and cached artifact format
+checks through its existing calls. The service decreased from 3,629 to 3,061
+lines. [Validation evidence](artifacts/validation.md) records 231 focused
+passes and the fixture artifact readback.
