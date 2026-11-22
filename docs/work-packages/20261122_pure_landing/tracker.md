@@ -105,3 +105,6 @@ on Forest following contract checkpoint `25d1b44a4`.
 
 [WEPPcloud Stack directory](artifacts/20261122_stack_directory.md) covers the
 twelve repositories selected under checkpoints `51aedcb8e` and `2eedf3a64`.
+
+[Stack table verification](artifacts/20261122_stack_directory.md) covers the
+13 full repository names and both private notes under checkpoint `11f6bacbd`.

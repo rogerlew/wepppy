@@ -64,9 +64,19 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
     assert [link.text for link in page.select("#about a")] == ["WEPP Model", "FAQ"]
     stack = page.select_one("#resources #weppcloud-stack")
     assert stack.h3.text == "WEPPcloud Stack"
-    assert len(stack.select("dt a[href]")) == len(stack.select("dd")) == 12
-    forest = stack.select_one('a[href="https://github.com/wepp-in-the-woods/wepp-forest"]')
-    assert stack.find(id=forest["aria-describedby"]).text == "Private repository. Collaborator access required."
+    rows = stack.select("table tbody tr")
+    assert len(rows) == 13
+    private_names = set()
+    for row in rows:
+        link = row.select_one('th[scope="row"] a')
+        label = link.get_text(strip=True)
+        assert link["href"] == f"https://github.com/{label}"
+        assert link.select_one('svg[aria-hidden="true"]')
+        assert row.td.get_text(strip=True)
+        if link.has_attr("aria-describedby"):
+            private_names.add(label)
+            assert row.find(id=link["aria-describedby"]).text == "Private repository. Collaborator access required."
+    assert private_names == {"wepp-in-the-woods/wepp-forest", "wepp-in-the-woods/wepp-forest-revegetation"}
     documentation = page.select_one("#resources a")
     assert documentation.strong.text == "User Summary Documentation"
     assert documentation["href"] == "/weppcloud/usersum/doc/usersum.weppcloud.references"
