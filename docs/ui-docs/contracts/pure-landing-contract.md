@@ -63,7 +63,9 @@ Use existing source wording for content updates unless a specific change
 has been approved. Use plain link labels without decorative arrows. Follow the
 same shared link color and decoration across landing destinations, including
 resource and organization links, with no persistent underline and visible hover and
-keyboard focus. Distinguish links in running text by weight. Present resources as action links, contacts as a
+keyboard focus. Distinguish links in running text by weight. Include the original lightning, YouTube and GitHub marks beside their respective
+resource labels. Keep the marks decorative so each card retains one named link.
+Present resources as action links, contacts as a
 directory and affiliates as individual themed cards with a linked logo and visible name.
 Display the nine original light landing captions, including mottos, verbatim
 and in source order. A shared card surface groups each logo with its attribution.
