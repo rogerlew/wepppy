@@ -1866,6 +1866,13 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Roads controller test refactor
+
+[Work package](docs/work-packages/20261121_roads_controller_test_refactor/package.md)
+closed locally on 2026-11-22 UTC. Eight focused modules carry the same 92
+passing cases. Every replacement module is below the quality tool's red
+thresholds.
+
 ### Pure controls render test refactor
 
 [Work package](docs/work-packages/20261121_pure_controls_render_refactor/package.md)
