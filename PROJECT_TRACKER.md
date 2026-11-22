@@ -901,7 +901,6 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
-
 ### Channel delineation map boundary
 
 [Work package](docs/work-packages/20261119_channel_delineation_map_boundary/package.md) implemented and locally validated. The full suite passed 6,706 tests before a baseline SSURGO cache fixture failure, confirmed on the unchanged starting revision. Repository-wide acceptance is pending.
@@ -1866,6 +1865,12 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Pure controls render test refactor
+
+[Work package](docs/work-packages/20261121_pure_controls_render_refactor/package.md)
+closed on 2026-11-22 UTC. Isolated Jinja mutations, preserved all 299 focused
+test cases and verified seven cases in a different order.
 
 ### I-CREWS interfaces in WEPPcloud
 

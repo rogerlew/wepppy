@@ -27,24 +27,21 @@ from wepppy.nodb.project_config_snapshot import (
 from wepppy.project_config_serialization import parse_config_text
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "templates"
-COMMAND_BAR_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "command_bar" / "templates"
-RUN_0_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_0" / "templates"
-RQ_JOB_DASHBOARD_TEMPLATE_ROOT = (
-    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "rq" / "job_dashboard" / "templates"
-)
-README_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "readme_md" / "templates"
-RQ_INFO_DETAILS_TEMPLATE_ROOT = (
-    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "rq" / "info_details" / "templates"
-)
-FORK_CONSOLE_TEMPLATE_ROOT = (
-    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "fork_console" / "templates"
-)
-ARCHIVE_CONSOLE_TEMPLATE_ROOT = (
-    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "archive_dashboard" / "templates"
-)
-RUN_SYNC_CONSOLE_TEMPLATE_ROOT = (
-    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_sync_dashboard" / "templates"
+WEPPCLOUD_ROOT = REPO_ROOT / "wepppy" / "weppcloud"
+ROUTES_ROOT = WEPPCLOUD_ROOT / "routes"
+TEMPLATE_ROOT = WEPPCLOUD_ROOT / "templates"
+COMMAND_BAR_TEMPLATE_ROOT = ROUTES_ROOT / "command_bar" / "templates"
+RUN_0_TEMPLATE_ROOT = ROUTES_ROOT / "run_0" / "templates"
+TEMPLATE_SEARCH_PATH = (
+    TEMPLATE_ROOT,
+    COMMAND_BAR_TEMPLATE_ROOT,
+    RUN_0_TEMPLATE_ROOT,
+    ROUTES_ROOT / "rq/job_dashboard/templates",
+    ROUTES_ROOT / "readme_md/templates",
+    ROUTES_ROOT / "rq/info_details/templates",
+    ROUTES_ROOT / "fork_console/templates",
+    ROUTES_ROOT / "archive_dashboard/templates",
+    ROUTES_ROOT / "run_sync_dashboard/templates",
 )
 PURE_TEMPLATES = [
     "controls/ag_fields_pure.htm",
@@ -62,6 +59,18 @@ PURE_TEMPLATES = [
 ]
 
 pytestmark = pytest.mark.routes
+
+
+def _template_user(*roles: str, authenticated: bool) -> SimpleNamespace:
+    return SimpleNamespace(
+        has_role=lambda role: role in roles,
+        roles=list(roles),
+        is_authenticated=authenticated,
+    )
+
+
+def _run_request() -> SimpleNamespace:
+    return SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
 
 
 def _eu_preset_authority(root: Path):
@@ -91,25 +100,12 @@ def _eu_preset_authority(root: Path):
     return resolve_run_capability_authority(config)
 
 
-@pytest.fixture(scope="module")
-def jinja_env() -> Environment:
+def _build_jinja_env() -> Environment:
     env = Environment(
-        loader=FileSystemLoader(
-            [
-                str(TEMPLATE_ROOT),
-                str(COMMAND_BAR_TEMPLATE_ROOT),
-                str(RUN_0_TEMPLATE_ROOT),
-                str(RQ_JOB_DASHBOARD_TEMPLATE_ROOT),
-                str(README_TEMPLATE_ROOT),
-                str(RQ_INFO_DETAILS_TEMPLATE_ROOT),
-                str(FORK_CONSOLE_TEMPLATE_ROOT),
-                str(ARCHIVE_CONSOLE_TEMPLATE_ROOT),
-                str(RUN_SYNC_CONSOLE_TEMPLATE_ROOT),
-            ]
-        ),
+        loader=FileSystemLoader(TEMPLATE_SEARCH_PATH),
         undefined=DebugUndefined,
     )
-    stub_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    stub_user = _template_user(authenticated=False)
     stub_unitizer = SimpleNamespace(is_english=False, preferences={})
     stub_migration_status = SimpleNamespace(
         needs_migration=True,
@@ -139,7 +135,6 @@ def jinja_env() -> Environment:
         contrast_order_reduction_passes=1,
     )
     stub_watershed = SimpleNamespace(delineation_backend_is_wbt=True)
-    env.filters.setdefault("tojson", lambda value: json.dumps(value))
     env.globals.update(
         url_for=lambda *args, **kwargs: "",
         url_for_run=lambda *args, **kwargs: "",
@@ -211,6 +206,18 @@ def jinja_env() -> Environment:
         skip_cache=False,
     )
     return env
+
+
+@pytest.fixture(scope="module")
+def jinja_env() -> Environment:
+    """Share the template cache across cases that read the default context."""
+    return _build_jinja_env()
+
+
+@pytest.fixture
+def mutable_jinja_env() -> Environment:
+    """Provide fresh globals, filters, and nested context for cases that modify them."""
+    return _build_jinja_env()
 
 
 @pytest.mark.parametrize("template_name", PURE_TEMPLATES)
@@ -2403,8 +2410,7 @@ def test_poweruser_panel_inline_clients_are_guarded_and_idempotent() -> None:
 
 def test_command_bar_clear_locks_uses_csrf_protected_post() -> None:
     source = (
-        Path(__file__).parents[3]
-        / "wepppy/weppcloud/routes/command_bar/static/command-bar.js"
+        ROUTES_ROOT / "command_bar/static/command-bar.js"
     ).read_text(encoding="utf-8")
     clear_locks = source[source.index("clearLocks() {"):source.index("clearDirectoryLocks() {")]
 
@@ -2444,11 +2450,11 @@ def test_disturbed_modal_renders_requested_controls(jinja_env: Environment) -> N
 
 def test_base_report_uses_modal_manager_hooks_for_disturbed_controls(jinja_env: Environment) -> None:
     template = jinja_env.get_template("reports/_base_report.htm")
-    poweruser = SimpleNamespace(has_role=lambda role: role == "PowerUser", roles=["PowerUser"], is_authenticated=True)
+    poweruser = _template_user("PowerUser", authenticated=True)
     rendered = template.render(
         user=poweruser, current_user=poweruser,
         ron=SimpleNamespace(mods={"disturbed"}, runid="test-run", config_stem="test-config", name="", scenario=""),
-        request=SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"}),
+        request=_run_request(),
     )
 
     assert 'data-modal-open="puModal"' in rendered
@@ -2628,7 +2634,7 @@ def test_base_report_pup_context_hides_parent_actions_and_scopes_requests(
         {% block report_content %}<p id="child-report">Child</p>{% endblock %}
         """
     )
-    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    anon_user = _template_user(authenticated=False)
     ron = SimpleNamespace(
         mods=set(),
         runid="batch;;child",
@@ -2671,7 +2677,7 @@ def test_report_shell_falls_back_to_global_header_without_run_view(
         {% block report_content %}<p id="global-report">Global</p>{% endblock %}
         """
     )
-    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    anon_user = _template_user(authenticated=False)
     ron = SimpleNamespace(
         mods=set(),
         runid="fixture-run",
@@ -2722,7 +2728,7 @@ def test_legacy_report_shell_renders_content_state_and_shared_runtime(
         {% block report_content %}<article id="legacy-report-content">Legacy</article>{% endblock %}
         """
     )
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    auth_user = _template_user(authenticated=True)
     ron = SimpleNamespace(
         mods={"disturbed"},
         runid="fixture-run",
@@ -2895,7 +2901,7 @@ def test_geneva_summary_report_renders_filters_and_map_targets(
     jinja_env: Environment,
 ) -> None:
     template = jinja_env.get_template("reports/geneva/summary.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    auth_user = _template_user(authenticated=True)
     ron = SimpleNamespace(
         mods={"geneva"},
         runid="geneva-run",
@@ -2982,8 +2988,8 @@ def test_geneva_summary_report_renders_filters_and_map_targets(
 
 def test_run_header_hides_team_public_readonly_for_anonymous(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    anon_user = _template_user(authenticated=False)
+    request = _run_request()
 
     rendered = template.render(
         user=anon_user,
@@ -3031,7 +3037,7 @@ def test_run_header_project_config_update_modal_is_accessible_and_dormant(
     jinja_env: Environment, manifest_state: str, header_ron_view_model,
 ) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    auth_user = _template_user(authenticated=True)
     request = SimpleNamespace(view_args={"runid": "parent;;omni;;child", "config": "config"})
 
     rendered = template.render(
@@ -3077,7 +3083,7 @@ def test_legacy_run_header_omits_project_config_update_workflow(
 
 def test_interfaces_template_shows_login_bypass_banner_for_anonymous_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
-    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    anon_user = _template_user(authenticated=False)
 
     def _url_for(endpoint: str, **values) -> str:
         if endpoint == "security.login":
@@ -3105,7 +3111,7 @@ def test_interfaces_template_renders_exact_anonymous_cap_creation_contract(
     jinja_env: Environment,
 ) -> None:
     template = jinja_env.overlay(autoescape=True).get_template("interfaces.htm")
-    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    anon_user = _template_user(authenticated=False)
 
     rendered = template.render(
         user=anon_user,
@@ -3507,7 +3513,7 @@ def test_run_sync_console_renders_exact_admin_contract_and_escaped_config(
 
 def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    auth_user = _template_user(authenticated=True)
 
     def _url_for(endpoint: str, **values) -> str:
         if endpoint == "security.login":
@@ -3613,7 +3619,7 @@ def test_interfaces_more_menu_retains_role_specific_entries(
 
 def test_interfaces_template_renders_earth_launch_card(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    auth_user = _template_user(authenticated=True)
 
     def _url_for(endpoint: str, **values) -> str:
         if endpoint == "static":
@@ -3637,7 +3643,7 @@ def test_interfaces_template_renders_earth_launch_card(jinja_env: Environment) -
 
 def test_interfaces_template_renders_registry_maturity_badges(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    auth_user = _template_user(authenticated=True)
 
     def _url_for(endpoint: str, **values) -> str:
         if endpoint == "static":
@@ -3691,7 +3697,7 @@ def test_interfaces_template_renders_registry_maturity_badges(jinja_env: Environ
 
 def test_interfaces_template_applies_visible_config_filter(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    auth_user = _template_user(authenticated=True)
 
     def _url_for(endpoint: str, **values) -> str:
         if endpoint == "static":
@@ -3725,8 +3731,8 @@ def test_interfaces_template_applies_visible_config_filter(jinja_env: Environmen
 
 def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    auth_user = _template_user(authenticated=True)
+    request = _run_request()
 
     rendered = template.render(
         user=auth_user,
@@ -3742,7 +3748,7 @@ def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env:
 def test_run_header_hides_poweruser_launcher_for_ordinary_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     ordinary_user = SimpleNamespace(has_role=lambda role: False, roles=["User"], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    request = _run_request()
 
     rendered = template.render(user=ordinary_user, current_user=ordinary_user, request=request)
 
@@ -3751,8 +3757,8 @@ def test_run_header_hides_poweruser_launcher_for_ordinary_user(jinja_env: Enviro
 
 def test_run_header_renders_project_mutation_contract(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    user = SimpleNamespace(has_role=lambda role: role == "PowerUser", roles=["PowerUser"], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    user = _template_user("PowerUser", authenticated=True)
+    request = _run_request()
     ron = SimpleNamespace(
         mods=["disturbed"], runid="test-run", config_stem="test-config",
         nodb_version=3, name="Project A", scenario="Baseline", readonly=True,
@@ -3779,7 +3785,7 @@ def test_run_header_renders_project_mutation_contract(jinja_env: Environment) ->
 def test_run_header_omits_standalone_runner_toggles(jinja_env: Environment) -> None:
     from wepppy.weppcloud.feature_registry.runtime import build_header_mod_options
 
-    user = SimpleNamespace(has_role=lambda role: role == "Root", roles=["Root"], is_authenticated=True)
+    user = _template_user("Root", authenticated=True)
     mods = {"culvert_runner", "batch_runner", "omni"}
     ron = SimpleNamespace(
         mods=mods, runid="test-run", config_stem="test-config", nodb_version=3,
@@ -3787,7 +3793,7 @@ def test_run_header_omits_standalone_runner_toggles(jinja_env: Environment) -> N
     )
     rendered = jinja_env.get_template("header/_run_header_fixed.htm").render(
         user=user, current_user=user, current_ron=ron, ron=ron,
-        request=SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"}),
+        request=_run_request(),
         current_ttl=SimpleNamespace(user_disabled=True),
         header_mod_options=build_header_mod_options(
             active_mods=mods, user=user, is_wbt=True, include_all=True,
@@ -3800,8 +3806,8 @@ def test_run_header_omits_standalone_runner_toggles(jinja_env: Environment) -> N
 
 def test_run_header_renders_interface_maturity_badge_without_mod_dropdown_badges(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: role == "Admin", roles=["Admin"], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    auth_user = _template_user("Admin", authenticated=True)
+    request = _run_request()
 
     rendered = template.render(
         user=auth_user,
@@ -3832,8 +3838,8 @@ def test_run_header_shows_projection_pill_only_after_map_assignment(
     template_name: str,
 ) -> None:
     template = jinja_env.get_template(template_name)
-    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    anon_user = _template_user(authenticated=False)
+    request = _run_request()
     base_ron = {
         "mods": [],
         "runid": "test-run",
@@ -3871,7 +3877,7 @@ def test_run_header_renders_accessible_config_summary_after_projection(
     jinja_env: Environment,
 ) -> None:
     template = jinja_env.overlay(autoescape=True).get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    auth_user = _template_user(authenticated=True)
     ron = SimpleNamespace(
         mods=[],
         runid="parent;;omni;;child",
@@ -3933,7 +3939,7 @@ def test_run_header_omits_config_summary_without_target_context(
     jinja_env: Environment,
 ) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    anon_user = _template_user(authenticated=False)
     ron = SimpleNamespace(
         mods=[],
         runid="test-run",
@@ -3966,7 +3972,7 @@ def test_run_header_keeps_config_summary_when_locale_is_unavailable(
     jinja_env: Environment,
 ) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    anon_user = _template_user(authenticated=False)
     ron = SimpleNamespace(
         mods=[],
         runid="test-run",
@@ -4071,8 +4077,8 @@ def test_rangeland_cover_control_renders_modes_defaults_and_build(jinja_env: Env
 
 def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    auth_user = _template_user(authenticated=True)
+    request = _run_request()
 
     rendered = template.render(
         user=auth_user,
@@ -4088,8 +4094,8 @@ def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Enviro
 
 def test_run_header_shows_rusle_mod_when_disturbed_enabled(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    auth_user = _template_user(authenticated=True)
+    request = _run_request()
 
     rendered = template.render(
         user=auth_user,
@@ -4108,8 +4114,8 @@ def test_run_header_shows_rusle_mod_when_disturbed_enabled(jinja_env: Environmen
 
 def test_run_header_hides_rusle_mod_for_topaz_backend(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    auth_user = _template_user(authenticated=True)
+    request = _run_request()
 
     rendered = template.render(
         user=auth_user,
@@ -4429,7 +4435,7 @@ def test_ag_fields_control_renders_plant_database_and_mapping_contract(
     assert 'data-role="unused-mappings"' in rendered
 
 
-def test_wepp_control_renders_core_run_and_lifecycle_contract(jinja_env: Environment) -> None:
+def test_wepp_control_renders_core_run_and_lifecycle_contract(mutable_jinja_env: Environment) -> None:
     class TemplateValue:
         def __getattr__(self, _name: str) -> "TemplateValue":
             return self
@@ -4452,9 +4458,9 @@ def test_wepp_control_renders_core_run_and_lifecycle_contract(jinja_env: Environ
         def __str__(self) -> str:
             return ""
 
-    jinja_env.globals["isfloat"] = lambda _value: False
-    jinja_env.globals["hasattr"] = lambda _value, _name: False
-    template = jinja_env.get_template("controls/wepp_pure.htm")
+    mutable_jinja_env.globals["isfloat"] = lambda _value: False
+    mutable_jinja_env.globals["hasattr"] = lambda _value, _name: False
+    template = mutable_jinja_env.get_template("controls/wepp_pure.htm")
     rendered = template.render(
         wepp=TemplateValue(),
         soils=TemplateValue(),
@@ -4503,10 +4509,10 @@ def test_wepp_exec_latest_only_renders_as_a_saved_value(
 
 
 def test_pmet_advanced_template_renders_payload_and_routine_contract(
-    jinja_env: Environment,
+    mutable_jinja_env: Environment,
 ) -> None:
-    jinja_env.globals["isfloat"] = lambda value: isinstance(value, (int, float))
-    template = jinja_env.get_template("controls/wepp_pure_advanced_options/pmet.htm")
+    mutable_jinja_env.globals["isfloat"] = lambda value: isinstance(value, (int, float))
+    template = mutable_jinja_env.get_template("controls/wepp_pure_advanced_options/pmet.htm")
     rendered = template.render(
         ron=SimpleNamespace(mods=set()),
         wepp=SimpleNamespace(pmet_kcb=0.95, pmet_rawp=0.8, run_pmet=True),
@@ -4590,8 +4596,8 @@ def test_debris_flow_control_renders_override_and_run_contract(jinja_env: Enviro
 
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    auth_user = _template_user(authenticated=True)
+    request = _run_request()
 
     rendered = template.render(
         user=auth_user,
@@ -4608,8 +4614,8 @@ def test_run_header_renders_unauthorized_omni_contrasts_reason_below_label(
     jinja_env: Environment,
 ) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    auth_user = _template_user(authenticated=True)
+    request = _run_request()
 
     rendered = template.render(
         user=auth_user,
@@ -4641,8 +4647,8 @@ def test_run_header_renders_unauthorized_omni_contrasts_reason_below_label(
 
 def test_run_header_includes_geneva_mod_toggle(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
-    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
-    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    auth_user = _template_user(authenticated=True)
+    request = _run_request()
 
     rendered = template.render(
         user=auth_user,
@@ -4742,12 +4748,20 @@ def test_report_templates_use_semantic_copy_buttons() -> None:
         assert "aria-label=\"Copy " in source
 
 
-def test_wepp_return_period_template_reports_empty_core_measures(jinja_env: Environment) -> None:
-    jinja_env.filters["sort_numeric"] = lambda values, reverse=False: sorted(values, key=float, reverse=reverse)
-    jinja_env.globals["unitizer"] = lambda value, _units: value
-    jinja_env.globals["unitizer_units"] = lambda units: units
+@pytest.fixture
+def return_period_env(mutable_jinja_env: Environment) -> Environment:
+    mutable_jinja_env.filters["sort_numeric"] = lambda values, reverse=False: sorted(
+        values, key=float, reverse=reverse
+    )
+    mutable_jinja_env.globals["unitizer"] = lambda value, _units: value
+    mutable_jinja_env.globals["unitizer_units"] = lambda units: units
+    return mutable_jinja_env
 
-    template = jinja_env.get_template("reports/wepp/return_periods.htm")
+
+def test_wepp_return_period_template_reports_empty_core_measures(
+    return_period_env: Environment,
+) -> None:
+    template = return_period_env.get_template("reports/wepp/return_periods.htm")
     report = SimpleNamespace(
         return_periods={
             "Precipitation Depth": {
@@ -4794,15 +4808,14 @@ def test_wepp_return_period_template_reports_empty_core_measures(jinja_env: Envi
     assert 'data-report-table="peak-discharge"' not in rendered
 
 
-def test_return_period_comparison_renders_independent_dates_and_empty_parent(jinja_env: Environment) -> None:
-    jinja_env.filters["sort_numeric"] = lambda values, reverse=False: sorted(values, key=float, reverse=reverse)
-    jinja_env.globals["unitizer"] = lambda value, _units: value
-    jinja_env.globals["unitizer_units"] = lambda units: units
+def test_return_period_comparison_renders_independent_dates_and_empty_parent(
+    return_period_env: Environment,
+) -> None:
     parent = SimpleNamespace(return_periods={}, units_d={}, intervals=[5, 2],
                              exclude_yr_indxs=[0], years=20, num_events=0, y0=2000)
     child = SimpleNamespace(return_periods={"Runoff": {2: {"mo": 3, "da": 4, "year": 2, "Runoff": 17}}},
                             units_d={"Runoff": "mm"}, intervals=[5], y0=2010)
-    rendered = jinja_env.get_template("reports/wepp/return_periods.htm").render(
+    rendered = return_period_env.get_template("reports/wepp/return_periods.htm").render(
         report=parent, scenario_reports=[{"name": "Burned", "report": parent},
                                          {"name": "undisturbed", "report": child}],
         compare_scenarios=True, selected_omni_scenarios=["undisturbed"],
@@ -5316,7 +5329,7 @@ def test_ttl_header_control_available_to_all_signed_in_users(jinja_env, template
     user = SimpleNamespace(has_role=lambda role: role in roles, roles=roles, is_authenticated=authenticated)
     rendered = jinja_env.get_template(template_name).render(
         user=user, current_user=user,
-        request=SimpleNamespace(view_args={'runid': 'test-run', 'config': 'test-config'}))
+        request=_run_request())
     assert ('id="checkbox_ttl_disabled"' in rendered) is authenticated
 
 
@@ -5328,7 +5341,7 @@ def test_ttl_header_control_available_to_all_signed_in_users(jinja_env, template
     ({'policy': 'rolling_90d', 'expires_at': '2027-01-02T00:00:00Z'}, 'Automatic deletion is enabled for'),
 ])
 def test_automatic_deletion_header_status_and_contextual_help(jinja_env, template_name, ttl, message):
-    user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    user = _template_user(authenticated=True)
     rendered = jinja_env.get_template(template_name).render(user=user, current_user=user, current_ttl=ttl)
     assert message in rendered
     assert 'Disable automatic deletion' in rendered
@@ -5379,13 +5392,15 @@ def test_runs0_observed_shell_requires_own_state(
 
 
 @pytest.mark.parametrize("developer_mode", [None, False, True])
-def test_run_header_developer_indicator_uses_current_view_model(jinja_env, developer_mode):
+def test_run_header_developer_indicator_uses_current_view_model(
+    mutable_jinja_env: Environment, developer_mode: bool | None,
+) -> None:
     # The component gallery supplies only current_ron, unlike run pages.
-    jinja_env.globals.pop("ron", None)
-    view = jinja_env.globals["current_ron"]
+    del mutable_jinja_env.globals["ron"]
+    view = mutable_jinja_env.globals["current_ron"]
     if developer_mode is not None:
         view.developer_mode = developer_mode
-    rendered = jinja_env.get_template("header/_run_header_fixed.htm").render()
+    rendered = mutable_jinja_env.get_template("header/_run_header_fixed.htm").render()
     indicator = re.search(r"<span data-project-developer-indicator ([^>]*)>", rendered)
     assert indicator is not None
     assert ("hidden" in indicator.group(1)) is (developer_mode is not True)
