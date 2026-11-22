@@ -8,6 +8,8 @@ import collections.abc as cabc
 
 import yaml
 
+from wepppy.project_assets import WEPP_LOSS_HILL, get_asset
+
 from .contracts import (
     SUPPORTED_EVENT_SELECTORS,
     SUPPORTED_OUTPUT_SCOPES,
@@ -15,6 +17,10 @@ from .contracts import (
 )
 
 _LOCATOR_KINDS: frozenset[str] = frozenset({"nodb_ref", "relpath", "path_template"})
+_OMNI_PROJECTION_PREFIXES = {
+    "scenario": "_pups/omni/scenarios/{scenario_id}",
+    "contrast": "_pups/omni/contrasts/{contrast_id}",
+}
 _SCOPE_CLASS_VALUES: frozenset[str] = frozenset({"scope_aware", "scope_invariant"})
 _CATALOG_STATUSES: frozenset[str] = frozenset({"draft", "active", "deprecated"})
 
@@ -200,7 +206,7 @@ def _parse_layer(
     metadata: CatalogMetadata,
     source_name: str,
 ) -> CatalogLayer:
-    layer = _require_mapping(raw_layer, layer_path)
+    layer = dict(_require_mapping(raw_layer, layer_path))
     layer_id = _require_string(layer.get("layer_id"), f"{layer_path}.layer_id")
     family = _require_string(layer.get("family"), f"{layer_path}.family")
     scope_class = _require_string(layer.get("scope_class"), f"{layer_path}.scope_class")
@@ -210,13 +216,15 @@ def _parse_layer(
             f"got {scope_class!r}."
         )
 
-    geometry = _require_mapping(layer.get("geometry"), f"{layer_path}.geometry")
-    _validate_locator(
-        geometry.get("locator"),
-        f"{layer_path}.geometry.locator",
-        allowed_kinds=metadata.allowed_locator_kinds,
-        source_name=source_name,
-    )
+    def parse_locator_owner(value: object, path: str) -> dict[str, object]:
+        owner = dict(_require_mapping(value, path))
+        owner["locator"] = _parse_locator(
+            owner.get("locator"), f"{path}.locator",
+            allowed_kinds=metadata.allowed_locator_kinds, source_name=source_name,
+        )
+        return owner
+
+    layer["geometry"] = parse_locator_owner(layer.get("geometry"), f"{layer_path}.geometry")
 
     join = _require_mapping(layer.get("join"), f"{layer_path}.join")
     _require_string(join.get("primary_key"), f"{layer_path}.join.primary_key")
@@ -224,32 +232,27 @@ def _parse_layer(
     sources = _require_sequence(layer.get("sources"), f"{layer_path}.sources")
     if not sources:
         raise LayerCatalogValidationError(f"{source_name}: {layer_path}.sources must be non-empty.")
-    for index, source_value in enumerate(sources):
-        source = _require_mapping(source_value, f"{layer_path}.sources[{index}]")
-        _validate_locator(
-            source.get("locator"),
-            f"{layer_path}.sources[{index}].locator",
-            allowed_kinds=metadata.allowed_locator_kinds,
-            source_name=source_name,
-        )
+    layer["sources"] = [
+        parse_locator_owner(source, f"{layer_path}.sources[{index}]")
+        for index, source in enumerate(sources)
+    ]
 
     dependencies = _require_sequence(layer.get("dependencies"), f"{layer_path}.dependencies")
-    for index, dependency_value in enumerate(dependencies):
-        dependency = _require_mapping(dependency_value, f"{layer_path}.dependencies[{index}]")
-        _validate_locator(
-            dependency.get("locator"),
-            f"{layer_path}.dependencies[{index}].locator",
-            allowed_kinds=metadata.allowed_locator_kinds,
-            source_name=source_name,
-        )
+    layer["dependencies"] = [
+        parse_locator_owner(dependency, f"{layer_path}.dependencies[{index}]")
+        for index, dependency in enumerate(dependencies)
+    ]
 
     if "table_profiles" in layer:
-        _validate_table_profiles(
-            layer.get("table_profiles"),
-            f"{layer_path}.table_profiles",
-            allowed_locator_kinds=metadata.allowed_locator_kinds,
-            source_name=source_name,
-        )
+        profiles = []
+        for index, value in enumerate(_require_sequence(layer["table_profiles"], f"{layer_path}.table_profiles")):
+            path = f"{layer_path}.table_profiles[{index}]"
+            profile = dict(_require_mapping(value, path))
+            profile["geometry"] = parse_locator_owner(profile.get("geometry"), f"{path}.geometry")
+            join = _require_mapping(profile.get("join"), f"{path}.join")
+            _require_string(join.get("primary_key"), f"{path}.join.primary_key")
+            profiles.append(profile)
+        layer["table_profiles"] = profiles
 
     temporal = _require_mapping(layer.get("temporal"), f"{layer_path}.temporal")
     supported_modes = _require_string_array(
@@ -313,41 +316,39 @@ def _parse_layer(
         scope_class=scope_class,
         temporal_supported_modes=tuple(supported_modes),
         temporal_mode_rules=mode_rules,
-        raw=dict(layer),
+        raw=layer,
     )
 
 
-def _validate_table_profiles(
-    value: object,
-    path: str,
-    *,
-    allowed_locator_kinds: tuple[str, ...],
-    source_name: str,
-) -> None:
-    profiles = _require_sequence(value, path)
-    for index, profile_value in enumerate(profiles):
-        profile = _require_mapping(profile_value, f"{path}[{index}]")
-        geometry = _require_mapping(profile.get("geometry"), f"{path}[{index}].geometry")
-        _validate_locator(
-            geometry.get("locator"),
-            f"{path}[{index}].geometry.locator",
-            allowed_kinds=allowed_locator_kinds,
-            source_name=source_name,
-        )
-        join = _require_mapping(profile.get("join"), f"{path}[{index}].join")
-        _require_string(join.get("primary_key"), f"{path}[{index}].join.primary_key")
-
-
-def _validate_locator(
+def _parse_locator(
     value: object,
     path: str,
     *,
     allowed_kinds: tuple[str, ...],
     source_name: str,
-) -> None:
+) -> cabc.Mapping[str, object]:
     locator = _require_mapping(value, path)
     keys = set(locator.keys())
-    if keys != {"kind", "value"}:
+    if "asset_id" in keys:
+        if keys - {"asset_id", "projection"}:
+            raise LayerCatalogValidationError(f"{source_name}: {path} mixes an asset reference with extra keys.")
+        asset_id = _require_string(locator["asset_id"], f"{path}.asset_id")
+        try:
+            asset = get_asset(asset_id)
+        except KeyError as exc:
+            raise LayerCatalogValidationError(f"{source_name}: {path} has unknown asset {asset_id!r}.") from exc
+
+        template = asset.path_template
+        if "projection" in keys:
+            projection = _require_string(locator["projection"], f"{path}.projection")
+            if asset != WEPP_LOSS_HILL or projection not in _OMNI_PROJECTION_PREFIXES:
+                raise LayerCatalogValidationError(
+                    f"{source_name}: {path} has unsupported projection {projection!r} for {asset_id!r}."
+                )
+            template = f"{_OMNI_PROJECTION_PREFIXES[projection]}/{asset.relative_path()}"
+        locator = {"kind": "path_template" if "{" in template else "relpath", "value": template}
+
+    if set(locator) != {"kind", "value"}:
         raise LayerCatalogValidationError(
             f"{source_name}: {path} must contain exactly keys 'kind' and 'value'; found {sorted(keys)!r}."
         )
@@ -358,6 +359,7 @@ def _validate_locator(
             f"{source_name}: {path}.kind must be one of {list(allowed_kinds)!r}, got {kind!r}."
         )
     _require_string(locator.get("value"), f"{path}.value")
+    return locator
 
 
 def _require_mapping(value: object, path: str) -> cabc.Mapping[str, object]:

@@ -1,3 +1,5 @@
+Closed locally. The [feature export service test refactor](docs/work-packages/20261121_features_export_service_test_refactor/package.md) split the service cases into six modules and verified all 79 focused cases.
+
 Closed locally — [Schema defaults route refactor](docs/work-packages/20261121_schema_defaults_code_quality_refactor/package.md). All ten published paths and 435 responses matched the baseline. Full pytest passed.
 
 [Retire PRISM analysis sidecars](docs/work-packages/20261121_retire_prism_sidecars/package.md) — implemented and locally validated.
@@ -152,7 +154,7 @@ Completed (local implementation): [Roads GL Dashboard](docs/work-packages/202610
 
 Completed (local implementation): [Roads activation messaging](docs/work-packages/20261023_roads_activation_messaging/package.md) — actionable server-configuration explanation and project-URL support handoff; 21 route tests plus direct guard/response readback pass. Text-only change; no deployment or project repair.
 
-Bounded execution complete; general enablement HOLD: [Query-engine asynchronous catalog refresh](docs/work-packages/20261023_query_catalog_async_refresh/package.md) — full deployment `0da9c9071` on wepp1–3; shared-batch pilot passed 17 jobs, two eight-scope artifact waves and 48 query checks with pause/resume recovery. Scratch scopes retired; async remains disabled. Whole-fleet cycle capacity and new-arrival delay are separate gates. See [acceptance](docs/work-packages/20261023_query_catalog_async_refresh/artifacts/20261027_shared_pilot_acceptance.md).
+Deployed on wepp1–3. [Query catalog production rollout](docs/work-packages/20261023_query_catalog_async_refresh/tracker.md#november-22-production-rollout-closeout) enables general refresh and the Rocket cap of two outstanding refreshes per batch owner. Fleet-capacity acceptance remains open.
 
 Completed (local implementation): [Roads validation suite](docs/work-packages/20261023_roads_validation_suite/package.md) — 516 cases across all four textures, isolated project checks and vendored Usersum report; two bounded legacy-input repairs. Implementation `a501c15cc`; full regression 11,647 passed/131 skipped; independent reviews pass. Full-upload unrutted rejection and qualified positive subset documented; no deployment.
 
@@ -1872,6 +1874,38 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+
+### Shared project asset declarations (2026-11-22)
+
+Two producer-owned declarations now serve the query and Feature Export adapters. Both Rocket clients observed equivalent results across 14 project views, including parent-backed scenario watersheds and local hill loss. The private writer/export replay reproduced the 695-feature normal-project export. [Work package](docs/work-packages/20261122_shared_project_asset_declarations/package.md)
+
+
+### Project RQ code quality refactor (2026-11-21)
+
+Extracted WBT subcatchment job-state validation from the project worker.
+Focused mutation-guard and real Redis tests passed.
+[Work package](docs/work-packages/20261121_project_rq_code_quality/package.md)
+
+
+### Features Export service refactor (2026-11-21)
+
+Extracted carrier identity alignment and cached artifact checks from the export
+service. Focused service, worker, and route tests passed. [Work package](docs/work-packages/20261121_features_export_service_refactor/package.md)
+
+### Omni test refactor
+
+[Work package](docs/work-packages/20261121_omni_test_refactor/package.md)
+closed locally on 2026-11-22 UTC. Six controller modules preserve 83 cases.
+All 229 focused Omni tests passed, and the resulting files fall below the
+red quality thresholds.
+
+### Roads controller test refactor
+
+[Work package](docs/work-packages/20261121_roads_controller_test_refactor/package.md)
+closed locally on 2026-11-22 UTC. Eight focused modules carry the same 92
+passing cases. Every replacement module is below the quality tool's red
+thresholds.
 
 ### Pure controls render test refactor
 

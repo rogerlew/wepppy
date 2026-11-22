@@ -10,6 +10,16 @@ The operator authorized committing the reviewed contract and scaffolding executi
 
 ## Progress
 
+- [x] November 22. Completed the [read-only declaration and writer audit](../../artifacts/declared_asset_audit/findings.md) across normal projects and both Omni child types.
+
+- [x] November 22. Ran the Rocket test-project phase comparison and fixed-budget completion-hint replay. [Experiment and evidence](../../artifacts/rocket_refresh_phases_and_completion_replay.md)
+
+- [x] November 22. Completed the [production reconciliation visit experiment](../../tracker.md#november-22-reconciliation-visit-experiment) over eight consecutive scheduler ticks.
+
+- [x] November 22. Implemented and activated the temporary Rocket batch-owner cap on the three-host fleet. Four Rocket test catalogs passed peer readback.
+- [x] November 22. Assessed the natural cycle and recorded a failed 24-hour fleet-capacity gate with peer receipt, ordinary-job and artifact evidence. [Fleet result](../../tracker.md#november-22-fleet-capacity-acceptance)
+- [ ] Record matched production-window performance and natural-cycle capacity acceptance. The [rollout checkpoint](../../tracker.md#november-22-production-rollout-closeout) records the 33-hour cycle in progress and the wpc1 handoff.
+
 - 2026-11-21 UTC. Implemented the Admin/Root RQ catalog panels against reviewed checkpoint `2dacc6b57`. The route and real-Redis catalog suites passed 58 tests.
 
 - [x] October 28 default-queue contract checkpoint `0e6302905`, independent reviews, runtime wiring and 129 focused real-Redis/artifact regressions; local normal-worker live job-tree readback passed.
@@ -26,10 +36,20 @@ The operator authorized committing the reviewed contract and scaffolding executi
 - [x] Nine scratch scopes retired under lifecycle guards to private evidence storage; 711 source hashes and eight catalog hashes preserved, old managed paths absent.
 - [x] Independent execution correctness/security review complete; exact evidence limits retained. Secondary QA documented separately.
 - [x] November 6 authorized production deployment: compatible fleet, fresh default-worker pilot, scheduler routing/storage parity and general async configuration converged.
-- [ ] M6 general fleet rollout acceptance: supervised observation 02 is running; later natural complete cycle, full-union age census, artifact proof and new ordinary-arrival delay remain unproved.
+- [ ] M6 general fleet rollout acceptance: the November 21 cycle missed its deadline. A passing cycle under the deployed cap, continuous ordinary-arrival evidence, full-union age census and peer artifact matrix remain open.
 - [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
 ## Surprises & Discoveries
+
+- November 22. All three parent catalogs differed from a projected union of their child catalogs. Contrast children used parent-backed climate and watershed paths even without explicit physical path fields.
+
+- November 22. The climate-heavy fixture made 321 Python-visible Arrow schema reads for 82 Parquet datasets. Eleven verified live publications still occupied FIFO positions several minutes after workers finished.
+
+- November 22. Of 200 visits, 186 cycled to the tail. Three long-running run workers sampled on both hosts were repeatedly in kernel RPC wait.
+
+- November 22. Discovery finished in 46 minutes, while reconciliation was still pending at 39 h 39 min. Outstanding current-incarnation receipts dated back to November 6 across multiple namespaces.
+
+- Seven same-owner arrivals behaved differently when synchronized and when replayed at the tightest observed production offsets. Limiting admission to two saved active worker time in all eight pairs.
 
 - The general cursor contains a fleet-sized pending list. The page can avoid transferring it by reading a compact summary written in the existing cursor transaction.
 
@@ -102,6 +122,18 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 
 ## Decision Log
 
+- November 22. Consolidate producer, Feature Export and query-engine asset locators in one shared declaration surface. Moving an output should require one naming change. [Ownership and first parity comparison](#shared-project-asset-declarations)
+
+- November 22. Prefer producer-owned relative declarations for a shadow resolver. Preserve child-local overrides and treat parent-qualified visibility as a separate compatibility decision.
+
+- November 22. Evaluate redundant schema opens during collection and bounded completion-directed confirmation separately. Preserve strict verification and check displaced FIFO work.
+
+- November 22. Measure the slow run phases and replay confirmation priority at fixed permit and visit budgets before changing concurrency.
+
+- November 22. Record a failed fleet-capacity observation. The deadline preceded cap activation, so attributing the miss to the cap requires a separate trial.
+
+- November 21: target worker capacity on Rocket with a reversible, deployment-selected owner limit. Re-evaluate at wpc1 cutover. Four paced trials do not establish a general batch latency improvement.
+
 - Show simultaneous admission blockers and scheduler health separately on manual refresh. See the current catalog refresh contract under “Admin admission and health snapshot”.
 
 November 6: the operator authorized combined notifications/catalog production
@@ -144,6 +176,18 @@ state, shortening reconciliation spacing or weakening global acceptance.
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+- November 22. Audited 43,259 catalog entries. The source and data support a shadow feasibility trial; changing the live discovery contract and fleet acceptance remain open.
+
+- November 22. With publication times held fixed, two hint slots cleared all eleven known publications in the modeled window. The Rocket fixture measured receipt-to-publication independently.
+
+- November 22. Fourteen cursor exits and eleven worker finishes occurred in four minutes. FIFO depth implies roughly 97 minutes before another visit to a requeued locator at the observed cadence.
+
+- November 22. The bounded peer sample proves a freshness miss. Six measured ordinary jobs met the wait threshold and one newly published catalog passed independent query readback. The fleet gate remains open.
+
+November 22 closed the deployment milestone. Production admission and cross-host artifact readback passed. The current cycle exceeded the configured 24-hour target. Fleet-capacity acceptance remains open.
+
+- November 21: experimental evidence is complete for the six-file sibling fixture. Real RQ admission, operator visibility, rollback and the large-child workload remain pilot gates.
 
 - Admin monitoring is implemented on the task branch. Missing summaries on mixed-version deployments render explicitly. Production panel rollout remains pending.
 
@@ -353,3 +397,47 @@ admission pause and scheduler hold preserve the transition boundary. General-cyc
 acceptance remains open; reviewed monitoring must start only after convergence.
 See the combined package tracker and independent security/correctness reviews
 for the live execution and recovery evidence.
+
+
+## Temporary Rocket batch-owner admission pilot
+
+Use the Rocket NFS study `/wc1/query-catalog-validation/batch-owner-qh05IUvH/evidence` as the baseline. Under production arrival offsets, limiting two children reduced median active worker time from 24.3 to 15.9 worker-seconds but won only two of four burst-completion pairs. Simultaneous arrivals favored two in all four pairs. All 224 timed receipts and their catalogs passed peer readback. The fixture contained six Parquet inputs per child. The live flat-project study observed second protected sections up to 76 seconds, so large children still need coverage.
+
+1. Specify the temporary policy in the query-catalog refresh and pilot contracts. Record two as a pilot parameter with its rationale and retirement condition in an ADR. Enable it explicitly for selected Rocket batch roots, initially off. Keep blocking filesystem guards and the existing global cap of seven subject to compatible-worker capacity and ordinary-work priority.
+2. Apply it in the existing watched admission transaction before RQ enqueue. Count outstanding refresh bindings for the canonical filesystem guard owner (namespace plus relative owner path) across workers, path aliases and child scopes. Count reservations as well as started jobs. Resolve owner identity before the watched section and reuse existing binding scope/configuration for legacy entries. Exercise a mixed-version ledger and stage activation only after all enqueue participants enforce the rule. Use the existing terminal and uncertain-execution accounting.
+3. Return an owner-capacity pending reason on saturation. Preserve the receipt and retry path; let the scheduler consider eligible work from other owners. Derive availability from outstanding jobs so completion opens a slot. Avoid a separate semaphore, persistent pause, retry-budget debit or a worker waiting for admission. Disabling the pilot restores ordinary admission on the next admission decision; existing jobs drain normally.
+4. Extend the catalog panel in rq/info-details with the effective policy, per-owner outstanding count and capacity deferrals. Validate concurrent enqueuers on both hosts, alias identity, independent owners, retry after completion/failure, cancellation while execution is uncertain, scheduler progress past a saturated owner, and rollback with in-flight jobs. Test the real default-queue scheduler and workers on test batches with small and large children. Verify every receipt and query each published catalog from the peer.
+5. Compare disabled/enabled matched windows. Primary measures are occupied worker-seconds per seven verified child refreshes and ordinary-job queue delay. Also record batch completion, oldest pending receipt, other-owner progress and worker compatibility. Require repeatable capacity savings and complete receipt drainage; roll back if receipts strand, ordinary work suffers or batch tails regress beyond the operator's accepted tradeoff. Retain permit, job and artifact evidence.
+6. At migration, start wpc1 with its normal blocking policy and the Rocket limit disabled. Replay the same sibling schedules and larger children through the real queue on wpc1. Retire the override, parameter and temporary monitoring specific to the pilot once Rocket is drained unless wpc1 evidence justifies a new policy.
+
+### Worker continuity during rollout
+
+Land the admission code disabled and stage it with the next routine deployment that covers every admission producer. Model jobs can call request_catalog_refresh on default or batch workers, independently of scheduler reconciliation. Updating the scheduler alone cannot enforce a fleet-wide limit. Keep the activation setting in admission policy, outside the exact-match worker compatibility advertisement and serialized job configuration. Read it at admission time so activation and rollback require only a policy change.
+
+Before activating, verify the deployed admission implementation on every producer, including both worker pools that run model jobs. Verify queued legacy jobs can execute across revisions. Account for existing outstanding refreshes and let an owner already above two drain through normal completion. Rehearse activation and rollback with ordinary default and batch jobs in flight. Verify the same workers remain registered, the in-flight jobs finish with their artifacts, the default and batch queues continue serving work, and receipt drainage resumes for deferred owners. Avoid a dedicated worker rollout for this temporary optimization. If routine deployment cannot preserve in-flight work, leave the pilot disabled until a suitable window or the wpc1 reevaluation.
+
+Implementation checkpoint on November 21. The watched cap and admin monitoring
+are implemented. Independent correctness and security reviews closed the
+malformed selector and retained-scope findings. Disposable Redis and real RQ
+scheduler/worker tests demonstrated cross-alias admission, other-owner progress,
+receipt drainage and catalog readback. Fleet rollout and Rocket acceptance remain open.
+
+November 22 revision records the production capacity verdict and distinguishes the mixed-release cycle from a future cap-specific trial.
+
+November 22 revision adds the live visit experiment to distinguish confirmation delay from worker service time.
+
+November 22 revision records the matched phase experiment and the fixed-budget replay of completion hints.
+
+November 22 revision records the read-only writer and declaration audit requested before selecting a maintenance representation.
+
+## Shared project asset declarations
+
+Define each asset family once with a stable identifier, a producer-owned locator or naming function, its scope parameters, and any explicit parent projection. Put the shared interface below both consumers. Feature Export layer sources and dependencies reference asset identifiers; the query engine enumerates families eligible for its catalog. A producer uses the same locator when publishing or notifying a refresh. Keep existing public dataset keys as the names clients query.
+
+Start with Feature Export's validated locator forms (`relpath`, `path_template`, `nodb_ref`). A template can resolve one selected contrast for an export; catalog enumeration also needs the owning producer's list of valid contrast IDs. A NoDb reference needs an explicitly supplied, read-only controller resolver. Asset location is separate from permission to open the resolved file.
+
+Feature Export owns joins, geometry roles, required/optional inputs and dependency fingerprints. The query engine owns catalog visibility, freshness, schema verification and publication. A shared dependency marker can be required by an export without becoming a query dataset. Reuse the current access-scope checks for child overrides, authorized parent-backed inputs and relocated projects.
+
+First migrate one fixed path (`watershed/hillslopes.parquet`) and the baseline/Omni uses of `loss_pw0.hill.parquet` in shadow mode. Compare each producer output with the current Feature Export resolution and the query engine's logical key and selected physical source. Include a normal project, a scenario override, a contrast and its explicitly parent-qualified export path. Verify the same export dependency fingerprint, catalog schema and query result. Parent visibility beyond the named qualified paths remains a compatibility decision. Retire duplicated path literals only after parity.
+
+November 22 revision records the operator's consolidation direction and the first comparison for validating it.

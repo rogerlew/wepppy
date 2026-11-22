@@ -32,6 +32,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | Roads parameterization program | `tests/tools/test_roads_parameterization_*.py`, `test_roads_engineered_surface.py` | Generated-material preservation, conductivity cap scope, numerical/physical gates and failed-case denominators; native runs remain isolated study artifacts |
 | Microservices | `tests/microservices/` | Starlette/FastAPI endpoints, payload validation |
 | WEPP admission persistence | `tests/microservices/test_wepp_admission_persistence.py` | Real NoDb rejection/readback, disposable Redis leases/replay, and prepared soil inputs; uses the RQ lifecycle fixture and optional `RQ212_TEST_REDIS_SOCKET` |
+| Shared project asset declarations | `tests/test_project_assets.py`, `tests/nodb/test_shared_asset_publication.py` | Declaration invariants, real writer output, managed refresh receipts, query values and Feature Export source digests |
 | Query engine | `tests/query_engine/` | DuckDB-backed analytics, MCP endpoints |
 | Go microservices | `services/status2/internal/**/_test.go` (Go) | Go-based WebSocket and checklist services (`status2`, `preflight2`) |
 

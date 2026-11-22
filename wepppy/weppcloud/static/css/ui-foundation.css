@@ -1515,8 +1515,23 @@ h5:first-child {
 }
 
 .wc-theme-switcher {
-  display: inline-flex;
+  display: inline-grid;
+  grid-template: ". label" "bell select" / auto minmax(0, 1fr);
   align-items: center;
+  row-gap: var(--wc-space-xs);
+}
+
+.wc-theme-switcher > label {
+  grid-area: label;
+}
+
+.wc-theme-switcher > .wc-notification-bell {
+  grid-area: bell;
+  margin-inline-end: var(--wc-space-sm);
+}
+
+.wc-theme-switcher > .wc-theme-switcher__select {
+  grid-area: select;
 }
 
 .wc-header .wc-theme-switcher .wc-run-header__field > span {

@@ -437,7 +437,7 @@ def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None
     queue = queue if queue is not None else _default_queue()
     connection = queue.connection
     identity = _configuration_id()
-    from . import _query_catalog_pilot as pilot
+    from . import _query_catalog_admission as admission, _query_catalog_pilot as pilot
     manifest = pilot.read(connection, pilot_id)["manifest"] if pilot_id else None
     key = "query-catalog:inventory:" + identity + (":pilot:" + pilot_id if pilot_id else "")
     roots = configured_roots()
@@ -509,6 +509,7 @@ def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None
             existing["cycle"] = existing.get("cycle", False) or item.get("cycle", False)
         pending = list(by_path.values())
         admitted = 0
+        owner_deferrals = 0
         failures: list[dict[str, str]] = []
         for _ in range(min(settings.admission_limit, len(pending))):
             # Redis verifies the current token; an expired lease is never revived.
@@ -552,6 +553,8 @@ def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None
                         connection.sadd(dirty_key, str(path))
                     continue
                 result = enqueue_catalog_refresh(path, scope=scope.as_dict(), queue=queue, pilot_id=pilot_id, controller_token=controller_token)
+                if result.get("error_code") == admission.OWNER_PENDING:
+                    owner_deferrals += 1
                 if result.get("job_id"):
                     admitted += 1
                 if item.get("cycle"):
@@ -584,7 +587,7 @@ def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None
                 pipeline.set(key + ":health", json.dumps({
                     "tick": now, "started": scan.get("cycle_started_at"),
                     "completed": scan.get("completed_at"), "visited": scan["visited"],
-                    "pending": len(pending), "admitted": admitted,
+                    "pending": len(pending), "admitted": admitted, "owner_deferrals": owner_deferrals,
                     "failures": len(failures) + len(scan["cycle_errors"]),
                     "unavailable": len(unavailable_namespaces),
                     "discovery_unavailable": discovery.get("state") == "unavailable",

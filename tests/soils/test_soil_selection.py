@@ -8,7 +8,6 @@ import sqlite3
 import ssl
 import subprocess
 import threading
-import time
 from urllib.parse import parse_qs
 from xml.etree import ElementTree
 
@@ -47,6 +46,7 @@ def row_for(table, columns, label):
 @contextmanager
 def server(schema, *, mode='success', label='mirror', tls=None):
     calls = []
+    release_stalled_response = threading.Event()
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass
@@ -69,11 +69,15 @@ def server(schema, *, mode='success', label='mirror', tls=None):
                 if mode == 'unavailable' or (mode == 'partial' and table == 'chorizon'):
                     self.send_response(503); self.end_headers(); return
                 if mode == 'slow_headers':
-                    self.wfile.write(b'HTTP/1.1 200 OK\r\n'); self.wfile.flush(); time.sleep(0.4); return
+                    self.wfile.write(b'HTTP/1.1 200 OK\r\n'); self.wfile.flush()
+                    release_stalled_response.wait(timeout=5)
+                    return
                 if mode == 'slow_body':
                     self.send_response(200); self.send_header('Content-Type', 'application/json')
                     self.send_header('Content-Length', '100'); self.end_headers()
-                    self.wfile.write(b'{'); self.wfile.flush(); time.sleep(0.4); return
+                    self.wfile.write(b'{'); self.wfile.flush()
+                    release_stalled_response.wait(timeout=5)
+                    return
                 if table == 'metadata':
                     data = metadata()
                     if mode == 'not_ready':
@@ -105,6 +109,7 @@ def server(schema, *, mode='success', label='mirror', tls=None):
     try:
         yield srv, calls
     finally:
+        release_stalled_response.set()
         srv.shutdown(); srv.server_close(); thread.join()
 
 
@@ -156,10 +161,20 @@ def test_primary_success_and_warm_reuse_preserve_retrievals(schema, tmp_path):
 @pytest.mark.parametrize('mode', ['unavailable', 'partial', 'missing', 'not_ready', 'slow_headers', 'slow_body'])
 def test_fallback_rebuilds_whole_collection_with_real_xml_tls(schema, tmp_path, monkeypatch, sda_tls, mode):
     if mode.startswith('slow'):
-        monkeypatch.setattr(selection, 'SOURCE_BUDGET_SECONDS', 0.2)
+        # Stall the real mirror request while leaving the XML/TLS fallback its full budget.
+        request_json = source._request_json
+
+        def short_mirror_request(*args, **kwargs):
+            with monkeypatch.context() as mirror:
+                mirror.setattr(source, 'REQUEST_DEADLINE_SECONDS', 0.2)
+                return request_json(*args, **kwargs)
+
+        monkeypatch.setattr(source, '_request_json', short_mirror_request)
     with server(schema, mode=mode) as (primary, _), server(schema, label='SDA', tls=sda_tls) as (sda, calls):
         route_sda(monkeypatch, sda)
         c = build(primary, tmp_path)
+        if mode.startswith('slow'):
+            assert c.selection_event['attempts'][0]['reason'] == 'deadline_exceeded'
         assert c.conn.execute('SELECT compname FROM component').fetchone()[0] == 'SDA'
         assert c.data_source.profile == 'legacy-xml'
         assert c.selection_event['actual_supplier'] == source.SoilDataSource().identity()

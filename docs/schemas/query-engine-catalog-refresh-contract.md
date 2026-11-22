@@ -12,6 +12,8 @@ Use existing Redis/RQ, default workers and scheduler infrastructure. No new queu
 
 The WMesque and Runs catalog queue implementations are precedents for transactional admission and concurrent invalidation handling, not a shared catalog data model. Mere duplicate suppression does not establish eventual consistency.
 
+The proposed [shared asset declaration contract](shared-project-asset-declarations-contract.md) governs the first shadow comparison of producer-owned names. Existing publication, reader and scope contracts govern production pending validation.
+
 ## Migration policy and interfaces
 
 Introduce explicit `request_catalog_refresh(wd, asset_path=None)` for migrated producers. `asset_path=None` requests full reconciliation. The receipt describes durable intent and admission separately: scope, request identifier, `pending|queued|running|failed|current` state, optional canonical `job_id`, and safe error code. It MUST NOT claim an RQ job exists when enqueue has failed or coalesced without a known job.
@@ -420,3 +422,15 @@ directory scans and job payloads. Report missing, unsupported or malformed
 telemetry as unavailable. Preserve queue tables when catalog telemetry alone
 fails. A scheduler tick or cycle completion cannot certify per-run publication.
 This distinction matters when admission is paused while the scheduler still runs.
+
+## Rocket batch-owner admission
+
+On shared default, refresh producers watch the optional RQ Redis string
+`query-catalog:batch-admission:v1:batch-owner-namespace` alongside the admission
+ledger. Its value selects a configured batch namespace. Within that namespace
+the first relative path component identifies the filesystem guard owner across
+root aliases. Two outstanding refresh reservations for that owner defer a new
+refresh with `query_catalog_owner_capacity_pending`. Terminal evidence releases
+capacity under the existing execution-accounting rules. Deferred scopes keep
+their receipts and the scheduler continues its bounded rotation. The global
+permit ceiling, ordinary queue priority and inventory admission still apply.

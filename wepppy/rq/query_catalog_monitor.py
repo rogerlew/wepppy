@@ -1,4 +1,6 @@
 """Read-only observations for the Admin/Root RQ snapshot."""
+from collections import Counter
+from hashlib import sha256
 from datetime import datetime, timezone
 import json
 import logging
@@ -68,13 +70,29 @@ def _admission(connection, panel):
         pipe.llen(queue.key)
         pipe.lrange(queue.key, 0, admission.CAP - 1)
         *statuses, length, head = pipe.execute()
+    namespace, invalid = admission.owner_policy(connection, catalog.catalog_worker_configuration())
+    if invalid:
+        messages.append('Batch owner policy does not select a unique batch namespace. The owner cap is inactive.')
+    rows.append(('Batch owner cap', f'{admission.OWNER_CAP} in {namespace}' if namespace else ('Invalid' if invalid else 'Disabled')))
+    owners = Counter()
     outstanding = uncertain = 0
     for binding, raw in zip(jobs.values(), statuses):
         state = raw.decode() if raw else None
         if state is not None and state not in admission.TERMINAL | catalog.ACTIVE_STATES:
             raise ValueError('Unknown job status')
         outstanding += admission.execution_outstanding(binding, state)
+        if binding['kind'] == 'refresh' and admission.execution_outstanding(binding, state):
+            try:
+                owner = admission.batch_owner(binding.get('scope'), namespace)
+            except admission.AdmissionDenied:
+                messages.append('Outstanding refresh has invalid owner accounting.')
+                return
+            if owner:
+                owners[owner] += 1
         uncertain += admission.execution_uncertain(binding, state)
+    for owner, count in sorted(owners.items()):
+        label = sha256(owner.encode()).hexdigest()[:12]
+        rows.append((f'Batch owner {label}', f'{count} of {admission.OWNER_CAP}'))
     rows.extend([('Outstanding permits', f'{outstanding} of {admission.CAP}'),
                  ('Uncertain reservations', uncertain)])
     if uncertain:
@@ -126,6 +144,10 @@ def _health(connection, panel):
             ('Time since scheduler tick', f"{round(time.time() - summary['tick'])} seconds"),
             ('Cycle started', _timestamp(summary['started'])), ('Cycle completed', _timestamp(summary['completed']))]
     panel['rows'].extend(rows + [(label, summary[k]) for k, label in fields])
+    if 'owner_deferrals' in summary:
+        if type(summary['owner_deferrals']) is not int or summary['owner_deferrals'] < 0:
+            raise ValueError('Invalid owner deferral count')
+        panel['rows'].append(('Owner capacity deferrals at last tick', summary['owner_deferrals']))
     if summary['failures'] or summary['unavailable'] or summary['discovery_unavailable']:
         panel['messages'].append('Reconciliation reported a problem at the last tick.')
     elif summary['completed'] is not None:

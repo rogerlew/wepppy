@@ -287,3 +287,72 @@ def test_activate_query_engine_rejects_unsupported_pass_family(
 
     with pytest.raises(ValueError, match="pass_family must be 'legacy_ascii' or 'hbp'"):
         activate_query_engine(tmp_path, run_interchange=True, force_refresh=True)
+
+
+@pytest.mark.parametrize(
+    "collection,selector,override",
+    [("scenarios", "scenario", False), ("scenarios", "scenario", True), ("contrasts", "contrast_id", False)],
+)
+def test_declared_query_assets_follow_published_views(
+    tmp_path: Path, collection: str, selector: str, override: bool
+) -> None:
+    from wepppy.query_engine.access_scope import access_scope
+    from wepppy.query_engine.catalog import load_catalog
+    from wepppy.query_engine.core import build_query_plan
+    from wepppy.query_engine.executor import DuckDBExecutor
+    from wepppy.query_engine.payload import QueryRequest
+    from wepppy.query_engine.project_assets import declared_catalog_entry
+
+    # Independent baseline paths and distinct values catch selecting the wrong copy.
+    hills = "watershed/hillslopes.parquet"
+    loss = "wepp/output/interchange/loss_pw0.hill.parquet"
+    qualified = f"_pups/omni/{collection}/1/{loss}"
+    child = tmp_path / "_pups" / "omni" / collection / "1"
+    _write_parquet(tmp_path / hills, pa.table({"value": [10]}))
+    _write_parquet(tmp_path / loss, pa.table({"value": [20]}))
+    activate_query_engine(tmp_path, run_interchange=False)
+    _write_parquet(child / loss, pa.table({"value": [30]}))
+    if override:
+        _write_parquet(child / hills, pa.table({"value": [40]}))
+    activate_query_engine(child, run_interchange=False)
+
+    def read_declared(root, asset_id, expected_key, **selection):
+        catalog = load_catalog(root)
+        entry = declared_catalog_entry(catalog, asset_id, **selection)
+        assert entry == catalog.get(expected_key)
+        assert [e.path for e in catalog.entries()].count(expected_key) == 1
+        assert entry.path == expected_key
+        with access_scope(root, tmp_path, lambda: None):
+            plan = build_query_plan(QueryRequest(datasets=[entry.path], columns=["value"]), catalog)
+            return DuckDBExecutor(root).execute(plan.sql, plan.params, sources=plan.sources).to_pylist()
+
+    assert read_declared(child, "watershed.hillslopes", hills) == [{"value": 40 if override else 10}]
+    assert read_declared(child, "wepp.loss_hill", loss) == [{"value": 30}]
+    assert read_declared(tmp_path, "wepp.loss_hill", loss) == [{"value": 20}]
+    selection = {selector: "1"}
+    assert declared_catalog_entry(load_catalog(tmp_path), "wepp.loss_hill", **selection) is None
+    update_catalog_entry(tmp_path, qualified)
+    assert read_declared(tmp_path, "wepp.loss_hill", qualified, **selection) == [{"value": 30}]
+
+
+def test_declared_query_lookup_rejects_ambiguity_and_invalid_projection(tmp_path: Path) -> None:
+    from wepppy.query_engine.catalog import CatalogEntry, DatasetCatalog
+    from wepppy.query_engine.project_assets import declared_catalog_entry
+
+    key = "watershed/hillslopes.parquet"
+    catalog = DatasetCatalog(tmp_path, [
+        CatalogEntry(key, ".parquet", 1, "", fs_path="a.parquet"),
+        CatalogEntry(key, ".parquet", 1, "", fs_path="b.parquet"),
+    ])
+    with pytest.raises(ValueError, match="Ambiguous"):
+        declared_catalog_entry(catalog, "watershed.hillslopes")
+    with pytest.raises(ValueError, match="projections"):
+        declared_catalog_entry(catalog, "watershed.hillslopes", scenario="1")
+    with pytest.raises(ValueError, match="projections"):
+        declared_catalog_entry(catalog, "wepp.loss_hill", contrast_id="1", output_scope="roads")
+    with pytest.raises(ValueError, match="Choose one"):
+        declared_catalog_entry(catalog, "wepp.loss_hill", scenario="1", contrast_id="1")
+    with pytest.raises(ValueError, match="child name"):
+        declared_catalog_entry(catalog, "wepp.loss_hill", scenario="../sibling")
+    with pytest.raises(KeyError):
+        declared_catalog_entry(catalog, "unknown")

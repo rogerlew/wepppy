@@ -1,0 +1,13 @@
+# Rocket owner admission correctness review
+
+Reviewed the working diff against d9e5ba7eb on November 21, 2026. Initial disposition is **changes required**.
+
+- **RO-C1.** The retained ledger parser accepts a refresh binding with malformed scope metadata. With the policy enabled, a string scope or integer relative path raises `AttributeError` from `batch_owner`. That exception escapes the admin panel's isolated error boundary and the scheduler's per-scope error boundary. An empty scope returns no owner, allowing an unclassified reservation to escape the count. A local direct call reproduced each outcome. Validate the inputs needed for classification and return an explicit accounting refusal for an unclassifiable outstanding refresh. Preserve existing behavior with the policy absent. Add a retained-ledger regression for the page and admission.
+- **Concurrency and rollback.** The candidate uses the resolved scope and retained configuration. It watches the policy key, ledger and job status before the enqueue transaction. For valid batch roots in the selected namespace, the first relative component agrees with the guard owner. Inventory, global capacity and ordinary queue priority retain their existing checks. Removing the key lets the next new admission use global capacity.
+- **Validation boundary.** The added integration test exercises concurrent admission for one owner, another owner, an existing reservation, cancellation before execution, rollback and catalog publication. The plan's physical alias, scheduler rotation after deferral, two-host continuity and matched large-child measurements need separate evidence before production activation.
+
+## Corrected implementation
+
+**RO-C1 closed. Correctness review passes for disabled staging.** The shared owner classifier now validates retained scope shape and relative components. Invalid active bindings return the canonical accounting refusal for affected admissions and an explicit panel warning. An absent policy key bypasses classification. Bounded policy selection also excludes namespaces shared by different layouts.
+
+The dedicated `tests/rq/test_query_catalog_owner_scheduler.py` regression passed using the real scheduler, worker and a private Redis process. It moved an intact receipt across configured batch root aliases, saturated the shared owner with two legacy reservations, observed one owner deferral and the distinct owner's same-tick admission, then verified receipt acknowledgment, catalog entries in all four runs, and cycle completion after worker drainage. WCTL receipt `d513d172ac984d1f99d5e5176bc83f9b` records one pass and zero skips. Two-host continuity and matched production windows remain rollout evidence.

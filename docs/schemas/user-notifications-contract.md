@@ -137,6 +137,10 @@ asynchronously on page load; no polling service or WebSocket is needed. Updating
 read state refreshes the local badge. Other open tabs update on their next page
 load. Keyboard, screen-reader, narrow-screen and theme behavior must work.
 
+In headers with a theme selector, center the bell on the dropdown row and use
+the standard small header spacing between the controls. The “Themes” label sits
+above the dropdown, so its height does not affect the bell's alignment.
+
 The inbox shows status, title/body, created date, applicable expiration and safe
 actions. Include resolved/unavailable history with clear status. Exactly 100
 items maximum per page; the server owns this bound. Use numbered pages with

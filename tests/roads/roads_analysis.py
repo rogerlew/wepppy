@@ -21,6 +21,7 @@ def source_hashes():
     paths += list((REPO / "wepp_runner").glob("*.py"))
     paths += list((REPO / "wepp_runner/templates").rglob("*"))
     paths += list((REPO / "wepppy/wepp/interchange").glob("*.py"))
+    paths += [REPO / "wepppy/project_assets.py"]
     paths += [REPO / "wepp_runner/bin" / (site()["binary"] + suffix) for suffix in ("", "_hill")]
     return {str(p.relative_to(REPO)):digest(p) for p in sorted(set(paths)) if p.is_file()}
 
