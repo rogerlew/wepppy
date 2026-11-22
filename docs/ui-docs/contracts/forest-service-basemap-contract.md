@@ -55,9 +55,8 @@ and retain “Forest Service - Geospatial Office” credit. Credit must track ac
 visible providers through loading, failure, and switching, without implying
 that a pending selection already rendered. Preserve other providers' credits.
 
-Light and dark Vite landing pages identify the optional
-Forest Service basemap separately from their existing background provider, with
-an accessible limitations disclosure or link. Explain that this map cannot
+The landing page identifies the optional Forest Service basemap separately
+from the Atlas provider and displays the use limitations inline. Explain that this map cannot
 establish ownership, legal boundaries, jurisdiction, or access rights. Obtain
 private-land permission and check public-land restrictions. For motor-vehicle
 access, consult official Motor Vehicle Use Maps or the Forest Service. Hazards

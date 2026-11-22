@@ -11,7 +11,7 @@ import uuid
 
 import json
 import redis
-from flask import send_from_directory, session
+from flask import session
 from flask_security import current_user
 from werkzeug.routing import BuildError
 
@@ -37,7 +37,6 @@ _ACCESS_LOG_DEFAULTS = [
     '/wc1/geodata/weppcloud_runs/access.csv',
 ]
 _RUN_LOCATIONS_FILENAME = 'runid-locations.json'
-_LANDING_STATIC_DIRNAME = 'ui-lab'
 _OPERATOR_TOKEN_ALLOWED_SCOPES = ("rq:read", "rq:status", "rq:enqueue", "rq:export")
 _OPERATOR_TOKEN_ALLOWED_SCOPE_SET = frozenset(_OPERATOR_TOKEN_ALLOWED_SCOPES)
 _OPERATOR_TOKEN_DEFAULT_TTL_SECONDS = 900
@@ -888,14 +887,6 @@ def _resolve_run_locations_path() -> Path:
     return fallback / _RUN_LOCATIONS_FILENAME
 
 
-def _resolve_landing_static_root() -> Path:
-    return Path(current_app.static_folder) / _LANDING_STATIC_DIRNAME
-
-
-def _resolve_landing_static_asset(*parts: str) -> Path:
-    return _resolve_landing_static_root().joinpath(*parts)
-
-
 def _load_or_refresh_run_locations(force: bool = False) -> List[Dict[str, Any]]:
     output_path = _resolve_run_locations_path()
 
@@ -914,66 +905,17 @@ def _load_or_refresh_run_locations(force: bool = False) -> List[Dict[str, Any]]:
     return []
 
 
-def _build_landing_state() -> Dict[str, Any]:
-    user_info: Dict[str, Any] = {
-        'is_authenticated': bool(getattr(current_user, 'is_authenticated', False)),
-        'email': getattr(current_user, 'email', None),
-        'name': getattr(current_user, 'name', None),
-    }
-    return {'user': user_info}
-
-
-def _render_ui_lab_index_with_state(index_path: Path) -> Optional['flask.Response']:
-    try:
-        html = index_path.read_text(encoding='utf-8')
-    except (OSError, UnicodeDecodeError):
-        current_app.logger.exception('Landing HTML export unavailable: %s', index_path)
-        return None
-
-    state_json = json.dumps(_build_landing_state())
-    injection = f'<script>window.__WEPP_STATE__ = {state_json};</script>'
-    if '</head>' in html:
-        html = html.replace('</head>', f'{injection}</head>', 1)
-    else:
-        html = injection + html
-
-    response = make_response(html)
-    response.headers['Content-Type'] = 'text/html; charset=utf-8'
-    response.headers['Cache-Control'] = 'no-store, max-age=0'
-    return response
-
-
-def _landing_assets_dir() -> Path:
-    return _resolve_landing_static_asset('assets')
-
-
-def _render_landing_page(variant: str = 'light') -> 'flask.Response':
-    """Render landing page.
-
-    Args:
-        variant: 'light' for flat governmental style, 'dark' for aurora/glassmorphism style
-    """
-    try:
-        _load_or_refresh_run_locations()
-    except Exception:
-        current_app.logger.exception('Failed to refresh landing run locations')
-
-    index_file = 'index-light.html' if variant == 'light' else 'index.html'
-    vite_index = _resolve_landing_static_asset(index_file)
-    rendered = _render_ui_lab_index_with_state(vite_index)
-    if rendered is not None:
-        return rendered
-
-    response = make_response('Landing page temporarily unavailable.', 503)
-    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
-    response.headers['Cache-Control'] = 'no-store, max-age=0'
-    return response
-
-
 @weppcloud_site_bp.route('/')
+@weppcloud_site_bp.route('/landing/', endpoint='landing', strict_slashes=False)
 @handle_with_exception_factory
 def index():
-    return _render_landing_page('light')
+    response = make_response(render_template(
+        'landing/index.htm',
+        atlas=build_landing_atlas(_resolve_run_locations_path()),
+        copyright_year=datetime.now(UTC).year,
+    ))
+    response.headers['Cache-Control'] = 'no-store, max-age=0'
+    return response
 
 
 @weppcloud_site_bp.route('/interfaces/', strict_slashes=False)
@@ -1072,38 +1014,14 @@ def _landing_run_locations_response() -> 'flask.Response':
     return response
 
 
-@weppcloud_site_bp.route('/landing/', strict_slashes=False)
-@handle_with_exception_factory
-def landing():
-    return _render_landing_page('light')
-
-
 @weppcloud_site_bp.route('/landing/preview/', strict_slashes=False)
-@handle_with_exception_factory
-def landing_preview():
-    atlas = build_landing_atlas(_resolve_run_locations_path())
-    response = make_response(render_template(
-        'landing/preview.htm',
-        atlas=atlas,
-        copyright_year=datetime.now(UTC).year,
-    ))
-    response.headers['Cache-Control'] = 'no-store, max-age=0'
-    response.headers['X-Robots-Tag'] = 'noindex'
-    return response
-
-
 @weppcloud_site_bp.route('/landing/light/', strict_slashes=False)
-@handle_with_exception_factory
-def landing_light():
-    """Render the light-themed (governmental aesthetic) landing page variant."""
-    return _render_landing_page('light')
-
-
 @weppcloud_site_bp.route('/landing/dark/', strict_slashes=False)
-@handle_with_exception_factory
-def landing_dark():
-    """Render the dark-themed (aurora/glassmorphism) landing page variant."""
-    return _render_landing_page('dark')
+def landing_redirect():
+    target = url_for('weppcloud_site.index')
+    if request.query_string:
+        target += '?' + request.query_string.decode('latin-1')
+    return redirect(target, code=308)
 
 
 @weppcloud_site_bp.route('/landing/run-locations.json', strict_slashes=False)
@@ -1123,59 +1041,6 @@ def landing_variant_run_locations():
 @handle_with_exception_factory
 def landing_run_locations_root():
     return _landing_run_locations_response()
-
-
-def _get_mimetype_for_asset(asset_path: str) -> Optional[str]:
-    """Return explicit MIME type for assets that Safari may reject otherwise."""
-    if asset_path.endswith('.js'):
-        return 'application/javascript'
-    if asset_path.endswith('.mjs'):
-        return 'application/javascript'
-    if asset_path.endswith('.css'):
-        return 'text/css'
-    if asset_path.endswith('.json'):
-        return 'application/json'
-    return None
-
-
-@weppcloud_site_bp.route('/landing/assets/<path:asset_path>', strict_slashes=False)
-@handle_with_exception_factory
-def landing_static_assets(asset_path: str):
-    assets_root = _landing_assets_dir()
-    if not assets_root.exists():
-        abort(404)
-    mimetype = _get_mimetype_for_asset(asset_path)
-    if mimetype:
-        return send_from_directory(assets_root, asset_path, mimetype=mimetype)
-    return send_from_directory(assets_root, asset_path)
-
-
-@weppcloud_site_bp.route('/landing/light/assets/<path:asset_path>', strict_slashes=False)
-@weppcloud_site_bp.route('/landing/dark/assets/<path:asset_path>', strict_slashes=False)
-@handle_with_exception_factory
-def landing_variant_static_assets(asset_path: str):
-    return landing_static_assets(asset_path)
-
-
-@weppcloud_site_bp.route('/assets/<path:asset_path>', strict_slashes=False)
-@handle_with_exception_factory
-def landing_static_assets_root(asset_path: str):
-    return landing_static_assets(asset_path)
-
-
-@weppcloud_site_bp.route('/landing/vite.svg', strict_slashes=False)
-@handle_with_exception_factory
-def landing_static_vite_icon():
-    icon_path = _resolve_landing_static_asset('vite.svg')
-    if not icon_path.exists():
-        abort(404)
-    return send_from_directory(icon_path.parent, icon_path.name)
-
-
-@weppcloud_site_bp.route('/vite.svg', strict_slashes=False)
-@handle_with_exception_factory
-def landing_static_vite_icon_root():
-    return landing_static_vite_icon()
 
 
 def register_csrf_exemptions(csrf) -> None:
