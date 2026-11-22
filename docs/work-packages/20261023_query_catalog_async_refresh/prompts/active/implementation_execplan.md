@@ -10,6 +10,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 
 ## Progress
 
+- [x] November 22. Completed the [production reconciliation visit experiment](../../tracker.md#november-22-reconciliation-visit-experiment) over eight consecutive scheduler ticks.
+
 - [x] November 22. Implemented and activated the temporary Rocket batch-owner cap on the three-host fleet. Four Rocket test catalogs passed peer readback.
 - [x] November 22. Assessed the natural cycle and recorded a failed 24-hour fleet-capacity gate with peer receipt, ordinary-job and artifact evidence. [Fleet result](../../tracker.md#november-22-fleet-capacity-acceptance)
 - [ ] Record matched production-window performance and natural-cycle capacity acceptance. The [rollout checkpoint](../../tracker.md#november-22-production-rollout-closeout) records the 33-hour cycle in progress and the wpc1 handoff.
@@ -34,6 +36,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 - [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
 ## Surprises & Discoveries
+
+- November 22. Of 200 visits, 186 cycled to the tail. Three long-running run workers sampled on both hosts were repeatedly in kernel RPC wait.
 
 - November 22. Discovery finished in 46 minutes, while reconciliation was still pending at 39 h 39 min. Outstanding current-incarnation receipts dated back to November 6 across multiple namespaces.
 
@@ -110,6 +114,8 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 
 ## Decision Log
 
+- November 22. Measure the slow run phases and replay confirmation priority at fixed permit and visit budgets before changing concurrency.
+
 - November 22. Record a failed fleet-capacity observation. The deadline preceded cap activation, so attributing the miss to the cap requires a separate trial.
 
 - November 21: target worker capacity on Rocket with a reversible, deployment-selected owner limit. Re-evaluate at wpc1 cutover. Four paced trials do not establish a general batch latency improvement.
@@ -156,6 +162,8 @@ state, shortening reconciliation spacing or weakening global acceptance.
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+- November 22. Fourteen cursor exits and eleven worker finishes occurred in four minutes. FIFO depth implies roughly 97 minutes before another visit to a requeued locator at the observed cadence.
 
 - November 22. The bounded peer sample proves a freshness miss. Six measured ordinary jobs met the wait threshold and one newly published catalog passed independent query readback. The fleet gate remains open.
 
@@ -397,3 +405,5 @@ scheduler/worker tests demonstrated cross-alias admission, other-owner progress,
 receipt drainage and catalog readback. Fleet rollout and Rocket acceptance remain open.
 
 November 22 revision records the production capacity verdict and distinguishes the mixed-release cycle from a future cap-specific trial.
+
+November 22 revision adds the live visit experiment to distinguish confirmation delay from worker service time.
