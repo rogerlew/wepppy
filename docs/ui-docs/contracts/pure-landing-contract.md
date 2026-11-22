@@ -54,8 +54,10 @@ the landing destinations and account link in the header navigation slot
 using the same `wc-nav__link` treatment as Interfaces. Expose Interfaces,
 Docs, Research, then Login or My Runs directly on desktop. On mobile
 provide those same links in order under a keyboard-operable hamburger
-labeled Menu. Keep the skip link and shared header tools. A borderless introduction pairs an outcome-led
-headline with existing WEPPcloud landscape imagery. About describes the
+labeled Menu. Keep the skip link and shared header tools. Use a text-only introduction with WEPPcloud as H1, Water Erosion Prediction
+Project as its subtitle, the original data-driven watershed modeling statement
+as H2 and a short explanation of the online WEPP interface. Omit hero artwork
+and action links; the header provides navigation. About describes the
 three modeling tasks. Present resources as action links, contacts as a
 directory and affiliates as linked logos with visible names. Omit slogans,
 retain every contact and funding acknowledgment, keep sponsor roles distinct
