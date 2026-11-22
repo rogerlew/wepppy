@@ -1,6 +1,6 @@
 # Project RQ code quality refactor
 
-**Status** Open 2026-11-21
+**Status** Closed 2026-11-21
 
 **Timezone** UTC
 
@@ -35,3 +35,11 @@ There is no numerical parameterization change.
 The maintainer owns execution and integration. Close the package after the
 focused evidence is recorded, then integrate through a commit-preserving PR.
 The operator waived the full test suite.
+
+## Outcome
+
+The project worker delegates WBT subcatchment state inspection to
+`project_rq_subcatchment_state.py`. The worker decreased from 3,379 to
+3,107 lines. [Validation evidence](artifacts/validation.md) records 86
+focused passes, including real Redis readback, and semantic parity for
+all 154 queue graph edges.

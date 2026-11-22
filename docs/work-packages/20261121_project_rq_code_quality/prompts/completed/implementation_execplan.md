@@ -12,14 +12,17 @@ policy without reading the surrounding project workers and transaction code.
 ## Progress
 
 - [x] Locate the validation block and Redis-backed tests.
-- [ ] Move validation and wire it through the current admission flow.
-- [ ] Record test evidence and prepare the package for integration.
+- [x] Move validation and wire it through the current admission flow.
+- [x] Record test evidence and prepare the package for integration.
 
 ## Surprises & Discoveries
 
 The existing test suite exercises live Redis queues under unique names. It
 already checks saved job links, orphaned active jobs, and retries after a
-transaction commits but its response is lost.
+transaction commits but its response is lost. The graph artifacts are
+already stale on the base, so the check compared fresh graphs. The
+dev image needed the repository-pinned Markdown wheel to collect the
+Redis-backed slice.
 
 ## Decision Log
 
@@ -29,7 +32,9 @@ transaction commits but its response is lost.
 
 ## Outcomes & Retrospective
 
-Implementation and validation are pending.
+The extracted helpers run through the existing worker admission paths.
+All 86 focused tests passed. [Validation evidence](../../artifacts/validation.md)
+records Redis readback, the unchanged graph, and the exact test commands.
 
 ## Implementation
 
