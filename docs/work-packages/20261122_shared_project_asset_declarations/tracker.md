@@ -5,7 +5,7 @@ Opened 2026-11-22 UTC. Owner group: project asset producers, Feature Export, que
 | Milestone | Status and evidence |
 | --- | --- |
 | Scaffold and design review | Complete for the scaffold. Three independent reviewers returned findings, which were addressed. See [contract decision](artifacts/20261122_contract_decision.md), [correctness review](artifacts/20261122_correctness_review.md) and [security review](artifacts/20261122_security_review.md). |
-| Contract checkpoint | Verify independent dispositions and ancestor revision before implementation. |
+| Contract checkpoint | Complete. Reviewed contract `1b51ac142` is an ancestor of implementation baseline `a957440ab`. |
 | Scoped tests and implementation | Pending. Record exact node IDs, revision and results. |
 | Actual production projects and isolated replay | Pending. Record coverage and mismatches against the [production protocol](artifacts/production_validation.md). |
 | Adoption/rollout | Open for later decision. |

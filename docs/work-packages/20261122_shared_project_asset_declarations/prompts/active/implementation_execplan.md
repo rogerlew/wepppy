@@ -7,7 +7,7 @@ Allow a producer to change a migrated asset location once while preserving both 
 ## Progress
 
 - [x] 2026-11-22 UTC. Scaffold the contract, source boundaries, scoped tests, actual-project protocol and independent planning reviews.
-- [ ] M0. Confirm the final contract matrix, record any needed canonical cross-owner approvals, and establish its reviewed commit as an ancestor of implementation.
+- [x] M0. Verified the reviewed contract commit `1b51ac142` is an ancestor of the clean implementation baseline `a957440ab`. The decision matrix and three scaffold reviews cover the two selected families. Implementation must preserve the four existing owner contracts.
 - [ ] M1. Implement shared naming behind both consumer adapters and exercise the scoped local matrix.
 - [ ] M2. Execute the actual-project gate and the matched isolated export/writer replays.
 - [ ] M3. Review evidence, publish disposition and decide whether to migrate additional families.
