@@ -26,6 +26,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] Verify inline funding, credits and legal text on Forest at desktop, phone and 200% zoom.
 - [x] Restore the nine original affiliation captions and inspect the rendered cards on Forest.
 - [x] Restore the resource marks and inspect the three cards on Forest.
+- [x] Add the WEPPcloud Stack repository directory under Help and resources.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 

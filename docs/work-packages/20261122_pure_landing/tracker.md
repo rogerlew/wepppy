@@ -102,3 +102,6 @@ were verified on Forest following checkpoint `4d0e254dd`.
 
 [Help and resources marks](artifacts/20261122_resource_marks.md) were verified
 on Forest following contract checkpoint `25d1b44a4`.
+
+[WEPPcloud Stack directory](artifacts/20261122_stack_directory.md) covers the
+twelve repositories selected under checkpoints `51aedcb8e` and `2eedf3a64`.

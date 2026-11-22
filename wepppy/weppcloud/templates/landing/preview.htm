@@ -106,6 +106,17 @@
       </li>
       {% endfor %}
     </ul>
+    <section id="weppcloud-stack" aria-labelledby="stack-heading">
+      <h3 id="stack-heading">WEPPcloud Stack</h3>
+      <dl class="wc-landing__stack-repos">
+        {% for owner, name, description in content.stack_repositories %}
+        <div>
+          <dt><a href="https://github.com/{{ owner }}/{{ name }}"{% if name == 'wepp-forest' %} aria-describedby="forest-repo-access"{% endif %}>{{ name }}</a></dt>
+          <dd>{{ description }}{% if name == 'wepp-forest' %} <span id="forest-repo-access">Private repository. Collaborator access required.</span>{% endif %}</dd>
+        </div>
+        {% endfor %}
+      </dl>
+    </section>
   </section>
 
   <section id="contacts" class="wc-landing__section" aria-labelledby="contacts-heading">

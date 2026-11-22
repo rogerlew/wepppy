@@ -62,6 +62,11 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
     assert hero.select_one("h2").text == "Data-driven watershed hydrology and erosion modeling to support decision-making."
     assert not hero.select("a, button, img")
     assert [link.text for link in page.select("#about a")] == ["WEPP Model", "FAQ"]
+    stack = page.select_one("#resources #weppcloud-stack")
+    assert stack.h3.text == "WEPPcloud Stack"
+    assert len(stack.select("dt a[href]")) == len(stack.select("dd")) == 12
+    forest = stack.select_one('a[href="https://github.com/wepp-in-the-woods/wepp-forest"]')
+    assert stack.find(id=forest["aria-describedby"]).text == "Private repository. Collaborator access required."
     documentation = page.select_one("#resources a")
     assert documentation.strong.text == "User Summary Documentation"
     assert documentation["href"] == "/weppcloud/usersum/doc/usersum.weppcloud.references"

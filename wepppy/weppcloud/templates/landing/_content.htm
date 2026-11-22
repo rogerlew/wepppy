@@ -168,3 +168,18 @@
   'Anurag Srivastava',
   'Alex Watanabe'
 ] %}
+
+{% set stack_repositories = [
+  ('rogerlew', 'wepppy', 'Hosts the WEPPcloud web application, prepares model inputs, runs WEPP, and publishes maps and reports.'),
+  ('wepp-in-the-woods', 'wepppyo3', 'Provides Rust routines that Python calls to summarize rasters, process climate files, and read WEPP outputs.'),
+  ('rogerlew', 'weppcloud-wbt', 'Adapts WhiteboxTools to delineate watersheds and drainage networks from elevation data.'),
+  ('wepp-in-the-woods', 'peridot', 'Turns delineated terrain into the hillslope profiles and connected channels that WEPP models.'),
+  ('rogerlew', 'jimf-cligen532', 'Generates daily weather sequences for WEPP from climate station parameters using CLIGEN 5.32.'),
+  ('rogerlew', 'rosetta', 'Estimates soil water retention and hydraulic conductivity from soil texture and other measured properties.'),
+  ('rogerlew', 'soil-data-access', 'Provides an independent API for the USDA SSURGO and STATSGO2 soil survey data used to build model inputs.'),
+  ('wepp-in-the-woods', 'wepp-forest', 'Simulates runoff, erosion, and sediment transport on forested hillslopes and through watershed channels.'),
+  ('rogerlew', 'topaz', 'Delineates channels and subcatchments from elevation grids for projects using the TOPAZ workflow.'),
+  ('rogerlew', 'oxidized-rasterstats', 'Uses Rust to summarize raster values within polygons and sample raster values at points.'),
+  ('devalc', 'WEPPcloudR', 'Creates reports with graphs and tables that summarize watershed model results.'),
+  ('jackson-nakae', 'PATH-cost-effective', 'Compares the cost of hillslope treatments against sediment targets and maps the selected treatments.'),
+] %}

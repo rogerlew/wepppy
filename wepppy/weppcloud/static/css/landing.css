@@ -98,6 +98,20 @@
   padding: 1.1rem;
 }
 .wc-landing__resources strong { display: block; margin-bottom: .5rem; }
+#weppcloud-stack { margin-block-start: var(--wc-space-2xl, 2rem); }
+.wc-landing__stack-repos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr));
+  column-gap: var(--wc-space-xl);
+  margin: 0;
+}
+.wc-landing__stack-repos > div {
+  border-block-start: 1px solid var(--wc-color-border);
+  padding-block: var(--wc-space-md);
+}
+.wc-landing__stack-repos dt { font-weight: 600; }
+.wc-landing__stack-repos dd { margin: .25rem 0 0; }
+#forest-repo-access { display: block; font-style: italic; }
 .wc-landing__directory > li {
   display: grid;
   grid-template-columns: 1fr 1.2fr 1fr;
