@@ -90,6 +90,12 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
             "Interfaces", "Docs", "Research", "Login",
         ]
     assert not page.select("main details, main summary")
+    affiliates = page.select('[aria-labelledby="collaborators-heading"] li.wc-card')
+    assert len(affiliates) == 9
+    assert all(card.select_one("a[href] img") and card.p.get_text(strip=True) for card in affiliates)
+    assert affiliates[0].p.get_text() == "Go Vandals! University of Idaho"
+    assert affiliates[2].select_one('[lang="cy"]').get_text() == "Gweddw Crefft Heb Ei Dawn"
+    assert affiliates[-1].p.get_text() == "Shaping the Future of Science"
     funding = page.select_one("dl.wc-landing__funding")
     assert len(funding.select("dt > a")) == len(funding.select("dd")) == 5
     assert "22-IA-11261975-090" in funding.select_one("dd").get_text()

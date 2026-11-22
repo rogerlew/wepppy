@@ -96,3 +96,6 @@ covers checkpoint `c7b2bc3d7`.
 
 [Visible funding, credits and disclaimer](artifacts/20261122_visible_references.md)
 records Forest verification following contract checkpoint `3ede01d55`.
+
+[Affiliation cards and original captions](artifacts/20261122_affiliation_cards.md)
+were verified on Forest following checkpoint `4d0e254dd`.

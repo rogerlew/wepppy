@@ -113,7 +113,12 @@
     <h2 id="collaborators-heading">Affiliations and collaborators</h2>
     <p class="wc-landing__reading">WEPPcloud is made possible through collaborative partnerships across research institutions, government agencies, and international funding programs.</p>
     <ul class="wc-landing__logos wc-landing__list" role="list">
-      {% for org in content.affiliations %}<li>{{ organization_link(org) }}{% if org.description %}<p>{{ org.description }}</p>{% endif %}</li>{% endfor %}
+      {% for org in content.affiliations %}
+      <li class="wc-card">
+        {{ organization_link(org) }}
+        <p>{% if org.welsh_prefix %}<span lang="cy">{{ org.welsh_prefix }}</span>{{ org.caption[org.welsh_prefix|length:] }}{% else %}{{ org.caption }}{% endif %}</p>
+      </li>
+      {% endfor %}
     </ul>
   </section>
 
