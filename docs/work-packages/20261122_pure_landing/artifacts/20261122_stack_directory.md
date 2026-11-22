@@ -26,3 +26,7 @@ Chromium and WebKit rendered all 13 links and exposed both column headers
 and 13 row headers at desktop and phone widths. At 320 pixels descriptions
 stacked and full repository names wrapped within the table. All 25 landing
 route tests passed, including the two private link-to-note associations.
+
+From base `394695fcd`, both independent reviewers accepted listing
+rogerlew/cligen-rs after the Fortran generator as its planned successor.
+The upstream README describes a Rust port of CLIGEN 5.32.x.
