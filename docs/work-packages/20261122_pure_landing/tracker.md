@@ -5,7 +5,7 @@ Started 2026-11-22 19:02 UTC.
 - [x] Inventory current landing sections, theme patterns and shared assets.
 - [x] Commit the contract checkpoint and review disposition.
 - [x] Render and verify the initial review route.
-- [ ] Review and implement the Atlas hero correction.
+- [ ] Reuse the Deck.gl Atlas and restore the original section order.
 - [ ] Complete manual screen-reader and assistive-technology acceptance.
 - [ ] Obtain human acceptance before cutover and UI Lab retirement.
 
@@ -38,3 +38,6 @@ instance mounted the pinned Comrak package for the browser run.
 The operator's Atlas feedback supersedes the table-only presentation.
 The [hero correction](artifacts/20261122_atlas_hero_contract_decision.md)
 records the new contract and local review scope.
+
+The CSS-map preview was declined. The operator requested the existing Deck.gl
+map, no year controls and the original section order.

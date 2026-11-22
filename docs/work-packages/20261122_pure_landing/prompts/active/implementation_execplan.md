@@ -31,8 +31,10 @@ retirement must preserve this independently used renderer.
 layout and themes. Use a native year filter and paginated atlas table for
 access to the existing snapshot without a map renderer or client package.
 The operator subsequently clarified that the Atlas is the visual hero.
-Make a bundled world silhouette with server-rendered CSS markers the
-primary visual and put the table in a native disclosure.
+The operator rejected the CSS-map preview and requested reuse of the
+Deck.gl map, removal of access-year controls, and original section order.
+Reuse WEPPcloud's Deck map and raster tile helpers with the existing
+CARTO provider. Verify the actual Forest render and text equivalent.
 
 ## Outcomes & Retrospective
 
