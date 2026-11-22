@@ -99,3 +99,6 @@ records Forest verification following contract checkpoint `3ede01d55`.
 
 [Affiliation cards and original captions](artifacts/20261122_affiliation_cards.md)
 were verified on Forest following checkpoint `4d0e254dd`.
+
+[Help and resources marks](artifacts/20261122_resource_marks.md) were verified
+on Forest following contract checkpoint `25d1b44a4`.

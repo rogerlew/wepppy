@@ -25,6 +25,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] Remove decorative link arrows and restore shared link decoration.
 - [x] Verify inline funding, credits and legal text on Forest at desktop, phone and 200% zoom.
 - [x] Restore the nine original affiliation captions and inspect the rendered cards on Forest.
+- [x] Restore the resource marks and inspect the three cards on Forest.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 
