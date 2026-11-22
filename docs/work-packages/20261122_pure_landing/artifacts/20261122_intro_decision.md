@@ -11,3 +11,7 @@ mobile widths. Implementation pending. No data or access changes.
 Two independent reviewers accepted the change. Use the opening text from
 `weppcloud-ui-lab/src/AppLight.tsx`, keep the hero and heading anchors,
 and use the shared theme foreground throughout.
+
+Forest Chromium verified the two headings, absence of hero links, buttons
+and artwork, and fit at 1440, 390 and 320 CSS pixels. Both landing route
+suites passed (25 tests).

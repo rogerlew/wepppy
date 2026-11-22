@@ -51,18 +51,14 @@
 <div class="wc-container wc-landing" id="main-content" tabindex="-1">
   <section id="hero" class="wc-landing__hero" aria-labelledby="landing-title">
     <div>
-      <h1 id="landing-title">Predict watershed runoff and erosion</h1>
-      <p class="wc-landing__lead">
-        WEPPcloud is an open-source platform for the Water Erosion Prediction Project (WEPP) model.
-        Predict runoff, erosion, and sediment delivery for watershed planning, research,
-        and post-fire response.
-      </p>
-      <div class="wc-feature__actions">
-        <a class="pure-button pure-button-primary" href="{{ url_for('weppcloud_site.interfaces') }}">Explore interfaces</a>
-        <a class="pure-button pure-button-secondary" href="{{ url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') }}">Read the user guide</a>
-      </div>
+      <h1 id="landing-title">WEPPcloud</h1>
+      <p class="wc-landing__subtitle">Water Erosion Prediction Project</p>
     </div>
-    <img class="wc-landing__landscape" src="{{ static_url('images/interfaces/lake-tahoe.jpg') }}" alt="" width="960" height="960">
+    <h2>Data-driven watershed hydrology and erosion modeling to support decision-making.</h2>
+    <p>
+      WEPPcloud is an online interface for running WEPP (Water Erosion Prediction Project) Model.
+      Access tools, explore documentation, or review the latest watershed analytics.
+    </p>
   </section>
 
   <section id="about" class="wc-landing__section" aria-labelledby="about-heading">

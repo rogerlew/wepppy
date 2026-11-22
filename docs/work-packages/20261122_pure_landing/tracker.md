@@ -84,3 +84,6 @@ supersedes the design review's custom header. Contract checkpoint `0489ef246`.
 
 [Direct navigation and mobile hamburger](artifacts/20261122_navigation_decision.md)
 supersedes the More menu disposition. Contract checkpoint `67447cc29`.
+
+The [text introduction](artifacts/20261122_intro_decision.md) replaces the
+illustrated hero on Forest. Contract checkpoint `738d78146`.

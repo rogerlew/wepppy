@@ -21,6 +21,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] Disposition desktop/mobile design findings and verify the revised Forest preview.
 - [x] Restore the shared site masthead and verify Interfaces style parity on Forest.
 - [x] Verify the four direct desktop destinations and mobile hamburger on Forest.
+- [x] Restore the original text introduction without its action row.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 
