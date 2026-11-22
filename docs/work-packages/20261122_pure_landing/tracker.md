@@ -81,3 +81,6 @@ cover checkpoint `05f86c5b2` and its responsive presentation changes.
 
 [Shared masthead decision and verification](artifacts/20261122_shared_header_decision.md)
 supersedes the design review's custom header. Contract checkpoint `0489ef246`.
+
+[Direct navigation and mobile hamburger](artifacts/20261122_navigation_decision.md)
+supersedes the More menu disposition. Contract checkpoint `67447cc29`.

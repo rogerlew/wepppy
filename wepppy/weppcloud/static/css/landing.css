@@ -16,6 +16,23 @@
 }
 .wc-landing-header .wc-theme-switcher__select { width: auto; }
 
+.wc-landing__mobile-menu { display: none; }
+
+@media (max-width: 540px) {
+  .wc-landing-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+  }
+  .wc-landing__desktop-links { display: none; }
+  .wc-landing__mobile-menu { display: block; }
+  .wc-landing__mobile-menu summary::after { content: none; }
+  .wc-landing__mobile-menu summary::-webkit-details-marker { display: none; }
+  .wc-landing__mobile-links { display: grid; padding-block-start: var(--wc-space-xs); }
+  .wc-landing-header .wc-header__tools { grid-column: 1 / -1; }
+  .wc-landing-header:has(.wc-landing__mobile-menu:not([open])) .wc-header__tools { display: none; }
+}
+
 .wc-landing__disclosure summary { cursor: pointer; }
 
 .wc-landing__skip[href]:any-link {

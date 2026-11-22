@@ -74,7 +74,11 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
     assert not header.select_one(".wc-brand img, [data-notification-bell]")
     assert header.select_one(".wc-nav__link[href='/weppcloud/login']")
     assert header.select_one(".wc-header__tools [data-theme-select]")
-    assert header.select_one(".wc-nav__menu-button").text == "More"
+    assert header.select_one("details summary").get_text(strip=True) == "Menu"
+    for group in header.select(".wc-landing__desktop-links, .wc-landing__mobile-links"):
+        assert [link.text for link in group.select("a.wc-nav__link")] == [
+            "Interfaces", "Docs", "Research", "Login",
+        ]
     assert "22-IA-11261975-090" in page.get_text()
     assert "simulation outputs are estimates" in page.get_text()
     assert "Run Atlas data is temporarily unavailable." in page.get_text()
