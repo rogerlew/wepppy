@@ -11,7 +11,12 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 import wepppy.nodb.config_builder.resolver as builder_resolver_module
-from wepppy.microservices.rq_engine import orchestration_read_routes, schema_defaults_routes
+from wepppy.microservices.rq_engine import (
+    orchestration_read_routes,
+    schema_defaults_controllers,
+    schema_defaults_routes,
+    schema_defaults_runtime,
+)
 from wepppy.nodb.locales import (
     build_continental_us_capability_graph,
     build_locale_capability_graph,
@@ -1251,7 +1256,7 @@ def test_schema_defaults_classifies_live_graph_failure_as_registry_503(
     )
 
     def load(_runid, _config):
-        schema_defaults_routes._resolve_runtime_capability_graphs(LegacyConfig())
+        schema_defaults_runtime._resolve_runtime_capability_graphs(LegacyConfig())
         raise AssertionError("unreachable")
 
     monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", load)
@@ -1471,22 +1476,22 @@ def test_schema_v1_compatibility_preserves_present_wepp_axis_without_live_regist
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     resolved = SimpleNamespace(
-        mode=schema_defaults_routes.RunCapabilityMode.COMPATIBILITY,
+        mode=schema_defaults_runtime.RunCapabilityMode.COMPATIBILITY,
         graph=None,
     )
     monkeypatch.setattr(
-        schema_defaults_routes,
+        schema_defaults_runtime,
         "resolve_run_capability_authority",
         lambda _config: resolved,
     )
     monkeypatch.setattr(
-        schema_defaults_routes,
+        schema_defaults_runtime,
         "capability_authority",
         lambda _config: (_ for _ in ()).throw(
             AssertionError("schema-v1 compatibility consulted stored graph reader")
         ),
     )
-    assert schema_defaults_routes._resolve_runtime_capability_graphs(object()) == (
+    assert schema_defaults_runtime._resolve_runtime_capability_graphs(object()) == (
         None,
         None,
         frozenset(),
@@ -1916,7 +1921,7 @@ def test_edde_controller_defaults_preserve_unselected_or_saved_future_fields(sel
     runtime.states.update(climate_mode_code=17, edde_projection=selection,
                           future_start_year=2060 if selection else "",
                           future_end_year=2070 if selection else "")
-    defaults = schema_defaults_routes._controller_defaults("climate", runtime)
+    defaults = schema_defaults_controllers._controller_defaults("climate", runtime)
     assert defaults["edde_projection"] == selection
     assert defaults["future_start_year"] == (2060 if selection else "")
     assert "observed_start_year" not in defaults
@@ -1938,13 +1943,13 @@ def test_runtime_live_binaries_preserve_geometry_with_empty_historic_mofe(monkey
         'Climate': SimpleNamespace(), 'Landuse': SimpleNamespace(multi_ofe=True),
         'Soils': SimpleNamespace(), 'Wepp': wepp, 'RedisPrep': SimpleNamespace(),
     }.items():
-        monkeypatch.setattr(schema_defaults_routes, name,
+        monkeypatch.setattr(schema_defaults_runtime, name,
                             SimpleNamespace(getInstance=lambda wd, instance=instance: instance))
-    monkeypatch.setattr(schema_defaults_routes, 'get_wd', lambda _: str(tmp_path))
-    monkeypatch.setattr(schema_defaults_routes, '_resolve_runtime_capability_graphs',
+    monkeypatch.setattr(schema_defaults_runtime, 'get_wd', lambda _: str(tmp_path))
+    monkeypatch.setattr(schema_defaults_runtime, '_resolve_runtime_capability_graphs',
                         lambda _: (graph, graph, frozenset()))
-    monkeypatch.setattr(schema_defaults_routes, '_runtime_snapshot_updated_at', lambda **_: None)
-    runtime = schema_defaults_routes._load_runtime_state(RUNID, CONFIG)
+    monkeypatch.setattr(schema_defaults_runtime, '_runtime_snapshot_updated_at', lambda **_: None)
+    runtime = schema_defaults_runtime._load_runtime_state(RUNID, CONFIG)
     assert 'wepp_261010' in runtime.wepp_binary_options
     assert 'wbt|multiple-ofe|wepp_261010' in runtime.wepp_model_tuples
     assert not any(item.startswith('topaz|multiple-ofe|') for item in runtime.wepp_model_tuples)

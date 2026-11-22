@@ -106,6 +106,12 @@ this service as the canonical async interface for run-scoped operations.
 - `upload_*_routes.py` - file uploads for batch/climate/landuse inputs.
 - `run_sync_routes.py` - admin-only run sync + migrations.
 
+### Schema defaults and discovery
+
+The ten discovery GET handlers live in `schema_defaults_routes.py`. They authorize the request before loading the run snapshot in `schema_defaults_runtime.py`. Controller defaults, hints and templates live in `schema_defaults_controllers.py`, with validation schemas in `schema_defaults_controllers_schema.py`. Both controller and operation schemas use capability fields from `schema_defaults_fields.py`.
+
+To edit an operation's discovery metadata, find its builder in `schema_defaults_ops_<domain>.py`. The catalog in `schema_defaults_ops.py` applies availability rules and publishes operations in stable order. Common response shapes and error documentation live in `schema_defaults_descriptors.py` and `schema_defaults_operation_docs.py`. The output and geospatial modules build the artifact inventory and map metadata.
+
 ## Adding or Extending Routes
 - Define `router = APIRouter()` and export it via `__all__ = ["router"]`.
 - Register the router in `__init__.py` with `prefix="/api"`.

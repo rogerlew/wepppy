@@ -7,7 +7,7 @@ From the repository root, inspect wepppy/microservices/rq_engine/schema_defaults
 ## Progress
 
 - [x] 2026-11-21. Identified owners, consumers and baseline metrics.
-- [ ] Wire the extracted discovery builders into the router.
+- [x] 2026-11-21. Wired the extracted discovery builders into the router. Baseline focused tests passed (132 tests).
 - [ ] Validate emitted responses, quality metrics, contracts and tests. Record independent review.
 
 ## Milestones and verification
