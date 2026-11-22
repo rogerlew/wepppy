@@ -82,8 +82,12 @@ label size. Keep the inspection paragraph and project-cycle controls out
 of the page. Plain-text hover tooltips retain the existing project fields.
 Marker area represents each run's hillslope count, with a minimum visible
 marker and maximum radius to keep the map legible, and both an outline and fill distinguish
-soil burn severity data. The canvas has no separate tab stop. Wheel
-scrolling remains page scrolling.
+soil burn severity data. The canvas has no separate tab stop. Unmodified wheel input scrolls the page. Holding Ctrl while scrolling over
+the map zooms it through the existing Deck.gl controller. Show “Hold Ctrl
+while scrolling to zoom the map.” at the lower right and separate “Standard
+runs” and “Runs with SBS” legend chips at the upper left, as in the original
+Atlas. The overlays use theme colors and allow pointer input to reach the
+map. Keep the tip clear of the zoom buttons at narrow widths.
 
 Synchronize Deck.gl overlays and the vector basemap through the Atlas
 camera for pan, zoom, reset and resize. Loading starts after the map
