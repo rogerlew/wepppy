@@ -67,7 +67,7 @@ requests omit application credentials and preview referrers. Credit
 OpenStreetMap and CARTO for the preview map. The shell follows the selected
 theme and the basemap uses the same palette as the original light landing.
 
-Use the existing compiled public snapshot. Keep unique runs, total
+Use the existing compiled snapshot. Keep unique runs, total
 hillslopes and latest recorded access in shared `wc-landing__card` cards
 above the map. Restore the original compact lower-left zoom-in, zoom-out
 and reset map buttons with accessible names and focus indicators. The Atlas has no access-year
@@ -96,8 +96,15 @@ summary and metrics. Geodetically valid polar locations remain in the
 summary and metrics. Web Mercator only plots eligible coordinates and
 uses the same dateline location for +180 and −180.
 
-The existing public snapshot, authorization and cache generation remain
-in scope as-is. Serialize only public marker fields with Jinja JSON
+At normal snapshot compilation, include a project's Atlas row only if its
+run directory has the existing explicit public designation (NoDb PUBLIC
+marker). If multiple input directories contribute to one run ID, each must
+qualify for that merged row to be published. A change of visibility takes effect in the next successful
+generation. The preview and all four JSON aliases use this same published
+snapshot regardless of session. Only its eligible rows contribute labels,
+tooltips, metrics and geographic summaries. Never ship a second unfiltered
+snapshot as a static asset. Project access and internal statistics keep
+their existing rules. Serialize only public marker fields with Jinja JSON
 encoding. No project links, raw access log, identity data, or user-controlled
 tile URLs are part of this surface.
 
