@@ -1,0 +1,60 @@
+# Deliver a theme-aware WEPPcloud landing page
+
+This ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Keep
+Progress, Surprises & Discoveries, Decision Log, and Outcomes &
+Retrospective current.
+
+## Purpose
+
+Render `/weppcloud/landing/preview/` so visitors can review a maintainable
+WEPPcloud home page that uses the same navigation and theme as Interfaces,
+Runs and reports. Preserve the current public landing throughout review.
+
+## Progress
+
+- [x] (2026-11-22 19:02 UTC) Inventory content, shared shell and UI Lab consumers.
+- [ ] Commit the reviewed contract and record its revision in the tracker.
+- [ ] Build the route and verify served content and behavior.
+- [ ] After human approval, cut over and retire UI Lab.
+
+## Surprises & Discoveries
+
+Forest Service run and dashboard maps load MapLibre from
+`wepppy/weppcloud/static/ui-lab/maplibre/`. The landing migration and
+retirement must preserve this independently used renderer.
+
+## Decision Log
+
+2026-11-22 UTC. Use `base_pure.htm` and a scoped stylesheet for consistent
+layout and themes. Use a native year filter and paginated atlas table for
+access to the existing snapshot without a map renderer or client package.
+
+## Outcomes & Retrospective
+
+Implementation and cutover evidence are pending.
+
+## Plan and validation
+
+Review and commit the checkpoint under `artifacts/` with the canonical
+contract before editing templates, routes or tests. Add a preview handler
+in `wepppy/weppcloud/routes/weppcloud_site.py`. Add Jinja and scoped CSS
+under `wepppy/weppcloud/templates/` and `wepppy/weppcloud/static/css/`.
+Reuse the site's existing route mount and theme controls. Use the snapshot
+resolver already used by the public atlas. Verify real populated, empty,
+missing and malformed snapshot states and bounded year and page inputs.
+Use a snapshot fixture to verify data escapes at the rendered response.
+
+Run focused landing route pytest checks and existing CSS/frontend gates
+through `wctl`. Load the preview on a development instance and inspect
+the real DOM, stylesheet, assets, signed-in links and persisted theme.
+Capture wide and narrow layouts, keyboard focus and axe results for all
+five AA themes. Add manual accessibility evidence following the Access
+Board baseline and report any unavailable checks in the tracker.
+
+After human acceptance, record approved URL compatibility, move the
+locked shared renderer and license to WEPPcloud's static vendor path and
+verify its served boundary. Remove Vite code, generated landing assets,
+environment and build wiring, stale live docs and obsolete tests. Verify
+the new home and landing URL, saved bookmarks per the approved disposition,
+and real Forest Service rendering on Runs and dashboards. Use the current
+task branch for review and integration.

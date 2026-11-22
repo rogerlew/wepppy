@@ -151,3 +151,9 @@ Existing exports remain compatible; incomplete deployments now fail explicitly.
 Validate both themes and default routes, real missing/unreadable export states,
 no legacy template reference, and unchanged state injection. Implementation
 conformance for FSBASE-03 is locally validated; production deployment is not claimed.
+
+## Pure landing review
+
+The additive [Pure landing review route](pure-landing-contract.md#delivery)
+uses its own Jinja template with the Forest Service credit and use limitations.
+The light and dark Vite pages retain this contract during the review phase.

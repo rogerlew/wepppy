@@ -901,6 +901,13 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Pure CSS landing migration
+
+The [work package](docs/work-packages/20261122_pure_landing/package.md) tracks
+a theme-aware landing preview and Section 508 evidence. Human acceptance
+gates the public cutover and UI Lab retirement.
+
 ### Channel delineation map boundary
 
 [Work package](docs/work-packages/20261119_channel_delineation_map_boundary/package.md) implemented and locally validated. The full suite passed 6,706 tests before a baseline SSURGO cache fixture failure, confirmed on the unchanged starting revision. Repository-wide acceptance is pending.
