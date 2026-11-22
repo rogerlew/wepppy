@@ -1,6 +1,3 @@
-{% macro theme_option(value, name, qualifier) -%}
-<option value="{{ value }}">{{ name }}{% if not compact_theme_names | default(false) %} · {{ qualifier }}{% endif %}</option>
-{%- endmacro %}
 <div class="wc-theme-switcher" data-theme-switcher>
   <label class="wc-run-header__field" for="wc-theme-switcher-select">
     <span>Themes</span>
@@ -8,19 +5,19 @@
             class="wc-theme-switcher__select wc-run-header__input"
             data-theme-select
             aria-label="Interface theme">
-      {{ theme_option('default', 'Default (Light)', 'AA checked') }}
-      {{ theme_option('light-high-contrast', 'High Contrast (Light)', 'AA checked') }}
-      {{ theme_option('onedark', 'OneDark', 'Sensory preference') }}
-      {{ theme_option('dark-modern', 'Dark Modern', 'Sensory preference') }}
-      {{ theme_option('ayu-dark', 'Ayu Dark', 'Sensory preference') }}
-      {{ theme_option('ayu-mirage', 'Ayu Mirage', 'AA checked') }}
-      {{ theme_option('ayu-light', 'Ayu Light', 'Sensory preference') }}
-      {{ theme_option('ayu-dark-bordered', 'Ayu Dark · Bordered', 'Sensory preference') }}
-      {{ theme_option('ayu-mirage-bordered', 'Ayu Mirage · Bordered', 'AA checked') }}
-      {{ theme_option('ayu-light-bordered', 'Ayu Light · Bordered', 'Sensory preference') }}
-      {{ theme_option('cursor-dark-anysphere', 'Cursor Dark (Anysphere)', 'Sensory preference') }}
-      {{ theme_option('cursor-dark-midnight', 'Cursor Dark (Midnight)', 'AA checked') }}
-      {{ theme_option('cursor-dark-high-contrast', 'Cursor Dark (High Contrast)', 'Sensory preference') }}
+      <option value="default">Default (Light) · AA checked</option>
+      <option value="light-high-contrast">High Contrast (Light) · AA checked</option>
+      <option value="onedark">OneDark · Sensory preference</option>
+      <option value="dark-modern">Dark Modern · Sensory preference</option>
+      <option value="ayu-dark">Ayu Dark · Sensory preference</option>
+      <option value="ayu-mirage">Ayu Mirage · AA checked</option>
+      <option value="ayu-light">Ayu Light · Sensory preference</option>
+      <option value="ayu-dark-bordered">Ayu Dark · Bordered · Sensory preference</option>
+      <option value="ayu-mirage-bordered">Ayu Mirage · Bordered · AA checked</option>
+      <option value="ayu-light-bordered">Ayu Light · Bordered · Sensory preference</option>
+      <option value="cursor-dark-anysphere">Cursor Dark (Anysphere) · Sensory preference</option>
+      <option value="cursor-dark-midnight">Cursor Dark (Midnight) · AA checked</option>
+      <option value="cursor-dark-high-contrast">Cursor Dark (High Contrast) · Sensory preference</option>
     </select>
   </label>
 </div>

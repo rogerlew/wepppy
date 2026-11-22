@@ -24,6 +24,7 @@ def preview(tmp_path, monkeypatch):
     app.jinja_env.globals.update(
         static_url=lambda filename: url_for("static", filename=filename),
         current_user=user,
+        notification_inbox_available=True,
     )
     for endpoint, path in {
         "usersum.usersum_index": "/usersum/",
@@ -31,6 +32,8 @@ def preview(tmp_path, monkeypatch):
         "usersum.view_markdown": "/usersum/view/<category>/<path:filename>",
         "user.runs": "/runs",
         "security.login": "/login",
+        "notifications.index": "/notifications/",
+        "notifications.unread_count": "/notifications/unread-count",
     }.items():
         app.add_url_rule(path, endpoint, lambda **kwargs: "")
 
@@ -66,14 +69,20 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
     assert page.select_one("[data-forest-service-credit]")
     assert page.select_one('a[href="https://www.swansea.ac.uk/"]').get_text(strip=True) == "Swansea University"
     assert "Jim Frankenberger" in page.get_text()
-    assert page.select_one(".wc-landing__menu summary").text == "Menu"
+    header = page.select_one("header.wc-header > .wc-header__inner.wc-container")
+    assert header.select_one(".wc-brand").get_text(strip=True) == "WEPPcloud"
+    assert not header.select_one(".wc-brand img, [data-notification-bell]")
+    assert header.select_one(".wc-nav__link[href='/weppcloud/login']")
+    assert header.select_one(".wc-header__tools [data-theme-select]")
+    assert header.select_one(".wc-nav__menu-button").text == "More"
     assert "22-IA-11261975-090" in page.get_text()
     assert "simulation outputs are estimates" in page.get_text()
     assert "Run Atlas data is temporarily unavailable." in page.get_text()
 
     user.is_authenticated = True
     response, page = _get(client)
-    assert page.select_one('nav[aria-label="Primary"] a[href="/weppcloud/runs"]').text == "My Runs"
+    assert page.select_one('.wc-header__tools [data-notification-bell]')
+    assert page.select_one('.wc-nav__link[href="/weppcloud/runs"]').text == "My Runs"
     assert 'href="/weppcloud/login"' not in response.text
     assert user.email not in response.text
 

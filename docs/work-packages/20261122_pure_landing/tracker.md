@@ -78,3 +78,6 @@ successful scheduled compilation roll this into the served feed.
 
 The [design review disposition and Forest verification](artifacts/20261122_design_review.md)
 cover checkpoint `05f86c5b2` and its responsive presentation changes.
+
+[Shared masthead decision and verification](artifacts/20261122_shared_header_decision.md)
+supersedes the design review's custom header. Contract checkpoint `0489ef246`.

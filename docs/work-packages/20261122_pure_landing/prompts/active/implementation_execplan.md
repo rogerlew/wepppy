@@ -19,6 +19,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] Verify Ctrl-wheel zoom and the overlaid legend and tip on Forest.
 - [x] Filter Atlas rows at normal compilation and verify the resulting public feeds.
 - [x] Disposition desktop/mobile design findings and verify the revised Forest preview.
+- [x] Restore the shared site masthead and verify Interfaces style parity on Forest.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 

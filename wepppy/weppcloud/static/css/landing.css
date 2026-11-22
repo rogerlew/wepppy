@@ -5,43 +5,18 @@
   overflow-wrap: anywhere;
 }
 
-.wc-landing-masthead { padding-inline: var(--wc-space-xl); }
-.wc-landing-header,
-.wc-landing__toolbar,
-.wc-landing-header .wc-brand,
-.wc-landing-header .wc-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--wc-space-lg);
-}
-.wc-landing-header { min-height: 3.75rem; justify-content: space-between; }
-.wc-landing-header .wc-brand { gap: .55rem; font-size: 1.3rem; font-weight: 750; }
-.wc-landing-header a[href]:any-link { --wc-color-link: var(--wc-color-text); color: var(--wc-color-text); text-decoration: none; }
-.wc-landing__menu[open] > summary { display: none; }
-.wc-landing__menu > summary, .wc-landing__disclosure summary { cursor: pointer; }
-.wc-landing__theme {
-  display: grid;
-  position: relative;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 1px solid var(--wc-color-border);
-  border-radius: var(--wc-radius-md);
-  font-size: 1.5rem;
-}
-.wc-landing__theme select {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+/* Keep the shared controls within the available width, including long theme names. */
+.wc-landing-header { flex-wrap: wrap; }
+.wc-landing-header .wc-header__tools,
+.wc-landing-header .wc-theme-switcher,
+.wc-landing-header .wc-theme-switcher label,
+.wc-landing-header .wc-theme-switcher__select {
   min-width: 0;
-  opacity: 0;
-  cursor: pointer;
+  max-width: 100%;
 }
-.wc-landing__theme:focus-within { outline: 2px solid var(--wc-color-accent); outline-offset: 2px; }
-.wc-landing__theme .wc-theme-switcher { display: contents; }
-.wc-landing__theme label { display: contents; }
-.wc-landing__theme label > span { display: none; }
+.wc-landing-header .wc-theme-switcher__select { width: auto; }
+
+.wc-landing__disclosure summary { cursor: pointer; }
 
 .wc-landing__skip[href]:any-link {
   position: absolute;
@@ -133,12 +108,7 @@
 .wc-landing-footer nav { display: flex; flex-wrap: wrap; align-content: start; gap: .4rem 1rem; }
 
 @media (max-width: 44rem) {
-  .wc-landing-masthead, .wc-landing-footer { padding-inline: 1rem; }
-  .wc-landing-header { align-items: start; padding-block: .75rem; box-sizing: border-box; }
-  .wc-landing-header .wc-brand { min-height: 2.25rem; }
-  .wc-landing__menu > summary, .wc-landing__menu[open] > summary { display: list-item; width: fit-content; margin-left: auto; padding: .4rem .65rem; }
-  .wc-landing__toolbar, .wc-landing-header .wc-nav { flex-direction: column; align-items: flex-end; gap: .75rem; }
-  .wc-landing__toolbar { padding: .75rem 0; }
+  .wc-landing-footer { padding-inline: 1rem; }
   .wc-landing__hero, .wc-landing__resources, .wc-landing-footer .wc-container { grid-template-columns: 1fr; }
   .wc-landing__landscape { height: clamp(8rem, 35vw, 13rem); object-position: center 38%; }
   .wc-landing__hero .wc-feature__actions { display: grid; gap: .5rem; }
