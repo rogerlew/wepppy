@@ -5,10 +5,10 @@ The py312 native source and release commit is `e6fc1e6f50ad91b57c13ab6ac795fdbea
 | Verification | Result |
 | --- | --- |
 | Public hillslope PASS on 47,582 distinct one-day source IDs | Previous release failed at group 32,768. Candidate wrote 47,582 rows in 15,861 groups. Reopened footer and full ordered identity column agreed with its summary. |
-| Full-count daily reduction | Repeated the first PASS and WAT day from real hill 1 under 47,582 distinct source IDs. Each public native writer produced 15,861 groups. totalwatsed3 produced one 79-column row for all IDs and for selection 1, 32,768 and 47,582. Area and subsurface runoff volume scaled by selected count. Runoff depth and calendar key matched the single-input output. Areas were 2,482,765,951.760226 and 156,536.04 square metres. This local one-day process peaked at 859,064 KiB RSS. |
+| Full-count daily reduction | Repeated the first PASS and WAT day from real hill 1 under 47,582 distinct source IDs. Each public native writer produced 15,861 groups. totalwatsed3 produced one 79-column row for all IDs and for selection 1, 32,768 and 47,582. Area and subsurface runoff volume scaled by selected count. Runoff depth and calendar key matched the single-input output. Areas were 2,482,765,951.760226 and 156,536.04 square meters. This local one-day process peaked at 859,064 KiB RSS. |
 | AgFields | Repeated the retained five-row LOSS report under 47,582 sub-field IDs with five sub-fields per field. Reopened and validated 237,910 rows across 15,861 groups. |
 | Native crate | 114 unit and 19 integration tests passed. Includes unknown-length 32,768-chunk stream, multiple physical groups from one oversized chunk, zero rows and staged rollback. |
-| Native release Python suite | 181 passed, including malformed footers, scientific oracles, AgFields, water balance and Roads. |
+| Native release Python suite | 182 passed, including overstated and malformed footers, scientific oracles, AgFields, water balance and Roads. |
 | WEPPpy interchange and startup | 154 passed, 1 skipped. Final receipt `a940e69abd554290b22dd45e88d29539`. |
 | Real 45-year data and Roads | All six families, all 79 daily columns, subset, empty, interleaved and no-statistics layouts. See the independent correctness review for exact comparison tolerances. |
 | Repository-wide WEPPpy tests | Running. |

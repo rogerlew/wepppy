@@ -9,3 +9,5 @@ Trace every shared native sink, other interchange writers, AgFields publication 
 Complexity budget covers existing native and Python paths, regression tests and paired build. Security impact is low. There are no new privileges or services. Observe freshly generated artifacts and dependent daily totals during the first large-run replay. A matching footer with missing or duplicate identities is a failure. Production replay is a distinct operational outcome.
 
 See the [execution plan](prompts/active/implementation.md) and [tracker](tracker.md).
+
+The physical packing thresholds and their rationale are recorded in [ADR-0157](../../adrs/ADR-0157-interchange-row-group-packing.md). The WEPPpy operator owns production recovery. Local engineering acceptance requires a fresh file at the incident source count, legacy and packed daily parity, and the repository validation gates.
