@@ -90,3 +90,6 @@ illustrated hero on Forest. Contract checkpoint `738d78146`.
 
 [Plain link labels and decoration](artifacts/20261122_link_decision.md)
 were verified on Forest following checkpoint `76bb04deb`.
+
+[Semantic parity and link verification](artifacts/20261122_semantic_parity.md)
+covers checkpoint `c7b2bc3d7`.

@@ -61,6 +61,11 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
     assert hero.select_one("h1 + p").text == "Water Erosion Prediction Project"
     assert hero.select_one("h2").text == "Data-driven watershed hydrology and erosion modeling to support decision-making."
     assert not hero.select("a, button, img")
+    assert [link.text for link in page.select("#about a")] == ["WEPP Model", "FAQ"]
+    documentation = page.select_one("#resources a")
+    assert documentation.strong.text == "User Summary Documentation"
+    assert documentation["href"] == "/weppcloud/usersum/doc/usersum.weppcloud.references"
+    assert page.select_one('nav[aria-label="Primary"] a[href="/weppcloud/usersum/"]').text == "Docs"
     assert [section.get("aria-labelledby") for section in page.select(".wc-landing > section")] == [
         "landing-title", "about-heading", "atlas-heading", "resources-heading",
         "contacts-heading", "collaborators-heading", "sponsors-heading",

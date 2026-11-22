@@ -62,15 +62,18 @@
   </section>
 
   <section id="about" class="wc-landing__section" aria-labelledby="about-heading">
-    <h2 id="about-heading">About WEPPcloud</h2>
-    <div class="wc-landing__features">
-      <div><h3>Assemble inputs</h3><p>Build watershed models from terrain, soil, vegetation, and climate data.</p></div>
-      <div><h3>Compare scenarios</h3><p>Compare the effects of wildfire, treatments, and land management side by side.</p></div>
-      <div><h3>Review and export</h3><p>Use maps and reports to calibrate your model or export results for further analysis.</p></div>
-    </div>
+    <h2 id="about-heading">What is WEPPcloud?</h2>
+    <p class="wc-landing__reading">
+      WEPPcloud is an open-source, online watershed modeling platform that automates the acquisition and
+      processing of geospatial resources and performs process-based modeling to predict runoff, erosion, and
+      sediment delivery in minutes. Users can select from a variety of processing options for climate inputs,
+      wildfire, treatments, and land-management scenarios to support side-by-side comparisons and model
+      calibration. They can then analyze and view results through interface reports and maps, and export
+      results for planning, research, and post-fire response.
+    </p>
     <ul class="wc-landing__links" role="list">
-      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.wepp_model') }}">Learn about the WEPP model</a></li>
-      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.faq') }}">Frequently asked questions</a></li>
+      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.wepp_model') }}">WEPP Model</a></li>
+      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.faq') }}">FAQ</a></li>
     </ul>
   </section>
 
@@ -78,11 +81,12 @@
 
   <section id="resources" class="wc-landing__section" aria-labelledby="resources-heading">
     <h2 id="resources-heading">Help and resources</h2>
+    <p class="wc-landing__reading">Documentation, tutorials, and source code for WEPPcloud.</p>
     <ul class="wc-landing__resources wc-landing__list" role="list">
       {% for title, href, description in [
-        ('WEPPcloud Help', url_for('usersum.usersum_index'), 'Find guides to projects, model inputs, and interpreting results.'),
-        ('WEPPcloud on YouTube', 'https://www.youtube.com/@fswepp4700', 'Watch tutorials, demonstrations, and release updates.'),
-        ('wepppy on GitHub', 'https://github.com/rogerlew/wepppy', 'Browse the source code, developer documentation, and issue tracker.')
+        ('User Summary Documentation', url_for('usersum.view_doc', doc_id='usersum.weppcloud.references'), 'WEPPcloud Documentation'),
+        ('WEPPcloud YouTube', 'https://www.youtube.com/@fswepp4700', 'Video tutorials, release notes, and demos.'),
+        ('wepppy on GitHub', 'https://github.com/rogerlew/wepppy', 'Source code, issues, and AI-friendly docs.')
       ] %}
       <li><a href="{{ href }}"><strong>{{ title }}</strong><span>{{ description }}</span></a></li>
       {% endfor %}
@@ -91,6 +95,7 @@
 
   <section id="contacts" class="wc-landing__section" aria-labelledby="contacts-heading">
     <h2 id="contacts-heading">Points of contact</h2>
+    <p class="wc-landing__reading">Connect with the researchers, engineers, and hydrologists who shape WEPPcloud.</p>
     <ul class="wc-landing__directory wc-landing__list" role="list">
       {% for contact in content.contacts %}
       <li>
@@ -106,13 +111,15 @@
 
   <section class="wc-landing__section" aria-labelledby="collaborators-heading">
     <h2 id="collaborators-heading">Affiliations and collaborators</h2>
+    <p class="wc-landing__reading">WEPPcloud is made possible through collaborative partnerships across research institutions, government agencies, and international funding programs.</p>
     <ul class="wc-landing__logos wc-landing__list" role="list">
-      {% for org in content.affiliations %}<li>{{ organization_link(org) }}</li>{% endfor %}
+      {% for org in content.affiliations %}<li>{{ organization_link(org) }}{% if org.description %}<p>{{ org.description }}</p>{% endif %}</li>{% endfor %}
     </ul>
   </section>
 
   <section class="wc-landing__section" aria-labelledby="sponsors-heading">
     <h2 id="sponsors-heading">Sponsors</h2>
+    <p class="wc-landing__reading">WEPPcloud development is supported by grants from federal agencies, international research programs, and scientific funding bodies.</p>
     <ul class="wc-landing__links wc-landing__funders" role="list">
       {% for org in content.sponsors %}<li><a href="{{ org.link }}">{{ org.name }}</a></li>{% endfor %}
     </ul>
@@ -126,6 +133,7 @@
 
   <section class="wc-landing__section" aria-labelledby="contributors-heading">
     <h2 id="contributors-heading">Contributors</h2>
+    <p class="wc-landing__reading">WEPPcloud is the result of collaborative efforts from researchers, engineers, and scientists across multiple institutions.</p>
     <ul class="wc-landing__contributors" role="list">
       {% for name in content.contributors %}
       <li>{{ name }}</li>
@@ -135,6 +143,7 @@
 
   <section id="attributions" class="wc-landing__section" aria-labelledby="attributions-heading">
     <h2 id="attributions-heading">Attributions and data sources</h2>
+    <p class="wc-landing__reading">WEPPcloud leverages open data, research-quality datasets, and mapping services from partners worldwide.</p>
     <details class="wc-landing__disclosure">
       <summary>Map credits and regional data documentation</summary>
       <div>

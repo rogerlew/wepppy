@@ -19,3 +19,9 @@ original documentation resource's References destination. Preserve same-tab
 navigation. Use the existing contrast-safe theme link token consistently
 throughout the body and footer; the default light resting token falls below
 4.5:1 on their tinted surfaces. Foundation owns each interaction state.
+
+Forest verification matched the restored About and section introductions,
+resource copy and model/FAQ labels to AppLight.tsx. All body/footer links
+used the same resting color within each of the five AA themes. Hover,
+keyboard focus and focused link/contrast axe checks passed, along with
+25 landing route tests.
