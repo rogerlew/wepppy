@@ -130,3 +130,18 @@ the existing targeted-batch deployment interface and October 27 provenance;
 `--targeted-batch` is insufficient for the new routing. Use the full canonical
 deployment for participating producers, scheduler and default workers. No new
 targeted mode, worker pool or production activation is authorized by this change.
+
+## Operating the temporary Rocket owner cap
+
+Stage the code with the policy key absent. Verify every producer uses the new
+image and confirm the selected batch namespace maps exclusively to Rocket.
+In the RQ Redis database set
+`query-catalog:batch-admission:v1:batch-owner-namespace` to that namespace.
+The admission panel shows the limit and outstanding reservations per hashed
+owner. The health panel counts owner-capacity deferrals during the last
+committed scheduler tick. Direct producer attempts are outside that counter.
+Delete just this policy key to roll back or before repointing the namespace to
+wpc1. Existing reservations finish normally. Compare occupied worker time,
+ordinary queue delay and peer-readable catalogs across matched test batches.
+An unrecognized selector leaves the optimization inactive and appears in the
+admission panel. Select a namespace used exclusively by batch-layout roots.

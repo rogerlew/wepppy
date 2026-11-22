@@ -830,3 +830,52 @@ def test_admin_health_reads_committed_tick_and_isolates_malformed_summary(catalo
     assert panels['Catalog health']['messages'] == ['Monitoring data unavailable.']
     assert 'No observed admission blocker.' in panels['Catalog admission']['messages']
     assert 'private-value' not in str(panels)
+
+
+def test_batch_owner_cap_counts_legacy_bindings_and_releases_slots(catalog_queue, monkeypatch):
+    from rq.job import Job
+    from wepppy.rq import _query_catalog_admission as admission
+
+    root, queue, worker = catalog_queue
+    conn = queue.connection
+    config = tasks.catalog_worker_configuration()
+    batch = dict(config['roots'][0], layout='batch')
+    monkeypatch.setenv('QUERY_CATALOG_ROOTS_JSON', json.dumps([batch]))
+    for consumer in [worker, *worker._catalog_test_companions]:
+        conn.hset(consumer.key, tasks.WORKER_FIELD, json.dumps(tasks.catalog_worker_configuration()))
+    children = []
+    for owner in ('first', 'second'):
+        runs = root / owner / 'runs'
+        runs.mkdir(parents=True)
+        for n in range(4):
+            child = project(runs, str(n))
+            core.record_catalog_refresh(child, 'values.csv')
+            children.append(child)
+
+    def enqueue(path):
+        return tasks.enqueue_catalog_refresh(path, queue=queue)
+
+    first = enqueue(children[0])['job_id']
+    conn.set(admission.OWNER_POLICY_KEY, batch['namespace'])
+    try:
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            list(pool.map(enqueue, children[1:4]))
+        # Competing writers can all contend. Retry sequentially to converge.
+        results = [enqueue(child) for child in children[1:4]]
+        assert len(queue.get_job_ids()) == 2
+        deferred = [child for child, result in zip(children[1:4], results)
+                    if result.get('error_code') == admission.OWNER_PENDING]
+        assert len(deferred) == 2
+        assert core.pending_catalog_requests(deferred[0])
+        assert enqueue(children[4])['job_id']
+        Job.fetch(first, connection=conn).cancel()
+        assert enqueue(deferred[0])['job_id']
+        conn.delete(admission.OWNER_POLICY_KEY)
+        assert enqueue(deferred[1])['job_id']
+        drain(queue, worker)
+        for child in [*children[1:4], children[4]]:
+            assert not core.pending_catalog_requests(child)
+            assert any(row['path'] == 'values.csv' for row in
+                       json.loads((child / '_query_engine/catalog.json').read_text())['files'])
+    finally:
+        conn.delete(admission.OWNER_POLICY_KEY)
