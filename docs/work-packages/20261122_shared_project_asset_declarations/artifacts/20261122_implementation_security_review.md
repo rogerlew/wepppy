@@ -19,6 +19,10 @@ The static review found no new authority to read another project or publish an i
 
 The isolated wctl run passed 23 tests on the reviewed commit. Its receipt `665040566c004fbea5d053c14b22c26b` records zero source changes. The run covered declaration validation and collisions, named query views with distinct Parquet values, ambiguous and invalid projections, denied sibling read and publication paths, scoped relocation, permitted parent export dependencies and out-of-parent rejection. It exercised the actual scoped reader and retained catalog, including the distinction between a child-direct key and an absent parent projection.
 
+## Review of original-project evidence
+
+Independently compared the 13 private observation records from each of the four host/revision combinations. The retained catalog, physical source selection, scoped query and export observation fields agreed across all four. Six child views per arm denied their selected sibling at the access boundary before any read. Three views had read-only markers and two exercised retained-root relocation. A diagnostic combining a relocated child with a foreign retained pointer raised an existing path-relative validation error before opening the file. The HTTP response and its redaction for that combined case remain unverified. The [production evidence](20261122_live_project_comparison.md) contains aggregate results and the observer identities.
+
 ## Release disposition
 
 Code security review applies to the exact revision above. The package requires separate correctness review and completed original-project comparisons and matched private export replay before operational acceptance. The study does not authorize production activation.

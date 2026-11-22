@@ -1,6 +1,6 @@
 # Required actual-project validation
 
-Status: protocol only. No candidate has been exercised. A previous catalog census, unit fixture or isolated copy supplies no substitute for the live read-only comparison.
+Candidate `f17ec6ca3` completed the [original-project observations](20261122_live_project_comparison.md) and [matched private replay](20261122_private_replay.md). The acceptance matrix retains open coverage for an actual scenario-local watershed override. The sections below define the protocol and remain the authority for subsequent comparisons.
 
 ## Freeze the comparison
 

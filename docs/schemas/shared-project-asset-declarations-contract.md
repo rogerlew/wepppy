@@ -1,6 +1,6 @@
 # Shared project asset declarations
 
-Status: proposed contract-first checkpoint. Runtime conformance and production acceptance are pending. The [work package](../work-packages/20261122_shared_project_asset_declarations/package.md) tracks review and evidence.
+Status: first-slice candidate tested locally and on sampled production projects. Production acceptance remains open for unobserved original-project coverage. The [work package](../work-packages/20261122_shared_project_asset_declarations/package.md) tracks review and evidence.
 
 ## Ownership and scope
 

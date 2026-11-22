@@ -1,12 +1,12 @@
 # Shared project asset declarations
 
-Opened 2026-11-22 UTC. Status: **scaffolded for contract review**. Target: faithful extraction of shared logical asset declarations. Implementation, unit validation, production validation and release are open.
+Opened 2026-11-22 UTC. Status: **first implementation tested; production acceptance open**. The two shared declarations are wired at candidate `f17ec6ca3`. All 56 revision/host observations matched across 14 original project views. A distinguishable scenario-local watershed override remains unverified on an original project. [Production comparison](artifacts/20261122_live_project_comparison.md) · [Writer and export replay](artifacts/20261122_private_replay.md)
 
 ## Outcome and scope
 
 Define the location once at the writer and preserve what Feature Export users and query clients see. Keep the export layer catalog in Feature Export. The first vertical slice follows one fixed watershed asset and one scope-dependent WEPP loss table through the producer, export dependency plan, query catalog and named parent projection. Audit evidence includes 181 production catalogs and shows materially different child-direct and parent-qualified views. [Audit and limitations](../20261023_query_catalog_async_refresh/artifacts/declared_asset_audit/findings.md)
 
-The proposed [canonical contract](../../schemas/shared-project-asset-declarations-contract.md) owns the shared semantics. The [ExecPlan](prompts/active/implementation_execplan.md) sequences the contract checkpoint, implementation and validation. [Tracker](tracker.md)
+The [canonical contract](../../schemas/shared-project-asset-declarations-contract.md) owns the shared semantics. The [ExecPlan](prompts/active/implementation_execplan.md) sequences the contract checkpoint, implementation and validation. [Tracker](tracker.md)
 
 ## Boundaries and responsibilities
 

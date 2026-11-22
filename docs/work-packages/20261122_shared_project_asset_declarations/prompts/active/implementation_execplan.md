@@ -9,8 +9,8 @@ Allow a producer to change a migrated asset location once while preserving both 
 - [x] 2026-11-22 UTC. Scaffold the contract, source boundaries, scoped tests, actual-project protocol and independent planning reviews.
 - [x] M0. Verified the reviewed contract commit `1b51ac142` is an ancestor of the clean implementation baseline `a957440ab`. The decision matrix and three scaffold reviews cover the two selected families. Implementation must preserve the four existing owner contracts.
 - [x] M1. Candidate `f17ec6ca3681efd5f93207a8b825b1059c94c177` passed the scoped producer, export, query and RQ suites. The native producers retain independent filename contracts.
-- [ ] M2. Execute the actual-project gate and the matched isolated export/writer replays.
-- [ ] M3. Review evidence, publish disposition and decide whether to migrate additional families.
+- [ ] M2. Completed the original-project comparison on 14 views and the matched writer/export replay. Actual scenario-local watershed precedence remains open. The study also records direct contrast missing geometry and the limits of stale Roads coverage. [Production evidence](../../artifacts/20261122_live_project_comparison.md)
+- [x] M3. Independent correctness and security reviewers assessed the candidate and primary production observations. Hold additional families and rollout while the actual-project gate remains open. [Correctness review](../../artifacts/20261122_implementation_correctness_review.md) · [Security review](../../artifacts/20261122_implementation_security_review.md)
 
 ## Surprises & Discoveries
 
@@ -48,6 +48,6 @@ Rerun comparisons from an immutable source identity and use a fresh private outp
 
 ## Outcomes & Retrospective
 
-The deliverable at scaffold time is the design and acceptance protocol. Code conformance, performance benefit and live candidate parity are unverified.
+The two declarations preserve observed query and export behavior on the sampled original projects. All 21 scenario watershed selections inspected resolved to the parent’s physical table. The scoped override test passed. A real override with an eligible parent remains the outstanding precedence check. Three read-only contrasts retained their existing missing-geometry outcome. None of 156 real contrast roots checked supplied the expected geometry. Neither result supports assuming the missing positive case passed. Keep the full NFS scan in place. See the [tracker](../../tracker.md) and [production results](../../artifacts/20261122_live_project_comparison.md).
 
 2026-11-22 UTC revision establishes the contract-first scaffold and production evidence requirements.
