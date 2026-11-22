@@ -10,6 +10,8 @@ import shutil
 from pathlib import Path
 from typing import Tuple
 
+from wepppy.project_assets import WEPP_LOSS_HILL
+
 __all__ = ["migrate_interchange", "refresh_query_catalog"]
 PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
 PASS_FAMILY_HBP = "hbp"
@@ -57,7 +59,7 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
 
     # Check if the new-format loss files exist (loss_pw0.hill.parquet, loss_pw0.out.parquet)
     # Old interchange may have H.loss.parquet but not the loss_pw0.* files
-    loss_hill_file = interchange_dir / "loss_pw0.hill.parquet"
+    loss_hill_file = run_path / WEPP_LOSS_HILL.relative_path()
     loss_out_file = interchange_dir / "loss_pw0.out.parquet"
     has_new_format = loss_hill_file.exists() and loss_out_file.exists()
 
