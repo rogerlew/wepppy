@@ -8,11 +8,14 @@ import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
+from tests.factories.redis import make_redis_prep
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import (
     job_routes,
     orchestration_read_routes,
+    schema_defaults_outputs,
     schema_defaults_routes,
+    schema_defaults_runtime,
 )
 
 pytestmark = pytest.mark.microservice
@@ -223,7 +226,7 @@ def test_outputs_payload_includes_trust_provenance_and_retrieval_handles(
             "download_url_template": "/rq-engine/api/runs/{runid}/{config}/export/features/job/{job_id}/download",
         }
 
-    monkeypatch.setattr(schema_defaults_routes, "_build_features_export_artifact", _fake_feature_artifact)
+    monkeypatch.setattr(schema_defaults_outputs, "_build_features_export_artifact", _fake_feature_artifact)
 
     with TestClient(rq_engine.app) as client:
         response = client.get(OUTPUTS_PATH)
@@ -272,7 +275,7 @@ def test_outputs_payload_uses_empty_defaults_when_no_artifacts(
 ) -> None:
     _stub_schema_auth(monkeypatch)
     monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_schema_runtime())
-    monkeypatch.setattr(schema_defaults_routes, "_build_features_export_artifact", lambda runtime, wd: None)
+    monkeypatch.setattr(schema_defaults_outputs, "_build_features_export_artifact", lambda runtime, wd: None)
 
     with TestClient(rq_engine.app) as client:
         response = client.get(OUTPUTS_PATH)
@@ -283,7 +286,7 @@ def test_outputs_payload_uses_empty_defaults_when_no_artifacts(
     assert payload["data_state"] == "not_materialized"
     assert payload["data_updated_at"] is None
     assert UTC_TIMESTAMP_RE.match(payload["updated_at"])
-    assert payload["updated_at"] != schema_defaults_routes.UNKNOWN_UPDATED_AT
+    assert payload["updated_at"] != schema_defaults_runtime.UNKNOWN_UPDATED_AT
     updated_at = datetime.fromisoformat(payload["updated_at"].replace("Z", "+00:00"))
     assert updated_at <= datetime.now(timezone.utc)
 
@@ -393,19 +396,14 @@ def test_outputs_artifact_source_run_revision_uses_unknown_sentinel_when_unavail
 ) -> None:
     runtime = _sample_schema_runtime()
 
-    class _FakePrep:
-        def get_rq_job_id(self, key: str) -> str | None:
-            return "rq-998"
-
-        def get_rq_job_ids(self) -> dict[str, str]:
-            return {}
+    prep = make_redis_prep(initial_job_ids=[("features_export", "rq-998")])
 
     artifact_path = tmp_path / "features_export.zip"
     artifact_path.write_bytes(b"abc123")
 
-    monkeypatch.setattr(schema_defaults_routes.RedisPrep, "getInstance", lambda wd: _FakePrep())
+    monkeypatch.setattr(schema_defaults_outputs, "RedisPrep", prep)
     monkeypatch.setattr(
-        schema_defaults_routes,
+        schema_defaults_outputs,
         "get_wepppy_rq_job_info",
         lambda job_id: {
             "job_id": job_id,
@@ -416,20 +414,20 @@ def test_outputs_artifact_source_run_revision_uses_unknown_sentinel_when_unavail
         },
     )
     monkeypatch.setattr(
-        schema_defaults_routes,
+        schema_defaults_outputs,
         "resolve_download_artifact_path",
         lambda wd, job_id, job_result: (artifact_path, "export/features/artifacts/features_export_latest/features_export.zip"),
     )
-    monkeypatch.setattr(schema_defaults_routes, "load_job_manifest", lambda wd, job_id: {"generated_at_utc": "2026-04-10T10:20:02Z"})
+    monkeypatch.setattr(schema_defaults_outputs, "load_job_manifest", lambda wd, job_id: {"generated_at_utc": "2026-04-10T10:20:02Z"})
 
-    artifact = schema_defaults_routes._build_features_export_artifact(runtime, wd=str(tmp_path))
+    artifact = schema_defaults_outputs._build_features_export_artifact(runtime, wd=str(tmp_path))
 
     assert artifact is not None
-    assert artifact["source_run_state_revision"] == schema_defaults_routes.UNKNOWN_SOURCE_RUN_STATE_REVISION
+    assert artifact["source_run_state_revision"] == schema_defaults_runtime.UNKNOWN_SOURCE_RUN_STATE_REVISION
     def changed_file(*args, **kwargs):
         raise OSError("artifact changed during hash")
-    monkeypatch.setattr(schema_defaults_routes, "sha256_file", changed_file)
-    assert schema_defaults_routes._build_features_export_artifact(runtime, wd=str(tmp_path)) is None
+    monkeypatch.setattr(schema_defaults_outputs, "sha256_file", changed_file)
+    assert schema_defaults_outputs._build_features_export_artifact(runtime, wd=str(tmp_path)) is None
 
 
 def test_outputs_artifact_accepts_legacy_missing_job_runid_when_artifact_is_run_scoped(
@@ -437,19 +435,14 @@ def test_outputs_artifact_accepts_legacy_missing_job_runid_when_artifact_is_run_
 ) -> None:
     runtime = _sample_schema_runtime()
 
-    class _FakePrep:
-        def get_rq_job_id(self, key: str) -> str | None:
-            return "rq-999"
-
-        def get_rq_job_ids(self) -> dict[str, str]:
-            return {}
+    prep = make_redis_prep(initial_job_ids=[("features_export", "rq-999")])
 
     artifact_path = tmp_path / "features_export_legacy.zip"
     artifact_path.write_bytes(b"legacy")
 
-    monkeypatch.setattr(schema_defaults_routes.RedisPrep, "getInstance", lambda wd: _FakePrep())
+    monkeypatch.setattr(schema_defaults_outputs, "RedisPrep", prep)
     monkeypatch.setattr(
-        schema_defaults_routes,
+        schema_defaults_outputs,
         "get_wepppy_rq_job_info",
         lambda job_id: {
             "job_id": job_id,
@@ -460,13 +453,13 @@ def test_outputs_artifact_accepts_legacy_missing_job_runid_when_artifact_is_run_
         },
     )
     monkeypatch.setattr(
-        schema_defaults_routes,
+        schema_defaults_outputs,
         "resolve_download_artifact_path",
         lambda wd, job_id, job_result: (artifact_path, "export/features/artifacts/features_export_legacy/features_export.zip"),
     )
-    monkeypatch.setattr(schema_defaults_routes, "load_job_manifest", lambda wd, job_id: {"generated_at_utc": "2026-04-10T10:20:02Z"})
+    monkeypatch.setattr(schema_defaults_outputs, "load_job_manifest", lambda wd, job_id: {"generated_at_utc": "2026-04-10T10:20:02Z"})
 
-    artifact = schema_defaults_routes._build_features_export_artifact(runtime, wd=str(tmp_path))
+    artifact = schema_defaults_outputs._build_features_export_artifact(runtime, wd=str(tmp_path))
 
     assert artifact is not None
     assert artifact["producer_job_id"] == "rq-999"
@@ -479,23 +472,23 @@ def test_output_sha_changes_for_restored_time_bytes_and_checks_expectations(tmp_
     path = tmp_path / 'export.zip'
     path.write_bytes(b'first bytes')
     before = path.stat()
-    first = schema_defaults_routes._sha256_file(path)
+    first = schema_defaults_outputs._sha256_file(path)
     path.write_bytes(b'other bytes')
     os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
-    current = schema_defaults_routes._sha256_file(path, size_bytes=before.st_size, mtime_ns=before.st_mtime_ns)
+    current = schema_defaults_outputs._sha256_file(path, size_bytes=before.st_size, mtime_ns=before.st_mtime_ns)
     assert current != first and current == hashlib.sha256(b'other bytes').hexdigest()
     with pytest.raises(OSError):
-        schema_defaults_routes._sha256_file(path, size_bytes=1)
+        schema_defaults_outputs._sha256_file(path, size_bytes=1)
 
 
 def test_output_sha_rechecks_metadata_after_helper(tmp_path, monkeypatch):
     path = tmp_path / 'export.zip'
     path.write_bytes(b'old')
     before = path.stat()
-    real_digest = schema_defaults_routes.sha256_file
+    real_digest = schema_defaults_outputs.sha256_file
     def change_then_hash(path):
         path.write_bytes(b'new larger artifact')
         return real_digest(path)
-    monkeypatch.setattr(schema_defaults_routes, 'sha256_file', change_then_hash)
+    monkeypatch.setattr(schema_defaults_outputs, 'sha256_file', change_then_hash)
     with pytest.raises(OSError):
-        schema_defaults_routes._sha256_file(path, size_bytes=before.st_size, mtime_ns=before.st_mtime_ns)
+        schema_defaults_outputs._sha256_file(path, size_bytes=before.st_size, mtime_ns=before.st_mtime_ns)
