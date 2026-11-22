@@ -65,6 +65,11 @@ same shared link color and decoration across landing destinations, including
 resource and organization links, with no persistent underline and visible hover and
 keyboard focus. Distinguish links in running text by weight. Include the original lightning, YouTube and GitHub marks beside their respective
 resource labels. Keep the marks decorative so each card retains one named link.
+Under the resource cards, show a WEPPcloud Stack subsection with a linked name and
+short role description for wepppy, wepppyo3, weppcloud-wbt, peridot, jimf-cligen532,
+rosetta, soil-data-access, and wepp-forest. Identify wepp-forest as private and
+requiring collaborator access. Include topaz and oxidized-rasterstats for their
+terrain delineation and raster analysis roles.
 Present resources as action links, contacts as a
 directory and affiliates as individual themed cards with a linked logo and visible name.
 Display the nine original light landing captions, including mottos, verbatim
