@@ -66,7 +66,9 @@ resource and organization links, with no persistent underline and visible hover 
 keyboard focus. Distinguish links in running text by weight. Present resources as action links, contacts as a
 directory and affiliates as linked logos with visible names. Omit slogans,
 retain every contact and funding acknowledgment, keep sponsor roles distinct
-and group dense credits and legal text in native disclosures. Provide footer
+and display each funding acknowledgment beside its sponsor. Show map credits,
+Forest Service use limitations, regional documentation and all legal paragraphs
+in normal document flow. Stack reference columns on narrow screens. Provide footer
 shortcuts, hosting credit and a consistent mobile gutter. Use the shared
 theme palette for UI surfaces and readable text.
 
