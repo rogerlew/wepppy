@@ -42,6 +42,7 @@ When a dependency is promoted with performance or capability claims: treat marke
 
 | Date | Dependency | Outcome | Evidence |
 |------|------------|---------|----------|
+| 2026-11 | Comrak via comrak-ext 0.2.8 | accept compatibility candidate for shared Markdown rendering and reviewed Python extensions | `docs/work-packages/20261120_comrak_markdown_migration/artifacts/20261120_dependency_evaluation.md` |
 | 2026-11 | MapLibre GL JS 5.24.1 (existing landing dependency) | reuse local lazy underlay; browser/security gates recorded in completed package | `docs/work-packages/20261116_weppcloud_forest_service_basemap/artifacts/renderer_evaluation.md` |
 | 2026-11 | joserfc 1.8.0 with Authlib 1.9.1 | conditional candidate; clean build and final scan/gates required | `docs/work-packages/20261110_wepp1_dependency_security_gate/artifacts/20261112_oauth_implementation.md` |
 | 2026-11 | libpass 1.9.3 | accept isolated compatibility candidate replacing Passlib; final gates pending | `docs/work-packages/20261110_wepp1_dependency_security_gate/artifacts/20261112_python_compatibility.md` |

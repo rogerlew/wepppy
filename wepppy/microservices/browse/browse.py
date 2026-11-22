@@ -80,7 +80,6 @@ from http import HTTPStatus
 
 import pandas as pd
 import pyarrow.parquet as pq
-from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 from starlette.applications import Starlette
@@ -95,6 +94,8 @@ from starlette.responses import (
     Response as StarletteResponse,
 )
 from starlette.routing import Route
+
+from wepppy.markdown_render import render_markdown as markdown_to_html
 from wepppy.microservices.browse._download import create_routes as create_download_routes
 from wepppy.microservices.browse.report import create_routes as create_report_routes
 from wepppy.microservices.browse.dtale import (

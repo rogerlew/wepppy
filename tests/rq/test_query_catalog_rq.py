@@ -783,3 +783,50 @@ def test_browser_worker_keeps_exact_omni_parent_source_policy(catalog_queue, sou
         assert job.get_status() == JobStatus.FAILED
         assert not (child / '_query_engine/catalog.json').exists()
         assert len(core.pending_catalog_requests(child)) == 1
+
+
+def test_admin_catalog_panels_expose_pause_and_expired_claim_without_mutation(catalog_queue):
+    from wepppy.rq import _query_catalog_admission as admission
+    from wepppy.rq.query_catalog_monitor import catalog_panels
+
+    _, queue, _ = catalog_queue
+    conn = queue.connection
+    ledger = admission._ledger(conn)
+    ledger['jobs']['query_catalog_refresh_' + str(uuid4())] = {
+        'kind': 'refresh', 'configuration': {}, 'claimed': True, 'reserved_at': 1,
+    }
+    before = json.dumps(ledger)
+    conn.set(admission.LEDGER_KEY, before)
+    conn.set(admission.PAUSE_KEY, '/private/run/secret')
+    panels = dict(catalog_panels(conn))
+    panel = panels['Catalog admission']
+    rows = dict(panel['rows'])
+    assert rows['Pause expires'] == 'No expiry'
+    assert rows['Uncertain reservations'] == 1
+    assert rows['Default workers'] == '12 compatible, 0 incompatible'
+    assert 'secret' not in str(panels)
+    assert 'Catalog admission is paused.' in panel['messages']
+    assert conn.get(admission.LEDGER_KEY) == before.encode()
+    assert 'No scheduler summary' in panels['Catalog health']['messages'][0]
+
+
+def test_admin_health_reads_committed_tick_and_isolates_malformed_summary(catalog_queue):
+    from wepppy.rq.query_catalog_monitor import catalog_panels
+
+    _, queue, _ = catalog_queue
+    conn = queue.connection
+    tasks.reconcile_query_catalogs(queue=queue)
+    panels = dict(catalog_panels(conn))
+    rows = dict(panels['Catalog health']['rows'])
+    assert rows['Last committed scheduler tick'].endswith(' UTC')
+    assert rows['Pending locators'] == 0
+    assert rows['Reconciliation errors'] == 0
+    key = 'query-catalog:inventory:' + tasks._configuration_id()
+    oversized = conn.get(key + ':health') + b' ' * 4100 + b'private-value'
+    conn.set(key + ':health', oversized)
+    assert dict(catalog_panels(conn))['Catalog health']['messages'] == ['Monitoring data unavailable.']
+    conn.set(key + ':health', '{"tick": "private-value"}')
+    panels = dict(catalog_panels(conn))
+    assert panels['Catalog health']['messages'] == ['Monitoring data unavailable.']
+    assert 'No observed admission blocker.' in panels['Catalog admission']['messages']
+    assert 'private-value' not in str(panels)

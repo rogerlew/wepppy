@@ -27,7 +27,10 @@ def _text(value):
 
 
 def _ledger(connection):
-    raw = connection.get(LEDGER_KEY)
+    return _parse_ledger(connection.get(LEDGER_KEY))
+
+
+def _parse_ledger(raw):
     if raw is None:
         raise AdmissionDenied('query_catalog_accounting_unavailable')
     data = json.loads(raw)

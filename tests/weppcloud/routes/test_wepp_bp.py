@@ -514,7 +514,16 @@ def test_report_wepp_results_marks_stale_when_invalidated(wepp_client, monkeypat
     assert response.get_data(as_text=True) == "Run Results (stale)"
 
 
-def test_report_wepp_results_not_stale_when_current(wepp_client, monkeypatch: pytest.MonkeyPatch):
+@pytest.mark.parametrize("fork_state", [None, "failed", "succeeded"])
+def test_report_wepp_results_not_stale_when_current(wepp_client, monkeypatch: pytest.MonkeyPatch, fork_state):
+    from wepppy.microservices.rq_engine import auth
+
+    class ForkReceiptRedis:
+        def hget(self, key, field):
+            assert (key, field) == (f"rq:fork:planned:{RUN_ID}", "state")
+            return fork_state
+
+    monkeypatch.setattr(auth, "_AUTH_REDIS_CLIENT", lambda **_kwargs: ForkReceiptRedis())
     client, _, run_dir = wepp_client
     _touch_wepp_results(run_dir)
 
@@ -554,6 +563,7 @@ def test_report_wepp_results_not_stale_when_current(wepp_client, monkeypatch: py
 
     def fake_render_template(template_name: str, **kwargs: Any) -> str:
         assert template_name == "controls/wepp_reports.htm"
+        assert kwargs["fork_query_blocked"] is (fork_state == "failed")
         return str(kwargs["run_results_title"])
 
     monkeypatch.setattr(wepp_module, "render_template", fake_render_template)

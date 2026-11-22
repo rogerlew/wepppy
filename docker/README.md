@@ -753,12 +753,26 @@ For AI agents performing deployments:
 - [ ] Static assets accessible (404s resolved)
 - [ ] Monitoring established
 
+### CI Comrak and PRISM runtime alignment (2026-11-21)
+
+The [baseline job](https://github.com/rogerlew/wepppy/actions/runs/44933644862/job/136937190372)
+failed during database bootstrap because its Python environment lacked
+`comrak`. The stubtest job had already passed. The next common image cleared
+bootstrap but still lacked the native `raw_tdmean_c` API required by PRISM.
+
+`Dockerfile.test` uses the digest published by the
+[common-image build for `2dfde16fb`](https://github.com/rogerlew/wepppy/actions/runs/44942315781).
+That revision includes the pinned `comrak-ext` dependency and WEPPpyo3
+`af3b5c977bbdae576fadec929620412732824ad1`, which supplies the updated climate
+extension without the retired PRISM analysis sidecars.
+
 ### CI native alignment acceptance (2026-10-29)
 
 The [common-image build for `84412a38b`](https://github.com/rogerlew/wepppy/actions/runs/40813271338)
 published digest `sha256:7619a9fc9b3e8adf1e09b65b4a0aa9a995c30fface90561bdc509411074b6cfb`,
-now pinned by `Dockerfile.test`. The isolated test Compose project accepted the
-required interchange SHA from `/opt/vendor/wepppyo3/release/linux/py312/`.
+which was pinned by `Dockerfile.test` at the time. The isolated test Compose
+project accepted the required interchange SHA from
+`/opt/vendor/wepppyo3/release/linux/py312/`.
 Startup-contract, anisotropy, developer-mode and Roads publication checks passed
 (62 tests), as did the complete eight-module stubtest suite and test-stub checks.
 Focused startup-file isolation passed with one unchanged-order iteration and

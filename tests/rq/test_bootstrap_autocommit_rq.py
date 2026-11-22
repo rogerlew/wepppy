@@ -502,6 +502,7 @@ def test_noprep_watershed_enqueue_keeps_autocommit_disabled(monkeypatch: pytest.
     ('run_wepp_noprep_rq', 'enqueue_wepp_noprep_pipeline'),
     ('run_wepp_watershed_noprep_rq', 'enqueue_watershed_noprep_pipeline'),
 ])
+@pytest.mark.usefixtures("wepp_cache_clear_calls")
 def test_prepared_individual_storm_queues_without_the_upstream_cli(monkeypatch, tmp_path, task_name, pipeline_name):
     prepared = tmp_path / 'wepp' / 'runs'
     prepared.mkdir(parents=True)

@@ -7,17 +7,23 @@ from wepppy.observability.secret_profiles import WEB
 import os
 import re
 from functools import lru_cache
-from html import escape as html_escape, unescape as html_unescape
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Set, Tuple, TypedDict
-from urllib.parse import quote, unquote, urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 
-from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # type: ignore[import-not-found]
 from flask import Blueprint, Response, abort, current_app, jsonify, redirect, render_template, request  # type: ignore[import-not-found]
 
+from wepppy.markdown_render import render_markdown
 from wepppy.weppcloud.feature_registry.runtime import load_config_registry, load_feature_registry
 from wepppy.weppcloud.feature_registry.schema import ROLE_AUDIENCES
-from wepppy.weppcloud.usersum_anchors import usersum_anchor_slug
+from wepppy.weppcloud.usersum_anchors import add_heading_anchors as _add_heading_anchors
+from wepppy.weppcloud.usersum_docs.docs_contracts import VendorSpec, load_vendor_specs
+from wepppy.weppcloud.usersum_docs.markdown_links import (
+    is_vendor_staging_path,
+    markdown_link_path,
+    resolve_markdown_path,
+    vendor_location,
+)
 from wepppy.weppcloud.usersum_docs.adr_catalog import discover_adrs, read_adr, resolve_adr
 from wepppy.weppcloud.usersum_docs.pg_search import (
     PostgresUsersumSearchBackend,
@@ -130,15 +136,6 @@ _PARAM_HEADER_RE = re.compile(r"^#### `([^`]+)` —\s*(.+)$")
 _DETAIL_RE = re.compile(r"^- \*\*([^*]+)\*\*: ?(.*)$")
 _WHITESPACE_RE = re.compile(r"\s+")
 _WORD_TOKEN_RE = re.compile(r"[a-z0-9_]+")
-_ANCHOR_HREF_RE = re.compile(
-    r'(<a\b[^>]*?\bhref\s*=\s*)(["\'])(.*?)(\2)',
-    re.IGNORECASE | re.DOTALL,
-)
-_HEADING_RE = re.compile(
-    r"<h(?P<level>[1-6])(?P<attrs>[^>]*)>(?P<body>.*?)</h\1>",
-    re.IGNORECASE | re.DOTALL,
-)
-_HEADING_ID_ATTR_RE = re.compile(r'\bid\s*=\s*(["\'])(?P<id>.*?)\1', re.IGNORECASE | re.DOTALL)
 
 
 class ParameterDetail(TypedDict):
@@ -299,7 +296,13 @@ def _caller_max_role() -> str:
 
 
 def _is_doc_visible(doc: RuntimeDoc, caller_max_role: str) -> bool:
-    return _ROLE_RANK[doc["min_role"]] <= _ROLE_RANK[caller_max_role]
+    if _ROLE_RANK[doc["min_role"]] > _ROLE_RANK[caller_max_role]:
+        return False
+    if doc["source"] == "vendor":
+        original = _vendor_original_doc(_REPO_ROOT / doc["rel_path"])
+        if original is not None:
+            return _ROLE_RANK[original["min_role"]] <= _ROLE_RANK[caller_max_role]
+    return True
 
 
 def _split_csv_values(raw_values: Sequence[str]) -> List[str]:
@@ -363,24 +366,27 @@ def _parse_int_query_arg(name: str, *, default: int, min_value: int, max_value: 
     return parsed
 
 
-def _resolve_linked_markdown_path(source_path: Path, href_path: str) -> Path | None:
-    rel_token = href_path.strip()
-    if not rel_token:
-        return None
+@lru_cache(maxsize=1)
+def _vendor_specs() -> dict[str, VendorSpec]:
+    return load_vendor_specs(_BASE_DIR)
 
-    candidate: Path
-    if rel_token.startswith("/"):
-        candidate = (_REPO_ROOT / rel_token.lstrip("/")).resolve()
-    else:
-        candidate = (source_path.parent / rel_token).resolve()
 
-    if not candidate.is_file():
+def _vendor_original_doc(path: Path) -> RuntimeDoc | None:
+    location = vendor_location(_REPO_ROOT, path, _vendor_specs())
+    if location is None:
         return None
-    if candidate.suffix.lower() != ".md":
+    vendor, source_path = location
+    if not vendor["source_is_usersum_repo"]:
         return None
-    if _REPO_ROOT not in candidate.parents:
-        return None
-    return candidate
+    return _catalog().docs_by_rel_path.get(source_path)
+
+
+def _doc_for_source_path(path: Path, rel_path: str) -> RuntimeDoc | None:
+    registered = _catalog().docs_by_rel_path.get(rel_path)
+    original = _vendor_original_doc(path)
+    if original and (registered is None or _ROLE_RANK[original["min_role"]] > _ROLE_RANK[registered["min_role"]]):
+        return original
+    return registered
 
 
 def _route_for_repo_markdown(path: Path) -> str | None:
@@ -419,15 +425,13 @@ def _annotate_nav_tree_for_index(nodes: List[Dict[str, Any]]) -> List[Dict[str, 
 
 
 def _rewrite_markdown_href(source_path: Path, href: str) -> str:
+    path_part = markdown_link_path(href)
+    if path_part is None:
+        return href
     parsed = urlsplit(href)
-    if parsed.scheme or parsed.netloc:
-        return href
-
-    path_part = parsed.path
-    if not path_part or not path_part.lower().endswith(".md"):
-        return href
-
-    linked_path = _resolve_linked_markdown_path(source_path, unquote(path_part))
+    linked_path = resolve_markdown_path(
+        _REPO_ROOT, source_path, path_part, _vendor_specs(), _catalog().docs_by_rel_path
+    )
     if linked_path is None:
         return href
 
@@ -438,53 +442,9 @@ def _rewrite_markdown_href(source_path: Path, href: str) -> str:
     return urlunsplit(("", "", routed_path, parsed.query, parsed.fragment))
 
 
-def _rewrite_markdown_links(source_path: Path, content_html: str) -> str:
-    def _replace(match: re.Match[str]) -> str:
-        href_value = html_unescape(match.group(3))
-        rewritten_href = _rewrite_markdown_href(source_path, href_value)
-        if rewritten_href == href_value:
-            return match.group(0)
-        return (
-            f"{match.group(1)}{match.group(2)}"
-            f"{html_escape(rewritten_href, quote=True)}"
-            f"{match.group(4)}"
-        )
-
-    return _ANCHOR_HREF_RE.sub(_replace, content_html)
-
-
-def _add_heading_anchors(content_html: str) -> str:
-    slug_counts: Dict[str, int] = {}
-
-    def _reserve_slug(slug: str) -> str:
-        count = slug_counts.get(slug, 0)
-        if count == 0:
-            slug_counts[slug] = 1
-            return slug
-        while True:
-            candidate = f"{slug}-{count}"
-            count += 1
-            if candidate not in slug_counts:
-                slug_counts[slug] = count
-                slug_counts[candidate] = 1
-                return candidate
-
-    def _replace(match: re.Match[str]) -> str:
-        level = match.group("level")
-        attrs = match.group("attrs") or ""
-        body = match.group("body")
-        existing_id_match = _HEADING_ID_ATTR_RE.search(attrs)
-        if existing_id_match is not None:
-            existing_id = existing_id_match.group("id").strip()
-            if existing_id:
-                slug_counts.setdefault(existing_id, 1)
-            return match.group(0)
-        base_slug = usersum_anchor_slug(body) or "section"
-        anchor_id = _reserve_slug(base_slug)
-        escaped_anchor_id = html_escape(anchor_id, quote=True)
-        return f'<h{level}{attrs} id="{escaped_anchor_id}">{body}</h{level}>'
-
-    return _HEADING_RE.sub(_replace, content_html)
+def _render_document_html(source_path: Path, source: str) -> str:
+    rendered = render_markdown(source, rewrite_link=lambda href: _rewrite_markdown_href(source_path, href))
+    return _add_heading_anchors(rendered)
 
 
 def _doc_breadcrumbs(doc: RuntimeDoc) -> List[Dict[str, str | None]]:
@@ -523,7 +483,10 @@ def _render_with_usersum_shell(
 
     nav_tree = filter_nav_tree_for_visibility(
         catalog.nav_tree,
-        docs_by_id=catalog.docs_by_id,
+        docs_by_id={
+            doc_id: doc for doc_id, doc in catalog.docs_by_id.items()
+            if _is_doc_visible(doc, discovery_role_ceiling)
+        },
         caller_max_role=discovery_role_ceiling,
         active_doc_id=active_doc["doc_id"] if active_doc else None,
     )
@@ -551,9 +514,7 @@ def _render_markdown_document(
     breadcrumbs: List[Dict[str, str | None]] | None = None,
 ):
     markdown_source = path.read_text(encoding="utf-8")
-    content_html = markdown_to_html(markdown_source)
-    content_html = _add_heading_anchors(content_html)
-    content_html = _rewrite_markdown_links(path, content_html)
+    content_html = _render_document_html(path, markdown_source)
     repo_rel_path = _repo_relative_markdown_path(path)
     return _render_with_usersum_shell(
         "usersum/view.htm",
@@ -563,13 +524,19 @@ def _render_markdown_document(
         title=title,
         content_html=content_html,
         doc_path_label=doc_path_label,
+        is_withdrawn_260727=repo_rel_path == (
+            "wepppy/weppcloud/routes/usersum/vendor/wepp-forest/release/wepp_260727_release_notes.md"
+        ),
         github_file_url=_github_blob_url(path),
         raw_markdown_url=url_for_run("usersum.raw_markdown", rel_path=repo_rel_path),
     )
 
 
 def _resolve_repo_markdown_path(rel_path: str) -> Path:
-    candidate = (_REPO_ROOT / rel_path).resolve()
+    requested = _REPO_ROOT / rel_path
+    candidate = requested.resolve()
+    if is_vendor_staging_path(_REPO_ROOT, requested) or is_vendor_staging_path(_REPO_ROOT, candidate):
+        abort(404)
     if not candidate.is_file():
         abort(404)
         raise RuntimeError("unreachable")
@@ -726,7 +693,7 @@ def view_src_markdown(rel_path: str):
         abort(404)
         raise RuntimeError("unreachable")
 
-    manifest_doc = _catalog().docs_by_rel_path.get(canonical_rel_path)
+    manifest_doc = _doc_for_source_path(path, canonical_rel_path)
     if manifest_doc is not None and not _is_doc_visible(manifest_doc, caller_max_role):
         abort(404)
         raise RuntimeError("unreachable")
@@ -764,7 +731,7 @@ def raw_markdown(rel_path: str):
         abort(404)
         raise RuntimeError("unreachable")
 
-    manifest_doc = _catalog().docs_by_rel_path.get(canonical_rel_path)
+    manifest_doc = _doc_for_source_path(path, canonical_rel_path)
     if manifest_doc is not None and not _is_doc_visible(manifest_doc, caller_max_role):
         abort(404)
         raise RuntimeError("unreachable")
@@ -846,7 +813,7 @@ def _render_search_snippet_html(snippet_text: str) -> str:
     normalized = _normalise_spaces(snippet_text)
     if not normalized:
         return ""
-    return markdown_to_html(normalized).strip()
+    return render_markdown(normalized).strip()
 
 
 def _postgres_search_backend() -> PostgresUsersumSearchBackend | None:
@@ -926,6 +893,8 @@ def _search_documents(
     tokens = _tokenize_search_query(normalized_query)
     matches: List[SearchResult] = []
     for doc in catalog.visible_docs(caller_max_role):
+        if not _is_doc_visible(doc, caller_max_role):
+            continue
         if doc["min_role"] not in role_scope:
             continue
         if categories is not None and doc["category"] not in categories:
@@ -1181,7 +1150,10 @@ def usersum_search():
         except UsersumSearchUnavailableError as exc:
             error_message = safe_text(exc, source_profile=current_profile(WEB))
 
-    category_options = sorted({doc["category"] for doc in _catalog().visible_docs(caller_max_role)})
+    category_options = sorted({
+        doc["category"] for doc in _catalog().visible_docs(caller_max_role)
+        if _is_doc_visible(doc, caller_max_role)
+    })
     return _render_with_usersum_shell(
         "usersum/search.htm",
         caller_max_role=caller_max_role,

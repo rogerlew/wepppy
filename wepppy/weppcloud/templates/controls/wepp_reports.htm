@@ -135,12 +135,16 @@
                rel="noopener">
               The Deval in the Details Report
             </a>
+            {% if fork_query_blocked %}
+            <span class="wc-text-muted">GL Dashboard is unavailable while this fork is incomplete.</span>
+            {% else %}
             <a class="wc-link wc-link--file"
                href="{{ url_for_run('gl_dashboard.gl_dashboard', runid=runid, config=config) }}"
                target="_blank"
                rel="noopener">
               GL Dashboard
             </a>
+            {% endif %}
             {% if interchange_readme_exists|default(false) %}
             <a class="wc-link wc-link--file"
                href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/interchange/README.md') }}"

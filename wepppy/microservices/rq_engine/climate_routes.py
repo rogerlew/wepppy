@@ -81,12 +81,6 @@ _OBSERVED_ORDER_MESSAGE_RE = re.compile(
 )
 
 
-def _maybe_nodir_error_response(exc: Exception):
-    if isinstance(exc, NoDirError):
-        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
-    return None
-
-
 def nodir_resolve(_wd: str, _root: str, *, view: str = "effective") -> None:
     return _nodir_resolve(_wd, _root, view=view)
 
@@ -184,14 +178,15 @@ def _build_climate_validation_errors(
             )
         ]
 
-    inferred_errors = _infer_year_validation_errors_from_payload(payload=payload)
-    if inferred_errors:
-        return inferred_errors
+    if not message:
+        inferred_errors = _infer_year_validation_errors_from_payload(payload=payload)
+        if inferred_errors:
+            return inferred_errors
 
     return [
         {
             "code": "invalid_request",
-            "message": "Invalid climate field values.",
+            "message": message or f"Climate validation raised {type(exc).__name__} without a message.",
         }
     ]
 
@@ -708,25 +703,19 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
             capability_response = _validate_v2_climate_selection(climate, authority, payload)
             if capability_response is not None:
                 return capability_response
-        climate.parse_inputs(payload)
-        _validate_observed_year_bounds_before_enqueue(climate)
-    except (AssertionError, KeyError, TypeError, ValueError) as exc:
-        nodir_response = _maybe_nodir_error_response(exc)
-        if nodir_response is not None:
-            return nodir_response
-        logger.info(
-            "rq-engine build-climate validation failed",
-            extra={"runid": runid, "config": config, "error": str(exc)},
-        )
-        return validation_error_response(_build_climate_validation_errors(exc, payload=payload))
+        try:
+            climate.parse_inputs(payload)
+            _validate_observed_year_bounds_before_enqueue(climate)
+        except (AssertionError, KeyError, ValueError) as exc:
+            return validation_error_response(
+                _build_climate_validation_errors(exc, payload=payload), log_exception=True
+            )
+    except NoDirError as exc:
+        return error_response(exc.message, status_code=exc.http_status, code=exc.code)
     except RequestPayloadError:
         raise
-    except Exception as exc:  # broad-except: boundary contract
-        nodir_response = _maybe_nodir_error_response(exc)
-        if nodir_response is not None:
-            return nodir_response
-        logger.exception("rq-engine build-climate payload parse failed", extra={"runid": runid, "config": config})
-        return error_response("Error parsing climate inputs", status_code=400)
+    except Exception:  # broad-except: HTTP boundary preserves the traceback for unexpected failures.
+        return error_response_with_traceback("Error preparing climate inputs")
 
     if climate.run_group == "batch":
         return JSONResponse({"message": "Set climate inputs for batch processing"})

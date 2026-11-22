@@ -34,6 +34,25 @@
     </div>
   </header>
 
+  {% for title, panel in catalog %}
+    <section class="wc-panel wc-stack">
+      <h2>{{ title }}</h2>
+      {% for message in panel.messages %}
+        <p><strong>{{ message }}</strong></p>
+      {% endfor %}
+      {% if panel.rows %}
+        <dl class="wc-summary-pane__list">
+          {% for label, value in panel.rows %}
+            <div class="wc-summary-pane__item">
+              <dt class="wc-summary-pane__term">{{ label }}</dt>
+              <dd class="wc-summary-pane__definition">{{ value }}</dd>
+            </div>
+          {% endfor %}
+        </dl>
+      {% endif %}
+    </section>
+  {% endfor %}
+
   <section class="wc-panel wc-stack">
     <header class="wc-stack">
       <h2>Recently Completed Jobs</h2>

@@ -17,11 +17,12 @@ from flask import (
 )
 from flask_security import current_user
 
-from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # pip install cmarkgfm
 # https://github.com/sindresorhus/github-markdown-css for styling
 from jinja2.sandbox import SandboxedEnvironment
 from jinja2 import nodes
 from werkzeug.exceptions import HTTPException
+
+from wepppy.markdown_render import render_markdown
 from wepppy.weppcloud.utils.helpers import (
     authorize,
     authorize_and_handle_with_exception_factory,
@@ -213,7 +214,7 @@ def _render_markdown(markdown_source, context):
     except Exception as exc:
         logger.warning("README template render failed: %s", exc)
         rendered_markdown = "**ERROR**: README template failed to render."
-    html = markdown_to_html(rendered_markdown)
+    html = render_markdown(rendered_markdown)
     if len(html.encode("utf-8")) > README_MAX_BYTES:
         abort(413, description="Rendered README HTML exceeds the 1 MiB size limit")
     return html

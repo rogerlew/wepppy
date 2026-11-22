@@ -10,7 +10,7 @@ import pandas as pd
 
 from wepppy.climates.cligen import ClimateFile, df_to_prn
 
-__all__ = ['validate_years', 'build_cell', 'floor_dewpoint', 'read_cli', 'validate_cli']
+__all__ = ['validate_years', 'build_cell', 'read_cli', 'validate_cli']
 MJ_TO_LANGLEYS = 1_000_000.0 / 41840.0
 
 
@@ -19,10 +19,14 @@ def validate_years(start, end):
         raise ValueError(f"PRISM requires complete years from 1981 through {date.today().year - 1}")
 
 
-def read_cli(path):
-    frame = ClimateFile(str(path)).as_dataframe()
+def _dated_weather(cli):
+    frame = cli.as_dataframe()
     frame.index = pd.to_datetime(dict(year=frame.year, month=frame.mo, day=frame.da))
     return frame
+
+
+def read_cli(path):
+    return _dated_weather(ClimateFile(str(path)))
 
 
 def validate_cli(path, dates):
@@ -36,20 +40,6 @@ def validate_cli(path, dates):
             or (frame.tdew < frame.tmin).any()):
         raise ValueError(f'Invalid PRISM-derived CLI weather: {path}')
     return frame
-
-
-def floor_dewpoint(path, raw_tdmean, diagnostic):
-    """Use raw Td even after monthly revision; a cooler hill must lose the WS floor."""
-    frame = read_cli(path)
-    if not frame.index.equals(raw_tdmean.index):
-        raise ValueError('PRISM dewpoint calendar mismatch')
-    adjusted = np.maximum(raw_tdmean.to_numpy(), frame.tmin.to_numpy())
-    cli = ClimateFile(str(path))
-    cli.replace_var('tdew', frame.index, adjusted)
-    cli.write(str(path))
-    pd.DataFrame({'raw_tdmean_C': raw_tdmean.to_numpy(), 'final_tmin_C': frame.tmin.to_numpy(),
-                  'derived_tdmean_C': adjusted}, index=frame.index).to_csv(diagnostic, index_label='date')
-    validate_cli(path, frame.index)
 
 
 def build_cell(cligen, frame, wind, directory, stem, *, seed=None,
@@ -76,8 +66,12 @@ def build_cell(cligen, frame, wind, directory, stem, *, seed=None,
     cli.replace_var('rad', frame.index, frame.soltotal * MJ_TO_LANGLEYS)
     cli.replace_var('w-vl', frame.index, wind['vs(m/s)'])
     cli.replace_var('w-dir', frame.index, wind['th(DegreesClockwisefromnorth)'])
+    weather = _dated_weather(cli)
+    if not weather.index.equals(frame.index):
+        raise ValueError('PRISM dewpoint calendar mismatch')
+    adjusted = np.maximum(frame.tdmean.to_numpy(), weather.tmin.to_numpy())
+    cli.replace_var('tdew', weather.index, adjusted)
     cli.write(str(path))
-    floor_dewpoint(path, frame.tdmean, directory / (stem + '-dewpoint.csv'))
     actual = validate_cli(path, frame.index)
     expected_ppt = np.round(frame.ppt / 25.4 * 100) * 0.254
     expected = {'prcp': expected_ppt,

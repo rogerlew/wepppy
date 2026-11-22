@@ -271,3 +271,11 @@ cycle, new ordinary arrivals during that cycle, independent full-union age censu
 and artifact proof. Sample coverage gaps and owned fixture/account cleanup remain
 open. See the combined package's active ExecPlan observation-02 handoff; do not
 reset state, shorten cycle spacing or extend the deadline to force completion.
+
+
+## November 21 admin catalog monitoring
+
+Contract checkpoint `2dacc6b57` adds the Admin/Root snapshot. Dedicated panels
+show simultaneous admission blockers and the latest committed reconciliation
+summary. Route and real-Redis suites passed 58 tests. See the
+[decision and reviews](artifacts/20261121_contract_decision.md).

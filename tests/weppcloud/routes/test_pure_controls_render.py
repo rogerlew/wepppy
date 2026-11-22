@@ -5414,3 +5414,23 @@ def test_climate_summary_warning_follows_the_active_upload(jinja_env, stored, ef
     )
     html = jinja_env.get_template('reports/climate.htm').render(climate=climate, station_meta=None)
     assert ('Single-storm climates are deprecated.' in html) is warning
+
+
+@pytest.mark.parametrize("protected", [False, True])
+@pytest.mark.parametrize("name", ["header/_run_header_fixed.htm", "controls/wepp_reports.htm"])
+def test_live_gl_dashboard_entries_show_fork_availability(jinja_env, protected, name):
+    def project_url(endpoint, **_kwargs):
+        return "/project-dashboard" if endpoint == "gl_dashboard.gl_dashboard" else "/project"
+
+    html = jinja_env.get_template(name).render(
+        fork_status=protected,
+        fork_query_blocked=protected,
+        runid="ab-fork",
+        config="cfg",
+        url_for_run=project_url,
+        climate=SimpleNamespace(is_single_storm=False, ss_batch_storms=None, mods=set()),
+        prep=SimpleNamespace(has_sbs=False),
+        run_results_title="Run Results",
+    )
+    assert ('href="/project-dashboard"' in html) is not protected
+    assert ("GL Dashboard is unavailable while this fork is incomplete." in html) is protected

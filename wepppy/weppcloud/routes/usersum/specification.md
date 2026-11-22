@@ -261,6 +261,11 @@ Visibility and path guards:
 
 ## Link Resolution and Prefix Safety
 
+WEPPpy's [Markdown rendering contract](../../../../docs/schemas/markdown-rendering-contract.md)
+governs parsing and safe HTML output. Usersum rewrites parsed link
+destinations before rendering and checks fragments with the same heading
+IDs the web viewer emits.
+
 Usersum uses deployment-prefix-safe URL generation with `url_for_run(...)` (not raw static route strings) for rendered navigation and links.
 
 Key behavior:
@@ -275,6 +280,35 @@ Key behavior:
   - otherwise -> `/usersum/src/<repo-relative-path>`
 
 This keeps links valid under prefixed deployments such as `/weppcloud/...`.
+
+Usersum heading IDs are derived from rendered heading text. Lowercase the
+text, remove punctuation except hyphens and underscores, convert whitespace
+to hyphens, and collapse and trim runs of hyphens. Empty slugs use
+`section`. Resolve collisions in document order using the first available
+numeric suffix. Keep existing IDs stable for published deep links and the
+contextual help link helper. Docs Quality checks local Markdown fragments
+against the same IDs the Usersum renderer emits, comparing fragments exactly after one
+URL percent-decoding pass. It reports the referring
+document, target, and fragment for unresolved links. This check applies to
+the Usersum Markdown corpus and registered documents. Unresolved links are
+warnings. When the normalized fragment resolves, the warning suggests it.
+Run `PYTHONPATH=. python3 tools/usersum_docs_tool.py lint-links` for a local check.
+
+For vendored sources, relative links resolve inside the vendor snapshot.
+A root-relative Markdown link to a file in that snapshot also resolves
+inside the snapshot when it exists there. A link prefixed by the configured
+source checkout path resolves against that same source tree. Existing explicit links to WEPPpy
+documents retain their normal resolution when there is no vendor match.
+Canonical manifest routing takes precedence for registered targets. Linked
+copies outside the manifest are reachable by the source route under the
+normal publication policy. An installation that explicitly enables strict
+source mode continues to require a manifest entry on that route.
+
+For the vendor whose source is WEPPpy itself, links to registered original
+documents use the original canonical route and its role. The build does
+not create a duplicate for those links. Source and raw requests for a
+copied path may never bypass the original document's role.
+
 
 ## Layout and UI Contract
 
@@ -327,7 +361,7 @@ Response payload:
   - `rel_path`
   - `min_role`
   - `category`
-  - `snippet` (HTML fragment rendered via `cmarkgfm`)
+  - `snippet` (HTML fragment rendered by the shared Markdown adapter)
   - `score`
   - `breadcrumb[]`
 - paging metadata:
@@ -495,6 +529,43 @@ Scheduler runtime wiring:
 - scheduler parses interval tokens in `scheduled-tasks.yml` (for example `${USERSUM_INDEX_INTERVAL_SECONDS:-14400}`) at runtime.
 
 ## Vendor Sync and Authoring Policy
+
+Resolve each configured source ref locally to one Git commit and read its
+Git tree and blobs. Use the regular
+committed Markdown files selected by its include globs as seeds. A vendor may
+pin an archive commit and explicitly name historical seeds that must retain
+their published URLs. Use the active commit for paths it contains and the
+archive commit for historical paths absent from the active commit. This gives
+each output path one authoritative source. Follow links from archived seeds
+under the same rules. Follow
+local Markdown links recursively in that commit and copy the reachable
+files using their source-relative paths. Use the configured excludes at
+every step. Include reference-style links, handle cycles once per file,
+and preserve query strings and fragments for rendering. Remote links and
+non-Markdown assets are outside the vendor walk. A link cannot select an
+uncommitted file, a Git symlink, a submodule, or a path outside the source tree.
+
+Report a warning for each unresolved local Markdown edge with the vendor,
+referring file, original destination and reason. Continue with other
+reachable files. An unavailable configured active or archive ref is a build error when
+the source repository is present. The existing skip behavior for an
+unavailable checkout during index builds still applies. Discover the
+graph before writing or cleaning that vendor directory. Vendor destinations
+must be disjoint children of the Usersum vendor directory. Existing symlinks
+in destination paths are errors before writes or cleanup. Reject noncanonical
+Git tree paths. Temporary snapshot directories are unavailable through
+Usersum, and same-repository original roles apply across every route. Default rebuilds
+remove stale generated copies. The explicit `sync-vendors --no-clean`
+operator option retains existing copies. Dry runs report the same graph as
+write runs.
+
+Reachable committed files are eligible for publication because the
+configured sources are open source. Discovery alone adds no navigation or
+search entry. Existing manifest roles continue to govern registered pages.
+The historical 260727 release notes show the WEPPpy withdrawal and
+pass-format migration guidance from the [binary lifecycle policy](../../../../docs/binary-lifecycle.md#withdrawn-releases)
+in the rendered page. Its vendored Markdown is the upstream artifact.
+
 
 Vendor docs are generated/synced content.
 

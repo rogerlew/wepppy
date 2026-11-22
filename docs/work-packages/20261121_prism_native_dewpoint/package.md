@@ -1,0 +1,3 @@
+# Native hillslope dew-point revision
+
+The diagonal-intersection job completed 47,582 hillslope revisions before starting an additional serial Python rewrite of 45 years per hillslope. Move the existing floor into the owned native daily writer. Complexity budget is one optional keyword and the existing revision, validation and diagnostic paths. Security impact is low, with the same run-scoped staging and publication boundary. No dedicated security review is required. Acceptance requires reading generated weather and diagnostics through the real rebuilt extension and checking failure and omitted-keyword behavior. No scientific rule or data schema migration is proposed.

@@ -831,12 +831,15 @@ def report_wepp_results(runid, config):
     )
 
     try:
+        from wepppy.weppcloud.utils.query_cookie import fork_query_blocked
+
         return render_template('controls/wepp_reports.htm',
                                climate=climate,
                                prep=prep,
                                runid=runid,
                                config=config,
                                run_results_title=run_results_title,
+                               fork_query_blocked=fork_query_blocked(runid),
                                wepp_results_stale=wepp_results_stale,
                                totalwatsed3_exists=totalwatsed3_exists,
                                totalwatsed2_exists=totalwatsed2_exists,
