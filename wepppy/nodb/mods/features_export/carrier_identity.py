@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from wepppy.project_assets import WATERSHED_HILLSLOPES
 from wepppy.runtime_paths import pick_existing_parquet_path
 
 from .join_planner import (
@@ -318,8 +319,8 @@ def _load_watershed_identity_lookup(
 
 def _watershed_identity_relpaths_for_carrier(carrier_token: str) -> tuple[str, ...]:
     if carrier_token == "chan_map-channels":
-        return ("watershed/channels.parquet", "watershed/hillslopes.parquet")
-    return ("watershed/hillslopes.parquet", "watershed/channels.parquet")
+        return ("watershed/channels.parquet", WATERSHED_HILLSLOPES.relative_path())
+    return (WATERSHED_HILLSLOPES.relative_path(), "watershed/channels.parquet")
 
 
 def _read_watershed_identity_pairs(parquet_path: Path) -> tuple[tuple[object, object], ...]:

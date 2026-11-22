@@ -9,10 +9,11 @@ from wepppy.wepp.interchange._roads_lifecycle import report_read
 
 import pandas as pd
 
+from wepppy.project_assets import WATERSHED_HILLSLOPES, WEPP_LOSS_HILL
 from wepppy.query_engine.payload import QueryRequest
 
 from .helpers import ReportQueryContext
-from .output_scope import normalize_output_scope, scoped_dataset_path
+from .output_scope import normalize_output_scope
 from .report_base import ReportBase
 from .row_data import RowData
 
@@ -22,8 +23,7 @@ __all__ = ["HillSummaryReport", "HillSummary"]
 class HillSummaryReport(ReportBase):
     """Per-hillslope summary derived from loss_pw0.hill + spatial metadata."""
 
-    _BASELINE_LOSS_DATASET = "wepp/output/interchange/loss_pw0.hill.parquet"
-    _HILLSLOPE_DATASET = "watershed/hillslopes.parquet"
+    _HILLSLOPE_DATASET = WATERSHED_HILLSLOPES.relative_path()
     _LANDUSE_DATASET = "landuse/landuse.parquet"
     _SOILS_DATASET = "soils/soils.parquet"
 
@@ -45,7 +45,7 @@ class HillSummaryReport(ReportBase):
             raise FileNotFoundError(self._wd)
 
         self._output_scope = normalize_output_scope(output_scope)
-        self._loss_dataset = scoped_dataset_path(self._BASELINE_LOSS_DATASET, self._output_scope)
+        self._loss_dataset = WEPP_LOSS_HILL.relative_path(self._output_scope)
         self._fraction_under = fraction_under
 
         context = self._prepare_context()

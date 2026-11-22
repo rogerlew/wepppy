@@ -58,7 +58,7 @@ Packaging rules:
   - Remove redundant alias columns after coalescing.
 
 ## 3. Layer Catalog And Discoverability
-The backend owns an authoritative, versioned export layer catalog. The proposed [shared project asset declarations](../../../../docs/schemas/shared-project-asset-declarations-contract.md) cover producer-owned locations for the first shadow comparison. This specification retains authority over layer, plan, dependency and cache behavior.
+The backend owns an authoritative, versioned export layer catalog. The [shared project asset declarations](../../../../docs/schemas/shared-project-asset-declarations-contract.md) cover producer-owned locations for the first shadow comparison. This specification retains authority over layer, plan, dependency and cache behavior.
 GL Dashboard taxonomy and discoverability are used as a blueprint, but export contracts are backend-defined and independent of frontend module internals.
 
 Catalog source of truth:
@@ -100,7 +100,10 @@ Catalog contract:
 - Missing optional measure behavior (`warn` with `measure_unavailable`)
 
 Locator contract (strict):
-- Every `geometry.locator`, `sources[*].locator`, and `dependencies[*].locator` uses exactly:
+
+The catalog author can reference a shared declaration with `locator: {asset_id: watershed.hillslopes}` or `locator: {asset_id: wepp.loss_hill}`. The WEPP hill loss reference accepts an optional `projection` of `scenario` or `contrast` for its named baseline child output. An unqualified WEPP loss reference uses the requested output scope. At catalog load, references expand into the same logical locators consumed by planning, schema discovery, dependency tracking and materialization. This preserves existing role IDs, scope selection, missing markers and cache identity. Unknown references, unsupported projections and mixed reference/locator keys fail catalog validation.
+
+- After loading, every `geometry.locator`, `sources[*].locator`, and `dependencies[*].locator` uses exactly:
 - `kind`: one of `nodb_ref|relpath|path_template`
 - `value`: locator value string
 - Locator aliases such as `path`, `path_ref`, `path_template`, or `source_ref` are not allowed.

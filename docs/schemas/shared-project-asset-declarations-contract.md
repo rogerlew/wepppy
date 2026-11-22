@@ -10,6 +10,12 @@ Feature Export owns its layer catalog, joins, column behavior, geometry, require
 
 The first slice covers `watershed/hillslopes.parquet` and the loss table `wepp/output/interchange/loss_pw0.hill.parquet`, including existing output-scope substitutions and named Omni projections. Baseline/Roads template expansion applies only to layers that support it today. Existing Omni scenario and contrast loss projections use their baseline paths. Production membership outside this slice continues under existing rules. Normal, scenario and contrast views resolve independently. Parent-qualified visibility is explicit. A child key in its own catalog does not add that key to the parent's listing. A layer that already resolves an explicitly qualified path can continue to use it even when the parent query catalog omits it.
 
+## First-slice implementation
+
+`wepppy.project_assets` names the two logical families. The Peridot postprocessor, watershed migration and WEPP loss interchange adapter use those names when publishing or checking outputs. The native Peridot and WEPPpyo3 writers have their own filename contracts. A physical rename requires coordinated native changes and readback from the resulting binaries.
+
+Feature Export resolves declaration references when loading its layer catalog. Downstream planners and fingerprinting receive the existing locator representation. Query discovery still scans with its existing membership rules. The observer can select a declared key from an already published catalog for parity testing. Query execution remains responsible for selecting an authorized physical file.
+
 ## Identity and compatibility
 
 - Reject duplicate declaration IDs and conflicting declarations for a canonical query key in the same project view before returning a candidate listing or publishing. Child-first precedence within one declared family remains valid. Multiple export source IDs can reference the same asset. Compare ordered entries and multiplicity as well as key lookup, so a last-write-wins dictionary cannot hide a collision.

@@ -645,11 +645,20 @@ def test_migrate_watershed_outputs_from_legacy_csv(
     )
 
     _patch_dummy_watershed_and_translator(monkeypatch)
-    monkeypatch.setattr(peridot_runner, "_update_catalog_entry", None)
+    updates = []
+    monkeypatch.setattr(
+        peridot_runner, "_update_catalog_entry", lambda wd, key: updates.append((wd, key))
+    )
 
     changed = peridot_runner.migrate_watershed_outputs(str(tmp_path), remove_csv=True, verbose=False)
 
     assert changed is True
+    assert updates == [
+        (str(tmp_path), "watershed/hillslopes.parquet"),
+        (str(tmp_path), "watershed/channels.parquet"),
+        (str(tmp_path), "watershed/flowpaths.parquet"),
+        (str(tmp_path), "watershed"),
+    ]
     assert (watershed_dir / "hillslopes.parquet").exists()
     assert (watershed_dir / "channels.parquet").exists()
     assert (watershed_dir / "flowpaths.parquet").exists()
