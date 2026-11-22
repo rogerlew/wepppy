@@ -43,9 +43,29 @@ required by FSBASE-01. Preserve the four regional data documentation links.
 Edit prose in the [landing template](../../../wepppy/weppcloud/templates/landing/preview.htm)
 and names and acknowledgments in the [landing content partial](../../../wepppy/weppcloud/templates/landing/_content.htm).
 Use existing shared button conventions. A landing-local macro is
-appropriate for repeated organization cards shared by collaborators and
-sponsors. Keep one-off content in semantic HTML and keep the shared macro API
+appropriate for repeated organization links. Keep one-off content in semantic HTML and keep the shared macro API
 unchanged. This lets maintainers update text without rebuilding frontend assets.
+
+## Reviewed presentation
+
+Use a compact responsive navigation disclosure, shared theme picker and
+prominent account action. A borderless introduction pairs an outcome-led
+headline with existing WEPPcloud landscape imagery. About describes the
+three modeling tasks. Present resources as action links, contacts as a
+directory and affiliates as linked logos with visible names. Omit slogans,
+retain every contact and funding acknowledgment, keep sponsor roles distinct
+and group dense credits and legal text in native disclosures. Provide footer
+shortcuts, hosting credit and a consistent mobile gutter. Use the shared
+theme palette for UI surfaces and readable text.
+
+Keep the interactive Atlas and metric group above it, formatted with clear
+numeric hierarchy and a human-readable date. Open on the contiguous US at
+a responsive zoom and level pitch. Bound marker size to reduce overlap
+while retaining hillslope-area encoding. Keep the blue standard marker and
+use ember with the existing thicker outline for SBS. Keep the requested
+two legend chips and persistent desktop wheel instruction. A touch-only
+screen omits the Ctrl instruction. Run ID eligibility follows the build
+rollover publication rule below.
 
 ## Run Atlas
 
