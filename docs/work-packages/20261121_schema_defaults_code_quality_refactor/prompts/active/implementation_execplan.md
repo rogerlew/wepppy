@@ -8,7 +8,8 @@ From the repository root, inspect wepppy/microservices/rq_engine/schema_defaults
 
 - [x] 2026-11-21. Identified owners, consumers and baseline metrics.
 - [x] 2026-11-21. Wired the extracted discovery builders into the router. Baseline focused tests passed (132 tests).
-- [ ] Validate emitted responses, quality metrics, contracts and tests. Record independent review.
+- [x] 2026-11-21. Verified 435 HTTP responses and ten OpenAPI definitions. Completed quality and contract checks and independent review.
+- [ ] Finish the broad validation gate and record the outcome.
 
 ## Milestones and verification
 
@@ -26,4 +27,4 @@ On 2026-11-21, chose faithful extraction using existing authority and HTTP contr
 
 ## Outcomes & Retrospective
 
-The baseline at c82da0a94 has 5,359 source lines, maximum function length 2,249 and maximum cyclomatic complexity 90. Candidate evidence is pending.
+The baseline at c82da0a94 has 5,359 source lines, maximum function length 2,249 and maximum cyclomatic complexity 90. The router now measures 540/37/6 and every extracted module exits the red bands. Ordered response comparisons passed. The first broad test run identified an older native PRISM library in the test image.
