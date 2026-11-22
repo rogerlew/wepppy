@@ -63,3 +63,10 @@ The metrics are above the map and marker area follows hillslope count.
 The inspection paragraph is removed. Checkpoints `16234b319` and
 `051eb80ed` precede the correction.
 [Rendered evidence](artifacts/20261122_positron_atlas_validation.md).
+
+Checkpoint `d81dafd64` governs the [Atlas wheel gesture and map overlays](artifacts/20261122_atlas_wheel_decision.md).
+Chromium on Forest verified native page scrolling and Ctrl-wheel zoom on
+the canvas and through the legend and tip, synchronized Deck and basemap
+zoom, and uncanceled Ctrl-wheel outside the map. The tip clears the zoom
+buttons at 1200, 390 and 320 CSS pixels. Both landing route suites passed
+(25 tests).

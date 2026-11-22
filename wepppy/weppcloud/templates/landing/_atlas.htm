@@ -38,9 +38,14 @@
     <figure class="wc-landing__atlas-figure">
       <div class="wc-landing__atlas-frame">
         <div class="wc-landing__atlas-map" role="region"
-             aria-label="Run Atlas map" aria-describedby="atlas-keyboard atlas-geography" hidden>
+             aria-label="Run Atlas map" aria-describedby="atlas-keyboard atlas-wheel-tip atlas-geography" hidden>
           <div class="wc-landing__atlas-basemap" aria-hidden="true"></div>
           <div class="wc-landing__atlas-canvas" aria-hidden="true"></div>
+          <ul class="wc-landing__atlas-key" aria-label="Map legend" role="list">
+            <li><span class="wc-landing__atlas-dot" aria-hidden="true"></span> Standard runs</li>
+            <li><span class="wc-landing__atlas-dot wc-landing__atlas-dot--sbs" aria-hidden="true"></span> Runs with SBS<span class="wc-landing__visually-hidden"> (soil burn severity)</span></li>
+          </ul>
+          <p id="atlas-wheel-tip" class="wc-landing__atlas-tip">Hold Ctrl while scrolling to zoom the map.</p>
         </div>
         <div class="wc-landing__atlas-controls" role="group" aria-label="Run Atlas map controls" hidden>
           {% for step, label in [(1, 'Zoom map in'), (-1, 'Zoom map out')] %}
@@ -60,11 +65,7 @@
       </div>
       <p class="wc-landing__atlas-status" role="status">Interactive map unavailable.</p>
       <figcaption>
-        <ul class="wc-landing__atlas-key" role="list">
-          <li><span class="wc-landing__atlas-dot" aria-hidden="true"></span> Standard runs</li>
-          <li><span class="wc-landing__atlas-dot wc-landing__atlas-dot--sbs" aria-hidden="true"></span> Runs with soil burn severity data</li>
-          <li>Larger markers indicate more hillslopes.</li>
-        </ul>
+        <span>Larger markers indicate more hillslopes.</span>
         <span><a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://carto.com/attributions">CARTO</a></span>
       </figcaption>
     </figure>

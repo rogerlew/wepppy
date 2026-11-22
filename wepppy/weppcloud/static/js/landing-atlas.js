@@ -132,7 +132,7 @@ function initAtlas(figure, deck, maplibre) {
 
   const deckOptions = {
     deck, target, initialViewState: initialView,
-    controllerOptions: { scrollZoom: false, dragRotate: false, touchRotate: false, keyboard: false },
+    controllerOptions: { scrollZoom: true, dragRotate: false, touchRotate: false, keyboard: false },
     layers: layers(camera.zoom),
     getTooltip: tooltip,
     onViewStateChange: ({ viewState }) => updateCamera(viewState),
@@ -164,6 +164,11 @@ function initAtlas(figure, deck, maplibre) {
     removeBasemap();
     throw error;
   }
+
+  // Let ordinary wheel events scroll the page before Deck can consume them.
+  region.addEventListener('wheel', event => {
+    if (!event.ctrlKey) event.stopPropagation();
+  }, { capture: true, passive: true });
 
   region.addEventListener('keydown', event => {
     if (!Object.hasOwn(PAN, event.key) || event.altKey || event.metaKey || event.ctrlKey) return;

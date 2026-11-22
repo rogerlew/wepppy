@@ -175,8 +175,7 @@
   inset: 0;
 }
 
-.wc-landing__atlas-figure figcaption,
-.wc-landing__atlas-key {
+.wc-landing__atlas-figure figcaption {
   display: flex;
   flex-wrap: wrap;
   gap: var(--wc-space-sm) var(--wc-space-lg);
@@ -188,10 +187,46 @@
   margin-block-start: var(--wc-space-sm);
 }
 
+.wc-landing__atlas-key,
+.wc-landing__atlas-tip {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
 .wc-landing__atlas-key {
+  inset: var(--wc-space-md) var(--wc-space-md) auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-space-xs);
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.wc-landing__atlas-key li,
+.wc-landing__atlas-tip {
+  margin: 0;
+  padding: var(--wc-space-xs) var(--wc-space-sm);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  background: var(--wc-color-surface);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.wc-landing__atlas-key li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-space-sm);
+  border-radius: 2rem;
+}
+
+.wc-landing__atlas-tip {
+  inset-inline-end: var(--wc-space-md);
+  inset-block-end: var(--wc-space-lg);
+  /* Reserve the lower-left corner for the three zoom controls. */
+  max-inline-size: calc(100% - 8rem - 2 * var(--wc-space-lg) - var(--wc-space-md));
 }
 
 .wc-landing__atlas-dot {
