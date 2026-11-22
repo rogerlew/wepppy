@@ -462,3 +462,38 @@ def test_native_producer_is_required_and_does_not_use_duckdb(tmp_path, monkeypat
     with pytest.raises(boundary["WeppInterchangeUnavailableError"], match="totalwatsed3_to_parquet"):
         facade.run_totalwatsed3(tmp_path, _BaseflowOpts(), ash_dir=tmp_path / "missing")
     assert output.read_bytes() == before
+
+
+@pytest.mark.parametrize("selected", [None, [2], []])
+def test_daily_output_matches_across_mixed_and_split_groups(tmp_path, selected):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    interchange = tmp_path / "wepp" / "output" / "interchange"
+    _write_wat(interchange / "H.wat.parquet", area_m2=1500.0)
+    _write_pass(interchange / "H.pass.parquet")
+    _write_soil(interchange / "H.soil.parquet", tsmf=0.42)
+    _write_element(interchange / "H.element.parquet", qrain=1.25, qsnow=0.5)
+    inputs = {}
+    for path in interchange.glob("H.*.parquet"):
+        original = pq.read_table(path)
+        idx = original.schema.get_field_index("wepp_id")
+        tables = [
+            original.set_column(idx, original.schema.field(idx), pa.array([hill], type=original[idx].type))
+            for hill in (1, 2, 3)
+        ]
+        inputs[path] = pa.concat_tables(tables)
+        pq.write_table(inputs[path], path, row_group_size=1)
+
+    def produce():
+        return pq.read_table(run_totalwatsed3(
+            interchange, _BaseflowOpts(gwstorage=0.0, dscoeff=0.0, bfcoeff=0.0),
+            wepp_ids=selected, ash_dir=tmp_path / "absent",
+        ))
+
+    expected = produce()
+    for path, table in inputs.items():
+        pq.write_table(table, path, row_group_size=2)
+    actual = produce()
+    assert actual.schema.equals(expected.schema, check_metadata=True)
+    pd.testing.assert_frame_equal(actual.to_pandas(), expected.to_pandas(), rtol=1e-12, atol=1e-12)

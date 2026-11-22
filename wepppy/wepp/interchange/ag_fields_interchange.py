@@ -12,10 +12,12 @@ import re
 import shutil
 import time
 import uuid
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Final
 
+import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 
@@ -229,6 +231,38 @@ def _expected_zero_row_ids(
     return zero_row_ids
 
 
+def _identity_runs(parquet_file: pq.ParquetFile, path: Path) -> Iterator[tuple[int, int]]:
+    """Yield contiguous identity pairs, projecting only mixed groups."""
+    schema = parquet_file.schema_arrow
+    field_index = schema.get_field_index("field_id")
+    sub_field_index = schema.get_field_index("sub_field_id")
+    for row_group_index in range(parquet_file.metadata.num_row_groups):
+        row_group = parquet_file.metadata.row_group(row_group_index)
+        if row_group.num_rows == 0:
+            raise ValueError(f"AgFields output {path.name} contains an empty row group")
+        field_stats = row_group.column(field_index).statistics
+        sub_field_stats = row_group.column(sub_field_index).statistics
+        if (
+            field_stats is None
+            or sub_field_stats is None
+            or not field_stats.has_min_max
+            or not sub_field_stats.has_min_max
+        ):
+            raise ValueError(f"AgFields output {path.name} lacks identity statistics")
+        if field_stats.null_count or sub_field_stats.null_count:
+            raise ValueError(f"AgFields output {path.name} contains null identity values")
+        if field_stats.min == field_stats.max and sub_field_stats.min == sub_field_stats.max:
+            yield int(field_stats.min), int(sub_field_stats.min)
+            continue
+        for batch in parquet_file.iter_batches(
+            row_groups=[row_group_index], columns=["field_id", "sub_field_id"]
+        ):
+            fields, sub_fields = (col.to_numpy() for col in batch.columns)
+            changes = np.flatnonzero((fields[1:] != fields[:-1]) | (sub_fields[1:] != sub_fields[:-1]))
+            for index in np.r_[0, changes + 1]:
+                yield int(fields[index]), int(sub_fields[index])
+
+
 def _validate_output(
     path: Path,
     ordinary_schema: pa.Schema,
@@ -253,39 +287,16 @@ def _validate_output(
     if metadata != expected_schema.metadata:
         raise ValueError(f"AgFields output {path.name} has unexpected schema metadata")
 
-    field_index = schema.get_field_index("field_id")
-    sub_field_index = schema.get_field_index("sub_field_id")
-    ordered_pairs: list[tuple[int, int]] = []
     seen: set[tuple[int, int]] = set()
-    for row_group_index in range(parquet_file.metadata.num_row_groups):
-        row_group = parquet_file.metadata.row_group(row_group_index)
-        if row_group.num_rows == 0:
-            raise ValueError(f"AgFields output {path.name} contains an empty row group")
-        field_stats = row_group.column(field_index).statistics
-        sub_field_stats = row_group.column(sub_field_index).statistics
-        if (
-            field_stats is None
-            or sub_field_stats is None
-            or not field_stats.has_min_max
-            or not sub_field_stats.has_min_max
-        ):
-            raise ValueError(f"AgFields output {path.name} lacks identity statistics")
-        if field_stats.null_count or sub_field_stats.null_count:
-            raise ValueError(f"AgFields output {path.name} contains null identity values")
-        if field_stats.min != field_stats.max or sub_field_stats.min != sub_field_stats.max:
-            raise ValueError(
-                f"AgFields output {path.name} mixes identities within one source row group"
-            )
-        pair = (int(field_stats.min), int(sub_field_stats.min))
-        expected_field_id = expected_mapping.get(pair[1])
-        if expected_field_id != pair[0]:
-            raise ValueError(
-                f"AgFields output {path.name} contains an unexpected identity pair {pair}"
-            )
-        if pair in seen:
-            raise ValueError(f"AgFields output {path.name} repeats identity pair {pair}")
+    previous_sub_field = None
+    for pair in _identity_runs(parquet_file, path):
+        field_id, sub_field_id = pair
+        if expected_mapping.get(sub_field_id) != field_id:
+            raise ValueError(f"AgFields output {path.name} contains an unexpected identity pair {pair}")
+        if previous_sub_field is not None and sub_field_id < previous_sub_field:
+            raise ValueError(f"AgFields output {path.name} rows are not in numeric sub_field_id order")
         seen.add(pair)
-        ordered_pairs.append(pair)
+        previous_sub_field = sub_field_id
 
     expected_pairs = {
         (field_id, sub_field_id)
@@ -306,15 +317,6 @@ def _validate_output(
             f"AgFields output {path.name} has unexplained missing identity pairs; "
             f"missing={sorted(missing)[:10]} "
             f"expected_zero_rows={sorted(expected_missing)[:10]}"
-        )
-    if ordered_pairs != sorted(ordered_pairs, key=lambda pair: pair[1]):
-        raise ValueError(
-            f"AgFields output {path.name} row groups are not in numeric sub_field_id order"
-        )
-    if parquet_file.metadata.num_row_groups != len(ordered_pairs):
-        raise ValueError(
-            f"AgFields output {path.name} must contain one row group per "
-            "row-bearing source"
         )
     return {
         "rows": parquet_file.metadata.num_rows,
@@ -458,7 +460,9 @@ def _manifest_is_current(
         if (
             source_count < 1
             or identity_count + zero_row_source_count != source_count
-            or summary["row_groups"] != identity_count
+            or not (identity_count <= summary["rows"] and summary["row_groups"] <= summary["rows"])
+            or bool(summary["rows"]) != bool(identity_count)
+            or bool(summary["rows"]) != bool(summary["row_groups"])
             or not isinstance(zero_row_ids, list)
             or (family != "ebe" and zero_row_source_count != 0)
             or len(zero_row_ids) != zero_row_source_count

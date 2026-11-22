@@ -24,7 +24,7 @@ WEPPpyo3 owns:
 - WEPP hillslope and watershed report parsing;
 - typed record construction and schema metadata emitted by the writers;
 - chunked Parquet writing and atomic target publication;
-- one source-ordered row group per hillslope input file;
+- source-ordered hillslope rows with bounded physical row groups;
 - watershed EBE outlet inference and raw `chan.out` peak-signal audit;
 - watershed PASS climate-file hint discovery;
 - the full query-engine catalog scan;
@@ -64,9 +64,10 @@ preflight the subset they are about to use before removing or publishing output.
 - Parquet field names, types, units, descriptions, row ordering, and dataset
   version metadata remain compatible with the declarations in the facade
   modules.
-- Hillslope bulk writers receive a sorted source list and emit one row group per
-  source in that order, including an empty row group where the format contract
-  requires source identity to be retained.
+- Hillslope bulk writers retain caller-supplied source order. Physical groups may span
+  adjacent sources and large sources may span groups. Empty sources contribute
+  zero rows. Use identity columns for selection and the closed footer for group
+  counts. AgFields validates ordered field and sub-field pairs across boundaries.
 - Writers use Snappy compression unless their native API explicitly accepts a
   different supported value.
 - Writers publish through a temporary path and rename only after a successful
