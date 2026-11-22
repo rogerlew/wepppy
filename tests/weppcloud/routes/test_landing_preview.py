@@ -64,7 +64,9 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
     assert page.select_one('a[href="/weppcloud/usersum/view/weppcloud/accessibility-statement.md"]')
     assert page.select_one('a[href="mailto:Jackson.Nakae@usda.gov"]')
     assert page.select_one("[data-forest-service-credit]")
-    assert page.select_one('span[lang="cy"]').text == "Gweddw Crefft Heb Ei Dawn"
+    assert page.select_one('a[href="https://www.swansea.ac.uk/"]').get_text(strip=True) == "Swansea University"
+    assert "Jim Frankenberger" in page.get_text()
+    assert page.select_one(".wc-landing__menu summary").text == "Menu"
     assert "22-IA-11261975-090" in page.get_text()
     assert "simulation outputs are estimates" in page.get_text()
     assert "Run Atlas data is temporarily unavailable." in page.get_text()

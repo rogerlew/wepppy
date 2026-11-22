@@ -64,7 +64,7 @@ a responsive zoom and level pitch. Bound marker size to reduce overlap
 while retaining hillslope-area encoding. Keep the blue standard marker and
 use ember with the existing thicker outline for SBS. Keep the requested
 two legend chips and persistent desktop wheel instruction. A touch-only
-screen omits the Ctrl instruction. Run ID eligibility follows the build
+screen omits the Ctrl instruction and permits one-finger vertical page scrolling. Run ID eligibility follows the build
 rollover publication rule below.
 
 ## Run Atlas
@@ -103,7 +103,7 @@ of the page. Plain-text hover tooltips retain the existing project fields.
 Marker area represents each run's hillslope count, with a minimum visible
 marker and maximum radius to keep the map legible, and both an outline and fill distinguish
 soil burn severity data. The canvas has no separate tab stop. Unmodified wheel input scrolls the page. Holding Ctrl while scrolling over
-the map zooms it through the existing Deck.gl controller. Show “Hold Ctrl
+the map zooms it through the existing Deck.gl controller. On devices with a fine pointer, show “Hold Ctrl
 while scrolling to zoom the map.” at the lower right and separate “Standard
 runs” and “Runs with SBS” legend chips at the upper left, as in the original
 Atlas. The overlays use theme colors and allow pointer input to reach the

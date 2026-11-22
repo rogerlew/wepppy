@@ -1,21 +1,11 @@
 {% extends "base_pure.htm" %}
 {% import "landing/_content.htm" as content %}
 
-{% macro organizations(organization_list) %}
-<ul class="wc-landing__grid wc-landing__list" role="list">
-  {% for organization in organization_list %}
-  <li class="wc-landing__card">
-    <div class="wc-landing__logo">
-      <img src="{{ static_url(organization.logo) }}" alt="" width="180" height="60" loading="lazy">
-    </div>
-    <h3><a href="{{ organization.link }}">{{ organization.name }}</a></h3>
-    <p>
-      {% if organization.motto %}<span lang="{{ organization.motto_language }}">{{ organization.motto }}</span> — {% endif %}
-      {{ organization.caption }}
-    </p>
-  </li>
-  {% endfor %}
-</ul>
+{% macro organization_link(org) %}
+<a class="wc-landing__organization" href="{{ org.link }}">
+  <span class="wc-landing__logo"><img src="{{ static_url(org.logo) }}" alt="" width="150" height="54" loading="lazy"></span>
+  <span>{{ org.name }}</span>
+</a>
 {% endmacro %}
 
 {% block title %}WEPPcloud · Watershed modeling{% endblock %}
@@ -30,29 +20,34 @@
 
 {% block site_header %}
 <a class="wc-landing__skip" href="#main-content">Skip to main content</a>
-{{ super() }}
-{% endblock %}
-
-{% block header_container_class %}wc-container wc-landing-header{% endblock %}
-
-{% block header_nav %}
-<nav class="wc-nav" aria-label="Primary">
-  <a class="wc-nav__link" href="{{ url_for('weppcloud_site.interfaces') }}">Interfaces</a>
-  <a class="wc-nav__link" href="{{ url_for('usersum.usersum_index') }}">Help</a>
-  <a class="wc-nav__link" href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.references') }}">Research</a>
-  {% if current_user.is_authenticated %}
-  <a class="wc-nav__link" href="{{ url_for('user.runs') }}">My Runs</a>
-  {% else %}
-  <a class="wc-nav__link" href="{{ url_for('security.login') }}">Login</a>
-  {% endif %}
-</nav>
+<header class="wc-header wc-landing-masthead">
+  <div class="wc-container wc-landing-header">
+    <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}"><img src="{{ static_url('favicon/favicon2.ico') }}" alt="" width="28" height="28">WEPPcloud</a>
+    <details class="wc-landing__menu">
+      <summary>Menu</summary>
+      <div class="wc-landing__toolbar">
+        <nav class="wc-nav" aria-label="Primary">
+          <a href="{{ url_for('weppcloud_site.interfaces') }}">Interfaces</a>
+          <a href="{{ url_for('usersum.usersum_index') }}">Help</a>
+          <a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.references') }}">Research</a>
+          <a class="pure-button pure-button-secondary" href="{{ url_for('user.runs') if current_user.is_authenticated else url_for('security.login') }}">{{ 'My Runs' if current_user.is_authenticated else 'Login' }}</a>
+        </nav>
+        {% include 'header/_notifications.htm' %}
+        <div class="wc-landing__theme" title="Choose interface theme">
+          <span aria-hidden="true">◐</span>
+          {% with compact_theme_names=true %}{% include 'header/_theme_switcher.htm' %}{% endwith %}
+        </div>
+      </div>
+    </details>
+  </div>
+</header>
 {% endblock %}
 
 {% block body_container %}
 <div class="wc-container wc-landing" id="main-content" tabindex="-1">
-  <section id="hero" class="wc-panel wc-landing__hero" aria-labelledby="landing-title">
+  <section id="hero" class="wc-landing__hero" aria-labelledby="landing-title">
     <div>
-      <h1 id="landing-title">Watershed hydrology and erosion modeling</h1>
+      <h1 id="landing-title">Predict watershed runoff and erosion</h1>
       <p class="wc-landing__lead">
         WEPPcloud is an open-source platform for the Water Erosion Prediction Project (WEPP) model.
         Predict runoff, erosion, and sediment delivery for watershed planning, research,
@@ -63,18 +58,18 @@
         <a class="pure-button pure-button-secondary" href="{{ url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') }}">Read the user guide</a>
       </div>
     </div>
+    <img class="wc-landing__landscape" src="{{ static_url('images/interfaces/lake-tahoe.jpg') }}" alt="" width="960" height="960">
   </section>
 
   <section id="about" class="wc-landing__section" aria-labelledby="about-heading">
     <h2 id="about-heading">About WEPPcloud</h2>
-    <p class="wc-landing__reading">
-      WEPPcloud assembles and processes geospatial data for watershed modeling. Compare climate
-      inputs, wildfire conditions, treatments, and land-management scenarios side by side.
-      Use the reports and maps to review results and calibrate the model, or export results
-      for further analysis.
-    </p>
+    <div class="wc-landing__features">
+      <div><h3>Assemble inputs</h3><p>Build watershed models from terrain, soil, vegetation, and climate data.</p></div>
+      <div><h3>Compare scenarios</h3><p>Compare the effects of wildfire, treatments, and land management side by side.</p></div>
+      <div><h3>Review and export</h3><p>Use maps and reports to calibrate your model or export results for further analysis.</p></div>
+    </div>
     <ul class="wc-landing__links" role="list">
-      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.wepp_model') }}">About the WEPP model</a></li>
+      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.wepp_model') }}">Learn about the WEPP model →</a></li>
       <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.faq') }}">Frequently asked questions</a></li>
     </ul>
   </section>
@@ -83,31 +78,27 @@
 
   <section id="resources" class="wc-landing__section" aria-labelledby="resources-heading">
     <h2 id="resources-heading">Help and resources</h2>
-    <ul class="wc-landing__grid wc-landing__list" role="list">
-      <li class="wc-landing__card">
-        <h3><a href="{{ url_for('usersum.usersum_index') }}">WEPPcloud Help</a></h3>
-        <p>Find guides for creating projects, choosing model inputs, and interpreting results.</p>
-      </li>
-      <li class="wc-landing__card">
-        <h3><a href="https://www.youtube.com/@fswepp4700">WEPPcloud on YouTube</a></h3>
-        <p>Watch tutorials, release updates, and demonstrations.</p>
-      </li>
-      <li class="wc-landing__card">
-        <h3><a href="https://github.com/rogerlew/wepppy">wepppy on GitHub</a></h3>
-        <p>Browse the source code, developer documentation, and issue tracker.</p>
-      </li>
+    <ul class="wc-landing__resources wc-landing__list" role="list">
+      {% for title, href, description in [
+        ('WEPPcloud Help', url_for('usersum.usersum_index'), 'Find guides to projects, model inputs, and interpreting results.'),
+        ('WEPPcloud on YouTube', 'https://www.youtube.com/@fswepp4700', 'Watch tutorials, demonstrations, and release updates.'),
+        ('wepppy on GitHub', 'https://github.com/rogerlew/wepppy', 'Browse the source code, developer documentation, and issue tracker.')
+      ] %}
+      <li><a href="{{ href }}"><strong>{{ title }}</strong><span>{{ description }}</span><b aria-hidden="true">→</b></a></li>
+      {% endfor %}
     </ul>
   </section>
 
   <section id="contacts" class="wc-landing__section" aria-labelledby="contacts-heading">
     <h2 id="contacts-heading">Points of contact</h2>
-    <ul class="wc-landing__grid wc-landing__list" role="list">
+    <ul class="wc-landing__directory wc-landing__list" role="list">
       {% for contact in content.contacts %}
-      <li class="wc-landing__card">
-        <h3>{{ contact.name }}</h3>
-        <p>{{ contact.title }}<br>{{ contact.institution }}</p>
-        <p>{{ contact.expertise | join(' · ') }}</p>
-        <p><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></p>
+      <li>
+        <div><h3>{{ contact.name }}</h3><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></div>
+        <div>{{ contact.title }}<br><small>{{ contact.institution }}</small></div>
+        {% if contact.expertise %}<ul class="wc-landing__tags" aria-label="Expertise" role="list">
+          {% for field in contact.expertise %}<li>{{ field }}</li>{% endfor %}
+        </ul>{% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -115,17 +106,27 @@
 
   <section class="wc-landing__section" aria-labelledby="collaborators-heading">
     <h2 id="collaborators-heading">Affiliations and collaborators</h2>
-    {{ organizations(content.affiliations) }}
+    <ul class="wc-landing__logos wc-landing__list" role="list">
+      {% for org in content.affiliations %}<li>{{ organization_link(org) }}</li>{% endfor %}
+    </ul>
   </section>
 
   <section class="wc-landing__section" aria-labelledby="sponsors-heading">
     <h2 id="sponsors-heading">Sponsors</h2>
-    {{ organizations(content.sponsors) }}
+    <ul class="wc-landing__links wc-landing__funders" role="list">
+      {% for org in content.sponsors %}<li><a href="{{ org.link }}">{{ org.name }}</a></li>{% endfor %}
+    </ul>
+    <details class="wc-landing__disclosure">
+      <summary>Funding acknowledgments</summary>
+      {% for org in content.sponsors %}
+      <p>{% for word in org.caption.split() %}{% if '-' in word and word[0].isdigit() or word.startswith('IIA-') %}<span class="wc-landing__grant">{{ word }}</span>{% else %}{{ word }}{% endif %}{{ ' ' if not loop.last }}{% endfor %}</p>
+      {% endfor %}
+    </details>
   </section>
 
   <section class="wc-landing__section" aria-labelledby="contributors-heading">
     <h2 id="contributors-heading">Contributors</h2>
-    <ul class="wc-landing__contributors">
+    <ul class="wc-landing__contributors" role="list">
       {% for name in content.contributors %}
       <li>{{ name }}</li>
       {% endfor %}
@@ -134,8 +135,9 @@
 
   <section id="attributions" class="wc-landing__section" aria-labelledby="attributions-heading">
     <h2 id="attributions-heading">Attributions and data sources</h2>
-    <div class="wc-landing__grid">
-      <div class="wc-landing__card">
+    <details class="wc-landing__disclosure">
+      <summary>Map credits and regional data documentation</summary>
+      <div>
         <h3>Map services</h3>
         <p>
           Project maps use <a href="https://www.google.com/maps">Google</a> Terrain and Satellite.
@@ -159,11 +161,11 @@
         </details>
         <p>
           Hydrography flowlines come from the
-          <a href="https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/">U.S. Geological Survey NHDPlus HR NetworkNHDFlowline</a>.
+          <a href="https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/">U.S. Geological Survey NHDPlus HR network flowlines</a>.
           <a href="https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/metadata">View the flowline metadata</a>.
         </p>
       </div>
-      <div class="wc-landing__card">
+      <div>
         <h3>Regional data documentation</h3>
         {% set attribution_url = url_for('usersum.view_markdown', category='weppcloud', filename='data-attribution.md') %}
         <ul>
@@ -173,12 +175,13 @@
           <li><a href="{{ attribution_url }}#global-and-earth-workflows">Earth</a></li>
         </ul>
       </div>
-    </div>
+    </details>
   </section>
 
   <section class="wc-landing__section" aria-labelledby="disclaimer-heading">
     <h2 id="disclaimer-heading">Legal disclaimer</h2>
-    <div class="wc-landing__reading">
+    <details class="wc-landing__disclosure wc-landing__reading">
+      <summary>Model outputs are estimates. Read the full disclaimer.</summary>
       <p>
         WEPPcloud simulation outputs are estimates derived from mathematical models and
         publicly available geospatial data. They are not a substitute for professional
@@ -202,7 +205,7 @@
         subject to uncertainty and agree that you bear sole responsibility for any decisions,
         actions, or consequences arising from their use.
       </p>
-    </div>
+    </details>
   </section>
 </div>
 {% endblock %}
@@ -210,7 +213,13 @@
 {% block footer %}
 <footer class="wc-landing-footer">
   <div class="wc-container">
-    <a href="{{ url_for('usersum.view_markdown', category='weppcloud', filename='accessibility-statement.md') }}">Accessibility statement</a>
+    <div><strong>WEPPcloud</strong><p>Open-source watershed modeling.</p></div>
+    <nav aria-label="Footer">
+      <a href="#resources">Resources</a><a href="#contributors-heading">Contributors</a>
+      <a href="#attributions-heading">Data and attributions</a><a href="#disclaimer-heading">Disclaimer</a>
+      <a href="{{ url_for('usersum.view_markdown', category='weppcloud', filename='accessibility-statement.md') }}">Accessibility statement</a>
+    </nav>
+    <span>Hosted by <a href="https://www.uidaho.edu/research/computing">University of Idaho Research Computing &amp; Data Services</a></span>
     <span>© {{ copyright_year }} University of Idaho · USDA Forest Service</span>
   </div>
 </footer>
@@ -218,6 +227,7 @@
 
 
 {% block script_extras %}
+<script src="{{ static_url('js/landing-navigation.js') }}" defer></script>
 {{ super() }}
 {% if atlas and atlas.run_count %}
 <script src="{{ static_url('ui-lab/maplibre/maplibre-gl.js') }}" defer></script>

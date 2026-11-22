@@ -75,3 +75,6 @@ The [publication review](artifacts/20261122_atlas_publication_security_review.md
 records verification of checkpoint `b69fa6e4c`. Only explicitly public
 projects enter a newly compiled Atlas. Normal deployment and the subsequent
 successful scheduled compilation roll this into the served feed.
+
+The [design review disposition and Forest verification](artifacts/20261122_design_review.md)
+cover checkpoint `05f86c5b2` and its responsive presentation changes.

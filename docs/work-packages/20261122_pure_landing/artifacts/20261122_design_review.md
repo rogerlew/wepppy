@@ -31,3 +31,34 @@ to logos, leave basemap credits beside the map, and target visible section
 headings from footer links. Hide the Ctrl tip only without a fine pointer
 and keep the separate keyboard instructions. Use native disclosures with
 working no-script navigation.
+
+## Forest verification
+
+The preview at `/weppcloud/landing/preview/` renders this design. Chromium
+measured a 62 CSS pixel phone header. Browsers at 1440 and 390 pixels and
+a no-script browser at 320 pixels passed the navigation, disclosure and
+overflow checks. Keyboard input opened the menu, funding, data and legal
+disclosures. The icon picker offers the 13 shared themes with plain names.
+The phone test scrolled the document with a one-finger drag starting on
+the map. Fine-pointer wheel tests passed over the map, tip and legend.
+
+Five AA theme axe scans returned zero violations. Actual CARTO vector tile
+responses, run-label readback at zoom, camera synchronization, hillslope
+scaling and the 26 pixel cap passed. The Forest snapshot had 101 coordinate
+pairs. None was inside the central North Atlantic inspection window
+(65°W to 20°W, 5°N to 55°N). No project coordinates were edited. ID
+publication still follows the normal scheduled compiler rollover. Existing
+compiler regressions cover private projects before the browser receives
+the data, independent of zoom.
+
+The landing and shared Pure template suites passed (328 tests). Desktop
+and phone screenshots are in the worktree's ignored `out/pure-landing/`
+directory as `review-layout-1440.png`, `review-layout-390.png`, and
+`atlas-reviewed-desktop.png`. Manual assistive-technology acceptance
+and public cutover remain open.
+
+The opening camera refits when the available map area changes. Forest
+browser readback confirmed both bounding corners remain visible on desktop,
+after resizing to phone width, and after reset at 320 pixels. A deliberate
+zoom survives resizing. Frontend lint, 1,109 Jest tests and nine Node
+tests passed.

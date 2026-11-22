@@ -2,7 +2,7 @@ import { createMapController } from './gl-dashboard/map/controller.js';
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
 const CARTO_ASSETS = /^\/v\/\d{8}-\d{2}\/(?:vectortiles\/carto\.streets\/v2\/\d+\/\d+\/\d+\.mvt|fonts\/[^/]+\/\d+-\d+\.pbf|gl\/positron-gl-style\/sprite(?:@2x)?\.(?:json|png))$/;
-const INITIAL_VIEW = { longitude: -98.5795, latitude: 39.8283, zoom: 3.5, minZoom: 1, maxZoom: 14, pitch: 35, bearing: 0 };
+const INITIAL_VIEW = { longitude: -98.5795, latitude: 39.8283, zoom: 3.5, minZoom: 1, maxZoom: 14, pitch: 0, bearing: 0 };
 const PAN = { ArrowLeft: [-80, 0], ArrowRight: [80, 0], ArrowUp: [0, -80], ArrowDown: [0, 80] };
 
 function basemapRequest(value) {
@@ -47,7 +47,14 @@ function initAtlas(figure, deck, maplibre) {
   const controls = figure.querySelector('.wc-landing__atlas-controls');
   const keyboard = figure.querySelector('#atlas-keyboard');
   const rows = JSON.parse(figure.querySelector('[data-atlas-rows]').textContent);
-  const initialView = { ...INITIAL_VIEW, zoom: innerWidth < 560 ? 2.5 : INITIAL_VIEW.zoom };
+  region.hidden = false;
+  function openingView() {
+    const opening = new deck.WebMercatorViewport({
+      width: region.clientWidth, height: region.clientHeight,
+    }).fitBounds([[-125, 25], [-66, 50]], { padding: 16 });
+    return { ...INITIAL_VIEW, longitude: opening.longitude, latitude: opening.latitude, zoom: opening.zoom };
+  }
+  const initialView = openingView();
   const position = row => [row.longitude === 180 ? -180 : row.longitude, row.latitude];
 
   const centroids = new deck.ScatterplotLayer({
@@ -56,10 +63,10 @@ function initAtlas(figure, deck, maplibre) {
     pickable: true,
     radiusUnits: 'pixels',
     radiusMinPixels: 4,
-    radiusMaxPixels: 60,
+    radiusMaxPixels: 26,
     getPosition: position,
     getRadius: row => Math.sqrt(row.hillslopes ?? 0),
-    getFillColor: row => row.severity ? [109, 40, 217, 200] : [2, 132, 199, 200],
+    getFillColor: row => row.severity ? [173, 62, 10, 220] : [2, 132, 199, 200],
     getLineColor: [255, 255, 255, 220],
     lineWidthUnits: 'pixels',
     getLineWidth: row => row.severity ? 3 : 1,
@@ -81,9 +88,9 @@ function initAtlas(figure, deck, maplibre) {
   const labelSize = zoom => Math.min(10, Math.max(1, zoom));
   const layers = zoom => [centroids, labels.clone({ sizeScale: labelSize(zoom) })];
   let camera = initialView;
+  let atOpeningView = true;
 
   status.textContent = 'Loading Run Atlas map…';
-  region.hidden = false;
   const basemap = new maplibre.Map({
     container: region.querySelector('.wc-landing__atlas-basemap'),
     style: MAP_STYLE,
@@ -117,7 +124,8 @@ function initAtlas(figure, deck, maplibre) {
     if (!basemapFailed) status.textContent = '';
   });
 
-  function updateCamera(next) {
+  function updateCamera(next, opening = false) {
+    atOpeningView = opening;
     const labelsChanged = labelSize(camera.zoom) !== labelSize(next.zoom);
     camera = next;
     map.setViewState(camera);
@@ -130,12 +138,18 @@ function initAtlas(figure, deck, maplibre) {
     if (labelsChanged) map.applyLayers(layers(camera.zoom));
   }
 
+  const touchOnly = matchMedia('(pointer: coarse) and (not (any-pointer: fine))').matches;
   const deckOptions = {
     deck, target, initialViewState: initialView,
-    controllerOptions: { scrollZoom: true, dragRotate: false, touchRotate: false, keyboard: false },
+    touchAction: touchOnly ? 'pan-y' : 'none',
+    controllerOptions: { dragPan: !touchOnly, scrollZoom: true, dragRotate: false, touchRotate: false, keyboard: false },
     layers: layers(camera.zoom),
     getTooltip: tooltip,
-    onViewStateChange: ({ viewState }) => updateCamera(viewState),
+    onViewStateChange: ({ viewState, interactionState }) => {
+      const interacting = interactionState?.isDragging || interactionState?.isZooming ||
+        interactionState?.isPanning || interactionState?.inTransition;
+      updateCamera(viewState, atOpeningView && !interacting);
+    },
     onAfterRender() {
       const canvas = target.querySelector('canvas');
       if (canvas && !region.hidden && region.tabIndex !== 0) {
@@ -187,7 +201,12 @@ function initAtlas(figure, deck, maplibre) {
       updateCamera({ ...camera, zoom });
     });
   }
-  controls.querySelector('[data-atlas-reset]').addEventListener('click', () => updateCamera(initialView));
+  controls.querySelector('[data-atlas-reset]').addEventListener('click', () => updateCamera(openingView(), true));
+  new ResizeObserver(() => {
+    requestAnimationFrame(() => {
+      if (atOpeningView && !region.hidden) updateCamera(openingView(), true);
+    });
+  }).observe(region);
 }
 
 const atlas = document.querySelector('[data-run-atlas]');

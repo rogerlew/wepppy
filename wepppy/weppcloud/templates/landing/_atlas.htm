@@ -1,6 +1,6 @@
 {% macro access_time(timestamp) %}
   {% if timestamp %}
-  <time datetime="{{ timestamp.isoformat() }}">{{ timestamp.strftime('%Y-%m-%d %H:%M UTC') }}</time>
+  <time datetime="{{ timestamp.isoformat() }}">{{ timestamp.strftime('%b %d, %Y') }}</time>
   {% else %}
   Unknown
   {% endif %}
@@ -38,12 +38,12 @@
     <figure class="wc-landing__atlas-figure">
       <div class="wc-landing__atlas-frame">
         <div class="wc-landing__atlas-map" role="region"
-             aria-label="Run Atlas map" aria-describedby="atlas-keyboard atlas-wheel-tip atlas-geography" hidden>
+             aria-label="Run Atlas map" aria-describedby="atlas-keyboard atlas-geography" hidden>
           <div class="wc-landing__atlas-basemap" aria-hidden="true"></div>
           <div class="wc-landing__atlas-canvas" aria-hidden="true"></div>
           <ul class="wc-landing__atlas-key" aria-label="Map legend" role="list">
             <li><span class="wc-landing__atlas-dot" aria-hidden="true"></span> Standard runs</li>
-            <li><span class="wc-landing__atlas-dot wc-landing__atlas-dot--sbs" aria-hidden="true"></span> Runs with SBS<span class="wc-landing__visually-hidden"> (soil burn severity)</span></li>
+            <li title="Runs with soil burn severity data"><span class="wc-landing__atlas-dot wc-landing__atlas-dot--sbs" aria-hidden="true"></span> Runs with SBS<span class="wc-landing__visually-hidden"> (soil burn severity)</span></li>
           </ul>
           <p id="atlas-wheel-tip" class="wc-landing__atlas-tip">Hold Ctrl while scrolling to zoom the map.</p>
         </div>
