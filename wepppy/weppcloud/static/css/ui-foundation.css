@@ -1534,6 +1534,10 @@ h5:first-child {
   grid-area: select;
 }
 
+.wc-header .wc-theme-switcher .wc-run-header__field > span {
+  color: var(--wc-color-text);
+}
+
 .wc-theme-switcher__select {
   min-width: 9rem;
 }

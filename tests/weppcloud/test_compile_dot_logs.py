@@ -18,6 +18,8 @@ pytestmark = pytest.mark.unit
 
 
 class RonStub:
+    ispublic = staticmethod(script.Ron.ispublic)
+
     def __init__(self, config_stem: str, has_sbs: bool) -> None:
         self.config_stem = config_stem
         self.has_sbs = has_sbs
@@ -62,6 +64,7 @@ def test_compile_dot_logs_builds_outputs_and_touches_ttl(
     runid = "alpha-bravo"
     run_dir = prefix_dir / runid
     run_dir.mkdir(parents=True)
+    (run_dir / "PUBLIC").touch()
 
     _write_parquet_rows(run_dir / "watershed" / "hillslopes.parquet", 2)
     _write_parquet_rows(run_dir / "ash" / "post" / "hillslope_annuals.parquet", 1)
@@ -151,6 +154,7 @@ def test_compile_dot_logs_filters_deleted_runs(
     runid = "charlie-delta"
     run_dir = prefix_dir / runid
     run_dir.mkdir(parents=True)
+    (run_dir / "PUBLIC").touch()
     _write_parquet_rows(run_dir / "watershed" / "hillslopes.parquet", 1)
 
     log_path = prefix_dir / f".{runid}"
@@ -203,6 +207,8 @@ def test_missing_artifact_does_not_remove_location_or_project(
     monkeypatch.setattr(ttl_module, "read_ttl_state", lambda _wd: {"delete_state": "active"})
     monkeypatch.setattr(ttl_module, "DELETE_STATE_ACTIVE", "active")
 
+    public_marker = prefix_dir / "empty-count" / "PUBLIC"
+    public_marker.touch()
     access_csv = tmp_path / "access.csv"
     run_locations = tmp_path / "runid-locations.json"
     script.compile_dot_logs(
@@ -214,9 +220,27 @@ def test_missing_artifact_does_not_remove_location_or_project(
 
     locations = json.loads(run_locations.read_text(encoding="utf-8"))
     by_runid = {entry["runid"]: entry for entry in locations}
+    assert set(by_runid) == {"empty-count"}
     assert by_runid["empty-count"]["hillslopes"] == 0
     counters = json.loads((tmp_path / "runs_counter.json").read_text(encoding="utf-8"))
     assert counters["projects"] == 2
+
+    # Visibility may change while logs are being processed for the next build.
+    def revoke_before_publication(wd, **kwargs):
+        if Path(wd) == public_marker.parent:
+            public_marker.unlink()
+
+    monkeypatch.setattr(ttl_module, "touch_ttl", revoke_before_publication)
+    result = script.compile_dot_logs(
+        access_log_path=str(access_csv),
+        run_locations_path=str(run_locations),
+        run_roots=[str(run_root)],
+        legacy_roots=[str(tmp_path / "legacy")],
+    )
+    assert result["run_locations"] == 0
+    assert json.loads(run_locations.read_text()) == []
+    assert len(_read_access_csv(access_csv)) == 2
+    assert json.loads((tmp_path / "runs_counter.json").read_text()) == counters
 
 
 def test_systemic_parquet_failure_preserves_existing_outputs(
@@ -350,6 +374,7 @@ def test_centroid_absence_does_not_remove_project_count(
     runid = "kilo-lima"
     run_dir = prefix_dir / runid
     run_dir.mkdir()
+    (run_dir / "PUBLIC").touch()
     _write_parquet_rows(run_dir / "watershed" / "hillslopes.parquet", 2)
     _write_access_log(prefix_dir / f".{runid}", [datetime(2025, 6, 1, 12, 0, 0)])
     monkeypatch.setattr(script, "Ron", RonStub)
@@ -415,7 +440,9 @@ def test_compile_lock_rejects_overlap(tmp_path: Path) -> None:
                 pass
 
 
+@pytest.mark.parametrize("legacy_public", [False, True])
 def test_duplicate_runid_logs_reuse_same_metadata(
+    legacy_public: bool,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -423,11 +450,14 @@ def test_duplicate_runid_logs_reuse_same_metadata(
     run_root = tmp_path / "runs"
     primary_dir = run_root / "mn" / runid
     primary_dir.mkdir(parents=True)
+    (primary_dir / "PUBLIC").touch()
     _write_parquet_rows(primary_dir / "watershed" / "hillslopes.parquet", 4)
     _write_access_log(run_root / "mn" / f".{runid}", [datetime(2025, 7, 1, 12, 0, 0)])
 
     legacy_root = tmp_path / "legacy"
     (legacy_root / runid).mkdir(parents=True)
+    if legacy_public:
+        (legacy_root / runid / "PUBLIC").touch()
     _write_access_log(legacy_root / f".{runid}", [datetime(2025, 7, 2, 12, 0, 0)])
     monkeypatch.setattr(script, "Ron", RonStub)
     monkeypatch.setattr(script, "Watershed", WatershedStub)
@@ -447,6 +477,10 @@ def test_duplicate_runid_logs_reuse_same_metadata(
     assert result["logs"] == 2
     assert result["runs"] == 1
     assert [row["hillslopes"] for row in rows] == ["4", "4"]
+    locations = json.loads((tmp_path / "runid-locations.json").read_text())
+    assert [(row["runid"], row["access_count"]) for row in locations] == (
+        [(runid, 2)] if legacy_public else []
+    )
 
 
 def test_disappearance_after_stat_is_counted_as_read_error(
@@ -610,6 +644,7 @@ def test_cross_directory_run_locations_override(
     runid = "quebec-romeo"
     run_dir = prefix_dir / runid
     run_dir.mkdir()
+    (run_dir / "PUBLIC").touch()
     _write_parquet_rows(run_dir / "watershed" / "hillslopes.parquet", 1)
     _write_access_log(prefix_dir / f".{runid}", [datetime(2025, 9, 1, 12, 0, 0)])
     monkeypatch.setattr(script, "Ron", RonStub)

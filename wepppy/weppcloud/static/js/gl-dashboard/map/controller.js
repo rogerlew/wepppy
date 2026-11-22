@@ -9,6 +9,7 @@ export function createMapController({
   target,
   controllerOptions,
   eventRecognizerOptions,
+  touchAction,
   initialViewState,
   onHover,
   getTooltip,
@@ -20,6 +21,7 @@ export function createMapController({
   const deckgl = new deck.Deck({
     parent: target,
     controller: controllerOptions,
+    ...(touchAction ? { touchAction } : {}),
     ...(eventRecognizerOptions ? { eventRecognizerOptions } : {}),
     initialViewState,
     layers,

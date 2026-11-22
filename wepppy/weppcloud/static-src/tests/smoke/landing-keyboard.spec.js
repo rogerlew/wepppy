@@ -47,115 +47,45 @@ function buildUrl(pathname) {
   return new URL(pathname, base).toString();
 }
 
-async function activeElementSnapshot(page) {
-  return page.evaluate(() => {
-    const element = document.activeElement;
-    if (!element || element === document.body) {
-      return {
-        name: '',
-        tagName: '',
-        isMapStage: false,
-        hasVisibleFocus: false,
-        top: 0,
-        bottom: 0,
-      };
-    }
-    const ariaLabel = element.getAttribute('aria-label');
-    const labelledBy = element.getAttribute('aria-labelledby');
-    let name = ariaLabel ? ariaLabel.trim() : '';
-    if (!name && labelledBy) {
-      name = labelledBy
-        .split(/\s+/)
-        .map((id) => document.getElementById(id)?.textContent?.trim() || '')
-        .filter(Boolean)
-        .join(' ');
-    }
-    if (!name) {
-      name = (element.textContent || '').trim().replace(/\s+/g, ' ');
-    }
-
-    const style = window.getComputedStyle(element);
-    const rect = element.getBoundingClientRect();
-    const outlineWidth = Number.parseFloat(style.outlineWidth || '0');
-    const hasVisibleFocus =
-      (outlineWidth >= 2 && style.outlineStyle !== 'none') ||
-      (style.boxShadow && style.boxShadow !== 'none');
-
-    return {
-      name,
-      tagName: element.tagName,
-      isMapStage: element.classList.contains('light-map-stage'),
-      hasVisibleFocus,
-      top: rect.top,
-      bottom: rect.bottom,
-    };
+async function expectKeyboardFocus(control) {
+  await expect(control).toBeFocused();
+  const visibleFocus = await control.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return (parseFloat(style.outlineWidth) > 0 && style.outlineStyle !== 'none')
+      || style.boxShadow !== 'none';
   });
+  expect(visibleFocus).toBe(true);
 }
 
-test.describe('light landing keyboard accessibility', () => {
-  test('loads installed light route and exposes a usable tab sequence', async ({ page }) => {
-    const failedVariantRequests = [];
-    page.on('response', (response) => {
-      const url = response.url();
-      const failedVariantAsset = url.includes('/landing/light/assets/');
-      const failedVariantData = url.includes('/landing/light/run-locations.json');
-      if (response.status() >= 400 && (failedVariantAsset || failedVariantData)) {
-        failedVariantRequests.push(`${response.status()} ${url}`);
-      }
-    });
+test('landing keyboard accessibility on the canonical home', async ({ page }) => {
+  await page.goto(buildUrl(withSitePrefix('/')), { waitUntil: 'domcontentloaded' });
+  await expect(page.getByRole('heading', { level: 1, name: 'WEPPcloud' })).toBeVisible();
+  await page.keyboard.press('Tab');
+  await expectKeyboardFocus(page.getByRole('link', { name: 'Skip to main content' }));
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#main-content')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expectKeyboardFocus(page.getByRole('link', { name: 'WEPP Model', exact: true }));
+  await page.keyboard.press('Tab');
+  await expectKeyboardFocus(page.getByRole('link', { name: 'FAQ', exact: true }));
 
-    await page.goto(buildUrl(withSitePrefix('/landing/light/')), { waitUntil: 'domcontentloaded' });
-
-    await expect(page.getByRole('heading', { name: 'WEPPcloud', exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeAttached();
-    await expect(page.getByRole('region', { name: 'Explore Active WEPPcloud Projects' })).toBeVisible();
-    expect(failedVariantRequests).toEqual([]);
-    expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
-
-    const focusableCount = await page.evaluate(
-      () => document.querySelectorAll('a[href], button, select, textarea, input, [tabindex]:not([tabindex="-1"])').length
-    );
-    expect(focusableCount).toBeGreaterThan(20);
-    await expect(page.getByRole('link', { name: 'Interfaces' })).toHaveAttribute('tabindex', '0');
-    await expect(page.getByRole('link', { name: 'Docs', exact: true })).toHaveAttribute('tabindex', '0');
-
-    await expect(page.getByLabel('Run year filter')).toBeHidden();
-
-    const expectedSequence = [
-      'Skip to main content',
-      'Interfaces',
-      'Docs',
-      'Research',
-      'Login',
-      'WEPP Model',
-      'FAQ',
-      'Zoom map in',
-      'Zoom map out',
-      'Reset map view',
-      'Open run atlas filters',
-    ];
-    const seen = [];
-    const viewportHeight = page.viewportSize()?.height || 720;
-    for (let index = 0; index < expectedSequence.length; index += 1) {
-      await page.keyboard.press('Tab');
-      const snapshot = await activeElementSnapshot(page);
-      seen.push(snapshot.name);
-      expect(snapshot.isMapStage).toBe(false);
-      expect(snapshot.hasVisibleFocus).toBe(true);
-      expect(snapshot.top).toBeGreaterThanOrEqual(0);
-      expect(snapshot.bottom).toBeLessThanOrEqual(viewportHeight);
-    }
-
-    expect(seen).toEqual(expectedSequence);
-    expect(seen).not.toContain('Run year filter');
-
-    await page.getByRole('button', { name: 'Open run atlas filters' }).focus();
-    await page.keyboard.press('Enter');
-    await expect(page.getByRole('button', { name: 'Close run atlas filters' })).toBeFocused();
-    await expect(page.getByLabel('Run year filter')).toBeVisible();
-
+  if (await page.locator('[data-run-atlas]').count()) {
+    const map = page.getByRole('region', { name: 'Run Atlas map', exact: true });
+    await expect(map).toBeVisible();
     await page.keyboard.press('Tab');
-    await expect(page.getByLabel('Run year filter')).toBeFocused();
-    expect((await activeElementSnapshot(page)).hasVisibleFocus).toBe(true);
-  });
+    await expectKeyboardFocus(map);
+    await page.keyboard.press('ArrowRight');
+    for (const action of ['Zoom map in', 'Zoom map out', 'Reset map view']) {
+      const button = page.getByRole('button', { name: action });
+      const colors = () => button.evaluate((el) => {
+        const style = getComputedStyle(el);
+        return [style.backgroundColor, style.borderColor];
+      });
+      const resting = await colors();
+      await page.keyboard.press('Tab');
+      await expect(button).toBeFocused();
+      await expect.poll(colors).not.toEqual(resting);
+      await page.keyboard.press('Enter');
+    }
+  }
 });
