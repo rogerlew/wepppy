@@ -87,3 +87,6 @@ supersedes the More menu disposition. Contract checkpoint `67447cc29`.
 
 The [text introduction](artifacts/20261122_intro_decision.md) replaces the
 illustrated hero on Forest. Contract checkpoint `738d78146`.
+
+[Plain link labels and decoration](artifacts/20261122_link_decision.md)
+were verified on Forest following checkpoint `76bb04deb`.

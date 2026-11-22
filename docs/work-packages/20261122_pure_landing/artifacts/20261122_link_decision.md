@@ -10,3 +10,8 @@ keyboard focus. Implementation pending.
 Both independent reviews accepted the scope. Use a heavier weight for
 inline prose and hosting links. Remove local text-decoration overrides so
 resource cards and linked logos inherit shared hover and focus states.
+
+Forest browser checks found no arrows or resting underlines on landing
+content or footer links. Hover and keyboard traversal passed. Focused axe
+checks for text contrast and inline link identification passed on all five
+AA themes with the map credits expanded. Both landing suites passed.

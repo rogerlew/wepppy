@@ -69,7 +69,7 @@
       <div><h3>Review and export</h3><p>Use maps and reports to calibrate your model or export results for further analysis.</p></div>
     </div>
     <ul class="wc-landing__links" role="list">
-      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.wepp_model') }}">Learn about the WEPP model →</a></li>
+      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.wepp_model') }}">Learn about the WEPP model</a></li>
       <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.faq') }}">Frequently asked questions</a></li>
     </ul>
   </section>
@@ -84,7 +84,7 @@
         ('WEPPcloud on YouTube', 'https://www.youtube.com/@fswepp4700', 'Watch tutorials, demonstrations, and release updates.'),
         ('wepppy on GitHub', 'https://github.com/rogerlew/wepppy', 'Browse the source code, developer documentation, and issue tracker.')
       ] %}
-      <li><a href="{{ href }}"><strong>{{ title }}</strong><span>{{ description }}</span><b aria-hidden="true">→</b></a></li>
+      <li><a href="{{ href }}"><strong>{{ title }}</strong><span>{{ description }}</span></a></li>
       {% endfor %}
     </ul>
   </section>

@@ -22,6 +22,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] Restore the shared site masthead and verify Interfaces style parity on Forest.
 - [x] Verify the four direct desktop destinations and mobile hamburger on Forest.
 - [x] Restore the original text introduction without its action row.
+- [x] Remove decorative link arrows and restore shared link decoration.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 
