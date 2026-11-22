@@ -122,6 +122,8 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 
 ## Decision Log
 
+- November 22. Consolidate producer, Feature Export and query-engine asset locators in one shared declaration surface. Moving an output should require one naming change. [Ownership and first parity comparison](#shared-project-asset-declarations)
+
 - November 22. Prefer producer-owned relative declarations for a shadow resolver. Preserve child-local overrides and treat parent-qualified visibility as a separate compatibility decision.
 
 - November 22. Evaluate redundant schema opens during collection and bounded completion-directed confirmation separately. Preserve strict verification and check displaced FIFO work.
@@ -427,3 +429,15 @@ November 22 revision adds the live visit experiment to distinguish confirmation 
 November 22 revision records the matched phase experiment and the fixed-budget replay of completion hints.
 
 November 22 revision records the read-only writer and declaration audit requested before selecting a maintenance representation.
+
+## Shared project asset declarations
+
+Define each asset family once with a stable identifier, a producer-owned locator or naming function, its scope parameters, and any explicit parent projection. Put the shared interface below both consumers. Feature Export layer sources and dependencies reference asset identifiers; the query engine enumerates families eligible for its catalog. A producer uses the same locator when publishing or notifying a refresh. Keep existing public dataset keys as the names clients query.
+
+Start with Feature Export's validated locator forms (`relpath`, `path_template`, `nodb_ref`). A template can resolve one selected contrast for an export; catalog enumeration also needs the owning producer's list of valid contrast IDs. A NoDb reference needs an explicitly supplied, read-only controller resolver. Asset location is separate from permission to open the resolved file.
+
+Feature Export owns joins, geometry roles, required/optional inputs and dependency fingerprints. The query engine owns catalog visibility, freshness, schema verification and publication. A shared dependency marker can be required by an export without becoming a query dataset. Reuse the current access-scope checks for child overrides, authorized parent-backed inputs and relocated projects.
+
+First migrate one fixed path (`watershed/hillslopes.parquet`) and the baseline/Omni uses of `loss_pw0.hill.parquet` in shadow mode. Compare each producer output with the current Feature Export resolution and the query engine's logical key and selected physical source. Include a normal project, a scenario override, a contrast and its explicitly parent-qualified export path. Verify the same export dependency fingerprint, catalog schema and query result. Parent visibility beyond the named qualified paths remains a compatibility decision. Retire duplicated path literals only after parity.
+
+November 22 revision records the operator's consolidation direction and the first comparison for validating it.
