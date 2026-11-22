@@ -1,5 +1,9 @@
 # Query catalog refresh tracker
 
+## November 22 shared declarations decision
+
+Use one producer-owned asset definition across writers, Feature Export and the query engine. Retain consumer-specific layer and catalog semantics. Start with a fixed watershed dataset and a scope-dependent loss table; compare both consumers before changing live discovery. [Shared declaration plan](prompts/active/implementation_execplan.md#shared-project-asset-declarations)
+
 ## November 22 declared asset and writer audit
 
 The read-only audit covered 1,066 tracked Python files and 181 production catalogs, including all 156 contrast and ten scenario child catalogs under the three selected parents. The reviewed naming rules accounted for every observed Parquet key, including intermediate files whose public visibility is undecided. Parent-qualified visibility differed across all three projects. Proceed to a scope-aware shadow comparison before changing catalog membership. [Evidence, writer inventory and maintenance recommendation](artifacts/declared_asset_audit/findings.md)
