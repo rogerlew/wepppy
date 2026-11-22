@@ -5,7 +5,17 @@ The operator accepted the Forest preview design on November 22. WIP checkpoint
 Proceed with cutover preparation. Public deployment and UI Lab deletion are
 premature until the two conditions below are satisfied.
 
-## Conditions for retirement
+## Operator disposition
+
+The operator approved cutover and directed that the visual Atlas stay as reviewed.
+The accepted delivery contract retains embedded public-snapshot rows, normal
+homepage indexing and normal scheduled publication rollover. The proposed
+separate fetch and per-marker interaction below were declined. Manual
+accessibility conformance evidence remains open. Both independent reviewers
+called for fragment/query checks, serving-path checks and explicit reporting
+of snapshot generation status. Preserve the three MapLibre files byte-for-byte.
+
+## Original assessment conditions
 
 1. **Provide equivalent access to Atlas project details.** Keyboard panning,
    zoom, metrics and a quadrant summary are present. Individual public run

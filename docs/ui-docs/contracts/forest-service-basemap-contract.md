@@ -132,28 +132,8 @@ FSBASE-02 repairs the legacy global header's deleted About endpoint with
 “WEPPcloud user guide,” targeting the existing `usersum.view_markdown` route
 for `weppcloud/user-guide.md`. No access rule or other navigation changes.
 
-FSBASE-03 supersedes the former requirement to preserve a Flask landing
-fallback. Operator instruction on 2026-11-16: “this is too complicated. remove
-the fallback.” Keep the light and dark Vite pages; `/` and `/landing/` continue
-to select light, and explicit light/dark routes keep their existing theme.
-Delete the obsolete `landing.htm` template and its route fallback. Missing or
-unreadable requested HTML exports return HTTP 503 with a short, plain message
-that the landing page is temporarily unavailable; do not serve the other theme
-or a substitute page. Log the unavailable export for operator diagnosis without
-exposing filesystem paths to visitors. Existing state injection and successful
-response cache behavior remain unchanged. Operators restore availability by
-running the existing landing export build and verifying both theme routes.
-
-Rationale: requiring the frontend build eliminates a third, drifting landing
-implementation and its independent CDN renderer. This removes the confirmed
-legacy attribution sink rather than maintaining another dependency path.
-Existing exports remain compatible; incomplete deployments now fail explicitly.
-Validate both themes and default routes, real missing/unreadable export states,
-no legacy template reference, and unchanged state injection. Implementation
-conformance for FSBASE-03 is locally validated; production deployment is not claimed.
-
-## Pure landing review
-
-The additive [Pure landing review route](pure-landing-contract.md#delivery)
-uses its own Jinja template with the Forest Service credit and use limitations.
-The light and dark Vite pages retain this contract during the review phase.
+The landing delivery contract supersedes FSBASE-03's Vite delivery on
+approved cutover. Home and landing serve Jinja. Runs and GL dashboards
+use the checked-in MapLibre 5.24.1 distribution and license from
+`static/vendor/maplibre/`. The existing lazy loading, provider behavior
+and map attribution contracts apply. See the [landing contract](pure-landing-contract.md#delivery).

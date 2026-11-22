@@ -1,18 +1,13 @@
 # WEPPcloud landing page
 
-The preview is implemented for local review. Public cutover requires human
-acceptance of the rendered replacement and its accessibility evidence.
-
 ## Delivery
 
-During review, GET `/landing/preview/` renders the replacement for anonymous
-and authenticated users. Normal WEPPcloud mount-prefix handling applies.
-The response uses the site's no-store policy for personalized content.
-The home page, `/landing/`, and both explicit UI Lab variants continue to
-follow [FSBASE-03](forest-service-basemap-contract.md#landing-delivery-and-navigation-fsbase-0203)
-during this phase. The preview is unlinked from existing navigation and
-requests exclusion from search indexing. It is accessible by URL and
-requires no environment configuration.
+GET `/` and `/landing/` render the same server-side landing with personalized
+navigation and no-store caching. Home keeps its normal indexing behavior and
+the approved Atlas embeds the published snapshot. Retain all four public JSON
+aliases and normal scheduled rollover. Redirect light, dark and preview page
+URLs to mount-aware home, preserving the query string and fragment navigation.
+Retire obsolete Vite asset and icon URLs. There is no landing configuration flag.
 
 Use server-rendered Jinja and the existing Pure CSS WEPPcloud shell. Reuse
 its theme initializer, theme selector, tokens, typography, page width,
@@ -40,7 +35,7 @@ Retain cartography and hydrography credits in a section that describes where
 they apply, including the separate Forest Service credit and use limitations
 required by FSBASE-01. Preserve the four regional data documentation links.
 
-Edit prose in the [landing template](../../../wepppy/weppcloud/templates/landing/preview.htm)
+Edit prose in the [landing template](../../../wepppy/weppcloud/templates/landing/index.htm)
 and names and acknowledgments in the [landing content partial](../../../wepppy/weppcloud/templates/landing/_content.htm).
 Use existing shared button conventions. A landing-local macro is
 appropriate for repeated organization links. Keep one-off content in semantic HTML and keep the shared macro API
@@ -110,8 +105,7 @@ and its versioned vector tiles, fonts and sprites from
 `vectortiles/carto.streets/v2`, `fonts`, and `gl/positron-gl-style/sprite`
 resources used by that style. Disallow arbitrary style resource origins
 and provider attribution markup. Reuse the local locked MapLibre assets
-already shipped with WEPPcloud. When UI Lab is retired, preserve those
-shared assets under the WEPPcloud-owned static vendor path. The preview
+under the WEPPcloud-owned static vendor path. The landing
 needs no new configuration, proxy or CSP relaxation. Cross-origin
 requests omit application credentials and preview referrers. Credit
 OpenStreetMap and CARTO for the preview map. The shell follows the selected
@@ -150,7 +144,7 @@ At normal snapshot compilation, include a project's Atlas row only if its
 run directory has the existing explicit public designation (NoDb PUBLIC
 marker). If multiple input directories contribute to one run ID, each must
 qualify for that merged row to be published. A change of visibility takes effect in the next successful
-generation. The preview and all four JSON aliases use this same published
+generation. The landing and all four JSON aliases use this same published
 snapshot regardless of session. Only its eligible rows contribute labels,
 tooltips, metrics and geographic summaries. Never ship a second unfiltered
 snapshot as a static asset. Project access and internal statistics keep
@@ -178,26 +172,21 @@ main landmark and H1, logical headings, labeled controls,
 descriptive links, visible keyboard focus, readable text at 200% zoom,
 and usable narrow layouts with and without scripts. Keep the requested
 visual-only presentation of individual run IDs and hover details during
-review. Their keyboard and nonvisual equivalence remains an open
-manual Section 508 acceptance item before cutover.
+review. The operator approved the existing presentation for cutover. Manual assessment
+of per-marker equivalence remains open for Section 508 conformance reporting.
 Verify desktop and narrow screenshots show the map as the main visual after About.
 Check rendered geographic features, run ID labels and keyboard navigation
 in served output. Verify with keyboard and axe across default,
 light-high-contrast, ayu-mirage, ayu-mirage-bordered and cursor-dark-midnight.
 Review text and non-text contrast and perform manual assistive technology
 checks against the [Access Board web testing baseline](https://ictbaseline.access-board.gov/web-baselines/)
-before claiming conformance or approving cutover.
+before claiming conformance.
 
 ## Approved cutover
 
-After human approval, make home and `/landing/` serve the Jinja page.
-Apply the approved compatibility disposition to explicit variant URLs,
-preview, root and variant JSON/asset aliases, and old fragment bookmarks
-such as `#about` and `#map`. Inventory and remove UI Lab source,
-exports, Vite-only routes, state injection, build/test/deploy wiring, and
-live operator instructions. The optional Forest Service map on Runs and
-dashboards must keep its approved locked MapLibre assets and license
-byte-for-byte in a WEPPcloud-owned static vendor path with no UI Lab dependency.
-Verify lazy loading and provider switching in both consumers and update the Forest Service delivery contract
-with the approved cutover. No environment switch or runtime choice between
-implementations is required.
+The operator accepted the Atlas as designed and authorized retirement.
+Preserve its appearance, data and interactions. Serve the existing locked
+MapLibre 5.24.1 JS, CSS and license from `static/vendor/maplibre/` for the
+landing, Runs and dashboards. Remove the separate frontend and export pipeline.
+Preserve legacy hero, about and map fragments. Accessibility evidence and
+remaining manual checks are recorded separately from release approval.
