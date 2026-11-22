@@ -30,7 +30,7 @@ order. Keep introduction, About, full-width Run Atlas, help and resources,
 points of contact, affiliations and collaborators, sponsors, contributors,
 attributions and data sources, legal disclaimer, and the accessibility
 footer in that order. Preserve
-the WEPP and watershed modeling overview, Interfaces, Help, Research, Login
+the WEPP and watershed modeling overview, Interfaces, Docs, Research, Login
 or My Runs, model and FAQ links, Run Atlas, help resources, contacts,
 collaborators, sponsors, contributors, data and mapping attributions, legal
 disclaimer, and accessibility statement. Preserve names, contact details,
@@ -51,7 +51,10 @@ unchanged. This lets maintainers update text without rebuilding frontend assets.
 Inherit the standard site masthead from `base_pure.htm`, including its
 text brand, notification and theme controls, and responsive layout. Place
 the landing destinations and account link in the header navigation slot
-using the same `wc-nav__link` treatment as Interfaces. Keep the skip link. A borderless introduction pairs an outcome-led
+using the same `wc-nav__link` treatment as Interfaces. Expose Interfaces,
+Docs, Research, then Login or My Runs directly on desktop. On mobile
+provide those same links in order under a keyboard-operable hamburger
+labeled Menu. Keep the skip link and shared header tools. A borderless introduction pairs an outcome-led
 headline with existing WEPPcloud landscape imagery. About describes the
 three modeling tasks. Present resources as action links, contacts as a
 directory and affiliates as linked logos with visible names. Omit slogans,
