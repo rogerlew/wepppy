@@ -58,7 +58,9 @@ labeled Menu. Keep the skip link and shared header tools. Use a text-only introd
 Project as its subtitle, the original data-driven watershed modeling statement
 as H2 and a short explanation of the online WEPP interface. Omit hero artwork
 and action links; the header provides navigation. About describes the
-three modeling tasks. Present resources as action links, contacts as a
+three modeling tasks. Use plain link labels without decorative arrows. Follow the
+shared link treatment with no persistent underline and visible hover and
+keyboard focus. Distinguish links in running text by weight. Present resources as action links, contacts as a
 directory and affiliates as linked logos with visible names. Omit slogans,
 retain every contact and funding acknowledgment, keep sponsor roles distinct
 and group dense credits and legal text in native disclosures. Provide footer
