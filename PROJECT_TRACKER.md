@@ -1868,6 +1868,12 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+
+### Features Export service refactor (2026-11-21)
+
+Extracted carrier identity alignment and cached artifact checks from the export
+service. Focused service, worker, and route tests passed. [Work package](docs/work-packages/20261121_features_export_service_refactor/package.md)
+
 ### Omni test refactor
 
 [Work package](docs/work-packages/20261121_omni_test_refactor/package.md)
