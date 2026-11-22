@@ -1,5 +1,9 @@
 # Query catalog refresh tracker
 
+## November 22 declared asset and writer audit
+
+The read-only audit covered 1,066 tracked Python files and 181 production catalogs, including all 156 contrast and ten scenario child catalogs under the three selected parents. The reviewed naming rules accounted for every observed Parquet key, including intermediate files whose public visibility is undecided. Parent-qualified visibility differed across all three projects. Proceed to a scope-aware shadow comparison before changing catalog membership. [Evidence, writer inventory and maintenance recommendation](artifacts/declared_asset_audit/findings.md)
+
 ## November 22 Rocket refresh phases and completion hints
 
 Two matched NFS fixtures reproduced the asset mix of a climate-heavy run. The replay used the earlier eight production ticks and verified all eleven eligible publications on wepp2. At the same 200-visit budget, two completion hints per tick yielded 23 modeled cursor exits versus 14 observed FIFO exits. Two otherwise observed clearances slipped past the replay window. Production worker and scheduler configuration stayed in place. Fleet-capacity acceptance remains open. [Phase timings, peer validation and replay results](artifacts/rocket_refresh_phases_and_completion_replay.md)

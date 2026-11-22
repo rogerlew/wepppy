@@ -10,6 +10,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 
 ## Progress
 
+- [x] November 22. Completed the [read-only declaration and writer audit](../../artifacts/declared_asset_audit/findings.md) across normal projects and both Omni child types.
+
 - [x] November 22. Ran the Rocket test-project phase comparison and fixed-budget completion-hint replay. [Experiment and evidence](../../artifacts/rocket_refresh_phases_and_completion_replay.md)
 
 - [x] November 22. Completed the [production reconciliation visit experiment](../../tracker.md#november-22-reconciliation-visit-experiment) over eight consecutive scheduler ticks.
@@ -38,6 +40,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 - [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
 ## Surprises & Discoveries
+
+- November 22. All three parent catalogs differed from a projected union of their child catalogs. Contrast children used parent-backed climate and watershed paths even without explicit physical path fields.
 
 - November 22. The climate-heavy fixture made 321 Python-visible Arrow schema reads for 82 Parquet datasets. Eleven verified live publications still occupied FIFO positions several minutes after workers finished.
 
@@ -118,6 +122,8 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 
 ## Decision Log
 
+- November 22. Prefer producer-owned relative declarations for a shadow resolver. Preserve child-local overrides and treat parent-qualified visibility as a separate compatibility decision.
+
 - November 22. Evaluate redundant schema opens during collection and bounded completion-directed confirmation separately. Preserve strict verification and check displaced FIFO work.
 
 - November 22. Measure the slow run phases and replay confirmation priority at fixed permit and visit budgets before changing concurrency.
@@ -168,6 +174,8 @@ state, shortening reconciliation spacing or weakening global acceptance.
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+- November 22. Audited 43,259 catalog entries. The source and data support a shadow feasibility trial; changing the live discovery contract and fleet acceptance remain open.
 
 - November 22. With publication times held fixed, two hint slots cleared all eleven known publications in the modeled window. The Rocket fixture measured receipt-to-publication independently.
 
@@ -417,3 +425,5 @@ November 22 revision records the production capacity verdict and distinguishes t
 November 22 revision adds the live visit experiment to distinguish confirmation delay from worker service time.
 
 November 22 revision records the matched phase experiment and the fixed-budget replay of completion hints.
+
+November 22 revision records the read-only writer and declaration audit requested before selecting a maintenance representation.
