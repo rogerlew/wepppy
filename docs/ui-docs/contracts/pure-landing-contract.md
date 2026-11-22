@@ -57,9 +57,12 @@ provide those same links in order under a keyboard-operable hamburger
 labeled Menu. Keep the skip link and shared header tools. Use a text-only introduction with WEPPcloud as H1, Water Erosion Prediction
 Project as its subtitle, the original data-driven watershed modeling statement
 as H2 and a short explanation of the online WEPP interface. Omit hero artwork
-and action links; the header provides navigation. About describes the
-three modeling tasks. Use plain link labels without decorative arrows. Follow the
-shared link treatment with no persistent underline and visible hover and
+and action links; the header provides navigation. Restore the light landing's original About paragraph, model and FAQ labels,
+resource labels, descriptions and destinations, and section introductions.
+Use existing source wording for content updates unless a specific change
+has been approved. Use plain link labels without decorative arrows. Follow the
+same shared link color and decoration across landing destinations, including
+resource and organization links, with no persistent underline and visible hover and
 keyboard focus. Distinguish links in running text by weight. Present resources as action links, contacts as a
 directory and affiliates as linked logos with visible names. Omit slogans,
 retain every contact and funding acknowledgment, keep sponsor roles distinct
