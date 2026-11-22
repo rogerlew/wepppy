@@ -1,0 +1,223 @@
+{% extends "base_pure.htm" %}
+{% import "landing/_content.htm" as content %}
+
+{% macro organizations(organization_list) %}
+<ul class="wc-landing__grid wc-landing__list" role="list">
+  {% for organization in organization_list %}
+  <li class="wc-landing__card">
+    <div class="wc-landing__logo">
+      <img src="{{ static_url(organization.logo) }}" alt="" width="180" height="60" loading="lazy">
+    </div>
+    <h3><a href="{{ organization.link }}">{{ organization.name }}</a></h3>
+    <p>
+      {% if organization.motto %}<span lang="{{ organization.motto_language }}">{{ organization.motto }}</span> — {% endif %}
+      {{ organization.caption }}
+    </p>
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %}
+
+{% block title %}WEPPcloud · Watershed modeling{% endblock %}
+
+{% block head_extras %}
+<link rel="stylesheet" href="{{ static_url('css/landing.css') }}">
+{% endblock %}
+
+{% block site_header %}
+<a class="wc-landing__skip" href="#main-content">Skip to main content</a>
+{{ super() }}
+{% endblock %}
+
+{% block header_container_class %}wc-container wc-landing-header{% endblock %}
+
+{% block header_nav %}
+<nav class="wc-nav" aria-label="Primary">
+  <a class="wc-nav__link" href="{{ url_for('weppcloud_site.interfaces') }}">Interfaces</a>
+  <a class="wc-nav__link" href="{{ url_for('usersum.usersum_index') }}">Help</a>
+  <a class="wc-nav__link" href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.references') }}">Research</a>
+  {% if current_user.is_authenticated %}
+  <a class="wc-nav__link" href="{{ url_for('user.runs') }}">My Runs</a>
+  {% else %}
+  <a class="wc-nav__link" href="{{ url_for('security.login') }}">Login</a>
+  {% endif %}
+</nav>
+{% endblock %}
+
+{% block body_container %}
+<div class="wc-container wc-landing" id="main-content" tabindex="-1">
+  <section id="hero" class="wc-panel wc-landing__hero" aria-labelledby="landing-title">
+    <div>
+      <h1 id="landing-title">Watershed hydrology and erosion modeling</h1>
+      <p class="wc-landing__lead">
+        WEPPcloud is an open-source platform for the Water Erosion Prediction Project (WEPP) model.
+        Predict runoff, erosion, and sediment delivery for watershed planning, research,
+        and post-fire response.
+      </p>
+      <div class="wc-feature__actions">
+        <a class="pure-button pure-button-primary" href="{{ url_for('weppcloud_site.interfaces') }}">Explore interfaces</a>
+        <a class="pure-button pure-button-secondary" href="{{ url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') }}">Read the user guide</a>
+      </div>
+    </div>
+    <nav class="wc-landing__contents" aria-labelledby="landing-contents">
+      <h2 id="landing-contents">On this page</h2>
+      <ul role="list">
+        <li><a href="#about">About WEPPcloud</a></li>
+        <li><a href="#map">Run Atlas</a></li>
+        <li><a href="#resources">Help and resources</a></li>
+        <li><a href="#contacts">Points of contact</a></li>
+        <li><a href="#attributions">Attributions and data sources</a></li>
+      </ul>
+    </nav>
+  </section>
+
+  <section id="about" class="wc-landing__section" aria-labelledby="about-heading">
+    <h2 id="about-heading">About WEPPcloud</h2>
+    <p class="wc-landing__reading">
+      WEPPcloud assembles and processes geospatial data for watershed modeling. Compare climate
+      inputs, wildfire conditions, treatments, and land-management scenarios side by side.
+      Use the reports and maps to review results and calibrate the model, or export results
+      for further analysis.
+    </p>
+    <ul class="wc-landing__links" role="list">
+      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.wepp_model') }}">About the WEPP model</a></li>
+      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.faq') }}">Frequently asked questions</a></li>
+    </ul>
+  </section>
+
+  {% include "landing/_atlas.htm" %}
+
+  <section id="resources" class="wc-landing__section" aria-labelledby="resources-heading">
+    <h2 id="resources-heading">Help and resources</h2>
+    <ul class="wc-landing__grid wc-landing__list" role="list">
+      <li class="wc-landing__card">
+        <h3><a href="{{ url_for('usersum.usersum_index') }}">WEPPcloud Help</a></h3>
+        <p>Find guides for creating projects, choosing model inputs, and interpreting results.</p>
+      </li>
+      <li class="wc-landing__card">
+        <h3><a href="https://www.youtube.com/@fswepp4700">WEPPcloud on YouTube</a></h3>
+        <p>Watch tutorials, release updates, and demonstrations.</p>
+      </li>
+      <li class="wc-landing__card">
+        <h3><a href="https://github.com/rogerlew/wepppy">wepppy on GitHub</a></h3>
+        <p>Browse the source code, developer documentation, and issue tracker.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="contacts" class="wc-landing__section" aria-labelledby="contacts-heading">
+    <h2 id="contacts-heading">Points of contact</h2>
+    <ul class="wc-landing__grid wc-landing__list" role="list">
+      {% for contact in content.contacts %}
+      <li class="wc-landing__card">
+        <h3>{{ contact.name }}</h3>
+        <p>{{ contact.title }}<br>{{ contact.institution }}</p>
+        <p>{{ contact.expertise | join(' · ') }}</p>
+        <p><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></p>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="wc-landing__section" aria-labelledby="collaborators-heading">
+    <h2 id="collaborators-heading">Affiliations and collaborators</h2>
+    {{ organizations(content.affiliations) }}
+  </section>
+
+  <section class="wc-landing__section" aria-labelledby="sponsors-heading">
+    <h2 id="sponsors-heading">Sponsors</h2>
+    {{ organizations(content.sponsors) }}
+  </section>
+
+  <section class="wc-landing__section" aria-labelledby="contributors-heading">
+    <h2 id="contributors-heading">Contributors</h2>
+    <ul class="wc-landing__contributors">
+      {% for name in content.contributors %}
+      <li>{{ name }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section id="attributions" class="wc-landing__section" aria-labelledby="attributions-heading">
+    <h2 id="attributions-heading">Attributions and data sources</h2>
+    <div class="wc-landing__grid">
+      <div class="wc-landing__card">
+        <h3>Map services</h3>
+        <p>
+          Project maps use <a href="https://www.google.com/maps">Google</a> Terrain and Satellite.
+          The map version of the Run Atlas uses <a href="https://www.openstreetmap.org/">OpenStreetMap contributors</a>
+          and <a href="https://carto.com/attributions">CARTO</a> tiles.
+        </p>
+        <p data-forest-service-credit>
+          Optional Forest Service Basemap for project maps.
+          <a href="https://www.arcgis.com/home/item.html?id=2e1593463c30495e9c802098527e3d1b" rel="noreferrer">
+            USDA, U.S. Forest Service</a> · Forest Service - Geospatial Office.
+          Google Terrain is the default.
+        </p>
+        <details>
+          <summary>Forest Service map use limitations</summary>
+          <p>
+            This map cannot establish ownership, legal boundaries, jurisdiction, or access rights.
+            Obtain permission before entering private land and check public-land restrictions.
+            For motor-vehicle access, consult official Motor Vehicle Use Maps or the Forest Service.
+            Hazards may be absent. This map is unsuitable for navigation. No endorsement is implied.
+          </p>
+        </details>
+        <p>
+          Hydrography flowlines come from the
+          <a href="https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/">U.S. Geological Survey NHDPlus HR NetworkNHDFlowline</a>.
+          <a href="https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/metadata">View the flowline metadata</a>.
+        </p>
+      </div>
+      <div class="wc-landing__card">
+        <h3>Regional data documentation</h3>
+        {% set attribution_url = url_for('usersum.view_markdown', category='weppcloud', filename='data-attribution.md') %}
+        <ul>
+          <li><a href="{{ attribution_url }}#united-states">United States</a></li>
+          <li><a href="{{ attribution_url }}#europe">Europe</a></li>
+          <li><a href="{{ attribution_url }}#australia">Australia</a></li>
+          <li><a href="{{ attribution_url }}#global-and-earth-workflows">Earth</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="wc-landing__section" aria-labelledby="disclaimer-heading">
+    <h2 id="disclaimer-heading">Legal disclaimer</h2>
+    <div class="wc-landing__reading">
+      <p>
+        WEPPcloud simulation outputs are estimates derived from mathematical models and
+        publicly available geospatial data. They are not a substitute for professional
+        judgment or site-specific field assessment.
+      </p>
+      <p>
+        This software and its outputs are provided &ldquo;as is&rdquo; without warranty of
+        any kind, express or implied, including but not limited to the warranties of
+        merchantability, fitness for a particular purpose, and noninfringement. In no event
+        shall the University of Idaho, USDA Forest Service, or any contributing institution,
+        developer, or contributor be liable for any direct, indirect, incidental, special,
+        exemplary, or consequential damages (including, but not limited to, loss of data,
+        property damage, environmental harm, procurement of substitute goods or services, or
+        financial loss) arising from the use of or reliance on WEPPcloud or its outputs,
+        however caused and on any theory of liability, whether in contract, strict liability,
+        or tort (including negligence or otherwise), even if advised of the possibility of
+        such damage.
+      </p>
+      <p>
+        By using WEPPcloud, you acknowledge that simulation outputs are approximations
+        subject to uncertainty and agree that you bear sole responsibility for any decisions,
+        actions, or consequences arising from their use.
+      </p>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block footer %}
+<footer class="wc-landing-footer">
+  <div class="wc-container">
+    <a href="{{ url_for('usersum.view_markdown', category='weppcloud', filename='accessibility-statement.md') }}">Accessibility statement</a>
+    <span>© {{ copyright_year }} University of Idaho · USDA Forest Service</span>
+  </div>
+</footer>
+{% endblock %}

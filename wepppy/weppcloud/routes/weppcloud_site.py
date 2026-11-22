@@ -1,5 +1,6 @@
 from collections import deque
 from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
 import os
 import threading
 import time
@@ -15,6 +16,7 @@ from flask_security import current_user
 from werkzeug.routing import BuildError
 
 from ._common import *  # noqa: F401,F403
+from ._landing_atlas import build_landing_atlas
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.weppcloud.feature_registry.runtime import (
     config_maturity_badge,
@@ -1074,6 +1076,24 @@ def _landing_run_locations_response() -> 'flask.Response':
 @handle_with_exception_factory
 def landing():
     return _render_landing_page('light')
+
+
+@weppcloud_site_bp.route('/landing/preview/', strict_slashes=False)
+@handle_with_exception_factory
+def landing_preview():
+    atlas = build_landing_atlas(
+        _resolve_run_locations_path(),
+        request.args.get('year', ''),
+        request.args.get('page', ''),
+    )
+    response = make_response(render_template(
+        'landing/preview.htm',
+        atlas=atlas,
+        copyright_year=datetime.now(UTC).year,
+    ))
+    response.headers['Cache-Control'] = 'no-store, max-age=0'
+    response.headers['X-Robots-Tag'] = 'noindex'
+    return response
 
 
 @weppcloud_site_bp.route('/landing/light/', strict_slashes=False)

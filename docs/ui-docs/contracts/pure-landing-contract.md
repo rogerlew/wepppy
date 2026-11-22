@@ -1,7 +1,7 @@
 # WEPPcloud landing page
 
-Status: implementation pending. Public cutover requires human acceptance of
-the rendered replacement and its accessibility evidence.
+The preview is implemented for local review. Public cutover requires human
+acceptance of the rendered replacement and its accessibility evidence.
 
 ## Delivery
 
@@ -36,8 +36,9 @@ Retain cartography and hydrography credits in a section that describes where
 they apply, including the separate Forest Service credit and use limitations
 required by FSBASE-01. Preserve the four regional data documentation links.
 
-Author content in the landing template and its local data or partials. Use
-existing shared table and button conventions. A landing-local macro is
+Edit prose in the [landing template](../../../wepppy/weppcloud/templates/landing/preview.htm)
+and names and acknowledgments in the [landing content partial](../../../wepppy/weppcloud/templates/landing/_content.htm).
+Use existing shared table and button conventions. A landing-local macro is
 appropriate for repeated organization cards shared by collaborators and
 sponsors. Keep one-off content in semantic HTML and keep the shared macro API
 unchanged. This lets maintainers update text without rebuilding frontend assets.

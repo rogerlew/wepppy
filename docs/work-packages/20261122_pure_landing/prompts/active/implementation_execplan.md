@@ -13,8 +13,9 @@ Runs and reports. Preserve the current public landing throughout review.
 ## Progress
 
 - [x] (2026-11-22 19:02 UTC) Inventory content, shared shell and UI Lab consumers.
-- [ ] Commit the reviewed contract and record its revision in the tracker.
-- [ ] Build the route and verify served content and behavior.
+- [x] Commit the reviewed contract and record its revision in the tracker.
+- [x] Verify the locally served route, data states, theme and keyboard behavior.
+- [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 
 ## Surprises & Discoveries
@@ -31,7 +32,11 @@ access to the existing snapshot without a map renderer or client package.
 
 ## Outcomes & Retrospective
 
-Implementation and cutover evidence are pending.
+The preview is locally implemented and reviewed. Focused pytest,
+frontend lint and tests, and the public-page browser checks passed.
+The public cutover remains pending human approval and manual
+assistive-technology evidence. See the package tracker for the
+blocked broad preflight and the review artifact for direct evidence.
 
 ## Plan and validation
 
@@ -58,3 +63,11 @@ environment and build wiring, stale live docs and obsolete tests. Verify
 the new home and landing URL, saved bookmarks per the approved disposition,
 and real Forest Service rendering on Runs and dashboards. Use the current
 task branch for review and integration.
+
+The isolated development instance can use a disposable mount for a synthetic
+snapshot and the checked-out app, without remounting the shared development
+stack. Build the existing Pure CSS vendor assets using
+`wctl --project-dir /home/workdir/wepppy-pure-landing run-npm build` when
+the development checkout lacks those ignored artifacts. Serve the generated
+Pure CSS files through the shared static path before judging the rendered
+preview. The preview adds no asset build to that existing setup.

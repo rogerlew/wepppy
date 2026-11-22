@@ -1,0 +1,170 @@
+{# Public names, contact details, and funding acknowledgments. #}
+{% set contacts = [
+  {
+    "name": 'Roger Lew',
+    "title": 'WEPPcloud DevOps Architect, Associate Research Professor',
+    "institution": 'University of Idaho',
+    "email": 'rogerlew@uidaho.edu',
+    "expertise": ['WEPPcloud', 'WEPP inputs & outputs', 'Data pipelines', 'Analytics'],
+  },
+  {
+    "name": 'Mariana Dobre',
+    "title": 'Assistant Professor',
+    "institution": 'University of Idaho',
+    "email": 'mdobre@uidaho.edu',
+    "expertise": ['Hydrology', 'Soil science', 'Calibration', 'Forests'],
+  },
+  {
+    "name": 'Pete Robichaud',
+    "title": 'Senior Advisor',
+    "institution": 'Former USDA Forest Service, Rocky Mountain Research Station',
+    "email": 'probi@wsu.edu',
+    "expertise": ['Forest response', 'WEPP', 'Post-fire erosion', 'Ash transport'],
+  },
+  {
+    "name": 'Anurag Srivastava',
+    "title": 'Research Scientist',
+    "institution": 'University of Idaho',
+    "email": 'srivanu@uidaho.edu',
+    "expertise": ['WEPP model', 'Hydrology', 'Soil erosion', 'Climate datasets'],
+  },
+  {
+    "name": 'Erin Brooks',
+    "title": 'Professor',
+    "institution": 'University of Idaho',
+    "email": 'ebrooks@uidaho.edu',
+    "expertise": ['Landscape hydrology', 'Precision agriculture', 'Nutrient cycling', 'Water quality'],
+  },
+  {
+    "name": 'Brian (Scott) Sheppard',
+    "title": 'Research Hydrologist',
+    "institution": 'USDA Forest Service, Rocky Mountain Research Station',
+    "email": 'brian.sheppard@usda.gov',
+    "expertise": ['Hydrology', 'Fire response modeling'],
+  },
+  {
+    "name": 'Jackson Nakae',
+    "title": 'PATH-Cost Effective',
+    "institution": 'Oak Ridge Institute for Science and Education (ORISE)',
+    "email": 'Jackson.Nakae@usda.gov',
+    "expertise": ['PATH-Cost Effective'],
+  },
+] %}
+
+{% set affiliations = [
+  {
+    "name": 'University of Idaho',
+    "caption": 'Go Vandals! University of Idaho',
+    "logo": 'images/University_of_Idaho_logo.svg',
+    "link": 'https://www.uidaho.edu/',
+  },
+  {
+    "name": 'Portland State University',
+    "caption": 'Let Knowledge Serve the City — Portland State University',
+    "logo": 'images/Portland_State_University_logo.svg',
+    "link": 'https://www.pdx.edu/',
+  },
+  {
+    "name": 'Swansea University',
+    "motto": 'Gweddw Crefft Heb Ei Dawn',
+    "motto_language": 'cy',
+    "caption": 'Technical Skill is Bereft Without Culture',
+    "logo": 'images/Swansea_University_logo.png',
+    "link": 'https://www.swansea.ac.uk/',
+  },
+  {
+    "name": 'USDA Forest Service',
+    "caption": 'Caring for the land and serving people. Rocky Mountain Research Station',
+    "logo": 'images/Logo_of_the_United_States_Forest_Service.svg',
+    "link": 'https://www.fs.usda.gov/rmrs/',
+  },
+  {
+    "name": 'UI Research Computing & Data Services',
+    "caption": 'Proudly hosted by the University of Idaho Research Computing + Data Services',
+    "logo": 'images/RCDS_Logo-horizontal.svg',
+    "link": 'https://www.uidaho.edu/research/computing',
+  },
+  {
+    "name": 'Rangeland Analysis Platform',
+    "caption": 'Big data for big landscapes - combining satellite imagery with thousands of on-the-ground vegetation measurements',
+    "logo": 'images/rapIconSmall.png',
+    "link": 'https://rangelands.app/',
+  },
+  {
+    "name": 'Michigan Technological University',
+    "caption": 'Tomorrow needs Michigan Tech - R1 flagship technological research university',
+    "logo": 'images/michigan-tech-logo-full-yellow.svg',
+    "link": 'https://www.mtu.edu/',
+  },
+  {
+    "name": 'Washington State University',
+    "caption": 'World-class research university dedicated to solving problems and improving lives',
+    "logo": 'images/Washington-State-University-Logo.png',
+    "link": 'https://www.wsu.edu/',
+  },
+  {
+    "name": 'Oak Ridge Institute for Science and Education (ORISE)',
+    "caption": 'Shaping the Future of Science',
+    "logo": 'images/orise-logo.png',
+    "link": 'https://orise.orau.gov/',
+  },
+] %}
+
+{% set sponsors = [
+  {
+    "name": 'USDA Forest Service and ORISE',
+    "caption": 'This work was funded through joint venture agreements 22-JV-11261953-063, 23-JV-11261954-064, and 23-JV-11261976-080 with the USDA Forest Service and interagency agreement 22-IA-11261975-090 between ORISE and the USDA Forest Service.',
+    "logo": 'images/Logo_of_the_United_States_Forest_Service.svg',
+    "link": 'https://www.fs.usda.gov/',
+  },
+  {
+    "name": 'NSF Idaho EPSCoR',
+    "caption": 'This work was made possible by the NSF Idaho EPSCoR Program and by the National Science Foundation under award number IIA-1301792.',
+    "logo": 'images/Idaho_epscor_logo_no_white_background.png',
+    "link": 'https://www.idahoepscor.org/',
+  },
+  {
+    "name": 'USDA NIFA',
+    "caption": 'This work is supported by AFRI program [grant no. 2016-67020-25320/project accession no. 1009827] from the USDA National Institute of Food and Agriculture.',
+    "logo": 'images/USDA_logo.png',
+    "link": 'https://www.nifa.usda.gov/',
+  },
+  {
+    "name": 'UKRI NERC',
+    "caption": 'The Wildfire Ash Transport And Risk estimation tool (WATAR) was made possible with funding provided by UK NERC Grant NE/R011125/1 and European Commission (H2020 FirEUrisk project no. 101003890).',
+    "logo": 'images/ukri-nerc-logo-600x160.png',
+    "link": 'https://www.ukri.org/councils/nerc/',
+  },
+  {
+    "name": 'NASA WWAO',
+    "caption": "The revegetation module in WEPPcloud was supported by NASA's Western Water Application Office (WWAO).",
+    "logo": 'images/nasa-grantee-insignia-rgb.png',
+    "link": 'https://wwao.jpl.nasa.gov/',
+  },
+] %}
+
+{% set contributors = [
+  'Garrit Bass',
+  'Marta Basso',
+  'Erin Brooks',
+  'Subhankar Das',
+  'Chinmay Deval',
+  'Sahan T. M. Dissanayake',
+  'Mariana Dobre',
+  'Stefan Doerr',
+  'Helen Dow',
+  'William Elliot',
+  'Ames Fowler',
+  'Jim Frakenberger',
+  'Jackson Nakae',
+  'Sonja Kolstoe',
+  'Roger Lew',
+  'Sarah Lewis',
+  'Mary E. Miller',
+  'Jonay Neris',
+  'Pete Robichaud',
+  'Cristina Santin',
+  'Brian (Scott) Sheppard',
+  'Anurag Srivastava',
+  'Alex Watanabe'
+] %}
