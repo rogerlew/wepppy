@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 from shapely.geometry import Point
 
-from wepppy.nodb.mods.features_export import service
+from wepppy.nodb.mods.features_export import carrier_identity, service
 from wepppy.nodb.mods.features_export.join_planner import (
     MaterializationContractError,
     resolve_geometry_key,
@@ -104,7 +104,7 @@ def test_backfill_identity_from_geometry_key_fills_missing_event_identity_values
         crs="EPSG:4326",
     )
 
-    result = service._backfill_identity_from_geometry_key(
+    result = carrier_identity.backfill_identity_from_geometry_key(
         frame,
         geometry_key_column="TopazID",
         consolidated_join_key_column=service._CONSOLIDATED_JOIN_KEY_COLUMN,
@@ -118,8 +118,8 @@ def test_align_carrier_identity_join_key_prefers_topaz_join_for_subcatchments(
     tmp_path: Path,
 ) -> None:
     monkeypatch.setattr(
-        service,
-        "_backfill_tabular_identity_from_watershed",
+        carrier_identity,
+        "backfill_tabular_identity_from_watershed",
         lambda **kwargs: kwargs["frame"],  # noqa: ARG005
     )
 
@@ -130,7 +130,7 @@ def test_align_carrier_identity_join_key_prefers_topaz_join_for_subcatchments(
             "topaz_id": [101, 101, 102],
         }
     )
-    existing_join_result = service._align_carrier_identity_join_key(
+    existing_join_result = carrier_identity.align_carrier_identity_join_key(
         frame=existing_join_frame,
         wd=tmp_path,
         carrier_layer="sbs_map-subcatchments",
@@ -148,7 +148,7 @@ def test_align_carrier_identity_join_key_prefers_topaz_join_for_subcatchments(
             "topaz_id": [101, 102, 103],
         }
     )
-    one_to_one_identity_result = service._align_carrier_identity_join_key(
+    one_to_one_identity_result = carrier_identity.align_carrier_identity_join_key(
         frame=one_to_one_identity_frame,
         wd=tmp_path,
         carrier_layer="sbs_map-subcatchments",
@@ -169,7 +169,7 @@ def test_align_carrier_identity_join_key_prefers_topaz_join_for_subcatchments(
             "topaz_id": [71, 72, 82],
         }
     )
-    topaz_domain_result = service._align_carrier_identity_join_key(
+    topaz_domain_result = carrier_identity.align_carrier_identity_join_key(
         frame=topaz_domain_frame,
         wd=tmp_path,
         carrier_layer="sbs_map-subcatchments",
@@ -184,7 +184,7 @@ def test_align_carrier_identity_join_key_prefers_topaz_join_for_subcatchments(
             "topaz_id": [101, 101, 102],
         }
     )
-    missing_join_result = service._align_carrier_identity_join_key(
+    missing_join_result = carrier_identity.align_carrier_identity_join_key(
         frame=missing_join_frame,
         wd=tmp_path,
         carrier_layer="sbs_map-subcatchments",
@@ -202,7 +202,7 @@ def test_align_carrier_identity_join_key_retargets_to_backfilled_topaz_ids(
         frame["topaz_id"] = [71, 72, 82]
         return frame
 
-    monkeypatch.setattr(service, "_backfill_tabular_identity_from_watershed", _fake_backfill)
+    monkeypatch.setattr(carrier_identity, "backfill_tabular_identity_from_watershed", _fake_backfill)
 
     frame = pd.DataFrame(
         {
@@ -210,7 +210,7 @@ def test_align_carrier_identity_join_key_retargets_to_backfilled_topaz_ids(
             "wepp_id": [13, 14, 17],
         }
     )
-    result = service._align_carrier_identity_join_key(
+    result = carrier_identity.align_carrier_identity_join_key(
         frame=frame,
         wd=tmp_path,
         carrier_layer="sbs_map-subcatchments",
@@ -361,7 +361,7 @@ def test_geometry_attachment_uses_resolved_identity_domain(geometry_key, geometr
     key = service._CONSOLIDATED_JOIN_KEY_COLUMN
     core = pd.DataFrame({key: ["31"], "wepp_id": [3], "topaz_id": [31], "ET": [3.61]})
     geometry = gpd.GeoDataFrame({key: geometry_ids, "geometry": [Point(3, 0), Point(31, 0)]}, crs=4326)
-    aligned = service._align_core_to_geometry_identity(
+    aligned = carrier_identity.align_core_to_geometry_identity(
         core, geometry_key_column=geometry_key, carrier_layer="sbs_map-subcatchments"
     )
     result = attach_geometry_once(
@@ -379,7 +379,7 @@ def test_geometry_attachment_uses_resolved_identity_domain(geometry_key, geometr
 def test_geometry_identity_rejects_missing_or_collapsing_mapping(identities):
     core = pd.DataFrame({service._CONSOLIDATED_JOIN_KEY_COLUMN: ["31", "163"], "wepp_id": identities})
     with pytest.raises(MaterializationContractError, match="complete and one-to-one"):
-        service._align_core_to_geometry_identity(
+        carrier_identity.align_core_to_geometry_identity(
             core, geometry_key_column="WeppID", carrier_layer="sbs_map-subcatchments"
         )
 
@@ -387,9 +387,9 @@ def test_geometry_identity_rejects_missing_or_collapsing_mapping(identities):
 def test_geometry_identity_rejects_missing_column_and_preserves_other_carriers():
     core = pd.DataFrame({service._CONSOLIDATED_JOIN_KEY_COLUMN: ["31"]})
     with pytest.raises(MaterializationContractError, match="missing the resolved"):
-        service._align_core_to_geometry_identity(
+        carrier_identity.align_core_to_geometry_identity(
             core, geometry_key_column="WeppID", carrier_layer="sbs_map-subcatchments"
         )
-    assert service._align_core_to_geometry_identity(
+    assert carrier_identity.align_core_to_geometry_identity(
         core, geometry_key_column="WeppID", carrier_layer="ag_fields_subfields_geojson"
     ) is core

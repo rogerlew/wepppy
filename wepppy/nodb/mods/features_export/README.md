@@ -148,3 +148,11 @@ A failed conversion preserves previous artifacts and published bindings. Legacy
 artifacts without verified producer provenance remain downloadable; use a new
 ordinary export to generate a verified companion. Successful companions include
 their own manifest and README alongside the native GDB tree.
+
+## Service internals
+
+`service.py` orchestrates submission, execution, cached result reuse, and
+publication. `carrier_identity.py` aligns hillslope and channel keys to
+geometry and backfills Topaz and WEPP IDs from watershed tables.
+`cached_artifact_validation.py` checks the format of an existing artifact
+after the service resolves its path inside the run.
