@@ -1,4 +1,4 @@
-In progress — [Schema defaults route refactor](docs/work-packages/20261121_schema_defaults_code_quality_refactor/package.md).
+Closed locally — [Schema defaults route refactor](docs/work-packages/20261121_schema_defaults_code_quality_refactor/package.md). All ten published paths and 435 responses matched the baseline. Full pytest passed.
 
 [Retire PRISM analysis sidecars](docs/work-packages/20261121_retire_prism_sidecars/package.md) — implemented and locally validated.
 

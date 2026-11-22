@@ -1,6 +1,6 @@
 # RQ engine schema defaults code quality refactor
 
-Opened 2026-11-21. The discovery API exposes the schemas, defaults, hints, output inventory and operation documentation an API client uses to plan work on a run. At c82da0a94 one module owns all ten HTTP routes, reads NoDb controllers, resolves capabilities and builds every operation descriptor. This package gives maintainers smaller, directly testable responsibilities.
+Closed locally 2026-11-21 (Pacific). The discovery API exposes the schemas, defaults, hints, output inventory and operation documentation an API client uses to plan work on a run. At c82da0a94 one module owns all ten HTTP routes, reads NoDb controllers, resolves capabilities and builds every operation descriptor. The refactor separates those responsibilities across 17 production modules. The router now measures 540 source lines, and 435 fixture-based HTTP responses matched the original bytes.
 
 ## Scope and acceptance
 
