@@ -11,6 +11,7 @@ The operator authorized committing the reviewed contract and scaffolding executi
 ## Progress
 
 - [x] November 22. Implemented and activated the temporary Rocket batch-owner cap on the three-host fleet. Four Rocket test catalogs passed peer readback.
+- [x] November 22. Assessed the natural cycle and recorded a failed 24-hour fleet-capacity gate with peer receipt, ordinary-job and artifact evidence. [Fleet result](../../tracker.md#november-22-fleet-capacity-acceptance)
 - [ ] Record matched production-window performance and natural-cycle capacity acceptance. The [rollout checkpoint](../../tracker.md#november-22-production-rollout-closeout) records the 33-hour cycle in progress and the wpc1 handoff.
 
 - 2026-11-21 UTC. Implemented the Admin/Root RQ catalog panels against reviewed checkpoint `2dacc6b57`. The route and real-Redis catalog suites passed 58 tests.
@@ -29,10 +30,12 @@ The operator authorized committing the reviewed contract and scaffolding executi
 - [x] Nine scratch scopes retired under lifecycle guards to private evidence storage; 711 source hashes and eight catalog hashes preserved, old managed paths absent.
 - [x] Independent execution correctness/security review complete; exact evidence limits retained. Secondary QA documented separately.
 - [x] November 6 authorized production deployment: compatible fleet, fresh default-worker pilot, scheduler routing/storage parity and general async configuration converged.
-- [ ] M6 general fleet rollout acceptance: supervised observation 02 is running; later natural complete cycle, full-union age census, artifact proof and new ordinary-arrival delay remain unproved.
+- [ ] M6 general fleet rollout acceptance: the November 21 cycle missed its deadline. A passing cycle under the deployed cap, continuous ordinary-arrival evidence, full-union age census and peer artifact matrix remain open.
 - [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
 ## Surprises & Discoveries
+
+- November 22. Discovery finished in 46 minutes, while reconciliation was still pending at 39 h 39 min. Outstanding current-incarnation receipts dated back to November 6 across multiple namespaces.
 
 - Seven same-owner arrivals behaved differently when synchronized and when replayed at the tightest observed production offsets. Limiting admission to two saved active worker time in all eight pairs.
 
@@ -107,6 +110,8 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 
 ## Decision Log
 
+- November 22. Record a failed fleet-capacity observation. The deadline preceded cap activation, so attributing the miss to the cap requires a separate trial.
+
 - November 21: target worker capacity on Rocket with a reversible, deployment-selected owner limit. Re-evaluate at wpc1 cutover. Four paced trials do not establish a general batch latency improvement.
 
 - Show simultaneous admission blockers and scheduler health separately on manual refresh. See the current catalog refresh contract under “Admin admission and health snapshot”.
@@ -151,6 +156,8 @@ state, shortening reconciliation spacing or weakening global acceptance.
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+- November 22. The bounded peer sample proves a freshness miss. Six measured ordinary jobs met the wait threshold and one newly published catalog passed independent query readback. The fleet gate remains open.
 
 November 22 closed the deployment milestone. Production admission and cross-host artifact readback passed. The current cycle exceeded the configured 24-hour target. Fleet-capacity acceptance remains open.
 
@@ -388,3 +395,5 @@ are implemented. Independent correctness and security reviews closed the
 malformed selector and retained-scope findings. Disposable Redis and real RQ
 scheduler/worker tests demonstrated cross-alias admission, other-owner progress,
 receipt drainage and catalog readback. Fleet rollout and Rocket acceptance remain open.
+
+November 22 revision records the production capacity verdict and distinguishes the mixed-release cycle from a future cap-specific trial.

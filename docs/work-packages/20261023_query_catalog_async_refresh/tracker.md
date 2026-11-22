@@ -1,5 +1,25 @@
 # Query catalog refresh tracker
 
+## November 22 fleet-capacity acceptance
+
+**Failed for the natural cycle that started November 21 at 00:51:28 UTC.** At November 22 16:30:39 UTC it had run for 39 h 39 min with 4,928 cycle locators pending against a 24-hour target. The deadline had already passed before release `dfc1eaa74` activated. This observation establishes the production miss. A cycle wholly under the new owner cap and matched large-batch windows are still needed to assess the cap.
+
+| Production check | Evidence |
+| --- | --- |
+| Discovery | The matching discovery generation completed in 46 min 20 s after 53,880 directory visits and 181,380 entries. The retained set held 42,681 lexical locators, including possible aliases. Both frontier and stream were empty. |
+| Reconciliation | A single Redis transaction read the cursor, discovery and queue lengths. The cursor had no completion or cycle errors. Pending fell from 10,440 at 09:50:59 to 4,928 at 16:30:39, about 827 net locators/hour. This measures backlog change, including confirmation visits. |
+| Freshness | On wepp2, stable double reads of 24 distinct writable scopes found 74 pending receipts. At least 21 scopes had a current-incarnation receipt older than 24 h. The oldest observed was created November 6 at 09:25:03 UTC, at least 16.29 days before readback. Old receipts occurred in all four namespaces. |
+| Ordinary default queue | Six identifiable, finished non-catalog jobs enqueued and started after 08:42 UTC waited 0.040–0.134 s, below the 300 s threshold in this sample. The admission panel showed 12 compatible workers, 7 of 7 permits occupied, zero uncertain reservations and zero ordinary jobs waiting at the checkpoint. Whole-window maxima remain unknown. |
+| Published artifact | Three live wepp1 refreshes supplied paths for an independent wepp2 read. One was current at readback. Its catalog digest and required schema passed verification, and the query planner and DuckDB returned the same 1,096 rows as the Parquet footer. The other two had outstanding work. Only the successful `wc1:runs` example contributes artifact evidence. |
+
+**Observation method.** Sort the cycle-pending paths and take indices `floor(i × N / 24)` for i from 0 through 23. This yielded 12 batch, three culvert, four wc1 run and five legacy run scopes. Use the existing acceptance helper's `scope_readback` and `artifact_readback` under the worker identity. Sample ordinary arrivals from the first 4,000 reverse-ranked finished default registry entries using retained enqueue/start timestamps. These are bounded samples. The precondition for the full-union receipt census, a completed cycle, was unmet. The sample proves a freshness violation but cannot estimate fleet prevalence or the fleet's oldest receipt.
+
+**Capacity implication.** The live scheduler allows 25 pending visits every 30 s, an optimistic 72,000 visits/day at continuous cadence. Every discovered locator needs an initial visit. A surviving writable locator that creates a full-reconciliation receipt needs another visit to confirm it drained. After 42,681 initial visits, only 29,319 visits/day remain for confirmations and retries at this cadence. The writable count is unknown. Measure first visits, clean confirmations, permit deferrals and repeated pending visits per tick alongside worker completion rate before choosing between scheduler tuning and more NFS concurrency. The observed long tail followed discovery and crossed the Rocket batch-cap boundary into three other namespaces.
+
+**Disposition.** Fleet capacity remains unaccepted. For a retest, retain ordinary arrival observations from the first tick of a natural cycle under the deployed cap, then run the stable full-union census and namespace artifact matrix at completion. The scheduler waits 86,400 s after a completed cycle before starting the next. Release and cap-specific performance evidence remain separate. [Fleet acceptance procedure](../20261105_production_notifications_catalog_cutover/artifacts/general_catalog_acceptance_procedure.md)
+
+Private raw evidence is retained under `/home/workdir/query-catalog-studies/fleet-capacity-OsieApDa`. SHA-256 of the cursor/arrival capture is `e529addfaa363b93c1c85c478e30aec22a631f1f71cdf4978e81b4b33b0a2ca5`, of the receipt readback `229561ed3499ff1508e447014f0d5d3f12c256c553674d4d4ab60a8490f6c1b0`, and of the peer artifact sample `a996a9793746ddd658495140b3a813db60450dadabd70271e0a1be01ff67f512`.
+
 ## November 22 production rollout closeout
 
 Release `dfc1eaa74` is active on wepp1, wepp2 and wepp3. The same wepp1-built image passed all three host identity checks. On Rocket NFS, the candidate admitted two siblings, deferred a third and admitted another owner. All four test receipts drained and wepp2 queried all four Parquet artifacts. The final focused catalog suite passed 74 tests.
