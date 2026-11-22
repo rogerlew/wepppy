@@ -80,7 +80,8 @@ panning, native zoom and reset controls, and a normal Tab exit. Render
 run ID labels directly on the map, with the original zoom-dependent
 label size. Keep the inspection paragraph and project-cycle controls out
 of the page. Plain-text hover tooltips retain the existing project fields.
-Marker size shows access count, and both an outline and fill distinguish
+Marker area represents each run's hillslope count, with a minimum visible
+marker and maximum radius to keep the map legible, and both an outline and fill distinguish
 soil burn severity data. The canvas has no separate tab stop. Wheel
 scrolling remains page scrolling.
 
