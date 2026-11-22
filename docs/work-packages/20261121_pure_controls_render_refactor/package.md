@@ -1,6 +1,7 @@
 # Pure controls render test refactor
 
-**Status** Closed on 2026-11-22 UTC  
+**Status** Closed on 2026-11-22 UTC
+
 **Started** 2026-11-22 04:57 UTC
 
 ## Scope and objectives
