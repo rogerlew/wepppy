@@ -1,6 +1,6 @@
 # Required actual-project validation
 
-Candidate `f17ec6ca3` completed the [original-project observations](20261122_live_project_comparison.md) and [matched private replay](20261122_private_replay.md). The acceptance matrix retains open coverage for an actual scenario-local watershed override. The sections below define the protocol and remain the authority for subsequent comparisons.
+Candidate `f17ec6ca3` completed the [original-project observations](20261122_live_project_comparison.md) and [matched private replay](20261122_private_replay.md). The operator clarified the normal scenario contract after reviewing the results. Generated scenarios link the parent watershed. The three direct scenario pairs and the broader 21-scenario identity check provide production evidence for that layout. An atypical local watershed remains a scoped compatibility test. The sections below define the protocol and remain the authority for subsequent comparisons.
 
 ## Freeze the comparison
 
@@ -14,7 +14,7 @@ Budget project count, bytes, elapsed time, per-statement runtime and retries bef
 | --- | --- |
 | Normal project with both assets | Source and logical key for the watershed table and baseline hill loss. Compare actual artifact values and a matched export layer. |
 | Normal project with Roads results | For the existing scope-dependent layer, compare baseline versus Roads selection and currentness. An explicit stale or unavailable Roads request must retain its existing unavailable outcome; substitution of baseline data fails the comparison. |
-| Omni scenario direct | Include an authorized inherited source and a local override with distinguishable values or digests. Check selected bytes, logical key and each consumer’s own path spelling. |
+| Omni scenario direct | Verify the parent-backed watershed by physical identity and a scenario-local loss table with values distinguishable from the parent. Check selected bytes, logical key and each consumer’s own path spelling. |
 | Omni contrast direct | Check the local loss output and local merged soils/landuse as controls against accidental parent selection. Include a parent-backed climate or watershed asset. |
 | Parent-qualified | Use an actual parent exposing a named child loss key and one omitting it despite the child dataset existing. Compare query visibility and the explicitly qualified export selection separately. Include both scenario and contrast paths. |
 | Retained/exceptional | Require a relocated or stale recorded root, a missing optional output and a read-only project. Cover a denied child-to-sibling/outside selection under the query boundary using a non-mutating comparison. One project may cover multiple cells. |

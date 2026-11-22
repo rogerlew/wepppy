@@ -1,6 +1,6 @@
 # Shared project asset declarations
 
-Opened 2026-11-22 UTC. Status: **first implementation tested; production acceptance open**. The two shared declarations are wired at candidate `f17ec6ca3`. All 56 revision/host observations matched across 14 original project views. A distinguishable scenario-local watershed override remains unverified on an original project. [Production comparison](artifacts/20261122_live_project_comparison.md) · [Writer and export replay](artifacts/20261122_private_replay.md)
+Opened 2026-11-22 UTC. Status: **first implementation tested on production inputs**. The two shared declarations are wired at candidate `f17ec6ca3`. All 56 revision/host observations matched across 14 original project views. All 21 inspected scenario watersheds resolve to the parent, as expected for generated scenarios. [Production comparison](artifacts/20261122_live_project_comparison.md) · [Writer and export replay](artifacts/20261122_private_replay.md)
 
 ## Outcome and scope
 
