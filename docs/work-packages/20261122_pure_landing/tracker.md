@@ -70,3 +70,8 @@ the canvas and through the legend and tip, synchronized Deck and basemap
 zoom, and uncanceled Ctrl-wheel outside the map. The tip clears the zoom
 buttons at 1200, 390 and 320 CSS pixels. Both landing route suites passed
 (25 tests).
+
+The [publication review](artifacts/20261122_atlas_publication_security_review.md)
+records verification of checkpoint `b69fa6e4c`. Only explicitly public
+projects enter a newly compiled Atlas. Normal deployment and the subsequent
+successful scheduled compilation roll this into the served feed.

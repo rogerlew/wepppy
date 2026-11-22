@@ -17,6 +17,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] Verify the locally served route, data states, theme and keyboard behavior.
 - [x] Restore the Deck.gl Atlas, preserve ordering and verify the Forest review deployment.
 - [x] Verify Ctrl-wheel zoom and the overlaid legend and tip on Forest.
+- [x] Filter Atlas rows at normal compilation and verify the resulting public feeds.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 
@@ -41,6 +42,9 @@ basemap. Keep the Atlas's on-map run ID labels, geographic text summary,
 and keyboard navigation. The operator removed the project-details
 disclosure and inspection paragraph. Restore the original Ctrl-wheel gesture and
 upper-left run-type chips, with the scroll tip in the lower right.
+
+The operator chose normal scheduled snapshot rollover for Atlas publication.
+Check explicit visibility during compilation before writing each location row.
 
 ## Outcomes & Retrospective
 
