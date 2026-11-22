@@ -28,6 +28,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] Restore the resource marks and inspect the three cards on Forest.
 - [x] Add the WEPPcloud Stack repository directory under Help and resources.
 - [x] Verify the 13-row GitHub table, private-model notes and phone layout on Forest.
+- [x] List the Rust CLIGEN port beside the Fortran generator.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 

@@ -65,7 +65,7 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
     stack = page.select_one("#resources #weppcloud-stack")
     assert stack.h3.text == "WEPPcloud Stack"
     rows = stack.select("table tbody tr")
-    assert len(rows) == 13
+    assert len(rows) == 14
     private_names = set()
     for row in rows:
         link = row.select_one('th[scope="row"] a')
