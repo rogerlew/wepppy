@@ -1868,6 +1868,13 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Omni test refactor
+
+[Work package](docs/work-packages/20261121_omni_test_refactor/package.md)
+closed locally on 2026-11-22 UTC. Six controller modules preserve 83 cases.
+All 229 focused Omni tests passed, and the resulting files fall below the
+red quality thresholds.
+
 ### Roads controller test refactor
 
 [Work package](docs/work-packages/20261121_roads_controller_test_refactor/package.md)
