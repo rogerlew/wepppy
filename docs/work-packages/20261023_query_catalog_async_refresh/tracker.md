@@ -1,5 +1,9 @@
 # Query catalog refresh tracker
 
+## November 22 Rocket refresh phases and completion hints
+
+Two matched NFS fixtures reproduced the asset mix of a climate-heavy run. The replay used the earlier eight production ticks and verified all eleven eligible publications on wepp2. At the same 200-visit budget, two completion hints per tick yielded 23 modeled cursor exits versus 14 observed FIFO exits. Two otherwise observed clearances slipped past the replay window. Production worker and scheduler configuration stayed in place. Fleet-capacity acceptance remains open. [Phase timings, peer validation and replay results](artifacts/rocket_refresh_phases_and_completion_replay.md)
+
 ## November 22 reconciliation visit experiment
 
 From 16:41:03 to 16:45:03 UTC on Rocket, eight consecutive production scheduler ticks made 200 visits. **186 visits (93%) sent the locator to the back of the list.** The pending count fell from 4,878 to 4,864. Worker records independently showed 11 successful refresh jobs during those four minutes. This was the reconciliation tail of the November 21 cycle.

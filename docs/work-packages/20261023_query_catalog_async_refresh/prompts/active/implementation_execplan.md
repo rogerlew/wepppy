@@ -10,6 +10,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 
 ## Progress
 
+- [x] November 22. Ran the Rocket test-project phase comparison and fixed-budget completion-hint replay. [Experiment and evidence](../../artifacts/rocket_refresh_phases_and_completion_replay.md)
+
 - [x] November 22. Completed the [production reconciliation visit experiment](../../tracker.md#november-22-reconciliation-visit-experiment) over eight consecutive scheduler ticks.
 
 - [x] November 22. Implemented and activated the temporary Rocket batch-owner cap on the three-host fleet. Four Rocket test catalogs passed peer readback.
@@ -36,6 +38,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 - [x] M7 bounded handoff: reconcile package/tracker/contracts/operator notes and publish retained sanitized evidence; do not relabel fleet enablement complete.
 
 ## Surprises & Discoveries
+
+- November 22. The climate-heavy fixture made 321 Python-visible Arrow schema reads for 82 Parquet datasets. Eleven verified live publications still occupied FIFO positions several minutes after workers finished.
 
 - November 22. Of 200 visits, 186 cycled to the tail. Three long-running run workers sampled on both hosts were repeatedly in kernel RPC wait.
 
@@ -114,6 +118,8 @@ The unchanged 184-year isolated model produced duplicate daily observations in r
 
 ## Decision Log
 
+- November 22. Evaluate redundant schema opens during collection and bounded completion-directed confirmation separately. Preserve strict verification and check displaced FIFO work.
+
 - November 22. Measure the slow run phases and replay confirmation priority at fixed permit and visit budgets before changing concurrency.
 
 - November 22. Record a failed fleet-capacity observation. The deadline preceded cap activation, so attributing the miss to the cap requires a separate trial.
@@ -162,6 +168,8 @@ state, shortening reconciliation spacing or weakening global acceptance.
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+- November 22. With publication times held fixed, two hint slots cleared all eleven known publications in the modeled window. The Rocket fixture measured receipt-to-publication independently.
 
 - November 22. Fourteen cursor exits and eleven worker finishes occurred in four minutes. FIFO depth implies roughly 97 minutes before another visit to a requeued locator at the observed cadence.
 
@@ -407,3 +415,5 @@ receipt drainage and catalog readback. Fleet rollout and Rocket acceptance remai
 November 22 revision records the production capacity verdict and distinguishes the mixed-release cycle from a future cap-specific trial.
 
 November 22 revision adds the live visit experiment to distinguish confirmation delay from worker service time.
+
+November 22 revision records the matched phase experiment and the fixed-budget replay of completion hints.
