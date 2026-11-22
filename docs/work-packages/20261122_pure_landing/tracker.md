@@ -111,3 +111,7 @@ twelve repositories selected under checkpoints `51aedcb8e` and `2eedf3a64`.
 
 The [stack directory](artifacts/20261122_stack_directory.md) now identifies
 cligen-rs as the planned successor to the Fortran weather generator.
+
+The operator accepted the preview design as good enough for cutover assessment.
+Candidate implementation `08562c8f0` is checkpointed for review. Manual
+accessibility acceptance and the public route disposition remain open.
