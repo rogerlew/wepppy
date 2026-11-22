@@ -71,6 +71,11 @@ rosetta, soil-data-access, and wepp-forest. Identify wepp-forest as private and
 requiring collaborator access. Include topaz and oxidized-rasterstats for their
 terrain delineation and raster analysis roles. Link the upstream devalc/WEPPcloudR
 reporting project and jackson-nakae/PATH-cost-effective treatment optimizer.
+Display the Stack as a two-column table with one repository per row. Stack each
+description beneath its repository on phones. Prefix every full owner/repo link
+with the decorative GitHub mark to identify the destination. Include
+wepp-in-the-woods/wepp-forest-revegetation alongside wepp-forest and associate
+both links with the visible note “Private repository. Collaborator access required.”
 Present resources as action links, contacts as a
 directory and affiliates as individual themed cards with a linked logo and visible name.
 Display the nine original light landing captions, including mottos, verbatim

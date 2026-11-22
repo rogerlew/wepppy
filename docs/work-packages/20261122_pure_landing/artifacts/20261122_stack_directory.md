@@ -16,3 +16,8 @@ Forest served all twelve named links and role descriptions. The private
 model link refers to its visible access note through aria-describedby.
 The directory fit at 1440, 390 and 320 pixels. Both landing route suites
 passed (25 tests).
+
+From base `44143d903`, the operator requested a stacked repository table,
+full owner/repo labels, GitHub marks and the private revegetation model.
+Both independent reviewers accepted the amendment. Preserve row and column
+headers on phones and give each private link its own visible access note.
