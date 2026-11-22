@@ -45,26 +45,43 @@ unchanged. This lets maintainers update text without rebuilding frontend assets.
 
 ## Run Atlas
 
-Use the same compiled run-location snapshot that feeds the current landing.
-Read it through the existing WEPPcloud path resolver. Show overall run count,
-total hillslopes and latest recorded access, and use a native GET year filter
-and pagination for a recent-first project table. The filter uses last-access
-year. A new filter starts on page one. Filter and pagination URLs return
-visitors to the results heading and pagination retains the active year. Show the selected run count
-and filtered hillslopes. Keep geographic coordinates, soil burn severity
-presence, run name and ID, config, hill count, access count and last access
-available as text. Use native disclosures for secondary row details. Render at most 25 records per page. Treat displayed
-records as summaries of the public atlas dataset and render no direct links
-to individual runs. Preserve project authorization and cache-generation
-behavior. Render only the listed fields from the JSON artifact. Escape dataset text,
-including IDs and config strings. The sibling raw access log is outside this
-boundary.
+The Run Atlas map is the landing hero's focal point. Place it in the first
+visual section with the headline and project entry action. It should read as
+a map at a glance, retain geographic context on narrow screens, and inherit
+the selected theme. The map is a world overview of project locations on a
+bundled Natural Earth land silhouette. Server-rendered CSS markers group
+coordinates into fixed geographic cells. The map and markers share an
+equirectangular 2:1 extent at longitude −180 to 180 and latitude −90 to 90.
+Edge points use the nearest in-bounds cell. Keep the full extent at every
+viewport and use a visible key that explains larger markers represent more
+runs. The overview has no pan, zoom, pointer-only content, external tile
+requests, client renderer, or animation. The hero still shows the basemap and
+a readable status for missing, malformed or empty data.
 
-The table replaces the preview's map presentation and pointer-only tooltips.
-It makes atlas information available using the keyboard and screen readers
-and removes the landing's map renderer, tiles and build pipeline. The
-existing map experience remains available in both UI Lab variants during
-review. Evaluate this presentation change at the human acceptance gate.
+Read the existing compiled public snapshot through its existing path resolver.
+Use the full selected set for the map and keep markers stable across table
+pagination. Show overall run count, total hillslopes and latest recorded access.
+The native GET filter applies last-access year to both the map and table. A new
+year starts on page one and returns to the Atlas heading. Pagination retains the
+year, returns to the results heading and keeps project details expanded.
+
+Keep the text equivalent in a clearly labeled native disclosure next to the
+map. The summary describes the map and marker size. The disclosure lists
+selected run counts for four quadrants divided by the equator and Greenwich
+meridian. Pagination leaves the distribution unchanged. It also includes the
+selected run count, filtered hillslopes and a recent-first
+table with at most 25 rows per page. Coordinates, soil burn severity presence,
+run name and ID, config, hill count, access count and last access remain
+available as text. The visual itself is decorative to assistive technology.
+Project authorization, snapshot generation and the public data boundary are
+unchanged. Render only the named fields, escape all text, derive marker positions
+from validated numeric coordinates and render no direct links to individual
+runs. The raw access log is outside this boundary.
+
+The map restores the visual overview that the initial table-only preview
+omitted. The bundled silhouette and bounded server-rendered markers keep the
+hero themeable and avoid the old rendering and tile dependencies. Native text
+details supply the data independently of the visual.
 
 | Input or runtime state | Required outcome |
 | --- | --- |
@@ -73,10 +90,10 @@ review. Evaluate this presentation change at the human acceptance gate.
 | Missing or empty year and page | All years, first page |
 | Available year and valid page | Matching rows with the requested page and current filter retained |
 | Unknown year or invalid, oversized or out-of-range page | All years for unknown year, first page for invalid page |
-| No snapshot or valid empty snapshot | Readable unavailable or empty status respectively, with other page content usable |
-| Populated snapshot | Overall totals, available years, filtered totals and paged project information |
+| No snapshot or valid empty snapshot | Map silhouette with unavailable or empty status respectively, and the page remains usable |
+| Populated snapshot | Hero markers for the selected year, overall totals, and paged project information in a native disclosure |
 | Supported record with absent optional text or counters | Render remaining information and identify missing values |
-| Malformed snapshot, row or hostile text | Report unavailable for unreadable or invalid snapshot or a nonempty snapshot with no valid rows. Skip structurally invalid rows in mixed snapshots. Escape text without generating URLs |
+| Malformed snapshot, row or hostile text | Report unavailable for unreadable or invalid snapshot or a nonempty snapshot with no valid rows. Skip structurally invalid rows in mixed snapshots. Escape text and use only validated coordinates for markers |
 | Archived, removed or restored runs | Reflect the current compiled snapshot and retain existing project access rules |
 
 Missing and empty snapshots are anticipated conditions. An unreadable or
@@ -90,7 +107,10 @@ and the repository's existing AA theme baseline. Include a skip link, one
 main landmark and H1, logical headings, labeled controls, table headers,
 descriptive links, visible keyboard focus, readable text at 200% zoom,
 usable narrow layouts with and without scripts, and no reliance on color or mouse hover.
-Verify served output with keyboard and axe across default,
+Verify desktop and narrow screenshots show the map as the dominant hero.
+Check marker alignment and separability from land and water,
+filter and pagination behavior, and disclosure focus
+in served output. Verify with keyboard and axe across default,
 light-high-contrast, ayu-mirage, ayu-mirage-bordered and cursor-dark-midnight.
 Keep any horizontal table overflow contained, with a named focusable
 scroll region and keyboard guidance when scripts are disabled. Verify the

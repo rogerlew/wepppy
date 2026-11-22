@@ -15,6 +15,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] (2026-11-22 19:02 UTC) Inventory content, shared shell and UI Lab consumers.
 - [x] Commit the reviewed contract and record its revision in the tracker.
 - [x] Verify the locally served route, data states, theme and keyboard behavior.
+- [ ] Review, implement and verify the Atlas hero correction.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 
@@ -29,6 +30,9 @@ retirement must preserve this independently used renderer.
 2026-11-22 UTC. Use `base_pure.htm` and a scoped stylesheet for consistent
 layout and themes. Use a native year filter and paginated atlas table for
 access to the existing snapshot without a map renderer or client package.
+The operator subsequently clarified that the Atlas is the visual hero.
+Make a bundled world silhouette with server-rendered CSS markers the
+primary visual and put the table in a native disclosure.
 
 ## Outcomes & Retrospective
 

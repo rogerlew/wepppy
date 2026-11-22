@@ -4,7 +4,8 @@ Started 2026-11-22 19:02 UTC.
 
 - [x] Inventory current landing sections, theme patterns and shared assets.
 - [x] Commit the contract checkpoint and review disposition.
-- [x] Render and verify the review route.
+- [x] Render and verify the initial review route.
+- [ ] Review and implement the Atlas hero correction.
 - [ ] Complete manual screen-reader and assistive-technology acceptance.
 - [ ] Obtain human acceptance before cutover and UI Lab retirement.
 
@@ -33,3 +34,7 @@ and the shape and GeoParquet parser provenance. The isolated preview
 instance mounted the pinned Comrak package for the browser run.
 
 [Review findings and browser evidence](artifacts/20261122_correctness_review.md).
+
+The operator's Atlas feedback supersedes the table-only presentation.
+The [hero correction](artifacts/20261122_atlas_hero_contract_decision.md)
+records the new contract and local review scope.
