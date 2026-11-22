@@ -69,7 +69,8 @@ Under the resource cards, show a WEPPcloud Stack subsection with a linked name a
 short role description for wepppy, wepppyo3, weppcloud-wbt, peridot, jimf-cligen532,
 rosetta, soil-data-access, and wepp-forest. Identify wepp-forest as private and
 requiring collaborator access. Include topaz and oxidized-rasterstats for their
-terrain delineation and raster analysis roles.
+terrain delineation and raster analysis roles. Link the upstream devalc/WEPPcloudR
+reporting project and jackson-nakae/PATH-cost-effective treatment optimizer.
 Present resources as action links, contacts as a
 directory and affiliates as individual themed cards with a linked logo and visible name.
 Display the nine original light landing captions, including mottos, verbatim
