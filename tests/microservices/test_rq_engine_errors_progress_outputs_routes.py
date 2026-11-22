@@ -8,6 +8,7 @@ import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
+from tests.factories.redis import make_redis_prep
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import (
     job_routes,
@@ -395,17 +396,12 @@ def test_outputs_artifact_source_run_revision_uses_unknown_sentinel_when_unavail
 ) -> None:
     runtime = _sample_schema_runtime()
 
-    class _FakePrep:
-        def get_rq_job_id(self, key: str) -> str | None:
-            return "rq-998"
-
-        def get_rq_job_ids(self) -> dict[str, str]:
-            return {}
+    prep = make_redis_prep(initial_job_ids=[("features_export", "rq-998")])
 
     artifact_path = tmp_path / "features_export.zip"
     artifact_path.write_bytes(b"abc123")
 
-    monkeypatch.setattr(schema_defaults_outputs.RedisPrep, "getInstance", lambda wd: _FakePrep())
+    monkeypatch.setattr(schema_defaults_outputs, "RedisPrep", prep)
     monkeypatch.setattr(
         schema_defaults_outputs,
         "get_wepppy_rq_job_info",
@@ -439,17 +435,12 @@ def test_outputs_artifact_accepts_legacy_missing_job_runid_when_artifact_is_run_
 ) -> None:
     runtime = _sample_schema_runtime()
 
-    class _FakePrep:
-        def get_rq_job_id(self, key: str) -> str | None:
-            return "rq-999"
-
-        def get_rq_job_ids(self) -> dict[str, str]:
-            return {}
+    prep = make_redis_prep(initial_job_ids=[("features_export", "rq-999")])
 
     artifact_path = tmp_path / "features_export_legacy.zip"
     artifact_path.write_bytes(b"legacy")
 
-    monkeypatch.setattr(schema_defaults_outputs.RedisPrep, "getInstance", lambda wd: _FakePrep())
+    monkeypatch.setattr(schema_defaults_outputs, "RedisPrep", prep)
     monkeypatch.setattr(
         schema_defaults_outputs,
         "get_wepppy_rq_job_info",

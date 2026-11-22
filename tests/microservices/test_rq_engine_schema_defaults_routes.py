@@ -172,6 +172,11 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch, scope: str, *, token_class: str 
     monkeypatch.setattr(schema_defaults_routes, "authorize_run_access", lambda claims, runid: None)
 
 
+def _stub_authorized_sample_run(monkeypatch: pytest.MonkeyPatch, scope: str) -> None:
+    _stub_auth(monkeypatch, scope)
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+
 def _assert_canonical_error(payload: dict[str, Any], *, code: str | None = None) -> None:
     assert set(payload).issuperset({"error"})
     assert isinstance(payload["error"], dict)
@@ -206,8 +211,7 @@ def test_schema_defaults_routes_reject_wrong_scope(monkeypatch: pytest.MonkeyPat
 
 @pytest.mark.parametrize("scope", ("rq:status", "rq:read"))
 def test_schema_defaults_routes_accept_supported_scopes(monkeypatch: pytest.MonkeyPatch, scope: str) -> None:
-    _stub_auth(monkeypatch, scope)
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, scope)
 
     with TestClient(rq_engine.app) as client:
         for path in SCHEMA_DEFAULT_PATHS:
@@ -247,8 +251,7 @@ def test_schema_defaults_routes_reject_run_access_without_loading_state(
 
 
 def test_list_controllers_payload_contract(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         response = client.get(CONTROLLERS_PATH)
@@ -301,8 +304,7 @@ def test_list_controllers_payload_contract(monkeypatch: pytest.MonkeyPatch) -> N
 
 
 def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         schema_response = client.get(CONTROLLER_SCHEMA_PATH)
@@ -377,8 +379,7 @@ def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPa
 
 
 def test_controller_routes_return_404_for_unknown_controller(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         for suffix in ("schema", "hints", "templates"):
@@ -388,8 +389,7 @@ def test_controller_routes_return_404_for_unknown_controller(monkeypatch: pytest
 
 
 def test_list_run_endpoints_payload_contract(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         response = client.get(RUN_ENDPOINTS_PATH)
@@ -450,8 +450,7 @@ def test_list_run_endpoints_payload_contract(monkeypatch: pytest.MonkeyPatch) ->
 
 
 def test_run_endpoint_schema_and_defaults_payload_contract(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         schema_response = client.get(RUN_ENDPOINT_SCHEMA_PATH)
@@ -594,8 +593,7 @@ def test_landuse_operations_are_discoverable_with_schema_and_defaults(
 def test_fetch_dem_and_build_channels_schema_marks_bounds_required_for_modes_0_1(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         response = client.get(
@@ -625,8 +623,7 @@ def test_fetch_dem_and_build_channels_schema_marks_bounds_required_for_modes_0_1
 def test_run_endpoint_schema_and_defaults_exist_for_each_listed_operation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         list_response = client.get(RUN_ENDPOINTS_PATH)
@@ -655,8 +652,7 @@ def test_run_endpoint_schema_and_defaults_exist_for_each_listed_operation(
 
 
 def test_build_climate_defaults_emit_integer_climate_mode(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/defaults")
@@ -689,8 +685,7 @@ def test_build_climate_defaults_switch_to_future_years_for_future_mode(
 
 
 def test_build_climate_schema_includes_future_window_fields(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/schema")
@@ -735,8 +730,7 @@ def test_controller_schema_does_not_expose_unknown_runtime_climate_mode(
 def test_list_run_endpoints_can_include_operation_docs_snapshot(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         response = client.get(f"{RUN_ENDPOINTS_PATH}?include_operation_docs=true")
@@ -823,8 +817,7 @@ def test_operation_errors_return_live_registry_diagnostic_503(
 def test_list_run_endpoints_rejects_invalid_include_operation_docs_value(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         response = client.get(f"{RUN_ENDPOINTS_PATH}?include_operation_docs=maybe")
@@ -841,8 +834,7 @@ def test_list_run_endpoints_rejects_invalid_include_operation_docs_value(
 def test_build_soils_schema_and_defaults_require_disturbed_fields(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         schema_response = client.get(BUILD_SOILS_SCHEMA_PATH)
@@ -945,8 +937,7 @@ def test_build_soils_defaults_infer_sol_ver_from_disturbed9002_config_when_missi
 def test_build_rusle_schema_and_defaults_include_rock_fraction_partition(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         schema_response = client.get(BUILD_RUSLE_SCHEMA_PATH)
@@ -1015,8 +1006,7 @@ def test_run_endpoints_include_upload_sbs_for_baer_mod(monkeypatch: pytest.Monke
 def test_fork_endpoint_schema_and_defaults_include_skip_wepp_runs_output(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         schema_response = client.get(FORK_SCHEMA_PATH)
@@ -1064,8 +1054,7 @@ def test_run_endpoints_omit_upload_sbs_when_fire_mods_absent(monkeypatch: pytest
 def test_run_endpoint_errors_exist_for_each_listed_operation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         list_response = client.get(RUN_ENDPOINTS_PATH)
@@ -1170,8 +1159,7 @@ def test_readiness_ready_operations_are_discoverable_in_run_endpoints(
 def test_run_endpoint_detail_routes_return_404_for_unknown_operation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     with TestClient(rq_engine.app) as client:
         for suffix in ("schema", "defaults"):
@@ -1864,8 +1852,7 @@ def test_schema_defaults_route_internal_errors_return_canonical_500(
     path: str,
     patched: str,
 ) -> None:
-    _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    _stub_authorized_sample_run(monkeypatch, "rq:status")
 
     def _boom(*_args: Any, **_kwargs: Any) -> Any:
         raise RuntimeError("boom")
