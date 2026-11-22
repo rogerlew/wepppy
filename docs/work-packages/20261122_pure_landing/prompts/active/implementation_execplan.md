@@ -29,6 +29,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] Add the WEPPcloud Stack repository directory under Help and resources.
 - [x] Verify the 13-row GitHub table, private-model notes and phone layout on Forest.
 - [x] List the Rust CLIGEN port beside the Fortran generator.
+- [x] Checkpoint the accepted preview design and assess cutover and retirement.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 
@@ -59,7 +60,7 @@ Check explicit visibility during compilation before writing each location row.
 
 ## Outcomes & Retrospective
 
-The preview is locally implemented and reviewed. Focused pytest,
+The operator accepted the Forest preview design. The [cutover assessment](../../artifacts/20261122_cutover_assessment.md) records the remaining release work. Focused pytest,
 frontend lint and tests, and the public-page browser checks passed.
 The public cutover remains pending human approval and manual
 assistive-technology evidence. See the package tracker for the

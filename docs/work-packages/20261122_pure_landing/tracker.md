@@ -115,3 +115,7 @@ cligen-rs as the planned successor to the Fortran weather generator.
 The operator accepted the preview design as good enough for cutover assessment.
 Candidate implementation `08562c8f0` is checkpointed for review. Manual
 accessibility acceptance and the public route disposition remain open.
+
+[Final cutover assessment](artifacts/20261122_cutover_assessment.md)
+records the WIP checkpoint, route disposition proposal, verified renderer
+hashes, test results and outstanding acceptance conditions.
