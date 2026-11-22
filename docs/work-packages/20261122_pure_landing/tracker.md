@@ -7,7 +7,7 @@ Started 2026-11-22 19:02 UTC.
 - [x] Render and verify the initial review route.
 - [x] Reuse the Deck.gl Atlas and restore the original section order.
 - [ ] Complete manual screen-reader and assistive-technology acceptance.
-- [ ] Obtain human acceptance before cutover and UI Lab retirement.
+- [x] Obtain human acceptance and deploy the Jinja home on Forest.
 
 [Package](package.md) · [Execution plan](prompts/active/implementation_execplan.md) · [Contract decision](artifacts/20261122_contract_decision.md)
 
@@ -119,3 +119,5 @@ accessibility acceptance and the public route disposition remain open.
 [Final cutover assessment](artifacts/20261122_cutover_assessment.md)
 records the WIP checkpoint, route disposition proposal, verified renderer
 hashes, test results and outstanding acceptance conditions.
+
+[Forest cutover verification](artifacts/20261122_forest_cutover.md) records the approved deployment, public feed generation and cross-page map checks.

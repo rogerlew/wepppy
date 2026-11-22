@@ -1,19 +1,9 @@
 # Pure CSS landing migration
 
-Visitors can review a server-rendered, theme-aware landing page with the
-same scientific, help, attribution and funding content as the UI Lab page.
-Authors can update content through Jinja without a frontend build.
+Forest serves the approved landing through Jinja and the shared Pure CSS
+shell. The Atlas uses Deck.gl and MapLibre. Runs and GL dashboards share
+the checked-in MapLibre distribution. Content updates require no landing build.
 
-The target is faithful extraction of semantic content. The preview also
-reuses the Deck.gl Run Atlas as the main visual after About, with keyboard
-access to map information. The human approval
-gate covers layout, content and accessibility before switching home routes
-and retiring UI Lab. The [canonical landing contract](../../ui-docs/contracts/pure-landing-contract.md)
-defines the intended behavior.
-
-Complexity budget: one additive Flask route, Jinja, scoped CSS and existing
-public data and shell. Security impact is low. The preview reads the existing
-public snapshot and renders escaped HTML and bounded map inputs with no project links or new
-permissions. A dedicated security review artifact is unnecessary at this
-scope. The cutover retains the separately used Forest Service renderer with
-its existing security boundary.
+See the [delivery contract](../../ui-docs/contracts/pure-landing-contract.md),
+[Forest cutover verification](artifacts/20261122_forest_cutover.md) and
+[tracker](tracker.md). Manual Section 508 conformance review remains open.

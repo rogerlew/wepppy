@@ -905,8 +905,8 @@ When resuming Kubernetes work:
 ### Pure CSS landing migration
 
 The [work package](docs/work-packages/20261122_pure_landing/package.md) tracks
-a theme-aware landing preview and Section 508 evidence. Human acceptance
-gates the public cutover and UI Lab retirement.
+the Jinja home deployed on Forest, retirement of the separate frontend build,
+and the remaining manual Section 508 conformance review.
 
 ### Channel delineation map boundary
 
