@@ -10,7 +10,8 @@ The operator authorized committing the reviewed contract and scaffolding executi
 
 ## Progress
 
-- [ ] November 21: implement and validate the temporary Rocket batch-owner admission pilot described below.
+- [x] November 22. Implemented and activated the temporary Rocket batch-owner cap on the three-host fleet. Four Rocket test catalogs passed peer readback.
+- [ ] Record matched production-window performance and natural-cycle capacity acceptance. The [rollout checkpoint](../../tracker.md#november-22-production-rollout-closeout) records the 33-hour cycle in progress and the wpc1 handoff.
 
 - 2026-11-21 UTC. Implemented the Admin/Root RQ catalog panels against reviewed checkpoint `2dacc6b57`. The route and real-Redis catalog suites passed 58 tests.
 
@@ -150,6 +151,8 @@ state, shortening reconciliation spacing or weakening global acceptance.
 - 2026-10-23 / scaffold: Implement prerequisites and prove consumer compatibility before any producer wave is enabled. Public pending-state API/UX changes are not part of initial execution.
 - 2026-10-23 / validation: Keep the full isolated scientific run unchanged after discovering duplicate raw daily records. Record the independent report failure and expected finalizer limitation separately from successful catalog behavior; a scientific repair is outside this catalog change.
 ## Outcomes & Retrospective
+
+November 22 closed the deployment milestone. Production admission and cross-host artifact readback passed. The current cycle exceeded the configured 24-hour target. Fleet-capacity acceptance remains open.
 
 - November 21: experimental evidence is complete for the six-file sibling fixture. Real RQ admission, operator visibility, rollback and the large-child workload remain pilot gates.
 

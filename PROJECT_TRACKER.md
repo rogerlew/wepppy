@@ -154,7 +154,7 @@ Completed (local implementation): [Roads GL Dashboard](docs/work-packages/202610
 
 Completed (local implementation): [Roads activation messaging](docs/work-packages/20261023_roads_activation_messaging/package.md) — actionable server-configuration explanation and project-URL support handoff; 21 route tests plus direct guard/response readback pass. Text-only change; no deployment or project repair.
 
-Bounded execution complete; general enablement HOLD: [Query-engine asynchronous catalog refresh](docs/work-packages/20261023_query_catalog_async_refresh/package.md) — full deployment `0da9c9071` on wepp1–3; shared-batch pilot passed 17 jobs, two eight-scope artifact waves and 48 query checks with pause/resume recovery. Scratch scopes retired; async remains disabled. Whole-fleet cycle capacity and new-arrival delay are separate gates. See [acceptance](docs/work-packages/20261023_query_catalog_async_refresh/artifacts/20261027_shared_pilot_acceptance.md).
+Deployed on wepp1–3. [Query catalog production rollout](docs/work-packages/20261023_query_catalog_async_refresh/tracker.md#november-22-production-rollout-closeout) enables general refresh and the Rocket cap of two outstanding refreshes per batch owner. Fleet-capacity acceptance remains open.
 
 Completed (local implementation): [Roads validation suite](docs/work-packages/20261023_roads_validation_suite/package.md) — 516 cases across all four textures, isolated project checks and vendored Usersum report; two bounded legacy-input repairs. Implementation `a501c15cc`; full regression 11,647 passed/131 skipped; independent reviews pass. Full-upload unrutted rejection and qualified positive subset documented; no deployment.
 

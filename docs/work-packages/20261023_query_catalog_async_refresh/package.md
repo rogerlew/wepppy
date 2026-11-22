@@ -1,6 +1,8 @@
 # Query catalog asynchronous refresh
 
-Status (2026-10-27): **authorized implementation, deployment and bounded shared-batch
+**November 22, 2026. Implementation and production rollout complete. Fleet-capacity acceptance remains open.** General asynchronous refresh is enabled on shared default. Rocket batch admission limits each owner to two outstanding refreshes within the global ceiling of seven. The [November 22 checkpoint](tracker.md#november-22-production-rollout-closeout) records the measured state and remaining acceptance work.
+
+October 27 historical status: **authorized implementation, deployment and bounded shared-batch
 pilot complete; general fleet enablement HOLD.** Full canonical deployment of
 `0da9c9071` completed on wepp1–3. The actual pilot passed one inventory and
 16 refresh jobs on both production batch hosts, both eight-scope artifact waves,
@@ -8,7 +10,7 @@ pilot complete; general fleet enablement HOLD.** Full canonical deployment of
 pause/resume recovery. Scratch scopes are retired into private evidence storage.
 General async remains disabled; whole-fleet capacity is not inferred from this pilot.
 
-Current authority and evidence: [shared pilot acceptance](artifacts/20261027_shared_pilot_acceptance.md),
+October pilot evidence: [shared pilot acceptance](artifacts/20261027_shared_pilot_acceptance.md),
 [tracker](tracker.md), and [active plan](prompts/active/implementation_execplan.md).
 Historical undeployed/source-only-candidate statements in retained artifacts are
 superseded by the separately authorized full deployment and this acceptance.

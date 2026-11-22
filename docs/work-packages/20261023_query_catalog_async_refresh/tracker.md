@@ -1,6 +1,14 @@
 # Query catalog refresh tracker
 
-## Status
+## November 22 production rollout closeout
+
+Release `dfc1eaa74` is active on wepp1, wepp2 and wepp3. The same wepp1-built image passed all three host identity checks. On Rocket NFS, the candidate admitted two siblings, deferred a third and admitted another owner. All four test receipts drained and wepp2 queried all four Parquet artifacts. The final focused catalog suite passed 74 tests.
+
+At the 09:50:59 UTC production scheduler tick, admission was open with 12 compatible default workers, a global ceiling of seven and a cap of two in `wc1:batch`. The tick reported zero reconciliation errors and zero unavailable namespaces. The current cycle began November 21 at 00:51:28 UTC. After about 33 hours, 10,440 locators remained pending and the scheduler had recorded no completion for that cycle. The configured target is 24 hours. The four catalog jobs stopped for deployment remained tracked in the dirty index for autonomous reconciliation.
+
+Keep fleet acceptance open for a natural completed cycle with oldest-unreconciled age, ordinary-job delay and peer artifact readback. Matched production windows with large batch children remain the test of the Rocket cap's performance. At migration, clear the Rocket selector before redirecting the namespace, then reevaluate on wpc1 as recorded in the deployments repository's RKE2 cutover maintenance window. [Rocket cap decision](../../adrs/ADR-0156-rocket-batch-owner-admission.md)
+
+## Historical status
 
 2026-11-06: operator requests production cutover alongside notifications. Combined
 planning is recorded in [production readiness](../20261105_production_notifications_catalog_cutover/notes/production-deployment-readiness.md#combined-notification-and-query-catalog-production-cutover).
