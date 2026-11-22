@@ -379,3 +379,9 @@ Use the Rocket NFS study `/wc1/query-catalog-validation/batch-owner-qh05IUvH/evi
 Land the admission code disabled and stage it with the next routine deployment that covers every admission producer. Model jobs can call request_catalog_refresh on default or batch workers, independently of scheduler reconciliation. Updating the scheduler alone cannot enforce a fleet-wide limit. Keep the activation setting in admission policy, outside the exact-match worker compatibility advertisement and serialized job configuration. Read it at admission time so activation and rollback require only a policy change.
 
 Before activating, verify the deployed admission implementation on every producer, including both worker pools that run model jobs. Verify queued legacy jobs can execute across revisions. Account for existing outstanding refreshes and let an owner already above two drain through normal completion. Rehearse activation and rollback with ordinary default and batch jobs in flight. Verify the same workers remain registered, the in-flight jobs finish with their artifacts, the default and batch queues continue serving work, and receipt drainage resumes for deferred owners. Avoid a dedicated worker rollout for this temporary optimization. If routine deployment cannot preserve in-flight work, leave the pilot disabled until a suitable window or the wpc1 reevaluation.
+
+Implementation checkpoint on November 21. The watched cap and admin monitoring
+are implemented. Independent correctness and security reviews closed the
+malformed selector and retained-scope findings. Disposable Redis and real RQ
+scheduler/worker tests demonstrated cross-alias admission, other-owner progress,
+receipt drainage and catalog readback. Fleet rollout and Rocket acceptance remain open.
