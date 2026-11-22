@@ -8,11 +8,13 @@ Allow a producer to change a migrated asset location once while preserving both 
 
 - [x] 2026-11-22 UTC. Scaffold the contract, source boundaries, scoped tests, actual-project protocol and independent planning reviews.
 - [x] M0. Verified the reviewed contract commit `1b51ac142` is an ancestor of the clean implementation baseline `a957440ab`. The decision matrix and three scaffold reviews cover the two selected families. Implementation must preserve the four existing owner contracts.
-- [ ] M1. Implement shared naming behind both consumer adapters and exercise the scoped local matrix.
+- [x] M1. Candidate `f17ec6ca3681efd5f93207a8b825b1059c94c177` passed the scoped producer, export, query and RQ suites. The native producers retain independent filename contracts.
 - [ ] M2. Execute the actual-project gate and the matched isolated export/writer replays.
 - [ ] M3. Review evidence, publish disposition and decide whether to migrate additional families.
 
 ## Surprises & Discoveries
+
+The CLI watershed migration also publishes from legacy NoDb data. It now uses the same declaration as Peridot finalization. Roads and baseline readiness checks consume the declared hill-loss name. Existing native writers still choose their own filenames and require independent artifact verification.
 
 Export planners inspect raw locator values for geometry/carrier and SWAT table expansion. Export dependency identity can preserve an authorized parent-relative spelling that is invalid as an external query key. A shared physical-path normalizer could break both consumers.
 

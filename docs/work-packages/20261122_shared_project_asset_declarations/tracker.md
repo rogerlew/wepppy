@@ -6,7 +6,7 @@ Opened 2026-11-22 UTC. Owner group: project asset producers, Feature Export, que
 | --- | --- |
 | Scaffold and design review | Complete for the scaffold. Three independent reviewers returned findings, which were addressed. See [contract decision](artifacts/20261122_contract_decision.md), [correctness review](artifacts/20261122_correctness_review.md) and [security review](artifacts/20261122_security_review.md). |
 | Contract checkpoint | Complete. Reviewed contract `1b51ac142` is an ancestor of implementation baseline `a957440ab`. |
-| Scoped tests and implementation | Pending. Record exact node IDs, revision and results. |
+| Scoped tests and implementation | Passed on `f17ec6ca3`. The combined suite passed 461 cases with no skips, including disposable-Redis RQ tests. The separate Roads inspection passed 6. Additional query/report regression coverage passed 261 cases, with overlap. [Scoped evidence](artifacts/20261122_scoped_validation.md). |
 | Actual production projects and isolated replay | Pending. Record coverage and mismatches against the [production protocol](artifacts/production_validation.md). |
 | Adoption/rollout | Open for later decision. |
 
