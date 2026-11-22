@@ -93,3 +93,6 @@ were verified on Forest following checkpoint `76bb04deb`.
 
 [Semantic parity and link verification](artifacts/20261122_semantic_parity.md)
 covers checkpoint `c7b2bc3d7`.
+
+[Visible funding, credits and disclaimer](artifacts/20261122_visible_references.md)
+records Forest verification following contract checkpoint `3ede01d55`.

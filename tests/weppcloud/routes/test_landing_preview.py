@@ -89,7 +89,11 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
         assert [link.text for link in group.select("a.wc-nav__link")] == [
             "Interfaces", "Docs", "Research", "Login",
         ]
-    assert "22-IA-11261975-090" in page.get_text()
+    assert not page.select("main details, main summary")
+    funding = page.select_one("dl.wc-landing__funding")
+    assert len(funding.select("dt > a")) == len(funding.select("dd")) == 5
+    assert "22-IA-11261975-090" in funding.select_one("dd").get_text()
+    assert len(page.select(".wc-landing__legal p")) == 3
     assert "simulation outputs are estimates" in page.get_text()
     assert "Run Atlas data is temporarily unavailable." in page.get_text()
 

@@ -120,15 +120,24 @@
   <section class="wc-landing__section" aria-labelledby="sponsors-heading">
     <h2 id="sponsors-heading">Sponsors</h2>
     <p class="wc-landing__reading">WEPPcloud development is supported by grants from federal agencies, international research programs, and scientific funding bodies.</p>
-    <ul class="wc-landing__links wc-landing__funders" role="list">
-      {% for org in content.sponsors %}<li><a href="{{ org.link }}">{{ org.name }}</a></li>{% endfor %}
-    </ul>
-    <details class="wc-landing__disclosure">
-      <summary>Funding acknowledgments</summary>
+    <dl class="wc-landing__funding">
       {% for org in content.sponsors %}
-      <p>{% for word in org.caption.split() %}{% if '-' in word and word[0].isdigit() or word.startswith('IIA-') %}<span class="wc-landing__grant">{{ word }}</span>{% else %}{{ word }}{% endif %}{{ ' ' if not loop.last }}{% endfor %}</p>
+      <div>
+        <dt><a href="{{ org.link }}">{{ org.name }}</a></dt>
+        <dd>
+          {%- for word in org.caption.split() -%}
+            {%- if ('-' in word and word[0].isdigit()) or word.startswith(('IIA-', 'NE/')) -%}
+              {%- set grant, separator, suffix = word.partition('/project') -%}
+              <span class="wc-landing__grant">{{ grant }}</span>{{ separator }}{{ suffix }}
+            {%- else -%}
+              {{ word }}
+            {%- endif -%}
+            {{- ' ' if not loop.last -}}
+          {%- endfor -%}
+        </dd>
+      </div>
       {% endfor %}
-    </details>
+    </dl>
   </section>
 
   <section class="wc-landing__section" aria-labelledby="contributors-heading">
@@ -144,8 +153,7 @@
   <section id="attributions" class="wc-landing__section" aria-labelledby="attributions-heading">
     <h2 id="attributions-heading">Attributions and data sources</h2>
     <p class="wc-landing__reading">WEPPcloud leverages open data, research-quality datasets, and mapping services from partners worldwide.</p>
-    <details class="wc-landing__disclosure">
-      <summary>Map credits and regional data documentation</summary>
+    <div class="wc-landing__references">
       <div>
         <h3>Map services</h3>
         <p>
@@ -159,19 +167,18 @@
             USDA, U.S. Forest Service</a> · Forest Service - Geospatial Office.
           Google Terrain is the default.
         </p>
-        <details>
-          <summary>Forest Service map use limitations</summary>
-          <p>
-            This map cannot establish ownership, legal boundaries, jurisdiction, or access rights.
-            Obtain permission before entering private land and check public-land restrictions.
-            For motor-vehicle access, consult official Motor Vehicle Use Maps or the Forest Service.
-            Hazards may be absent. This map is unsuitable for navigation. No endorsement is implied.
-          </p>
-        </details>
+
         <p>
           Hydrography flowlines come from the
           <a href="https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/">U.S. Geological Survey NHDPlus HR network flowlines</a>.
           <a href="https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/metadata">View the flowline metadata</a>.
+        </p>
+        <h4>Forest Service map use limitations</h4>
+        <p>
+          This map cannot establish ownership, legal boundaries, jurisdiction, or access rights.
+          Obtain permission before entering private land and check public-land restrictions.
+          For motor-vehicle access, consult official Motor Vehicle Use Maps or the Forest Service.
+          Hazards may be absent. This map is unsuitable for navigation. No endorsement is implied.
         </p>
       </div>
       <div>
@@ -184,13 +191,12 @@
           <li><a href="{{ attribution_url }}#global-and-earth-workflows">Earth</a></li>
         </ul>
       </div>
-    </details>
+    </div>
   </section>
 
-  <section class="wc-landing__section" aria-labelledby="disclaimer-heading">
+  <section class="wc-landing__section wc-landing__legal" aria-labelledby="disclaimer-heading">
     <h2 id="disclaimer-heading">Legal disclaimer</h2>
-    <details class="wc-landing__disclosure wc-landing__reading">
-      <summary>Model outputs are estimates. Read the full disclaimer.</summary>
+    <div class="wc-landing__reading">
       <p>
         WEPPcloud simulation outputs are estimates derived from mathematical models and
         publicly available geospatial data. They are not a substitute for professional
@@ -214,7 +220,7 @@
         subject to uncertainty and agree that you bear sole responsibility for any decisions,
         actions, or consequences arising from their use.
       </p>
-    </details>
+    </div>
   </section>
 </div>
 {% endblock %}

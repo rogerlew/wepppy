@@ -9,6 +9,7 @@
 
 /* Keep the shared controls within the available width, including long theme names. */
 .wc-landing-header { flex-wrap: wrap; }
+.wc-landing-header .wc-header__nav,
 .wc-landing-header .wc-header__tools,
 .wc-landing-header .wc-theme-switcher,
 .wc-landing-header .wc-theme-switcher label,
@@ -18,6 +19,7 @@
 }
 .wc-landing-header .wc-theme-switcher__select { width: auto; }
 
+.wc-landing__desktop-links { flex-wrap: wrap; }
 .wc-landing__mobile-menu { display: none; }
 
 @media (max-width: 540px) {
@@ -34,8 +36,6 @@
   .wc-landing-header .wc-header__tools { grid-column: 1 / -1; }
   .wc-landing-header:has(.wc-landing__mobile-menu:not([open])) .wc-header__tools { display: none; }
 }
-
-.wc-landing__disclosure summary { cursor: pointer; }
 
 .wc-landing__skip[href]:any-link {
   position: absolute;
@@ -106,11 +106,35 @@
 .wc-landing__logo:has(img[src*="michigan-tech"]) { background-color: #172325; }
 .wc-landing__contributors { columns: 4 11rem; column-gap: 2rem; }
 .wc-landing__contributors li { break-inside: avoid; padding-block: .15rem; }
-.wc-landing__disclosure { background: var(--wc-color-surface-alt); border-radius: var(--wc-radius-md); padding: .85rem 1rem; }
-.wc-landing__disclosure summary { font-weight: 600; }
-.wc-landing__disclosure > p, .wc-landing__disclosure > div { max-width: 76ch; }
-.wc-landing__funders { margin-block-end: 1rem; }
-.wc-landing__grant { white-space: nowrap; }
+.wc-landing__funding { margin: var(--wc-space-xl) 0 0; }
+.wc-landing__funding > div,
+.wc-landing__legal {
+  display: grid;
+  grid-template-columns: minmax(11rem, 1fr) minmax(0, 3fr);
+  gap: var(--wc-space-xl);
+  align-items: baseline;
+}
+.wc-landing__funding > div {
+  padding-block: var(--wc-space-lg);
+  border-block-start: 1px solid var(--wc-color-border);
+}
+.wc-landing__grant { display: inline-block; max-inline-size: 100%; overflow-wrap: anywhere; }
+.wc-landing__funding dt { font-weight: 600; }
+.wc-landing__funding dd { margin: 0; max-inline-size: 72ch; text-wrap: pretty; }
+.wc-landing__references {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--landing-gap);
+  margin-block-start: var(--wc-space-xl);
+}
+.wc-landing__references h3,
+.wc-landing__references p:first-of-type,
+.wc-landing__legal p:first-child { margin-block-start: 0; }
+.wc-landing__references h4 { margin-block: var(--wc-space-xl) var(--wc-space-sm); }
+.wc-landing__references ul { padding-inline-start: 1.25rem; }
+.wc-landing__references li + li { margin-block-start: var(--wc-space-xs); }
+.wc-landing__legal { padding-block-start: var(--wc-space-xl); border-block-start: 1px solid var(--wc-color-border); }
+.wc-landing__legal p { max-inline-size: 72ch; }
 .wc-landing__metrics { padding: 1rem 0; margin: 1rem 0; border-block: 1px solid var(--wc-color-border); }
 .wc-landing__metrics dt { font-size: .88rem; }
 .wc-landing__metrics dd { margin: .3rem 0 0; font-size: clamp(1.6rem, 4vw, 3rem); font-weight: 650; line-height: 1.1; }
@@ -125,7 +149,12 @@
 @media (max-width: 44rem) {
   .wc-landing-footer { padding-inline: 1rem; }
   .wc-landing__resources, .wc-landing-footer .wc-container { grid-template-columns: 1fr; }
-  .wc-landing__directory > li { grid-template-columns: 1fr; }
+  .wc-landing__directory > li,
+  .wc-landing__funding > div,
+  .wc-landing__references,
+  .wc-landing__legal { grid-template-columns: 1fr; }
+  .wc-landing__funding > div, .wc-landing__legal { gap: var(--wc-space-xs); }
+  .wc-landing__references { gap: var(--wc-space-xl); }
   .wc-landing__logos { grid-template-columns: 1fr 1fr; }
   .wc-landing__metrics { gap: .5rem; }
   .wc-landing__metrics dt { font-size: .78rem; }
