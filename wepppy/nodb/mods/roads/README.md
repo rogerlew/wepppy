@@ -327,10 +327,15 @@ The public package exports `Roads`, `MonotonicConversionSummary`, and the three
 `convert_geojson_*_to_monotonic_segments*` helpers listed explicitly in
 [__init__.py](__init__.py).
 
+The [controller tests](../../../../tests/nodb/mods/roads_controller/) group
+configuration and uploads, preparation, native input and PASS handling, routed
+and unrutted execution, reporting and inspection, and parameterization.
+Select the directory to run all controller cases.
+
 Focused checks for behavior changes:
 
 ```bash
-wctl run-pytest tests/nodb/mods/test_roads_controller.py tests/nodb/mods/test_roads_monotonic_segments.py --maxfail=1
+wctl run-pytest tests/nodb/mods/roads_controller tests/nodb/mods/test_roads_monotonic_segments.py --maxfail=1
 wctl run-pytest tests/nodb/mods/test_roads_parameterization.py tests/nodb/mods/test_roads_parameterization_comparisons.py --maxfail=1
 wctl run-pytest tests/nodb/mods/test_roads_segment_loss_summary.py tests/wepp/interchange/test_roads_accounting.py tests/wepp/interchange/test_roads_lifecycle.py --maxfail=1
 wctl run-pytest tests/weppcloud/routes/test_roads_bp.py tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1
