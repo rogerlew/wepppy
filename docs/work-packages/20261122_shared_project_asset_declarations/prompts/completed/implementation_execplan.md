@@ -1,5 +1,7 @@
 # Shared project asset declarations ExecPlan
 
+All four milestones completed for the first slice on 2026-11-22 UTC. The six production case classes passed. The scanner default, fleet capacity and rollout require separate decisions.
+
 ## Purpose and scope
 
 Allow a producer to change a migrated asset location once while preserving both existing export and query outcomes. Start from the [contract](../../../../schemas/shared-project-asset-declarations-contract.md) and [decision](../../artifacts/20261122_contract_decision.md). This plan owns consolidation; the older catalog refresh package owns fleet capacity and the temporary Rocket cap.
