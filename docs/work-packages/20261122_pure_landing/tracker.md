@@ -56,3 +56,10 @@ precede the implementation. [Verification](artifacts/20261122_deck_atlas_validat
 The operator asked to remove the inspection paragraph, draw run IDs on the
 map, and restore the production landing basemap. Production rendered CARTO
 Positron vector tiles successfully. This supersedes the Terrain preview.
+
+Forest now renders the same Positron vector basemap as the production
+landing, with run ID labels and the original lower-left zoom controls.
+The metrics are above the map and marker area follows hillslope count.
+The inspection paragraph is removed. Checkpoints `16234b319` and
+`051eb80ed` precede the correction.
+[Rendered evidence](artifacts/20261122_positron_atlas_validation.md).

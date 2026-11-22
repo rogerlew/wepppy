@@ -1,50 +1,55 @@
-import { createBasemapDefs } from './gl-dashboard/config.js';
 import { createMapController } from './gl-dashboard/map/controller.js';
-import { createBasemapController } from './gl-dashboard/map/basemap-controller.js';
 
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const CARTO_ASSETS = /^\/v\/\d{8}-\d{2}\/(?:vectortiles\/carto\.streets\/v2\/\d+\/\d+\/\d+\.mvt|fonts\/[^/]+\/\d+-\d+\.pbf|gl\/positron-gl-style\/sprite(?:@2x)?\.(?:json|png))$/;
 const INITIAL_VIEW = { longitude: -98.5795, latitude: 39.8283, zoom: 3.5, minZoom: 1, maxZoom: 14, pitch: 35, bearing: 0 };
 const PAN = { ArrowLeft: [-80, 0], ArrowRight: [80, 0], ArrowUp: [0, -80], ArrowDown: [0, 80] };
 
+function basemapRequest(value) {
+  const url = new URL(value);
+  if (url.href !== MAP_STYLE && !(
+    url.origin === 'https://tiles.basemaps.cartocdn.com' &&
+    !url.username && !url.password && !url.search && !url.hash && CARTO_ASSETS.test(url.pathname)
+  )) {
+    throw new Error('Unexpected Run Atlas basemap resource.');
+  }
+  return { url: url.href, credentials: 'omit', referrerPolicy: 'no-referrer' };
+}
+
+function labelOffset({ run_id: runId }) {
+  let hash = 0;
+  for (let index = 0; index < runId.length; index += 1) {
+    hash = ((hash << 5) - hash + runId.charCodeAt(index)) | 0;
+  }
+  const angle = (Math.abs(hash) % 360) * Math.PI / 180;
+  const distance = 4 + Math.abs(hash % 7);
+  return [Math.round(6 + Math.cos(angle) * distance), Math.round(Math.sin(angle) * distance)];
+}
+
 function tooltip({ object }) {
   if (!object) return null;
-  const config = object.config === '' ? null : object.config;
   return [
     object.name || 'Unnamed run',
     `Run ID: ${object.run_id}`,
     `Location: ${object.latitude}, ${object.longitude}`,
-    `Config: ${config ?? 'Unknown'}`,
+    `Config: ${object.config === '' ? 'Unknown' : object.config ?? 'Unknown'}`,
     `Soil burn severity data: ${object.severity == null ? 'Unknown' : object.severity ? 'Yes' : 'No'}`,
+    `Hillslopes: ${object.hillslopes ?? 'Unknown'}`,
     `Accesses: ${object.access_count ?? 'Unknown'}`,
     `Last accessed: ${object.last_accessed || 'Unknown'}`,
   ].join('\n');
 }
 
-function initAtlas(figure, deck) {
+function initAtlas(figure, deck, maplibre) {
   const region = figure.querySelector('.wc-landing__atlas-map');
   const target = region.querySelector('.wc-landing__atlas-canvas');
   const status = figure.querySelector('.wc-landing__atlas-status');
   const controls = figure.querySelector('.wc-landing__atlas-controls');
   const keyboard = figure.querySelector('#atlas-keyboard');
-  const inspection = figure.querySelector('.wc-landing__atlas-inspection');
   const rows = JSON.parse(figure.querySelector('[data-atlas-rows]').textContent);
   const initialView = { ...INITIAL_VIEW, zoom: innerWidth < 560 ? 2.5 : INITIAL_VIEW.zoom };
   const position = row => [row.longitude === 180 ? -180 : row.longitude, row.latitude];
-  const { basemapDefs: { googleTerrain } } = createBasemapDefs();
-  const basemaps = createBasemapController({
-    deck,
-    basemapDefs: {
-      googleTerrain: {
-        ...googleTerrain,
-        getUrl(x, y, z) {
-          if (!Number.isInteger(z) || z < 0 || z > 19 ||
-              ![x, y].every(index => Number.isInteger(index) && index >= 0 && index < 2 ** z)) {
-            throw new RangeError('Invalid Run Atlas tile coordinates.');
-          }
-          return googleTerrain.getUrl(x, y, z);
-        },
-      },
-    },
-  });
+
   const centroids = new deck.ScatterplotLayer({
     id: 'run-centroids',
     data: rows,
@@ -53,57 +58,82 @@ function initAtlas(figure, deck) {
     radiusMinPixels: 4,
     radiusMaxPixels: 60,
     getPosition: position,
-    getRadius: row => Math.max(6, row.access_count ?? 1),
-    getFillColor: row => row.severity ? [142, 73, 234, 200] : [2, 132, 199, 200],
+    getRadius: row => Math.sqrt(row.hillslopes ?? 0),
+    getFillColor: row => row.severity ? [109, 40, 217, 200] : [2, 132, 199, 200],
     getLineColor: [255, 255, 255, 220],
     lineWidthUnits: 'pixels',
     getLineWidth: row => row.severity ? 3 : 1,
     stroked: true,
   });
 
-  let camera = initialView;
-  let inspected = -1;
-  const baseLayer = basemaps.createBaseLayer('googleTerrain').clone({
-    id: 'atlas-google-terrain',
-    onViewportLoad(tiles) {
-      if (tiles.length && tiles.every(tile => tile.content != null)) status.textContent = '';
-    },
-    onTileError(error) {
-      status.textContent = 'Some map tiles are unavailable.';
-      console.error(error);
-    },
+  const labels = new deck.TextLayer({
+    id: 'run-labels',
+    data: rows,
+    getPosition: position,
+    getText: row => row.run_id,
+    getSize: 1,
+    sizeUnits: 'pixels',
+    getColor: [30, 41, 59, 220],
+    getTextAnchor: 'start',
+    getAlignmentBaseline: 'bottom',
+    getPixelOffset: labelOffset,
   });
-
-  function layers() {
-    return [baseLayer, centroids, new deck.TextLayer({
-      id: 'run-labels',
-      data: rows,
-      visible: camera.zoom >= 5,
-      getPosition: position,
-      getText: row => row.name || row.run_id,
-      getSize: 12,
-      getColor: [30, 41, 59],
-      fontSettings: { sdf: true },
-      outlineWidth: 1,
-      outlineColor: [255, 255, 255],
-      getTextAnchor: 'start',
-      getPixelOffset: [9, 0],
-    })];
-  }
-
-  function updateCamera(next) {
-    const labelsChanged = (camera.zoom >= 5) !== (next.zoom >= 5);
-    camera = next;
-    map.setViewState(camera);
-    if (labelsChanged) map.applyLayers(layers());
-  }
+  const labelSize = zoom => Math.min(10, Math.max(1, zoom));
+  const layers = zoom => [centroids, labels.clone({ sizeScale: labelSize(zoom) })];
+  let camera = initialView;
 
   status.textContent = 'Loading Run Atlas map…';
   region.hidden = false;
-  const map = createMapController({
+  const basemap = new maplibre.Map({
+    container: region.querySelector('.wc-landing__atlas-basemap'),
+    style: MAP_STYLE,
+    center: [camera.longitude, camera.latitude],
+    zoom: camera.zoom,
+    pitch: camera.pitch,
+    bearing: camera.bearing,
+    interactive: false,
+    attributionControl: false,
+    renderWorldCopies: false,
+    transformRequest: basemapRequest,
+  });
+  basemap.getCanvas().tabIndex = -1;
+  let basemapFailed = false;
+  let basemapRemoved = false;
+  const removeBasemap = () => {
+    if (!basemapRemoved) {
+      basemapRemoved = true;
+      basemap.remove();
+    }
+  };
+  basemap.once('style.load', () => {
+    basemap.on('movestart', () => { basemapFailed = false; });
+  });
+  basemap.on('error', ({ error }) => {
+    basemapFailed = true;
+    status.textContent = 'Some Run Atlas basemap resources are unavailable.';
+    console.error(error);
+  });
+  basemap.on('idle', () => {
+    if (!basemapFailed) status.textContent = '';
+  });
+
+  function updateCamera(next) {
+    const labelsChanged = labelSize(camera.zoom) !== labelSize(next.zoom);
+    camera = next;
+    map.setViewState(camera);
+    basemap.jumpTo({
+      center: [camera.longitude, camera.latitude],
+      zoom: camera.zoom,
+      pitch: camera.pitch,
+      bearing: camera.bearing,
+    });
+    if (labelsChanged) map.applyLayers(layers(camera.zoom));
+  }
+
+  const deckOptions = {
     deck, target, initialViewState: initialView,
     controllerOptions: { scrollZoom: false, dragRotate: false, touchRotate: false, keyboard: false },
-    layers: layers(),
+    layers: layers(camera.zoom),
     getTooltip: tooltip,
     onViewStateChange: ({ viewState }) => updateCamera(viewState),
     onAfterRender() {
@@ -117,6 +147,7 @@ function initAtlas(figure, deck) {
     },
     onError(error, layer) {
       if (!layer) {
+        removeBasemap();
         region.hidden = true;
         controls.hidden = true;
         keyboard.hidden = true;
@@ -124,27 +155,18 @@ function initAtlas(figure, deck) {
       status.textContent = 'Interactive map unavailable.';
       console.error(error);
     },
-  });
-  map.setViewState(camera);
+  };
+  let map;
+  try {
+    map = createMapController(deckOptions);
+    map.setViewState(camera);
+  } catch (error) {
+    removeBasemap();
+    throw error;
+  }
 
   region.addEventListener('keydown', event => {
-    if (event.altKey || event.metaKey || event.ctrlKey) return;
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      if (!rows.length) {
-        inspection.textContent = 'No project locations are plotted.';
-        return;
-      }
-      if (inspected === -1) {
-        inspected = event.shiftKey ? rows.length - 1 : 0;
-      } else {
-        inspected = (inspected + (event.shiftKey ? -1 : 1) + rows.length) % rows.length;
-      }
-      inspection.textContent = `Project ${inspected + 1} of ${rows.length}.
-${tooltip({ object: rows[inspected] })}`;
-      return;
-    }
-    if (!Object.hasOwn(PAN, event.key)) return;
+    if (!Object.hasOwn(PAN, event.key) || event.altKey || event.metaKey || event.ctrlKey) return;
     const [view] = map.deckgl.getViewports();
     if (!view) return;
     const [x, y] = PAN[event.key];
@@ -161,17 +183,15 @@ ${tooltip({ object: rows[inspected] })}`;
     });
   }
   controls.querySelector('[data-atlas-reset]').addEventListener('click', () => updateCamera(initialView));
-
 }
 
 const atlas = document.querySelector('[data-run-atlas]');
-if (atlas && globalThis.deck?.Deck) {
+if (atlas && globalThis.deck?.Deck && globalThis.maplibregl?.Map) {
   try {
-    initAtlas(atlas, globalThis.deck);
+    initAtlas(atlas, globalThis.deck, globalThis.maplibregl);
   } catch (error) {
     atlas.querySelector('.wc-landing__atlas-map').hidden = true;
-    atlas.querySelector('.wc-landing__atlas-status').textContent =
-      'Interactive map unavailable.';
+    atlas.querySelector('.wc-landing__atlas-status').textContent = 'Interactive map unavailable.';
     console.error(error);
   }
 }

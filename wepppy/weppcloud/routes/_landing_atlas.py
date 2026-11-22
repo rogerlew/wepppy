@@ -98,10 +98,7 @@ def build_landing_atlas(path: Path):
         "run_count": len(rows),
         "hillslopes": sum(row["hillslopes"] or 0 for row in rows),
         "latest_access": rows[0]["last_accessed"] if rows else None,
-        "map_rows": [
-            {key: value for key, value in row.items() if key != "hillslopes"}
-            for row in rows if abs(row["latitude"]) <= _MERCATOR_MAX_LATITUDE
-        ],
+        "map_rows": [row for row in rows if abs(row["latitude"]) <= _MERCATOR_MAX_LATITUDE],
         "quadrants": (
             ("North of the equator, west of Greenwich", quadrants[True, False]),
             ("North of the equator, east of Greenwich", quadrants[True, True]),

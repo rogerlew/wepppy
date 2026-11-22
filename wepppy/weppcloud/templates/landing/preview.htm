@@ -22,6 +22,9 @@
 
 {% block head_extras %}
 <meta name="referrer" content="no-referrer">
+{% if atlas and atlas.run_count %}
+<link rel="stylesheet" href="{{ static_url('ui-lab/maplibre/maplibre-gl.css') }}">
+{% endif %}
 <link rel="stylesheet" href="{{ static_url('css/landing.css') }}">
 {% endblock %}
 
@@ -136,7 +139,7 @@
         <h3>Map services</h3>
         <p>
           Project maps use <a href="https://www.google.com/maps">Google</a> Terrain and Satellite.
-          The original light landing uses <a href="https://www.openstreetmap.org/">OpenStreetMap contributors</a>
+          The Run Atlas uses <a href="https://www.openstreetmap.org/">OpenStreetMap contributors</a>
           and <a href="https://carto.com/attributions">CARTO</a> tiles.
         </p>
         <p data-forest-service-credit>
@@ -217,6 +220,7 @@
 {% block script_extras %}
 {{ super() }}
 {% if atlas and atlas.run_count %}
+<script src="{{ static_url('ui-lab/maplibre/maplibre-gl.js') }}" defer></script>
 <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js" referrerpolicy="no-referrer" defer></script>
 <script type="module" src="{{ static_url('js/landing-atlas.js') }}"></script>
 {% endif %}

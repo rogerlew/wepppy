@@ -120,9 +120,15 @@ def test_preview_maps_the_full_public_atlas_without_year_controls(preview):
 
     response, page = _get(client, "/landing/preview/?year=2025")
     assert not page.select("#map details, #map table, #map form, select[name=year]")
-    assert page.select_one("#map a[href='https://www.google.com/maps']").text == "Google Terrain"
+    assert page.select_one("#map a[href='https://carto.com/attributions']").text == "CARTO"
+    assert page.select_one("#map > .wc-landing__metrics + [data-run-atlas]")
+    assert "Larger markers indicate more hillslopes." in page.select_one("#map figcaption").get_text()
+    assert {button["aria-label"] for button in page.select("#map button")} == {
+        "Zoom map in", "Zoom map out", "Reset map view",
+    }
     assert "North of the equator, west of Greenwich: 27." in page.select_one("#atlas-geography").get_text()
-    assert "Enter reads the next project" in page.select_one("#atlas-keyboard").get_text()
+    assert "Use the arrow keys to pan." in page.select_one("#atlas-keyboard").get_text()
+    assert not page.select(".wc-landing__atlas-inspection")
     assert page.select_one('script[src*="deck.gl"]')
     assert page.select_one('script[type=module][src$="landing-atlas.js"]')
 
@@ -136,7 +142,8 @@ def test_preview_maps_the_full_public_atlas_without_year_controls(preview):
     assert rows[-1]["run_id"] == "older"
     assert all("year" not in row for row in rows)
 
-    assert all("hillslopes" not in row for row in rows)
+    assert rows[0]["hillslopes"] == 4
+    assert rows[-1]["hillslopes"] is None
     assert "<script>26</script>" not in response.text
     assert "<b>config</b>" not in response.text
     assert "private preview field" not in response.text
@@ -152,7 +159,7 @@ def test_preview_keeps_polar_projects_in_summary(preview):
         [181, 20], [float("nan"), 20], [True, 20],
     ]
     path.write_text(json.dumps([
-        {"runid": f"run-{index}", "coordinates": coordinates}
+        {"runid": f"run-{index}", "coordinates": coordinates, "hillslopes": 0}
         for index, coordinates in enumerate(locations)
     ]), encoding="utf-8")
 
@@ -162,3 +169,4 @@ def test_preview_keeps_polar_projects_in_summary(preview):
     rows = json.loads(page.select_one("[data-atlas-rows]").string)
     assert [row["run_id"] for row in rows] == ["run-2", "run-3", "run-4"]
     assert [row["longitude"] for row in rows] == [0, 180, -180]
+    assert all(row["hillslopes"] == 0 for row in rows)
