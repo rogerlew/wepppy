@@ -11,15 +11,11 @@ import pandas as pd
 import pyarrow.parquet as pq
 
 from wepppy.all_your_base import find_ranges
-from wepppy.wepp.interchange.watershed_loss_interchange import run_wepp_watershed_loss_interchange
+from wepppy.wepp.interchange.watershed_loss_interchange import (
+    AVERAGE_FILENAMES,
+    run_wepp_watershed_loss_interchange,
+)
 
-
-AVERAGE_FILENAMES = {
-    "hill": "loss_pw0.hill.parquet",
-    "chn": "loss_pw0.chn.parquet",
-    "out": "loss_pw0.out.parquet",
-    "class_data": "loss_pw0.class_data.parquet",
-}
 
 def _ensure_interchange_assets(output_dir: Path) -> Dict[str, Path]:
     assets = {}

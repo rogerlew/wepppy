@@ -1,6 +1,6 @@
 # Shared project asset declarations
 
-Status: proposed contract-first checkpoint. Runtime conformance and production acceptance are pending. The [work package](../work-packages/20261122_shared_project_asset_declarations/package.md) tracks review and evidence.
+Status: first-slice candidate tested locally and against original projects on both Rocket NFS clients. The production scenario layout uses the parent watershed and child-local hill loss. The [work package](../work-packages/20261122_shared_project_asset_declarations/package.md) tracks review and evidence.
 
 ## Ownership and scope
 
@@ -8,7 +8,13 @@ Each migrated dataset family has one stable internal identity and one producer-o
 
 Feature Export owns its layer catalog, joins, column behavior, geometry, required/optional roles, display metadata and dependency fingerprints. The query engine owns discoverability, freshness, access checks, schema verification and publication. An asset reference by a consumer, including a dependency marker, grants neither query visibility nor permission to access a file. Share naming below the two consumers. Each consumer adapts a declaration into its existing contract, including its path spelling and error behavior.
 
-The first slice covers `watershed/hillslopes.parquet` and the loss table `wepp/output/interchange/loss_pw0.hill.parquet`, including existing output-scope substitutions and named Omni projections. Baseline/Roads template expansion applies only to layers that support it today. Existing Omni scenario and contrast loss projections use their baseline paths. Production membership outside this slice continues under existing rules. Normal, scenario and contrast views resolve independently. Parent-qualified visibility is explicit. A child key in its own catalog does not add that key to the parent's listing. A layer that already resolves an explicitly qualified path can continue to use it even when the parent query catalog omits it.
+The first slice covers `watershed/hillslopes.parquet` and the loss table `wepp/output/interchange/loss_pw0.hill.parquet`, including existing output-scope substitutions and named Omni projections. Baseline/Roads template expansion applies only to layers that support it today. Existing Omni scenario and contrast loss projections use their baseline paths. Production membership outside this slice continues under existing rules. Normal, scenario and contrast views resolve independently. Generated Omni scenarios link the parent watershed. Validate the physical identity of that shared table and the scenario-local loss result on actual projects. Historical layouts with a local watershed retain existing selection behavior. Parent-qualified visibility is explicit. A child key in its own catalog does not add that key to the parent's listing. A layer that already resolves an explicitly qualified path can continue to use it even when the parent query catalog omits it.
+
+## First-slice implementation
+
+`wepppy.project_assets` names the two logical families. The Peridot postprocessor, watershed migration and WEPP loss interchange adapter use those names when publishing or checking outputs. The native Peridot and WEPPpyo3 writers have their own filename contracts. A physical rename requires coordinated native changes and readback from the resulting binaries.
+
+Feature Export resolves declaration references when loading its layer catalog. Downstream planners and fingerprinting receive the existing locator representation. Query discovery still scans with its existing membership rules. The observer can select a declared key from an already published catalog for parity testing. Query execution remains responsible for selecting an authorized physical file.
 
 ## Identity and compatibility
 

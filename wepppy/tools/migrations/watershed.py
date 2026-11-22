@@ -14,6 +14,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from wepppy.project_assets import WATERSHED_HILLSLOPES
 from wepppy.tools.migrations.parquet_paths import pick_existing_parquet_path
 
 __all__ = [
@@ -331,7 +332,7 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
     watershed_dir = run_path / "watershed"
     watershed_nodb = run_path / "watershed.nodb"
     sidecar_parquets = [
-        watershed_dir / "hillslopes.parquet",
+        run_path / WATERSHED_HILLSLOPES.relative_path(),
         watershed_dir / "channels.parquet",
         watershed_dir / "flowpaths.parquet",
     ]
@@ -363,7 +364,7 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
         hillslope_rows = _legacy_hillslope_rows(state.get("_subs_summary"))
         applied, message = _write_legacy_parquet(
             hillslope_rows,
-            watershed_dir / "hillslopes.parquet",
+            run_path / WATERSHED_HILLSLOPES.relative_path(),
             [
                 "topaz_id",
                 "slope_scalar",
@@ -565,7 +566,7 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
 
     # Check that required parquet files exist
     required_parquets = [
-        "watershed/hillslopes.parquet",
+        WATERSHED_HILLSLOPES.relative_path(),
         "watershed/flowpaths.parquet",
         "watershed/channels.parquet",
     ]
@@ -646,7 +647,7 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
         import duckdb
         con = duckdb.connect()
 
-        hillslopes_path = pick_existing_parquet_path(run_path, "watershed/hillslopes.parquet")
+        hillslopes_path = pick_existing_parquet_path(run_path, WATERSHED_HILLSLOPES.relative_path())
         channels_path = pick_existing_parquet_path(run_path, "watershed/channels.parquet")
         if hillslopes_path is None or channels_path is None:
             raise FileNotFoundError("Missing required watershed parquet files")

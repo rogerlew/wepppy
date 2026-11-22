@@ -36,7 +36,7 @@ def test_watershed_loss_interchange_outputs_expected_tables(tmp_path: Path) -> N
 
     interchange_dir = workdir / "interchange"
     expected_paths = {
-        "average_hill": interchange_dir / AVERAGE_FILENAMES["hill"],
+        "average_hill": interchange_dir / "loss_pw0.hill.parquet",
         "average_chn": interchange_dir / AVERAGE_FILENAMES["chn"],
         "average_out": interchange_dir / AVERAGE_FILENAMES["out"],
         "average_class": interchange_dir / AVERAGE_FILENAMES["class_data"],
@@ -111,6 +111,17 @@ def test_watershed_loss_interchange_outputs_expected_tables(tmp_path: Path) -> N
     class_year_match = class_all[(class_all["year"] == 2003) & (class_all["Class"] == 4)].iloc[0]
     assert class_year_match["Diameter"] == pytest.approx(0.3)
     assert class_year_match["Fraction In Flow Exiting"] == pytest.approx(0.255)
+
+
+def test_watershed_loss_rejects_native_destination_drift(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / "loss_pw0.txt").touch()
+    monkeypatch.setattr(
+        _watershed_loss,
+        "call_wepppyo3_interchange",
+        lambda *args: {"output_paths": [str(tmp_path / "other" / "loss_pw0.hill.parquet")]},
+    )
+    with pytest.raises(_watershed_loss.WeppInterchangeExecutionError, match="declared average hill"):
+        run_wepp_watershed_loss_interchange(tmp_path)
 
 
 def test_watershed_loss_interchange_maps_current_annual_hillslope_area(

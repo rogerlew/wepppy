@@ -6,6 +6,7 @@ import yaml
 from wepppy.nodb.mods.features_export.catalog_loader import (
     LayerCatalogValidationError,
     load_layer_catalog,
+    parse_layer_catalog,
 )
 
 pytestmark = pytest.mark.unit
@@ -113,3 +114,34 @@ def test_load_layer_catalog_rejects_locator_alias_keys(tmp_path) -> None:
 
     with pytest.raises(LayerCatalogValidationError, match="exactly keys 'kind' and 'value'"):
         load_layer_catalog(catalog_path)
+
+
+@pytest.mark.parametrize(
+    ("locator", "error"),
+    [
+        ({"asset_id": "unknown"}, "unknown asset"),
+        ({"asset_id": "watershed.hillslopes", "projection": "contrast"}, "unsupported projection"),
+        ({"asset_id": "wepp.loss_hill", "projection": "../external"}, "unsupported projection"),
+        ({"asset_id": "wepp.loss_hill", "value": "fallback"}, "extra keys"),
+    ],
+)
+def test_declared_locator_fails_closed(locator, error) -> None:
+    with pytest.raises(LayerCatalogValidationError, match=error):
+        parse_layer_catalog(_minimal_catalog_payload(locator=locator))
+
+
+def test_catalog_expands_shared_roles_and_profile_geometry_without_mutating_input() -> None:
+    locator = {"asset_id": "watershed.hillslopes"}
+    payload = _minimal_catalog_payload(locator=locator)
+    layer = payload["layers"][0]
+    layer["sources"][0]["locator"] = locator
+    layer["dependencies"].append({"dep_id": "dep", "locator": locator})
+    layer["table_profiles"] = [{"geometry": {"locator": locator}, "join": layer["join"]}]
+
+    result = parse_layer_catalog(payload).layers[0].raw
+    expanded = {"kind": "relpath", "value": "watershed/hillslopes.parquet"}
+    assert result["geometry"]["locator"] == expanded
+    assert result["sources"][0]["locator"] == expanded
+    assert result["dependencies"][0]["locator"] == expanded
+    assert result["table_profiles"][0]["geometry"]["locator"] == expanded
+    assert locator == {"asset_id": "watershed.hillslopes"}

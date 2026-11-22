@@ -580,3 +580,75 @@ def test_verified_entry_rejects_change_between_digest_and_snapshot_stat(tmp_path
             relpath="attrs.parquet", wd_path=tmp_path, layer_id=None, output_layer_id=None,
             dependency_role="source", dependency_id="attrs", content_hash_mode="sha256",
         )
+
+
+def test_shipped_declarations_preserve_legacy_export_plan_dependencies_and_cache(tmp_path: Path) -> None:
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    import yaml
+
+    from wepppy.nodb.mods.features_export.cache_key import build_cache_key
+    from wepppy.nodb.mods.features_export.catalog_loader import default_catalog_path, load_layer_catalog
+
+    # Pre-extraction source contracts, independent of the producer declarations.
+    legacy_locators = {
+        "watershed_hillslope_attributes": ("relpath", "watershed/hillslopes.parquet"),
+        "wepp_loss_hill": ("path_template", "wepp/{scope_root}/interchange/loss_pw0.hill.parquet"),
+        "omni_scenario_loss_hill": (
+            "path_template", "_pups/omni/scenarios/{scenario_id}/wepp/output/interchange/loss_pw0.hill.parquet"
+        ),
+        "omni_contrast_loss_hill": (
+            "path_template", "_pups/omni/contrasts/{contrast_id}/wepp/output/interchange/loss_pw0.hill.parquet"
+        ),
+    }
+    raw = yaml.safe_load(default_catalog_path().read_text(encoding="utf-8"))
+    replaced = []
+    for layer in raw["layers"]:
+        for source in layer["sources"]:
+            source_id = source["source_id"]
+            if source_id in legacy_locators:
+                assert "asset_id" in source["locator"]
+                kind, value = legacy_locators[source_id]
+                source["locator"] = {"kind": kind, "value": value}
+                replaced.append(source_id)
+    assert sorted(replaced) == sorted(legacy_locators)
+    legacy = parse_layer_catalog(raw)
+    declared = load_layer_catalog()
+    assert declared == legacy
+
+    physical_values = {
+        "wepp/output/interchange/loss_pw0.hill.parquet": 11,
+        "wepp/roads/output/interchange/loss_pw0.hill.parquet": 22,
+        "_pups/omni/scenarios/a/wepp/output/interchange/loss_pw0.hill.parquet": 33,
+        "_pups/omni/contrasts/1/wepp/output/interchange/loss_pw0.hill.parquet": 44,
+    }
+    for relative_path, value in physical_values.items():
+        source_path = tmp_path / relative_path
+        source_path.parent.mkdir(parents=True)
+        pq.write_table(pa.table({"wepp_id": [1], "runoff_mm": [value]}), source_path)
+
+    base = {"format": "parquet", "units": "si", "swat_run_id": "run_test", "output_scopes": ["baseline", "roads"]}
+    requests = [
+        ({"layers": ["wepp.summary.hillslopes", "watershed.subcatchments"]}, [11, 22]),
+        # Explicit Omni layers create both a base and a selector-qualified plan entry.
+        ({"layers": ["omni.scenarios.hillslopes"], "scenarios": ["a"]}, [33, 33]),
+        ({"layers": ["omni.contrasts.hillslopes"], "contrast_ids": ["1"]}, [44, 44]),
+    ]
+    for request, expected_values in requests:
+        plan = resolve_export_plan({**base, **request}, declared)
+        baseline_plan = resolve_export_plan({**base, **request}, legacy)
+        assert plan == baseline_plan
+        for mode in ("none", "sha256"):
+            options = {"nodb_ref_resolver": lambda *_: "geometry.geojson", "content_hash_mode": mode}
+            snapshot = build_dependency_snapshot(plan, declared, tmp_path, **options)
+            baseline = build_dependency_snapshot(baseline_plan, legacy, tmp_path, **options)
+            assert snapshot == baseline
+            assert build_cache_key(plan, snapshot.fingerprint) == build_cache_key(baseline_plan, baseline.fingerprint)
+            assert sorted(
+                pq.read_table(tmp_path / entry.relpath)["runoff_mm"][0].as_py()
+                for entry in snapshot.entries if entry.exists and entry.dependency_id in legacy_locators
+            ) == expected_values
+            if "watershed.subcatchments" in request["layers"]:
+                optional = [entry for entry in snapshot.entries if entry.dependency_id == "watershed_hillslope_attributes"]
+                assert len(optional) == 1
+                assert optional[0].exists is False

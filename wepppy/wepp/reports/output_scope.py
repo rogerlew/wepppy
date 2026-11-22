@@ -6,13 +6,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, cast
 
+from wepppy.project_assets import wepp_output_scope_root
+
 OutputScope = Literal["baseline", "roads"]
 
 DEFAULT_OUTPUT_SCOPE: OutputScope = "baseline"
 VALID_OUTPUT_SCOPES: tuple[OutputScope, ...] = ("baseline", "roads")
 
-_BASELINE_OUTPUT_PREFIX = "wepp/output"
-_ROADS_OUTPUT_PREFIX = "wepp/roads/output"
+_BASELINE_OUTPUT_PREFIX = f"wepp/{wepp_output_scope_root('baseline')}"
+_ROADS_OUTPUT_PREFIX = f"wepp/{wepp_output_scope_root('roads')}"
 
 
 @dataclass(frozen=True, slots=True)
