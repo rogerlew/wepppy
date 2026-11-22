@@ -22,6 +22,7 @@ from wepppy.io_wait import (
     get_peridot_input_poll_s,
 )
 
+from wepppy.project_assets import WATERSHED_HILLSLOPES
 from wepppy.query_engine import request_catalog_refresh
 
 try:
@@ -476,7 +477,8 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
 
     hill_df['wepp_id'] = hill_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
 
-    hill_df.to_parquet(_join(wd, 'watershed/hillslopes.parquet'), index=False)
+    hill_key = WATERSHED_HILLSLOPES.relative_path()
+    hill_df.to_parquet(_join(wd, hill_key), index=False)
     sub_area = float(hill_df['area'].sum())
     lngs = hill_lngs
     lats = hill_lats
@@ -508,7 +510,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     _refresh_watershed_readme(
         watershed_dir,
         {
-            'watershed/hillslopes.parquet': hill_df,
+            hill_key: hill_df,
             'watershed/channels.parquet': chn_df,
             **(
                 {'watershed/flowpaths.parquet': fps_df}
@@ -716,8 +718,10 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
 
     root = Path(wd).expanduser()
     watershed_dir = root / "watershed"
+    hill_key = WATERSHED_HILLSLOPES.relative_path()
+    hill_target = root / hill_key
     canonical_candidates = [
-        watershed_dir / "hillslopes.parquet",
+        hill_target,
         watershed_dir / "channels.parquet",
         watershed_dir / "flowpaths.parquet",
     ]
@@ -768,7 +772,6 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
     for legacy_col in ("TopazID", "WeppID"):
         if legacy_col in hill_df.columns:
             hill_df.drop(columns=[legacy_col], inplace=True)
-    hill_target = watershed_dir / "hillslopes.parquet"
     hill_df.to_parquet(hill_target, index=False)
     modified = True
 
@@ -816,7 +819,7 @@ def migrate_watershed_outputs(wd: str, *, remove_csv: bool = True, verbose: bool
 
     if modified and _update_catalog_entry is not None:
         try:
-            _update_catalog_entry(wd, "watershed/hillslopes.parquet")
+            _update_catalog_entry(wd, hill_key)
             if (watershed_dir / "channels.parquet").exists():
                 _update_catalog_entry(wd, "watershed/channels.parquet")
             if (watershed_dir / "flowpaths.parquet").exists():

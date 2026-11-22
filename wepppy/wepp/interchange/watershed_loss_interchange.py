@@ -6,7 +6,9 @@ import logging
 from pathlib import Path
 from typing import Dict
 
-from ._rust_interchange import call_wepppyo3_interchange, version_args
+from wepppy.project_assets import WEPP_LOSS_HILL, wepp_output_scope_root
+
+from ._rust_interchange import WeppInterchangeExecutionError, call_wepppyo3_interchange, version_args
 
 
 LOGGER = logging.getLogger(__name__)
@@ -14,7 +16,7 @@ LOGGER = logging.getLogger(__name__)
 LOSS_FILENAME = "loss_pw0.txt"
 
 AVERAGE_FILENAMES = {
-    "hill": "loss_pw0.hill.parquet",
+    "hill": WEPP_LOSS_HILL.filename,
     "chn": "loss_pw0.chn.parquet",
     "out": "loss_pw0.out.parquet",
     "class_data": "loss_pw0.class_data.parquet",
@@ -41,8 +43,10 @@ def run_wepp_watershed_loss_interchange(wepp_output_dir: Path | str) -> Dict[str
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
 
+    # Callers pass the already selected output directory for baseline or Roads.
+    loss_hill = Path(WEPP_LOSS_HILL.relative_path()).relative_to("wepp", wepp_output_scope_root("baseline"))
     mapping = {
-        "average_hill": interchange_dir / AVERAGE_FILENAMES["hill"],
+        "average_hill": base / loss_hill,
         "average_chn": interchange_dir / AVERAGE_FILENAMES["chn"],
         "average_out": interchange_dir / AVERAGE_FILENAMES["out"],
         "average_class": interchange_dir / AVERAGE_FILENAMES["class_data"],
@@ -53,7 +57,7 @@ def run_wepp_watershed_loss_interchange(wepp_output_dir: Path | str) -> Dict[str
     }
 
     major, minor = version_args()
-    call_wepppyo3_interchange(
+    summary = call_wepppyo3_interchange(
         "watershed LOSS",
         "watershed_loss_to_parquet",
         str(source),
@@ -61,5 +65,9 @@ def run_wepp_watershed_loss_interchange(wepp_output_dir: Path | str) -> Dict[str
         major,
         minor,
     )
+    # The paired native writer owns its filename table. Verify its publication
+    # receipt before returning the declared destination to downstream readers.
+    if str(mapping["average_hill"]) not in summary["output_paths"]:
+        raise WeppInterchangeExecutionError("Native LOSS publication omitted the declared average hill output")
     LOGGER.info("wepp interchange: LOSS via WEPPpyo3")
     return mapping

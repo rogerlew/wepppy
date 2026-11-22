@@ -4,6 +4,7 @@ from __future__ import annotations
 from wepppy.observability.safe_traceback import safe_text
 from wepppy.observability.safe_logging import current_profile
 from wepppy.observability.secret_profiles import WEB
+from wepppy.project_assets import WEPP_LOSS_HILL
 
 from contextlib import ExitStack, contextmanager
 from contextvars import ContextVar
@@ -29,7 +30,7 @@ PARAMETERIZATION_SNAPSHOT = OUTPUT / 'roads.parameterization.comparison.json'
 CACHE = Path('wepp/reports/cache')
 CACHE_KEY = 'hillslope_watbal_summary_roads'
 COMMON = ('H.pass.parquet', 'ebe_pw0.parquet', 'README.md')
-CONTINUOUS = ('H.wat.parquet', 'loss_pw0.out.parquet', 'loss_pw0.hill.parquet',
+CONTINUOUS = ('H.wat.parquet', 'loss_pw0.out.parquet', WEPP_LOSS_HILL.filename,
               'loss_pw0.chn.parquet', 'totalwatsed3.parquet', 'roads_segment_loss_summary.parquet')
 _INVALIDATED = ContextVar('roads_lifecycle_invalidated', default=frozenset())
 _WRITERS = ContextVar('roads_lifecycle_writers', default=frozenset())

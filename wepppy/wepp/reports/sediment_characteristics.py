@@ -8,6 +8,7 @@ from typing import List, Union
 
 import pandas as pd
 
+from wepppy.project_assets import WEPP_LOSS_HILL
 from wepppy.query_engine.payload import QueryRequest
 
 from .helpers import ReportQueryContext
@@ -29,7 +30,7 @@ class SedimentCharacteristics:
 
     _CLASS_DATASET = "wepp/output/interchange/loss_pw0.class_data.parquet"
     _OUTLET_DATASET = "wepp/output/interchange/loss_pw0.out.parquet"
-    _HILL_DATASET = "wepp/output/interchange/loss_pw0.hill.parquet"
+    _HILL_DATASET = WEPP_LOSS_HILL.relative_path()
     _HILL_ALL_YEARS_DATASET = "wepp/output/interchange/loss_pw0.all_years.hill.parquet"
     _PASS_DATASET = "wepp/output/interchange/H.pass.parquet"
 

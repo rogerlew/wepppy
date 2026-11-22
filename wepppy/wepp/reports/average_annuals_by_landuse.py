@@ -12,6 +12,7 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from wepppy.project_assets import WATERSHED_HILLSLOPES, WEPP_LOSS_HILL
 from wepppy.query_engine.payload import QueryRequest
 from wepppy.query_engine.catalog import DatasetCatalog
 from wepppy.query_engine.context import RunContext
@@ -65,8 +66,8 @@ class AverageAnnualsByLanduseReport(ReportBase):
 
     _CACHE_KEY = "average_annuals_by_landuse"
     _CACHE_VERSION = "1"
-    _LOSS_DATASET = "wepp/output/interchange/loss_pw0.hill.parquet"
-    _HILLSLOPE_DATASET = "watershed/hillslopes.parquet"
+    _LOSS_DATASET = WEPP_LOSS_HILL.relative_path()
+    _HILLSLOPE_DATASET = WATERSHED_HILLSLOPES.relative_path()
     _LANDUSE_DATASET = "landuse/landuse.parquet"
 
     _DISPLAY_COLUMNS = [

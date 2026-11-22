@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
+from wepppy.project_assets import WEPP_LOSS_HILL
 
 def _build_roads_segment_loss_summary_parquet(self, *, interchange_dir: Path) -> str:
     from ._segment_loss_summary import build_segment_loss_summary
@@ -38,7 +39,7 @@ def _required_roads_report_resource_relpaths(
             [
                 os.path.join(base, "H.wat.parquet"),
                 os.path.join(base, "loss_pw0.out.parquet"),
-                os.path.join(base, "loss_pw0.hill.parquet"),
+                WEPP_LOSS_HILL.relative_path("roads"),
                 os.path.join(base, "loss_pw0.chn.parquet"),
                 os.path.join(base, "totalwatsed3.parquet"),
             ]
