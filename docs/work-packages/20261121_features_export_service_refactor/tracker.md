@@ -17,5 +17,5 @@
 
 ## Integration
 
-The implementation commit is . The PR records remote check
-results and merge status. The integration receipt follows the accepted commit.
+Implementation commit `69a29f6e6` contains the code changes. The integration
+receipt follows the accepted commit. [Pull request #713](https://github.com/rogerlew/wepppy/pull/713)

@@ -35,5 +35,10 @@ match the service implementations they replace. Run-relative path resolution
 still runs before cache format checks for export reuse and publication.
 The changed-file broad-exception guard passed with zero net increase.
 
+The observe-only quality report counted 3,139 to 2,662 source lines in the
+service. Its longest function still spans 295 lines. The moved carrier identity
+module has 341 source lines, including a 126-line function retained as a direct
+extraction. The cached artifact validation module has 147 source lines.
+
 This evidence supports local fixture validation. Production execution and
 deployment are outside this refactor.
