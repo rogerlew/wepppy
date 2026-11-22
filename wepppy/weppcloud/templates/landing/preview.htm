@@ -21,6 +21,7 @@
 {% block title %}WEPPcloud · Watershed modeling{% endblock %}
 
 {% block head_extras %}
+<meta name="referrer" content="no-referrer">
 <link rel="stylesheet" href="{{ static_url('css/landing.css') }}">
 {% endblock %}
 
@@ -59,16 +60,6 @@
         <a class="pure-button pure-button-secondary" href="{{ url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') }}">Read the user guide</a>
       </div>
     </div>
-    <nav class="wc-landing__contents" aria-labelledby="landing-contents">
-      <h2 id="landing-contents">On this page</h2>
-      <ul role="list">
-        <li><a href="#about">About WEPPcloud</a></li>
-        <li><a href="#map">Run Atlas</a></li>
-        <li><a href="#resources">Help and resources</a></li>
-        <li><a href="#contacts">Points of contact</a></li>
-        <li><a href="#attributions">Attributions and data sources</a></li>
-      </ul>
-    </nav>
   </section>
 
   <section id="about" class="wc-landing__section" aria-labelledby="about-heading">
@@ -145,7 +136,7 @@
         <h3>Map services</h3>
         <p>
           Project maps use <a href="https://www.google.com/maps">Google</a> Terrain and Satellite.
-          The map version of the Run Atlas uses <a href="https://www.openstreetmap.org/">OpenStreetMap contributors</a>
+          The original light landing uses <a href="https://www.openstreetmap.org/">OpenStreetMap contributors</a>
           and <a href="https://carto.com/attributions">CARTO</a> tiles.
         </p>
         <p data-forest-service-credit>
@@ -220,4 +211,13 @@
     <span>© {{ copyright_year }} University of Idaho · USDA Forest Service</span>
   </div>
 </footer>
+{% endblock %}
+
+
+{% block script_extras %}
+{{ super() }}
+{% if atlas and atlas.run_count %}
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js" referrerpolicy="no-referrer" defer></script>
+<script type="module" src="{{ static_url('js/landing-atlas.js') }}"></script>
+{% endif %}
 {% endblock %}

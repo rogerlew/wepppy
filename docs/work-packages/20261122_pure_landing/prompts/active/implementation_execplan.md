@@ -15,7 +15,7 @@ Runs and reports. Preserve the current public landing throughout review.
 - [x] (2026-11-22 19:02 UTC) Inventory content, shared shell and UI Lab consumers.
 - [x] Commit the reviewed contract and record its revision in the tracker.
 - [x] Verify the locally served route, data states, theme and keyboard behavior.
-- [ ] Review, implement and verify the Atlas hero correction.
+- [x] Restore the Deck.gl Atlas, preserve ordering and verify the Forest review deployment.
 - [ ] Complete manual assistive-technology review.
 - [ ] After human approval, cut over and retire UI Lab.
 

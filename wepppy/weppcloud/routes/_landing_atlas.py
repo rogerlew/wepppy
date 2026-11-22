@@ -1,12 +1,13 @@
 """Read and prepare the public landing atlas without exposing extra row fields."""
 
+from collections import Counter
 from datetime import UTC, datetime
 import json
 from pathlib import Path
 
 from flask import current_app
 
-_PAGE_SIZE = 25
+_MERCATOR_MAX_LATITUDE = 85.05112878
 
 
 def _count(value):
@@ -47,7 +48,6 @@ def _atlas_row(record):
 
     name = record.get("run_name")
     config = record.get("config")
-    year = record.get("year")
     severity = record.get("has_sbs")
     return {
         "run_id": run_id,
@@ -55,7 +55,6 @@ def _atlas_row(record):
         "config": config if isinstance(config, str) or type(config) is int else None,
         "longitude": longitude,
         "latitude": latitude,
-        "year": year if type(year) is int and 1 <= year <= 9999 else None,
         "severity": severity if isinstance(severity, bool) else None,
         "hillslopes": _count(record.get("hillslopes")),
         "access_count": _count(record.get("access_count")),
@@ -85,38 +84,28 @@ def _read_atlas(path: Path):
     return rows
 
 
-def build_landing_atlas(path: Path, requested_year: str, requested_page: str):
-    """Return overall metrics and one page of filtered, newest-first results."""
+def build_landing_atlas(path: Path):
+    """Return overall metrics and newest-first rows for the Atlas map."""
     rows = _read_atlas(path)
     if rows is None:
         return None
 
     oldest = datetime.min.replace(tzinfo=UTC)
     rows.sort(key=lambda row: row["last_accessed"] or oldest, reverse=True)
-    years = sorted({row["year"] for row in rows if row["year"] is not None}, reverse=True)
-    year = next((year for year in years if str(year) == requested_year), None)
-    matches = rows if year is None else [row for row in rows if row["year"] == year]
 
-    page_count = max(1, (len(matches) + _PAGE_SIZE - 1) // _PAGE_SIZE)
-    page = 1
-    if (
-        len(requested_page) <= len(str(page_count))
-        and requested_page.isascii() and requested_page.isdecimal()
-    ):
-        candidate = int(requested_page)
-        if 1 <= candidate <= page_count:
-            page = candidate
-
-    start = (page - 1) * _PAGE_SIZE
+    quadrants = Counter((row["latitude"] >= 0, row["longitude"] >= 0) for row in rows)
     return {
         "run_count": len(rows),
         "hillslopes": sum(row["hillslopes"] or 0 for row in rows),
         "latest_access": rows[0]["last_accessed"] if rows else None,
-        "years": years,
-        "year": year,
-        "filtered_count": len(matches),
-        "filtered_hillslopes": sum(row["hillslopes"] or 0 for row in matches),
-        "page": page,
-        "page_count": page_count,
-        "rows": matches[start:start + _PAGE_SIZE],
+        "map_rows": [
+            {key: value for key, value in row.items() if key != "hillslopes"}
+            for row in rows if abs(row["latitude"]) <= _MERCATOR_MAX_LATITUDE
+        ],
+        "quadrants": (
+            ("North of the equator, west of Greenwich", quadrants[True, False]),
+            ("North of the equator, east of Greenwich", quadrants[True, True]),
+            ("South of the equator, west of Greenwich", quadrants[False, False]),
+            ("South of the equator, east of Greenwich", quadrants[False, True]),
+        ),
     }

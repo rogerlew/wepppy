@@ -5,7 +5,7 @@ Started 2026-11-22 19:02 UTC.
 - [x] Inventory current landing sections, theme patterns and shared assets.
 - [x] Commit the contract checkpoint and review disposition.
 - [x] Render and verify the initial review route.
-- [ ] Reuse the Deck.gl Atlas and restore the original section order.
+- [x] Reuse the Deck.gl Atlas and restore the original section order.
 - [ ] Complete manual screen-reader and assistive-technology acceptance.
 - [ ] Obtain human acceptance before cutover and UI Lab retirement.
 
@@ -45,3 +45,10 @@ map, no year controls and the original section order.
 CARTO's raster endpoint returned API-key watermark images with HTTP 200.
 The operator asked to remove the project browser. The Deck.gl preview uses
 WEPPcloud's existing Google Terrain basemap and drops the disclosure.
+
+
+The Deck.gl preview is live on [Forest](https://forest.tail305ec9.ts.net/weppcloud/landing/preview/).
+It uses Forest's compiled public atlas snapshot. The original section order,
+Deck.gl reuse, absence of year controls, and removal of the disclosure are
+covered in the focused suite. Checkpoints `5e6688462` and `6e4295d88`
+precede the implementation. [Verification](artifacts/20261122_deck_atlas_validation.md).

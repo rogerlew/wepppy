@@ -1081,11 +1081,7 @@ def landing():
 @weppcloud_site_bp.route('/landing/preview/', strict_slashes=False)
 @handle_with_exception_factory
 def landing_preview():
-    atlas = build_landing_atlas(
-        _resolve_run_locations_path(),
-        request.args.get('year', ''),
-        request.args.get('page', ''),
-    )
+    atlas = build_landing_atlas(_resolve_run_locations_path())
     response = make_response(render_template(
         'landing/preview.htm',
         atlas=atlas,

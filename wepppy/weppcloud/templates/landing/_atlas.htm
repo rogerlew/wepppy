@@ -19,6 +19,40 @@
   {% elif not atlas.run_count %}
   <p>No projects with recorded locations are available yet.</p>
   {% else %}
+  <div data-run-atlas>
+    <figure class="wc-landing__atlas-figure">
+      <div class="wc-landing__atlas-map" role="region"
+           aria-label="Run Atlas map" aria-describedby="atlas-keyboard atlas-geography" hidden>
+        <div class="wc-landing__atlas-canvas" aria-hidden="true"></div>
+      </div>
+      <p class="wc-landing__atlas-status" role="status">
+        Interactive map unavailable.
+      </p>
+      <figcaption>
+        <ul class="wc-landing__atlas-key" role="list">
+          <li><span class="wc-landing__atlas-dot" aria-hidden="true"></span> Standard runs</li>
+          <li><span class="wc-landing__atlas-dot wc-landing__atlas-dot--sbs" aria-hidden="true"></span> Runs with soil burn severity data</li>
+          <li>Larger markers indicate more accesses.</li>
+        </ul>
+        <a href="https://www.google.com/maps">Google Terrain</a>
+      </figcaption>
+    </figure>
+    <p id="atlas-geography" class="wc-landing__visually-hidden">
+      Project locations by geographic quadrant.
+      {% for label, count in atlas.quadrants %}
+      {{ label }}: {{ '{:,}'.format(count) }}.
+      {% endfor %}
+    </p>
+    <p class="wc-landing__atlas-inspection" role="status" aria-atomic="true"></p>
+    <p id="atlas-keyboard" hidden>Use the arrow keys to pan. Enter reads the next project. Shift+Enter reads the previous project.</p>
+    <div class="wc-landing__atlas-controls" role="group" aria-label="Run Atlas map controls" hidden>
+      <button class="pure-button pure-button-secondary" type="button" data-atlas-zoom="1">Zoom in</button>
+      <button class="pure-button pure-button-secondary" type="button" data-atlas-zoom="-1">Zoom out</button>
+      <button class="pure-button pure-button-secondary" type="button" data-atlas-reset>Reset map</button>
+    </div>
+    <script type="application/json" data-atlas-rows>{{ atlas.map_rows | tojson }}</script>
+  </div>
+
   <dl class="wc-landing__grid wc-landing__metrics">
     <div class="wc-landing__card">
       <dt>Unique runs</dt>
@@ -34,72 +68,5 @@
     </div>
   </dl>
 
-  <form class="pure-form wc-landing__filter" method="get" action="{{ url_for('weppcloud_site.landing_preview') }}#atlas-results">
-    <div>
-      <label for="atlas-year">Last accessed year</label>
-      <select id="atlas-year" name="year">
-        <option value="">All years</option>
-        {% for year in atlas.years %}
-        <option value="{{ year }}"{% if year == atlas.year %} selected{% endif %}>{{ year }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <button class="pure-button pure-button-secondary" type="submit">Filter runs</button>
-  </form>
-
-  <h3 id="atlas-results" tabindex="-1">Atlas results{% if atlas.year %} for {{ atlas.year }}{% endif %}</h3>
-  <p>{{ '{:,}'.format(atlas.filtered_count) }} {{ 'run' if atlas.filtered_count == 1 else 'runs' }} ·
-     {{ '{:,}'.format(atlas.filtered_hillslopes) }} recorded hillslopes</p>
-  <noscript>
-    <p>If more columns extend beyond the table, focus it and use the left and right arrow keys.</p>
-  </noscript>
-  <div class="wc-table-wrapper wc-landing__table" tabindex="0" role="region" aria-label="Run Atlas table">
-    <table class="wc-table wc-table--striped">
-      <caption>Projects ordered by last access</caption>
-      <thead>
-        <tr>
-          <th scope="col">Project</th>
-          <th scope="col" class="wc-text-right">Hillslopes</th>
-          <th scope="col">Last accessed</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for entry in atlas.rows %}
-        <tr>
-          <th scope="row" aria-labelledby="atlas-project-{{ loop.index }}">
-            <span id="atlas-project-{{ loop.index }}">{{ entry.name or entry.run_id }}</span>
-            <details class="wc-landing__row-details">
-              <summary>Project details<span class="wc-landing__visually-hidden"> for {{ entry.name or entry.run_id }}</span></summary>
-              <dl>
-                <dt>Run ID</dt><dd>{{ entry.run_id }}</dd>
-                <dt>Config</dt><dd>{{ entry.config if entry.config is not none else 'Unknown' }}</dd>
-                <dt>Latitude</dt><dd>{{ entry.latitude }}</dd>
-                <dt>Longitude</dt><dd>{{ entry.longitude }}</dd>
-                <dt>Soil burn severity data</dt>
-                <dd>{{ 'Unknown' if entry.severity is none else 'Yes' if entry.severity else 'No' }}</dd>
-                <dt>Access count</dt>
-                <dd>{{ '{:,}'.format(entry.access_count) if entry.access_count is not none else 'Unknown' }}</dd>
-              </dl>
-            </details>
-          </th>
-          <td class="wc-text-right">{{ '{:,}'.format(entry.hillslopes) if entry.hillslopes is not none else 'Unknown' }}</td>
-          <td>{{ access_time(entry.last_accessed) }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  {% if atlas.page_count > 1 %}
-  <nav class="wc-landing__pagination" aria-label="Run Atlas pages">
-    {% if atlas.page > 1 %}
-    <a class="pure-button pure-button-secondary" href="{{ url_for('weppcloud_site.landing_preview', year=atlas.year, page=atlas.page - 1) }}#atlas-results">Previous page</a>
-    {% endif %}
-    <span>Page {{ atlas.page }} of {{ atlas.page_count }}</span>
-    {% if atlas.page < atlas.page_count %}
-    <a class="pure-button pure-button-secondary" href="{{ url_for('weppcloud_site.landing_preview', year=atlas.year, page=atlas.page + 1) }}#atlas-results">Next page</a>
-    {% endif %}
-  </nav>
-  {% endif %}
   {% endif %}
 </section>

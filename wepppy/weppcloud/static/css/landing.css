@@ -45,10 +45,6 @@
 }
 
 .wc-landing__hero {
-  display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 1.4fr);
-  align-items: center;
-  gap: var(--landing-gap);
   min-block-size: 0;
   margin: 0;
   padding: var(--landing-gap);
@@ -67,26 +63,11 @@
   font-size: 1.125rem;
 }
 
-.wc-landing__contents {
-  padding-inline-start: var(--wc-space-xl);
-  border-inline-start: 1px solid var(--wc-color-border);
-}
-
-.wc-landing__contents h2 {
-  margin: 0 0 var(--wc-space-sm);
-  font-size: 1.125rem;
-}
-
-.wc-landing__contents ul,
 .wc-landing__links,
 .wc-landing__list {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.wc-landing__contents li + li {
-  margin-block-start: var(--wc-space-sm);
 }
 
 .wc-landing__section {
@@ -155,8 +136,6 @@
 }
 
 .wc-landing__links,
-.wc-landing__filter,
-.wc-landing__pagination,
 .wc-landing-footer .wc-container {
   display: flex;
   flex-wrap: wrap;
@@ -173,64 +152,74 @@
   font-weight: var(--wc-font-weight-semibold);
 }
 
-.wc-landing__filter {
-  align-items: flex-end;
-  margin-block-end: var(--wc-space-xl);
+.wc-landing__atlas-figure {
+  margin: 0;
 }
 
-.wc-landing .wc-landing__filter label {
-  display: block;
-  margin-block: 0 var(--wc-space-xs);
+.wc-landing__atlas-map {
+  position: relative;
+  height: clamp(23rem, 45vw, 36rem);
+  overflow: hidden;
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-md);
+  background: var(--wc-color-surface-alt);
 }
 
-.wc-landing .wc-landing__filter select {
-  margin-block: 0;
+.wc-landing__atlas-canvas {
+  position: absolute;
+  inset: 0;
 }
 
-.wc-landing__table caption {
-  text-align: start;
-  padding: var(--wc-space-sm) var(--wc-space-md);
+.wc-landing__atlas-controls:not([hidden]),
+.wc-landing__atlas-figure figcaption,
+.wc-landing__atlas-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-space-sm) var(--wc-space-lg);
 }
 
-.wc-landing__table .wc-table {
-  min-inline-size: 24rem;
+.wc-landing__atlas-figure figcaption {
+  --wc-color-link: var(--wc-color-link-hover);
+  justify-content: space-between;
+  margin-block-start: var(--wc-space-sm);
 }
 
-.wc-landing__table tbody th {
-  border-block-end: 1px solid var(--wc-color-border);
+.wc-landing__atlas-key {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.wc-landing summary {
-  cursor: pointer;
-  text-decoration: underline;
+.wc-landing__atlas-dot {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: rgb(2 132 199);
 }
 
-.wc-landing summary:focus-visible,
-.wc-landing__table:focus-visible {
+.wc-landing__atlas-dot--sbs {
+  background: rgb(142 73 234);
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.wc-landing__atlas-controls {
+  margin-block-start: var(--wc-space-lg);
+}
+
+.wc-landing__atlas-status:empty,
+.wc-landing__atlas-inspection:empty {
+  margin: 0;
+}
+
+.wc-landing__atlas-inspection {
+  white-space: pre-line;
+}
+
+.wc-landing__atlas-map:focus-visible {
   outline: 2px solid var(--wc-color-accent);
   outline-offset: 2px;
-}
-
-.wc-landing__row-details {
-  margin-block-start: var(--wc-space-xs);
-  font-weight: var(--wc-font-weight-normal);
-}
-
-.wc-landing__row-details dl {
-  margin-block: var(--wc-space-sm);
-}
-
-.wc-landing__row-details dt {
-  font-weight: var(--wc-font-weight-semibold);
-}
-
-.wc-landing__row-details dd {
-  margin: 0 0 var(--wc-space-xs);
-}
-
-.wc-landing__pagination {
-  align-items: center;
-  margin-block-start: var(--wc-space-lg);
 }
 
 .wc-landing-footer {
@@ -251,16 +240,6 @@
   .wc-landing-header .wc-nav {
     column-gap: var(--wc-space-xs);
   }
-
-  .wc-landing__hero {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .wc-landing__contents {
-    padding: var(--wc-space-lg) 0 0;
-    border-inline-start: 0;
-    border-block-start: 1px solid var(--wc-color-border);
-  }
 }
 
 /* Preserve underlines beside the shared foundation’s important link rule. */
@@ -277,23 +256,20 @@
   color: var(--wc-color-text);
 }
 
-.wc-landing-header .wc-theme-switcher__select,
-.wc-landing .wc-landing__filter select {
+.wc-landing-header .wc-theme-switcher__select {
   --wc-select-chevron-color: var(--wc-color-text);
   color: var(--wc-color-text);
   background-color: var(--wc-color-surface);
   border-color: var(--wc-color-accent);
 }
 
-.wc-landing-header .wc-theme-switcher__select:focus-visible,
-.wc-landing .wc-landing__filter select:focus-visible {
+.wc-landing-header .wc-theme-switcher__select:focus-visible {
   outline: 2px solid var(--wc-color-accent);
   outline-offset: 2px;
 }
 
 @media (forced-colors: active) {
-  .wc-landing-header .wc-theme-switcher__select,
-  .wc-landing .wc-landing__filter select {
+  .wc-landing-header .wc-theme-switcher__select {
     appearance: auto;
     background-image: none;
   }

@@ -42,7 +42,7 @@ required by FSBASE-01. Preserve the four regional data documentation links.
 
 Edit prose in the [landing template](../../../wepppy/weppcloud/templates/landing/preview.htm)
 and names and acknowledgments in the [landing content partial](../../../wepppy/weppcloud/templates/landing/_content.htm).
-Use existing shared table and button conventions. A landing-local macro is
+Use existing shared button conventions. A landing-local macro is
 appropriate for repeated organization cards shared by collaborators and
 sponsors. Keep one-off content in semantic HTML and keep the shared macro API
 unchanged. This lets maintainers update text without rebuilding frontend assets.

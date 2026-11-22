@@ -53,6 +53,11 @@ def test_preview_renders_semantic_content_and_auth_links(preview):
     assert page.select_one("a[href='#main-content']")
     assert page.select_one("main #main-content").get("tabindex") == "-1"
     assert len(page.select("h1")) == 1
+    assert [section.get("aria-labelledby") for section in page.select(".wc-landing > section")] == [
+        "landing-title", "about-heading", "atlas-heading", "resources-heading",
+        "contacts-heading", "collaborators-heading", "sponsors-heading",
+        "contributors-heading", "attributions-heading", "disclaimer-heading",
+    ]
     assert page.select_one("[data-theme-select]")
     assert page.select_one('nav[aria-label="Primary"] a[href="/weppcloud/login"]')
     assert page.select_one('a[href="/weppcloud/usersum/doc/usersum.weppcloud.references"]')
@@ -93,7 +98,7 @@ def test_preview_handles_snapshot_failure_or_empty_state(preview, payload, messa
     assert page.select_one("#resources")
 
 
-def test_preview_reads_and_filters_public_atlas(preview):
+def test_preview_maps_the_full_public_atlas_without_year_controls(preview):
     client, path, _ = preview
     rows = [
         {
@@ -113,37 +118,47 @@ def test_preview_reads_and_filters_public_atlas(preview):
     rows += [{"runid": "older", "coordinates": [-12, 6], "year": 2025}, {"runid": "bad"}]
     path.write_text(json.dumps(rows), encoding="utf-8")
 
-    response, page = _get(client, "/landing/preview/?year=2026")
-    assert page.select_one("#atlas-year option[selected]").text == "2026"
-    assert page.select_one("form").get("action") == "/weppcloud/landing/preview/#atlas-results"
-    assert page.select_one("#atlas-results").text == "Atlas results for 2026"
+    response, page = _get(client, "/landing/preview/?year=2025")
+    assert not page.select("#map details, #map table, #map form, select[name=year]")
+    assert page.select_one("#map a[href='https://www.google.com/maps']").text == "Google Terrain"
+    assert "North of the equator, west of Greenwich: 27." in page.select_one("#atlas-geography").get_text()
+    assert "Enter reads the next project" in page.select_one("#atlas-keyboard").get_text()
+    assert page.select_one('script[src*="deck.gl"]')
+    assert page.select_one('script[type=module][src$="landing-atlas.js"]')
+
     count, hillslopes, latest = page.select(".wc-landing__metrics dd")
     assert count.get_text(strip=True) == "27"
     assert hillslopes.get_text(strip=True) == "104"
     assert latest.time["datetime"] == "2026-01-26T14:30:00+00:00"
-    assert "26 runs ·" in page.get_text()
-    assert "104 recorded hillslopes" in page.get_text()
-    project_rows = page.select("tbody tr")
-    assert len(project_rows) == 25
-    assert "<script>26</script>" in project_rows[0].get_text()
-    assert "<b>config</b>" in project_rows[0].get_text()
-    assert project_rows[0].select_one("script,b,a") is None
-    assert "-116.16" in project_rows[0].get_text()
+    rows = json.loads(page.select_one("[data-atlas-rows]").string)
+    assert len(rows) == 27
+    assert rows[0]["name"] == "<script>26</script>"
+    assert rows[-1]["run_id"] == "older"
+    assert all("year" not in row for row in rows)
+
+    assert all("hillslopes" not in row for row in rows)
+    assert "<script>26</script>" not in response.text
+    assert "<b>config</b>" not in response.text
     assert "private preview field" not in response.text
-    assert "older" not in response.text
-    assert page.select_one("a[href$='#atlas-results']").get("href") == (
-        "/weppcloud/landing/preview/?year=2026&page=2#atlas-results"
-    )
 
-    _, page = _get(client, "/landing/preview/?year=2026&page=2")
-    assert len(page.select("tbody tr")) == 1
-    assert "run-1" in page.select_one("tbody").get_text()
-    assert "Previous page" in page.get_text()
+    _, page = _get(client, "/landing/preview/?page=2&year=1900")
+    assert json.loads(page.select_one("[data-atlas-rows]").string) == rows
 
-    _, page = _get(client, "/landing/preview/?year=unknown&page=999999999999999999999")
-    assert page.select_one("#atlas-results").text == "Atlas results"
-    assert "Page 1 of 2" in page.get_text()
 
-    _, page = _get(client, "/landing/preview/?year=2025")
-    assert "older" in page.select_one("tbody").get_text()
-    assert "Unknown" in page.select_one("tbody").get_text()
+def test_preview_keeps_polar_projects_in_summary(preview):
+    client, path, _ = preview
+    locations = [
+        [-180, 90], [180, -90], [0, 0], [180, 45], [-180, 45],
+        [181, 20], [float("nan"), 20], [True, 20],
+    ]
+    path.write_text(json.dumps([
+        {"runid": f"run-{index}", "coordinates": coordinates}
+        for index, coordinates in enumerate(locations)
+    ]), encoding="utf-8")
+
+    _, page = _get(client)
+    assert page.select_one(".wc-landing__metrics dd").get_text(strip=True) == "5"
+    assert "North of the equator, west of Greenwich: 2." in page.select_one("#atlas-geography").get_text()
+    rows = json.loads(page.select_one("[data-atlas-rows]").string)
+    assert [row["run_id"] for row in rows] == ["run-2", "run-3", "run-4"]
+    assert [row["longitude"] for row in rows] == [0, 180, -180]
