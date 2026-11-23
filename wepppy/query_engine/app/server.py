@@ -30,6 +30,7 @@ from urllib.parse import urlparse
 import yaml
 from starlette.concurrency import run_in_threadpool
 from starlette.applications import Starlette
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import (
@@ -640,8 +641,9 @@ async def run_info(request: StarletteRequest) -> Response:
     schema_path = str(request.app.url_path_for("run_schema", runid=slug))
     query_path = str(request.app.url_path_for("run_query_endpoint", runid=slug))
     return TEMPLATES.TemplateResponse(
-        "run_info.html",
-        {
+        request=request,
+        name="run_info.html",
+        context={
             "request": request,
             "runid": runid_str,
             "runid_slug": runid_str.lstrip("/"),
@@ -770,8 +772,9 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
     full_post_url = f"{forwarded_prefix}{current_path}" if forwarded_prefix else current_path
 
     return TEMPLATES.TemplateResponse(
-        "query_console.html",
-        {
+        request=request,
+        name="query_console.html",
+        context={
             "request": request,
             "run_name": run_name,
             "config_name": config_name,
@@ -1114,7 +1117,6 @@ def create_app() -> Starlette:
         allow_headers=["Authorization", "Content-Type"],
     )
 
-    @app.middleware("http")
     async def correlation_id_middleware(request: StarletteRequest, call_next):
         inbound_id = select_inbound_correlation_id(request.headers.get(CORRELATION_ID_HEADER))
         correlation_id, token = bind_correlation_id(inbound_id)
@@ -1126,4 +1128,5 @@ def create_app() -> Starlette:
         finally:
             reset_correlation_id(token)
 
+    app.add_middleware(BaseHTTPMiddleware, dispatch=correlation_id_middleware)
     return app
