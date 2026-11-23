@@ -91,6 +91,11 @@ use ember with the existing thicker outline for SBS. Keep the requested
 two legend chips and persistent desktop wheel instruction. A touch-only
 screen omits the Ctrl instruction and permits one-finger vertical page scrolling.
 
+Use the Legal disclaimer’s heading and content columns for “What is WEPPcloud?”
+and the Run Atlas introduction. Place the About links below its paragraph in
+the content column. Stack heading before content at the disclaimer’s narrow
+breakpoint. Keep the Atlas metrics and map full width below its introduction.
+
 ## Run Atlas
 
 The Run Atlas is the landing's main visual and follows About as it did
