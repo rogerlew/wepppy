@@ -8,13 +8,15 @@ Reduce applicable runtime exposure while preserving login, upload, data acquisit
 
 - [x] 2026-11-23 UTC. Bound scope to the serving artifact and existing release policy.
 - [x] 2026-11-23 06:56 UTC. Confirmed the baseline worker image on all three hosts and verified the local review copies of the retained JSON against the pinned manifest.
-- [ ] Reconcile the inventory and establish applicability.
+- [x] 2026-11-23 07:10 UTC. Reconciled the serving inventory against source packages, prior evidence and all known-exploited flags. The private ledger identifies unresolved exposures.
 - [ ] Validate public-facing framework and authentication repairs.
 - [ ] Validate image processing, bundled libraries and frontend dependency repairs.
 - [ ] Resolve OS and embedded-tool findings and qualify cache cleanup.
 - [ ] Build, test and review one integrated candidate and record the release decision.
 
 - [x] 2026-11-23 07:03 UTC. Committed separate frontend, framework, native and build-cache batches. Focused tests passed. Started the integrated clean build from `5729db5e1` on forest.
+
+- [x] 2026-11-23 07:19 UTC. Corrected OAuthlib to 4.0.1 and qualified six additional Python dependency repairs. Moved the clean build of `65084ea5a` to forest1 after forest Docker storage reached 5.2 GiB free. The source checkout uses serving-archive permissions inside a private staging directory.
 
 ## Milestones and verification
 
@@ -34,8 +36,10 @@ The serving image includes a separate PyCurl Brotli 1.1.0 decoder. The OpenSSH s
 
 2026-11-23 UTC. Use one package because all repair batches affect the same common image and share a release decision. A failing batch can be revised or reverted independently. Any residual exposure returns to the existing policy and approval process.
 
+2026-11-23 UTC. Rejected the OAuthlib 4.0.0 intermediate after review identified an additional device-flow advisory. Chose 4.0.1. Retained the serving Node and Python base digests for the comparison.
+
 ## Outcomes & Retrospective
 
-Four repair commits are available. Component trials on forest passed 158 framework/OAuth and 36 codec/transport cases. The targeted npm lock passed lint, 1,109 Jest tests, nine Node tests and the production asset build. The final image gates and release decision remain open.
+Six repair commits are available. Component trials on forest passed 158 framework/OAuth and 36 codec/transport cases. The targeted npm lock passed lint, 1,109 Jest tests, nine Node tests and the production asset build. The final image gates and release decision remain open.
 
 Revision on 2026-11-23 records actual baseline identity, repair batches and the start of candidate validation.

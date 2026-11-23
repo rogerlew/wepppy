@@ -2,11 +2,12 @@
 
 | Milestone | Status and evidence to retain |
 | --- | --- |
-| Baseline | Serving source, image and scan manifest pinned in [package](package.md). wepp1 web and workers, both wepp2 workers and both wepp3 workers report the pinned image. JSON review copies verified against the manifest. Itemized review in progress. |
-| Web and auth | `9afda6161` moves the common image to Starlette 1.3.1, Authlib 1.9.10, joserfc 1.8.0 and OAuthlib 4.0.0. The focused trial passed 158 OAuth and query access tests. |
+| Baseline | Serving source, image and scan manifest pinned in [package](package.md). wepp1 web and workers, both wepp2 workers and both wepp3 workers report the pinned image. JSON review copies verified against the manifest. The private ledger covers 3,002 primary and 516 suppressed rows, plus all 18 baseline npm package records. |
+| Web and auth | `9afda6161` moves the common image to Starlette 1.3.1, Authlib 1.9.10, joserfc 1.8.0 and an updated OAuthlib. Commit `50de1db06` corrects OAuthlib to 4.0.1 after independent review. The focused trial passed 158 OAuth and query access tests. |
 | Image processing and npm | `8d2ae32ad` passed 36 Pillow and PyCurl consumer cases. `f880db9c7` passed npm ci, lint, all tests and build. Local audit returned zero critical/high. |
+| Additional Python consumers | `65084ea5a` updates Tornado, dnspython, SoupSieve, Mistune, fsspec and Jupyter Core. Signed login, notebook, transport and scientific file trials passed 90 tests with the final pins. |
 | Debian, Go and cache | `5729db5e1` uses an ephemeral uv cache during production installation. All three embedded Go tool consumers have been identified. Awaiting installed-image readback and scan delta. |
-| Candidate and decision | Clean candidate build from `5729db5e1` on forest. Hold pending exact-image evidence and independent reviews. Roger Lew owns production risk acceptance. |
+| Candidate and decision | Integrated source `65084ea5a` is building on forest1 with the serving Node/Python base digests and production identities. Hold pending exact-image evidence and independent reviews. Roger Lew owns production risk acceptance. |
 
 Update each row with the commit, immutable artifact and evidence location as work lands. Track individual exceptions in the existing private evidence store.
 
