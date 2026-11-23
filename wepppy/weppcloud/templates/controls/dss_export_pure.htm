@@ -71,11 +71,11 @@
       {% if mode1_style %}style="{{ mode1_style }}"{% endif %}>
       {{ ui.text_field(
            "dss_export_channel_ids",
-           "Channel Topaz IDs to export",
+           "Channel TOPAZ IDs to export",
            value=(wepp.dss_export_channel_ids | join(', ')),
            placeholder="e.g. 24, 54, 224",
            extra_control_class="disable-readonly",
-           help="Provide a comma-separated list of channel Topaz IDs."
+           help="Provide a comma-separated list of channel TOPAZ IDs."
          ) }}
     </div>
 

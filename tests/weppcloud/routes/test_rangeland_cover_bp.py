@@ -350,7 +350,7 @@ def test_modify_rangeland_cover_requires_topaz_ids(rangeland_client):
 
     assert response.status_code == 500
     body = response.get_json()
-    assert "Topaz ID" in body["error"]["message"] or "provide at least one" in body["error"]["message"]
+    assert "TOPAZ ID" in body["error"]["message"] or "provide at least one" in body["error"]["message"]
 
     instance = RangelandStub.getInstance(run_dir)
     assert instance.modify_calls == []

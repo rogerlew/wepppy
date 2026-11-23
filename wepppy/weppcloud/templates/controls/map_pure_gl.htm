@@ -165,7 +165,7 @@
                id="input_centerloc"
                name="input_centerloc"
                type="text"
-               placeholder="Lon, Lat, [Zoom] | TopazID | WeppID"
+               placeholder="Lon, Lat, [Zoom] | TOPAZ ID | WEPP ID"
                autocomplete="off"
                inputmode="text">
       </div>
@@ -173,7 +173,7 @@
         <button type="button"
                 class="pure-button pure-button-secondary"
                 id="btn_find_topaz_id"
-                data-map-action="find-topaz">Find Topaz ID</button>
+                data-map-action="find-topaz">Find TOPAZ ID</button>
         <button type="button"
                 class="pure-button pure-button-secondary"
                 id="btn_find_wepp_id"
@@ -186,6 +186,7 @@
                 data-map-action="go">Go</button>
       </div>
     </div>
+    {{ usersum_doc_link('weppcloud', 'wepp-model.md', 'How to read TOPAZ IDs and WEPP IDs', section='TOPAZ IDs and WEPP IDs') }}
   </div>
 
   <div class="wc-map-layout">
