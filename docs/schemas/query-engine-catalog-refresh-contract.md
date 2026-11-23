@@ -434,3 +434,29 @@ refresh with `query_catalog_owner_capacity_pending`. Terminal evidence releases
 capacity under the existing execution-accounting rules. Deferred scopes keep
 their receipts and the scheduler continues its bounded rotation. The global
 permit ceiling, ordinary queue priority and inventory admission still apply.
+
+## Dedicated catalog queue on wepp3
+
+The production deployment uses one RQ process on wepp3 listening exclusively to
+`query-catalog`. It serves both refresh and inventory. The `fork-archive`
+process retains its own queue and can run concurrently. This keeps catalog
+execution out of ordinary worker slots while allowing the Rocket NFS effects of
+concurrent fork/archive and catalog access to be measured.
+
+Bind the advertised configuration, scheduler task, enqueue, execution claim and
+pilot manifest to `query-catalog`. Only live consumers exclusively subscribed
+to that queue with the current configuration qualify. The pilot requires one such
+consumer. Preserve the global seven-reservation accounting ceiling, the
+compatible-worker capacity bound, Rocket batch-owner limits, ordinary ready
+backlog deferral on `default`, and durable per-scope receipts. With one worker
+the effective limit is one outstanding job across both maintenance classes.
+A pending dirty scope must remain eligible for subsequent ticks when that slot
+is occupied by inventory or refresh.
+
+Pause admission during migration, settle legacy in-flight reservations and verify
+the new consumer before resuming. Keep historical ledger, cursor and pilot
+records. New queue-bound configuration starts a new inventory cycle and
+rediscovers durable intent. Old manifests can be inspected; new execution
+requires current authority. During acceptance measure ordinary queue wait,
+fork/archive completion, NFS metadata latency and the age of the oldest pending
+receipt. Apply the same drain and rediscovery procedure before rolling back.

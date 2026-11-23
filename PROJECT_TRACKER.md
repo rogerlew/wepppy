@@ -1,3 +1,5 @@
+In progress — [Dedicated query catalog queue on wepp3](docs/work-packages/20261123_dedicated_query_catalog_queue/package.md).
+
 Implemented and validated locally — [Restore channel upstream area](docs/work-packages/20261122_channel_upstream_area/package.md).
 
 Closed locally — [Large-watershed Parquet interchange](docs/work-packages/20261122_interchange_row_groups/package.md). Verified at 47,582 source IDs and against 45-year source data. Production recovery pending.
