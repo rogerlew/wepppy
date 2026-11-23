@@ -7,8 +7,8 @@ Starting from local master, characterize the public runbook with deterministic c
 ## Progress
 
 - [x] Locate the package export and live pytest entry point.
-- [ ] Characterize success and failure.
-- [ ] Extract and validate.
+- [x] Characterize success and failure.
+- [x] Extract and validate.
 
 ## Surprises & Discoveries
 
@@ -20,4 +20,4 @@ Use a repeatable offline replay for exact call and evidence comparison. Keep the
 
 ## Outcomes & Retrospective
 
-Pending validation.
+Four scoped replay cases reproduced the original client calls and both generated evidence files. The isolated pytest run passed all four and skipped the opt-in live test. See the [tracker](../../tracker.md) for measurements, test commands, and validation limits.
