@@ -8,6 +8,12 @@ The Rocket mount on wepp3 used NFSv3 soft. Wepp1 and wepp2 used NFSv4.2 hard. Th
 
 The operator evidence directory is `/workdir/query-catalog-studies/catalog-queue-rollout-20261123/acceptance/`. The three-host evidence file is `cross.json`, SHA-256 `52ce4f9164e58e16f257acd9e2d397e94f8603ee56d1ddf4a6f61680ad5a9b81`. Private artifacts retain the source job and scope identifiers. The baseline comes from `baseline-corrected.json`.
 
+## Staged production image
+
+At 06:19 UTC, the staged wepp3 image `sha256:b6e0462f8a749eabb168ea398a4f8056c46305f2a003e04b026c0d5623567c94` from master `dacf4185d945f9700a235ac23fb1b99623cf11e6` completed a real refresh before activation. The worker used the production entry point, numeric identity, groups and Rocket mounts. Linux mountinfo showed read-only access to `/geodata` and `/geodata/prism` and writable access to `/wc1`, `/geodata/wc1` and `/geodata/weppcloud_runs`.
+
+The test used private root declarations under Rocket's validation area and a disposable Redis reachable only by loopback in an isolated network namespace. A pristine Redis with no admission ledger correctly deferred the first attempt. After explicit bootstrap in a fresh private Redis, one compatible worker consumed the real `refresh_query_catalog_rq` on `query-catalog`. The RQ queue wait was 0.036 seconds and execution took 0.637 seconds. Wepp1 and wepp3 independently read the acknowledged receipt, zero pending requests and the expected Parquet schema and values through both aliases. All four reads agreed on catalog SHA-256 `7740ea4814a21a315b7c706a240d0462d230883aa5f7c6137863fff46469305c`. The disposable containers were removed. Evidence is in the operator directory under `shadow-3ac52598d37647cbbdc73535f0f1a9d7/`.
+
 ## Live exercise
 
 1. Read back actual candidate container mounts, worker groups and registration under its production identity. Check one dedicated consumer alongside the independent fork/archive worker. Record ready depth and queue-head age on default, batch, fork-archive and query-catalog. Check for a catalog callable on any default consumer.

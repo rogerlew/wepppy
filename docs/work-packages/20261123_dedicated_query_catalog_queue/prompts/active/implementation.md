@@ -8,8 +8,8 @@ Implement the [work package](../../package.md) against the catalog routing contr
 
 - [x] Pin the starting revision and document the authorized topology, scope and validation.
 - [x] Change enqueue, reconciliation, consumer readiness, Compose and deployment assumptions; validate compatibility, migration and rollback.
-- [ ] Run scoped tests and the RQ graph check, obtain independent reviews and merge through a protected PR.
-- [ ] Build one retained candidate on wepp1; validate native artifacts and security evidence, transfer by digest and apply host-specific bindings.
+- [x] Run scoped tests and the RQ graph check, obtain independent reviews and merge through a protected PR.
+- [x] Build one retained candidate on wepp1; validate native artifacts and security evidence, transfer by digest and apply host-specific bindings.
 - [ ] Fence admission and fetches as appropriate. Recheck job functions before stopping authorized catalog refreshes. Preserve other running jobs and durable receipts. Activate hosts sequentially, verify identities, restore dispatch and confirm received work.
 - [ ] Validate real artifact publication and coexistence on the production NFS clients; record residual risks and follow-up freshness observation.
 
@@ -23,4 +23,4 @@ Keep fork/archive serial and dedicated. Preserve default backlog deferral initia
 
 ## Outcomes & Retrospective
 
-The scoped tests verified catalog publication and inventory yielding to refresh on a single worker. Integration and release remain open. Record exact merged revision, image, deployment disposition, job and readback evidence in the tracker. A missing or incompatible consumer must leave a recoverable receipt. Rollback uses the retained prior artifact, restores queue topology and rediscovers durable pending work.
+The scoped tests verified catalog publication and inventory yielding to refresh on a single worker. PR #732 merged and all hosts retained the same image. The fresh scan found identical match sets and severities. Release activation and live archive overlap remain open. Record exact merged revision, image, deployment disposition, job and readback evidence in the tracker. A missing or incompatible consumer must leave a recoverable receipt. Rollback uses the retained prior artifact, restores queue topology and rediscovers durable pending work.
