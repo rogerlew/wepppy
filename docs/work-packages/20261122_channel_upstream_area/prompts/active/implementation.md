@@ -7,8 +7,10 @@ In weppcloud-wbt, repair HillslopesTopaz so netw.tsv reports the cumulative area
 ## Progress
 
 - [x] Diagnose the historical field and select compatible semantics.
-- [ ] Correct the producer and check independently counted areas.
-- [ ] Exercise Peridot and generated inputs, publish and record outcomes.
+- [x] Correct the producer and check independently counted areas.
+- [x] Publish Peridot and reproduce WEPP inputs on 22,081 incident reaches.
+- [x] Exercise both SWAT+ width modes through written geometry and native execution.
+- [ ] Complete WEPPpy validation and record integration status.
 
 ## Surprises & Discoveries
 
@@ -26,4 +28,4 @@ Run the WBT fixture through HillslopesTopaz and compare every upstream-node coun
 
 ## Outcomes & Retrospective
 
-Implementation in progress.
+The repaired producer and existing Peridot binary produced 38.3 m in pw0.slp. Independent checks matched every reach. The targeted native SWAT+ simulations completed. See the package validation artifact for input scope and reproduction.

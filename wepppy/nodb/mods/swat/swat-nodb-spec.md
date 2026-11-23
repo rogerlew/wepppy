@@ -190,6 +190,8 @@ Notes:
 - Bundled templates: `wepppy/nodb/mods/swat/templates/ref_1hru` (derived from `Osu_1hru`), `Ames_sub1`, and `Osu_1hru`.
 - `disable_aquifer=true` removes aquifer objects from `object.cnt` and strips aquifer outflows from `rout_unit.con`.
 
+For channel geometry, regenerate legacy WBT network tables before building TxtInOut. The canonical `areaup` field is cumulative upstream-node area in m² and joins on `topaz_id`. A missing channel drainage area stops the build. See [the channel parameterization decision](../../../../docs/adrs/ADR-0158-channel-upstream-node-area.md).
+
 ## Data flow overview
 
 ```

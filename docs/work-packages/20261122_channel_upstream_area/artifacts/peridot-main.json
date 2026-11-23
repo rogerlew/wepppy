@@ -1,0 +1,12 @@
+{
+  "accepted_sha": "324572a4ba36096020d8384bb3d475f81204bd69",
+  "branch": "main",
+  "claim": "remote_integration_snapshot",
+  "integration_mode": "merge-preserving",
+  "observed_at": "2026-11-23T03:11:04.526973+00:00",
+  "observed_remote_sha": "aae724c888862f95fda0ce1b7a432e16adaf399b",
+  "remote": "origin",
+  "repository": "https://github.com/wepp-in-the-woods/peridot",
+  "schema_version": 1,
+  "validation_scope": "ancestry-only; not behavioral acceptance or release approval"
+}

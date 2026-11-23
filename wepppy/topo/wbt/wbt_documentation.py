@@ -246,8 +246,8 @@ RESOURCE_SEQUENCE: List[ResourceDefinition] = [
         summary="Channel network attributes table.",
         description=(
             "Each row describes one link. Inflow IDs reference the link id column (-1 for absent inflows). "
-            "Join topaz_id to channel geometry within the same run. The areaup field sums cell area "
-            "for hillslope IDs topaz_id minus 1 and minus 2."
+            "Join topaz_id to channel geometry within the same run. The areaup field measures cumulative area draining "
+            "into the upstream node, excluding the node cell itself."
         ),
         units=(
             "ds_x/us_x are zero-based raster rows and ds_y/us_y are zero-based columns. "

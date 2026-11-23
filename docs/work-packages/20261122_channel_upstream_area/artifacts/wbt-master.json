@@ -1,0 +1,12 @@
+{
+  "accepted_sha": "77136396eed02e8f707a92218345bc25ebe4553b",
+  "branch": "master",
+  "claim": "remote_integration_snapshot",
+  "integration_mode": "merge-preserving",
+  "observed_at": "2026-11-23T03:13:50.328380+00:00",
+  "observed_remote_sha": "92dc068e2414de20d7688b00cb2c710677b9d2a3",
+  "remote": "origin",
+  "repository": "https://github.com/rogerlew/weppcloud-wbt.git",
+  "schema_version": 1,
+  "validation_scope": "ancestry-only; not behavioral acceptance or release approval"
+}
