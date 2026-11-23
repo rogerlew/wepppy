@@ -145,3 +145,7 @@ wpc1. Existing reservations finish normally. Compare occupied worker time,
 ordinary queue delay and peer-readable catalogs across matched test batches.
 An unrecognized selector leaves the optimization inactive and appears in the
 admission panel. Select a namespace used exclusively by batch-layout roots.
+
+## Dedicated catalog queue amendment
+
+The [dedicated queue contract](query-engine-catalog-refresh-contract.md#dedicated-catalog-queue-on-wepp3) governs current routing. Run the pilot controller on wepp3 alongside its single exclusive consumer to keep approved filesystem identities on the same NFS client. Historical batch and default manifests remain inspectable. New pilot admissions require the current queue-bound configuration.

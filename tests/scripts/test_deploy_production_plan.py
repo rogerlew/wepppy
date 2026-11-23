@@ -170,8 +170,16 @@ def test_targeted_batch_rejects_inactive_replica(tmp_path: Path) -> None:
 
 
 def test_wepp3_plan_does_not_start_container_for_secret_preflight(tmp_path: Path) -> None:
-    services = {"rq-worker-fork-archive": _full_services()["rq-worker"]}
+    services = {name: _full_services()["rq-worker"] for name in ("rq-worker-fork-archive", "rq-worker-query-catalog")}
     result = _run_plan(tmp_path, services)
     assert result.returncode == 0, result.stderr
     assert "mode=wepp3-fork-archive" in result.stdout
-    assert "recreate=rq-worker-fork-archive" in result.stdout
+    assert "recreate=rq-worker-fork-archive rq-worker-query-catalog" in result.stdout
+
+
+
+@pytest.mark.parametrize("service", ["rq-worker-fork-archive", "rq-worker-query-catalog"])
+def test_incomplete_dedicated_topology_refuses_to_deploy(tmp_path: Path, service: str) -> None:
+    result = _run_plan(tmp_path, {service: _full_services()["rq-worker"]})
+    assert result.returncode != 0
+    assert "Unsupported production Compose topology" in result.stderr

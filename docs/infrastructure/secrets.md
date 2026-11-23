@@ -83,7 +83,7 @@ The caller's context must be restored after lookup. Secrets alone do not make
 another Flask app's database session valid.
 
 Do not grant Flask secrets to every service using the same image. The restricted
-fork/archive worker and scheduler use database configuration without reaching the
+fork/archive worker, query catalog worker and scheduler use database configuration without reaching the
 inspected Flask-dependent task bodies. General workers already require Flask.
 Isolated test/smoke stacks intentionally use disposable inline credentials.
 The [2026-10-27 assessment](../work-packages/20261027_service_secret_dependency_audit/artifacts/assessment.md)

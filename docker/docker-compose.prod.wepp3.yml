@@ -4,7 +4,7 @@ x-wepppyo3-interchange-entrypoint: &wepppyo3-interchange-entrypoint
   - --
 
 services:
-  rq-worker-fork-archive:
+  rq-worker-fork-archive: &dedicated-worker
     image: ${WEPPCLOUD_IMAGE:-wepppy:latest}
     build:
       context: ..
@@ -63,6 +63,31 @@ services:
       - -lc
       - |
         exec /workdir/wepppy/docker/rq-worker-startup.sh 1 fork-archive
+
+  rq-worker-query-catalog:
+    <<: *dedicated-worker
+    volumes:
+      - type: bind
+        source: /geodata/wc1
+        target: /wc1
+        bind:
+          create_host_path: false
+      - /geodata:/geodata:ro
+      - type: bind
+        source: /geodata/wc1
+        target: /geodata/wc1
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /geodata/weppcloud_runs
+        target: /geodata/weppcloud_runs
+        bind:
+          create_host_path: false
+    command:
+      - bash
+      - -lc
+      - |
+        exec /workdir/wepppy/docker/rq-worker-startup.sh 1 query-catalog
 
 secrets:
   postgres_password:

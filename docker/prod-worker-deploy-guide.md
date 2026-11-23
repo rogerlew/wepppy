@@ -5,16 +5,22 @@
 ## Scope
 This guide covers deploying the worker-only stack (`rq-worker`, `rq-worker-batch`, and optional `weppcloudr`) on a separate host that connects to the main WEPPcloud Redis instance.
 
-### Wepp3 serial worker
+### Wepp3 dedicated workers
 
-The Fork/Archive Serial Queue Isolation package defines
-`rq-worker-fork-archive` in `docker-compose.prod.wepp3.yml`. Wepp3 already
-has the production NFS mount and otherwise runs no containers. The service must
-start alone, consume only `fork-archive`, and have no dependency on `rq-worker`,
-`rq-worker-batch`, or `weppcloudr`. The wepp2 worker compose does not
-define it, and the wepp1 override forces its inherited service scale to zero.
-The service runs as numeric identity `1002:130`, matching ownership of the
-production `/wc1/runs` tree. Do not replace this with wepp3's host-local
+Wepp3 runs one `rq-worker-fork-archive` for serialized fork, archive and restore
+jobs and one `rq-worker-query-catalog` for catalog refreshes. Each subscribes
+only to its named queue. A catalog scan can overlap a fork. Wepp1 scales both
+services to zero and wepp2 has neither service.
+
+Both workers run as numeric identity `1002:130`. Both mount `/geodata/wc1` at
+`/wc1`. The catalog consumer additionally needs writable `/geodata/wc1` and
+`/geodata/weppcloud_runs` aliases so it can honor existing receipt paths and
+coordinate with writers through the same NFS locks. All other `/geodata`
+content is read-only. Match the producers' namespace and complete
+`QUERY_CATALOG_ROOTS_JSON`. Verify cross-host reads, atomic replacement and
+lock exclusion on the live mounts in both directions before routing work.
+
+Do not replace this with wepp3's host-local
 `roger:docker` ids; NFS authorization uses numeric ids and the host-local ids do
 not match the production run-storage identity. Keep the Redis secret's host
 mode at `0600`, and grant the worker identity a narrow read ACL:
@@ -52,23 +58,22 @@ docker compose -f docker/docker-compose.prod.wepp3.yml exec rq-worker-fork-archi
 # expected: uid=1002 gid=130
 ```
 
-On wepp3, install the dedicated preset and use the canonical production deploy
-script. The script auto-detects the single-service wepp3 topology, refuses to
-interrupt an active `fork-archive` job by using RQ warm shutdown, builds and
-recreates only that service, and verifies its runtime identity and exactly one
-RQ registration:
+On wepp3, install the dedicated preset and inspect the rendered service set.
 
 ```bash
 ./wctl/install.sh wepp3
-./scripts/deploy-production.sh --build-retained-candidate
-# After exact evidence is imported, reviewed, and approved:
-./scripts/deploy-production.sh --resume-retained-candidate <receipt-path>
+./scripts/deploy-production.sh --print-plan
 ```
 
-Build mode leaves the running fork/archive worker and RQ state unchanged. Resume
-holds the global dequeue fence, drains the active `fork-archive` registry while
-the known-good worker remains online, activates only the approved immutable
-image ID, and restores the exact prior image on a post-stop failure.
+Build on wepp1 and load its approved immutable common image onto wepp3.
+Use `--retain-images-from` with the source receipt and its SHA-256 to create a
+host-specific receipt. Pass `--new-service rq-worker-query-catalog` to both
+import and `--resume-retained-candidate` for first installation. Omit this flag
+on subsequent deployments. Resume holds the global dequeue fence, drains both
+started registries, warm-stops both workers, and verifies their storage identities
+and exclusive registrations. A failed activation restores the prior images and
+removes a first-install service that was previously absent. Check the catalog
+consumer's configuration against a producer after the shared fence is released.
 
 The deploy script re-resolves the effective Compose services after `git pull`.
 If the pull changes the deployment script itself, the running process re-execs

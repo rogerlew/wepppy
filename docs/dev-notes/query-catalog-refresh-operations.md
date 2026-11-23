@@ -1,32 +1,36 @@
 # Query catalog refresh operations
 
-Status (2026-10-27): full implementation/remediation deployed to wepp1–3 at
-`0da9c9071`; the actual bounded shared-batch pilot passed. General async remains
-disabled. Complete discovery, timeout recovery and HTTP acceptance pass; whole-fleet
-cycle capacity and new-arrival delay remain separate enablement gates.
-Authority: [refresh contract](../schemas/query-engine-catalog-refresh-contract.md).
-Execution and evidence: [work package](../work-packages/20261023_query_catalog_async_refresh/package.md).
-
 ## Scope and rollout
 
-October 28 routing amendment: new refresh, inventory and pilot jobs use `default`
-and its compatible consumers. Batch backlog no longer delays catalog admission;
-ordinary waiting work on default still defers it. The cap remains seven jobs.
-The pilot requires all twelve configured default consumers, six per host, with
-queue-bound capability. The October 27 shared-batch acceptance above is historical;
-default routing is not yet deployed or production-accepted.
+The dedicated `query-catalog` queue carries refresh and inventory. One exclusive
+worker consumes it on wepp3 alongside the separately subscribed fork/archive
+worker. The effective outstanding maintenance limit is one. Ordinary waiting
+work on `default` still defers new admission to protect shared NFS capacity.
+See the [routing contract](../schemas/query-engine-catalog-refresh-contract.md#dedicated-catalog-queue-on-wepp3).
 
-Before migration, pause catalog admission and drain/reconcile old batch catalog
-jobs. Keep the historical `query-catalog:batch-admission:v1` ledger and its pause
-key; do not rename/delete them or reset retained permits. Old batch pilot manifests
-remain evidence and cannot resume on default. Use a new pilot ID. New queue-bound
-configuration starts a new discovery identity; durable receipts are rediscovered,
-while old Redis inventory/dirty history remains intact.
+Apply a time-limited catalog admission pause for cutover and rollback, then
+drain or reconcile old queued, intermediate and started maintenance. Preserve
+the admission ledger, per-scope records and historical pilot/cursor records.
+Deploy the participating producers, scheduler and dedicated worker using the
+canonical full deployment. Verify the live subscription on the worker host
+with `consumer_status(Queue(CATALOG_QUEUE, connection=connection))` from
+`wepppy.rq.query_catalog_rq` using the RQ Redis connection. Expect exactly
+one compatible consumer, zero incompatible and an unsuspended pool. Check that
+worker's registered queues, heartbeat, hostname and source image.
 
-Use the full canonical deployment for all participants; `--targeted-batch` cannot
-activate this change. Verify genuine default registrations and queue identity,
-then observe publication artifacts and ordinary default-job delay. General async
-enablement remains a separate acceptance decision.
+A new configuration hash starts a fresh inventory. To carry existing dirty
+locators forward immediately, compute the old SHA-256 over the sorted compact
+JSON worker configuration with `queue` set to `default` and the new SHA-256
+with `queue` set to `query-catalog` (see `_configuration_id`). Verify all
+other configuration fields match. With old producers drained and admission
+fenced, union both `query-catalog:dirty:<hash>` sets into the **new** key
+(`SUNIONSTORE new_dirty new_dirty old_dirty`). Verify `SDIFF old_dirty
+new_dirty` is empty. Leave the old set, cursor and lock records in place.
+Full inventory independently rediscovers durable filesystem receipts. Check
+raw publication and ordinary wait on production test projects before acceptance.
+Record the oldest pending receipt age and fork/archive completion during the
+run. Identity-bound historical pilots remain read-only. Start a fresh pilot
+from the same wepp3 NFS client that will execute it.
 
 This maintenance indexes project artifacts; it does not generate model/interchange
 outputs. Existing synchronous APIs remain available for tools and freshness
@@ -35,12 +39,11 @@ only for managed roots when `QUERY_CATALOG_REFRESH_ENABLED=true`. Disabled rollo
 mode retains synchronous behavior. Enabled-mode queue/Redis failure retains
 pending intent; it never invokes a synchronous scan as an outage fallback.
 
-Before enabling, every eligible default consumer must advertise matching protocol,
+Before enabling, every eligible catalog consumer must advertise matching protocol,
 root/storage namespace and shared coordination settings. Deploy the paired native
 scanner release, publication/lifecycle guards, reader barriers, polling classifier
 and scheduler together. Keep existing identities, mounts and permissions; an
-incompatible companion worker blocks maintenance admission. No new queue/service
-is required. Follow the existing deployment entry point for the target platform;
+incompatible companion worker blocks maintenance admission. Follow the existing deployment entry point for the target platform;
 this document does not authorize rollout or prescribe an alternate deployment. The implementation review inspected `scripts/deploy-production.sh` and the existing wepp1 deployment record; coordinated cutover must use that entry point and its installed preset, queue fencing and compatibility preflights.
 
 ## Configuration
@@ -48,7 +51,7 @@ this document does not authorize rollout or prescribe an alternate deployment. T
 Operational limits and rationale are in
 [ADR-0104](../adrs/ADR-0104-query-catalog-refresh-operational-bounds.md). Default
 rollout is disabled. Scheduler cadence, inventory/admission bounds, retry delays
-and full-cycle target are configurable. Inventory discovery now uses an existing-default
+and full-cycle target are configurable. Inventory discovery now uses a dedicated
 maintenance job with `inventory_protocol: 1` in worker capabilities. The inventory
 limit is up to 100 entry records per worker checkpoint and up to 100 scope records
 drained per scheduler tick; the separate admission limit remains 25. Checkpoints
@@ -60,9 +63,9 @@ cycle interval starts from previous completion; it is not a strict per-scope
 freshness bound. Record traversal/reconciliation time separately from the delay
 before the next cycle.
 
-Enabled mode requires `QUERY_CATALOG_ROOTS_JSON`; missing configuration fails before admission. Use the same explicit configuration in producers, scheduler and every eligible default consumer. The [queue catalog](../../wepppy/rq/job-dependencies-catalog.md) provides a three-namespace example, not a complete fleet configuration. October 26 production evidence confirms active owned projects under `/geodata/weppcloud_runs`; excluding that legacy namespace would break existing workflows. Verify its identity, coordination and participant access before enablement. Include all deployment-owned namespaces; a missing configured namespace is degraded storage evidence, not a completed cycle.
+Enabled mode requires `QUERY_CATALOG_ROOTS_JSON`; missing configuration fails before admission. Use the same explicit configuration in producers, scheduler and every eligible catalog consumer. The [queue catalog](../../wepppy/rq/job-dependencies-catalog.md) provides a three-namespace example, not a complete fleet configuration. October 26 production evidence confirms active owned projects under `/geodata/weppcloud_runs`; excluding that legacy namespace would break existing workflows. Verify its identity, coordination and participant access before enablement. Include all deployment-owned namespaces; a missing configured namespace is degraded storage evidence, not a completed cycle.
 
-The existing development, production, worker-pool and dedicated wepp3 Compose definitions supply service settings through `${WEPPPY_ENV_FILE:-defaults.env}`. Stage these settings in that existing service env file; a shell variable used only for Compose interpolation is not sufficient. Verify the effective configuration in web producers, query services, scheduler and every eligible worker before enabling. All synchronous publishers also need the common guard release, even when they do not consume the default queue. No extra Compose override or service is required.
+The existing development, production, worker-pool and dedicated wepp3 Compose definitions supply service settings through `${WEPPPY_ENV_FILE:-defaults.env}`. Stage these settings in that existing service env file; a shell variable used only for Compose interpolation is not sufficient. Verify the effective configuration in web producers, query services, scheduler and every eligible worker before enabling. All synchronous publishers also need the common guard release, even when they do not consume the catalog queue.
 
 `QUERY_CATALOG_ROOTS_JSON` explicitly maps managed root path, storage namespace,
 external coordination directory and layout. Canonical mappings preserve equivalent
@@ -165,7 +168,7 @@ readbacks. General asynchronous refresh stays false; the tool refuses general
 enablement, alternative queue/root inputs, and identities other than UID1002/GID130.
 No source overlay, extra worker or fake worker registration is used.
 
-Run inside an existing default-worker container, as UID1002/GID130, against its installed
+Run inside the wepp3 catalog-worker container, as UID1002/GID130, against its installed
 checkout. Choose a unique lowercase pilot ID (8–64 characters) and an absolute
 private evidence directory. The directory must belong to that operator and have
 no group/other permissions. Exact IDs, owned paths and raw observations are
@@ -261,7 +264,7 @@ is recorded; do not claim exact original-status replay from its retained files.
 
 ## November 6 deployment preparation
 
-The scheduler task must select `default` explicitly: its dispatch passes the
+The scheduler task must select `query-catalog` explicitly because its dispatch passes the
 configured Queue into reconciliation. A retained real-YAML integration regression
 now covers inventory admission, worker consumption and published catalog content;
 the earlier handwritten batch/stub dispatch check did not establish that boundary.
@@ -280,7 +283,7 @@ and worker compatibility when preparation does not progress. The worker may
 still finish after the browser stops waiting.
 
 Before enabling GL preparation, drain old catalog jobs and verify that the
-scheduler and every eligible default worker run the containment-capable
+scheduler and every eligible catalog worker run the containment-capable
 revision and advertise `browser_prepare_protocol: 1`. Verify that the
 Query Engine and workers have matching roots, storage mapping, and enabled
 settings. Changing the worker capability changes the dirty-index identity.

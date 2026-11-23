@@ -44,6 +44,7 @@ def _run_deploy(
     recovery_failure: bool = False,
     stale_renderer: bool = False,
     local_worker_registration_failure: bool = False,
+    catalog_registration_failure: bool = False,
     rq_fence_loss: bool = False,
     rq_renew_once: bool = False,
     rq_renew_transient_failure: bool = False,
@@ -244,6 +245,8 @@ elif [[ "${args}" == *"Worker.all"* ]]; then
         count=$((count + 1))
         printf '%s\n' "${count}" > "${FAKE_RECOVERY_REGISTRATION_COUNT}"
         printf '0:0\n'
+    elif [[ "${FAKE_CATALOG_REGISTRATION_FAILURE:-0}" = 1 && "${args}" == *"exec -T rq-worker-query-catalog "* ]]; then
+        printf '1:0\n'
     elif [ "${FAKE_LOCAL_WORKER_REGISTRATION_FAILURE:-0}" = 1 ]; then
         printf '0:1\n'
     else
@@ -253,9 +256,9 @@ elif [[ "${args}" == *"exec -T rq-worker hostname"* ]]; then
     printf 'default-worker-host\n'
 elif [[ "${args}" == *"exec -T rq-worker-batch hostname"* ]]; then
     printf 'batch-worker-host\n'
-elif [[ "${args}" == *"exec -T rq-worker-fork-archive id -u"* ]]; then
+elif [[ "${args}" == *"exec -T rq-worker-"*" id -u"* ]]; then
     printf '1002\n'
-elif [[ "${args}" == *"exec -T rq-worker-fork-archive id -g"* ]]; then
+elif [[ "${args}" == *"exec -T rq-worker-"*" id -g"* ]]; then
     printf '130\n'
 elif [[ "${args}" == *"exec -T rq-worker-fork-archive"* && "${args}" == *"fork-archive"* ]]; then
     printf '1:1\n'
@@ -598,7 +601,7 @@ exec /bin/cp "$@"
     if compose_files is None:
         if "weppcloud" in services:
             compose_files = "docker/docker-compose.prod.yml"
-        elif set(services) == {"rq-worker-fork-archive"}:
+        elif set(services) == {"rq-worker-fork-archive", "rq-worker-query-catalog"}:
             compose_files = "docker/docker-compose.prod.wepp3.yml"
         else:
             compose_files = "docker/docker-compose.prod.worker.yml"
@@ -626,6 +629,7 @@ exec /bin/cp "$@"
             "FAKE_CANDIDATE_MISMATCH": "1" if candidate_mismatch else "0",
             "FAKE_RECOVERY_FAILURE": "1" if recovery_failure else "0",
             "FAKE_STALE_RENDERER": "1" if stale_renderer else "0",
+            "FAKE_CATALOG_REGISTRATION_FAILURE": "1" if catalog_registration_failure else "0",
             "FAKE_LOCAL_WORKER_REGISTRATION_FAILURE": (
                 "1" if local_worker_registration_failure else "0"
             ),
@@ -1630,7 +1634,7 @@ def test_worker_rejects_missing_current_host_registration_before_prune_or_succes
 
 
 def test_wepp3_retained_execution_drains_and_activates_immutable_image(tmp_path: Path) -> None:
-    services = {"rq-worker-fork-archive": _service("wepppy:test")}
+    services = {name: _service("wepppy:test") for name in ("rq-worker-fork-archive", "rq-worker-query-catalog")}
     result, commands = _run_deploy(tmp_path, services)
 
     assert result.returncode == 0, result.stdout + result.stderr
@@ -1644,7 +1648,9 @@ def test_wepp3_retained_execution_drains_and_activates_immutable_image(tmp_path:
     governance = _position(commands, "governance|check")
     secret_preflight = _position(commands, "test -r /run/secrets/redis_password")
     assert governance < secret_preflight < build < suspend < stop < down < activation < registration < resume
-    assert "fork-archive RQ registries are drained" in result.stdout
+    assert any("stop --timeout 216000 rq-worker-fork-archive rq-worker-query-catalog" in line for line in commands)
+    assert any("exec -T rq-worker-query-catalog id -u" in line for line in commands)
+    assert "fork-archive and query-catalog RQ registries are drained" in result.stdout
     assert "retained|record-activation" in commands
     assert any("wepppy-retained-rollback:" in command for command in commands)
     assert not any(command.startswith("docker|system prune") for command in commands)
@@ -1652,20 +1658,33 @@ def test_wepp3_retained_execution_drains_and_activates_immutable_image(tmp_path:
 
 
 def test_wepp3_active_job_timeout_releases_fence_without_stopping_worker(tmp_path: Path) -> None:
-    services = {"rq-worker-fork-archive": _service("wepppy:test")}
+    services = {name: _service("wepppy:test") for name in ("rq-worker-fork-archive", "rq-worker-query-catalog")}
     result, commands = _run_deploy(tmp_path, services, rq_probe_result="1")
 
     assert result.returncode != 0
-    assert "Timed out draining 1 active fork-archive RQ jobs" in result.stderr
+    assert "Timed out draining 1 active fork-archive and query-catalog RQ jobs" in result.stderr
     assert _position(commands, _RQ_SUSPEND) < _position(commands, _RQ_RESUME)
     assert not any("stop --timeout" in command for command in commands)
     assert not any(command.startswith("docker|compose -f") and " up -d " in command for command in commands)
 
 
+def test_catalog_registration_failure_restores_serial_worker_and_removes_first_install(tmp_path: Path) -> None:
+    catalog = "rq-worker-query-catalog"
+    services = {name: _service("wepppy:test") for name in ("rq-worker-fork-archive", catalog)}
+    result, commands = _run_deploy(
+        tmp_path, services, "--new-service", catalog, new_service=catalog, catalog_registration_failure=True,
+    )
+    assert result.returncode != 0, result.stdout
+    assert "Expected one live exclusive rq-worker-query-catalog registration" in result.stderr
+    assert "KNOWN_GOOD_RESTORE_FAILED" not in result.stderr
+    assert any(" rm --stop --force " in command and command.endswith(catalog) for command in commands)
+    assert any(_RQ_RESUME in command for command in commands)
+
+
 def test_wepp3_registration_failure_restores_known_good_and_retains_fence_on_failure(
     tmp_path: Path,
 ) -> None:
-    services = {"rq-worker-fork-archive": _service("wepppy:test")}
+    services = {name: _service("wepppy:test") for name in ("rq-worker-fork-archive", "rq-worker-query-catalog")}
     result, commands = _run_deploy(
         tmp_path,
         services,
@@ -1871,7 +1890,7 @@ def test_active_job_probe_never_cleans_registry(monkeypatch, capsys):
 @pytest.mark.parametrize("topology", ["full", "wepp3"])
 def test_governance_failure_precedes_build_stop_and_activation(tmp_path: Path, topology: str) -> None:
     services = (_full_services_with_cap_and_renderer() if topology == "full"
-                else {"rq-worker-fork-archive": _service("wepppy:test")})
+                else {name: _service("wepppy:test") for name in ("rq-worker-fork-archive", "rq-worker-query-catalog")})
     result, commands = _run_deploy(tmp_path, services, governance_failure=True)
     assert result.returncode == 89
     assert "governance|check" in commands

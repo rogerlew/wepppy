@@ -25,7 +25,7 @@ from rq.utils import utcformat
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
-queue_names = ("default", "batch", "fork-archive")
+queue_names = ("default", "batch", "fork-archive", "query-catalog")
 conn = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
 prefix = Worker.redis_worker_namespace_prefix
 queue_prefix = worker_registration.WORKERS_BY_QUEUE_KEY.split("%s", 1)[0]

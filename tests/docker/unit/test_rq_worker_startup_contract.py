@@ -133,7 +133,22 @@ def test_fork_archive_worker_topology_is_single_process_and_host_scoped() -> Non
     assert forest_worker["profiles"] == ["fork-archive"]
     assert "rq-worker-startup.sh 1 fork-archive" in _command_block(forest_worker)
 
-    assert set(wepp3_services) == {"rq-worker-fork-archive"}
+    assert set(wepp3_services) == {"rq-worker-fork-archive", "rq-worker-query-catalog"}
+    catalog = wepp3_services["rq-worker-query-catalog"]
+    assert "rq-worker-startup.sh 1 query-catalog" in _command_block(catalog)
+    assert catalog["user"] == "1002:130"
+    assert catalog["env_file"] == wepp3_services["rq-worker-fork-archive"]["env_file"]
+    assert catalog["volumes"][0] == {
+        "type": "bind", "source": "/geodata/wc1", "target": "/wc1", "bind": {"create_host_path": False},
+    }
+    assert catalog["volumes"][1] == "/geodata:/geodata:ro"
+    aliases = ["/geodata/wc1", "/geodata/weppcloud_runs"]
+    assert catalog["volumes"][2:] == [
+        {"type": "bind", "source": path, "target": path, "bind": {"create_host_path": False}}
+        for path in aliases
+    ]
+    assert forest_services["rq-worker-query-catalog"]["profiles"] == ["query-catalog"]
+    assert _load_yaml(_PROD_WEPP1_COMPOSE_PATH)["services"]["rq-worker-query-catalog"] == {"scale": 0}
     wepp3_worker = wepp3_services["rq-worker-fork-archive"]
     assert "rq-worker-startup.sh 1 fork-archive" in _command_block(wepp3_worker)
     assert wepp3_worker["user"] == "1002:130"
@@ -181,7 +196,7 @@ def test_production_deploy_script_supports_guarded_wepp3_mode() -> None:
     assert '!= "1002:130"' in deploy_script
     assert 'worker.hostname == socket.gethostname()' in deploy_script
     assert 'connection.ttl(worker.key) > 0' in deploy_script
-    assert 'REGISTERED_FORK_ARCHIVE_WORKERS}" != "1:1"' in deploy_script
+    assert '${registration}" = "1:1"' in deploy_script
     assert "rq-info --service rq-worker-fork-archive --detail" in deploy_script
     assert "Skipping broad Docker runtime prune on the dedicated wepp3 host" in deploy_script
 

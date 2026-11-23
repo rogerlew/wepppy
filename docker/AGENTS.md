@@ -40,11 +40,11 @@ production worker deployment.
 - host: wepp2
 - deployment family: wepp.cloud Docker Compose
 
-## production fork/archive worker
+## production dedicated workers
 - host: wepp3
 - compose source: `docker-compose.prod.wepp3.yml`
-- scope: `rq-worker-fork-archive` only; no other containers
-- contract: `docs/work-packages/20260803_fork_archive_serial_queue/package.md`
+- scope: one `rq-worker-fork-archive` and one `rq-worker-query-catalog`, each consuming only its own queue
+- operations: [worker deploy guide](prod-worker-deploy-guide.md#wepp3-dedicated-workers)
 
 ## Kubernetes
 - domain: openwepp.org

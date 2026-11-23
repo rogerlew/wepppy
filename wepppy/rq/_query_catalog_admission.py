@@ -1,4 +1,4 @@
-"""One Redis admission ledger for every catalog job on shared default."""
+"""One Redis admission ledger for every catalog job on the dedicated queue."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -15,6 +15,7 @@ from rq.suspension import WORKERS_SUSPENDED
 LEDGER_KEY = 'query-catalog:batch-admission:v1'
 PAUSE_KEY = LEDGER_KEY + ':paused'
 TERMINAL = frozenset({'finished', 'failed', 'stopped', 'canceled'})
+CATALOG_QUEUE = 'query-catalog'
 CAP = 7
 OWNER_POLICY_KEY = LEDGER_KEY + ':batch-owner-namespace'
 OWNER_CAP = 2
@@ -87,12 +88,14 @@ def execution_outstanding(binding: dict[str, Any], status: str | None) -> bool:
 
 def initialize_admission(connection: Any, queue: Queue) -> None:
     """Explicit operator bootstrap; never reset an existing or uncertain ledger."""
-    if queue.name != 'default':
-        raise ValueError('Catalog admission requires shared default')
+    if queue.name != CATALOG_QUEUE:
+        raise ValueError('Catalog admission requires the dedicated query-catalog queue')
     with connection.pipeline() as pipe:
-        queue_keys = [queue.key, Queue('batch', connection=connection).key]
+        origins = (CATALOG_QUEUE, 'default', 'batch')
+        queues = [Queue(origin, connection=connection) for origin in origins]
+        queue_keys = [key for candidate in queues for key in (candidate.key, candidate.intermediate_queue_key)]
         registry_keys = ['rq:' + name + ':' + origin
-                         for origin in ('default', 'batch')
+                         for origin in origins
                          for name in ('wip', 'deferred', 'scheduled')]
         keys = queue_keys + registry_keys
         pipe.watch(LEDGER_KEY, *keys)
@@ -145,9 +148,10 @@ def prepare(pipe: Any, queue: Queue, *, job_id: str, kind: str, configuration: d
     """Read all policy inputs under WATCH; caller enqueues and commits ticket."""
     from . import _query_catalog_pilot as pilot
     from .query_catalog_rq import WORKER_FIELD
-    if queue.name != 'default' or kind not in {'refresh', 'inventory'}:
+    if queue.name != CATALOG_QUEUE or kind not in {'refresh', 'inventory'}:
         raise AdmissionDenied('query_catalog_queue_invalid')
-    pipe.watch(LEDGER_KEY, PAUSE_KEY, OWNER_POLICY_KEY, queue.key, WORKERS_SUSPENDED)
+    default_key = Queue('default', connection=queue.connection).key
+    pipe.watch(LEDGER_KEY, PAUSE_KEY, OWNER_POLICY_KEY, default_key, queue.key, WORKERS_SUSPENDED)
     try:
         ledger = _ledger(pipe)
     except (AdmissionDenied, ValueError):
@@ -169,40 +173,29 @@ def prepare(pipe: Any, queue: Queue, *, job_id: str, kind: str, configuration: d
     queued = [_text(jid) for jid in pipe.lrange(queue.key, 0, -1)]
     if len(queued) != len(set(queued)):
         _deny(queue, pilot_id, 'accounting_failure')
-    if any(jid not in ledger['jobs'] for jid in queued):
+    if pipe.llen(default_key) or any(jid not in ledger['jobs'] for jid in queued):
         _deny(queue, pilot_id, 'query_catalog_ordinary_backlog')
     if any(_text(pipe.hget(Job.key_for(jid), 'status')) != 'queued' for jid in queued):
         _deny(queue, pilot_id, 'accounting_failure')
-    pipe.watch('rq:workers', 'rq:workers:default')
+    pipe.watch('rq:workers', f'rq:workers:{CATALOG_QUEUE}')
     registrations = list(worker_registration.get_keys(queue=queue))
     compatible = 0
     for registration in registrations:
         pipe.watch(registration)
         queues, advertised, death = pipe.hmget(registration, 'queues', WORKER_FIELD, 'death')
-        if death is not None or pipe.ttl(registration) <= 0 or 'default' not in (_text(queues) or '').split(','):
+        if death is not None or pipe.ttl(registration) <= 0 or CATALOG_QUEUE not in (_text(queues) or '').split(','):
             continue
         try:
             observed = json.loads(advertised) if advertised else None
         except (ValueError, TypeError):
             observed = None
-        if observed != configuration:
+        if _text(queues) != CATALOG_QUEUE or observed != configuration:
             _deny(queue, pilot_id, 'query_catalog_workers_unavailable')
         compatible += 1
     if pilot_id and compatible != pilot.EXPECTED_CONSUMERS:
         _deny(queue, pilot_id, 'configuration_mismatch')
     if not compatible:
         _deny(queue, pilot_id, 'query_catalog_workers_unavailable')
-    if len(remaining) >= min(CAP, compatible):
-        raise AdmissionDenied('query_catalog_capacity_pending')
-    if kind == 'refresh':
-        namespace, _ = owner_policy(pipe, configuration)
-        owner = batch_owner(scope, namespace)
-        if owner and sum(
-            binding['kind'] == 'refresh' and
-            batch_owner(binding.get('scope'), namespace) == owner
-            for binding in remaining.values()
-        ) >= OWNER_CAP:
-            raise AdmissionDenied(OWNER_PENDING)
     pilot_data = None
     if pilot_id:
         pipe.watch(pilot.key(pilot_id), pilot.key(pilot_id) + ':observer')
@@ -219,6 +212,17 @@ def prepare(pipe: Any, queue: Queue, *, job_id: str, kind: str, configuration: d
                 raise AdmissionDenied('query_catalog_pilot_scope_invalid')
     elif not configuration['enabled']:
         raise AdmissionDenied('query_catalog_refresh_disabled')
+    if len(remaining) >= min(CAP, compatible):
+        raise AdmissionDenied('query_catalog_capacity_pending')
+    if kind == 'refresh':
+        namespace, _ = owner_policy(pipe, configuration)
+        owner = batch_owner(scope, namespace)
+        if owner and sum(
+            binding['kind'] == 'refresh' and
+            batch_owner(binding.get('scope'), namespace) == owner
+            for binding in remaining.values()
+        ) >= OWNER_CAP:
+            raise AdmissionDenied(OWNER_PENDING)
     binding = dict(kind=kind, pilot_id=pilot_id, configuration=configuration,
                    scope=scope, claimed=False, reserved_at=time.time())
     if pilot_data:
@@ -241,7 +245,7 @@ def commit(pipe: Any, ticket: dict[str, Any]) -> None:
 def _authorize_job_once(connection: Any, job: Job, *, kind: str, pilot_id: str | None,
                   scope_id: str | None = None, wd: str | None = None) -> dict[str, Any] | None:
     from . import _query_catalog_pilot as pilot
-    from .query_catalog_rq import catalog_worker_configuration
+    from .query_catalog_rq import WORKER_FIELD, catalog_worker_configuration
     with connection.pipeline() as pipe:
         pipe.watch(LEDGER_KEY, Job.key_for(job.id))
         ledger = _ledger(pipe)
@@ -249,8 +253,14 @@ def _authorize_job_once(connection: Any, job: Job, *, kind: str, pilot_id: str |
         if (not binding or binding['kind'] != kind or binding.get('pilot_id') != pilot_id or
                 binding['configuration'] != catalog_worker_configuration() or binding.get('claimed')):
             raise ValueError('Catalog job has no unused admitted execution authority')
-        if job.origin != 'default' or _text(pipe.hget(Job.key_for(job.id), 'status')) != 'started':
+        if job.origin != CATALOG_QUEUE or _text(pipe.hget(Job.key_for(job.id), 'status')) != 'started':
             raise ValueError('Catalog job is not started')
+        worker_key = 'rq:worker:' + (job.worker_name or '')
+        pipe.watch(worker_key)
+        queues, advertised, death = pipe.hmget(worker_key, 'queues', WORKER_FIELD, 'death')
+        if (death is not None or pipe.ttl(worker_key) <= 0 or _text(queues) != CATALOG_QUEUE
+                or not advertised or json.loads(advertised) != binding['configuration']):
+            raise ValueError('Executing worker did not advertise catalog compatibility')
         if kind == 'refresh' and (binding['scope']['scope_id'] != scope_id or binding['scope']['wd'] != str(wd)):
             raise ValueError('Catalog scope argument changed')
         data = None

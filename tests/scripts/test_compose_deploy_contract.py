@@ -192,11 +192,12 @@ def test_runtime_contract_preserves_database_only_and_nonconsumer_services() -> 
     config = {"services": {
         "scheduler": {"environment": {"POSTGRES_PASSWORD": "test-only"}},
         "rq-worker-fork-archive": {"environment": {"POSTGRES_PASSWORD": "test-only"}},
+        "rq-worker-query-catalog": {"environment": {"POSTGRES_PASSWORD": "test-only"}},
         "profile-playback": {},
     }}
     result = _run("validate-runtime-config", config,
                   "--active-service", "scheduler", "--active-service", "rq-worker-fork-archive",
-                  "--active-service", "profile-playback")
+                  "--active-service", "rq-worker-query-catalog", "--active-service", "profile-playback")
     assert result.returncode == 0, result.stderr
 
 

@@ -6,7 +6,7 @@ from wepppy.observability.safe_traceback import render_exception, safe_text
 from wepppy.observability.safe_logging import current_profile, install as install_safe_logging
 from wepppy.observability.secret_profiles import WORKER, worker_profile
 import sys
-install_safe_logging(worker_profile(tuple(arg for arg in sys.argv if arg in {"default", "batch", "fork-archive"})))
+install_safe_logging(worker_profile(tuple(arg for arg in sys.argv if arg in {"default", "batch", "fork-archive", "query-catalog"})))
 
 import os
 import time

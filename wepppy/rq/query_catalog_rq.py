@@ -1,4 +1,4 @@
-"""Coalesced query-catalog maintenance on the existing default queue.
+"""Coalesced query-catalog maintenance on the dedicated catalog queue.
 
 Filesystem receipts are authoritative pending intent. Redis reservations and the
 resumable inventory cursor are recoverable accelerators, never acknowledgment.
@@ -21,6 +21,7 @@ from rq.job import Job
 from rq.suspension import WORKERS_SUSPENDED
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.rq._query_catalog_admission import CATALOG_QUEUE
 from wepppy.rq.job_id import new_rq_job_id
 
 __all__ = [
@@ -69,7 +70,7 @@ def catalog_worker_configuration() -> dict[str, Any]:
     from wepppy.query_engine.catalog_refresh import catalog_worker_configuration as configuration
     return {**configuration(), "enabled": QueryCatalogSettings.from_environ().enabled,
             "inventory_protocol": 1, "admission_protocol": 1, "pilot_protocol": 1,
-            "browser_prepare_protocol": 1, "queue": "default"}
+            "browser_prepare_protocol": 1, "queue": CATALOG_QUEUE}
 
 
 def _configuration_id() -> str:
@@ -95,8 +96,8 @@ def _suspension_key(scope_id: str) -> str:
     return "query-catalog:suspended:" + scope_id
 
 
-def _default_queue() -> Queue:
-    return Queue("default", connection=redis.Redis(**redis_connection_kwargs(RedisDB.RQ)))
+def _catalog_queue() -> Queue:
+    return Queue(CATALOG_QUEUE, connection=redis.Redis(**redis_connection_kwargs(RedisDB.RQ)))
 
 
 def catalog_recovery_registered(scope, *, register: bool) -> bool:
@@ -132,7 +133,7 @@ def consumer_status(queue: Queue) -> dict[str, Any]:
             observed = json.loads(configuration) if configuration else None
         except (ValueError, TypeError):
             observed = None
-        if observed != expected:
+        if observed != expected or (queue.name == CATALOG_QUEUE and _text(queues) != CATALOG_QUEUE):
             incompatible.append(_text(key) or "unknown")
         else:
             compatible += 1
@@ -162,7 +163,7 @@ def enqueue_catalog_refresh(
     from . import _query_catalog_admission as admission, _query_catalog_pilot as pilot
 
     if pilot_id:
-        pilot.authorize_receipt((queue if queue is not None else _default_queue()).connection, pilot_id, str(wd), controller_token)
+        pilot.authorize_receipt((queue if queue is not None else _catalog_queue()).connection, pilot_id, str(wd), controller_token)
     settings = QueryCatalogSettings.from_environ()
     resolved = resolve_scope(wd, create=False)
     current = resolved.as_dict()
@@ -172,7 +173,7 @@ def enqueue_catalog_refresh(
         raise ValueError("Catalog scope identity changed before admission")
     if not settings.enabled and not pilot_id:
         return _pending("query_catalog_refresh_disabled")
-    queue = queue if queue is not None else _default_queue()
+    queue = queue if queue is not None else _catalog_queue()
     connection = queue.connection
     scope_id = resolved.scope_id
     try:
@@ -264,9 +265,6 @@ def refresh_query_catalog_rq(
         raise RuntimeError("Query catalog worker configuration is incompatible")
     connection = job.connection
     from . import _query_catalog_admission as admission
-    registration = connection.hget("rq:worker:" + job.worker_name, WORKER_FIELD) if job.worker_name else None
-    if not registration or json.loads(registration) != configuration:
-        raise RuntimeError("Executing worker did not advertise catalog compatibility")
     admission.authorize_job(connection, job, kind="refresh", pilot_id=pilot_id, scope_id=scope_id, wd=wd)
     try:
         if connection.exists(_suspension_key(scope_id)):
@@ -302,7 +300,7 @@ def refresh_query_catalog_rq(
         admission.execution_exited(connection, job, pilot_id)
 
 
-def _enqueue_inventory(queue: Queue, key: str, roots: list[Any], *, new_cycle: bool, lock: Any, pilot_id: str | None = None, controller_token: str | None = None) -> dict[str, Any]:
+def _enqueue_inventory(queue: Queue, key: str, roots: list[Any], *, new_cycle: bool, lock: Any, refresh_turn: str | None = None, pilot_id: str | None = None, controller_token: str | None = None) -> dict[str, Any]:
     from wepppy.rq import _query_catalog_inventory as inventory
     from . import _query_catalog_admission as admission, _query_catalog_pilot as pilot
 
@@ -326,7 +324,10 @@ def _enqueue_inventory(queue: Queue, key: str, roots: list[Any], *, new_cycle: b
                     return current
             if not new_cycle and current.get("completed_at"):
                 return current
-            if previous and not new_cycle and current.get("failed_job") != previous:
+            yielded = previous and not new_cycle and job_state == "finished"
+            if yielded and previous != refresh_turn:
+                return {**current, "refresh_turn": previous}
+            if previous and not new_cycle and not yielded and current.get("failed_job") != previous:
                 # Hard worker death/timeout bypasses the worker's error boundary.
                 # Give its retained frontier the same bounded retry policy.
                 settings = QueryCatalogSettings.from_environ()
@@ -388,9 +389,6 @@ def inventory_query_catalog_rq(*, configuration: dict[str, Any], cycle: str, pil
     job = get_current_job()
     if job is None or configuration != catalog_worker_configuration() or (not QueryCatalogSettings.from_environ().enabled and not pilot_id):
         raise RuntimeError("Inventory worker configuration is incompatible")
-    registration = job.connection.hget("rq:worker:" + job.worker_name, WORKER_FIELD) if job.worker_name else None
-    if not registration or json.loads(registration) != configuration:
-        raise RuntimeError("Executing inventory worker did not advertise compatibility")
     from . import _query_catalog_admission as admission, _query_catalog_pilot as pilot
     manifest = admission.authorize_job(job.connection, job, kind="inventory", pilot_id=pilot_id)
     try:
@@ -398,6 +396,7 @@ def inventory_query_catalog_rq(*, configuration: dict[str, Any], cycle: str, pil
         settings = QueryCatalogSettings.from_environ()
         try:
             inventory.run(job.connection, key, job.id, cycle, configured_roots(), settings.inventory_limit,
+                          dirty_key=None if pilot_id else "query-catalog:dirty:" + _configuration_id(),
                           approved_paths={s["path"] for s in manifest["scopes"]} if manifest else None,
                           validate_scope=(lambda path: pilot._scope(manifest, str(path))) if manifest else None)
         except inventory.InventorySuperseded:
@@ -434,7 +433,7 @@ def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None
     settings = QueryCatalogSettings.from_environ()
     if not settings.enabled and not pilot_id:
         return {"state": "disabled", "admitted": 0}
-    queue = queue if queue is not None else _default_queue()
+    queue = queue if queue is not None else _catalog_queue()
     connection = queue.connection
     identity = _configuration_id()
     from . import _query_catalog_admission as admission, _query_catalog_pilot as pilot
@@ -475,12 +474,14 @@ def reconcile_query_catalogs(*, queue: Queue | None = None, pilot_id: str | None
         new_cycle = (not discovery or bool(cursor.get("rediscovery_required")) or
                      bool(cursor.get("completed_at") and now >= cursor["completed_at"] + settings.cycle_seconds))
         if not unavailable_namespaces and (new_cycle or not discovery.get("completed_at")):
-            discovery = _enqueue_inventory(queue, key, roots, new_cycle=new_cycle, lock=lock, pilot_id=pilot_id, controller_token=controller_token)
+            discovery = _enqueue_inventory(queue, key, roots, new_cycle=new_cycle, lock=lock, refresh_turn=cursor.get("refresh_turn"), pilot_id=pilot_id, controller_token=controller_token)
         scan = dict(cursor)
         if discovery.get("cycle") != cursor.get("cycle"):
             scan = {"cycle": discovery.get("cycle"), "stream_ack": "0-0",
                     "cycle_started_at": discovery.get("started_at", now),
                     "previous_cycle_errors": cursor.get("cycle_errors", [])}
+        if discovery.get("refresh_turn"):
+            scan["refresh_turn"] = discovery["refresh_turn"]
         if unavailable_namespaces:
             scan["rediscovery_required"] = True
         scan["unavailable_namespaces"] = unavailable_namespaces

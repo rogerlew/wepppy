@@ -840,7 +840,7 @@ services:
       redis:
         condition: service_started
 
-  rq-worker-fork-archive:
+  rq-worker-fork-archive: &dedicated-worker
     <<: *wepppy-service
     entrypoint: *wepppyo3-interchange-entrypoint
     container_name: wepppy-rq-worker-fork-archive
@@ -863,6 +863,17 @@ services:
     depends_on:
       redis:
         condition: service_started
+
+  rq-worker-query-catalog:
+    <<: *dedicated-worker
+    profiles: ["query-catalog"]
+    container_name: wepppy-rq-worker-query-catalog
+    command:
+      - bash
+      - -lc
+      - |
+        set -euo pipefail
+        exec /opt/venv/bin/rq worker-pool -n "1" --url '' --config wepppy.config.rq_redis --connection-class wepppy.config.rq_redis.Connection --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker query-catalog
 
   rq-webhook-dispatcher:
     image: wepppy-dev

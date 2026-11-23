@@ -515,8 +515,7 @@ configure_deploy_topology() {
     if echo "${COMPOSE_SERVICES}" | grep -q "^weppcloud$"; then
         HAS_WEPPCLOUD=true
     fi
-    if [ "$(printf "%s\n" "${COMPOSE_SERVICES}" | sed '/^$/d' | wc -l | tr -d ' ')" -eq 1 ] \
-        && echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker-fork-archive$"; then
+    if [ "$(printf '%s\n' "${COMPOSE_SERVICES}" | LC_ALL=C sort)" = $'rq-worker-fork-archive\nrq-worker-query-catalog' ]; then
         IS_WEPP3_FORK_ARCHIVE=true
     fi
 
@@ -548,8 +547,8 @@ configure_deploy_topology() {
 
     if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
         RQ_CONTROL_SERVICE="rq-worker-fork-archive"
-        RQ_DRAIN_DESCRIPTION="fork-archive"
-        RQ_DRAIN_REGISTRIES="fork-archive"
+        RQ_DRAIN_DESCRIPTION="fork-archive and query-catalog"
+        RQ_DRAIN_REGISTRIES="fork-archive,query-catalog"
     else
         RQ_CONTROL_SERVICE="rq-worker"
         RQ_DRAIN_DESCRIPTION="default and batch"
@@ -579,7 +578,10 @@ configure_deploy_topology() {
     if [ "${DEPLOY_MODE}" = "full" ]; then
         FILTERED_EXPECTED_SERVICES=()
         for service in "${EXPECTED_RUNNING_SERVICES[@]}"; do
-            [ "${service}" = "rq-worker-fork-archive" ] || FILTERED_EXPECTED_SERVICES+=("${service}")
+            case "${service}" in
+                rq-worker-fork-archive|rq-worker-query-catalog) continue ;;
+            esac
+            FILTERED_EXPECTED_SERVICES+=("${service}")
         done
         EXPECTED_RUNNING_SERVICES=("${FILTERED_EXPECTED_SERVICES[@]}")
     fi
@@ -1333,6 +1335,31 @@ prepare_retained_cutover() {
     CUTOVER_STARTED=true
 }
 
+verify_dedicated_registration() {
+    local service="$1" registration
+    registration="$(wctl docker compose exec -T "${service}" /opt/venv/bin/python -c '
+import socket
+import sys
+from rq import Worker
+from wepppy.config.redis_settings import redis_client, RedisDB
+
+queue = sys.argv[1]
+connection = redis_client(RedisDB.RQ)
+workers = [worker for worker in Worker.all(connection=connection)
+           if connection.ttl(worker.key) > 0 and queue in worker.queue_names()]
+current = [worker for worker in workers
+           if worker.hostname == socket.gethostname() and worker.queue_names() == [queue]]
+if queue == "query-catalog":
+    from rq import Queue
+    from wepppy.rq.query_catalog_rq import consumer_status
+    status = consumer_status(Queue(queue, connection=connection))
+    if status["compatible"] != 1 or status["incompatible"]:
+        sys.exit(1)
+print(f"{len(workers)}:{len(current)}")
+' "${service#rq-worker-}")" || return 1
+    [ "${registration}" = "1:1" ]
+}
+
 verify_known_good_state_once() {
     local expected_args=()
     local container_ids
@@ -1376,22 +1403,11 @@ print("{}:{}".format(
 ))
 ' "${default_hostname}" "${batch_hostname}")"
         [[ "${registration}" =~ ^[1-9][0-9]*:[1-9][0-9]*$ ]] || return 1
-    elif printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "rq-worker-fork-archive"; then
-        local fork_hostname registration
-        fork_hostname="$(wctl docker compose exec -T rq-worker-fork-archive hostname)"
-        registration="$(run_rq_control_program '
-import redis
-import sys
-from rq import Worker
-from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
-workers = [worker for worker in Worker.all(connection=connection) if connection.ttl(worker.key) > 0 and "fork-archive" in worker.queue_names()]
-print("{}:{}".format(
-    len(workers),
-    sum(worker.hostname == sys.argv[1] for worker in workers),
-))
-' "${fork_hostname}")"
-        [ "${registration}" = "1:1" ] || return 1
+    elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+        while IFS=$'\t' read -r service expected_id expected_count; do
+            [ "${expected_count}" -gt 0 ] || continue
+            verify_dedicated_registration "${service}" || return 1
+        done < "${KNOWN_GOOD_ROWS}"
     fi
 }
 
@@ -1774,18 +1790,16 @@ elif [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ]; then
     echo "    Skipping stack shutdown; workers and dependencies remain running."
 elif [ "${DEPLOY_MODE}" = "full" ]; then
     echo "    Skipping full-stack down; services will be force-recreated in place."
-elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
-    && wctl docker compose ps --status running --services 2>/dev/null \
-        | grep -q '^rq-worker-fork-archive$'; then
+elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
     FORK_ARCHIVE_STOP_TIMEOUT_SECONDS="${FORK_ARCHIVE_STOP_TIMEOUT_SECONDS:-216000}"
     prepare_retained_cutover
-    echo "    Requesting warm shutdown of rq-worker-fork-archive..."
+    echo "    Requesting warm shutdown of both dedicated workers..."
     run_wctl_with_retry \
         "$((FORK_ARCHIVE_STOP_TIMEOUT_SECONDS + 30))" \
         1 \
         0 \
         docker compose stop --timeout "${FORK_ARCHIVE_STOP_TIMEOUT_SECONDS}" \
-        rq-worker-fork-archive
+        rq-worker-fork-archive rq-worker-query-catalog
 fi
 if [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ] \
     && [ "${TARGETED_BATCH}" = false ] && [ "${DEPLOY_MODE}" != "full" ]; then
@@ -2063,37 +2077,33 @@ if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_BATCH}" = false ]; then
 else
     echo ">>> Step 6: Skipping WEPPcloud health check (worker stack detected)..."
     if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
-        echo "    Verifying dedicated fork/archive worker identity and registration..."
-        WORKER_UID="$(wctl docker compose exec -T rq-worker-fork-archive id -u)"
-        WORKER_GID="$(wctl docker compose exec -T rq-worker-fork-archive id -g)"
-        if [ "${WORKER_UID}:${WORKER_GID}" != "1002:130" ]; then
-            echo "✗ wepp3 worker identity is ${WORKER_UID}:${WORKER_GID}; expected 1002:130 for production NFS writes." >&2
-            false
-        fi
-        REGISTERED_FORK_ARCHIVE_WORKERS=""
-        for _attempt in $(seq 1 60); do
-            REGISTERED_FORK_ARCHIVE_WORKERS="$(
-                wctl docker compose exec -T rq-worker-fork-archive \
-                    /opt/venv/bin/python -c \
-                    'import socket; from rq import Worker; from wepppy.config.redis_settings import redis_client, RedisDB; connection = redis_client(RedisDB.RQ); workers = [worker for worker in Worker.all(connection=connection) if "fork-archive" in worker.queue_names()]; current = [worker for worker in workers if worker.hostname == socket.gethostname() and connection.ttl(worker.key) > 0]; print(f"{len(workers)}:{len(current)}")' \
-                    2>/dev/null || true
-            )"
-            if [ "${REGISTERED_FORK_ARCHIVE_WORKERS}" = "1:1" ]; then
-                break
+        for service in rq-worker-fork-archive rq-worker-query-catalog; do
+            WORKER_UID="$(wctl docker compose exec -T "${service}" id -u)"
+            WORKER_GID="$(wctl docker compose exec -T "${service}" id -g)"
+            if [ "${WORKER_UID}:${WORKER_GID}" != "1002:130" ]; then
+                echo "✗ ${service} identity is ${WORKER_UID}:${WORKER_GID}; expected 1002:130 for production NFS writes." >&2
+                false
             fi
-            sleep 2
+            registered=false
+            for _attempt in $(seq 1 60); do
+                if verify_dedicated_registration "${service}"; then
+                    registered=true
+                    break
+                fi
+                sleep 2
+            done
+            if [ "${registered}" != true ]; then
+                echo "✗ Expected one live exclusive ${service} registration from its current container." >&2
+                false
+            fi
         done
-        if [ "${REGISTERED_FORK_ARCHIVE_WORKERS}" != "1:1" ]; then
-            echo "✗ Expected one global/current-container fork-archive worker; found '${REGISTERED_FORK_ARCHIVE_WORKERS:-query failed}'." >&2
-            false
-        fi
         assert_rq_fence
         run_wctl_with_retry \
             "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
             "${WCTL_COMPOSE_RETRIES}" \
             "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
             rq-info --service rq-worker-fork-archive --detail
-        echo "✓ wepp3 fork/archive worker is running as 1002:130 and registered with RQ"
+        echo "✓ Both wepp3 workers are running as 1002:130 and registered with RQ"
     fi
 fi
 
@@ -2277,6 +2287,6 @@ if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_BATCH}" = false ]; then
     echo "Remember to hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)"
     echo "to bypass cache and load the new assets."
 elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
-    echo "Dedicated service: rq-worker-fork-archive"
+    echo "Dedicated services: rq-worker-fork-archive rq-worker-query-catalog"
     echo "Runtime identity: 1002:130"
 fi

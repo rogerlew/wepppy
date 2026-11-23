@@ -68,16 +68,12 @@ The deployment boundary is strict: `wepp.cloud` is Docker Compose and uses
 container registry. Do not introduce registry, manifest-digest, or GitOps
 requirements into a `wepp.cloud` rollout or recovery plan.
 
-The fork/archive serial queue uses `docker-compose.prod.wepp3.yml` on `wepp3`,
-which already has the production NFS mount and otherwise runs no
-containers. Development forest and Forest test production keep local consumers
-for behavioral parity; wepp1 and wepp2 must not consume the production serial
-queue. Track rollout evidence in the
-[Fork/Archive Serial Queue Isolation work package](../docs/work-packages/20260803_fork_archive_serial_queue/package.md).
-
-Install the wepp3 preset once. The canonical entry point recognizes the dedicated
-topology but currently fails closed before mutation until immutable retained
-fork/archive activation is implemented and reviewed:
+Production wepp3 runs one worker for `fork-archive` and one for `query-catalog`
+using `docker-compose.prod.wepp3.yml`. Wepp1 and wepp2 own the default and batch
+pools. Forest can enable a separate single-consumer profile for each dedicated
+queue. Install the wepp3 preset once and inspect the plan before activation.
+See the [worker deployment guide](prod-worker-deploy-guide.md#wepp3-dedicated-workers)
+for mount parity, first-install receipt options and rollback.
 
 ```bash
 ./wctl/install.sh wepp3
@@ -121,7 +117,7 @@ The script restarts itself when a pull updates its implementation and validates
 the post-pull Compose topology before building. It fails closed when an active
 worker-only wctl preset does not expose a supported service set.
 
-Full, worker-pool, and dedicated wepp3 fork/archive deployments are two-phase
+Full, worker-pool, and dedicated wepp3 worker deployments are two-phase
 retained-candidate operations:
 
 ```bash
@@ -172,7 +168,7 @@ docker compose --env-file docker/.env -f docker/docker-compose.prod.yml --profil
 - Runs `docker system prune -a -f` at the end of deploy (unused images, stopped containers, and unused networks).
 - Does **not** prune volumes unless explicitly requested with `--docker-prune-volumes`.
 - Use `--skip-docker-prune` to disable the end-of-deploy runtime prune. The dedicated wepp3
-  fork/archive deployment always skips the broad runtime prune; its build cache is still
+  worker deployment always skips the broad runtime prune; its build cache is still
   pruned immediately after the image build.
 
 Production Python services also fail startup unless the vendored
@@ -512,6 +508,7 @@ wctl docker compose config
 | `rq-worker`    | RQ worker pool servicing Redis queue DB 9 | — | Shares code volume; respects `UID`/`GID`. |
 | `rq-worker-batch` | RQ worker pool for batch queue (long-running jobs) | — | 4 workers, 8GB shm, higher resource limits. |
 | `rq-worker-fork-archive` | Single worker for fork, archive-create, and restore | — | One process; production runs only on wepp3. |
+| `rq-worker-query-catalog` | Refresh query-engine catalogs | — | One process on wepp3. |
 | `redis`        | Redis 7.4 | 6379 | Dev: `.docker-data/redis`, Prod: `redis-data` volume |
 | `postgres`     | PostgreSQL 16 | 5432 | Dev: `.docker-data/postgres`, Prod: `postgres-data` volume |
 | `caddy`        | Reverse proxy + TLS terminator (dev: HTTP only) | 8080 | Serves static assets and forwards to upstream services. |
