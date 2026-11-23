@@ -24,7 +24,7 @@ Reduce applicable runtime exposure while preserving login, upload, data acquisit
 
 - [x] Follow-up requested 2026-11-23 UTC. Qualified the two setuptools vendor repairs, assessed both GDAL copies, reconciled all 108 Go rows, and qualified replacements for all three executables. GDAL remains open for an explicit driver-compatibility or maintenance decision.
 
-- [ ] Follow-up release gate, 2026-11-23 UTC. Rebuild clean source `cc335e36555a8ae3af65eaba12b1080b8a16b57d`, run the full Python and frontend suites, rematch the serving SBOM and independently disposition the exact artifact.
+- [x] Follow-up release gate, 2026-11-23 UTC. Rebuilt clean source `cc335e36555a8ae3af65eaba12b1080b8a16b57d`, completed both full suites and the serving-image rematch, and recorded the [follow-up release hold](../../artifacts/20261123_followup_release_decision.md).
 
 - [x] The exact follow-up bundle was retained on wepp2. Independent reviews verified its executable and scientific artifacts. The one fix-listed High GDAL finding and 385 Debian rows keep activation on hold. Frontend lint and all frontend tests passed.
 
@@ -46,6 +46,8 @@ Forest1 built the image and CI extension but failed to create transient systemd 
 
 The newest setuptools wheel broke run-ID creation. Stock Git LFS retained fix-listed dependencies, and the first patched build omitted built-in help. The upstream Debian packaging restored the complete help and translation checks.
 
+On the clean follow-up image, the first broad run exceeded the 50 ms catalog latency delta. Three unchanged isolated checks and the full repeat passed. Both full-suite receipts remain in the protected evidence.
+
 ## Decision Log
 
 2026-11-23 UTC. Use one package because all repair batches affect the same common image and share a release decision. A failing batch can be revised or reverted independently. Any residual exposure returns to the existing policy and approval process.
@@ -60,4 +62,6 @@ Six repair commits are available. Component trials on forest passed 158 framewor
 
 The full candidate suite passed with 14,751 passed, 751 skipped and 99 deselected. The isolated test stacks were removed after validation. The work package remains open for Roger Lew’s disposition of residual security findings.
 
-The follow-up batch repaired two private Python components and qualified three Go executables. The combined component trial passed 38 targeted workflow tests, read back an actual PATH report and fetched all 15 Rosetta objects over HTTPS with matching hashes. On the first candidate, 18 of the 108 Go rows now have evidence for exclusion, and 90 retain open applicability. A new clean release build and same-database scan remain the separate release reassessment. [Go review](../../artifacts/20261123_go_reachability_review.md)
+The follow-up batch repaired two private Python components and qualified three Go executables. The combined component trial passed 38 targeted workflow tests, read back an actual PATH report and fetched all 15 Rosetta objects over HTTPS with matching hashes. On the first candidate, 18 of the 108 Go rows now have evidence for exclusion, and 90 retain open applicability. The subsequent release gate confirmed these repairs on the clean common image. [Go review](../../artifacts/20261123_go_reachability_review.md)
+
+Follow-up gate complete. The full Python suite passed with 14,751 passed, 751 skipped and 99 deselected. Frontend lint and all 1,118 JavaScript tests passed. Keep activation held pending the exact-image GDAL and residual-risk decision.

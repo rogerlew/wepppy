@@ -12,7 +12,7 @@ Reuse the [dependency security package](../20261110_wepp1_dependency_security_ga
 
 ## Follow-up qualification
 
-The operator directed continued service while the next Python and Go repair batches were qualified. The branch now carries four tested component updates. GDAL remains open because the available fix changes Rasterio’s drivers. The clean follow-up image passed independent workflow checks. Its scan removed 525 primary rows relative to serving and 198 relative to the first candidate. The follow-up remains on security hold. [Tracker](tracker.md) · [GDAL qualification](artifacts/20261123_gdal_followup.md) · [Go review](artifacts/20261123_go_reachability_review.md)
+The operator directed continued service while the next Python and Go repair batches were qualified. The branch now carries four tested component updates. GDAL remains open because the available fix changes Rasterio’s drivers. The clean follow-up image passed the full Python and frontend suites and independent workflow checks. Its scan removed 525 primary rows relative to serving and 198 relative to the first candidate. The follow-up remains on security hold. [Tracker](tracker.md) · [GDAL qualification](artifacts/20261123_gdal_followup.md) · [Go review](artifacts/20261123_go_reachability_review.md)
 
 ## Completion
 
