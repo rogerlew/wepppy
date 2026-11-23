@@ -4,7 +4,9 @@
  */
 
 import { normalizeModeValue, resolveColormapName } from '../colors.js';
-import { DASHBOARD_MODES, getFeatureKeyFromProperties, resolveTopazIdFromProperties } from '../batch-keys.js';
+import { DASHBOARD_MODES } from '../batch-keys.js';
+import { landuseValue, soilsValue, modeValue, scalarValue, weppEventValue, pickActive, resolveFeatureIdentity } from './layer-values.js';
+import { formatLayerTooltip } from './layer-tooltips.js';
 
 const CHANNEL_ORDER_COLORS = [
   '#8AE5FE',
@@ -60,28 +62,6 @@ const SBS_PACKED_RGB_TO_CLASS = Object.freeze(Object.entries(SBS_RGB_TO_CLASS).r
   lookup[(channels[0] << 16) | (channels[1] << 8) | channels[2]] = classCode;
   return lookup;
 }, {}));
-
-function resolveFeatureIdentity(props, state) {
-  const topazId = resolveTopazIdFromProperties(props);
-  const topazLabel = topazId != null ? String(topazId) : null;
-  if (state && state.dashboardMode === DASHBOARD_MODES.BATCH) {
-    const key = getFeatureKeyFromProperties(props) || null;
-    const runLabelRaw = props && (props.leaf_runid || props.runid || props.run_id || null);
-    const runLabel = runLabelRaw != null && String(runLabelRaw).trim() ? String(runLabelRaw) : null;
-    return { key, topazId: topazLabel, runLabel };
-  }
-  const key = topazLabel;
-  return { key, topazId: topazLabel, runLabel: null };
-}
-
-function buildTooltipTopazLines(identity, state) {
-  if (!identity || identity.topazId == null) return '';
-  if (state && state.dashboardMode === DASHBOARD_MODES.BATCH) {
-    const runLine = identity.runLabel ? `Run: ${identity.runLabel}\n` : '';
-    return `${runLine}TOPAZ ID: ${identity.topazId}\n`;
-  }
-  return `TOPAZ ID: ${identity.topazId}\n`;
-}
 
 function isRapOverlayActive(state) {
   if (!state || typeof state !== 'object') return false;
@@ -423,15 +403,6 @@ function buildChannelLegendItems() {
   return items;
 }
 
-function pickActive(arr) {
-  for (let i = arr.length - 1; i >= 0; i--) {
-    if (arr[i].visible) {
-      return arr[i];
-    }
-  }
-  return null;
-}
-
 export function createLayerUtils({
   deck,
   getState,
@@ -448,13 +419,6 @@ export function createLayerUtils({
     if (name === 'viridis') return viridisColor(normalized);
     // Fallback to viridis to avoid silent gray fills if a palette is added without support.
     return viridisColor(normalized);
-  }
-
-  function landuseValue(mode, row) {
-    if (!row) return null;
-    if (mode === 'dominant') return row.dominant || row.cover_desc || row.key || row._map || null;
-    const v = Number(row[mode]);
-    return Number.isFinite(v) ? v : null;
   }
 
   function landuseFillColor(mode, row) {
@@ -498,67 +462,6 @@ export function createLayerUtils({
     const range = state.comparisonDiffRanges[mode] || { min: usePercentScale ? -50 : -1, max: usePercentScale ? 50 : 1 };
     const normalized = Math.min(1, Math.max(0, (diff - range.min) / (range.max - range.min || 1)));
     return rdbuScale(normalized);
-  }
-
-  function soilsValue(mode, row) {
-    if (!row) return null;
-    if (mode === 'dominant') return row.texture || row.simple_texture || row.desc || row.dom_texture || row.dom_desc || null;
-    const v = Number(row[mode]);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function hillslopesValue(mode, row) {
-    if (!row) return null;
-    const v = Number(row[mode]);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function watarValue(mode, row) {
-    if (!row) return null;
-    const v = Number(row[mode]);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function openetValue(row) {
-    if (row == null) return null;
-    const v = Number(row);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function weppValue(mode, row) {
-    if (!row) return null;
-    const v = Number(row[mode]);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function weppChannelValue(mode, row) {
-    if (!row) return null;
-    const v = Number(row[mode]);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function weppYearlyChannelValue(mode, row) {
-    if (!row) return null;
-    const v = Number(row[mode]);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function weppYearlyValue(mode, row) {
-    if (!row) return null;
-    const v = Number(row[mode]);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function weppEventValue(mode, row) {
-    if (!row || (['event_P', 'event_Q', 'event_ET'].includes(mode) && row[mode] == null)) return null;
-    const v = Number(row[mode]);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function rapValue(row) {
-    if (row == null) return null;
-    const v = Number(row);
-    return Number.isFinite(v) ? v : null;
   }
 
   function landuseColor(mode, row, topazId) {
@@ -716,7 +619,7 @@ export function createLayerUtils({
   }
 
   function rapFillColor(row) {
-    const v = rapValue(row);
+    const v = scalarValue(row);
     if (v === null) return [128, 128, 128, 200];
     const normalized = Math.min(1, Math.max(0, v / 100));
     return winterColor(normalized);
@@ -968,7 +871,7 @@ export function createLayerUtils({
             const props = f && f.properties;
             const identity = resolveFeatureIdentity(props, state);
             const row = identity.key != null ? state.openetSummary[String(identity.key)] : null;
-            return openetFillColor(openetValue(row));
+            return openetFillColor(scalarValue(row));
           },
           updateTriggers: {
             getFillColor: [state.openetSelectedMonthIndex, overlay.datasetKey, state.openetRanges],
@@ -1339,249 +1242,7 @@ export function createLayerUtils({
   }
 
   function formatTooltip(info) {
-    const state = getState();
-    if (!info) return null;
-    const luOverlay = pickActive(state.landuseLayers);
-    if (info.object && luOverlay && state.landuseSummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.landuseSummary[String(identity.key)] : null;
-      const val = landuseValue(luOverlay.mode, row);
-      if (val !== null) {
-        const label =
-          luOverlay.mode === 'dominant'
-            ? `Landuse: ${val}`
-            : `${luOverlay.mode}: ${typeof val === 'number' ? val.toFixed(3) : val}`;
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: ${luOverlay.path}\n${topazLines}${label}`;
-      }
-    }
-    const soilOverlay = pickActive(state.soilsLayers);
-    if (info.object && soilOverlay && state.soilsSummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.soilsSummary[String(identity.key)] : null;
-      const val = soilsValue(soilOverlay.mode, row);
-      if (val !== null) {
-        let label;
-        if (soilOverlay.mode === 'dominant') {
-          label = `Soil: ${val}`;
-        } else if (soilOverlay.mode === 'bd') {
-          label = `Bulk density: ${typeof val === 'number' ? val.toFixed(2) : val} g/cm³`;
-        } else if (soilOverlay.mode === 'soil_depth') {
-          label = `Soil depth: ${typeof val === 'number' ? val.toFixed(0) : val} mm`;
-        } else {
-          label = `${soilOverlay.mode}: ${typeof val === 'number' ? val.toFixed(1) : val}%`;
-        }
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: ${soilOverlay.path}\n${topazLines}${label}`;
-      }
-    }
-    const hillslopesOverlay = pickActive(state.hillslopesLayers);
-    if (info.object && hillslopesOverlay && state.hillslopesSummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.hillslopesSummary[String(identity.key)] : null;
-      const val = hillslopesValue(hillslopesOverlay.mode, row);
-      if (val !== null) {
-        let label;
-        if (hillslopesOverlay.mode === 'slope_scalar') {
-          label = `Slope: ${typeof val === 'number' ? (val * 100).toFixed(1) : val}%`;
-        } else if (hillslopesOverlay.mode === 'length') {
-          label = `Length: ${typeof val === 'number' ? val.toFixed(1) : val} m`;
-        } else if (hillslopesOverlay.mode === 'aspect') {
-          label = `Aspect: ${typeof val === 'number' ? val.toFixed(0) : val}°`;
-        } else {
-          label = `${hillslopesOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-        }
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: ${hillslopesOverlay.path}\n${topazLines}${label}`;
-      }
-    }
-    const watarOverlay = pickActive(state.watarLayers);
-    if (info.object && watarOverlay && state.watarSummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.watarSummary[String(identity.key)] : null;
-      const val = watarValue(watarOverlay.mode, row);
-      if (val !== null) {
-        const label = `${watarOverlay.label}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: ${watarOverlay.path}\n${topazLines}${label}`;
-      }
-    }
-    const weppOverlay = pickActive(state.weppLayers);
-    if (info.object && weppOverlay && state.weppSummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.weppSummary[String(identity.key)] : null;
-      const val = weppValue(weppOverlay.mode, row);
-      if (val !== null) {
-        let label;
-        if (weppOverlay.mode === 'runoff_volume') {
-          label = `Runoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-        } else if (weppOverlay.mode === 'subrunoff_volume') {
-          label = `Subrunoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-        } else if (weppOverlay.mode === 'baseflow_volume') {
-          label = `Baseflow: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-        } else if (weppOverlay.mode === 'soil_loss') {
-          label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-        } else if (weppOverlay.mode === 'sediment_deposition') {
-          label = `Sed. Deposition: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-        } else if (weppOverlay.mode === 'sediment_yield') {
-          label = `Sed. Yield: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-        } else {
-          label = `${weppOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-        }
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: ${weppOverlay.path}\n${topazLines}${label}`;
-      }
-    }
-    const weppYearlyChannelOverlay = pickActive(state.weppYearlyChannelLayers || []);
-    if (info.object && weppYearlyChannelOverlay && state.weppYearlyChannelSummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.weppYearlyChannelSummary[String(identity.key)] : null;
-      const val = weppYearlyChannelValue(weppYearlyChannelOverlay.mode, row);
-      if (val !== null) {
-        let label;
-        if (weppYearlyChannelOverlay.mode === 'channel_discharge_volume') {
-          label = `Discharge Volume: ${typeof val === 'number' ? val.toFixed(2) : val} m^3`;
-        } else if (weppYearlyChannelOverlay.mode === 'channel_soil_loss') {
-          label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} kg`;
-        } else {
-          label = `${weppYearlyChannelOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-        }
-        const yearLine = state.weppYearlySelectedYear != null ? `Year: ${state.weppYearlySelectedYear}\n` : '';
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: ${weppYearlyChannelOverlay.path}\n${yearLine}${topazLines}${label}`;
-      }
-    }
-    const weppChannelOverlay = pickActive(state.weppChannelLayers || []);
-    if (info.object && weppChannelOverlay && state.weppChannelSummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.weppChannelSummary[String(identity.key)] : null;
-      const val = weppChannelValue(weppChannelOverlay.mode, row);
-      if (val !== null) {
-        let label;
-        if (weppChannelOverlay.mode === 'channel_discharge_volume') {
-          label = `Discharge Volume: ${typeof val === 'number' ? val.toFixed(2) : val} m^3`;
-        } else if (weppChannelOverlay.mode === 'channel_soil_loss') {
-          label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} kg`;
-        } else {
-          label = `${weppChannelOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-        }
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: ${weppChannelOverlay.path}\n${topazLines}${label}`;
-      }
-    }
-    const weppYearlyOverlay = pickActive(state.weppYearlyLayers);
-    if (info.object && weppYearlyOverlay && state.weppYearlySummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.weppYearlySummary[String(identity.key)] : null;
-      const val = weppYearlyValue(weppYearlyOverlay.mode, row);
-      if (val !== null) {
-        let label;
-        if (weppYearlyOverlay.mode === 'runoff_volume') {
-          label = `Runoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-        } else if (weppYearlyOverlay.mode === 'subrunoff_volume') {
-          label = `Subrunoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-        } else if (weppYearlyOverlay.mode === 'baseflow_volume') {
-          label = `Baseflow: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-        } else if (weppYearlyOverlay.mode === 'soil_loss') {
-          label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-        } else if (weppYearlyOverlay.mode === 'sediment_deposition') {
-          label = `Sed. Deposition: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-        } else if (weppYearlyOverlay.mode === 'sediment_yield') {
-          label = `Sed. Yield: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-        } else {
-          label = `${weppYearlyOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-        }
-        const yearLine = state.weppYearlySelectedYear != null ? `Year: ${state.weppYearlySelectedYear}\n` : '';
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: ${weppYearlyOverlay.path}\n${yearLine}${topazLines}${label}`;
-      }
-    }
-    const weppEventOverlay = pickActive(state.weppEventLayers);
-    if (info.object && weppEventOverlay && state.weppEventSummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.weppEventSummary[String(identity.key)] : null;
-      const val = weppEventValue(weppEventOverlay.mode, row);
-      if (val !== null) {
-        let label;
-        if (weppEventOverlay.mode === 'event_P') {
-          label = `Precipitation: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
-        } else if (weppEventOverlay.mode === 'event_Q') {
-          label = `Runoff: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
-        } else if (['event_P', 'event_Q', 'event_ET'].includes(weppEventOverlay.mode)) {
-          label = `Total ET: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
-        } else if (weppEventOverlay.mode === 'event_Saturation') {
-          label = `Saturation: ${typeof val === 'number' ? val.toFixed(2) : val}%`;
-        } else if (weppEventOverlay.mode === 'event_peakro') {
-          label = `Peak Runoff Rate: ${typeof val === 'number' ? val.toFixed(4) : val} m³/s`;
-        } else if (weppEventOverlay.mode === 'event_tdet') {
-          label = `Total Detachment: ${typeof val === 'number' ? val.toFixed(2) : val} kg`;
-        } else {
-          label = `${weppEventOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-        }
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: ${weppEventOverlay.path}\nDate: ${state.weppEventSelectedDate}\n${topazLines}${label}`;
-      }
-    }
-    const openetOverlay = pickActive(state.openetLayers);
-    if (info.object && openetOverlay && state.openetSummary) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.openetSummary[String(identity.key)] : null;
-      const val = openetValue(row);
-      if (val !== null) {
-        const metadata = state.openetMetadata;
-        const monthIndex = state.openetSelectedMonthIndex;
-        const entry =
-          metadata && Array.isArray(metadata.months) && Number.isFinite(monthIndex)
-            ? metadata.months[monthIndex]
-            : null;
-        const monthLabel = entry && entry.label ? entry.label : '';
-        const datasetLabel = openetOverlay.datasetKey || openetOverlay.label || 'OpenET';
-        const label = `ET: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
-        const monthLine = monthLabel ? `Month: ${monthLabel}\n` : '';
-        const topazLines = buildTooltipTopazLines(identity, state);
-        return `Layer: OpenET (${datasetLabel})\n${monthLine}${topazLines}${label}`;
-      }
-    }
-    if (info.object && state.rapSummary && (state.rapCumulativeMode || pickActive(state.rapLayers))) {
-      const props = info.object && info.object.properties;
-      const identity = resolveFeatureIdentity(props, state);
-      const row = identity.key != null ? state.rapSummary[String(identity.key)] : null;
-      const val = rapValue(row);
-      if (val !== null) {
-        const topazLines = buildTooltipTopazLines(identity, state);
-        if (state.rapCumulativeMode) {
-          const selectedBands = state.rapLayers.filter((l) => l.selected !== false);
-          const bandNames = selectedBands.map((l) => RAP_BAND_LABELS[l.bandKey] || l.bandKey).join(' + ');
-          const label = `Cumulative (${bandNames}): ${typeof val === 'number' ? val.toFixed(1) : val}%`;
-          return `Layer: Cumulative Cover\nYear: ${state.rapSelectedYear}\n${topazLines}${label}`;
-        }
-        const rapOverlay = pickActive(state.rapLayers);
-        const bandLabel = RAP_BAND_LABELS[rapOverlay.bandKey] || rapOverlay.bandKey;
-        const label = `${bandLabel}: ${typeof val === 'number' ? val.toFixed(1) : val}%`;
-        return `Layer: ${rapOverlay.path}\nYear: ${state.rapSelectedYear}\n${topazLines}${label}`;
-      }
-    }
-    const rasterLayer = pickActive(state.detectedLayers);
-    if (info.coordinate && rasterLayer) {
-      const val = sampleRaster(rasterLayer, info.coordinate);
-      if (val !== null) {
-        return `Layer: ${rasterLayer.path}\nValue: ${val}`;
-      }
-    }
-    if (info.tile) {
-      return `Tile z${info.tile.z}`;
-    }
-    return null;
+    return formatLayerTooltip(info, getState(), RAP_BAND_LABELS, sampleRaster);
   }
 
   function pickActiveLayerForLegend(category, state) {
@@ -1674,14 +1335,14 @@ export function createLayerUtils({
     helpers: {
       landuseValue,
       soilsValue,
-      hillslopesValue,
-      watarValue,
-      weppValue,
-      weppChannelValue,
-      weppYearlyChannelValue,
-      weppYearlyValue,
+      hillslopesValue: modeValue,
+      watarValue: modeValue,
+      weppValue: modeValue,
+      weppChannelValue: modeValue,
+      weppYearlyChannelValue: modeValue,
+      weppYearlyValue: modeValue,
       weppEventValue,
-      rapValue,
+      rapValue: scalarValue,
       landuseFillColor: landuseColor,
       soilsFillColor,
       hillslopesFillColor,

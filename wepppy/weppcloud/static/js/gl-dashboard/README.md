@@ -19,7 +19,9 @@
 - **layers/detector.js** — Overlay detection (raster/vector) with fetch; no DOM/deck. D8 Direction expects `dem/wbt/flovec.wgs.tif` via download routes and reads `WEPP_CELL_SIZE_M` from gdalinfo metadata.
 - **layers/orchestrator.js** — Detection sequencing + state wiring; no DOM.
 - **layers/renderer.js** — Sidebar + legends DOM; uses injected callbacks/state.
-- **map/layers.js** — Deck layer builders + tooltip/legend helpers; pure. D8 Direction renders a hot-pink IconLayer sized in meters and uses WhiteboxTools D8 pointer mapping.
+- **map/layer-values.js** — Feature identity, visible overlay selection and shared summary value readers.
+- **map/layer-tooltips.js** — Hover precedence, measure labels, units and precision for feature and raster tooltips.
+- **map/layers.js** — Deck layer builders, legend helpers and the public layer utility factory. D8 Direction renders a hot-pink IconLayer sized in meters and uses WhiteboxTools D8 pointer mapping.
 - **map/controller.js** — deck.gl wrapper for view state + layer stack.
 - **map/raster-utils.js** — GeoTIFF/SBS loaders, gdalinfo fetch; sitePrefix-aware.
 - **gl-dashboard.js** — Orchestrator wiring: imports, DI, DOM lookups, event binding, initializeDashboard, global hooks.
@@ -71,7 +73,7 @@ Deck.gl can reuse geometry. See the [operator and contract guide](../../../../..
 - **Map layers (raster/vector):**
   - Add paths/labels to `config.BASE_LAYER_DEFS` (rasters) or implement a detector that fetches summaries/geojson and returns layer descriptors with `visible` flags.
   - Keep detection pure (no DOM); wire it through `layers/orchestrator.js` and update state via `setState`.
-  - Extend `map/layers.js` with a builder for the new layer type and legends/tooltip helpers; update renderer legend handling only if format changes.
+  - Extend `map/layers.js` with a builder for the new layer type and map/layer-tooltips.js for hover text; update renderer legend handling only if format changes.
   - Ensure URLs use `buildBaseUrl`/`buildScenarioUrl` and include `ctx.sitePrefix`.
   - Update smoke tests to assert the layer appears in the sidebar and toggles affect legends/deck layer stack.
 - **Graph layers (graphs list):**
