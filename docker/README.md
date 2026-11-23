@@ -472,6 +472,8 @@ for the API, source provenance, freshness failures and recovery.
 
 `wctl` is the supported wrapper for `docker compose` (see `wctl/install.sh`). It merges `docker/defaults.env` plus optional `docker/.env` + host overrides, escapes `$` for Compose interpolation, and sets `WEPPPY_ENV_FILE` for `env_file:` wiring.
 
+The production and development images build the Git LFS Debian package and Quarto’s esbuild client in isolated Go stages. When updating the tooling, verify the real Rosetta LFS objects, Git LFS built-in help, and the PATH report. The Git LFS builder checks the reviewed go.mod and go.sum. [Component qualification](../docs/work-packages/20261123_production_grype_remediation/artifacts/20261123_git_lfs_build.md)
+
 The common image installs a SHA-256-verified Docker CLI for the WEPPcloudR renderer. When updating its version, update the upstream CLI-only archive checksum in both Dockerfiles and verify a DEVAL render through the new client.
 
 The Docker Compose v2 plugin is an expected prerequisite for Compose-backed

@@ -10,12 +10,20 @@ COPY wepppy/weppcloud/static-src/ ./
 RUN npm run build
 
 
-FROM golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 AS quarto-esbuild
+FROM golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 AS security-go-toolchain
+
+FROM security-go-toolchain AS quarto-esbuild
 WORKDIR /build
 RUN git clone --depth=1 --branch v0.25.10 https://github.com/evanw/esbuild.git src && \
     test "$(git -C src rev-parse HEAD)" = d6b668f96fb00d6a6d035f058e38b6bd2507beb6 && \
     GOTOOLCHAIN=local go work init ./src && \
     cd src && CGO_ENABLED=0 GOTOOLCHAIN=local go build -trimpath -ldflags="-s -w" -o /out/esbuild ./cmd/esbuild
+
+FROM security-go-toolchain AS git-lfs-builder
+RUN apt-get update && apt-get install -y --no-install-recommends debhelper dh-golang asciidoctor gettext
+WORKDIR /build
+COPY docker/native_security/build_git_lfs_deb.sh ./
+RUN sh build_git_lfs_deb.sh
 
 FROM rust:1.92.0-slim-trixie@sha256:bf3368a992915f128293ac76917ab6e561e4dda883273c8f5c9f6f8ea37a378e AS parquet-csv-builder
 RUN apt-get update && apt-get install -y --no-install-recommends python3 pkg-config && rm -rf /var/lib/apt/lists/*
@@ -53,12 +61,13 @@ ARG UV_INSTALLER_URL=https://astral.sh/uv/install.sh
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN apt-get update && \
+RUN --mount=type=bind,from=git-lfs-builder,source=/out,target=/tmp/lfs-package \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
         curl \
         git \
-        git-lfs \
+        /tmp/lfs-package/git-lfs.deb \
         gfortran \
         pkg-config \
         cmake \
