@@ -7,7 +7,7 @@ Dashboard maintainers should be able to follow section assembly, legend editing 
 ## Progress
 
 - [x] 2026-11-23 UTC. Identified the renderer entry point, duplicate channel controls and existing DOM tests.
-- [ ] Extract and wire the modules.
+- [x] 2026-11-23 UTC. Extracted and wired section, legend and RUSLE tolerance modules. Exercised both channel callbacks against the baseline and candidate.
 - [ ] Validate rendered output and review the local integration.
 
 ## Surprises & Discoveries
@@ -24,4 +24,4 @@ Run the renderer-open-state Jest suite from wepppy/weppcloud/static-src. Exercis
 
 ## Outcomes & Retrospective
 
-Execution pending.
+The public renderer fell from 1,671 to 604 lines. ESLint peak complexity across the four modules fell from 86 to 36. Chromium returned identical markup and legend input values for a populated channel sidebar and 70 legend cases, covering seven layer families, five modes and absent or populated ranges.

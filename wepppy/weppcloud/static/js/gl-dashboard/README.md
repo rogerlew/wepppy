@@ -18,7 +18,7 @@
 - **graphs/graph-loaders.js** — Graph data loaders (Omni/RAP/WEPP/OpenET); no DOM/deck.
 - **layers/detector.js** — Overlay detection (raster/vector) with fetch; no DOM/deck. D8 Direction expects `dem/wbt/flovec.wgs.tif` via download routes and reads `WEPP_CELL_SIZE_M` from gdalinfo metadata.
 - **layers/orchestrator.js** — Detection sequencing + state wiring; no DOM.
-- **layers/renderer.js** — Sidebar + legends DOM; uses injected callbacks/state.
+- **layers/renderer.js** — Sidebar controls and channel selection. The factory delegates ordered section construction to `layers/layer-sections.js`, legend rendering and editing to `layers/legends.js`, and the raster tolerance control to `layers/rusle-tolerance.js`. Each renderer instance uses the callbacks and state supplied by the dashboard.
 - **map/layer-values.js** — Feature identity, visible overlay selection and shared summary value readers.
 - **map/layer-tooltips.js** — Hover precedence, measure labels, units and precision for feature and raster tooltips.
 - **map/layers.js** — Deck layer builders, legend helpers and the public layer utility factory. D8 Direction renders a hot-pink IconLayer sized in meters and uses WhiteboxTools D8 pointer mapping.

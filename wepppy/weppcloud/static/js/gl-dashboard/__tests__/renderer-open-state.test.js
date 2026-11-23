@@ -12,6 +12,46 @@ function findDetailsForTitle(container, title) {
 }
 
 describe('gl-dashboard layer renderer', () => {
+  it.each([
+    ['WEPP', 'weppChannelLayers', 'weppYearlyChannelLayers', 'refreshWeppStatisticData'],
+    ['WEPP-Yearly', 'weppYearlyChannelLayers', 'weppChannelLayers', 'activateWeppYearlyChannelLayer'],
+  ])('awaits the %s channel refresh before applying the selection', async (prefix, selected, other, callback) => {
+    const layerListEl = document.createElement('ul');
+    const state = {
+      channelsLayers: [{ key: 'network', visible: true }],
+      [selected]: [{ key: 'flow', visible: false }],
+      [other]: [{ key: 'flow', visible: true }],
+    };
+    let finishRefresh;
+    const pending = new Promise((resolve) => { finishRefresh = resolve; });
+    const refresh = jest.fn(() => pending);
+    const applyLayers = jest.fn();
+    const renderer = createLayerRenderer({
+      domRefs: { layerListEl },
+      getState: () => state,
+      setValue: (key, value) => { state[key] = value; },
+      [callback]: refresh,
+      applyLayers,
+    });
+
+    renderer.updateLayerList();
+    const selector = '#layer-' + prefix + '-Channel-flow';
+    const radio = layerListEl.querySelector(selector);
+    expect(radio.name).toBe('wepp-channel-overlay');
+    radio.checked = true;
+    radio.dispatchEvent(new Event("change"));
+    expect(state[selected][0].visible).toBe(true);
+    expect(state[other][0].visible).toBe(false);
+    expect(state.channelsLayers[0].visible).toBe(false);
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(applyLayers).toHaveBeenCalledTimes(0);
+    finishRefresh();
+    await pending;
+    expect(applyLayers).toHaveBeenCalledTimes(1);
+    expect(layerListEl.querySelector(selector)).not.toBe(radio);
+    expect(layerListEl.querySelector(selector).checked).toBe(true);
+  });
+
   it('preserves section open state across updates', () => {
     const layerListEl = document.createElement('ul');
     const layerEmptyEl = document.createElement('div');
