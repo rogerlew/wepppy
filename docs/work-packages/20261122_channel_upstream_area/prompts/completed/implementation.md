@@ -10,7 +10,7 @@ In weppcloud-wbt, repair HillslopesTopaz so netw.tsv reports the cumulative area
 - [x] Correct the producer and check independently counted areas.
 - [x] Publish Peridot and reproduce WEPP inputs on 22,081 incident reaches.
 - [x] Exercise both SWAT+ width modes through written geometry and native execution.
-- [ ] Complete WEPPpy validation and record integration status.
+- [x] Record the final focused receipt and publish the WEPPpy candidate in PR 729.
 
 ## Surprises & Discoveries
 
