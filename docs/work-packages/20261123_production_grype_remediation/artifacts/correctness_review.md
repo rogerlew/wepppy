@@ -37,7 +37,7 @@ The real PATH controller produced a 2,137,819-byte HTML report with local browse
 
 On the same image, three query route cases, four full Google/CILogon provider exchanges and four file-consumer cases passed. The IO checks exercised on-disk and in-memory CSV, reference-file byte ranges and generated NetCDF values. The Git LFS clean/smudge fixture reproduced the source bytes. The independent provider tests stub outbound HTTP, the datastore and login sinks. Live provider/network availability and production deployment behavior remain outside this review.
 
-The exact-image framework and codec selection passed 194 tests in 20.35 seconds. It includes current callback redirects and account linking, query and MCP access, actual Pillow codec use and real loopback compressed HTTP/TLS transfer. The private checksum index is , SHA-256 .
+The exact-image framework and codec selection passed 194 tests in 20.35 seconds. It includes current callback redirects and account linking, query and MCP access, actual Pillow codec use and real loopback compressed HTTP/TLS transfer. The private checksum index is `review-evidence-sha256.json`, SHA-256 `12364ad2e75185e6079f795c86f1867f0d52c1eeeddce201155c8964ab461b05`.
 
 ## Verdict
 
