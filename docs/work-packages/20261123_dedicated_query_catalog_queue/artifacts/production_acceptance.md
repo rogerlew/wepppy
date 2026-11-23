@@ -1,0 +1,18 @@
+# Production acceptance for dedicated catalog routing
+
+## Prerelease evidence
+
+On November 23, 2026 at 05:33 UTC, 7 of 12 default worker processes were executing `refresh_query_catalog_rq`. The eight batch workers and the single fork/archive worker were idle. Ready queue depths were zero. A bounded sample of 16 of 1,883 dirty scope locators yielded 56 durable receipts (up to four per directory). The oldest observed receipt was 1,427,866 seconds old. The fleet-wide oldest age is unknown.
+
+The Rocket mount on wepp3 used NFSv3 soft. Wepp1 and wepp2 used NFSv4.2 hard. Three serving containers running as UID 1002, GID 130 opened both sharded project aliases on a newly created private test scope. Each host published a unique file generation using file fsync, atomic replacement and directory fsync. All hosts observed each generation through both aliases and the same logical scope ID, incarnation and READONLY marker transitions. Each lock holder excluded both other clients, and all three clients could acquire after each release. The directory inode was 218060097 on wepp1/wepp2 and 4288894273 on wepp3. These observations cover healthy-state cross-client coordination. NAS failure and recovery behavior remain untested. A separate read-only sample of actual legacy flat projects included one READONLY project and one writable project. All three hosts agreed on both scope identities, incarnations and READONLY classifications.
+
+The operator evidence directory is `/workdir/query-catalog-studies/catalog-queue-rollout-20261123/acceptance/`. The three-host evidence file is `cross.json`, SHA-256 `52ce4f9164e58e16f257acd9e2d397e94f8603ee56d1ddf4a6f61680ad5a9b81`. Private artifacts retain the source job and scope identifiers. The baseline comes from `baseline-corrected.json`.
+
+## Live exercise
+
+1. Read back actual candidate container mounts, worker groups and registration under its production identity. Check one dedicated consumer alongside the independent fork/archive worker. Record ready depth and queue-head age on default, batch, fork-archive and query-catalog. Check for a catalog callable on any default consumer.
+2. Create two exclusively owned test projects on Rocket. Write a small known Parquet asset on the catalog project and deterministic bounded payload files on the archive project. Use the ordinary archive job on the latter for a no-catalog control. Validate the ZIP integrity, payload bytes, RQ origin and worker.
+3. Exercise the actual managed receipt and production admission path. Run the same archive on the separate project during catalog activity. Verify a positive intersection of actual RQ execution intervals on independent workers. Verify matching receipt acknowledgment, zero pending receipts on the canary, catalog file contents, schema and fixture values on both hosts. Record queue waits, job durations, exact canary receipt age and Rocket client RPC counts/latencies alongside the control. Client mount counters include other host traffic.
+4. Use at most one repeat if natural job durations miss overlap. Stop issuing work on unexpected queue pressure, failed fixture ownership, worker mismatch or artifact failure. Limit the exercise to 15 minutes and retain timeout evidence. Keep the oldest sampled dirty receipt separate from the exact canary acknowledgment latency. A one-worker canary cannot establish sustainable arrival/service rates or achievable fleet freshness.
+
+The control uses archive creation, which verifies the real fork/archive worker while avoiding the filesystem-wide retention reconciliation that production restore can trigger. Release acceptance remains pending until the workflow passes with the deployed candidate.
