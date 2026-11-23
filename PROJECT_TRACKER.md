@@ -1,3 +1,5 @@
+The [Disturbed lookup live runbook refactor](docs/work-packages/20261123_disturbed_live_runbook/package.md) is in progress.
+
 The [GL dashboard sidebar renderer refactor](docs/work-packages/20261123_gl_sidebar_renderer/package.md) separates section assembly, legends and RUSLE tolerance controls.
 
 Completed locally — [GL dashboard layer tooltips](docs/work-packages/20261123_gl_layer_tooltips/package.md).
