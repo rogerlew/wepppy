@@ -34,6 +34,11 @@ GDAL_CONFIG="${GDAL_CONFIG:-/usr/bin/gdal-config}"
 LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-/usr/lib/x86_64-linux-gnu}"
 PATH="/usr/bin:${PATH}"
 
+owned_wheel_dir="$(mktemp -d)"
+trap 'rm -rf "${owned_wheel_dir}"' EXIT
+"${PYTHON}" "${ROOT_DIR}/docker/native_security/build_pillow_wheel.py" "${owned_wheel_dir}"
+uv pip install -p "${PYTHON}" --no-deps --no-cache "${owned_wheel_dir}"/*.whl
+
 uv pip install -p "${PYTHON}" \
   -r "${ROOT_DIR}/docker/requirements-uv.txt" \
   -r "${ROOT_DIR}/docker/requirements-stubs-uv.txt" \

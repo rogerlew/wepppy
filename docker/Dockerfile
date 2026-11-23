@@ -95,8 +95,12 @@ RUN curl -LsSf "${UV_INSTALLER_URL}" | sh && \
 
 # Resolve Python dependencies with uv inside a dedicated virtual environment.
 COPY docker/requirements-uv.txt /tmp/requirements-uv.txt
-RUN uv venv /opt/venv && \
+COPY docker/native_security/build_pillow_wheel.py /tmp/build_pillow_wheel.py
+RUN python /tmp/build_pillow_wheel.py /tmp/wepppy-wheels && \
+    uv venv /opt/venv && \
     source /opt/venv/bin/activate && \
+    uv pip install --no-deps --no-cache /tmp/wepppy-wheels/*.whl && \
+    rm -r /tmp/wepppy-wheels && \
     uv pip install --requirement /tmp/requirements-uv.txt && \
     GDAL_CONFIG=/usr/bin/gdal-config uv pip install \
         --no-binary fiona \
