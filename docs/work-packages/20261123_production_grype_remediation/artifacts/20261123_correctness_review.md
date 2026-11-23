@@ -23,7 +23,7 @@ The earlier `63ae6f940` framework trial predates current Google and CILogon acco
 
 The private checker receives candidate tests on a read-only mount and imports the installed application from the image. It also exercises ordinary local Git LFS clean/smudge, CSV, byte-range and NetCDF consumers. Its renderer uses the candidate Docker CLI to reach a disposable local service. Existing route tests cover datastore behavior separately from the independent provider fixture.
 
-## Candidate evidence
+## First candidate evidence
 
 The integrated image is `sha256:a116e2d21457a0e33a6070ab42518be0adead13ea9b53db5c55d9f7dfa8871d0` from `65084ea5a1587cde24f8f9612ed87e70d5a8fd6b`. A stopped-container export matched every baseline file and link in the four scientific source trees, including 1,206 WBT, 1,545 wepppyo3, 44 Rosetta and 11 weppcloud2 entries. The three Go executables and generated archive console bundle also match baseline bytes.
 
@@ -39,6 +39,21 @@ On the same image, three query route cases, four full Google/CILogon provider ex
 
 The exact-image framework and codec selection passed 194 tests in 20.35 seconds. It includes current callback redirects and account linking, query and MCP access, actual Pillow codec use and real loopback compressed HTTP/TLS transfer. The private checksum index is `review-evidence-sha256.json`, SHA-256 `12364ad2e75185e6079f795c86f1867f0d52c1eeeddce201155c8964ab461b05`.
 
-## Verdict
+## First candidate verdict
 
 Independent correctness review passes for the tested candidate workflows. The host installation instructions now cover the required owned Pillow wheel. No unresolved correctness defects were confirmed in these repairs. Hold release pending the package-wide regression results, security dispositions and production operator decision. Review completed by the independent correctness agent on 2026-11-23 UTC.
+
+## Follow-up candidate, 2026-11-23 17:29 UTC
+
+**Independent correctness review passed for image `sha256:27f3c409f45318dff99756cd854b7a03395f406da82c26dd3c0b6f9efbd4135b`.** The clean production Compose build used source `cc335e36555a8ae3af65eaba12b1080b8a16b57d` and the same Python and Node base digests as the serving build. A standalone container preflight on forest1 timed out while creating its systemd scope. BuildKit ran the application and scientific probes from the immutable candidate under UID 1002 and GID 130 with networking disabled and read-only test inputs. The extracted candidate CLI drove a disposable renderer on forest.
+
+| Workflow | Follow-up artifact readback |
+| --- | --- |
+| Quarto PATH | The actual controller produced a 2,137,819-byte HTML report with local browser assets and a nonblank 864 × 1,127 RGB map. The threshold CSV matched the previous candidate byte for byte. The 15.0 and 48.2 thresholds selected hillslope 12 at cost 513,272.60634374997. |
+| Docker CLI and WEPPcloudR DEVAL | CLI 29.10.0 executed the configured renderer under the worker identity. The published 14,076,832-byte HTML contains the expected run identifier and has UID 1002, GID 130 and mode 0644. |
+| Git LFS and Rosetta | Git LFS 3.8.1 materialized all 15 assets from an ordinary local Git/LFS source at the pinned commit. Every byte matched the installed assets, object verification passed, and Ann.parquet contained 4,640 rows. |
+| GDAL, Rasterio, Fiona, Pyogrio and DuckDB | All six readbacks matched the previous scientific trial, including netCDF values, GeoTIFF round trip, transformed coordinates, GeoJSON attributes, library maps, CLI checksum 10 and all 1,048,576 cells of a two-thread warp. The Debian and Rasterio copies still register the affected netCDF driver. |
+| External scientific sources and frontend assets | All 1,206 WBT, 1,545 wepppyo3, 44 Rosetta and 11 weppcloud2 file/link entries matched the serving inventory. The generated archive console and 18 shared vendor files matched serving hashes. The nine historical vendor files documented above account for the entire image-only difference in that directory. |
+| Auth, file and packaging consumers | Three query route cases, four signed provider exchanges and four file-consumer cases passed. Setuptools 80.10.2 generated both expected run-ID prefixes, supported a registered filesystem round trip, and built a wheel with identical module bytes. All three embedded Go executables matched their independently qualified replacement hashes. |
+
+The protected evidence index is `grype-remediation-20261123/gate2/correctness/review-receipt.json`, SHA-256 `a7c69b2b19b17e75b5da4af45da73b58a85f1fe1fed0c5c79b65a3b73cf5fa1e`. It binds the PATH and DEVAL outputs, scientific and source manifests, runner logs and build receipt to this exact candidate. The open GDAL finding and the package-wide security decision remain release considerations. [GDAL follow-up](20261123_gdal_followup.md) · [release decision](20261123_release_decision.md)
