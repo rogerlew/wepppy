@@ -727,7 +727,7 @@ describe("Config Builder controller", () => {
         expect(controller._selections()).not.toHaveProperty("cellsize_override");
         expect(root.querySelector("[name=cellsize_override]").value).toBe("10");
         expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("Advanced cell-size override");
-        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("10 metres (registered DEM default)");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("10 meters (registered DEM default)");
         expect(http.request.mock.calls.at(-1)[1].json.registry_revision).toBe("registry-2");
         expect(http.request.mock.calls.at(-1)[1].json.selections).not.toHaveProperty("cellsize_override");
     });

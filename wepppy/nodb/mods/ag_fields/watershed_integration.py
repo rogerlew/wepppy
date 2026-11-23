@@ -1213,7 +1213,7 @@ their file data. `pass_event_closure.parquet` records serialized event closure.
 `integration_summary.json` records executable identities and required outputs.
 
 The conserved metric suffixes, in order, are {metrics}. Water suffixes ending in
-`_m3` are cubic metres; sediment suffixes ending in `_kg` are kilograms.
+`_m3` are cubic meters; sediment suffixes ending in `_kg` are kilograms.
 
 `pass_sources.parquet` columns, in exact order, are the four contract identifiers;
 `parent_topaz_id`, `parent_wepp_id`, `source_id`, `source_kind`, `field_id`,

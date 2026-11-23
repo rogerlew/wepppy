@@ -1,7 +1,7 @@
 # WBT Channel Delineation
 
 Use the **Channel Delineation** control to define the terrain grid and build a
-modeled channel network with the Weppcloud-WBT delineation backend. The extent,
+modeled channel network with the WEPPcloud-WBT delineation backend. The extent,
 critical source area, minimum channel length, pruning method, and depression
 conditioning choice all affect where channels begin and which tributaries
 remain in the network.
@@ -14,7 +14,7 @@ channel routing. The resulting channels are modeled features derived from
 terrain; they are not surveyed or observed stream locations.
 
 This page explains the inputs and options shown when a project uses the
-Weppcloud-WBT backend. Projects configured for legacy TOPAZ delineation show
+WEPPcloud-WBT backend. Projects configured for legacy TOPAZ delineation show
 fewer options.
 
 ## When to Use It
@@ -36,7 +36,7 @@ rebuild.
 
 Have the following ready:
 
-- a project configured to use the Weppcloud-WBT delineation backend;
+- a project configured to use the WEPPcloud-WBT delineation backend;
 - an area of interest visible on the map, exact geographic bounds, a map object
   from another run, or an uploadable DEM; and
 - a general expectation for channel density based on mapped hydrography,

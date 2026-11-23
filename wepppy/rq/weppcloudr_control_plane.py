@@ -839,7 +839,7 @@ class RenderControlPlane:
             cancellation_requested=True,
             cleanup_state="complete",
             error_code="weppcloudr_k8s_cancelled",
-            reason="render cancelled",
+            reason="render canceled",
             ended_at=self._clock(),
             never_created=receipt.job_uid is None,
         )

@@ -387,7 +387,7 @@ class WepppyRqWorker(Worker):
 
     def handle_cancel_signal(self, signum: int, frame: object | None) -> None:
         """Handle SIGUSR1 by raising an exception to stop the job."""
-        raise JobCancelledException("Job was cancelled")
+        raise JobCancelledException("Job was canceled")
         
     def handle_exception(self, job: Job, *exc_info) -> None:
         """Publish exception details before delegating back to the superclass."""
