@@ -24,6 +24,8 @@ Reduce applicable runtime exposure while preserving login, upload, data acquisit
 
 - [x] Follow-up requested 2026-11-23 UTC. Qualified the two setuptools vendor repairs, assessed both GDAL copies, reconciled all 108 Go rows, and qualified replacements for all three executables. GDAL remains open for an explicit driver-compatibility or maintenance decision.
 
+- [ ] Follow-up release gate, 2026-11-23 UTC. Rebuild clean source `cc335e36555a8ae3af65eaba12b1080b8a16b57d`, run the full Python and frontend suites, rematch the serving SBOM and independently disposition the exact artifact.
+
 ## Milestones and verification
 
 1. Start from a clean current-master worktree. Confirm the serving image digest and load the retained SBOM, Grype, npm and native inventory from wepp2. Group rows by advisory alias and source component, retaining each installed path, executable owner, fix state and service exposure. Review all known-exploited flags across severity levels. Reconcile the OpenSSH client match against the affected daemon, libc and installed files. Record image and host scopes separately.
