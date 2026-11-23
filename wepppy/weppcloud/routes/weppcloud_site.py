@@ -5,18 +5,17 @@ import os
 import threading
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 import uuid
 
-import json
 import redis
 from flask import session
 from flask_security import current_user
 from werkzeug.routing import BuildError
 
 from ._common import *  # noqa: F401,F403
-from ._landing_atlas import build_landing_atlas
+from ._landing_atlas import build_landing_atlas, read_atlas_markers
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.weppcloud.feature_registry.runtime import (
     config_maturity_badge,
@@ -887,24 +886,6 @@ def _resolve_run_locations_path() -> Path:
     return fallback / _RUN_LOCATIONS_FILENAME
 
 
-def _load_or_refresh_run_locations(force: bool = False) -> List[Dict[str, Any]]:
-    output_path = _resolve_run_locations_path()
-
-    if force and not output_path.exists():
-        current_app.logger.warning(
-            "Run locations cache missing at %s; waiting for compile_dot_logs.",
-            output_path,
-        )
-    try:
-        with output_path.open() as handle:
-            cached = json.load(handle)
-            if isinstance(cached, list):
-                return cached
-    except (OSError, json.JSONDecodeError):
-        pass
-    return []
-
-
 @weppcloud_site_bp.route('/')
 @weppcloud_site_bp.route('/landing/', endpoint='landing', strict_slashes=False)
 @handle_with_exception_factory
@@ -1008,7 +989,7 @@ def cap_verify():
 
 
 def _landing_run_locations_response() -> 'flask.Response':
-    dataset = _load_or_refresh_run_locations()
+    dataset = read_atlas_markers(_resolve_run_locations_path()) or []
     response = jsonify(dataset)
     response.headers['Cache-Control'] = 'no-store, max-age=0'
     return response

@@ -168,9 +168,7 @@ Apply the Revised Section 508 web baseline, including WCAG 2.0 A and AA,
 and the repository's existing AA theme baseline. Include a skip link, one
 main landmark and H1, logical headings, labeled controls,
 descriptive links, visible keyboard focus, readable text at 200% zoom,
-and usable narrow layouts with and without scripts. Keep the requested
-visual-only presentation of individual run IDs and hover details during
-review. The operator approved the existing presentation for cutover. Manual assessment
+and usable narrow layouts with and without scripts. Individual watershed details appear on hover. Manual assessment
 of per-marker equivalence remains open for Section 508 conformance reporting.
 Verify desktop and narrow screenshots show the map as the main visual after About.
 Check rendered geographic features, watershed markers and keyboard navigation
