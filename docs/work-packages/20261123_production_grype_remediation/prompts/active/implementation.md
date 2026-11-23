@@ -22,6 +22,8 @@ Reduce applicable runtime exposure while preserving login, upload, data acquisit
 
 - [x] 2026-11-23 UTC. Imported the exact candidate bundle on wepp2 and rematched the serving SBOM against the same Grype database. Independent security review verified zero new normalized advisory groups. The same-database comparison removed 327 primary rows.
 
+- [x] Follow-up requested 2026-11-23 UTC. Qualified the two setuptools vendor repairs, assessed both GDAL copies, reconciled all 108 Go rows, and qualified replacements for all three executables. GDAL remains open for an explicit driver-compatibility or maintenance decision.
+
 ## Milestones and verification
 
 1. Start from a clean current-master worktree. Confirm the serving image digest and load the retained SBOM, Grype, npm and native inventory from wepp2. Group rows by advisory alias and source component, retaining each installed path, executable owner, fix state and service exposure. Review all known-exploited flags across severity levels. Reconcile the OpenSSH client match against the affected daemon, libc and installed files. Record image and host scopes separately.
@@ -38,14 +40,20 @@ The serving image includes a separate PyCurl Brotli 1.1.0 decoder. The OpenSSH s
 
 Forest1 built the image and CI extension but failed to create transient systemd scopes for standalone containers. Both images were transferred to forest with verified immutable identities. The first full run reached 2,802 passes, then retained-tree admission observed less than its 10 GiB free-space reserve in container scratch. A private scratch mount on forest provided sufficient capacity but hid the DuckDB spatial extension built into the image. The second run reached 7,159 passes before GeoJSON loading failed. Copying the exact image extension into that mount restored the GeoJSON test. Its SHA-256 is recorded in the private build evidence.
 
+The newest setuptools wheel broke run-ID creation. Stock Git LFS retained fix-listed dependencies, and the first patched build omitted built-in help. The upstream Debian packaging restored the complete help and translation checks.
+
 ## Decision Log
 
 2026-11-23 UTC. Use one package because all repair batches affect the same common image and share a release decision. A failing batch can be revised or reverted independently. Any residual exposure returns to the existing policy and approval process.
 
 2026-11-23 UTC. Rejected the OAuthlib 4.0.0 intermediate after review identified an additional device-flow advisory. Chose 4.0.1. Retained the serving Node and Python base digests for the comparison.
 
+2026-11-23 UTC. Continue serving the current image as directed. Keep the first image decision and measurements bound to their recorded identity. Stage the four qualified component commits. The proposed GDAL repair changes the Rasterio driver set, so retain the original scientific stack for this batch. [GDAL qualification](../../artifacts/20261123_gdal_followup.md)
+
 ## Outcomes & Retrospective
 
 Six repair commits are available. Component trials on forest passed 158 framework/OAuth and 36 codec/transport cases. The targeted npm lock passed lint, 1,109 Jest tests, nine Node tests and the production asset build. The exact-image security and correctness reviews are complete. The [release decision](../../artifacts/20261123_release_decision.md) holds the image under the existing policy.
 
 The full candidate suite passed with 14,751 passed, 751 skipped and 99 deselected. The isolated test stacks were removed after validation. The work package remains open for Roger Lew’s disposition of residual security findings.
+
+The follow-up batch repaired two private Python components and qualified three Go executables. The combined component trial passed 38 targeted workflow tests, read back an actual PATH report and fetched all 15 Rosetta objects over HTTPS with matching hashes. On the first candidate, 18 of the 108 Go rows now have evidence for exclusion, and 90 retain open applicability. A new clean release build and same-database scan remain the separate release reassessment. [Go review](../../artifacts/20261123_go_reachability_review.md)

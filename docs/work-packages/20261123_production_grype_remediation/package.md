@@ -10,6 +10,10 @@ The reference is source `dacf4185d945f9700a235ac23fb1b99623cf11e6`, image `sha25
 
 Reuse the [dependency security package](../20261110_wepp1_dependency_security_gate/package.md), [evidence contract](../../infrastructure/dependency-security-evidence.md), [dependency policy](../../adrs/ADR-0140-dependency-security-gate-policy.md) and [release policy](../../infrastructure/production-deployment-policy.md). Scientific native coverage, upstream backports, bundled libraries, cached copies and advisory aliases require artifact-specific evidence. Retain raw evidence under the existing private deployment evidence store.
 
+## Follow-up qualification
+
+The operator directed continued service while the next Python and Go repair batches were qualified. The branch now carries four tested component updates. GDAL remains open because the available fix changes Rasterio’s drivers. The previous release decision applies to its exact image. The follow-up has component-level evidence and awaits a clean release build, whole-image scan and release assessment. [Tracker](tracker.md) · [GDAL qualification](artifacts/20261123_gdal_followup.md) · [Go review](artifacts/20261123_go_reachability_review.md)
+
 ## Completion
 
 Deliver a disposition for each in-scope finding under the existing policy, tested repair commits, a same-database comparison for the final image, and an operator-readable release recommendation. Report outstanding applicable known-exploited findings, fixable applicable critical/high findings, expiring exceptions and native coverage gaps. Record any hold, risk owner and next action. Report production activation separately if authorized.
