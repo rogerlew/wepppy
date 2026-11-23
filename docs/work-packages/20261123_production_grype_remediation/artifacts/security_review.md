@@ -1,19 +1,19 @@
 # Independent security review
 
-**2026-11-23 UTC · High impact · Hold**. The security reviewer examined the serving common image, source batches through `5729db5e1`, the repaired frontend lock and the private evidence below. Login, signed identity tokens, request-path checks, compressed transfers, image decoding and report rendering cross trust boundaries. Roger Lew owns the release risk decision.
+**2026-11-23 UTC · High impact · Hold**. The security reviewer examined the serving common image, source batches through `65084ea5a`, the repaired frontend lock and the private evidence below. Login, signed identity tokens, request-path checks, compressed transfers, image decoding and report rendering cross trust boundaries. Roger Lew owns the release risk decision.
 
 ## Serving image
 
-The reviewed image is `sha256:b6e0462f8a749eabb168ea398a4f8056c46305f2a003e04b026c0d5623567c94`. The package-pinned manifest verifies the retained SBOM, scan, direct inventory, lock and npm report. The private review directory on forest is `evidence/grype-remediation-20261123/security/` under the dependency-security store. Its baseline ledger SHA-256 is `724a77e04cd1046f12a60e395f3918788725d195626985f0bceb9893bbd6d436`. Each row retains original scan position, advisory aliases, installed paths, source component, revision, fix state, prior review reference and current assessment. Open applicability requires further evidence or an explicit release decision.
+The reviewed image is `sha256:b6e0462f8a749eabb168ea398a4f8056c46305f2a003e04b026c0d5623567c94`. The package-pinned manifest verifies the retained SBOM, scan, direct inventory, lock and npm report. The private review directory on forest is `evidence/grype-remediation-20261123/security/` under the dependency-security store. Its baseline ledger SHA-256 is `724a77e04cd1046f12a60e395f3918788725d195626985f0bceb9893bbd6d436`. Each row retains original scan position, advisory aliases, installed paths, source component, revision, fix state, prior review reference and current assessment. The companion platform-disposition supplement binds ten rows to the reviewed platform, SHA-256 `6c33d41488fdfb021ae3f5c6c12f5f3777901373c131719c37de4458ceae6bc9`. Open applicability requires further evidence or an explicit release decision.
 
 | Evidence | Result |
 | --- | --- |
 | Grype inventory | 3,002 primary rows, including 87 Critical and 679 High. Another 516 rows were suppressed by the scanner for the Linux UAPI header package. All 3,518 rows appear in the ledger. |
 | Known-exploited flags across all severities | Six primary rows. Starlette has one applicable installed match and one build-cache match. Python Brotli has three verified patched copies. The OpenSSH client match requires an absent daemon and different libc. |
-| Fixed-version availability | 100 Python and 111 Go primary High/Critical rows outside the uv cache have scanner-listed fixes and open applicability. Repeated paths, advisory aliases and embedded modules are included in those counts. |
+| Fixed-version availability | 99 Python and 108 Go primary High/Critical rows outside the uv cache have scanner-listed fixes and open applicability after platform review. Repeated paths, advisory aliases and embedded modules are included in those counts. |
 | Debian | 61 source packages. Comparing the installed source revisions with Debian's trixie fixed versions establishes 60 backported primary High/Critical rows. The database labels these rows unresolved. The ledger preserves both results. |
 | Cache | 173 primary rows have only uv-cache paths, including 15 Critical and 89 High. Removing those paths reduces packaged copies. Assess installed code independently. |
-| Embedded Go | Docker CLI has 74 primary matches, git-lfs 62 and Quarto esbuild 61. WEPPcloudR uses the Docker CLI for its docker-exec backend, git-lfs materializes build assets and esbuild ships with Quarto. The scanner lacked function symbols. |
+| Embedded Go | Docker CLI has 74 primary matches, git-lfs 62 and Quarto esbuild 61. WEPPcloudR uses the Docker CLI for its docker-exec backend, git-lfs materializes build assets and esbuild ships with Quarto. The scanner lacked function symbols. All 75 Go advisory records were checked against linux/amd64. Six rows specify a different OS or CPU, including three Critical Windows-only rows. |
 | Native coverage | 3,422 native file identities and 15,574 verified scientific data files. Hash inventory does not map every WEPP, WhiteboxTools, GDAL, rasterio or vendor extension to every affected upstream function. |
 | Prior acceptance | All three hosts retain the same serving-image approval, owned by Roger Lew, expiring 2026-11-24 06:23:17.979322 UTC. Its scope is the pinned serving artifact. |
 
@@ -23,7 +23,7 @@ Archive readback on wepp2 bound Python Brotli's installed extension to its wheel
 
 The query middleware registration preserves ordering and the OAuth callback catches the migrated JOSE validation exception inside the existing login error boundary. Source review found no new credentials, permissions, deployment authority or expanded access checks. Artifact validation must exercise the actual verifier, valid login, rejected claims and redirect. Local npm audit comparison removed 17 concrete package/advisory/severity tuples and retained four. The audit lists zero new concrete advisory tuples despite changed counts of transitive dependency labels.
 
-The original repair selects OAuthlib 4.0.0, which enters the affected range for a High device authorization endpoint advisory. The prior 3.2.2 was outside that particular range. Use the corrected 4.0.1 version or retain a specific deployment reachability decision. [Upstream advisory](https://github.com/oauthlib/oauthlib/security/advisories/GHSA-3jp2-3mrg-2vxc).
+The original repair selects OAuthlib 4.0.0, which enters the affected range for a High device authorization endpoint advisory. The prior 3.2.2 was outside that particular range. Review prompted correction to 4.0.1 in `50de1db06`. The PyPI release records for all 13 selected package versions on `65084ea5a` list zero advisories. The image scan assesses the installed versions. [Upstream advisory](https://github.com/oauthlib/oauthlib/security/advisories/GHSA-3jp2-3mrg-2vxc).
 
 ## Release gate
 
