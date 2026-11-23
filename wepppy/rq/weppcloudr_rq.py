@@ -489,7 +489,7 @@ def render_deval_details_rq(
                 if not isinstance(executor, KubernetesJobBackend):
                     raise WeppcloudRError("Invalid Kubernetes render backend state.")
                 executor.cancel(request)
-                raise WeppcloudRError("WEPPcloudR render was cancelled before dispatch.")
+                raise WeppcloudRError("WEPPcloudR render was canceled before dispatch.")
             try:
                 result = executor.render(request, timeout=exec_timeout)
             except BackendExecutionError as exc:

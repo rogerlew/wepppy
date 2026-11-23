@@ -185,7 +185,7 @@
             && this._selections().cellsize_override !== previous.cellsize_override
         ) {
             var dem = this.components[this.form.elements.dem.value];
-            var defaultCellsize = dem ? String(dem.default_cellsize) + " metres (registered DEM default)" : "the registered DEM default";
+            var defaultCellsize = dem ? String(dem.default_cellsize) + " meters (registered DEM default)" : "the registered DEM default";
             messages.push("The previous Advanced cell-size override choice is incompatible with the current combination and was replaced with " + defaultCellsize + ".");
         }
         this.dom.setText(this.changeReason, messages.join(" "));
@@ -313,14 +313,14 @@
     ConfigBuilder.prototype._renderCellsize = function () {
         var dem = this.components[this.form.elements.dem.value];
         var defaultValue = dem ? Number(dem.default_cellsize) : null;
-        this.dom.setText(this.cellsize, defaultValue ? defaultValue + " metres (registered DEM default)" : "Select an elevation source.");
+        this.dom.setText(this.cellsize, defaultValue ? defaultValue + " meters (registered DEM default)" : "Select an elevation source.");
         this.overridePanel.hidden = !this.description.can_override_cellsize;
         this.overrideSelect.replaceChildren();
         if (!this.description.can_override_cellsize || !defaultValue) { return; }
         this.description.allowed_cell_sizes.forEach(function (value) {
             var option = global.document.createElement("option");
             option.value = String(value);
-            option.textContent = String(value) + " metres" + (Number(value) === defaultValue ? " (DEM default)" : " (advanced override)");
+            option.textContent = String(value) + " meters" + (Number(value) === defaultValue ? " (DEM default)" : " (advanced override)");
             this.overrideSelect.appendChild(option);
         }, this);
         this.overrideSelect.value = String(defaultValue);

@@ -2,7 +2,7 @@
 
 Model agricultural fields in WEPP within a watershed with crop schedule (observed climates over a period of time)
 
-Resources stored in weppcloud `ag_fields` directory
+Resources stored in WEPPcloud `ag_fields` directory
 
 ## Additional Model Inputs
 
@@ -68,7 +68,7 @@ e.g.
 
 #### `ag_fields/field_boundaries.tif`
 - raster with the field id burned in
-- aligned with weppcloud project rasters
+- aligned with WEPPcloud project rasters
 
 ### Each field is divided into hydrologiccal sub fields `ag_fields/sub_fields` by PERIDOT
 
@@ -112,7 +112,7 @@ schema
 
 ### Hangman notes
 
-Hangman is the weppcloud alpha project for developing AgFields
+Hangman is the WEPPcloud alpha project for developing AgFields
 
 runid: copacetic-note
 

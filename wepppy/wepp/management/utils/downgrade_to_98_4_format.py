@@ -252,7 +252,7 @@ def downgrade_to_98_4_format(
             "# Conversion note: Herbicide operations (code 17) were exported as code 4 ('other')."
         )
         general_notes.append(
-            "# WEPP 98.4 does not simulate herbicide applications; management behaviour may differ."
+            "# WEPP 98.4 does not simulate herbicide applications; management behavior may differ."
         )
         for name, original_code, mapped_code in operation_fallback_notes:
             general_notes.append(

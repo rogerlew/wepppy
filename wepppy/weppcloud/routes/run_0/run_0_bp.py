@@ -2687,7 +2687,7 @@ def create_index():
                 "action_url": create_action,
             },
             {
-                "label": f"{cfg} WhiteBoxTools",
+                "label": f"{cfg} WhiteboxTools",
                 "overrides": {"watershed:delineation_backend": "wbt"},
                 "config": cfg,
                 "action_url": create_action,

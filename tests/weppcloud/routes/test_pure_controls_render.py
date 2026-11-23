@@ -3258,7 +3258,7 @@ def test_authenticated_create_index_renders_exact_server_owned_variants(
                     "action_url": "/rq-engine/create/",
                 },
                 {
-                    "label": "disturbed9002 WhiteBoxTools",
+                    "label": "disturbed9002 WhiteboxTools",
                     "overrides": {"watershed:delineation_backend": "wbt"},
                     "config": "disturbed9002",
                     "action_url": "/rq-engine/create/",

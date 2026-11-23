@@ -1,10 +1,10 @@
 # Observed Model Fitting
 
-The Observed Model Fit tool compares measured watershed responses against a completed WEPP Cloud simulation. It aggregates modelled hillslope and channel outputs via the interchange Parquet assets and computes daily and annual skill metrics for each supplied observed measure.
+The **Observed Data Model Fit** control compares measured watershed responses against a completed WEPPcloud simulation. It aggregates modeled hillslope and channel outputs via the interchange Parquet assets and computes daily and annual skill metrics for each supplied observed measure.
 
 ## Prerequisites
 
-- A completed WEPP Cloud run for the project.
+- A completed WEPPcloud run for the project.
 - Observed outlet data for at least one supported measure.
 - A climate configuration that exposes observed years for comparison.
 
@@ -36,8 +36,8 @@ The blank entry on 01/05 is skipped during fitting.
 ## Running the Fit
 
 1. Enable **Observed Data** in **Mods**, then open **Observed Data Model Fit**.
-2. Paste the prepared CSV text into the **Observed Timeseries** field.
-3. Click **Run Model Fit**. The job is dispatched to the WEPP Cloud queue.
+2. Paste the prepared CSV text into the **Observed time series** field.
+3. Click **Run Model Fit**. The job is dispatched to the WEPPcloud queue.
 4. When processing completes, follow the “View Model Fit Results” link.
 
 ## Report Contents

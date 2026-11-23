@@ -6,7 +6,7 @@ Follow [Writing for people](../../../../../docs/standards/user-facing-language-s
 for the complete UI/help task. Clear prose cannot compensate for an unexplained
 control, misleading status, or help that users cannot find.
 
-Write for non-developers with backgrounds in hydrology, soil science, forestry, agriculture, range, watershed restoration, or land management. Assume roughly the knowledge level of an upper-division undergraduate hydrology student: readers should be comfortable with terms like runoff, infiltration, sediment yield, watershed, and soil texture, but they should not need to understand WEPPcloud internals, code structure, or queueing details.
+Write for non-developers with backgrounds in hydrology, soil science, forestry, agriculture, range, watershed restoration, or land management. Assume roughly the knowledge level of an upper-division undergraduate hydrology student: readers should be comfortable with terms like runoff, infiltration, sediment yield, watershed, and soil texture, but they should not need to understand WEPPcloud internals, code structure, or queuing details.
 
 ## When to write an ENDUSER.md
 
