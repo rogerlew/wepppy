@@ -1915,6 +1915,11 @@ closed locally on 2026-11-22 UTC. Eight focused modules carry the same 92
 passing cases. Every replacement module is below the quality tool's red
 thresholds.
 
+### Climate control render test setup
+
+Five render tests now share a fresh climate fixture. All 303 focused cases
+passed on 2026-11-23 UTC. [Work package](docs/work-packages/20261123_climate_render_test_setup/package.md)
+
 ### Pure controls render test refactor
 
 [Work package](docs/work-packages/20261121_pure_controls_render_refactor/package.md)

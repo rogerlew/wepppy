@@ -747,11 +747,9 @@ def test_soil_pure_template_renders_ssurgo_cache_checkbox(jinja_env: Environment
     assert 'id="soil_stacktrace_panel"' in rendered
 
 
-def test_climate_template_renders_catalog_station_and_build_contract(
-    jinja_env: Environment,
-) -> None:
-    template = jinja_env.get_template("controls/climate_pure.htm")
-    climate = SimpleNamespace(
+@pytest.fixture
+def climate() -> SimpleNamespace:
+    return SimpleNamespace(
         catalog_id="prism_stochastic",
         climate_mode=SimpleNamespace(value=5),
         climatestation_mode=SimpleNamespace(value=-1),
@@ -775,8 +773,15 @@ def test_climate_template_renders_catalog_station_and_build_contract(
         precip_monthly_scale_factors=None,
         precip_scale_reference=None,
         precip_scale_factor_map=None,
-        cligen_seed=24680,
     )
+
+
+def test_climate_template_renders_catalog_station_and_build_contract(
+    jinja_env: Environment,
+    climate: SimpleNamespace,
+) -> None:
+    template = jinja_env.get_template("controls/climate_pure.htm")
+    climate.cligen_seed = 24680
     catalog = [
         {
             "catalog_id": "prism_stochastic",
@@ -845,37 +850,13 @@ def test_climate_template_renders_catalog_station_and_build_contract(
 @pytest.mark.parametrize("availability", ["available", "restricted", "hidden", "disabled"])
 def test_climate_template_keeps_spatial_options_for_dataset_switching(
     jinja_env: Environment,
+    climate: SimpleNamespace,
     initial_dataset: str,
     observed_dataset: str,
     availability: str,
 ) -> None:
     from wepppy.nodb.locales import get_climate_dataset
 
-    climate = SimpleNamespace(
-        catalog_id="prism_stochastic",
-        climate_mode=SimpleNamespace(value=5),
-        climatestation_mode=SimpleNamespace(value=-1),
-        climate_spatialmode=SimpleNamespace(value=0),
-        uses_tenerife_station_catalog=False,
-        is_single_storm=False,
-        datasetMap={},
-        input_years=30,
-        observed_start_year=1981,
-        observed_end_year=2024,
-        future_start_year=2030,
-        future_end_year=2060,
-        cli_fn=None,
-        orig_cli_fn=None,
-        climate_daily_temp_ds="null",
-        use_gridmet_wind_when_applicable=True,
-        adjust_mx_pt5=False,
-        silent_pass_observed_quality_guard=False,
-        precip_scaling_mode=SimpleNamespace(value=0),
-        precip_scale_factor=None,
-        precip_monthly_scale_factors=None,
-        precip_scale_reference=None,
-        precip_scale_factor_map=None,
-    )
     climate.catalog_id = initial_dataset
     initial = get_climate_dataset(initial_dataset).to_mapping()
     observed = get_climate_dataset(observed_dataset).to_mapping()
@@ -910,37 +891,16 @@ def test_climate_template_keeps_spatial_options_for_dataset_switching(
 
 def test_schema_v1_europe_preset_renders_exact_climate_radios(
     jinja_env: Environment,
+    climate: SimpleNamespace,
     tmp_path: Path,
 ) -> None:
     from wepppy.nodb.locales import get_climate_dataset
 
     authority = _eu_preset_authority(tmp_path)
     assert authority.graph is not None
-    climate = SimpleNamespace(
-        catalog_id="vanilla_cligen",
-        climate_mode=SimpleNamespace(value=0),
-        climatestation_mode=SimpleNamespace(value=-1),
-        climate_spatialmode=SimpleNamespace(value=0),
-        uses_tenerife_station_catalog=False,
-        is_single_storm=False,
-        datasetMap={},
-        input_years=30,
-        observed_start_year=1981,
-        observed_end_year=2024,
-        future_start_year=2030,
-        future_end_year=2060,
-        cli_fn=None,
-        orig_cli_fn=None,
-        climate_daily_temp_ds="null",
-        use_gridmet_wind_when_applicable=False,
-        adjust_mx_pt5=False,
-        silent_pass_observed_quality_guard=False,
-        precip_scaling_mode=SimpleNamespace(value=0),
-        precip_scale_factor=None,
-        precip_monthly_scale_factors=None,
-        precip_scale_reference=None,
-        precip_scale_factor_map=None,
-    )
+    climate.catalog_id = "vanilla_cligen"
+    climate.climate_mode = SimpleNamespace(value=0)
+    climate.use_gridmet_wind_when_applicable = False
     catalog = [
         get_climate_dataset(catalog_id).to_mapping()
         for catalog_id in authority.graph.climate_datasets
@@ -972,6 +932,7 @@ def test_schema_v1_europe_preset_renders_exact_climate_radios(
 
 def test_run_context_renders_outside_axis_climate_with_ordinary_landcover(
     jinja_env: Environment,
+    climate: SimpleNamespace,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     run0_module = importlib.import_module(
@@ -999,31 +960,8 @@ def test_run_context_renders_outside_axis_climate_with_ordinary_landcover(
         user_defined_landcover_fn=None,
         mapping="disturbed",
     )
-    climate = SimpleNamespace(
-        catalog_id="retired-climate",
-        climate_mode=SimpleNamespace(value=5),
-        climatestation_mode=SimpleNamespace(value=5),
-        climate_spatialmode=SimpleNamespace(value=0),
-        uses_tenerife_station_catalog=False,
-        is_single_storm=False,
-        datasetMap={},
-        input_years=30,
-        observed_start_year=1981,
-        observed_end_year=2024,
-        future_start_year=2030,
-        future_end_year=2060,
-        cli_fn=None,
-        orig_cli_fn=None,
-        climate_daily_temp_ds="null",
-        use_gridmet_wind_when_applicable=True,
-        adjust_mx_pt5=False,
-        silent_pass_observed_quality_guard=False,
-        precip_scaling_mode=SimpleNamespace(value=0),
-        precip_scale_factor=None,
-        precip_monthly_scale_factors=None,
-        precip_scale_reference=None,
-        precip_scale_factor_map=None,
-    )
+    climate.catalog_id = "retired-climate"
+    climate.climatestation_mode = SimpleNamespace(value=5)
     retired_payload = {
         "catalog_id": "retired-climate",
         "label": "Retired climate",
@@ -1287,33 +1225,21 @@ def test_australia_run_control_selects_stored_builder_landcover_default(
 
 def test_climate_template_renders_upload_and_scaling_contract(
     jinja_env: Environment,
+    climate: SimpleNamespace,
 ) -> None:
     template = jinja_env.get_template("controls/climate_pure.htm")
-    climate = SimpleNamespace(
-        catalog_id="user_defined_cli",
-        climate_mode=SimpleNamespace(value=12),
-        climatestation_mode=SimpleNamespace(value=4),
-        climate_spatialmode=SimpleNamespace(value=0),
-        uses_tenerife_station_catalog=False,
-        is_single_storm=False,
-        datasetMap={},
-        input_years=30,
-        observed_start_year=1981,
-        observed_end_year=2024,
-        future_start_year=2030,
-        future_end_year=2060,
-        cli_fn="cli/custom.cli",
-        orig_cli_fn=None,
-        climate_daily_temp_ds="gridmet",
-        use_gridmet_wind_when_applicable=True,
-        adjust_mx_pt5=True,
-        silent_pass_observed_quality_guard=True,
-        precip_scaling_mode=SimpleNamespace(value=2),
-        precip_scale_factor=1.1,
-        precip_monthly_scale_factors=[1.0] * 12,
-        precip_scale_reference="prism",
-        precip_scale_factor_map="/configured/daymet_scale.tif",
-    )
+    climate.catalog_id = "user_defined_cli"
+    climate.climate_mode = SimpleNamespace(value=12)
+    climate.climatestation_mode = SimpleNamespace(value=4)
+    climate.cli_fn = "cli/custom.cli"
+    climate.climate_daily_temp_ds = "gridmet"
+    climate.adjust_mx_pt5 = True
+    climate.silent_pass_observed_quality_guard = True
+    climate.precip_scaling_mode = SimpleNamespace(value=2)
+    climate.precip_scale_factor = 1.1
+    climate.precip_monthly_scale_factors = [1.0] * 12
+    climate.precip_scale_reference = "prism"
+    climate.precip_scale_factor_map = "/configured/daymet_scale.tif"
     catalog = [{
         "catalog_id": "user_defined_cli", "label": "User CLI", "description": "",
         "help_text": "", "group": "User-Defined", "group_hint": "",
