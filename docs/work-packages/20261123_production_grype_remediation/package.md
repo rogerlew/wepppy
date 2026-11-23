@@ -1,6 +1,6 @@
 # Production common-image vulnerability remediation
 
-Opened 2026-11-23 UTC. **Production release held.** Roger Lew owns the open residual-risk decision. [Release decision](artifacts/20261123_release_decision.md)
+Opened 2026-11-23 UTC. **Production release held.** Roger Lew owns the open residual-risk decision. [Current release decision](artifacts/20261123_followup_release_decision.md)
 
 Produce one release decision for the common image serving wepp1, wepp2 and wepp3. The catalog rollout introduced zero new advisory matches, but the serving image carries inherited findings. Use independently reviewable dependency commits so a compatibility failure can be traced to its repair batch. The release candidate combines the accepted batches.
 
@@ -12,7 +12,7 @@ Reuse the [dependency security package](../20261110_wepp1_dependency_security_ga
 
 ## Follow-up qualification
 
-The operator directed continued service while the next Python and Go repair batches were qualified. The branch now carries four tested component updates. GDAL remains open because the available fix changes Rasterio’s drivers. The previous release decision applies to its exact image. The follow-up has component-level evidence and awaits a clean release build, whole-image scan and release assessment. [Tracker](tracker.md) · [GDAL qualification](artifacts/20261123_gdal_followup.md) · [Go review](artifacts/20261123_go_reachability_review.md)
+The operator directed continued service while the next Python and Go repair batches were qualified. The branch now carries four tested component updates. GDAL remains open because the available fix changes Rasterio’s drivers. The clean follow-up image passed independent workflow checks. Its scan removed 525 primary rows relative to serving and 198 relative to the first candidate. The follow-up remains on security hold. [Tracker](tracker.md) · [GDAL qualification](artifacts/20261123_gdal_followup.md) · [Go review](artifacts/20261123_go_reachability_review.md)
 
 ## Completion
 
