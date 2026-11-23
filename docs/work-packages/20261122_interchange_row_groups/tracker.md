@@ -10,9 +10,11 @@
 
 - 2026-11-23 00:26 UTC. Broad validation caught a candidate-only MOFE endpoint change in the provisional extension. Restored the shipped slope source in the isolated native build, published the corrected pair on task branches and repeated independent sample comparisons. Final broad run started.
 
+- 2026-11-23 02:36 UTC. Local implementation and validation complete. Final standalone full suite passed 14,901 tests with 535 skipped, 99 deselected and unchanged source and runtime fingerprints.
+
 ## Recovery and observation
 
-The original job tree still showed the hillslope child failed, watershed modeling started and post-watershed interchange deferred at the time of review. All 47,582 raw inputs in each six required families were present. The failed child is `6b56bb1a-4066-4dd0-b952-594e6fcda338`. Once the coordinated release is installed and the worker startup hash verified, retry that child and observe its dependent stages through publication. Read the final footers, identities, dates and watershed daily totals. Preserve the raw model outputs. Production deployment and a complete 45-year replay remain operational follow-up.
+At 2026-11-23 02:15 UTC the original job tree showed the hillslope child failed and watershed modeling started. Both totalwatsed3 child `28019041-ceca-4fd0-9c17-da0ee832d8d3` and post-watershed interchange were deferred. All 47,582 raw inputs in each six required families were present. The failed child is `6b56bb1a-4066-4dd0-b952-594e6fcda338`. Once the coordinated release is installed and the worker startup hash verified, retry that child and observe its dependent stages through publication. Read the final footers, identities, dates and watershed daily totals. Preserve the raw model outputs. Production deployment and a complete 45-year replay remain operational follow-up.
 
 ## Decision and evidence
 

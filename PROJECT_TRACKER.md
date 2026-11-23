@@ -1,4 +1,4 @@
-In progress — [Large-watershed Parquet interchange](docs/work-packages/20261122_interchange_row_groups/package.md).
+Closed locally — [Large-watershed Parquet interchange](docs/work-packages/20261122_interchange_row_groups/package.md). Verified at 47,582 source IDs and against 45-year source data. Production recovery pending.
 
 Closed locally. The [feature export service test refactor](docs/work-packages/20261121_features_export_service_test_refactor/package.md) split the service cases into six modules and verified all 79 focused cases.
 
