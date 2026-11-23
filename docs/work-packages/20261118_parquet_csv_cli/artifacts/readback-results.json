@@ -1,0 +1,26 @@
+[
+  {
+    "file": "chnwb.parquet",
+    "rows": 157788,
+    "columns": 29,
+    "header_parity": true,
+    "first_last_cell_parity": true,
+    "output_sha256": "f8004a93ddbabfabb518be762d19c695f4927d66b007b3087aced622f027ba8d"
+  },
+  {
+    "file": "H.wat.parquet",
+    "rows": 3004240,
+    "columns": 32,
+    "header_parity": true,
+    "first_last_cell_parity": true,
+    "output_sha256": "3b46f65692f3fbab2db74891eb1ce647114c640f021c36cc3e3a156c969c7231"
+  },
+  {
+    "file": "pass_pw0.events.parquet",
+    "rows": 385704,
+    "columns": 32,
+    "header_parity": true,
+    "first_last_cell_parity": true,
+    "output_sha256": "02d9895fb7aea89780d1eff4f18963516e0b7b307e88070af468e15d04fe981d"
+  }
+]

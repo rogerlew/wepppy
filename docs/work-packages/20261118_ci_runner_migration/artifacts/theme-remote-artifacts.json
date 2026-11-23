@@ -1,0 +1,29 @@
+{
+  "run_id": 44423392936,
+  "head": "2b3f56727",
+  "stats": {
+    "startTime": "2026-11-18T23:49:53.023Z",
+    "duration": 20626.353000000003,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "files": [
+    {
+      "path": "ci-browser-result.json",
+      "size_bytes": 3832,
+      "sha256": "ad3633b8e691a8d810fffe65a4ebf38a52cfba31e9d776e0110d1ce6b04f077f"
+    },
+    {
+      "path": "theme-metrics/theme-contrast.json",
+      "size_bytes": 1301760,
+      "sha256": "7b0d19d9af0d8df88b2bca7be01ea12c08f069ae4fc25736e9587d02f496d55e"
+    },
+    {
+      "path": "theme-metrics/theme-contrast.md",
+      "size_bytes": 201090,
+      "sha256": "826385adf1370fd4822282e864f1c88479c58ea69de514c86e91d3f666a31e93"
+    }
+  ]
+}

@@ -1,40 +1,45 @@
 name: Status2 Smoke
 on:
   schedule:
-    - cron: '0 9 * * *'
+  - cron: 0 9 * * *
   workflow_dispatch: null
 jobs:
   status2-smoke:
     runs-on:
-      - self-hosted
-      - Linux
-      - X64
-      - homelab
+    - self-hosted
+    - Linux
+    - X64
+    - remote-ci
     timeout-minutes: 20
     steps:
-      - name: Require provisioned smoke configuration and secrets
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f "${RUNNER_DOCKER_ENV}" || { echo "Provision RUNNER_DOCKER_ENV outside the checkout" >&2; exit 1; }
-          mkdir -p docker/secrets
-          for name in redis_password wepp_auth_jwt_secrets; do
-            target="docker/secrets/${name}"
-            source_file="$(dirname "${RUNNER_DOCKER_ENV}")/secrets/${name}"
-            if [ ! -f "${target}" ]; then
-              test -f "${source_file}" || { echo "Provision the required smoke secret files" >&2; exit 1; }
-              cp "${source_file}" "${target}"
-            fi
-            chmod 600 "${target}"
-          done
-      - name: Run status2 smoke test
-        run: |
-          set -euo pipefail
-          scripts/run-status2-smoke.sh
-      - name: Upload status2 smoke log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: status2-smoke-log
-          path: telemetry/status2-smoke.log
-          if-no-files-found: warn
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    - name: Install wctl shim
+      id: wctl
+      env:
+        WCTL_SYMLINK_PATH: ${{ github.workspace }}/.wctl/bin/wctl
+      run: |-
+        mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
+        ./wctl/install.sh dev
+        echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
+    - name: Run authenticated Status2 smoke
+      run: |-
+        set -euo pipefail
+        mkdir -p telemetry
+        wctl --compose-file docker/docker-compose.status-smoke-test.yml up --build --abort-on-container-exit --exit-code-from smoke 2>&1 | tee telemetry/status2-smoke.log
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: status2-smoke-log
+        path: telemetry/status2-smoke.log
+        if-no-files-found: error
+    - name: Remove isolated smoke runtime
+      if: always() && steps.wctl.outcome == 'success'
+      run: wctl --compose-file docker/docker-compose.status-smoke-test.yml down --volumes
+        --remove-orphans --rmi local
+    forest_bootstrap: false
+    env:
+      COMPOSE_PROJECT_NAME: wepppy-${{ github.run_id }}-${{ github.run_attempt }}-status-smoke
+permissions:
+  contents: read

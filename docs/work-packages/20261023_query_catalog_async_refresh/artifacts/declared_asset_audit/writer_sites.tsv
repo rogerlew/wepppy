@@ -1,0 +1,1341 @@
+source	line	scope	evidence	call	leading_arguments
+wepppy/all_your_base/all_your_base.py	224	cp_chmod	file publication candidate	shutil.copyfile	src, dst
+wepppy/all_your_base/geo/geo.py	305	raster_stacker	write-mode open candidate	rasterio.open	dst_fn, 'w'
+wepppy/all_your_base/geo/geo.py	308	raster_stacker	write-mode open candidate	rasterio.open	dst_fn, 'w'
+wepppy/all_your_base/geo/geo.py	529	write_arc	write-mode open candidate	open	fname, 'w'
+wepppy/all_your_base/geo/geo.py	877	crop_and_transform	write-mode open candidate	open	dst1 + '.cmd', 'w'
+wepppy/all_your_base/geo/geo.py	925	crop_and_transform	file publication candidate	shutil.copyfile	dst_final, dst
+wepppy/all_your_base/geo/geo.py	966	rasterize_geometry_from_geojson	write-mode open candidate	rasterio.open	dst_fn, 'w'
+wepppy/all_your_base/geo/shapefile.py	757	Writer.__getFileObj	write-mode open candidate	open	f, 'wb'
+wepppy/all_your_base/geo/webclients/wmesque.py	72	_wmesque1_retrieve	write-mode open candidate	open	fname, 'wb'
+wepppy/all_your_base/geo/webclients/wmesque.py	141	_publish_download	file publication candidate	shutil.copy2	target, backups / name
+wepppy/all_your_base/geo/webclients/wmesque.py	143	_publish_download	file publication candidate	os.replace	stage / name, target
+wepppy/all_your_base/geo/webclients/wmesque.py	150	_publish_download	file publication candidate	os.replace	backups / target.name, target
+wepppy/all_your_base/geo/webclients/wmesque.py	220	wmesque_retrieve	write-mode open candidate	output.open	'wb'
+wepppy/all_your_base/geo/webclients/wmesque.py	242	wmesque_retrieve	file publication candidate	(stage / (destination.name + '.meta')).write_text	json.dumps(metadata, indent=2)
+wepppy/au/climates/agdc/scripts/acquisition.py	63	download_agdc_monthlies	write-mode open candidate	open	fname, 'wb'
+wepppy/au/landuse_201011/__init__.py	120		write-mode open candidate	open	'rat.csv', 'w'
+wepppy/au/soils/asris_2001/asris_client.py	91	query_asris	write-mode open candidate	open	fn, 'w'
+wepppy/au/soils/asris_2001/asris_client.py	92	query_asris	serializer candidate	json.dump	d, fp
+wepppy/au/soils/asris_soil_grids/scripts/make_gdalinfo_jsons.py	29	write_gdalinfo_metadata	write-mode open candidate	open	_join(raster_dir, dataset_name + '.json'), 'w'
+wepppy/au/soils/asris_soil_grids/scripts/make_gdalinfo_jsons.py	30	write_gdalinfo_metadata	serializer candidate	json.dump	info, fp
+wepppy/au/soils/soil_build.py	226	build_asris_soils	write-mode open candidate	open	fn, 'w'
+wepppy/au/soils/soil_build.py	246	build_asris_soils	write-mode open candidate	open	fn, 'w'
+wepppy/au/soils/soil_build.py	266	build_asris_soils	write-mode open candidate	open	fn, 'w'
+wepppy/climates/cli_parquet.py	146	_CliParquetAttempt._status	file publication candidate	os.replace	temporary, 'status.json'
+wepppy/climates/cli_parquet.py	205	_CliParquetAttempt.publish	serializer candidate	pq.write_table	table.replace_schema_metadata(metadata), outgoing
+wepppy/climates/cli_parquet.py	218	_CliParquetAttempt.publish	file publication candidate	os.replace	'candidate.parquet', self.target
+wepppy/climates/cligen/_scripts/build_tenerife_station_db.py	69	_copy_station_par_files	file publication candidate	shutil.copyfile	src, dst
+wepppy/climates/cligen/_scripts/build_tenerife_station_db.py	102	build_tenerife_catalog	file publication candidate	shutil.copyfile	stations_csv, target_csv
+wepppy/climates/cligen/cligen.py	609	_make_clinp	write-mode open candidate	open	clinp, 'w'
+wepppy/climates/cligen/cligen.py	681	df_to_prn	write-mode open candidate	open	prn_fn, 'w'
+wepppy/climates/cligen/cligen.py	803	Prn.write	write-mode open candidate	open	_fn, 'w'
+wepppy/climates/cligen/cligen.py	1288	ClimateFile.make_storm_file	write-mode open candidate	open	dst_fn, 'w'
+wepppy/climates/cligen/cligen.py	1471	ClimateFile.write	write-mode open candidate	open	fn, 'w'
+wepppy/climates/cligen/cligen.py	1619	Station.write	write-mode open candidate	open	fn, 'w'
+wepppy/climates/cligen/cligen.py	1766	StationMeta.build_ghcn_daily_climate	file publication candidate	shutil.copyfile	self.parpath, self.par
+wepppy/climates/cligen/cligen.py	1780	StationMeta.build_ghcn_daily_climate	write-mode open candidate	open	'cligen.log', 'w'
+wepppy/climates/cligen/cligen.py	2076	CligenStationsManager.export_to_geojson	write-mode open candidate	open	geojson_fn, 'w'
+wepppy/climates/cligen/cligen.py	2077	CligenStationsManager.export_to_geojson	serializer candidate	json.dump	geojson, f
+wepppy/climates/cligen/cligen.py	2085	CligenStationsManager.export_to_geojson	write-mode open candidate	open	fallback_path, 'w'
+wepppy/climates/cligen/cligen.py	2086	CligenStationsManager.export_to_geojson	serializer candidate	json.dump	geojson, f
+wepppy/climates/cligen/cligen.py	2165	Cligen.stage_station_parameter_file	write-mode open candidate	open	temp_path, 'xb'
+wepppy/climates/cligen/cligen.py	2166	Cligen.stage_station_parameter_file	serializer candidate	shutil.copyfileobj	source, destination
+wepppy/climates/cligen/cligen.py	2182	Cligen.stage_station_parameter_file	file publication candidate	os.replace	temp_path, destination_path
+wepppy/climates/cligen/cligen.py	2234	Cligen.run_multiple_year	file publication candidate	shutil.copyfile	station_meta.parpath, par_fn
+wepppy/climates/cligen/cligen.py	2277	Cligen.run_multiple_year	write-mode open candidate	open	_join(cli_dir, 'cligen_{}.log'.format(cli_fname[:-4])), 'w'
+wepppy/climates/cligen/cligen.py	2433	Cligen.run_observed	write-mode open candidate	open	_join(cli_dir, 'cligen_{}.log'.format(_split(cli_fn)[-1][:-4])), 'w'
+wepppy/climates/cligen/cligen.py	2701	par_mod	write-mode open candidate	open	_join(wd, 'cligen.log'), 'w'
+wepppy/climates/cligen/single_storm.py	97	build_single_storm_cli	file publication candidate	tmp_par_path.write_text	par_contents
+wepppy/climates/cligen/single_storm.py	124	build_single_storm_cli	file publication candidate	shutil.copyfile	tmp_par_path, target_par_path
+wepppy/climates/cligen/single_storm.py	125	build_single_storm_cli	file publication candidate	shutil.copyfile	tmp_cli_path, target_cli_path
+wepppy/climates/cligen/single_storm.py	181	_write_clinp	write-mode open candidate	clinp_path.open	'w'
+wepppy/climates/cligen/single_storm.py	222	_run_cligen	write-mode open candidate	log_path.open	'w'
+wepppy/climates/daymet/daily_interpolation.py	227	interpolate_daily_timeseries	file publication candidate	df.rename	—
+wepppy/climates/daymet/daily_interpolation.py	247	interpolate_daily_timeseries	serializer candidate	df.to_parquet	_join(output_dir, f'daymet_observed_{topaz_id}_{start_year}-{end_year}.parquet')
+wepppy/climates/daymet/daymet_singlelocation_client.py	397	interpolate_daily_timeseries	serializer candidate	df.to_parquet	_join(output_dir, f'daymet_observed_{col},{row}_{start_year}-{end_year}.parquet')
+wepppy/climates/daymet/daymet_singlelocation_client.py	481	interpolate_daily_timeseries_for_location	serializer candidate	df.to_parquet	_join(output_dir, f'daymet_observed_{topaz_id}_{start_year}-{end_year}.parquet')
+wepppy/climates/edde/__main__.py	28	main	serializer candidate	write_json	output / 'inventory.json', client.inventory(args.model, args.scenario, args.year)
+wepppy/climates/edde/__main__.py	38	main	serializer candidate	write_json	output / 'manifest.json', {'status': 'incomplete', 'request': vars(args)}
+wepppy/climates/edde/__main__.py	40	main	serializer candidate	table.to_csv	output / 'daily.csv'
+wepppy/climates/edde/__main__.py	42	main	serializer candidate	write_json	output / 'manifest.json', manifest
+wepppy/climates/edde/client.py	64	write_json	file publication candidate	path.write_text	json.dumps(value, indent=2, allow_nan=False) + '\n'
+wepppy/climates/edde/client.py	183	EddeClient.fetch	serializer candidate	write_json	attempt, dict(status='incomplete', source=obj, partial=partial.name)
+wepppy/climates/edde/client.py	192	EddeClient.fetch	write-mode open candidate	partial.open	'wb'
+wepppy/climates/edde/client.py	202	EddeClient.fetch	file publication candidate	partial.replace	path
+wepppy/climates/edde/client.py	203	EddeClient.fetch	serializer candidate	write_json	meta, saved
+wepppy/climates/edde/client.py	204	EddeClient.fetch	serializer candidate	write_json	attempt, dict(status='complete', source=obj, sha256=saved['sha256'])
+wepppy/climates/edde/cligen.py	83	build_climate	serializer candidate	write_json	root / 'manifest.json', state
+wepppy/climates/edde/cligen.py	84	build_climate	serializer candidate	table.to_csv	root / 'source-daily.csv'
+wepppy/climates/edde/cligen.py	86	build_climate	serializer candidate	frame.to_csv	root / 'normalized-daily.csv'
+wepppy/climates/edde/cligen.py	111	build_climate	serializer candidate	write_json	root / 'manifest.json', state
+wepppy/climates/edde/cligen.py	180	revise_prism	serializer candidate	write_json	companion, result
+wepppy/climates/gridmet/admission.py	406	GridMetAdmissionController.acquire	file publication candidate	replace	snapshot
+wepppy/climates/gridmet/client.py	307	retrieve_nc	file publication candidate	os.replace	stage_path, destination
+wepppy/climates/gridmet/client.py	394	dump	write-mode open candidate	open	fn, 'wb'
+wepppy/climates/gridmet/client.py	493	interpolate_daily_timeseries_for_location	serializer candidate	df.to_parquet	_join(output_dir, f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.parquet')
+wepppy/climates/metquery_client.py	348	get_daily	write-mode open candidate	open	dst, 'wb'
+wepppy/climates/noaa/atlas14.py	133	download	file publication candidate	output_path.write_text	'\n'.join(lines) + '\n'
+wepppy/climates/noaa/temporal_distributions/_scripts/download_all_temporal_distributions.py	191	download_file	write-mode open candidate	open	output_path, 'wb'
+wepppy/climates/prism/_bulk_cache.py	28	atomic_json	serializer candidate	write_json	temporary, value
+wepppy/climates/prism/_bulk_cache.py	31	atomic_json	file publication candidate	os.replace	temporary, path
+wepppy/climates/prism/_bulk_cache.py	46	BulkCache.lock	write-mode open candidate	(self.root / 'locks' / f'{partition}.lock').open	'a'
+wepppy/climates/prism/_bulk_cache.py	95	BulkCache.stage	file publication candidate	(attempt / 'bulk.csv.gz').write_bytes	gzip.compress(raw, mtime=0)
+wepppy/climates/prism/_bulk_cache.py	96	BulkCache.stage	serializer candidate	write_json	attempt / 'manifest.json', manifest
+wepppy/climates/prism/_bulk_cache.py	106	BulkCache.stage	serializer candidate	frame.to_parquet	path
+wepppy/climates/prism/_bulk_cache.py	109	BulkCache.stage	serializer candidate	frame.to_csv	—
+wepppy/climates/prism/_bulk_cache.py	114	BulkCache.publish	serializer candidate	atomic_json	self.root / 'entries' / f'{start}_{end}' / f'{cell}.json', meta
+wepppy/climates/prism/_bulk_transport.py	19	write_json	file publication candidate	path.write_text	json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + '\n'
+wepppy/climates/prism/_bulk_transport.py	52	BulkTransport.request	serializer candidate	write_json	artifact, dict(url=url, request=data, status=response.status_code, retrieved_utc=now(), seconds=time.monotonic() - started, headers=dict(response.headers), bytes=length, sha256=hashlib.sha256(raw).hex
+wepppy/climates/prism/_bulk_transport.py	67	BulkTransport.manifests	serializer candidate	write_json	attempt / f'{label}.json', result
+wepppy/climates/prism/_bulk_transport.py	77	BulkTransport.extract	serializer candidate	write_json	attempt / 'request.json', params
+wepppy/climates/prism/bulk_client.py	99	PrismBulkClient._attempt	serializer candidate	write_json	attempt / 'status.json', dict(state='running', started_utc=now(), cells=[c.id for c in cells], start=str(start), end=str(end), geometry=GEOMETRY)
+wepppy/climates/prism/bulk_client.py	108	PrismBulkClient._attempt	serializer candidate	write_json	attempt / 'status.json', dict(state='failed', finished_utc=now(), error_type=type(exc).__name__, error=safe_text(str(exc), source_profile=current_profile(WORKER)))
+wepppy/climates/prism/bulk_client.py	126	PrismBulkClient._extract_or_reuse	file publication candidate	(attempt / 'bulk.csv.gz').write_bytes	gzip.compress(raw, mtime=0)
+wepppy/climates/prism/bulk_client.py	140	PrismBulkClient._extract_or_reuse	serializer candidate	write_json	attempt / 'result.json', refs
+wepppy/climates/prism/bulk_client.py	141	PrismBulkClient._extract_or_reuse	serializer candidate	write_json	attempt / 'status.json', dict(state='complete', finished_utc=now(), acquired_cells=len(missing), reused_cells=len(cells) - len(missing))
+wepppy/climates/prism/daily_client.py	61	retrieve_historical_timeseries	file publication candidate	df.rename	—
+wepppy/climates/prism/wepp_adapter.py	57	build_cell	file publication candidate	frame.rename	—
+wepppy/climates/prism/wepp_adapter.py	86	build_cell	serializer candidate	pd.DataFrame({'raw_ppt_mm': frame.ppt, 'prn_ppt_mm': expected_ppt, 'trace_rain_rounded_to_zero': (frame.ppt > 0) & (expected_ppt == 0), 'raw_soltotal_MJ_m2_day': frame.soltotal, 'cli_rad_langley_day': actual.rad}, index=frame.index).to_csv	directory / (stem + '-conversion.csv')
+wepppy/climates/snotel/__init__.py	10	download_snotel_data	write-mode open candidate	open	output_file, 'w'
+wepppy/climates/snotel/process.py	64	process_snotel	serializer candidate	imputed_df.to_csv	processed_fn
+wepppy/climates/snotel/sites/csv_to_geojson.py	94	csv_to_geojson	write-mode open candidate	open	output_geojson_path, 'w'
+wepppy/climates/snotel/sites/csv_to_geojson.py	95	csv_to_geojson	serializer candidate	json.dump	geojson, fout
+wepppy/climates/validation/24_us_stations/build_us_climates.py	56	mask_prn_file	write-mode open candidate	open	fn3, 'w'
+wepppy/climates/validation/24_us_stations/build_us_climates.py	245		file publication candidate	df.rename	—
+wepppy/declarative/records.py	79	guard	write-mode open candidate	lock.open	'a'
+wepppy/declarative/records.py	108	write	file publication candidate	os.replace	temp, path
+wepppy/eu/soils/esdac/esdac.py	803	ESDAC.build_wepp_soil	write-mode open candidate	open	_join(soils_dir, fn), 'w'
+wepppy/eu/soils/esdac/scripts/make_tifs.py	27	convert_rst_directory	write-mode open candidate	open	json_path, 'w'
+wepppy/eu/soils/esdac/scripts/make_tifs.py	28	convert_rst_directory	serializer candidate	json.dump	info, fp
+wepppy/eu/soils/eusoilhydrogrids/scripts/acquire.py	31	download_soilhydrogrids_archives	write-mode open candidate	open	output_path, 'wb'
+wepppy/eu/soils/soil_build.py	164	_build_esdac_soil	file publication candidate	replace	exc.result
+wepppy/eu/soils/soil_build.py	178	_build_esdac_soil	file publication candidate	replace	quality
+wepppy/eu/soils/soil_build.py	214	_write_quality_report	file publication candidate	temporary_path.write_text	json.dumps(payload, allow_nan=False, indent=2, sort_keys=True)
+wepppy/eu/soils/soil_build.py	218	_write_quality_report	file publication candidate	temporary_path.replace	report_path
+wepppy/eu/soils/soil_build.py	235	_mark_batch_conflict	file publication candidate	replace	result.quality
+wepppy/eu/soils/soil_build.py	240	_mark_batch_conflict	file publication candidate	replace	result
+wepppy/eu/soils/soil_build.py	304	_resolve_artifact_keys	file publication candidate	path.rename	path.with_name(f'{key}.sol')
+wepppy/eu/soils/soil_build.py	305	_resolve_artifact_keys	file publication candidate	replace	result
+wepppy/eu/soils/soil_build.py	305	_resolve_artifact_keys	file publication candidate	replace	result.quality
+wepppy/eu/soils/soil_build.py	431	build_esdac_soils	file publication candidate	source_path.replace	target_path
+wepppy/eu/soils/soil_build.py	434	build_esdac_soils	file publication candidate	staged_report_path.replace	report_path
+wepppy/eu/soils/soil_build.py	443	build_esdac_soils	file publication candidate	report_path.write_bytes	previous_report
+wepppy/export/arc_export.py	216	legacy_arc_export	write-mode open candidate	open	geojson_fn, 'w'
+wepppy/export/arc_export.py	217	legacy_arc_export	serializer candidate	json.dump	js, fp
+wepppy/export/arc_export.py	247	legacy_arc_export	write-mode open candidate	open	geojson_fn, 'w'
+wepppy/export/arc_export.py	248	legacy_arc_export	serializer candidate	json.dump	js, fp
+wepppy/export/arc_export.py	370	legacy_arc_export	write-mode open candidate	open	geojson_fn, 'w'
+wepppy/export/arc_export.py	560	arc_export	write-mode open candidate	open	geojson_fn, 'w'
+wepppy/export/arc_export.py	561	arc_export	serializer candidate	json.dump	js, fp
+wepppy/export/arc_export.py	689	arc_export	write-mode open candidate	open	geojson_fn, 'w'
+wepppy/export/ermit_input.py	275	create_ermit_input	write-mode open candidate	open	fn, 'w'
+wepppy/export/ermit_input.py	363	create_ermit_input	write-mode open candidate	open	fn1, 'w'
+wepppy/export/ermit_input.py	368	create_ermit_input	write-mode open candidate	open	fn2, 'w'
+wepppy/export/export.py	69	export_winwepp	write-mode open candidate	open	_join(export_winwepp_dir, 'projects', 'ww2.prw'), 'w'
+wepppy/export/export.py	72	export_winwepp	file publication candidate	shutil.copytree	soils.soils_dir, _join(export_winwepp_dir, 'wepppy.nodb.Soils')
+wepppy/export/export.py	74	export_winwepp	file publication candidate	shutil.copytree	_management_dir, _join(export_winwepp_dir, 'managements')
+wepppy/export/export.py	77	export_winwepp	file publication candidate	shutil.copytree	ron.cli_dir, cligen_dir
+wepppy/export/export.py	78	export_winwepp	write-mode open candidate	open	_join(cligen_dir, 'temp.par'), 'w'
+wepppy/export/export.py	81	export_winwepp	write-mode open candidate	open	_join(cligen_dir, 'countries.txt'), 'w'
+wepppy/landcover/emapr/oregonstate_emapr.py	127	OSUeMapR._attribution	file publication candidate	os.copyfile	_join(_thisdir, 'emapr_readme.txt', readme_txt)
+wepppy/landcover/rap/rangeland_analysis_platform.py	189	RangelandAnalysisPlatform._attribution	file publication candidate	shutil.copyfile	_join(_thisdir, 'rap_readme.txt'), readme_txt
+wepppy/locales/canada/bc/soils/sift/sift.py	177	SIFT._build_wepp_soils	write-mode open candidate	open	_join(outdir, f'{mukey}.json'), 'w'
+wepppy/locales/canada/bc/soils/sift/sift.py	178	SIFT._build_wepp_soils	serializer candidate	json.dump	d[mukey], fp
+wepppy/locales/canada/bc/soils/sift/sift.py	194	SIFT._build_wepp_soils	write-mode open candidate	open	_join(outdir, f'{mukey}.sol'), 'w'
+wepppy/locales/conus/openet/openet_client.py	189	fetch_monthly_multipolygon_timeseries	write-mode open candidate	open	out_fn, 'w'
+wepppy/locales/conus/openet/openet_client.py	190	fetch_monthly_multipolygon_timeseries	serializer candidate	json.dump	result, fp
+wepppy/locales/conus/openet/openet_client.py	192	fetch_monthly_multipolygon_timeseries	write-mode open candidate	open	_join(outdir, 'openet.json'), 'w'
+wepppy/locales/conus/openet/openet_client.py	193	fetch_monthly_multipolygon_timeseries	serializer candidate	json.dump	results, fp
+wepppy/locales/earth/copernicus-dem-30m/scripts/build_vrt_from_stac.py	232	main	file publication candidate	source_list.write_text	'\n'.join(source_urls) + '\n'
+wepppy/locales/earth/copernicus/__init__.py	143	_build_vrt_from_urls	file publication candidate	source_list_path.write_text	''.join((f'/vsicurl/{href}\n' for href in urls))
+wepppy/locales/earth/opentopography/__init__.py	76	opentopo_retrieve	write-mode open candidate	open	src_fn, 'wb'
+wepppy/locales/earth/soils/isric/__init__.py	186	fetch_layer	write-mode open candidate	open	file_path, 'wb'
+wepppy/locales/earth/soils/isric/__init__.py	296	fetch_isric_wrb	write-mode open candidate	open	file_path, 'wb'
+wepppy/locales/earth/soils/isric/__init__.py	547	ISRICSoilData.build_soil	write-mode open candidate	open	_join(self.soils_dir, soil_fn), 'w'
+wepppy/locales/earth/soils/isric/__init__.py	550	ISRICSoilData.build_soil	write-mode open candidate	open	_join(self.soils_dir, soil_fn + '.log'), 'w'
+wepppy/locales/earth/soils/isric/__init__.py	594	_build_soil	write-mode open candidate	open	'failed.txt', 'a'
+wepppy/microservices/browse/_download.py	592	_table_to_parquet_bytes	serializer candidate	pq.write_table	table, buf
+wepppy/microservices/browse/browse.py	915	_log_exception_details	write-mode open candidate	open	_join(wd, 'exceptions.log'), 'a'
+wepppy/microservices/browse/listing.py	273	create_manifest	file publication candidate	os.replace	tmp_path, manifest_path
+wepppy/microservices/parquet_csv/provenance.py	88	generate	file publication candidate	sidecar.write_text	json.dumps(result, indent=2) + '\n'
+wepppy/microservices/parquet_csv/runner.py	202	_stage	write-mode open candidate	destination.open	'xb'
+wepppy/microservices/rq_engine/ag_fields_routes.py	891	upload_plant_database	file publication candidate	archive_path.write_bytes	archive_bytes
+wepppy/microservices/rq_engine/culvert_routes.py	395	culverts_wepp_batch	file publication candidate	payload_zip_path.write_bytes	archive_bytes
+wepppy/microservices/rq_engine/culvert_routes.py	573	culverts_retry_run._clear_prior_run	file publication candidate	os.replace	run_dir, tombstone
+wepppy/microservices/rq_engine/culvert_routes.py	845	_write_batch_metadata	write-mode open candidate	metadata_path.open	'w'
+wepppy/microservices/rq_engine/culvert_routes.py	846	_write_batch_metadata	serializer candidate	json.dump	payload, handle
+wepppy/microservices/rq_engine/fork_archive_routes.py	857	_delete_fork_replacement_tree	file publication candidate	os.replace	target, tombstone
+wepppy/microservices/rq_engine/fork_archive_routes.py	1491	fork_project	write-mode open candidate	open	os.path.join(new_wd, '.redisprep-run-id'), 'x'
+wepppy/microservices/rq_engine/landuse_routes.py	787	build_landuse.stage_source	file publication candidate	shutil.copyfile	existing_source_path, target
+wepppy/microservices/rq_engine/omni_routes.py	794	_parse_inputs_with_prepared_upload.publish_candidate	file publication candidate	shutil.copy2	candidate_path, accepted_path
+wepppy/microservices/rq_engine/orchestration_read_routes.py	699	_parse_datetime_to_timestamp	file publication candidate	dt.replace	—
+wepppy/microservices/rq_engine/postfire_debris_flow_routes.py	135	new_attempt	serializer candidate	write_json	p.safe(wd, path / 'status.json', exists=False), {'schema_version': 1, 'kind': kind, 'attempt': record}
+wepppy/microservices/rq_engine/postfire_debris_flow_routes.py	244	upload	write-mode open candidate	(dest / item.filename).open	'xb'
+wepppy/microservices/rq_engine/postfire_debris_flow_routes.py	262	upload	serializer candidate	write_json	p.safe(wd, path / 'status.json', exists=False), {'schema_version': 1, 'kind': 'upload_attempt', 'attempt': record}
+wepppy/microservices/rq_engine/run_sync_routes.py	73	_as_iso	file publication candidate	value.replace	—
+wepppy/microservices/rq_engine/schema_defaults_outputs.py	50	_parse_iso_datetime	file publication candidate	parsed.replace	—
+wepppy/microservices/shape_converter/archive_validation.py	214	validate_and_extract_zip_archive	write-mode open candidate	resolved_target.open	'wb'
+wepppy/microservices/shape_converter/archive_validation.py	215	validate_and_extract_zip_archive	serializer candidate	shutil.copyfileobj	source, target
+wepppy/microservices/shape_converter/convert.py	420	_prepare_conversion_archive	file publication candidate	scratch.upload_archive_path.write_bytes	archive_bytes
+wepppy/microservices/shape_converter/convert.py	585	_finish_conversion	file publication candidate	output_path.write_bytes	serialized.content
+wepppy/microservices/shape_converter/convert.py	1128	probe_geoparquet_parser_runtime	file publication candidate	shutil.copyfile	canary, input_path
+wepppy/microservices/shape_converter/convert.py	1166	_write_readiness_dataset	file publication candidate	shp_path.write_bytes	shp_header + record_header + record_content
+wepppy/microservices/shape_converter/convert.py	1169	_write_readiness_dataset	file publication candidate	shp_path.with_suffix('.shx').write_bytes	_readiness_shape_header(file_length_words=(100 + len(shx_record)) // 2) + shx_record
+wepppy/microservices/shape_converter/convert.py	1185	_write_readiness_dataset	file publication candidate	shp_path.with_suffix('.dbf').write_bytes	bytes(dbf_header) + bytes(field) + b'\r' + record + b'\x1a'
+wepppy/microservices/shape_converter/inspect.py	122	_inspect_archive_bytes	file publication candidate	scratch.upload_archive_path.write_bytes	archive_bytes
+wepppy/microservices/shape_converter/parser_ipc.py	162	write_payload	write-mode open candidate	temporary.open	'xb'
+wepppy/microservices/shape_converter/parser_ipc.py	164	write_payload	file publication candidate	temporary.replace	path
+wepppy/microservices/shape_converter/rust/shape_parser_cli/tools/generate_provenance.py	129	main	file publication candidate	args.output.write_text	json.dumps(payload, indent=2, sort_keys=True) + '\n'
+wepppy/microservices/shape_converter/serialization.py	152	serialize_geoparquet	serializer candidate	pq.write_table	table, output_buffer
+wepppy/microservices/upload_boundary.py	302	write_stream_to_destination	write-mode open candidate	staged.open	'xb'
+wepppy/microservices/upload_boundary.py	306	write_stream_to_destination	file publication candidate	os.replace	staged, destination
+wepppy/microservices/vector_retention_lifecycle.py	263	_write_raw	file publication candidate	os.replace	temporary, path
+wepppy/microservices/vector_upload_normalization.py	511	reconcile_retention	file publication candidate	os.replace	receipt_path, corrupt_path
+wepppy/microservices/vector_upload_normalization.py	960	_atomic_json	file publication candidate	os.replace	temp, path
+wepppy/microservices/vector_upload_normalization.py	1834	prepare_vector_upload	file publication candidate	os.replace	partial, terminal
+wepppy/microservices/weppcloudr_control_plane.py	166	RedisReceiptStore.initialize	serializer candidate	request.to_json	—
+wepppy/microservices/weppcloudr_control_plane.py	181	RedisReceiptStore.prepare_execution_files	serializer candidate	request.to_json	—
+wepppy/microservices/weppcloudr_control_plane.py	281	RedisReceiptStore._atomic_write	file publication candidate	os.replace	temporary, path
+wepppy/nodb/_derived_build.py	133	publish_files	file publication candidate	shutil.copy2	target, previous
+wepppy/nodb/_derived_build.py	139	publish_files	file publication candidate	os.replace	source, target
+wepppy/nodb/_derived_build.py	164	publish_files	file publication candidate	os.replace	previous, target
+wepppy/nodb/_redis_prep_snapshot.py	92	publish_snapshot	file publication candidate	os.replace	name, 'redisprep.dump'
+wepppy/nodb/base.py	2069	NoDbBase.dump	file publication candidate	os.replace	temp_path, self._nodb
+wepppy/nodb/base.py	2708	NoDbBase.readonly	write-mode open candidate	open	path, 'w'
+wepppy/nodb/base.py	2739	NoDbBase.public	write-mode open candidate	open	path, 'w'
+wepppy/nodb/base.py	2760	NoDbBase.DEBUG	write-mode open candidate	open	path, 'w'
+wepppy/nodb/base.py	2781	NoDbBase.VERBOSE	write-mode open candidate	open	path, 'w'
+wepppy/nodb/batch_runner.py	139	_reset_run_workspace	file publication candidate	os.replace	run_dir, stale_dir
+wepppy/nodb/batch_runner.py	317	_write_nodb_document	write-mode open candidate	path.open	'w'
+wepppy/nodb/batch_runner.py	318	_write_nodb_document	serializer candidate	json.dump	document, fp
+wepppy/nodb/batch_runner.py	607	BatchRunner._run_batch_hillslopes_owned	file publication candidate	shutil.copytree	base_wd, runid_wd
+wepppy/nodb/batch_runner.py	624	BatchRunner._run_batch_hillslopes_owned	write-mode open candidate	open	nodb_fn, 'w'
+wepppy/nodb/batch_runner.py	625	BatchRunner._run_batch_hillslopes_owned	serializer candidate	json.dump	state, fp
+wepppy/nodb/batch_runner.py	1010	BatchRunner._maybe_init_sbs_map	write-mode open candidate	open	tmp_download, 'wb'
+wepppy/nodb/batch_runner.py	1031	BatchRunner._maybe_init_sbs_map	file publication candidate	os.replace	crop_target, dest_path
+wepppy/nodb/batch_runner.py	1245	BatchRunner.publish_geojson_transactional	file publication candidate	shutil.copy2	destination_path, backup_path
+wepppy/nodb/batch_runner.py	1253	BatchRunner.publish_geojson_transactional	file publication candidate	shutil.copy2	candidate_path, staged_path
+wepppy/nodb/batch_runner.py	1254	BatchRunner.publish_geojson_transactional	file publication candidate	os.replace	staged_path, destination_path
+wepppy/nodb/batch_runner.py	1275	BatchRunner.publish_geojson_transactional	file publication candidate	os.replace	backup_path, destination_path
+wepppy/nodb/config_builder/registry.py	736	load_registry	file publication candidate	replace	component
+wepppy/nodb/config_builder/registry.py	738	load_registry	file publication candidate	replace	component.constraints
+wepppy/nodb/configs/_migration/_tomlnull_migrate.py	20		write-mode open candidate	open	cfg, 'w'
+wepppy/nodb/core/climate.py	1537	Climate._post_defined_climate	file publication candidate	copyfile	orig_cli_fn, cli_path
+wepppy/nodb/core/climate.py	1578	Climate.set_user_defined_cli	file publication candidate	copyfile	source_path, candidate
+wepppy/nodb/core/climate.py	1579	Climate.set_user_defined_cli	file publication candidate	os.replace	candidate, active_path
+wepppy/nodb/core/climate_artifact_export_service.py	375	ClimateArtifactExportService.export_cli_precip_frequency_csv	file publication candidate	output_path.write_text	'\n'.join(lines) + '\n'
+wepppy/nodb/core/climate_build_helpers.py	260	_normalize_daymet_radiation_to_toa_bound	serializer candidate	provenance.to_csv	artifact
+wepppy/nodb/core/climate_build_helpers.py	359	download_file	write-mode open candidate	open	dst, 'wb'
+wepppy/nodb/core/climate_build_helpers.py	372	breakpoint_file_fix	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/core/climate_build_helpers.py	430	build_observed_prism	serializer candidate	df.to_parquet	_join(cli_dir, f'prism_{start_year}-{end_year}.parquet')
+wepppy/nodb/core/climate_build_helpers.py	463	build_observed_daymet	serializer candidate	df.to_parquet	_join(cli_dir, f'daymet_{start_year}-{end_year}.parquet')
+wepppy/nodb/core/climate_build_helpers.py	596	build_observed_snotel	serializer candidate	df.to_parquet	_join(cli_dir, f'snotel_{start_year}-{end_year}.parquet')
+wepppy/nodb/core/climate_build_helpers.py	623	build_observed_snotel	serializer candidate	df.to_parquet	_join(cli_dir, f'snotel_gridmet_{start_year}-{end_year}.parquet')
+wepppy/nodb/core/climate_build_helpers.py	625	build_observed_snotel	serializer candidate	df.to_parquet	_join(cli_dir, f'snotel_{start_year}-{end_year}.parquet')
+wepppy/nodb/core/climate_build_helpers.py	653	build_observed_gridmet	serializer candidate	df.to_parquet	_join(cli_dir, f'gridmet_{start_year}-{end_year}.parquet')
+wepppy/nodb/core/climate_build_helpers.py	1179	run_prism_revision	catalog API	request_catalog_refresh	wd, 'climate'
+wepppy/nodb/core/climate_edde_build.py	85	_normals	serializer candidate	write_json	stage / 'prism-normals.json', {'locations': normals, 'sha256': identities, 'source': 'wmesque prism 800m M4 normals', 'period': '1991-2020', 'acquisition': acquisition, 'endpoint': climate.wmesque_end
+wepppy/nodb/core/climate_edde_build.py	111	_inventory	serializer candidate	write_json	stage / 'source-inventory.json', selected
+wepppy/nodb/core/climate_edde_build.py	118	_retain_cache	file publication candidate	shutil.copy2	path, destination / path.name
+wepppy/nodb/core/climate_edde_build.py	158	run_edde_build	serializer candidate	write_json	stage / 'build-status.json', status
+wepppy/nodb/core/climate_edde_build.py	167	run_edde_build	serializer candidate	write_json	stage / 'eligibility.json', {'points': cells, 'grid': grid_record}
+wepppy/nodb/core/climate_edde_build.py	169	run_edde_build	serializer candidate	write_json	stage / 'build-status.json', status
+wepppy/nodb/core/climate_edde_build.py	177	run_edde_build	serializer candidate	write_json	stage / 'build-status.json', status
+wepppy/nodb/core/climate_edde_build.py	182	run_edde_build	serializer candidate	write_json	stage / f'source-{year}.json', manifest
+wepppy/nodb/core/climate_edde_build.py	187	run_edde_build	serializer candidate	frame.to_csv	stage / f'source-{year}.csv'
+wepppy/nodb/core/climate_edde_build.py	188	run_edde_build	serializer candidate	write_json	stage / f'source-{year}.json', manifest
+wepppy/nodb/core/climate_edde_build.py	219	run_edde_build	serializer candidate	write_json	generated / 'edde-provenance.json', provenance
+wepppy/nodb/core/climate_edde_build.py	228	run_edde_build	file publication candidate	shutil.copy2	path, publication / path.name
+wepppy/nodb/core/climate_edde_build.py	246	run_edde_build	serializer candidate	write_json	stage / 'build-status.json', status
+wepppy/nodb/core/climate_observed_build.py	73	_write_attempt_status	file publication candidate	temporary.write_text	json.dumps(status, sort_keys=True) + '\n'
+wepppy/nodb/core/climate_observed_build.py	74	_write_attempt_status	file publication candidate	temporary.replace	Path(stage) / 'build-status.json'
+wepppy/nodb/core/climate_observed_build.py	85	_publish_retained_attempt	file publication candidate	shutil.copy2	source, Path(publish_stage) / source.name
+wepppy/nodb/core/climate_observed_build.py	224	run_prism_revision_build	file publication candidate	shutil.copy2	snapshot['raw_prism'][0], source
+wepppy/nodb/core/climate_observed_build.py	265	run_prism_revision_build	catalog API	helpers.request_catalog_refresh	climate.wd, 'climate'
+wepppy/nodb/core/climate_prism_build.py	31	_retain_cache_attempt	file publication candidate	shutil.copytree	path, target
+wepppy/nodb/core/climate_prism_build.py	53	run_prism800m_build	serializer candidate	write_json	stage / 'build-status.json', status
+wepppy/nodb/core/climate_prism_build.py	72	run_prism800m_build	serializer candidate	write_json	stage / 'provenance.json', {'locations': result.locations, 'sources': sources, 'wind_location': locations['ws'], 'wind_day_alignment': 'calendar_label', 'station': snapshot.climatestation, 'seed': sna
+wepppy/nodb/core/climate_prism_build.py	77	run_prism800m_build	serializer candidate	frame.to_parquet	stage / (cell + '-source.parquet')
+wepppy/nodb/core/climate_prism_build.py	79	run_prism800m_build	serializer candidate	result.frames[ws_cell].to_parquet	stage / 'prism800m-source-ws.parquet'
+wepppy/nodb/core/climate_prism_build.py	82	run_prism800m_build	serializer candidate	wind.to_parquet	stage / 'gridmet-wind.parquet'
+wepppy/nodb/core/climate_prism_build.py	93	run_prism800m_build	file publication candidate	shutil.copy2	stage / generated[ws_cell][1], stage / 'wepp.cli'
+wepppy/nodb/core/climate_prism_build.py	102	run_prism800m_build	file publication candidate	shutil.copy2	stage / generated[result.locations[top]['cell']][1], stage / filename
+wepppy/nodb/core/climate_prism_build.py	114	run_prism800m_build	file publication candidate	shutil.copy2	path, publication / path.name
+wepppy/nodb/core/climate_prism_build.py	131	run_prism800m_build	serializer candidate	write_json	stage / 'build-status.json', status
+wepppy/nodb/core/climate_scaling_service.py	246	ClimateScalingService._scale_precip_annual_monthlies	write-mode open candidate	open	_join(cli_dir, 'reference_annual_monthlies.csv'), 'w'
+wepppy/nodb/core/climate_station_catalog_service.py	30	ClimateStationCatalogService._apply_runtime_constraints	file publication candidate	replace	dataset
+wepppy/nodb/core/climate_station_catalog_service.py	38	ClimateStationCatalogService._apply_runtime_constraints	file publication candidate	replace	dataset
+wepppy/nodb/core/climate_station_catalog_service.py	73	ClimateStationCatalogService.available_catalog_datasets	file publication candidate	replace	dataset
+wepppy/nodb/core/climate_user_defined_station_meta_service.py	164	ClimateUserDefinedStationMetaService._write_user_defined_par_stub	file publication candidate	par_path.write_text	''.join(lines)
+wepppy/nodb/core/kslast_map.py	60	prepare_kslast_map	write-mode open candidate	rasterio.open	mapped, 'r+'
+wepppy/nodb/core/kslast_map.py	95	prepare_kslast_map	file publication candidate	summary_path.write_text	json.dumps(summary, indent=2, sort_keys=True, allow_nan=False) + '\n'
+wepppy/nodb/core/kslast_map.py	98	prepare_kslast_map	file publication candidate	os.replace	mapped, soil_dir / 'kslast.tif'
+wepppy/nodb/core/kslast_map.py	99	prepare_kslast_map	file publication candidate	os.replace	summary_path, soil_dir / 'kslast_summary.json'
+wepppy/nodb/core/landuse.py	226	_write_mofe_management_file_task	write-mode open candidate	open	mofe_lc_fn, 'w'
+wepppy/nodb/core/landuse.py	588	Landuse.__init__	file publication candidate	shutil.copyfile	_landuse_map, self.lc_fn
+wepppy/nodb/core/landuse.py	591	Landuse.__init__	file publication candidate	shutil.copyfile	_landuse_map[:-4] + '.prj', self.lc_fn[:-4] + '.prj'
+wepppy/nodb/core/landuse.py	1125	Landuse.symlink_landuse_map	file publication candidate	os.symlink	landuse_src, dest
+wepppy/nodb/core/landuse.py	1144	Landuse.symlink_landuse_map	file publication candidate	os.symlink	prj_src, prj_dest
+wepppy/nodb/core/landuse.py	1148	Landuse.symlink_landuse_map	catalog API	request_catalog_refresh	self.wd, dest
+wepppy/nodb/core/landuse.py	1236	Landuse._build_NLCD	catalog API	request_catalog_refresh	self.wd, lc_fn
+wepppy/nodb/core/landuse.py	1515	Landuse._build_spatial_api	catalog API	request_catalog_refresh	self.wd, lc_fn
+wepppy/nodb/core/landuse.py	1529	Landuse._build_spatial_api	file publication candidate	shutil.copyfile	_join(man.man_dir, man.man_fn), _join(self.lc_dir, _split(man.man_fn)[-1])
+wepppy/nodb/core/landuse.py	1728	Landuse._build_fractionals	catalog API	request_catalog_refresh	self.wd, lc_fn
+wepppy/nodb/core/landuse.py	1745	Landuse._build_fractionals	write-mode open candidate	open	_join(frac_dir, 'dom.json'), 'w'
+wepppy/nodb/core/landuse.py	1746	Landuse._build_fractionals	serializer candidate	json.dump	dom_d, fp
+wepppy/nodb/core/landuse.py	1748	Landuse._build_fractionals	write-mode open candidate	open	_join(frac_dir, 'fractionals.json'), 'w'
+wepppy/nodb/core/landuse.py	1749	Landuse._build_fractionals	serializer candidate	json.dump	frac_d, fp
+wepppy/nodb/core/landuse.py	2771	Landuse.dump_landuse_parquet	serializer candidate	df.to_parquet	_join(self.lc_dir, 'landuse.parquet')
+wepppy/nodb/core/landuse.py	2772	Landuse.dump_landuse_parquet	catalog API	request_catalog_refresh	self.wd, 'landuse/landuse.parquet'
+wepppy/nodb/core/ron.py	234	Ron.__init__	file publication candidate	shutil.copyfile	self.dem_map, self.dem_fn
+wepppy/nodb/core/ron.py	295	Ron.__init__	catalog API	activate_query_engine	self.wd
+wepppy/nodb/core/ron.py	357	Ron.init_sbs_map	write-mode open candidate	open	sbs_path, 'wb'
+wepppy/nodb/core/ron.py	371	Ron.init_sbs_map	file publication candidate	shutil.copyfile	sbs_map, sbs_path
+wepppy/nodb/core/ron.py	618	Ron.fetch_dem	catalog API	request_catalog_refresh	self.wd, self.dem_fn
+wepppy/nodb/core/ron.py	901	Ron.symlink_dem	file publication candidate	os.symlink	dem_src, dest
+wepppy/nodb/core/ron.py	927	Ron.symlink_dem	catalog API	request_catalog_refresh	self.wd, dest
+wepppy/nodb/core/soils.py	784	Soils.symlink_soils_map	file publication candidate	os.symlink	soils_src, dest
+wepppy/nodb/core/soils.py	803	Soils.symlink_soils_map	file publication candidate	os.symlink	prj_src, prj_dest
+wepppy/nodb/core/soils.py	807	Soils.symlink_soils_map	catalog API	request_catalog_refresh	self.wd, dest
+wepppy/nodb/core/soils.py	860	Soils.build_chile	catalog API	request_catalog_refresh	self.wd, ssurgo_fn
+wepppy/nodb/core/soils.py	878	Soils.build_chile	file publication candidate	shutil.copyfile	src_sol_fn, sol_fn
+wepppy/nodb/core/soils.py	1179	Soils._build_from_map_db	file publication candidate	shutil.copyfile	src_sol_fn, sol_fn
+wepppy/nodb/core/soils.py	1222	Soils._build_spatial_api	catalog API	request_catalog_refresh	self.wd, ssurgo_fn
+wepppy/nodb/core/soils.py	1738	Soils._build_singledb	file publication candidate	shutil.copyfile	sol, _join(soils_dir, fn)
+wepppy/nodb/core/soils.py	1870	Soils._materialize_added_ssurgo_donor	file publication candidate	os.replace	source, destination
+wepppy/nodb/core/soils.py	2166	Soils._build_gridded	catalog API	request_catalog_refresh	self.wd, ssurgo_fn
+wepppy/nodb/core/soils.py	2457	Soils.dump_soils_parquet	serializer candidate	df.to_parquet	temporary_path
+wepppy/nodb/core/soils.py	2463	Soils.dump_soils_parquet	file publication candidate	os.replace	temporary_path, parquet_path
+wepppy/nodb/core/soils.py	2472	Soils.dump_soils_parquet	catalog API	request_catalog_refresh	self.wd, 'soils/soils.parquet'
+wepppy/nodb/core/watershed.py	1095	Watershed._write_structure_json	write-mode open candidate	open	tmp_path, 'w'
+wepppy/nodb/core/watershed.py	1096	Watershed._write_structure_json	serializer candidate	json.dump	structure, fp
+wepppy/nodb/core/watershed.py	1097	Watershed._write_structure_json	file publication candidate	os.replace	tmp_path, path
+wepppy/nodb/core/watershed.py	1324	Watershed._peridot_post_abstract_watershed	catalog API	request_catalog_refresh	self.wd, 'watershed'
+wepppy/nodb/core/watershed_mixins.py	420	WatershedOperationsMixin.symlink_channels_map._ensure_symlink	file publication candidate	os.symlink	src, dest
+wepppy/nodb/core/wepp.py	277	_reset_directory_with_fallback	file publication candidate	os.replace	path, stale_dir
+wepppy/nodb/core/wepp.py	785	prep_multi_ofe_hillslope	write-mode open candidate	open	man_dst_fn, 'w'
+wepppy/nodb/core/wepp.py	1787	Wepp._prep_wepp_ui	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/core/wepp.py	1800	Wepp._prep_frost	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/core/wepp.py	1815	Wepp._mint_default_frost_file	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/core/wepp.py	1825	Wepp._prep_tc	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/core/wepp.py	1830	Wepp._prep_tcr	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/core/wepp.py	1964	Wepp._prep_phosphorus	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/core/wepp.py	1979	Wepp._prep_snow	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/core/wepp.py	2035	Wepp._prep_baseflow	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/core/wepp.py	2082	Wepp._prep_slopes_peridot	file publication candidate	shutil.copyfile	src_fn, dst_fn
+wepppy/nodb/core/wepp.py	2096	Wepp._prep_slopes_peridot	file publication candidate	shutil.copyfile	projected_src_fn, dst_fn
+wepppy/nodb/core/wepp.py	2117	Wepp._prep_slopes	file publication candidate	shutil.copyfile	src_fn, dst_fn
+wepppy/nodb/core/wepp.py	2131	Wepp._prep_slopes	file publication candidate	shutil.copyfile	projected_src_fn, dst_fn
+wepppy/nodb/core/wepp.py	2386	Wepp._prep_structure	write-mode open candidate	open	_join(runs_dir, 'pw0.str'), 'w'
+wepppy/nodb/core/wepp.py	2409	Wepp._prep_structure	write-mode open candidate	open	_join(runs_dir, 'pw0.str'), 'w'
+wepppy/nodb/core/wepp.py	2439	Wepp._prep_channel_slopes	write-mode open candidate	open	_join(runs_dir, 'pw0.slp'), 'w'
+wepppy/nodb/core/wepp.py	2466	Wepp._prep_channel_slopes	write-mode open candidate	open	dst_fn, 'w'
+wepppy/nodb/core/wepp.py	2498	Wepp._prep_channel_chn	write-mode open candidate	open	_join(runs_dir, 'pw0.chn'), 'w'
+wepppy/nodb/core/wepp.py	2526	Wepp._prep_impoundment	write-mode open candidate	open	_join(runs_dir, 'pw0.imp'), 'w'
+wepppy/nodb/core/wepp.py	2603	Wepp._prep_channel_input	write-mode open candidate	open	_join(runs_dir, 'chan.inp'), 'w'
+wepppy/nodb/core/wepp.py	2649	Wepp._prep_7778_channel_soils	write-mode open candidate	open	_join(runs_dir, 'pw0.sol'), 'w'
+wepppy/nodb/core/wepp.py	2701	Wepp._prep_2006_channel_soils	write-mode open candidate	open	_join(runs_dir, 'pw0.sol'), 'w'
+wepppy/nodb/core/wepp.py	2721	Wepp._prep_watershed_managements	write-mode open candidate	open	_join(runs_dir, 'pw0.man'), 'w'
+wepppy/nodb/core/wepp_bootstrap_service.py	70	WeppBootstrapService.write_bootstrap_gitignore	write-mode open candidate	open	gitignore_path, 'w'
+wepppy/nodb/core/wepp_bootstrap_service.py	86	WeppBootstrapService.install_bootstrap_hook	write-mode open candidate	open	hook_path, 'w'
+wepppy/nodb/core/wepp_postprocess_service.py	92	WeppPostprocessService.report_return_periods	write-mode open candidate	open	return_periods_fn, 'w'
+wepppy/nodb/core/wepp_postprocess_service.py	93	WeppPostprocessService.report_return_periods	serializer candidate	json.dump	return_periods.to_dict(), fp
+wepppy/nodb/core/wepp_prep_service.py	178	WeppPrepService.prep_managements	file publication candidate	shutil.copyfile	build_d[meoization_key], dst_fn
+wepppy/nodb/core/wepp_prep_service.py	369	WeppPrepService.prep_managements	write-mode open candidate	open	dst_fn, 'w'
+wepppy/nodb/culvert_stream_selection.py	39	write_json	serializer candidate	json.dump	value, handle
+wepppy/nodb/culvert_stream_selection.py	42	write_json	file publication candidate	os.replace	temporary, path
+wepppy/nodb/culvert_stream_selection.py	98	prepare_original_outlets	serializer candidate	write_json	path, record
+wepppy/nodb/culvert_stream_selection.py	135	prepare_original_outlets	serializer candidate	write_json	path, dict(record, state='ready')
+wepppy/nodb/culvert_stream_selection.py	137	prepare_original_outlets	serializer candidate	write_json	path, dict(record, state='failed', error=type(exc).__name__)
+wepppy/nodb/culvert_stream_selection.py	174	install_original_outlet	serializer candidate	write_json	output, geojson
+wepppy/nodb/culvert_stream_selection.py	261	_prepare	serializer candidate	write_json	root / MANIFEST, manifest
+wepppy/nodb/culvert_stream_selection.py	280	_prepare	write-mode open candidate	rasterio.open	streams, 'w'
+wepppy/nodb/culvert_stream_selection.py	291	_prepare	serializer candidate	write_json	root / MANIFEST, manifest
+wepppy/nodb/culvert_stream_selection.py	294	_prepare	serializer candidate	write_json	root / MANIFEST, dict(manifest, state='failed', error=type(exc).__name__)
+wepppy/nodb/culvert_stream_selection.py	353	_select	serializer candidate	write_json	receipt_path, dict(receipt, state='selected', selected_passes=candidate['passes'], candidate=candidate)
+wepppy/nodb/culvert_stream_selection.py	355	_select	serializer candidate	write_json	receipt_path, dict(receipt, state='failed')
+wepppy/nodb/culvert_stream_selection.py	361	prepare	write-mode open candidate	(root / '.stream_candidates.lock').open	'a'
+wepppy/nodb/culvert_stream_selection.py	368	select	write-mode open candidate	(run / '.stream_selection.lock').open	'a'
+wepppy/nodb/culvert_stream_selection.py	376	topology_lock	write-mode open candidate	(root / '.stream_topology.lock').open	'a'
+wepppy/nodb/culverts_runner.py	482	CulvertsRunner.create_run_if_missing	file publication candidate	shutil.copytree	self.base_wd, run_wd
+wepppy/nodb/culverts_runner.py	495	CulvertsRunner.create_run_if_missing	write-mode open candidate	open	nodb_fn, 'w'
+wepppy/nodb/culverts_runner.py	496	CulvertsRunner.create_run_if_missing	serializer candidate	json.dump	state, handle
+wepppy/nodb/culverts_runner.py	585	CulvertsRunner._ensure_base_project	file publication candidate	shutil.copytree	src, dest
+wepppy/nodb/culverts_runner.py	595	CulvertsRunner._ensure_base_project	write-mode open candidate	open	nodb_fn, 'w'
+wepppy/nodb/culverts_runner.py	596	CulvertsRunner._ensure_base_project	serializer candidate	json.dump	state, handle
+wepppy/nodb/locales/capability_graph.py	254	CapabilityGraph.with_defaults	file publication candidate	replace	self
+wepppy/nodb/mods/ag_fields/ag_fields.py	277	AgFields.validate_field_boundary_geojson	file publication candidate	shutil.copy2	source_path, staged_geojson
+wepppy/nodb/mods/ag_fields/ag_fields.py	294	AgFields.validate_field_boundary_geojson	serializer candidate	df.to_parquet	staged_parquet
+wepppy/nodb/mods/ag_fields/ag_fields.py	302	AgFields.validate_field_boundary_geojson	file publication candidate	shutil.copy2	canonical_path, canonical_backup
+wepppy/nodb/mods/ag_fields/ag_fields.py	304	AgFields.validate_field_boundary_geojson	file publication candidate	shutil.copy2	parquet_path, parquet_backup
+wepppy/nodb/mods/ag_fields/ag_fields.py	320	AgFields.validate_field_boundary_geojson	file publication candidate	os.replace	staged_geojson, canonical_path
+wepppy/nodb/mods/ag_fields/ag_fields.py	321	AgFields.validate_field_boundary_geojson	file publication candidate	os.replace	staged_parquet, self.rotation_schedule_parquet
+wepppy/nodb/mods/ag_fields/ag_fields.py	336	AgFields.validate_field_boundary_geojson	file publication candidate	os.replace	canonical_backup, canonical_path
+wepppy/nodb/mods/ag_fields/ag_fields.py	340	AgFields.validate_field_boundary_geojson	file publication candidate	os.replace	parquet_backup, parquet_path
+wepppy/nodb/mods/ag_fields/ag_fields.py	348	AgFields.validate_field_boundary_geojson	catalog API	request_catalog_refresh	self.wd, relative_path
+wepppy/nodb/mods/ag_fields/ag_fields.py	562	AgFields.rasterize_field_boundaries_geojson	write-mode open candidate	rasterio.open	output_filepath, 'w'
+wepppy/nodb/mods/ag_fields/ag_fields.py	1017	AgFields.mark_watershed_integration_interrupted	file publication candidate	os.replace	attempt, quarantined
+wepppy/nodb/mods/ag_fields/ag_fields.py	1334	AgFields._rewrite_management_preserving_header_comments	file publication candidate	path.write_text	'\n'.join(rendered_lines) + '\n'
+wepppy/nodb/mods/ag_fields/ag_fields.py	1378	AgFields.handle_plant_file_db_upload	write-mode open candidate	target.open	'wb'
+wepppy/nodb/mods/ag_fields/ag_fields.py	1380	AgFields.handle_plant_file_db_upload	serializer candidate	shutil.copyfileobj	source, destination
+wepppy/nodb/mods/ag_fields/ag_fields.py	1431	AgFields.handle_plant_file_db_upload	file publication candidate	os.replace	final_staging / filename, final_target
+wepppy/nodb/mods/ag_fields/ag_fields.py	1434	AgFields.handle_plant_file_db_upload	file publication candidate	os.replace	source_staging / filename, source_target
+wepppy/nodb/mods/ag_fields/ag_fields.py	1661	AgFields.write_rotation_lookup	file publication candidate	os.replace	temporary, self.rotation_lookup_path
+wepppy/nodb/mods/ag_fields/ag_fields.py	2044	CropRotationManager.dump_rotation_lookup	write-mode open candidate	open	_join(self.ag_fields_dir, 'rotation_lookup_dump.tsv'), 'w'
+wepppy/nodb/mods/ag_fields/ag_fields.py	2124	run_wepp_subfield	file publication candidate	shutil.copyfile	slp_path, _join(ag_field_wepp_runs_dir, slp_relpath)
+wepppy/nodb/mods/ag_fields/ag_fields.py	2143	run_wepp_subfield	write-mode open candidate	open	run_path, 'w'
+wepppy/nodb/mods/ag_fields/concept1_inputs.py	154	synthesize_concept1_parent_inputs	file publication candidate	shutil.copy2	source_prefix.with_suffix('.cli'), target_prefix.with_suffix('.cli')
+wepppy/nodb/mods/ag_fields/concept1_integration.py	384	AgFieldsConcept1Integrator._write_parent_routing	serializer candidate	pq.write_table	table, temporary
+wepppy/nodb/mods/ag_fields/concept1_integration.py	385	AgFieldsConcept1Integrator._write_parent_routing	file publication candidate	os.replace	temporary, target
+wepppy/nodb/mods/ag_fields/concept1_planner.py	632	_atomic_json	serializer candidate	json.dump	payload, stream
+wepppy/nodb/mods/ag_fields/concept1_planner.py	636	_atomic_json	file publication candidate	os.replace	temporary, path
+wepppy/nodb/mods/ag_fields/concept1_planner.py	653	_atomic_parquet	serializer candidate	pq.write_table	table, temporary
+wepppy/nodb/mods/ag_fields/concept1_planner.py	654	_atomic_parquet	file publication candidate	os.replace	temporary, path
+wepppy/nodb/mods/ag_fields/corpus_execution.py	95	_atomic_json	file publication candidate	os.replace	temporary, path
+wepppy/nodb/mods/ag_fields/corpus_execution.py	151	_atomic_parquet	serializer candidate	pq.write_table	table, temporary
+wepppy/nodb/mods/ag_fields/corpus_execution.py	152	_atomic_parquet	file publication candidate	os.replace	temporary, path
+wepppy/nodb/mods/ag_fields/corpus_execution.py	279	_materialize_parent	file publication candidate	run_path.write_text	render_minimal_hillslope_run(parent_wepp_id, int(request['sim_years']))
+wepppy/nodb/mods/ag_fields/corpus_execution.py	409	_execute_parent	file publication candidate	stdout_path.write_text	stdout
+wepppy/nodb/mods/ag_fields/corpus_execution.py	410	_execute_parent	file publication candidate	stderr_path.write_text	stderr
+wepppy/nodb/mods/ag_fields/corpus_execution.py	508	run_parent_corpus	file publication candidate	shutil.copy2	source, destination
+wepppy/nodb/mods/ag_fields/hybrid_integration.py	130	_atomic_parquet	serializer candidate	pq.write_table	table, temporary
+wepppy/nodb/mods/ag_fields/hybrid_integration.py	131	_atomic_parquet	file publication candidate	os.replace	temporary, path
+wepppy/nodb/mods/ag_fields/hybrid_integration.py	411	AgFieldsHybridIntegrator._materialize_hybrid_parents	file publication candidate	os.replace	self.output_dir / f'H{parent_wepp_id}.pass.dat', self.background_pass_dir / f'H{parent_wepp_id}.pass.dat'
+wepppy/nodb/mods/ag_fields/management_corpus.py	98	_atomic_bytes	file publication candidate	os.replace	temporary, path
+wepppy/nodb/mods/ag_fields/management_corpus.py	117	_atomic_parquet	serializer candidate	pq.write_table	table, temporary
+wepppy/nodb/mods/ag_fields/management_corpus.py	118	_atomic_parquet	file publication candidate	os.replace	temporary, path
+wepppy/nodb/mods/ag_fields/management_corpus.py	282	_render_reparse_replace	file publication candidate	os.replace	temporary, destination
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py	99	polygonize_sub_fields	write-mode open candidate	open	dst_fn, 'w'
+wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py	100	polygonize_sub_fields	serializer candidate	json.dump	js, fp
+wepppy/nodb/mods/ag_fields/watershed_integration.py	127	_utc_now	file publication candidate	datetime.now(timezone.utc).replace	—
+wepppy/nodb/mods/ag_fields/watershed_integration.py	144	_atomic_json	serializer candidate	json.dump	payload, stream
+wepppy/nodb/mods/ag_fields/watershed_integration.py	148	_atomic_json	file publication candidate	os.replace	temporary, path
+wepppy/nodb/mods/ag_fields/watershed_integration.py	163	_atomic_text	file publication candidate	os.replace	temporary, path
+wepppy/nodb/mods/ag_fields/watershed_integration.py	179	_AtomicParquetWriter.__init__	serializer candidate	pq.ParquetWriter	self.temporary, schema
+wepppy/nodb/mods/ag_fields/watershed_integration.py	183	_AtomicParquetWriter.write	serializer candidate	self.writer.write_table	pa.Table.from_pylist(list(rows), schema=self.schema)
+wepppy/nodb/mods/ag_fields/watershed_integration.py	187	_AtomicParquetWriter.complete	file publication candidate	os.replace	self.temporary, self.path
+wepppy/nodb/mods/ag_fields/watershed_integration.py	686	AgFieldsWatershedIntegrator._publish_isolated_tree	file publication candidate	os.replace	self.root, backup
+wepppy/nodb/mods/ag_fields/watershed_integration.py	688	AgFieldsWatershedIntegrator._publish_isolated_tree	file publication candidate	os.replace	attempt, self.root
+wepppy/nodb/mods/ag_fields/watershed_integration.py	691	AgFieldsWatershedIntegrator._publish_isolated_tree	file publication candidate	os.replace	backup, self.root
+wepppy/nodb/mods/ag_fields/watershed_integration.py	725	AgFieldsWatershedIntegrator._preserve_failed_attempt	file publication candidate	os.replace	attempt, self.root
+wepppy/nodb/mods/ag_fields/watershed_integration.py	732	AgFieldsWatershedIntegrator._copy_input	file publication candidate	shutil.copy2	source, target
+wepppy/nodb/mods/ag_fields/watershed_integration.py	908	AgFieldsWatershedIntegrator._write_source_plan	serializer candidate	pq.write_table	table, temporary
+wepppy/nodb/mods/ag_fields/watershed_integration.py	909	AgFieldsWatershedIntegrator._write_source_plan	file publication candidate	os.replace	temporary, target
+wepppy/nodb/mods/ash_transport/ash_multi_year_model.py	217	AshModel.run_model	serializer candidate	all_dfs.to_parquet	out_fn
+wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py	260	AshModelAlex.run_model	serializer candidate	all_dfs.to_parquet	out_fn
+wepppy/nodb/mods/ash_transport/ashpost.py	305	AshPost.run_post	catalog API	request_catalog_refresh	self.wd, 'ash'
+wepppy/nodb/mods/ash_transport/ashpost_documentation.py	164	generate_ashpost_documentation	file publication candidate	readme_path.write_text	md
+wepppy/nodb/mods/ash_transport/ashpost_versioning.py	42	write_version_manifest	file publication candidate	path.write_text	json.dumps(payload, indent=2, sort_keys=True)
+wepppy/nodb/mods/ash_transport/neris_ash_model.py	410	AshModel.run_model	serializer candidate	df.to_csv	out_fn
+wepppy/nodb/mods/ash_transport/neris_ash_model.py	434	AshModel.run_model	serializer candidate	_df.to_csv	_join(out_dir, '%s_ash_stats_per_year_%s.csv' % (prefix, measure.split('_')[1]))
+wepppy/nodb/mods/ash_transport/neris_ash_model.py	459	AshModel.run_model	serializer candidate	_df.to_csv	_join(out_dir, '%s_ash_stats_per_event_%s.csv' % (prefix, measure.split('_')[0]))
+wepppy/nodb/mods/ash_transport/neris_ash_model.py	478	AshModel.run_model	write-mode open candidate	open	_join(out_dir, '%s_ash_return_periods.json' % prefix), 'w'
+wepppy/nodb/mods/ash_transport/neris_ash_model.py	479	AshModel.run_model	serializer candidate	json.dump	return_periods, fp
+wepppy/nodb/mods/ash_transport/neris_ash_model.py	481	AshModel.run_model	write-mode open candidate	open	_join(out_dir, '%s_ash_annuals.json' % prefix), 'w'
+wepppy/nodb/mods/ash_transport/neris_ash_model.py	482	AshModel.run_model	serializer candidate	json.dump	annuals, fp
+wepppy/nodb/mods/ash_transport/water_provenance.py	41	_write	serializer candidate	json.dump	payload, stream
+wepppy/nodb/mods/ash_transport/water_provenance.py	43	_write	file publication candidate	os.replace	name, path
+wepppy/nodb/mods/baer/baer.py	249	Baer.write_color_table	write-mode open candidate	open	self.color_tbl_path, 'w'
+wepppy/nodb/mods/baer/baer.py	730	Baer.modify_soils	file publication candidate	shutil.copyfile	_join(baer_soils_dir, fn), _join(soils_dir, fn)
+wepppy/nodb/mods/baer/sbs_map.py	858	SoilBurnSeverityMap._write_color_table	write-mode open candidate	open	color_tbl_path, 'w'
+wepppy/nodb/mods/baer/sbs_map.py	901	SoilBurnSeverityMap._write_color_table	write-mode open candidate	open	color_tbl_path, 'w'
+wepppy/nodb/mods/disturbed/disturbed.py	214	_atomic_write_lookup_rows	write-mode open candidate	open	tmp_path, 'w'
+wepppy/nodb/mods/disturbed/disturbed.py	222	_atomic_write_lookup_rows	file publication candidate	shutil.copyfile	fname, backup_fn
+wepppy/nodb/mods/disturbed/disturbed.py	223	_atomic_write_lookup_rows	file publication candidate	os.replace	tmp_path, fname
+wepppy/nodb/mods/disturbed/disturbed.py	303	_emit_lookup_audit	write-mode open candidate	open	audit_fn, 'a'
+wepppy/nodb/mods/disturbed/disturbed.py	414	migrate_land_soil_lookup	write-mode open candidate	open	target_fn, 'w'
+wepppy/nodb/mods/disturbed/disturbed.py	784	_run_disturbed_soil_transaction	file publication candidate	shutil.copy2	path, backup_path
+wepppy/nodb/mods/disturbed/disturbed.py	800	_run_disturbed_soil_transaction	file publication candidate	shutil.copy2	backup_path, target_path
+wepppy/nodb/mods/disturbed/disturbed.py	895	_publish_disturbed_soil_artifact	file publication candidate	os.replace	temporary_path, target
+wepppy/nodb/mods/disturbed/disturbed.py	942	_publish_disturbed_soil_copy	file publication candidate	shutil.copyfile	source_path, output_path
+wepppy/nodb/mods/disturbed/disturbed.py	946	_publish_disturbed_soil_copy	file publication candidate	shutil.copyfile	source_path, temporary_path
+wepppy/nodb/mods/disturbed/disturbed.py	1108	Disturbed.reset_land_soil_lookup	file publication candidate	shutil.copyfile	self.default_land_soil_lookup_fn, _lookup
+wepppy/nodb/mods/disturbed/disturbed.py	1273	Disturbed.build_uniform_sbs	write-mode open candidate	rasterio.open	sbs_fn, 'w'
+wepppy/nodb/mods/disturbed/disturbed.py	1819	Disturbed.write_openwepp_native_management	write-mode open candidate	open	dst_fn, 'w'
+wepppy/nodb/mods/disturbed/disturbed.py	1888	Disturbed.build_extended_land_soil_lookup	write-mode open candidate	open	extended_landsoil_lookup, 'w'
+wepppy/nodb/mods/disturbed/disturbed.py	1951	Disturbed.build_extended_land_soil_lookup	file publication candidate	os.replace	extended_landsoil_lookup, self.extended_lookup_fn
+wepppy/nodb/mods/features_export/cache_key.py	219	_write_cache_index	file publication candidate	tmp_path.write_text	serialized + '\n'
+wepppy/nodb/mods/features_export/cache_key.py	220	_write_cache_index	file publication candidate	tmp_path.replace	path
+wepppy/nodb/mods/features_export/carrier_layer_materializer.py	67	materialize_carrier_layer_core	file publication candidate	replace	source
+wepppy/nodb/mods/features_export/carrier_layer_materializer.py	81	materialize_carrier_layer_core	file publication candidate	replace	source
+wepppy/nodb/mods/features_export/duckdb_materializer.py	119	materialize_layer_attributes	file publication candidate	right.rename	—
+wepppy/nodb/mods/features_export/duckdb_materializer.py	218	materialize_carrier_core	file publication candidate	right.rename	—
+wepppy/nodb/mods/features_export/exporters/base.py	293	SingleLayerZipWriter.write	file publication candidate	layer_path.write_bytes	payload.payload_bytes()
+wepppy/nodb/mods/features_export/exporters/base.py	362	MultiLayerContainerWriter.write	file publication candidate	container_path.write_bytes	self.build_container_bytes(request, layer_pairs)
+wepppy/nodb/mods/features_export/exporters/csv.py	46	CsvExportWriter.write	serializer candidate	frame.to_csv	layer_path
+wepppy/nodb/mods/features_export/exporters/geodatabase.py	198	GeodatabaseExportWriter.write	file publication candidate	gpkg_staging_path.write_bytes	self._gpkg_staging_writer.build_container_bytes(request, layer_pairs)
+wepppy/nodb/mods/features_export/exporters/geoparquet.py	144	GeoparquetExportWriter.write	serializer candidate	frame.to_parquet	layer_path
+wepppy/nodb/mods/features_export/exporters/parquet.py	46	ParquetExportWriter.write	serializer candidate	frame.to_parquet	layer_path
+wepppy/nodb/mods/features_export/manifest.py	161	write_export_manifest	file publication candidate	resolved_path.write_text	serialize_export_manifest(manifest)
+wepppy/nodb/mods/features_export/output_column_naming.py	112	apply_unitized_column_suffixes	file publication candidate	frame.rename	—
+wepppy/nodb/mods/features_export/service.py	736	co_create_post_wepp_geodatabase_artifact	file publication candidate	readme_path.write_text	build_export_readme(manifest=manifest, runid=source_manifest['run_context']['runid'], config=source_manifest['run_context']['config'])
+wepppy/nodb/mods/features_export/service.py	978	_resolve_geopackage_co_creation_source	file publication candidate	extracted_path.write_bytes	source_handle.read()
+wepppy/nodb/mods/features_export/service.py	1124	_run_cache_miss_export	file publication candidate	readme_path.write_text	build_export_readme(manifest=manifest, runid=runid, config=config)
+wepppy/nodb/mods/features_export/service.py	1976	_build_materialized_execution_plan	file publication candidate	replace	plan
+wepppy/nodb/mods/features_export/service.py	2423	_merge_source_dataframe	file publication candidate	right.rename	—
+wepppy/nodb/mods/features_export/service.py	2557	_serialize_feature_collection_payload	serializer candidate	frame.to_json	—
+wepppy/nodb/mods/features_export/service.py	2638	_resolve_plan_swat_run_id	file publication candidate	replace	plan
+wepppy/nodb/mods/features_export/service.py	2640	_resolve_plan_swat_run_id	file publication candidate	replace	plan.request
+wepppy/nodb/mods/features_export/service.py	2969	_write_publication_registry	file publication candidate	tmp_path.write_text	json.dumps(normalized_registry, indent=2, sort_keys=True) + '\n'
+wepppy/nodb/mods/features_export/service.py	2973	_write_publication_registry	file publication candidate	tmp_path.replace	registry_path
+wepppy/nodb/mods/features_export/tabular_temporal_layout.py	119	reshape_temporal_wide_to_long	file publication candidate	source[list(present_columns.values())].rename	—
+wepppy/nodb/mods/features_export/temporal_wide_materializer.py	253	materialize_temporal_layer_wide	file publication candidate	pivoted.rename	—
+wepppy/nodb/mods/features_export/temporal_wide_materializer.py	845	_daily_water_fluxes	file publication candidate	frame[list(names.values())].rename	—
+wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py	199	_Attempt._status	serializer candidate	json.dump	payload, outgoing
+wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py	201	_Attempt._status	file publication candidate	os.replace	temporary, self.candidate('status.json')
+wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py	247	_Attempt.publish	file publication candidate	os.replace	candidate, self.target
+wepppy/nodb/mods/geneva/collaborators/artifact_io.py	39	GenevaArtifactIO.write_json	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/geneva/collaborators/artifact_io.py	40	GenevaArtifactIO.write_json	serializer candidate	json.dump	payload, handle
+wepppy/nodb/mods/geneva/collaborators/artifact_io.py	55	GenevaArtifactIO.write_text	file publication candidate	path.write_text	content
+wepppy/nodb/mods/geneva/collaborators/artifact_io.py	72	GenevaArtifactIO.write_records_parquet	serializer candidate	frame.to_parquet	path
+wepppy/nodb/mods/geneva/collaborators/batch_run_service.py	135	GenevaBatchRunService.run_batch	serializer candidate	artifact_io.write_json	geneva.wd, 'storm_inputs.json'
+wepppy/nodb/mods/geneva/collaborators/batch_run_service.py	368	GenevaBatchRunService._persist_storm_artifacts	serializer candidate	artifact_io.write_json	geneva.wd, f'{storm_prefix}/summary.json'
+wepppy/nodb/mods/geneva/collaborators/cn_table_service.py	588	GenevaCnTableService._emit_audit	write-mode open candidate	open	audit_path, 'a'
+wepppy/nodb/mods/geneva/collaborators/cn_table_service.py	607	GenevaCnTableService._atomic_write_rows	write-mode open candidate	open	tmp_path, 'w'
+wepppy/nodb/mods/geneva/collaborators/cn_table_service.py	617	GenevaCnTableService._atomic_write_rows	file publication candidate	os.replace	tmp_path, path
+wepppy/nodb/mods/geneva/collaborators/frequency_panel_service.py	207	GenevaFrequencyPanelService.build_frequency_panel	serializer candidate	artifact_io.write_json	geneva.wd, 'frequency_panel.json'
+wepppy/nodb/mods/geneva/collaborators/frequency_panel_service.py	245	GenevaFrequencyPanelService._normalize_cligen_source_for_kernel	file publication candidate	artifact_io.write_text	geneva.wd, _NORMALIZED_CLIGEN_RELPATH
+wepppy/nodb/mods/geneva/collaborators/frequency_panel_service.py	271	GenevaFrequencyPanelService._normalize_noaa_source_for_kernel	file publication candidate	artifact_io.write_text	geneva.wd, _NORMALIZED_NOAA_RELPATH
+wepppy/nodb/mods/geneva/collaborators/hru_event_measure_service.py	253	GenevaHruEventMeasureService.query_rows	catalog API	update_catalog_entry	geneva.wd, HRU_EVENT_MEASURE_DATASET_PATH
+wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py	234	GenevaHruMapGeometryService._materialize_feature_collection_from_raster	write-mode open candidate	candidate.open	'w'
+wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py	235	GenevaHruMapGeometryService._materialize_feature_collection_from_raster	serializer candidate	json.dump	feature_collection, outgoing
+wepppy/nodb/mods/geneva/collaborators/hru_preparation_service.py	159	GenevaHruPreparationService.prepare_hrus	serializer candidate	artifact_io.write_json	geneva.wd, 'hru_prepare_summary.json'
+wepppy/nodb/mods/geneva/collaborators/results_service.py	121	GenevaResultsService.summarize_batch_run	serializer candidate	geneva.artifact_io.write_json	geneva.wd, 'batch_summary.json'
+wepppy/nodb/mods/geneva/schemas/results_schema.py	41	utc_now_iso	file publication candidate	datetime.now(timezone.utc).replace	—
+wepppy/nodb/mods/locations/lt/data/tahoe/observed/Daily/climate_y2k_fix.py	20		write-mode open candidate	open	_join('y2k_fixed', _split(fn)[1]), 'w'
+wepppy/nodb/mods/observed/observed.py	112	Observed.parse_textdata	serializer candidate	df.to_csv	self.observed_fn
+wepppy/nodb/mods/observed/observed.py	345	Observed._load_hillslope_simulation	file publication candidate	sim.rename	—
+wepppy/nodb/mods/observed/observed.py	439	Observed._load_channel_simulation	file publication candidate	ebe_df.rename	—
+wepppy/nodb/mods/observed/observed.py	469	Observed._load_channel_simulation	file publication candidate	chan_df.rename	—
+wepppy/nodb/mods/observed/observed.py	487	Observed._load_channel_simulation	file publication candidate	chan_daily.rename	—
+wepppy/nodb/mods/observed/observed.py	639	Observed._normalize_swat_columns	file publication candidate	df.rename	—
+wepppy/nodb/mods/observed/observed.py	762	Observed._write_measure	write-mode open candidate	open	fn, 'w'
+wepppy/nodb/mods/omni/omni.py	318	_apply_contrast_output_triggers	write-mode open candidate	open	tc_path, 'w'
+wepppy/nodb/mods/omni/omni.py	447	_merge_contrast_parquet	file publication candidate	shutil.copyfile	control_parquet_fn, output_parquet_fn
+wepppy/nodb/mods/omni/omni.py	470	_merge_contrast_parquet	serializer candidate	merged.to_parquet	output_parquet_fn
+wepppy/nodb/mods/omni/omni.py	573	_omni_clone_sibling	file publication candidate	shutil.copyfile	_join(sibling_wd, 'disturbed.nodb'), _join(new_wd, 'disturbed.nodb')
+wepppy/nodb/mods/omni/omni.py	574	_omni_clone_sibling	file publication candidate	shutil.copyfile	_join(sibling_wd, 'landuse.nodb'), _join(new_wd, 'landuse.nodb')
+wepppy/nodb/mods/omni/omni.py	575	_omni_clone_sibling	file publication candidate	shutil.copyfile	_join(sibling_wd, 'soils.nodb'), _join(new_wd, 'soils.nodb')
+wepppy/nodb/mods/omni/omni.py	577	_omni_clone_sibling	file publication candidate	shutil.copytree	_join(sibling_wd, 'disturbed'), _join(new_wd, 'disturbed')
+wepppy/nodb/mods/omni/omni.py	596	_omni_clone_sibling	file publication candidate	shutil.copytree	str(src_root), dst_root
+wepppy/nodb/mods/omni/omni.py	606	_omni_clone_sibling	write-mode open candidate	open	dst, 'w'
+wepppy/nodb/mods/omni/omni.py	607	_omni_clone_sibling	serializer candidate	json.dump	d, fp
+wepppy/nodb/mods/omni/omni.py	908	Omni._refresh_catalog	catalog API	request_catalog_refresh	self.wd, rel_path or OMNI_REL_DIR
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	408	OmniArtifactExportService._write_feature_collection	write-mode open candidate	open	output_path, 'w'
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	409	OmniArtifactExportService._write_feature_collection	serializer candidate	json.dump	{'type': 'FeatureCollection', 'features': features}, fp
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	422	OmniArtifactExportService._write_projected_feature_collection	write-mode open candidate	open	utm_path, 'w'
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	423	OmniArtifactExportService._write_projected_feature_collection	serializer candidate	json.dump	payload, fp
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	428	OmniArtifactExportService._write_projected_feature_collection	file publication candidate	os.replace	wgs_path, output_path
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	484	OmniArtifactExportService.scenarios_report	serializer candidate	combined.to_parquet	out_path
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	485	OmniArtifactExportService.scenarios_report	catalog API	omni._refresh_catalog	os.path.relpath(out_path, omni.wd)
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	586	OmniArtifactExportService.contrasts_report	file publication candidate	ctrl_df[['key', 'v', 'units']].drop_duplicates(subset=['key']).rename	—
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	607	OmniArtifactExportService.contrasts_report	serializer candidate	combined.to_parquet	out_path
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	608	OmniArtifactExportService.contrasts_report	catalog API	omni._refresh_catalog	os.path.relpath(out_path, omni.wd)
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	665	OmniArtifactExportService.compile_hillslope_summaries	serializer candidate	combined.to_parquet	out_path
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	666	OmniArtifactExportService.compile_hillslope_summaries	catalog API	omni._refresh_catalog	os.path.relpath(out_path, omni.wd)
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	707	OmniArtifactExportService.compile_channel_summaries	serializer candidate	combined.to_parquet	out_path
+wepppy/nodb/mods/omni/omni_artifact_export_service.py	708	OmniArtifactExportService.compile_channel_summaries	catalog API	omni._refresh_catalog	os.path.relpath(out_path, omni.wd)
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	21	_symlink_relative_to_destination	file publication candidate	os.symlink	os.path.relpath(src, os.path.dirname(dst)), dst
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	63	_reset_workspace	file publication candidate	os.replace	target, stale_dir
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	197	OmniCloneContrastService.run_contrast	file publication candidate	shutil.copytree	str(src_root), str(dst_root)
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	226	OmniCloneContrastService.run_contrast	serializer candidate	shutil.copy	src, dst
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	238	OmniCloneContrastService.run_contrast	write-mode open candidate	open	dst, 'w'
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	239	OmniCloneContrastService.run_contrast	serializer candidate	json.dump	data, fp
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	394	OmniCloneContrastService.omni_clone	file publication candidate	shutil.copytree	src, dst
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	402	OmniCloneContrastService.omni_clone	serializer candidate	shutil.copy	src, dst
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	409	OmniCloneContrastService.omni_clone	write-mode open candidate	open	dst, 'w'
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	410	OmniCloneContrastService.omni_clone	serializer candidate	json.dump	data, fp
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	430	OmniCloneContrastService.omni_clone	file publication candidate	shutil.copytree	str(src_root), str(dst_root)
+wepppy/nodb/mods/omni/omni_clone_contrast_service.py	448	OmniCloneContrastService.omni_clone	file publication candidate	shutil.copytree	str(src_root), str(dst_root)
+wepppy/nodb/mods/omni/omni_contrast_build_service.py	500	OmniContrastBuildService._write_stream_order_report	write-mode open candidate	open	report_fn, 'w'
+wepppy/nodb/mods/omni/omni_contrast_build_service.py	753	OmniContrastBuildService.build_contrasts_cumulative_default	write-mode open candidate	open	report_fn, 'w'
+wepppy/nodb/mods/omni/omni_contrast_build_service.py	946	OmniContrastBuildService._write_hillslope_group_report	write-mode open candidate	open	report_fn, 'w'
+wepppy/nodb/mods/omni/omni_contrast_build_service.py	1347	OmniContrastBuildService._write_user_defined_report	write-mode open candidate	open	report_fn, 'w'
+wepppy/nodb/mods/omni/omni_documentation.py	298	_generate_documentation	file publication candidate	(base / readme_name).write_text	markdown
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py	173	OmniStateContrastMixin.delete_scenarios	catalog API	self._refresh_catalog	OMNI_REL_DIR
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py	753	OmniStateContrastMixin._write_contrast_id_definitions_psv	write-mode open candidate	open	tmp_path, 'w'
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py	774	OmniStateContrastMixin._write_contrast_id_definitions_psv	file publication candidate	os.replace	tmp_path, path
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py	870	OmniStateContrastMixin._write_contrast_sidecar	write-mode open candidate	open	sidecar_fn, 'w'
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py	926	OmniStateContrastMixin._write_contrast_run_status	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/omni/omni_state_contrast_mixin.py	927	OmniStateContrastMixin._write_contrast_run_status	serializer candidate	json.dump	payload, fp
+wepppy/nodb/mods/openet/openet_ts.py	117	_parse_timeseries_rows	file publication candidate	df.rename	—
+wepppy/nodb/mods/openet/openet_ts.py	456	OpenET_TS.acquire_timeseries	serializer candidate	df.to_parquet	cache_path
+wepppy/nodb/mods/openet/openet_ts.py	547	OpenET_TS.analyze	serializer candidate	combined.to_parquet	self.openet_parquet_path
+wepppy/nodb/mods/openet/openet_ts.py	553	OpenET_TS.analyze	catalog API	request_catalog_refresh	self.wd, 'openet/openet_ts.parquet'
+wepppy/nodb/mods/path_ce/data_prep.py	186	build_aggregates	file publication candidate	groups.rename	—
+wepppy/nodb/mods/path_ce/data_prep.py	207	build_aggregates	file publication candidate	df.rename	—
+wepppy/nodb/mods/path_ce/data_prep.py	226	build_aggregates	file publication candidate	outlet.rename	—
+wepppy/nodb/mods/path_ce/data_prep.py	275	build_aggregates	file publication candidate	hills.dropna(subset=['contrast_id', 'scenario']).assign(contrast_id=lambda d: pd.to_numeric(d['contrast_id'], errors='coerce').astype('Int64'), _topaz=lambda d: pd.to_numeric(d['Topaz ID'], errors='coerce').astype('Int64')).dropna(subset=['_topaz']).groupby(['contrast_id', 'scenario'], as_index=False)['_topaz'].agg(lambda values: sorted(pd.Series(values).dropna().astype(int).unique().tolist())).rename	—
+wepppy/nodb/mods/path_ce/data_prep.py	597	build_aggregates	file publication candidate	aggregate_char(working_all.copy())[['contrast_id', 'topaz_ids']].rename	—
+wepppy/nodb/mods/path_ce/data_prep.py	855	_prepare_ce_and_plot_data_impl	serializer candidate	final_data.to_parquet	output_dir / f'{output_prefix}_final_data.parquet'
+wepppy/nodb/mods/path_ce/data_prep.py	856	_prepare_ce_and_plot_data_impl	serializer candidate	hillslope_data_agg.to_parquet	output_dir / f'{output_prefix}_hillslope_agg.parquet'
+wepppy/nodb/mods/path_ce/data_prep.py	857	_prepare_ce_and_plot_data_impl	serializer candidate	outlet_data_final.to_parquet	output_dir / f'{output_prefix}_outlet_agg.parquet'
+wepppy/nodb/mods/path_ce/data_prep.py	858	_prepare_ce_and_plot_data_impl	serializer candidate	hillslope_char_data_agg.to_parquet	output_dir / f'{output_prefix}_char_agg.parquet'
+wepppy/nodb/mods/path_ce/data_prep.py	915	_load_contrast_groups_df	file publication candidate	groups.rename	—
+wepppy/nodb/mods/path_ce/path_ce_solver.py	294	ce_select_sites_flexible	file publication candidate	missing_hillslopes[[id_col, 'Sdyd post-fire']].rename	—
+wepppy/nodb/mods/path_ce/path_cost_effective.py	418	PathCostEffective._persist_solver_outputs	serializer candidate	pq.write_table	_dataframe_to_table(selection), self.path_dir / SELECTION_TABLE
+wepppy/nodb/mods/path_ce/path_cost_effective.py	421	PathCostEffective._persist_solver_outputs	serializer candidate	pq.write_table	_dataframe_to_table(sdyd_df), self.path_dir / SDYD_TABLE
+wepppy/nodb/mods/path_ce/path_cost_effective.py	422	PathCostEffective._persist_solver_outputs	serializer candidate	pq.write_table	_dataframe_to_table(result.untreatable_sdyd), self.path_dir / UNTREATABLE_TABLE
+wepppy/nodb/mods/path_ce/path_cost_effective.py	430	PathCostEffective._persist_solver_outputs	serializer candidate	pq.write_table	_dataframe_to_table(increase_ids), self.path_dir / UNTREATABLE_INCREASE_TABLE
+wepppy/nodb/mods/path_ce/path_cost_effective.py	547	PathCostEffective.run_sweep	serializer candidate	pq.write_table	_dataframe_to_table(flat), sweep_path
+wepppy/nodb/mods/path_ce/path_cost_effective.py	557	PathCostEffective.run_sweep	file publication candidate	manifest_path.write_text	json.dumps(manifest, indent=1)
+wepppy/nodb/mods/path_ce/path_cost_effective.py	654	PathCostEffective.run	catalog API	self._refresh_catalog	—
+wepppy/nodb/mods/path_ce/path_cost_effective.py	674	PathCostEffective._refresh_catalog	catalog API	request_catalog_refresh	self.wd, relative_dir
+wepppy/nodb/mods/path_ce/report_service.py	113	_copy_run_geojson	serializer candidate	shutil.copy	resolved, staging / 'static' / Path(relpath).name
+wepppy/nodb/mods/path_ce/report_service.py	119	_populate_staging	serializer candidate	shutil.copy	_ASSETS_ROOT / _QMD_NAME, staging / _QMD_NAME
+wepppy/nodb/mods/path_ce/report_service.py	120	_populate_staging	file publication candidate	shutil.copytree	_ASSETS_ROOT / 'static', staging / 'static'
+wepppy/nodb/mods/path_ce/report_service.py	121	_populate_staging	serializer candidate	shutil.copy	_plotly_bundle_path(), staging / 'static' / 'js' / 'vendor' / 'plotly.min.js'
+wepppy/nodb/mods/path_ce/report_service.py	182	render_report	file publication candidate	payload_path.write_text	json.dumps(payload, indent=1)
+wepppy/nodb/mods/path_ce/report_service.py	231	render_report	serializer candidate	shutil.copy	html_path, incoming_dir / REPORT_HTML
+wepppy/nodb/mods/path_ce/report_service.py	234	render_report	file publication candidate	shutil.copytree	staging / 'static', incoming_dir / 'static'
+wepppy/nodb/mods/path_ce/report_service.py	236	render_report	file publication candidate	os.rename	report_dir, retired_dir
+wepppy/nodb/mods/path_ce/report_service.py	237	render_report	file publication candidate	os.rename	incoming_dir, report_dir
+wepppy/nodb/mods/path_ce/threshold_sweep.py	86	find_threshold_ranges._status_for_threshold	write-mode open candidate	open	os.devnull, 'w'
+wepppy/nodb/mods/path_ce/threshold_sweep.py	186	all_thresholds	write-mode open candidate	open	os.devnull, 'w'
+wepppy/nodb/mods/polaris/polaris.py	227	_write_json	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/polaris/polaris.py	228	_write_json	serializer candidate	json.dump	payload, stream
+wepppy/nodb/mods/polaris/polaris.py	232	_write_markdown	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/polaris/polaris.py	489	Polaris.acquire_and_align	catalog API	request_catalog_refresh	self.wd, output_relpath
+wepppy/nodb/mods/postfire_debris_flow/analysis_support.py	15	write_valid_mask	write-mode open candidate	rasterio.open	path, 'w'
+wepppy/nodb/mods/postfire_debris_flow/dnbr.py	271	normalize_dnbr	file publication candidate	marker.write_text	json.dumps({'schema_version': 1, 'status': 'incomplete'}) + '\n'
+wepppy/nodb/mods/postfire_debris_flow/dnbr.py	273	normalize_dnbr	write-mode open candidate	rasterio.open	output / 'dnbr.tif', 'w'
+wepppy/nodb/mods/postfire_debris_flow/dnbr.py	281	normalize_dnbr	file publication candidate	(output / 'manifest.json').write_text	json.dumps(manifest, indent=2, allow_nan=False) + '\n'
+wepppy/nodb/mods/postfire_debris_flow/integration.py	201	_run	write-mode open candidate	(output / f'{label}.stdout.log').open	'xb'
+wepppy/nodb/mods/postfire_debris_flow/integration.py	201	_run	write-mode open candidate	(output / f'{label}.stderr.log').open	'xb'
+wepppy/nodb/mods/postfire_debris_flow/integration.py	331	build_m1_predictors	serializer candidate	write_json	output / 'incomplete.json', {'status': 'incomplete', 'retry': 'Use a fresh output directory'}
+wepppy/nodb/mods/postfire_debris_flow/integration.py	409	build_m1_predictors	serializer candidate	write_json	output / 'manifest.json', manifest
+wepppy/nodb/mods/postfire_debris_flow/kf_source.py	56	_native_window	write-mode open candidate	rasterio.open	output / 'native_kf.tif', 'w'
+wepppy/nodb/mods/postfire_debris_flow/kf_source.py	60	_native_window	serializer candidate	io.write_json	output / 'native_evidence.json', dict(object_identity=list(source.identity), source_url=KF_URL, native_grid=native_grid, transferred_bytes=transport.received, native_sha256=io.digest(output / 'native_
+wepppy/nodb/mods/postfire_debris_flow/kf_source.py	87	acquire_kf	serializer candidate	io.write_json	output / 'incomplete.json', dict(status='incomplete', policy=POLICY)
+wepppy/nodb/mods/postfire_debris_flow/kf_source.py	88	acquire_kf	file publication candidate	shutil.copyfile	io.regular(METADATA, io.MAX_TEXT), output / 'publisher_metadata.xml'
+wepppy/nodb/mods/postfire_debris_flow/kf_source.py	135	acquire_kf	serializer candidate	io.write_json	output / 'manifest.json', manifest
+wepppy/nodb/mods/postfire_debris_flow/m1_inputs.py	61	write_json	write-mode open candidate	Path(path).open	'x'
+wepppy/nodb/mods/postfire_debris_flow/m1_inputs.py	62	write_json	serializer candidate	json.dump	value, stream
+wepppy/nodb/mods/postfire_debris_flow/m1_inputs.py	223	prepare	write-mode open candidate	rasterio.open	path, 'w'
+wepppy/nodb/mods/postfire_debris_flow/m3_integration.py	92	build_m3_predictors	serializer candidate	io.write_json	output / 'incomplete.json', {'status': 'incomplete'}
+wepppy/nodb/mods/postfire_debris_flow/m3_integration.py	145	build_m3_predictors	serializer candidate	io.write_json	output / 'manifest.json', manifest
+wepppy/nodb/mods/postfire_debris_flow/m3_terrain.py	42	build_terrain	serializer candidate	io.write_json	output / 'incomplete.json', {'status': 'incomplete'}
+wepppy/nodb/mods/postfire_debris_flow/m3_terrain.py	84	build_terrain	serializer candidate	io.write_json	pour_point, {'type': 'FeatureCollection', 'features': [{'type': 'Feature', 'properties': {}, 'geometry': {'type': 'Point', 'coordinates': [x, y]}}], 'crs': {'type': 'name', 'properties': {'name': grid
+wepppy/nodb/mods/postfire_debris_flow/m3_terrain.py	104	build_terrain	serializer candidate	io.write_json	destination / 'summary.json', summary
+wepppy/nodb/mods/postfire_debris_flow/m3_terrain.py	110	build_terrain	serializer candidate	io.write_json	output / 'manifest.json', manifest
+wepppy/nodb/mods/postfire_debris_flow/migration.py	269	_prepare	serializer candidate	write_json	audit / 'status.json', {'status': 'preparing', 'recovery': 'No project mutation until migration.json exists.'}
+wepppy/nodb/mods/postfire_debris_flow/migration.py	272	_prepare	file publication candidate	shutil.copyfile	Path(wd) / controller.filename, backup / controller.filename
+wepppy/nodb/mods/postfire_debris_flow/migration.py	273	_prepare	serializer candidate	write_json	backup / 'state.json', state
+wepppy/nodb/mods/postfire_debris_flow/migration.py	282	_prepare	file publication candidate	dest.write_bytes	raw
+wepppy/nodb/mods/postfire_debris_flow/migration.py	294	_prepare	file publication candidate	dest.write_bytes	rendered[info['sha256']]
+wepppy/nodb/mods/postfire_debris_flow/migration.py	300	_prepare	serializer candidate	write_json	audit / 'migration.json', report
+wepppy/nodb/mods/postfire_debris_flow/migration.py	352	_install	file publication candidate	os.rename	legacy, target
+wepppy/nodb/mods/postfire_debris_flow/migration.py	360	_install	file publication candidate	path.rename	destination
+wepppy/nodb/mods/postfire_debris_flow/migration.py	362	_install	serializer candidate	write_json	audit / 'migration.json', report
+wepppy/nodb/mods/postfire_debris_flow/migration.py	371	_install	file publication candidate	shutil.copyfile	src, pending
+wepppy/nodb/mods/postfire_debris_flow/migration.py	372	_install	file publication candidate	os.replace	pending, dst
+wepppy/nodb/mods/postfire_debris_flow/migration.py	376	_install	serializer candidate	write_json	audit / 'migration.json', report
+wepppy/nodb/mods/postfire_debris_flow/migration.py	384	_install	serializer candidate	write_json	attempt / 'status.json', {'schema_version': 1, 'kind': 'historical_unknown', 'attempt': {'id': attempt.name, 'phase': 'historical_unknown', 'reason': 'No durable attempt receipt survives.'}}
+wepppy/nodb/mods/postfire_debris_flow/migration.py	388	_install	serializer candidate	write_json	audit / 'migration.json', report
+wepppy/nodb/mods/postfire_debris_flow/migration.py	421	migrate_attempts	serializer candidate	write_json	audit / 'migration.json', report
+wepppy/nodb/mods/postfire_debris_flow/migration.py	422	migrate_attempts	serializer candidate	write_json	audit / 'status.json', {'status': 'complete'}
+wepppy/nodb/mods/postfire_debris_flow/observability.py	19	write_json	file publication candidate	pending.write_text	json.dumps(value, indent=2, allow_nan=False) + '\n'
+wepppy/nodb/mods/postfire_debris_flow/observability.py	20	write_json	file publication candidate	os.replace	pending, path
+wepppy/nodb/mods/postfire_debris_flow/observability.py	42	record_attempts	serializer candidate	write_json	path, {'schema_version': 1, 'kind': kind, 'attempt': attempt}
+wepppy/nodb/mods/postfire_debris_flow/observability.py	52	record_error	write-mode open candidate	path.open	'a'
+wepppy/nodb/mods/postfire_debris_flow/production.py	559	execute_upload	file publication candidate	(target / 'encoding.json').write_text	json.dumps(encoding, allow_nan=False)
+wepppy/nodb/mods/postfire_debris_flow/production.py	608	reuse_predictors	file publication candidate	shutil.copyfile	source, destination
+wepppy/nodb/mods/postfire_debris_flow/publication.py	49	publish_outputs	serializer candidate	write_json	staged / 'status.json', {'status': 'incomplete', 'accepted_id': accepted['id']}
+wepppy/nodb/mods/postfire_debris_flow/publication.py	55	publish_outputs	write-mode open candidate	(staged / dst.name).open	'xb'
+wepppy/nodb/mods/postfire_debris_flow/publication.py	76	publish_outputs	file publication candidate	os.replace	staged / dst.name, dst
+wepppy/nodb/mods/postfire_debris_flow/publication.py	77	publish_outputs	serializer candidate	write_json	staged / 'status.json', {'status': 'complete', 'accepted_id': accepted['id']}
+wepppy/nodb/mods/postfire_debris_flow/rainfall_io.py	172	write_json	write-mode open candidate	Path(path).open	'x'
+wepppy/nodb/mods/postfire_debris_flow/results.py	110	build_results	serializer candidate	write_json	output / 'incomplete.json', {'schema_version': 1, 'status': 'incomplete'}
+wepppy/nodb/mods/postfire_debris_flow/results.py	115	build_results	write-mode open candidate	p.open	'xb'
+wepppy/nodb/mods/postfire_debris_flow/results.py	116	build_results	serializer candidate	pq.write_table	table, stream
+wepppy/nodb/mods/postfire_debris_flow/results.py	136	build_results	serializer candidate	write_json	output / 'manifest.json', manifest
+wepppy/nodb/mods/postfire_debris_flow/soil_inputs.py	104	_copy	write-mode open candidate	target.open	'xb'
+wepppy/nodb/mods/postfire_debris_flow/soil_inputs.py	147	prepare_soil	serializer candidate	io.write_json	output / 'incomplete.json', {'status': 'incomplete', 'policy': POLICY}
+wepppy/nodb/mods/postfire_debris_flow/soil_inputs.py	156	prepare_soil	write-mode open candidate	(output / name).open	'x'
+wepppy/nodb/mods/postfire_debris_flow/soil_inputs.py	224	prepare_soil	write-mode open candidate	rasterio.open	output / 'source.tif', 'w'
+wepppy/nodb/mods/postfire_debris_flow/soil_inputs.py	241	prepare_soil	serializer candidate	io.write_json	output / 'manifest.json', manifest
+wepppy/nodb/mods/postfire_debris_flow/soil_snapshot.py	63	_copy_source	write-mode open candidate	target.open	'xb'
+wepppy/nodb/mods/postfire_debris_flow/soil_snapshot.py	125	_write_csv	write-mode open candidate	path.open	'x'
+wepppy/nodb/mods/postfire_debris_flow/soil_snapshot.py	134	_write_json	write-mode open candidate	path.open	'x'
+wepppy/nodb/mods/postfire_debris_flow/soil_snapshot.py	135	_write_json	serializer candidate	json.dump	data, stream
+wepppy/nodb/mods/postfire_debris_flow/soil_thickness.py	230	_csv	write-mode open candidate	Path(path).open	'w'
+wepppy/nodb/mods/postfire_debris_flow/soil_thickness.py	291	build_artifacts	write-mode open candidate	rasterio.open	out / name, 'w'
+wepppy/nodb/mods/postfire_debris_flow/soil_thickness.py	296	build_artifacts	write-mode open candidate	rasterio.open	count_keys, 'w'
+wepppy/nodb/mods/postfire_debris_flow/soil_thickness.py	340	build_artifacts	file publication candidate	(out / 'manifest.json').write_text	json.dumps(dict(schema_version=1, source_id=source_id, policy=policy, thickness_unit='cm', S_scale='cm/254', inputs=hashes), indent=2) + '\n'
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	54	_lineage	serializer candidate	io.write_json	output / 'sda_skipped.json', {'reason': 'no_usable_original_keys'}
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	57	_lineage	serializer candidate	io.write_json	output / 'sda_query.json', request
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	63	_lineage	write-mode open candidate	response.open	'xb'
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	92	_catalog_from_response	serializer candidate	io.write_json	catalog, dict(schema_version=1, collection_by_mukey=associations, source=SDA_URL, retrieved_at=retrieved_at, current_versions=versions, response_sha256=response_hash)
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	136	_native_window	write-mode open candidate	rasterio.open	native, 'w'
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	147	_native_window	serializer candidate	io.write_json	evidence, dict(schema_version=1, source_id=SOURCE_ID, source=THICK_URL, sha256=digest, grid=native_grid, bounds=bounds, object_identity=list(source.identity), source_metadata=source_metadata, transfer
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	162	_acquisition_worker	write-mode open candidate	(output / f'{operation}_worker.log').open	'x'
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	168	_acquisition_worker	serializer candidate	io.write_json	output / f'{operation}_failure.json', {'status': 'failed', 'error_type': type(exc).__name__, 'error': safe_text(exc, source_profile=current_profile(WORKER))[:2048]}
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	177	_supervise	serializer candidate	io.write_json	output / f'{operation}_started.json', {'status': 'started', 'timeout_seconds': timeout}
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	194	_supervise	serializer candidate	io.write_json	output / f'{operation}_timeout.json', {'status': 'failed', 'reason': 'deadline_exceeded', 'worker_stopped': not process.is_alive()}
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	211	acquire_sources	serializer candidate	io.write_json	output / 'incomplete.json', {'status': 'incomplete'}
+wepppy/nodb/mods/postfire_debris_flow/source_acquisition.py	232	_finish_preparation	serializer candidate	io.write_json	output / 'complete.json', {'status': 'complete', 'prepared_receipt': str(receipt), 'prepared_receipt_sha256': io.digest(receipt, io.MAX_TEXT)}
+wepppy/nodb/mods/postfire_debris_flow/source_preparation.py	114	_thick_window	write-mode open candidate	rasterio.open	output, 'w'
+wepppy/nodb/mods/postfire_debris_flow/source_preparation.py	145	prepare_local_sources	serializer candidate	io.write_json	output / 'incomplete.json', {'status': 'incomplete'}
+wepppy/nodb/mods/postfire_debris_flow/source_preparation.py	184	prepare_local_sources	serializer candidate	io.write_json	evidence, dict(schema_version=1, collection_by_mukey={k: 'SSURGO' for k in verified}, source=record['source'], retrieved_at=record['retrieved_at'], catalog_sha256=catalog_hash)
+wepppy/nodb/mods/postfire_debris_flow/source_preparation.py	200	prepare_local_sources	serializer candidate	io.write_json	evidence, dict(schema_version=1, source_id=SOURCE_ID, source=record['source'], sha256=window_hash, grid=window_grid, bounds=bounds, parent_sha256=record['sha256'])
+wepppy/nodb/mods/postfire_debris_flow/source_preparation.py	212	prepare_local_sources	serializer candidate	io.write_json	output / 'soil_sources.json', candidate
+wepppy/nodb/mods/postfire_debris_flow/source_preparation.py	220	prepare_local_sources	serializer candidate	io.write_json	output / 'receipt.json', receipt
+wepppy/nodb/mods/postfire_debris_flow/source_preparation.py	291	promote_local_sources.install	file publication candidate	os.replace	staged.name, destination.name
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py	53	ReplayTransport.__init__	serializer candidate	io.write_json	output / 'replay_sources.json', {'sources_sha256': self.hashes, 'network_requests': 0}
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py	109	recover_sources	serializer candidate	io.write_json	output / 'incomplete.json', {'status': 'incomplete'}
+wepppy/nodb/mods/postfire_debris_flow/source_replay.py	124	recover_sources	serializer candidate	io.write_json	output / 'recovery_sources.json', {'original_receipt': str(original_receipt), 'original_receipt_sha256': digest, 'original_native_sha256': native_hash, 'network_requests': 0}
+wepppy/nodb/mods/postfire_debris_flow/source_transport.py	80	Transport.request	write-mode open candidate	(self.output / f'request-{self.requests:05d}-start.json').open	'x'
+wepppy/nodb/mods/postfire_debris_flow/source_transport.py	81	Transport.request	serializer candidate	json.dump	record, stream
+wepppy/nodb/mods/postfire_debris_flow/source_transport.py	104	Transport.request	write-mode open candidate	(self.output / f'request-{self.requests:05d}.body').open	'xb'
+wepppy/nodb/mods/postfire_debris_flow/source_transport.py	137	Transport.request	write-mode open candidate	name.open	'x'
+wepppy/nodb/mods/postfire_debris_flow/source_transport.py	138	Transport.request	serializer candidate	json.dump	record, stream
+wepppy/nodb/mods/rap/rap.py	190	RAP.acquire_rasters	catalog API	request_catalog_refresh	self.wd, self.rap_dir
+wepppy/nodb/mods/rap/rap_ts_build.py	136	acquire	catalog API	module.request_catalog_refresh	controller.wd, controller.rap_dir
+wepppy/nodb/mods/rap/rap_ts_build.py	178	analyze	serializer candidate	frame.to_parquet	Path(stage) / 'rap_ts.parquet'
+wepppy/nodb/mods/rap/rap_ts_build.py	183	analyze	catalog API	module.request_catalog_refresh	controller.wd, 'rap/rap_ts.parquet'
+wepppy/nodb/mods/rap/revegetation_inputs.py	35	publish_revegetation_input	file publication candidate	os.replace	target, history / name
+wepppy/nodb/mods/rap/revegetation_inputs.py	43	publish_revegetation_input	file publication candidate	os.replace	attempt, target
+wepppy/nodb/mods/revegetation/revegetation.py	97	Revegetation.load_cover_transform	file publication candidate	shutil.copyfile	src_fn, self.cover_transform_path
+wepppy/nodb/mods/roads/_execution.py	100	write_execution_manifest	file publication candidate	Path(roads.roads_segment_pass_manifest_path).write_text	json.dumps(results.segment_execution_records, indent=2, sort_keys=True)
+wepppy/nodb/mods/roads/_management_inputs.py	99	_build_routed_mofe_management_file	file publication candidate	output_path.write_text	'\n'.join(out) + '\n'
+wepppy/nodb/mods/roads/_management_inputs.py	176	_build_routed_two_ofe_management_file	file publication candidate	output_path.write_text	'\n'.join(out) + '\n'
+wepppy/nodb/mods/roads/_management_inputs.py	190	_materialize_routed_three_ofe_management_template	file publication candidate	shutil.copy2	source_path, output_path
+wepppy/nodb/mods/roads/_management_inputs.py	293	_build_single_ofe_management_file	file publication candidate	output_path.write_text	'\n'.join(out) + '\n'
+wepppy/nodb/mods/roads/_native_runner.py	39	_run_segment_hillslope	file publication candidate	shutil.copy2	single_ofe_management_path, segment_man_path
+wepppy/nodb/mods/roads/_native_runner.py	41	_run_segment_hillslope	file publication candidate	shutil.copy2	single_ofe_soil_path, segment_sol_path
+wepppy/nodb/mods/roads/_native_runner.py	43	_run_segment_hillslope	file publication candidate	shutil.copy2	single_ofe_slope_path, segment_slp_path
+wepppy/nodb/mods/roads/_parameterization_comparisons.py	227	write_comparison_snapshot	write-mode open candidate	candidate.open	'x'
+wepppy/nodb/mods/roads/_parameterization_comparisons.py	228	write_comparison_snapshot	serializer candidate	json.dump	snapshot, stream
+wepppy/nodb/mods/roads/_parameterization_comparisons.py	231	write_comparison_snapshot	file publication candidate	os.replace	candidate, destination
+wepppy/nodb/mods/roads/_parameterization_support.py	57	_record_parameterization_inputs	file publication candidate	Path(soil_path).with_suffix('.parameterization.json').write_text	json.dumps(provenance, indent=2, sort_keys=True)
+wepppy/nodb/mods/roads/_pass_routing.py	20	_safe_link_or_copy	file publication candidate	os.symlink	src_path, dst_path
+wepppy/nodb/mods/roads/_pass_routing.py	23	_safe_link_or_copy	file publication candidate	shutil.copy2	src_path, dst_path
+wepppy/nodb/mods/roads/_pass_routing.py	55	_rewrite_pass_header_climate_line	write-mode open candidate	pass_path.open	'w'
+wepppy/nodb/mods/roads/_pass_routing.py	163	_prepare_roads_runs_workspace	file publication candidate	shutil.copytree	entry, dst
+wepppy/nodb/mods/roads/_segment_loss_summary.py	222	build_segment_loss_summary	serializer candidate	pq.write_table	table, stream
+wepppy/nodb/mods/roads/_segment_loss_summary.py	226	build_segment_loss_summary	file publication candidate	os.replace	candidate, target
+wepppy/nodb/mods/roads/_slope_inputs.py	142	_write_routed_two_ofe_slope_file	file publication candidate	path.write_text	'\n'.join(content) + '\n'
+wepppy/nodb/mods/roads/_slope_inputs.py	170	_write_routed_three_ofe_slope_file	file publication candidate	path.write_text	'\n'.join(content) + '\n'
+wepppy/nodb/mods/roads/_slope_inputs.py	198	_write_routed_three_ofe_landuse_road_fill_slope_file	file publication candidate	path.write_text	'\n'.join(content) + '\n'
+wepppy/nodb/mods/roads/_slope_inputs.py	231	_write_routed_four_ofe_landuse_road_fill_hill_slope_file	file publication candidate	path.write_text	'\n'.join(content) + '\n'
+wepppy/nodb/mods/roads/_slope_inputs.py	243	_write_single_ofe_slope_file	file publication candidate	path.write_text	'\n'.join(content) + '\n'
+wepppy/nodb/mods/roads/_soil_inputs.py	106	_build_routed_mofe_soil_file	file publication candidate	output_path.write_text	ensure_200mm_boundary('\n'.join(out) + '\n')
+wepppy/nodb/mods/roads/_soil_inputs.py	224	_build_routed_two_ofe_soil_file	file publication candidate	output_path.write_text	ensure_200mm_boundary('\n'.join(out) + '\n')
+wepppy/nodb/mods/roads/_soil_inputs.py	332	_build_routed_three_ofe_soil_file	file publication candidate	output_path.write_text	ensure_200mm_boundary('\n'.join(out) + '\n')
+wepppy/nodb/mods/roads/_soil_inputs.py	418	_build_single_ofe_soil_file	file publication candidate	output_path.write_text	ensure_200mm_boundary('\n'.join(out) + '\n')
+wepppy/nodb/mods/roads/_unrutted.py	116	write_slope	file publication candidate	Path(path).write_text	'\n'.join(lines) + '\n'
+wepppy/nodb/mods/roads/_unrutted_native.py	69	_materialize_strip	file publication candidate	shutil.copyfile	plan['slope_path'], segment_slope_path
+wepppy/nodb/mods/roads/_unrutted_native.py	421	_materialize_remainder	file publication candidate	shutil.copyfile	remainder_prepared_path, remainder_slope_path
+wepppy/nodb/mods/roads/monotonic_segments.py	959	convert_geojson_file_to_monotonic_segments	file publication candidate	output_path.write_text	json.dumps(output_geojson, indent=2)
+wepppy/nodb/mods/roads/monotonic_segments.py	964	convert_geojson_file_to_monotonic_segments	file publication candidate	low_points_output_path.write_text	json.dumps(low_points_geojson, indent=2)
+wepppy/nodb/mods/roads/parameterization.py	166	_validate_parsed_asset	file publication candidate	path.write_bytes	text.encode('utf-8')
+wepppy/nodb/mods/roads/parameterization.py	332	materialize_baseline	write-mode open candidate	path.open	'xb'
+wepppy/nodb/mods/roads/parameterization.py	417	apply_soil_overrides	file publication candidate	soil.write_text	''.join(lines)
+wepppy/nodb/mods/roads/roads.py	356	Roads._ensure_roads_log_initialized	file publication candidate	log_path.write_text	f'{timestamp} [lifecycle] roads_log_initialized\n'
+wepppy/nodb/mods/roads/roads.py	371	Roads._append_roads_log	write-mode open candidate	open	self.roads_log_path, 'a'
+wepppy/nodb/mods/roads/roads.py	667	Roads.set_params	file publication candidate	shutil.copy2	self._nodb, snapshot / 'roads.nodb'
+wepppy/nodb/mods/roads/roads.py	774	Roads.set_uploaded_geojson	file publication candidate	shutil.copy2	target_path, backup_path
+wepppy/nodb/mods/roads/roads.py	775	Roads.set_uploaded_geojson	file publication candidate	shutil.copy2	source_path, staged_path
+wepppy/nodb/mods/roads/roads.py	807	Roads.set_uploaded_geojson	file publication candidate	os.replace	staged_path, target_path
+wepppy/nodb/mods/roads/roads.py	820	Roads.set_uploaded_geojson	file publication candidate	os.replace	backup_path, target_path
+wepppy/nodb/mods/roads/roads.py	1014	Roads.prepare_segments	file publication candidate	Path(self.roads_summary_path).write_text	json.dumps(prepare_summary, indent=2, sort_keys=True)
+wepppy/nodb/mods/rred/rred.py	123	Rred.copy_soils	serializer candidate	shutil.copy	fn, soils_dir
+wepppy/nodb/mods/rred/rred_api.py	50	retrieve_rred	write-mode open candidate	open	archive_path, 'wb'
+wepppy/nodb/mods/rusle/c_integration.py	98	_utc_now_iso	file publication candidate	datetime.now(timezone.utc).replace	—
+wepppy/nodb/mods/rusle/c_integration.py	531	_write_float_raster	write-mode open candidate	rasterio.open	path, 'w'
+wepppy/nodb/mods/rusle/c_integration.py	546	_write_uint8_raster	write-mode open candidate	rasterio.open	path, 'w'
+wepppy/nodb/mods/rusle/c_integration.py	726	run_rusle_c_factor	catalog API	request_catalog_refresh	wd, _relative_path(wd, path)
+wepppy/nodb/mods/rusle/c_integration.py	760	run_rusle_c_factor	catalog API	request_catalog_refresh	wd, _relative_path(wd, manifest_path)
+wepppy/nodb/mods/rusle/c_integration.py	858	run_rusle_c_factor	file publication candidate	shutil.copyfile	lookup_path, lookup_copy_path
+wepppy/nodb/mods/rusle/c_integration.py	865	run_rusle_c_factor	catalog API	request_catalog_refresh	wd, _relative_path(wd, path)
+wepppy/nodb/mods/rusle/c_integration.py	916	run_rusle_c_factor	catalog API	request_catalog_refresh	wd, _relative_path(wd, manifest_path)
+wepppy/nodb/mods/rusle/c_manifest.py	25	write_manifest	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/rusle/c_manifest.py	26	write_manifest	serializer candidate	json.dump	payload, stream
+wepppy/nodb/mods/rusle/k_compare.py	165	write_comparison_summary_json	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/rusle/k_compare.py	166	write_comparison_summary_json	serializer candidate	json.dump	payload, stream
+wepppy/nodb/mods/rusle/k_integration.py	69	_utc_now_iso	file publication candidate	datetime.now(timezone.utc).replace	—
+wepppy/nodb/mods/rusle/k_integration.py	134	_write_k_raster	write-mode open candidate	rasterio.open	path, 'w'
+wepppy/nodb/mods/rusle/k_integration.py	556	_resolve_optional_cfvo_layer_paths	catalog API	request_catalog_refresh	wd, _relative_path(wd, aligned_top)
+wepppy/nodb/mods/rusle/k_integration.py	557	_resolve_optional_cfvo_layer_paths	catalog API	request_catalog_refresh	wd, _relative_path(wd, aligned_sub)
+wepppy/nodb/mods/rusle/k_integration.py	853	run_rusle_k_factors	catalog API	request_catalog_refresh	wd, _relative_path(wd, path)
+wepppy/nodb/mods/rusle/k_integration.py	902	run_rusle_k_factors	catalog API	request_catalog_refresh	wd, _relative_path(wd, reference_samples_path)
+wepppy/nodb/mods/rusle/k_integration.py	903	run_rusle_k_factors	catalog API	request_catalog_refresh	wd, _relative_path(wd, comparison_path)
+wepppy/nodb/mods/rusle/k_manifest.py	23	write_manifest	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/rusle/k_manifest.py	24	write_manifest	serializer candidate	json.dump	payload, stream
+wepppy/nodb/mods/rusle/k_reference.py	202	write_reference_samples_json	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/rusle/k_reference.py	203	write_reference_samples_json	serializer candidate	json.dump	payload, stream
+wepppy/nodb/mods/rusle/ls_integration.py	35	_utc_now_iso	file publication candidate	datetime.now(timezone.utc).replace	—
+wepppy/nodb/mods/rusle/ls_integration.py	46	_write_manifest	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/rusle/ls_integration.py	47	_write_manifest	serializer candidate	json.dump	payload, stream
+wepppy/nodb/mods/rusle/rusle.py	48	_utc_now_iso	file publication candidate	datetime.now(timezone.utc).replace	—
+wepppy/nodb/mods/rusle/rusle.py	63	_write_manifest	write-mode open candidate	open	path, 'w'
+wepppy/nodb/mods/rusle/rusle.py	64	_write_manifest	serializer candidate	json.dump	dict(payload), stream
+wepppy/nodb/mods/rusle/rusle.py	246	_write_float_raster	write-mode open candidate	rasterio.open	path, 'w'
+wepppy/nodb/mods/rusle/rusle.py	664	Rusle._resolve_observed_rap	catalog API	request_catalog_refresh	self.wd, _relative_path(self.wd, rap_path)
+wepppy/nodb/mods/rusle/rusle.py	910	Rusle._write_readme	write-mode open candidate	open	readme_path, 'w'
+wepppy/nodb/mods/rusle/rusle.py	952	Rusle.build	catalog API	request_catalog_refresh	self.wd, _relative_path(self.wd, r_path)
+wepppy/nodb/mods/rusle/rusle.py	963	Rusle.build	catalog API	request_catalog_refresh	self.wd, _relative_path(self.wd, path)
+wepppy/nodb/mods/rusle/rusle.py	972	Rusle.build	catalog API	request_catalog_refresh	self.wd, _relative_path(self.wd, k_result.manifest)
+wepppy/nodb/mods/rusle/rusle.py	1004	Rusle.build	catalog API	request_catalog_refresh	self.wd, _relative_path(self.wd, p_path)
+wepppy/nodb/mods/rusle/rusle.py	1017	Rusle.build	catalog API	request_catalog_refresh	self.wd, _relative_path(self.wd, a_path)
+wepppy/nodb/mods/rusle/rusle.py	1031	Rusle.build	catalog API	update_catalog_entry	self.wd, readme_relpath
+wepppy/nodb/mods/rusle/rusle.py	1083	Rusle.build	catalog API	request_catalog_refresh	self.wd, _relative_path(self.wd, manifest_path)
+wepppy/nodb/mods/shrubland/shrubland.py	213	Shrubland.acquire_rasters	catalog API	request_catalog_refresh	self.wd, self.shrubland_dir
+wepppy/nodb/mods/skid_trails/skid_trails.py	206	SkidTrails.__init__	file publication candidate	shutil.copyfile	_skid_trails_map, _join(skid_trails_dir, _fn)
+wepppy/nodb/mods/skid_trails/skid_trails.py	247	SkidTrails.rasterize_skid_trails	write-mode open candidate	rasterio.open	self.skid_trails_raster, 'w'
+wepppy/nodb/mods/skid_trails/skid_trails.py	352	SkidTrails.walk_skid_trails	write-mode open candidate	open	_join(self.skid_trails_dir, 'skid_trails0.geojson'), 'w'
+wepppy/nodb/mods/skid_trails/skid_trails.py	355	SkidTrails.walk_skid_trails	catalog API	request_catalog_refresh	self.wd, 'skid_trails'
+wepppy/nodb/mods/swat/swat.py	544	Swat.build_recall	write-mode open candidate	open	manifest_path, 'w'
+wepppy/nodb/mods/swat/swat.py	545	Swat.build_recall	serializer candidate	json.dump	recall_manifest, handle
+wepppy/nodb/mods/swat/swat.py	604	Swat.run_swat	write-mode open candidate	open	log_path, 'w'
+wepppy/nodb/mods/swat/swat.py	665	Swat.run_swat	write-mode open candidate	open	index_path, 'w'
+wepppy/nodb/mods/swat/swat.py	666	Swat.run_swat	serializer candidate	json.dump	run_summary, handle
+wepppy/nodb/mods/swat/swat.py	687	Swat.run_swat	write-mode open candidate	open	index_path, 'w'
+wepppy/nodb/mods/swat/swat.py	688	Swat.run_swat	serializer candidate	json.dump	run_summary, handle
+wepppy/nodb/mods/swat/swat.py	732	Swat.run_swat_interchange	file publication candidate	shutil.copy2	source_manifest, manifest_path
+wepppy/nodb/mods/swat/swat.py	794	Swat.run_swat_interchange	catalog API	request_catalog_refresh	self.wd, interchange_dir
+wepppy/nodb/mods/swat/swat.py	917	Swat._write_print_prt	write-mode open candidate	open	print_path, 'w'
+wepppy/nodb/mods/swat/swat.py	941	Swat._copy_outputs	file publication candidate	shutil.copy2	src, dest
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py	280	SwatConnectivityMixin._write_chandeg_con	write-mode open candidate	open	chandeg_path, 'w'
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py	312	SwatConnectivityMixin._write_channel_lte	write-mode open candidate	open	dest_path, 'w'
+wepppy/nodb/mods/swat/swat_connectivity_mixin.py	358	SwatConnectivityMixin._write_hyd_sed_lte	write-mode open candidate	open	dest_path, 'w'
+wepppy/nodb/mods/swat/swat_recall_mixin.py	205	SwatRecallMixin._convert_wepp_recall_file	write-mode open candidate	open	data_path, 'w'
+wepppy/nodb/mods/swat/swat_recall_mixin.py	450	SwatRecallMixin._shift_recall_years	write-mode open candidate	open	data_path, 'w'
+wepppy/nodb/mods/swat/swat_recall_mixin.py	456	SwatRecallMixin._append_log	write-mode open candidate	open	log_path, 'a'
+wepppy/nodb/mods/swat/swat_recall_mixin.py	528	SwatRecallMixin._patch_object_counts	write-mode open candidate	open	object_path, 'w'
+wepppy/nodb/mods/swat/swat_recall_mixin.py	570	SwatRecallMixin._patch_rout_unit_con	write-mode open candidate	open	rout_path, 'w'
+wepppy/nodb/mods/swat/swat_recall_mixin.py	604	SwatRecallMixin._patch_time_sim	write-mode open candidate	open	time_path, 'w'
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py	31	SwatTxtInOutMixin._prepare_txtinout	file publication candidate	shutil.copytree	self.template_dir, self.swat_txtinout_dir
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py	63	SwatTxtInOutMixin._ensure_om_water_init	write-mode open candidate	open	om_path, 'w'
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py	191	SwatTxtInOutMixin._write_plant_ini	write-mode open candidate	open	plant_path, 'w'
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py	207	SwatTxtInOutMixin._append_plant_ini	write-mode open candidate	open	plant_path, 'a'
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py	236	SwatTxtInOutMixin._patch_hru_surf_storage	write-mode open candidate	open	hru_path, 'w'
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py	335	SwatTxtInOutMixin._patch_cli_nbyr	write-mode open candidate	open	data_path, 'w'
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py	382	SwatTxtInOutMixin._normalize_recall_paths	file publication candidate	shutil.copy2	src, dest
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py	390	SwatTxtInOutMixin._normalize_recall_paths	write-mode open candidate	open	recall_path, 'w'
+wepppy/nodb/mods/swat/swat_txtinout_mixin.py	436	SwatTxtInOutMixin._patch_recall_con_areas	write-mode open candidate	open	recall_con, 'w'
+wepppy/nodb/mods/treatments/treatments.py	416	Treatments.build_treatments	write-mode open candidate	open	new_man_path, 'w'
+wepppy/nodb/mods/treatments/treatments.py	601	Treatments._apply_mulch	write-mode open candidate	open	new_man_path, 'w'
+wepppy/nodb/mods/treecanopy/treecanopy.py	121	Treecanopy.acquire_raster	catalog API	request_catalog_refresh	self.wd, self.treecanopy_dir
+wepppy/nodb/project_config_snapshot.py	451	materialize_preset_snapshot	file publication candidate	os.replace	config_temp, config_path
+wepppy/nodb/project_config_snapshot.py	454	materialize_preset_snapshot	file publication candidate	os.replace	manifest_temp, manifest_path
+wepppy/nodb/project_config_update.py	1397	_replace_bytes	file publication candidate	os.replace	temporary, destination
+wepppy/nodb/project_config_update.py	1696	apply_project_config_update	file publication candidate	os.replace	journal_temp, root / JOURNAL_NAME
+wepppy/nodb/project_config_update.py	1701	apply_project_config_update	file publication candidate	os.replace	config_temp, config_path
+wepppy/nodb/project_config_update.py	1705	apply_project_config_update	file publication candidate	os.replace	manifest_temp, root / MANIFEST_NAME
+wepppy/nodb/scripts/dss_export/plot_peak_chan_compare.py	152	load_parquet_series	file publication candidate	df[['datetime', 'Peak_Discharge (m^3/s)']].rename	—
+wepppy/nodb/scripts/update_extended_mods_data.py	52	relink_configs	file publication candidate	cfg.write_text	updated
+wepppy/nodb/single_input_policy.py	75	single_input_capability_graph	file publication candidate	replace	graph
+wepppy/nodb/skeletonize.py	77	skeletonize_run	file publication candidate	gitignore_path.write_text	'\n'.join(_build_gitignore(run_path, allowlist, denylist)) + '\n'
+wepppy/nodb/version.py	92	_atomic_write	file publication candidate	tmp_path.replace	path
+wepppy/nodb/wepp_nodb_post_utils.py	173	activate_query_engine_for_run	catalog API	activate_query_engine	wepp.wd
+wepppy/observability/secret_profiles.py	31		file publication candidate	replace	spec
+wepppy/profile_recorder/assembler.py	79	ProfileAssembler.handle_event	write-mode open candidate	events_path.open	'a'
+wepppy/profile_recorder/assembler.py	85	ProfileAssembler.handle_event	file publication candidate	pointer_path.write_text	str(run_dir)
+wepppy/profile_recorder/assembler.py	156	ProfileAssembler.promote_draft	file publication candidate	shutil.copytree	draft_root, capture_target
+wepppy/profile_recorder/assembler.py	169	ProfileAssembler.promote_draft	file publication candidate	shutil.copytree	run_src, profile_root / 'run'
+wepppy/profile_recorder/assembler.py	190	ProfileAssembler._snapshot_candidate	file publication candidate	shutil.copy2	candidate, target
+wepppy/profile_recorder/assembler.py	255	ProfileAssembler._apply_task_rules	write-mode open candidate	note_path.open	'a'
+wepppy/profile_recorder/assembler.py	469	ProfileAssembler._snapshot_omni_upload	file publication candidate	shutil.copytree	limbo_src, limbo_dest
+wepppy/profile_recorder/assembler.py	479	ProfileAssembler._copy_seed_file	file publication candidate	shutil.copy2	source, target
+wepppy/profile_recorder/assembler.py	539	ProfileAssembler._ensure_config_seed	file publication candidate	shutil.copy2	candidate, target_cfg
+wepppy/profile_recorder/assembler.py	551	ProfileAssembler._ensure_config_seed	file publication candidate	active_path.write_text	config_slug
+wepppy/profile_recorder/assembler.py	560	ProfileAssembler._ensure_config_seed	file publication candidate	shutil.copy2	defaults_source, defaults_target
+wepppy/profile_recorder/assembler.py	595	ProfileAssembler._evaluate_ron_expectation	write-mode open candidate	note_path.open	'a'
+wepppy/profile_recorder/playback.py	873	PlaybackSession._hydrate_seed_files	file publication candidate	shutil.copy2	item, target / item.name
+wepppy/profile_recorder/playback.py	975	PlaybackSession._retag_run_group	file publication candidate	nodb_path.write_text	json.dumps(data)
+wepppy/profile_recorder/profile_recorder.py	300	ProfileRecorder._append_jsonl	write-mode open candidate	path.open	'a'
+wepppy/profile_recorder/sbs_seed.py	95	_json_record	serializer candidate	json.dump	value, stream
+wepppy/profile_recorder/sbs_seed.py	97	_json_record	file publication candidate	os.replace	temporary, name
+wepppy/query_engine/activate.py	290	update_catalog_entry	catalog API	activate_query_engine	base
+wepppy/query_engine/activate.py	409	_build_catalog	native dispatch	call_wepppyo3_interchange	'query-engine catalog scan', 'catalog_scan', str(base)
+wepppy/query_engine/app/access.py	297	prepare_context	file publication candidate	replace	entry
+wepppy/query_engine/catalog_refresh.py	240	resolve_scope	serializer candidate	atomic_json	marker, {'protocol': PROTOCOL, 'scope_id': scope_id, 'managed': root is not None, 'incarnation': incarnation, 'initialization_only': True}
+wepppy/query_engine/catalog_refresh.py	419	atomic_json	file publication candidate	os.replace	temporary, path
+wepppy/query_engine/catalog_refresh.py	447	invalidate_catalog_incarnation	file publication candidate	os.replace	receipts, history
+wepppy/query_engine/catalog_refresh.py	449	invalidate_catalog_incarnation	serializer candidate	atomic_json	base / REFRESH_PATH / 'incarnation.json', {'protocol': PROTOCOL, 'scope_id': _hash(namespace + '\x00' + relative), 'managed': root is not None, 'incarnation': incarnation}
+wepppy/query_engine/catalog_refresh.py	452	invalidate_catalog_incarnation	serializer candidate	atomic_json	base / REFRESH_PATH / 'status.json', {'protocol': PROTOCOL, 'incarnation': incarnation, 'state': 'pending', 'reason': 'lifecycle_replaced', 'updated_at': _now()}
+wepppy/query_engine/catalog_refresh.py	503	publish_catalog	serializer candidate	atomic_json	base / '_query_engine/catalog.json', catalog
+wepppy/query_engine/catalog_refresh.py	510	publish_catalog	serializer candidate	atomic_json	base / REFRESH_PATH / 'status.json', status
+wepppy/query_engine/catalog_refresh.py	547	record_catalog_refresh	serializer candidate	atomic_json	base / REFRESH_PATH / 'requests' / (identifier + '.json'), request
+wepppy/query_engine/catalog_refresh.py	595	request_catalog_refresh	catalog API	activate_query_engine	wd
+wepppy/query_engine/catalog_refresh.py	597	request_catalog_refresh	catalog API	update_catalog_entry	wd, asset_path
+wepppy/query_engine/catalog_refresh.py	599	request_catalog_refresh	catalog API	record_catalog_refresh	wd, asset_path
+wepppy/query_engine/catalog_refresh.py	673	prepare_catalog_intent	catalog API	record_catalog_refresh	base
+wepppy/query_engine/catalog_refresh.py	679	prepare_catalog_intent	catalog API	record_catalog_refresh	base, path
+wepppy/query_engine/catalog_refresh.py	805	_matches_stat	file publication candidate	datetime.fromtimestamp(stat.st_mtime_ns // 1000000000, timezone.utc).replace	—
+wepppy/query_engine/catalog_refresh.py	850	_acknowledge	serializer candidate	atomic_json	base / REFRESH_PATH / 'attempts' / (publication['publication_id'] + '.json'), attempt
+wepppy/query_engine/catalog_refresh.py	855	_acknowledge	serializer candidate	atomic_json	base / REFRESH_PATH / 'status.json', status
+wepppy/query_engine/catalog_refresh.py	872	refresh_catalog	serializer candidate	atomic_json	base / REFRESH_PATH / 'attempts' / ('malformed-' + str(uuid4()) + '.json'), {'protocol': PROTOCOL, 'incarnation': scope.incarnation, 'state': 'malformed_catalog', 'catalog_digest': hashlib.sha256(raw_
+wepppy/query_engine/catalog_refresh.py	911	refresh_catalog	serializer candidate	atomic_json	base / REFRESH_PATH / 'attempts' / (str(uuid4()) + '.json'), failure
+wepppy/query_engine/catalog_refresh.py	912	refresh_catalog	serializer candidate	atomic_json	base / REFRESH_PATH / 'status.json', failure
+wepppy/query_engine/catalog_refresh.py	1006	set_catalog_refresh_state	serializer candidate	atomic_json	path, current
+wepppy/query_engine/context.py	139	resolve_run_context	catalog API	activate_query_engine	scenario_dir
+wepppy/rhem/out/rhemtotalwatsed.py	75	RhemTotalWatSed.export	write-mode open candidate	open	fn, 'w'
+wepppy/rhem/rhem.py	263	make_parameter_file	write-mode open candidate	open	fn, 'w'
+wepppy/rhem/rhem.py	292	make_hillslope_run	write-mode open candidate	open	run_fn, 'w'
+wepppy/rhem/rhem.py	311	run_hillslope	write-mode open candidate	open	_join(runs_dir, 'hill_{}.err'.format(topaz_id)), 'w'
+wepppy/rq/_query_catalog_admission.py	127	ordinary_observation	file publication candidate	timestamp.replace	—
+wepppy/rq/auth_actor.py	104	_append_enqueue_trace	write-mode open candidate	trace_path.open	'a'
+wepppy/rq/batch_outcome.py	79	atomic_json	serializer candidate	json.dump	value, stream
+wepppy/rq/batch_outcome.py	82	atomic_json	file publication candidate	os.replace	temporary, path
+wepppy/rq/batch_outcome.py	131	enroll	serializer candidate	atomic_json	directory / 'enrollment.json', enrollment
+wepppy/rq/batch_outcome.py	133	enroll	serializer candidate	atomic_json	inside(root, 'batch_results/current.json'), {'attempt_id': job.id}
+wepppy/rq/batch_outcome.py	199	register	serializer candidate	atomic_json	path, enrollment
+wepppy/rq/batch_outcome.py	208	invalidate_culvert	serializer candidate	atomic_json	path, {'attempt_id': None}
+wepppy/rq/batch_outcome.py	422	publish	serializer candidate	atomic_json	directory / 'runs.json', {'schema_version': 1, 'attempt_id': root_job.id, 'workflow': enrollment['workflow'], 'runs': [{'run_id': rid, 'status': 'failed', 'reason': 'execution_failed'} for rid in enro
+wepppy/rq/batch_outcome.py	426	publish	serializer candidate	atomic_json	committed, result
+wepppy/rq/batch_outcome.py	428	publish	serializer candidate	atomic_json	directory / 'status.json', {'last_observed_at': datetime.now(timezone.utc).isoformat(), 'batch': summary(root_job, enrollment, state='finalizing')}
+wepppy/rq/batch_outcome.py	513	publish	file publication candidate	os.replace	temporary, directory / 'results.zip'
+wepppy/rq/batch_outcome.py	517	publish	serializer candidate	atomic_json	directory / 'runs.json', manifest
+wepppy/rq/batch_outcome.py	519	publish	serializer candidate	atomic_json	committed, result
+wepppy/rq/batch_outcome.py	583	_poll	serializer candidate	atomic_json	directory / 'runs.json', {'schema_version': 1, 'attempt_id': job.id, 'workflow': enrollment['workflow'], 'runs': rows}
+wepppy/rq/batch_outcome.py	585	_poll	serializer candidate	atomic_json	committed, result
+wepppy/rq/batch_rq.py	96	_write_run_metadata	file publication candidate	path.write_text	json.dumps(payload, indent=2)
+wepppy/rq/batch_rq.py	176	_reset_omni_nodb_from_base	write-mode open candidate	target.open	'w'
+wepppy/rq/batch_rq.py	177	_reset_omni_nodb_from_base	serializer candidate	json.dump	state, fp
+wepppy/rq/batch_rq.py	192	_reset_omni_nodb_from_base	file publication candidate	shutil.copytree	base_omni_dir, target_omni_dir
+wepppy/rq/batch_rq.py	898	run_batch_hillslopes_rq	serializer candidate	json.dump	receipt, stream
+wepppy/rq/batch_rq.py	901	run_batch_hillslopes_rq	file publication candidate	os.replace	temporary, path
+wepppy/rq/batch_rq.py	949	run_batch_watershed_rq	file publication candidate	upstream_started_at.replace	—
+wepppy/rq/climate_attempt.py	51	resolve_climate_attempt	file publication candidate	created.replace	—
+wepppy/rq/climate_upload_attempt.py	109	ClimateUploadAttempt.snapshot	write-mode open candidate	candidate.open	'xb'
+wepppy/rq/climate_upload_attempt.py	110	ClimateUploadAttempt.snapshot	serializer candidate	shutil.copyfileobj	source, target
+wepppy/rq/climate_upload_attempt.py	132	ClimateUploadAttempt.record	serializer candidate	json.dump	details, stream
+wepppy/rq/climate_upload_attempt.py	134	ClimateUploadAttempt.record	file publication candidate	os.replace	temporary, self.receipt.name
+wepppy/rq/culvert_rq.py	871	_generate_batch_topo	file publication candidate	shutil.copy2	streams_path, netful_path
+wepppy/rq/culvert_rq.py	909	_prune_short_streams	file publication candidate	os.replace	output, netful_path
+wepppy/rq/culvert_rq.py	1094	_try_generate_masked_stream_junctions_from_fallback	file publication candidate	os.replace	masked_chnjnt, chnjnt_path
+wepppy/rq/culvert_rq.py	1152	_extend_watershed_mask_to_candidate	write-mode open candidate	rasterio.open	seeded_mask, 'w'
+wepppy/rq/culvert_rq.py	1155	_extend_watershed_mask_to_candidate	file publication candidate	os.replace	seeded_mask, watershed_mask_path
+wepppy/rq/culvert_rq.py	1257	_seed_outlet_pixel	write-mode open candidate	rasterio.open	seeded_tif, 'w'
+wepppy/rq/culvert_rq.py	1271	_seed_outlet_pixel	file publication candidate	os.replace	seeded_tif, netful_path
+wepppy/rq/culvert_rq.py	1307	_ensure_outlet_junction	write-mode open candidate	rasterio.open	seeded_chnjnt, 'w'
+wepppy/rq/culvert_rq.py	1310	_ensure_outlet_junction	file publication candidate	os.replace	seeded_chnjnt, chnjnt_path
+wepppy/rq/culvert_rq_manifest.py	28	_write_run_metadata	write-mode open candidate	path.open	'w'
+wepppy/rq/culvert_rq_manifest.py	29	_write_run_metadata	serializer candidate	json.dump	payload, handle
+wepppy/rq/culvert_rq_manifest.py	34	_write_batch_summary	write-mode open candidate	path.open	'w'
+wepppy/rq/culvert_rq_manifest.py	35	_write_batch_summary	serializer candidate	json.dump	payload, handle
+wepppy/rq/culvert_rq_manifest.py	246	_fetch_job_info	file publication candidate	job.created_at.replace	—
+wepppy/rq/culvert_rq_manifest.py	394	_write_runs_manifest	file publication candidate	manifest_path.write_text	'\n'.join(lines)
+wepppy/rq/exception_logging.py	41	_append_exception_log	write-mode open candidate	target.open	'a'
+wepppy/rq/job_info.py	46	_utc_naive	file publication candidate	value.replace	—
+wepppy/rq/job_info.py	108	_build_queue_snapshot	file publication candidate	observed.replace	—
+wepppy/rq/job_info.py	439	_parse_datetime	file publication candidate	parsed.replace	—
+wepppy/rq/job_listings.py	27	_as_iso	file publication candidate	value.astimezone(timezone.utc).replace	—
+wepppy/rq/job_listings.py	227	list_recently_completed_jobs	file publication candidate	ended_at.replace	—
+wepppy/rq/landuse_upload_attempt.py	97	LanduseUploadAttempt.record	file publication candidate	os.replace	temporary, 'build-status.json'
+wepppy/rq/landuse_upload_attempt.py	128	LanduseUploadAttempt.snapshot	write-mode open candidate	target.open	'xb'
+wepppy/rq/landuse_upload_attempt.py	129	LanduseUploadAttempt.snapshot	serializer candidate	shutil.copyfileobj	source, output
+wepppy/rq/landuse_upload_attempt.py	157	apply_landuse_upload	file publication candidate	shutil.copyfile	snapshot.raw, Path(staging) / f'_{filename}'
+wepppy/rq/landuse_upload_attempt.py	158	apply_landuse_upload	file publication candidate	shutil.copyfile	snapshot.aligned, Path(staging) / 'nlcd.tif'
+wepppy/rq/migrations_rq.py	244	_run_archive_inline	file publication candidate	archive_path_tmp.rename	archive_path
+wepppy/rq/project_rq.py	702	test_run_rq	file publication candidate	shutil.copytree	base_wd, runid_wd
+wepppy/rq/project_rq.py	710	test_run_rq	write-mode open candidate	open	nodb_fn, 'w'
+wepppy/rq/project_rq.py	711	test_run_rq	serializer candidate	json.dump	state, fp
+wepppy/rq/project_rq.py	2720	_transfer_profile_fork_claim	file publication candidate	os.replace	temp_path, claim_path
+wepppy/rq/project_rq_archive.py	204	_write_private_archive_sidecar	file publication candidate	os.replace	temp, path
+wepppy/rq/project_rq_archive.py	551	archive_rq	file publication candidate	os.replace	archive_path_tmp, archive_path
+wepppy/rq/project_rq_archive.py	861	restore_archive_rq	write-mode open candidate	open	target_path, 'wb'
+wepppy/rq/project_rq_archive.py	862	restore_archive_rq	serializer candidate	shutil.copyfileobj	src, dst
+wepppy/rq/project_rq_fork.py	132	_capture_to_quarantine	file publication candidate	os.rename	source, destination
+wepppy/rq/project_rq_fork.py	384	_normalize_fork_omni_links	file publication candidate	os.symlink	action.canonical or '', action.name
+wepppy/rq/project_rq_fork.py	492	_normalize_fork_omni_links	file publication candidate	os.symlink	action.original, action.name
+wepppy/rq/project_rq_fork.py	554	_normalize_fork_omni_links	file publication candidate	os.symlink	action.original, action.name
+wepppy/rq/project_rq_fork.py	641	_write_fork_redisprep_namespace	file publication candidate	os.replace	temp_name, '.redisprep-run-id'
+wepppy/rq/project_rq_fork.py	871	_atomic_write_bound_fork_nodb	file publication candidate	os.replace	temp_name, rewrite.name
+wepppy/rq/query_catalog_rq.py	545	reconcile_query_catalogs	catalog API	record_catalog_refresh	path
+wepppy/rq/query_catalog_rq.py	547	reconcile_query_catalogs	catalog API	record_catalog_refresh	path
+wepppy/rq/run_catalog_rq.py	64	safe_job_details	file publication candidate	job.started_at.replace	—
+wepppy/rq/run_catalog_rq.py	65	safe_job_details	file publication candidate	job.ended_at.replace	—
+wepppy/rq/run_sync_rq.py	78	_normalize_nodb_paths	write-mode open candidate	open	nodb_path, 'w'
+wepppy/rq/run_sync_rq.py	135	_normalize_parquet_paths	serializer candidate	df.to_parquet	parquet_path
+wepppy/rq/run_sync_rq.py	373	_write_provenance	file publication candidate	target.write_text	json.dumps(provenance, indent=2, sort_keys=True)
+wepppy/rq/topo_utils.py	89	_prune_stream_order	file publication candidate	shutil.copy2	current, netful_path
+wepppy/rq/webhook_hooks.py	155	_record	file publication candidate	replace	_member(job, info, deadline)
+wepppy/rq/wepp_rq_dss.py	54	_copy_dss_readme	file publication candidate	shutil.copy2	source, dest_dir / 'README.dss_export.md'
+wepppy/rq/wepp_rq_dss.py	226	_write_dss_channel_geojson	write-mode open candidate	open	tmp_path, 'w'
+wepppy/rq/wepp_rq_dss.py	227	_write_dss_channel_geojson	serializer candidate	json.dump	output_geojson, dest_fp
+wepppy/rq/wepp_rq_dss.py	228	_write_dss_channel_geojson	file publication candidate	os.replace	tmp_path, dest_path
+wepppy/rq/wepp_rq_stage_post.py	371	_post_watershed_interchange_rq	catalog API	activate_query_engine	wd
+wepppy/rq/weppcloudr_backends.py	105	RenderRequest.digest	serializer candidate	self.to_json	—
+wepppy/rq/weppcloudr_backends.py	158	validate_request	serializer candidate	request.to_json	—
+wepppy/rq/weppcloudr_backends.py	262	HttpRenderControlPlaneClient.submit	serializer candidate	request.to_json	—
+wepppy/rq/weppcloudr_control_plane.py	502	RenderControlPlane._ensure_spec	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	549	RenderControlPlane._dispatch_create	file publication candidate	replace	current
+wepppy/rq/weppcloudr_control_plane.py	554	RenderControlPlane._dispatch_create	file publication candidate	replace	current
+wepppy/rq/weppcloudr_control_plane.py	578	RenderControlPlane.cancel	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	600	RenderControlPlane.cancel	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	643	RenderControlPlane._reconcile	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	682	RenderControlPlane._reconcile	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	698	RenderControlPlane._bind_and_reconcile	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	705	RenderControlPlane._bind_and_reconcile	file publication candidate	replace	updated
+wepppy/rq/weppcloudr_control_plane.py	721	RenderControlPlane._apply_observation	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	740	RenderControlPlane._apply_observation	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	772	RenderControlPlane._apply_observation	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	801	RenderControlPlane._begin_failure_cleanup	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	820	RenderControlPlane._terminal_failure	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	835	RenderControlPlane._terminal_cancel_without_job	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	857	RenderControlPlane._finalize_terminal	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	863	RenderControlPlane._finalize_terminal	file publication candidate	replace	receipt
+wepppy/rq/weppcloudr_control_plane.py	875	RenderControlPlane._finalize_terminal	file publication candidate	replace	receipt
+wepppy/runtime_paths/wepp_inputs.py	109	copy_input_file	file publication candidate	shutil.copyfile	src, dst
+wepppy/soils/ssurgo/fallback.py	78	_atomic_json	write-mode open candidate	temporary.open	'x'
+wepppy/soils/ssurgo/fallback.py	79	_atomic_json	serializer candidate	json.dump	payload, handle
+wepppy/soils/ssurgo/fallback.py	83	_atomic_json	file publication candidate	os.replace	temporary, path
+wepppy/soils/ssurgo/fallback.py	190	prepare_padded_candidate_raster	file publication candidate	os.replace	temporary_raster, raster_path
+wepppy/soils/ssurgo/retention.py	133	write_companion	write-mode open candidate	Path(str(path) + '.retention.json').open	'x'
+wepppy/soils/ssurgo/retention.py	134	write_companion	serializer candidate	json.dump	_json_safe(receipt), stream
+wepppy/soils/ssurgo/retention.py	254	finish_treatment_task	write-mode open candidate	Path(str(target) + '.retention.json').open	'x'
+wepppy/soils/ssurgo/retention.py	255	finish_treatment_task	serializer candidate	json.dump	receipt, stream
+wepppy/soils/ssurgo/retention.py	304	_write_derived	write-mode open candidate	Path(str(target) + '.retention.json').open	'x'
+wepppy/soils/ssurgo/retention.py	305	_write_derived	serializer candidate	json.dump	receipt, stream
+wepppy/soils/ssurgo/retention.py	508	write_exclusive	write-mode open candidate	open	target, 'x'
+wepppy/soils/ssurgo/selection.py	135	_publish_latest	serializer candidate	json.dump	event, stream
+wepppy/soils/ssurgo/selection.py	139	_publish_latest	file publication candidate	os.replace	temporary, target
+wepppy/soils/ssurgo/source.py	552	write_artifact_provenance	serializer candidate	json.dump	evidence, stream
+wepppy/soils/ssurgo/source.py	556	write_artifact_provenance	file publication candidate	os.replace	temporary, target
+wepppy/soils/ssurgo/spatializer.py	187	SurgoSpatializer.spatialize_var	write-mode open candidate	meta_path.open	'w'
+wepppy/soils/ssurgo/ssurgo.py	255	_write_text_atomic	write-mode open candidate	open	tmp_path, 'w'
+wepppy/soils/ssurgo/ssurgo.py	257	_write_text_atomic	file publication candidate	os.replace	tmp_path, path
+wepppy/soils/ssurgo/ssurgo.py	1414	WeppSoil.pickle	write-mode open candidate	open	self.pickle_fn, 'w'
+wepppy/soils/ssurgo/ssurgo.py	1462	WeppSoil._write7778	write-mode open candidate	open	fpath, 'w'
+wepppy/soils/ssurgo/ssurgo.py	1499	WeppSoil._write2006_2	write-mode open candidate	open	fpath, 'w'
+wepppy/soils/ssurgo/ssurgo.py	1535	WeppSoil.write_log	write-mode open candidate	open	fname, 'w'
+wepppy/soils/ssurgo/ssurgo.py	2139	SurgoSoilCollection.dump	write-mode open candidate	open	fname, 'w'
+wepppy/soils/ssurgo/ssurgo.py	2345	SurgoSoilCollection._write_missing_wepp_soil_log	write-mode open candidate	open	fname, 'w'
+wepppy/soils/ssurgo/ssurgo.py	2534	SurgoSoilCollection._write_cache_metadata	file publication candidate	datetime.now(timezone.utc).replace	—
+wepppy/tools/migrations/interchange.py	205	refresh_query_catalog	catalog API	activate_query_engine	str(run_path)
+wepppy/tools/migrations/landuse.py	149	migrate_landuse_parquet	serializer candidate	df.to_parquet	landuse_parquet
+wepppy/tools/migrations/landuse.py	151	migrate_landuse_parquet	catalog API	update_catalog_entry	run_path, 'landuse/landuse.parquet'
+wepppy/tools/migrations/migrate_ashpost_pickles.py	98	main	write-mode open candidate	log_path.open	'a'
+wepppy/tools/migrations/migrate_landuse_parquet.py	148	main	write-mode open candidate	log_path.open	'a'
+wepppy/tools/migrations/migrate_landuse_parquet.py	183	main	serializer candidate	df.to_parquet	landuse_fn
+wepppy/tools/migrations/migrate_observed_nodb.py	40	migrate_observed_nodb	file publication candidate	shutil.copy2	observed_nodb, backup_path
+wepppy/tools/migrations/migrate_observed_nodb.py	68	migrate_observed_nodb	write-mode open candidate	open	observed_nodb, 'w'
+wepppy/tools/migrations/migrate_observed_nodb.py	69	migrate_observed_nodb	serializer candidate	json.dump	data, f
+wepppy/tools/migrations/migrate_run_paths.py	90	migrate_nodb_file	file publication candidate	shutil.copy2	nodb_path, backup_path
+wepppy/tools/migrations/migrate_run_paths.py	96	migrate_nodb_file	write-mode open candidate	open	nodb_path, 'w'
+wepppy/tools/migrations/migrate_run_paths.py	97	migrate_nodb_file	serializer candidate	json.dump	migrated_data, f
+wepppy/tools/migrations/migrate_soils_parquet.py	148	main	write-mode open candidate	log_path.open	'a'
+wepppy/tools/migrations/migrate_soils_parquet.py	183	main	serializer candidate	df.to_parquet	soils_fn
+wepppy/tools/migrations/migrate_watersheds_peridot_tables.py	166	main	write-mode open candidate	log_path.open	'a'
+wepppy/tools/migrations/migrate_wbt_geojson_ids.py	104	_process_geojson	write-mode open candidate	path.open	'w'
+wepppy/tools/migrations/migrate_wbt_geojson_ids.py	105	_process_geojson	serializer candidate	json.dump	data, fp
+wepppy/tools/migrations/migrate_wbt_geojson_ids.py	156	main	write-mode open candidate	log_path.open	'a'
+wepppy/tools/migrations/nodb.py	62	migrate_observed_nodb	write-mode open candidate	open	observed_nodb, 'w'
+wepppy/tools/migrations/nodb.py	63	migrate_observed_nodb	serializer candidate	json.dump	data, f
+wepppy/tools/migrations/nodb.py	146	migrate_run_paths	write-mode open candidate	open	nodb_file, 'w'
+wepppy/tools/migrations/nodb.py	147	migrate_run_paths	serializer candidate	json.dump	migrated_data, f
+wepppy/tools/migrations/nodb.py	224	migrate_nodb_jsonpickle_format	write-mode open candidate	open	nodb_file, 'w'
+wepppy/tools/migrations/nodb.py	225	migrate_nodb_jsonpickle_format	serializer candidate	json.dump	new_data, f
+wepppy/tools/migrations/nodir_bulk.py	156	_append_audit	write-mode open candidate	audit_log.open	'a'
+wepppy/tools/migrations/run_migrations.py	89	create_archive	file publication candidate	archive_path_tmp.rename	archive_path
+wepppy/tools/migrations/soils.py	147	migrate_soils_parquet	serializer candidate	df.to_parquet	soils_parquet
+wepppy/tools/migrations/soils.py	149	migrate_soils_parquet	catalog API	update_catalog_entry	run_path, 'soils/soils.parquet'
+wepppy/tools/migrations/soils.py	224	migrate_soils_nodb_meta	write-mode open candidate	open	soils_nodb, 'w'
+wepppy/tools/migrations/soils.py	318	migrate_soils_dir_paths	write-mode open candidate	open	soils_nodb, 'w'
+wepppy/tools/migrations/unroll_root_resources_batch.py	366	_run_lock	serializer candidate	json.dump	payload, handle
+wepppy/tools/migrations/unroll_root_resources_batch.py	473	_refresh_query_catalog_entry	catalog API	update_catalog_entry	run_dir, target_relpath
+wepppy/tools/migrations/unroll_root_resources_batch.py	1082	_append_jsonl	write-mode open candidate	path.open	'a'
+wepppy/tools/migrations/unroll_root_resources_batch.py	1090	_write_summary	file publication candidate	path.write_text	json.dumps(payload, indent=2, sort_keys=True)
+wepppy/tools/migrations/unroll_root_resources_batch.py	1118	run_batch_migration	file publication candidate	audit_jsonl.write_text	''
+wepppy/tools/migrations/watershed.py	57	_atomic_write_json	serializer candidate	json.dump	payload, f
+wepppy/tools/migrations/watershed.py	62	_atomic_write_json	file publication candidate	tmp_path.replace	path
+wepppy/tools/migrations/watershed.py	270	_write_legacy_parquet	serializer candidate	df.to_parquet	target
+wepppy/tools/migrations/watershed.py	705	migrate_watershed_nodb_slim	write-mode open candidate	open	structure_json_path, 'w'
+wepppy/tools/migrations/watershed.py	706	migrate_watershed_nodb_slim	serializer candidate	json.dump	normalized_structure, f
+wepppy/tools/migrations/watershed.py	717	migrate_watershed_nodb_slim	write-mode open candidate	open	watershed_nodb, 'w'
+wepppy/tools/migrations/watershed.py	718	migrate_watershed_nodb_slim	serializer candidate	json.dump	data, f
+wepppy/tools/migrations/watershed.py	801	migrate_wbt_geojson	write-mode open candidate	open	geojson_path, 'w'
+wepppy/tools/migrations/watershed.py	802	migrate_wbt_geojson	serializer candidate	json.dump	data, f
+wepppy/topo/osm_roads/cache.py	439	_coerce_utc	file publication candidate	value.replace	—
+wepppy/topo/osm_roads/cache.py	622	_atomic_write_json	serializer candidate	json.dump	payload, fp
+wepppy/topo/osm_roads/cache.py	625	_atomic_write_json	file publication candidate	os.replace	tmp_path, path
+wepppy/topo/osm_roads/cache.py	662	write_tile_payload	serializer candidate	frame.to_parquet	tmp_path
+wepppy/topo/osm_roads/cache.py	663	write_tile_payload	file publication candidate	os.replace	tmp_path, path
+wepppy/topo/peridot/peridot_runner.py	214	_refresh_watershed_readme	file publication candidate	readme_path.write_text	refreshed
+wepppy/topo/peridot/peridot_runner.py	284	run_peridot_abstract_watershed	write-mode open candidate	open	_join(wd, '_peridot.log'), 'w'
+wepppy/topo/peridot/peridot_runner.py	333	run_peridot_wbt_abstract_watershed	write-mode open candidate	open	_join(wd, '_peridot.log'), 'w'
+wepppy/topo/peridot/peridot_runner.py	479	post_abstract_watershed	serializer candidate	hill_df.to_parquet	_join(wd, 'watershed/hillslopes.parquet')
+wepppy/topo/peridot/peridot_runner.py	487	post_abstract_watershed	serializer candidate	chn_df.to_parquet	_join(wd, 'watershed/channels.parquet')
+wepppy/topo/peridot/peridot_runner.py	506	post_abstract_watershed	serializer candidate	fps_df.to_parquet	flowpaths_parquet
+wepppy/topo/peridot/peridot_runner.py	522	post_abstract_watershed	catalog API	request_catalog_refresh	wd, 'watershed'
+wepppy/topo/peridot/peridot_runner.py	581	run_peridot_wbt_sub_fields_abstraction	write-mode open candidate	open	_join(wd, '_peridot.log'), 'w'
+wepppy/topo/peridot/peridot_runner.py	603	post_abstract_sub_fields	serializer candidate	field_df.to_parquet	_join(wd, 'ag_fields/sub_fields/fields.parquet')
+wepppy/topo/peridot/peridot_runner.py	608	post_abstract_sub_fields	serializer candidate	fps_df.to_parquet	_join(wd, 'ag_fields/sub_fields/field_flowpaths.parquet')
+wepppy/topo/peridot/peridot_runner.py	613	post_abstract_sub_fields	catalog API	request_catalog_refresh	wd, 'ag_fields/sub_fields'
+wepppy/topo/peridot/peridot_runner.py	638	_normalize_field_flowpaths_dataframe	file publication candidate	normalized.rename	—
+wepppy/topo/peridot/peridot_runner.py	772	migrate_watershed_outputs	serializer candidate	hill_df.to_parquet	hill_target
+wepppy/topo/peridot/peridot_runner.py	797	migrate_watershed_outputs	serializer candidate	chn_df.to_parquet	chn_target
+wepppy/topo/peridot/peridot_runner.py	806	migrate_watershed_outputs	serializer candidate	fp_df.to_parquet	fp_target
+wepppy/topo/peridot/peridot_runner.py	819	migrate_watershed_outputs	catalog API	_update_catalog_entry	wd, 'watershed/hillslopes.parquet'
+wepppy/topo/peridot/peridot_runner.py	821	migrate_watershed_outputs	catalog API	_update_catalog_entry	wd, 'watershed/channels.parquet'
+wepppy/topo/peridot/peridot_runner.py	823	migrate_watershed_outputs	catalog API	_update_catalog_entry	wd, 'watershed/flowpaths.parquet'
+wepppy/topo/peridot/peridot_runner.py	824	migrate_watershed_outputs	catalog API	_update_catalog_entry	wd, 'watershed'
+wepppy/topo/topaz/topaz.py	152	_cp_chmod	file publication candidate	shutil.copyfile	src, dst
+wepppy/topo/topaz/topaz.py	343	TopazRunner._prep_dir	file publication candidate	shutil.copyfile	_join(topaz_templates, 'RASFOR.INP'), _join(wd, 'RASFOR.INP')
+wepppy/topo/topaz/topaz.py	344	TopazRunner._prep_dir	file publication candidate	shutil.copyfile	_join(topaz_templates, 'RASPRO.INP'), _join(wd, 'RASPRO.INP')
+wepppy/topo/topaz/topaz.py	386	TopazRunner._create_dnmcnt_input	write-mode open candidate	open	_join(self.topaz_wd, 'DNMCNT.INP'), 'w'
+wepppy/topo/topaz/topaz.py	437	TopazRunner._load_channel_masks	write-mode open candidate	open	fname, 'w'
+wepppy/topo/topaz/topaz.py	752	TopazRunner._create_dednm_input	write-mode open candidate	open	_join(self.topaz_wd, dednm_inp), 'w'
+wepppy/topo/topaz/topaz.py	843	TopazRunner.create_prj	write-mode open candidate	open	fname, 'w'
+wepppy/topo/topaz/topaz.py	965	TopazRunner._run_dednm	write-mode open candidate	open	_join(topaz_wd, 'dednm.log'), 'w'
+wepppy/topo/topaz/topaz.py	1016	TopazRunner._run_rasfor	write-mode open candidate	open	_join(self.topaz_wd, 'rasfor.log'), 'w'
+wepppy/topo/topaz/topaz.py	1036	TopazRunner._run_rasbin	write-mode open candidate	open	_join(self.topaz_wd, 'rasbin.log'), 'w'
+wepppy/topo/topaz/topaz.py	1053	TopazRunner._run_raspro	write-mode open candidate	open	_join(self.topaz_wd, 'raspro.log'), 'w'
+wepppy/topo/topaz/topaz.py	1131	TopazRunner._polygonize_channels	write-mode open candidate	open	dst_fn2, 'w'
+wepppy/topo/topaz/topaz.py	1132	TopazRunner._polygonize_channels	serializer candidate	json.dump	js, fp
+wepppy/topo/topaz/topaz.py	1187	TopazRunner.create_channels_png	write-mode open candidate	open	_join(topaz_wd, 'NETFUL.VRT'), 'w'
+wepppy/topo/watershed_abstraction/slope_file.py	139	clip_slope_file_length	file publication candidate	os.replace	tmp_fn, dst_fn
+wepppy/topo/watershed_abstraction/slope_file.py	419	SlopeFile._segmented_multiple_ofe_python	write-mode open candidate	open	dst_fn, 'w'
+wepppy/topo/watershed_abstraction/support.py	393	json_to_wgs	serializer candidate	gdf_wgs.to_file	dst_wgs_fn
+wepppy/topo/watershed_abstraction/support.py	443	polygonize_netful	write-mode open candidate	open	dst_fn, 'w'
+wepppy/topo/watershed_abstraction/support.py	444	polygonize_netful	serializer candidate	json.dump	js, fp
+wepppy/topo/watershed_abstraction/support.py	484	polygonize_bound	write-mode open candidate	open	dst_fn, 'w'
+wepppy/topo/watershed_abstraction/support.py	485	polygonize_bound	serializer candidate	json.dump	js, fp
+wepppy/topo/watershed_abstraction/support.py	582	polygonize_subcatchments	write-mode open candidate	open	dst_fn2, 'w'
+wepppy/topo/watershed_abstraction/support.py	583	polygonize_subcatchments	serializer candidate	json.dump	js, fp
+wepppy/topo/watershed_abstraction/watershed_abstraction.py	416	WatershedAbstraction._make_channel_slps	write-mode open candidate	open	_join(out_dir, 'channels.slp'), 'w'
+wepppy/topo/watershed_abstraction/watershed_abstraction.py	426	WatershedAbstraction._make_channel_slps	write-mode open candidate	open	slp_fn, 'w'
+wepppy/topo/watershed_abstraction/watershed_abstraction.py	442	WatershedAbstraction._write_subcatchment_slps	write-mode open candidate	open	slp_fn, 'w'
+wepppy/topo/watershed_abstraction/watershed_abstraction.py	453	WatershedAbstraction._write_flowpath_slps	write-mode open candidate	open	_join(out_dir, fp_id + '.slp'), 'w'
+wepppy/topo/watershed_abstraction/watershed_abstraction.py	721	WatershedAbstraction.write_channels_geojson	write-mode open candidate	open	fn, 'w'
+wepppy/topo/watershed_abstraction/watershed_abstraction.py	722	WatershedAbstraction.write_channels_geojson	serializer candidate	json.dump	fc, fp
+wepppy/topo/watershed_abstraction/watershed_abstraction.py	970	WatershedAbstraction.abstract_subcatchment	write-mode open candidate	open	slp_fn, 'w'
+wepppy/topo/watershed_abstraction/wepp_top_translator.py	366	WeppTopTranslator.build_structure	write-mode open candidate	open	pickle_fn, 'wb'
+wepppy/topo/watershed_collection/watershed_collection.py	145	WatershedFeature.save_geojson	write-mode open candidate	open	filepath, 'w'
+wepppy/topo/watershed_collection/watershed_collection.py	146	WatershedFeature.save_geojson	serializer candidate	json.dump	geojson_object, f
+wepppy/topo/watershed_collection/watershed_collection.py	236	WatershedFeature.build_raster_mask	write-mode open candidate	rasterio.open	dst_filepath, 'w'
+wepppy/topo/wbt/terrain_processor.py	330	TerrainProcessor._run_phase1_dem_preparation	file publication candidate	shutil.copy2	self.dem_path, raw_dem_path
+wepppy/topo/wbt/terrain_processor.py	408	TerrainProcessor._run_phase2_conditioning_flow_stack	file publication candidate	shutil.copy2	fill_artifacts.relief_path, filled_dem_path
+wepppy/topo/wbt/terrain_processor.py	791	TerrainProcessor._run_phase5_visualization_artifacts	write-mode open candidate	manifest_path.open	'w'
+wepppy/topo/wbt/terrain_processor.py	792	TerrainProcessor._run_phase5_visualization_artifacts	serializer candidate	json.dump	{'entries': entries}, fp
+wepppy/topo/wbt/terrain_processor.py	1013	TerrainProcessor._create_preliminary_boundary	file publication candidate	shutil.copy2	boundary_source, boundary_out
+wepppy/topo/wbt/terrain_processor.py	1069	TerrainProcessor._create_final_boundary	file publication candidate	shutil.copy2	source, bound_out
+wepppy/topo/wbt/terrain_processor.py	1368	TerrainProcessor._generate_hillshade_and_slope	write-mode open candidate	rasterio.open	output_slope, 'w'
+wepppy/topo/wbt/terrain_processor.py	1370	TerrainProcessor._generate_hillshade_and_slope	write-mode open candidate	rasterio.open	output_hillshade, 'w'
+wepppy/topo/wbt/terrain_processor.py	1406	TerrainProcessor._generate_diff_raster	write-mode open candidate	rasterio.open	output_raster, 'w'
+wepppy/topo/wbt/terrain_processor.py	1685	TerrainProcessor._write_json	write-mode open candidate	path.open	'w'
+wepppy/topo/wbt/terrain_processor.py	1686	TerrainProcessor._write_json	serializer candidate	json.dump	payload, fp
+wepppy/topo/wbt/terrain_processor_helpers.py	244	create_masked_dem	write-mode open candidate	rasterio.open	output_path, 'w'
+wepppy/topo/wbt/terrain_processor_helpers.py	282	create_bounded_breach_composite	write-mode open candidate	rasterio.open	output_path, 'w'
+wepppy/topo/wbt/wbt_documentation.py	605	generate_wbt_documentation	file publication candidate	readme_path.write_text	markdown
+wepppy/topo/wbt/wbt_topaz_emulator.py	1286	WhiteboxToolsTopazEmulator._make_outlet_geojson	write-mode open candidate	open	dst, 'w'
+wepppy/topo/wbt/wbt_topaz_emulator.py	1326	WhiteboxToolsTopazEmulator._make_multiple_outlets_geojson	write-mode open candidate	open	dst, 'w'
+wepppy/topo/wbt/wbt_topaz_emulator.py	2140	WhiteboxToolsTopazEmulator._polygonize_channels	write-mode open candidate	open	dst_fn2, 'w'
+wepppy/topo/wbt/wbt_topaz_emulator.py	2141	WhiteboxToolsTopazEmulator._polygonize_channels	serializer candidate	json.dump	js, fp
+wepppy/webservices/inmemoryzip.py	33	InMemoryZip.writetofile	file publication candidate	path.write_bytes	self.read()
+wepppy/webservices/wmesque.py	485	build_catalog	write-mode open candidate	open	_catalog, 'w'
+wepppy/webservices/wmesque_catalog.py	58	_atomic_json	file publication candidate	os.replace	name, path
+wepppy/webservices/wmesque_catalog.py	230	_install_release	file publication candidate	os.rename	staged, target
+wepppy/webservices/wmesque_catalog.py	261	publish_dataset.copy_source	file publication candidate	shutil.copyfile	source, destination
+wepppy/webservices/wmesque_catalog.py	314	_copy	file publication candidate	shutil.copytree	origin, target
+wepppy/webservices/wmesque_catalog.py	316	_copy	file publication candidate	shutil.copyfile	origin, target
+wepppy/wepp/_scripts/compare.py	43		write-mode open candidate	open	'linux_windows_comparison_report.txt', 'w'
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	920	SeededSoilLanduseGenerator.generate_case	write-mode open candidate	generated_man.open	'w'
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	939	SeededSoilLanduseGenerator.generate_case	write-mode open candidate	generated_man.open	'w'
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	943	SeededSoilLanduseGenerator.generate_case	file publication candidate	shutil.copy2	seed.slp_path, generated_slp
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	944	SeededSoilLanduseGenerator.generate_case	file publication candidate	shutil.copy2	seed.cli_path, generated_cli
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	946	SeededSoilLanduseGenerator.generate_case	file publication candidate	shutil.copy2	seed.run_path, generated_run
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	985	SeededSoilLanduseGenerator.generate_case	write-mode open candidate	metadata_path.open	'w'
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	986	SeededSoilLanduseGenerator.generate_case	serializer candidate	json.dump	metadata, handle
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	1036	SeededSoilLanduseGenerator.generate_batch	write-mode open candidate	(case_dir / 'case_metadata.json').open	'w'
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	1037	SeededSoilLanduseGenerator.generate_batch	serializer candidate	json.dump	metadata, handle
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	1051	SeededSoilLanduseGenerator.generate_batch	write-mode open candidate	manifest_json.open	'w'
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	1052	SeededSoilLanduseGenerator.generate_batch	serializer candidate	json.dump	manifest, handle
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	1055	SeededSoilLanduseGenerator.generate_batch	write-mode open candidate	manifest_csv.open	'w'
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	1155	main	write-mode open candidate	inventory_path.open	'w'
+wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py	1156	main	serializer candidate	json.dump	payload, handle
+wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py	1052	_prepare_execution_workspace	file publication candidate	shutil.copy2	src_path, runs_dir / src_path.name
+wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py	1093	_execute_case	write-mode open candidate	log_path.open	'w'
+wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py	1126	_write_csv	write-mode open candidate	path.open	'w'
+wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py	1135	_write_json	file publication candidate	path.write_text	json.dumps(payload, indent=2, sort_keys=True) + '\n'
+wepppy/wepp/interchange/_roads_lifecycle.py	339	retain	file publication candidate	shutil.copy2	target, candidate
+wepppy/wepp/interchange/_roads_lifecycle.py	344	retain	file publication candidate	shutil.copytree	root / SEGMENTS, snapshot / SEGMENTS
+wepppy/wepp/interchange/_roads_lifecycle.py	349	retain	file publication candidate	os.rename	_path(root, relative), snapshot / relative
+wepppy/wepp/interchange/_roads_lifecycle.py	359	retain	file publication candidate	os.replace	candidate, snapshot / relative
+wepppy/wepp/interchange/_roads_lifecycle.py	384	restore_retained	file publication candidate	shutil.copytree	source, target
+wepppy/wepp/interchange/_roads_lifecycle.py	386	restore_retained	file publication candidate	shutil.copy2	source, target
+wepppy/wepp/interchange/_roads_lifecycle.py	456	publish	write-mode open candidate	candidate.open	'x'
+wepppy/wepp/interchange/_roads_lifecycle.py	457	publish	serializer candidate	json.dump	payload, stream
+wepppy/wepp/interchange/_roads_lifecycle.py	460	publish	file publication candidate	os.replace	candidate, destination
+wepppy/wepp/interchange/ag_fields_interchange.py	346	_write_manifest	file publication candidate	temporary.write_text	json.dumps(payload, indent=2, sort_keys=True)
+wepppy/wepp/interchange/ag_fields_interchange.py	347	_write_manifest	file publication candidate	os.replace	temporary, path
+wepppy/wepp/interchange/ag_fields_interchange.py	355	_publish_stage	file publication candidate	os.replace	stage_dir, final_dir
+wepppy/wepp/interchange/ag_fields_interchange.py	362	_publish_stage	file publication candidate	os.replace	final_dir, backup_dir
+wepppy/wepp/interchange/ag_fields_interchange.py	364	_publish_stage	file publication candidate	os.replace	stage_dir, final_dir
+wepppy/wepp/interchange/ag_fields_interchange.py	367	_publish_stage	file publication candidate	os.replace	backup_dir, final_dir
+wepppy/wepp/interchange/ag_fields_interchange.py	376	_publish_stage	file publication candidate	os.replace	backup_dir, final_dir
+wepppy/wepp/interchange/ag_fields_interchange.py	580	run_wepp_ag_fields_interchange	native dispatch	call_wepppyo3_interchange	f'AgFields hillslope {family.upper()}', symbol, sources[family]
+wepppy/wepp/interchange/hec_ras_boundary.py	327	_write_prj	file publication candidate	prj_path.write_text	WGS84_PRJ
+wepppy/wepp/interchange/hec_ras_buffer.py	337	_write_mask_raster	write-mode open candidate	rasterio.open	raster_path, 'w'
+wepppy/wepp/interchange/hec_ras_buffer.py	474	_write_buffer_prj	file publication candidate	prj_path.write_text	WGS84_PRJ
+wepppy/wepp/interchange/hill_ebe_interchange.py	135	run_wepp_hillslope_ebe_interchange	native dispatch	call_wepppyo3_interchange	'hillslope EBE', 'hillslope_ebe_files_to_parquet', [str(path) for path in ebe_files]
+wepppy/wepp/interchange/hill_element_interchange.py	96	run_wepp_hillslope_element_interchange	native dispatch	call_wepppyo3_interchange	'hillslope ELEMENT', 'hillslope_element_files_to_parquet', [str(path) for path in element_files]
+wepppy/wepp/interchange/hill_interchange.py	40	_audit_log	write-mode open candidate	log_path.open	'a'
+wepppy/wepp/interchange/hill_interchange.py	245	run_wepp_hillslope_interchange	catalog API	request_catalog_refresh	run_root, str(interchange_dir)
+wepppy/wepp/interchange/hill_loss_interchange.py	56	run_wepp_hillslope_loss_interchange	native dispatch	call_wepppyo3_interchange	'hillslope LOSS', 'hillslope_loss_files_to_parquet', [str(path) for path in loss_files]
+wepppy/wepp/interchange/hill_pass_interchange.py	168	run_wepp_hillslope_pass_interchange	native dispatch	call_wepppyo3_interchange	'hillslope PASS', 'hillslope_pass_files_to_parquet', [str(path) for path in pass_files]
+wepppy/wepp/interchange/hill_soil_interchange.py	112	run_wepp_hillslope_soil_interchange	native dispatch	call_wepppyo3_interchange	'hillslope SOIL', 'hillslope_soil_files_to_parquet', [str(path) for path in soil_files]
+wepppy/wepp/interchange/hill_wat_interchange.py	245	run_wepp_hillslope_wat_interchange	native dispatch	call_wepppyo3_interchange	'hillslope WAT', 'hillslope_wat_files_to_parquet', [str(path) for path in wat_files]
+wepppy/wepp/interchange/interchange_documentation.py	184	generate_interchange_documentation	file publication candidate	readme_path.write_text	md
+wepppy/wepp/interchange/roads_accounting.py	74	_save	serializer candidate	json.dump	ledger, stream
+wepppy/wepp/interchange/roads_accounting.py	78	_save	file publication candidate	os.replace	temporary, target
+wepppy/wepp/interchange/roads_accounting.py	195	compose	file publication candidate	shutil.copyfile	_path(root, rows[0]['pass']), output
+wepppy/wepp/interchange/totalwatsed3.py	408	run_totalwatsed3	native dispatch	call_wepppyo3_interchange	'totalwatsed3', 'totalwatsed3_to_parquet', str(targets.pass_path)
+wepppy/wepp/interchange/versioning.py	82	write_version_manifest	file publication candidate	path.write_text	json.dumps(payload, indent=2, sort_keys=True)
+wepppy/wepp/interchange/watershed_chan_peak_interchange.py	70	run_wepp_watershed_chan_peak_interchange	native dispatch	call_wepppyo3_interchange	'watershed channel peak', 'watershed_chan_peak_to_parquet', str(source)
+wepppy/wepp/interchange/watershed_chanwb_interchange.py	69	run_wepp_watershed_chanwb_interchange	native dispatch	call_wepppyo3_interchange	'watershed CHANWB', 'watershed_chanwb_to_parquet', str(source)
+wepppy/wepp/interchange/watershed_chnwb_interchange.py	86	run_wepp_watershed_chnwb_interchange	native dispatch	call_wepppyo3_interchange	'watershed CHNWB', 'watershed_chnwb_to_parquet', str(source)
+wepppy/wepp/interchange/watershed_ebe_interchange.py	74	run_wepp_watershed_ebe_interchange	native dispatch	call_wepppyo3_interchange	'watershed EBE', 'watershed_ebe_to_parquet', str(ebe_path)
+wepppy/wepp/interchange/watershed_interchange.py	34	_audit_log	write-mode open candidate	log_path.open	'a'
+wepppy/wepp/interchange/watershed_interchange.py	78	_write_pass_status	file publication candidate	status_path.write_text	json.dumps(payload, indent=2, sort_keys=True) + '\n'
+wepppy/wepp/interchange/watershed_interchange.py	169	run_wepp_watershed_interchange	catalog API	request_catalog_refresh	run_root, str(interchange_dir)
+wepppy/wepp/interchange/watershed_loss_interchange.py	56	run_wepp_watershed_loss_interchange	native dispatch	call_wepppyo3_interchange	'watershed LOSS', 'watershed_loss_to_parquet', str(source)
+wepppy/wepp/interchange/watershed_pass_interchange.py	36	run_wepp_watershed_pass_interchange	native dispatch	call_wepppyo3_interchange	'watershed PASS climate selection', 'watershed_pass_cli_hint', str(pass_path)
+wepppy/wepp/interchange/watershed_pass_interchange.py	43	run_wepp_watershed_pass_interchange	native dispatch	call_wepppyo3_interchange	'watershed PASS', 'watershed_pass_to_parquet', str(pass_path)
+wepppy/wepp/interchange/watershed_soil_interchange.py	133	run_wepp_watershed_soil_interchange	native dispatch	call_wepppyo3_interchange	'watershed SOIL', 'watershed_soil_to_parquet', str(soil_path)
+wepppy/wepp/interchange/watershed_soil_interchange.py	145	run_wepp_watershed_soil_interchange	file publication candidate	staged_target.replace	target
+wepppy/wepp/interchange/watershed_tc_out_interchange.py	23	_audit_log	write-mode open candidate	log_path.open	'a'
+wepppy/wepp/interchange/watershed_tc_out_interchange.py	88	run_wepp_watershed_tc_out_interchange	native dispatch	call_wepppyo3_interchange	'watershed TC_OUT', 'watershed_tc_out_to_parquet', str(source)
+wepppy/wepp/interchange/watershed_totalwatsed_export.py	255	totalwatsed_partitioned_dss_export	serializer candidate	sed_df.to_csv	sed_csv_path
+wepppy/wepp/management/managements.py	2391	Management.dump_to_json	write-mode open candidate	open	fn, 'w'
+wepppy/wepp/management/pmetpara.py	46	_replace_generated_text	file publication candidate	os.replace	temporary, path
+wepppy/wepp/management/scripts/export_covers.py	14		write-mode open candidate	open	'%s_weppcloud_managements.csv' % str(db), 'w'
+wepppy/wepp/management/scripts/export_covers.py	63		write-mode open candidate	open	extended_landsoil_lookup, 'w'
+wepppy/wepp/management/utils/downgrade_to_98_4_format.py	271	downgrade_to_98_4_format	write-mode open candidate	path.open	'w'
+wepppy/wepp/management/utils/multi_ofe.py	420	ManagementMultipleOfeSynth.write	write-mode open candidate	open	dst_fn, 'w'
+wepppy/wepp/management/utils/rotation_stack.py	139	ManagementRotationSynth._apply_prefix	file publication candidate	rename	section_name, section_type
+wepppy/wepp/management/utils/rotation_stack.py	788	ManagementRotationSynth.write	write-mode open candidate	dst_path.open	'w'
+wepppy/wepp/peakflow_census/census.py	154	stage_input_snapshot	file publication candidate	shutil.copy2	source, destination / name
+wepppy/wepp/peakflow_census/census.py	525	_atomic_parquet	serializer candidate	frame.to_parquet	temporary_path
+wepppy/wepp/peakflow_census/common.py	71	atomic_write_json	file publication candidate	os.replace	temporary, path
+wepppy/wepp/peakflow_census/execution.py	37	_copy_inputs	file publication candidate	shutil.copy2	source / copied.name, copied
+wepppy/wepp/peakflow_census/execution.py	43	_copy_inputs	file publication candidate	(destination / run_source.name).write_text	run_text.replace('.pass.dat', '.hbp')
+wepppy/wepp/peakflow_census/execution.py	47	_copy_inputs	file publication candidate	shutil.copy2	candidate, destination / name
+wepppy/wepp/peakflow_census/execution.py	105	_execute_trial_locked	file publication candidate	shutil.copy2	terminal_path, archive
+wepppy/wepp/peakflow_census/execution.py	111	_execute_trial_locked	file publication candidate	partial.rename	partial_archive
+wepppy/wepp/peakflow_census/execution.py	139	_execute_trial_locked	file publication candidate	(run_dir / 'stdout.log').write_bytes	completed.stdout
+wepppy/wepp/peakflow_census/execution.py	140	_execute_trial_locked	file publication candidate	(run_dir / 'stderr.log').write_bytes	completed.stderr
+wepppy/wepp/peakflow_census/mutations.py	109	apply_mutation	file publication candidate	path.write_text	''.join(lines)
+wepppy/wepp/peakflow_census/planning.py	132	plan_trials	file publication candidate	replace	record
+wepppy/wepp/reports/_cache_freshness.py	163	_CacheBuild._status	file publication candidate	os.replace	self.root / temporary, self.root / 'status.json'
+wepppy/wepp/reports/_cache_freshness.py	184	_CacheBuild.publish	serializer candidate	pq.write_table	table.replace_schema_metadata(metadata), outgoing
+wepppy/wepp/reports/_cache_freshness.py	199	_CacheBuild.publish	file publication candidate	os.replace	self.root / 'version.meta.json', sidecar.resolve()
+wepppy/wepp/reports/_cache_freshness.py	210	_CacheBuild.publish	file publication candidate	os.replace	self.root / 'candidate.parquet', self.target
+wepppy/wepp/reports/average_annuals_by_landuse.py	40	_normalize_report_context	file publication candidate	replace	entry
+wepppy/wepp/reports/average_annuals_by_landuse.py	59	_normalize_report_context	file publication candidate	replace	entry
+wepppy/wepp/reports/average_annuals_by_landuse.py	60	_normalize_report_context	file publication candidate	replace	run_context
+wepppy/wepp/reports/average_annuals_by_landuse.py	199	AverageAnnualsByLanduseReport._load_or_build	serializer candidate	pq.write_table	table, outgoing
+wepppy/wepp/reports/channel_watbal.py	95	ChannelWatbalReport.__init__	file publication candidate	dataframe.groupby(['wepp_id', 'water_year'], as_index=False).agg(aggregations).rename	—
+wepppy/wepp/reports/channel_watbal.py	121	ChannelWatbalReport.__init__	file publication candidate	aggregated.groupby('wepp_id', as_index=False)[list(self._MEASURE_MAP.values())].mean().rename	—
+wepppy/wepp/reports/channel_watbal.py	138	ChannelWatbalReport.__init__	file publication candidate	watershed.reset_index().rename	—
+wepppy/wepp/reports/frq_flood.py	122	FrqFloodReport._load_event_dataframe	file publication candidate	frame.rename	—
+wepppy/wepp/reports/helpers.py	122	ReportCacheManager.write_parquet	serializer candidate	dataframe.to_parquet	data_path
+wepppy/wepp/reports/helpers.py	125	ReportCacheManager.write_parquet	file publication candidate	meta_path.write_text	json.dumps(meta, indent=2)
+wepppy/wepp/reports/hillslope_watbal.py	430	HillslopeWatbalReport.to_dataframe	serializer candidate	dataframe.to_parquet	fp
+wepppy/wepp/reports/loss_channel_report.py	140	ChannelSummaryReport._build_dataframe	file publication candidate	frame.rename	—
+wepppy/wepp/reports/loss_hill_report.py	200	HillSummaryReport._build_dataframe	file publication candidate	frame.rename	—
+wepppy/wepp/reports/report_base.py	117	ReportBase.to_dataframe	serializer candidate	dataframe.to_parquet	fp
+wepppy/wepp/reports/return_periods.py	180	_generate_cli_parquet	serializer candidate	export_df.to_parquet	parquet_path
+wepppy/wepp/reports/return_periods.py	475	refresh_return_period_events	catalog API	activate_query_engine	base
+wepppy/wepp/reports/return_periods.py	656	refresh_return_period_events	serializer candidate	pq.write_table	event_table, events_path
+wepppy/wepp/reports/return_periods.py	657	refresh_return_period_events	serializer candidate	pq.write_table	ranks_table, ranks_path
+wepppy/wepp/reports/return_periods.py	660	refresh_return_period_events	catalog API	update_catalog_entry	root_dir, str(events_rel_path)
+wepppy/wepp/reports/return_periods.py	662	refresh_return_period_events	catalog API	activate_query_engine	root_dir
+wepppy/wepp/reports/return_periods.py	665	refresh_return_period_events	catalog API	update_catalog_entry	root_dir, str(ranks_rel_path)
+wepppy/wepp/reports/return_periods.py	667	refresh_return_period_events	catalog API	activate_query_engine	root_dir
+wepppy/wepp/reports/return_periods.py	1144	ReturnPeriods._export_tsv_summary_simple	write-mode open candidate	summary_path.open	'w'
+wepppy/wepp/reports/return_periods.py	1183	ReturnPeriods._export_tsv_summary_extraneous	write-mode open candidate	summary_path.open	'w'
+wepppy/wepp/soils/utils/multi_ofe.py	96	SoilMultipleOfeSynth.write	write-mode open candidate	open	dst_fn, 'w'
+wepppy/wepp/soils/utils/utils.py	240	soil_specialization	write-mode open candidate	open	dst, 'w'
+wepppy/wepp/soils/utils/utils.py	257	soil_specialization	write-mode open candidate	open	dst, 'w'
+wepppy/wepp/soils/utils/utils.py	286	modify_kslast	write-mode open candidate	open	dst, 'w'
+wepppy/wepp/soils/utils/wepp_soil_util.py	910	WeppSoilUtil.write	write-mode open candidate	open	fn, 'w'
+wepppy/wepp/soils/utils/wepp_soil_util.py	1261	WeppSoilUtil.dump_bson	write-mode open candidate	open	dst, 'wb'
+wepppy/wepp/soils/utils/wepp_soil_util.py	1372		write-mode open candidate	open	'/home/roger/PycharmProjects/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/summary.csv', 'w'
+wepppy/weppcloud/_scripts/compile_dot_logs.py	333	_write_json	write-mode open candidate	tmp_path.open	'w'
+wepppy/weppcloud/_scripts/compile_dot_logs.py	334	_write_json	serializer candidate	json.dump	payload, handle
+wepppy/weppcloud/_scripts/compile_dot_logs.py	335	_write_json	file publication candidate	tmp_path.replace	path
+wepppy/weppcloud/_scripts/compile_dot_logs.py	341	_write_csv	write-mode open candidate	tmp_path.open	'w'
+wepppy/weppcloud/_scripts/compile_dot_logs.py	345	_write_csv	file publication candidate	tmp_path.replace	path
+wepppy/weppcloud/_scripts/compile_dot_logs.py	403	_publish_candidates	file publication candidate	target.replace	backup
+wepppy/weppcloud/_scripts/compile_dot_logs.py	404	_publish_candidates	file publication candidate	candidate.replace	target
+wepppy/weppcloud/_scripts/compile_dot_logs.py	413	_publish_candidates	file publication candidate	backup.replace	target
+wepppy/weppcloud/_scripts/compile_dot_logs.py	460	_recover_publication_journal	file publication candidate	backup.replace	target
+wepppy/weppcloud/_scripts/compile_dot_logs.py	523	_compile_dot_logs_locked	write-mode open candidate	access_candidate_path.open	'w'
+wepppy/weppcloud/_scripts/scan_access_logs.py	163	main	write-mode open candidate	open	args.output, 'w'
+wepppy/weppcloud/account_security.py	91	_send_instructions	file publication candidate	last.replace	—
+wepppy/weppcloud/account_security.py	227	complete	file publication candidate	datetime.now(timezone.utc).replace	—
+wepppy/weppcloud/account_security.py	337	resolve_federated_account	file publication candidate	datetime.now(timezone.utc).replace	—
+wepppy/weppcloud/bootstrap/pre_receive.py	131	_append_push_log	write-mode open candidate	open	log_path, 'a'
+wepppy/weppcloud/combined_viewer_preparation.py	68	_save	file publication candidate	temporary.write_text	json.dumps(value, indent=2, allow_nan=False) + '\n'
+wepppy/weppcloud/combined_viewer_preparation.py	69	_save	file publication candidate	temporary.replace	path
+wepppy/weppcloud/combined_viewer_preparation.py	158	_prepare_guarded	file publication candidate	shutil.copy2	source, stage / 'loss_pw0.txt'
+wepppy/weppcloud/combined_viewer_preparation.py	182	_prepare_guarded	file publication candidate	staged_catalog.write_text	json.dumps(catalog, indent=2) + '\n'
+wepppy/weppcloud/controllers_js/build_controllers_js.py	108	write_output	file publication candidate	output_path.write_text	contents
+wepppy/weppcloud/controllers_js/unitizer_map_builder.py	358	write_unitizer_module	file publication candidate	output_path.write_text	contents
+wepppy/weppcloud/feature_registry/runtime.py	106	_apply_config_attribute_overrides	file publication candidate	replace	effective
+wepppy/weppcloud/routes/_common.py	121	_maybe_log_exception	write-mode open candidate	target.open	'a'
+wepppy/weppcloud/routes/_run_config.py	42	register_run_config_hooks.normalize_run_config	file publication candidate	replace	ctx
+wepppy/weppcloud/routes/_security/oauth.py	387	_link_identity	file publication candidate	confirmed_at.replace	—
+wepppy/weppcloud/routes/command_bar/command_bar.py	320	issue_query_engine_mcp_token	file publication candidate	instructions_path.write_text	markdown_body
+wepppy/weppcloud/routes/huc_fire.py	92	huc	write-mode open candidate	open	_join(disturbed.disturbed_dir, 'huc.json'), 'w'
+wepppy/weppcloud/routes/huc_fire.py	93	huc	serializer candidate	json.dump	geojson_data, fp
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	83	_utc_iso_timestamp	file publication candidate	datetime.now(tz=timezone.utc).replace	—
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	123	_write_json_atomic	write-mode open candidate	tmp_path.open	'w'
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	124	_write_json_atomic	serializer candidate	json.dump	payload, handle
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	126	_write_json_atomic	file publication candidate	os.replace	tmp_path, path
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	135	_write_bytes_atomic	write-mode open candidate	tmp_path.open	'wb'
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	137	_write_bytes_atomic	file publication candidate	os.replace	tmp_path, path
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	327	_install_uploaded_managements	file publication candidate	shutil.copyfile	source_path, incoming_path
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	345	_install_uploaded_managements	file publication candidate	os.replace	target_path, backup_path
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	348	_install_uploaded_managements	file publication candidate	os.replace	incoming_path, target_path
+wepppy/weppcloud/routes/nodb_api/landuse_bp.py	359	_install_uploaded_managements	file publication candidate	os.replace	backup_path, target_path
+wepppy/weppcloud/routes/nodb_api/project_bp.py	142	_restore_mod_backup	file publication candidate	os.replace	backup_path, nodb_path
+wepppy/weppcloud/routes/nodb_api/project_bp.py	152	_backup_mod_state	file publication candidate	os.replace	nodb_path, backup_path
+wepppy/weppcloud/routes/nodb_api/project_bp.py	628	resources_bounds_geojson	write-mode open candidate	open	fn2, 'w'
+wepppy/weppcloud/routes/nodb_api/project_bp.py	629	resources_bounds_geojson	serializer candidate	json.dump	js, fp
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py	419	_write_json_mapping	write-mode open candidate	path.open	'w'
+wepppy/weppcloud/routes/nodb_api/watershed_bp.py	420	_write_json_mapping	serializer candidate	json.dump	dict(payload), fp
+wepppy/weppcloud/routes/nodb_api/wepp_bp.py	296	_render_report_csv	serializer candidate	df.to_csv	buffer
+wepppy/weppcloud/routes/nodb_api/wepp_bp.py	314	_render_dataframe_csv	serializer candidate	df.to_csv	buffer
+wepppy/weppcloud/routes/nodb_api/wepp_bp.py	565	_apply_unitizer_preferences	file publication candidate	df.rename	—
+wepppy/weppcloud/routes/pivottable.py	526	pivottable_response	serializer candidate	df.to_csv	—
+wepppy/weppcloud/routes/pivottable.py	530	pivottable_response	serializer candidate	df.to_csv	—
+wepppy/weppcloud/routes/readme_md/readme_md.py	245	_atomic_write_markdown	write-mode open candidate	tmp_path.open	'x'
+wepppy/weppcloud/routes/readme_md/readme_md.py	249	_atomic_write_markdown	file publication candidate	os.replace	tmp_path, path
+wepppy/weppcloud/routes/rq/info_details/routes.py	130	_parse_ended_at_iso	file publication candidate	ended_at.replace	—
+wepppy/weppcloud/routes/run_0/run_0_bp.py	1864	_log_access	write-mode open candidate	open	fn, 'a'
+wepppy/weppcloud/routes/weppcloudr.py	201	viz_r	write-mode open candidate	open	_join(viz_export_dir, f'{routine}.stdout'), 'w'
+wepppy/weppcloud/routes/weppcloudr.py	203	viz_r	write-mode open candidate	open	_join(viz_export_dir, f'{routine}.stderr'), 'w'
+wepppy/weppcloud/routes/weppcloudr.py	363	weppcloudr_runner	write-mode open candidate	open	_join(viz_export_dir, f'{routine}.stdout'), 'w'
+wepppy/weppcloud/routes/weppcloudr.py	365	weppcloudr_runner	write-mode open candidate	open	_join(viz_export_dir, f'{routine}.stderr'), 'w'
+wepppy/weppcloud/routes/weppcloudr.py	401	_ensure_interchange	catalog API	activate_query_engine	wd
+wepppy/weppcloud/routes/weppcloudr.py	906	weppcloudr_proxy	write-mode open candidate	open	_join(viz_export_dir, f'{routine}.stdout'), 'w'
+wepppy/weppcloud/routes/weppcloudr.py	908	weppcloudr_proxy	write-mode open candidate	open	_join(viz_export_dir, f'{routine}.stderr'), 'w'
+wepppy/weppcloud/run_catalog/adapter.py	89	Adapter.__call__	file publication candidate	event.committed_at.astimezone(timezone.utc).replace	—
+wepppy/weppcloud/run_statistics.py	116	RunStatistics.dump	write-mode open candidate	open	self._nodb, 'w'
+wepppy/weppcloud/run_statistics.py	119	RunStatistics.dump	write-mode open candidate	open	self._json, 'w'
+wepppy/weppcloud/run_statistics.py	129	RunStatistics.lock	write-mode open candidate	open	self._lock, 'w'
+wepppy/weppcloud/static-src/scripts/convert_vscode_theme.py	310	reset_mapping	file publication candidate	mapping_path.write_text	json.dumps(defaults, indent=2) + '\n'
+wepppy/weppcloud/static-src/scripts/convert_vscode_theme.py	378	main	file publication candidate	out_path.write_text	css_text
+wepppy/weppcloud/static-src/scripts/convert_vscode_theme.py	384	main	file publication candidate	combined_path.write_text	'\n'.join(combined_css).rstrip() + '\n'
+wepppy/weppcloud/static-src/scripts/convert_vscode_theme.py	425	main	file publication candidate	Path(args.report).write_text	json.dumps(payload, indent=2)
+wepppy/weppcloud/static-src/scripts/convert_vscode_theme.py	448	main	file publication candidate	Path(args.md_report).write_text	'\n'.join(lines).rstrip() + '\n'
+wepppy/weppcloud/usersum_docs/docs_index.py	248	write_generated_index	file publication candidate	path.write_text	json.dumps(payload, indent=2, sort_keys=True) + '\n'
+wepppy/weppcloud/usersum_docs/vendor_sync.py	134	_write_snapshot	file publication candidate	shutil.copytree	target, staged
+wepppy/weppcloud/usersum_docs/vendor_sync.py	140	_write_snapshot	file publication candidate	destination.write_bytes	blob
+wepppy/weppcloud/usersum_docs/vendor_sync.py	142	_write_snapshot	file publication candidate	target.rename	previous
+wepppy/weppcloud/usersum_docs/vendor_sync.py	144	_write_snapshot	file publication candidate	staged.rename	target
+wepppy/weppcloud/usersum_docs/vendor_sync.py	147	_write_snapshot	file publication candidate	previous.rename	target
+wepppy/weppcloud/utils/feature_access_runtime.py	29	resource_context	file publication candidate	replace	context
+wepppy/weppcloud/utils/helpers.py	118	_ensure_omni_shared_inputs._ensure_link	file publication candidate	os.symlink	os.path.relpath(src, os.path.dirname(dst)), dst
+wepppy/weppcloud/utils/helpers.py	745	exception_factory	write-mode open candidate	open	_join(wd, 'exception_factory.log'), 'a'
+wepppy/weppcloud/utils/run_ttl.py	80	_coerce_datetime	file publication candidate	dt.replace	—
+wepppy/weppcloud/utils/run_ttl.py	89	_format_datetime	file publication candidate	dt.replace	—
+wepppy/weppcloud/utils/run_ttl.py	134	_write_payload	write-mode open candidate	tmp_path.open	'w'
+wepppy/weppcloud/utils/run_ttl.py	135	_write_payload	serializer candidate	json.dump	payload, handle
+wepppy/weppcloud/utils/run_ttl.py	136	_write_payload	file publication candidate	tmp_path.replace	path

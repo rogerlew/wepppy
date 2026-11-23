@@ -166,6 +166,9 @@ Per-override schema:
 - `set.internal_reason`: nullable internal reason that must satisfy maturity/internal_reason contract
 - `set.embargo_until`: nullable ISO date required when `set.internal_reason=publication_embargo`
 
+I-CREWS public Preview launch entries follow the
+[I-CREWS interface contract](../../../docs/ui-docs/contracts/i-crews-interface-contract.md).
+
 ## Runtime Semantics
 
 Feature action availability requires all:

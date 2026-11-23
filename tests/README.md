@@ -88,6 +88,39 @@ OSM_ROADS_POSTGRES_INTEGRATION=1 wctl run-pytest tests/topo -k osm_roads_postgre
 
 Happy testing! Keep the muscles fresh by running `wctl run-pytest tests --maxfail=1` early and often.
 
+## Omni controller tests
+
+Run the controller and service cases from the repository root with Bash.
+
+```bash
+wctl run-pytest --profile python -- tests/nodb/mods/test_omni*.py
+```
+
+Choose a controller module by responsibility.
+
+- [Scenarios and controller state](nodb/mods/test_omni.py)
+- [Workspace cloning and copied paths](nodb/mods/test_omni_clone.py)
+- [Contrast selection and previews](nodb/mods/test_omni_contrast_selection.py)
+- [Stream-order grouping and rebuilds](nodb/mods/test_omni_stream_order.py)
+- [Contrast sidecars, exports and report readback](nodb/mods/test_omni_contrast_artifacts.py)
+- [Contrast preparation, freshness and execution](nodb/mods/test_omni_contrast_execution.py)
+
+## Feature export service tests
+
+Run all service cases from the repository root with Bash.
+
+```bash
+wctl run-pytest --profile python -- tests/nodb/mods/test_features_export_service*.py
+```
+
+The original [service module](nodb/mods/test_features_export_service.py) covers
+execution, cache reuse and publication. The sibling service modules cover
+[submission](nodb/mods/test_features_export_service_submission.py),
+[materialization](nodb/mods/test_features_export_service_materialization.py),
+[source discovery and joins](nodb/mods/test_features_export_service_sources.py),
+[identity and units](nodb/mods/test_features_export_service_identity_and_units.py)
+and [temporal layouts](nodb/mods/test_features_export_service_temporal.py).
+
 ## Roads parameter validation
 
 See [the Roads suite](roads/README.md) for the portable 516-profile matrix,

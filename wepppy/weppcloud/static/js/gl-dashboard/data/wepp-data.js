@@ -1,6 +1,5 @@
 /**
  * @typedef {Object} WeppDataManagerDeps
- * @property {{ sitePrefix: string, runid: string, config: string }} ctx Run-scoped identifiers used when hitting base Query Engine paths.
  * @property {() => any} getState Read the reactive dashboard state object.
  * @property {(key: string, value: any, options?: { silent?: boolean }) => void} setValue Write a single state key with notifications.
  * @property {(updates: Record<string, any>, options?: { silent?: boolean }) => void} setState Merge state updates with optional silent flag.
@@ -41,7 +40,6 @@
  * @returns {WeppDataManager}
  */
 export function createWeppDataManager({
-  ctx,
   getState,
   setValue,
   setState,
@@ -648,10 +646,6 @@ export function createWeppDataManager({
       let filters;
       let baseQueryResult = {};
 
-      // Query Engine runs as a separate service at /query-engine/ (no sitePrefix)
-      const baseQueryPath = ctx.config ? `runs/${ctx.runid}/${ctx.config}` : `runs/${ctx.runid}`;
-      const baseQueryUrl = `/query-engine/${baseQueryPath}/query`;
-
       if (mode === 'event_P' || mode === 'event_Q' || mode === 'event_ET') {
         const parquetPath = WEPP_EVENT_WAT_PATH;
         const valueExpression =
@@ -674,18 +668,9 @@ export function createWeppDataManager({
           filters,
           group_by: ['hill.topaz_id'],
         };
-        const resp = await fetch(baseQueryUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(dataPayload),
-        });
-        if (resp.ok) {
-          const dataResult = await resp.json();
-          if (dataResult && dataResult.records) {
-            for (const row of dataResult.records) {
-              baseQueryResult[String(row.topaz_id)] = { [mode]: row.value };
-            }
-          }
+        const dataResult = await postBaseQueryEngine(dataPayload);
+        for (const row of dataResult?.records || []) {
+          baseQueryResult[String(row.topaz_id)] = { [mode]: row.value };
         }
       } else if (mode === 'event_Saturation') {
         const parquetPath = WEPP_EVENT_SOIL_PATH;
@@ -706,18 +691,9 @@ export function createWeppDataManager({
           filters,
           group_by: ['hill.topaz_id'],
         };
-        const resp = await fetch(baseQueryUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(dataPayload),
-        });
-        if (resp.ok) {
-          const dataResult = await resp.json();
-          if (dataResult && dataResult.records) {
-            for (const row of dataResult.records) {
-              baseQueryResult[String(row.topaz_id)] = { [mode]: row.value };
-            }
-          }
+        const dataResult = await postBaseQueryEngine(dataPayload);
+        for (const row of dataResult?.records || []) {
+          baseQueryResult[String(row.topaz_id)] = { [mode]: row.value };
         }
       } else if (mode === 'event_peakro' || mode === 'event_tdet') {
         const parquetPath = WEPP_EVENT_PASS_PATH;
@@ -740,18 +716,9 @@ export function createWeppDataManager({
           filters,
           group_by: ['hill.topaz_id'],
         };
-        const resp = await fetch(baseQueryUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(dataPayload),
-        });
-        if (resp.ok) {
-          const dataResult = await resp.json();
-          if (dataResult && dataResult.records) {
-            for (const row of dataResult.records) {
-              baseQueryResult[String(row.topaz_id)] = { [mode]: row.value };
-            }
-          }
+        const dataResult = await postBaseQueryEngine(dataPayload);
+        for (const row of dataResult?.records || []) {
+          baseQueryResult[String(row.topaz_id)] = { [mode]: row.value };
         }
       }
 

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from wepppy.nodb.core import Climate, Wepp
+from wepppy.project_assets import WEPP_LOSS_HILL
 from wepppy.query_engine.activate import activate_query_engine
 from wepppy.wepp.interchange import (
     cleanup_hillslope_sources_for_completed_interchange,
@@ -56,7 +57,7 @@ def _watershed_interchange_complete(
         "ebe_pw0.parquet",
         "chanwb.parquet",
         "chan.out.parquet",
-        "loss_pw0.hill.parquet",
+        WEPP_LOSS_HILL.filename,
         "loss_pw0.out.parquet",
         "loss_pw0.chn.parquet",
         "loss_pw0.class_data.parquet",

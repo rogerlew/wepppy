@@ -28,6 +28,9 @@ class VendorSpec(TypedDict):
     vendor_id: str
     source_repo_path: str
     source_ref: str
+    source_is_usersum_repo: bool
+    archive_ref: str | None
+    archive_paths: List[str]
     include_globs: List[str]
     exclude_globs: List[str]
     target_root: str
@@ -268,6 +271,17 @@ def _parse_vendors(payload: Dict[str, Any], path: Path) -> Dict[str, VendorSpec]
             raise UsersumContractsValidationError(f"{context}.vendor_id duplicates existing vendor_id {vendor_id!r}")
         source_repo_path = _require_string(raw_vendor.get("source_repo_path"), f"{context}.source_repo_path")
         source_ref = _require_string(raw_vendor.get("source_ref"), f"{context}.source_ref")
+        source_is_usersum_repo = raw_vendor.get("source_is_usersum_repo", False)
+        if not isinstance(source_is_usersum_repo, bool):
+            raise UsersumContractsValidationError(f"{context}.source_is_usersum_repo must be a boolean")
+        archive_ref = raw_vendor.get("archive_ref")
+        if archive_ref is not None:
+            archive_ref = _require_string(archive_ref, f"{context}.archive_ref")
+        archive_paths = _require_string_list(raw_vendor.get("archive_paths", []), f"{context}.archive_paths")
+        if bool(archive_ref) != bool(archive_paths):
+            raise UsersumContractsValidationError(f"{context}: archive_ref and archive_paths must be set together")
+        for archive_path in archive_paths:
+            _validate_rel_markdown_path(archive_path, f"{context}.archive_paths")
         include_globs = _require_string_list(raw_vendor.get("include_globs"), f"{context}.include_globs")
         if not include_globs:
             raise UsersumContractsValidationError(f"{context}.include_globs must not be empty")
@@ -291,6 +305,9 @@ def _parse_vendors(payload: Dict[str, Any], path: Path) -> Dict[str, VendorSpec]
             vendor_id=vendor_id,
             source_repo_path=source_repo_path,
             source_ref=source_ref,
+            source_is_usersum_repo=source_is_usersum_repo,
+            archive_ref=archive_ref,
+            archive_paths=archive_paths,
             include_globs=include_globs,
             exclude_globs=exclude_globs,
             target_root=target_root,
@@ -298,6 +315,11 @@ def _parse_vendors(payload: Dict[str, Any], path: Path) -> Dict[str, VendorSpec]
         )
 
     return vendors
+
+
+def load_vendor_specs(base_dir: Path) -> Dict[str, VendorSpec]:
+    path = base_dir / "vendors.yaml"
+    return _parse_vendors(_load_yaml(path), path)
 
 
 def load_and_validate_contracts(
@@ -313,11 +335,10 @@ def load_and_validate_contracts(
 
     docs_payload = _load_yaml(docs_manifest_path)
     nav_payload = _load_yaml(nav_tree_path)
-    vendors_payload = _load_yaml(vendors_path)
 
     docs = _parse_docs_manifest(docs_payload, docs_manifest_path)
     nav_roots, nav_key_to_doc_id = _parse_nav_tree(nav_payload, nav_tree_path)
-    vendors = _parse_vendors(vendors_payload, vendors_path)
+    vendors = load_vendor_specs(base_dir)
 
     manifest_doc_ids = {doc["doc_id"] for doc in docs}
     nav_doc_ids = set(nav_key_to_doc_id.values())

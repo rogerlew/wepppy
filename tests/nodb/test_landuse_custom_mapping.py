@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 import wepppy.nodb.core.landuse as landuse_module
-from wepppy.nodb.core.landuse import Landuse, LanduseCustomMappingError
+from wepppy.nodb.core.landuse import Landuse, LanduseCustomMappingError, LanduseMode
 
 pytestmark = pytest.mark.unit
 
@@ -292,3 +292,85 @@ def test_build_managements_relabels_stale_custom_mapping_description(
     landuse.build_managements(_map=custom_map_path)
 
     assert landuse.managements["43"].desc == "Moderate Severity Fire"
+
+@pytest.mark.parametrize("year", [1990, 2000, 2006, 2012, 2018])
+@pytest.mark.parametrize("provider", ["CORINE_LandCover", "corine_landcover"])
+def test_gridded_corine_uses_its_provider_map_and_retains_the_upload_selection(year, provider):
+    landuse = Landuse.__new__(Landuse)
+    landuse._mode = LanduseMode.Gridded
+    landuse._mapping = "esdac"
+    landuse._nlcd_db = f"eu/{provider}/{year}"
+    landuse.config_get_str = lambda _section, _option, default=None: default
+
+    row = landuse.get_mapping_dict()["25"]
+    assert row["Description"] == "Mixed forest"
+    assert row["ManagementFile"] == "UnDisturbed/Old_Forest.man"
+    assert landuse.mapping == "esdac"
+
+    landuse._mode = LanduseMode.UserDefined
+    assert "25" not in landuse.get_mapping_dict()
+    assert landuse.source_mapping == "esdac"
+
+
+def test_corine_provider_keeps_explicit_map_for_its_declared_dataset(tmp_path):
+    landuse = Landuse.__new__(Landuse)
+    landuse.wd = str(tmp_path)
+    landuse._mode = LanduseMode.Gridded
+    landuse._mapping = "esdac"
+    landuse._nlcd_db = "eu/CORINE_LandCover/2012"
+    config = {"nlcd_db": "eu/corine_landcover/2012", "mapping": str(tmp_path / "provider.json")}
+    landuse.config_get_str = lambda _section, option, default=None: config.get(option, default)
+    assert landuse.source_mapping == config["mapping"]
+
+    custom_dir = tmp_path / "landuse"
+    custom_dir.mkdir()
+    run_map = custom_dir / "run-map.json"
+    run_map.write_text("{}")
+    landuse._custom_mapping_relpath = "landuse/run-map.json"
+    assert landuse._resolve_effective_mapping_reference(landuse.source_mapping) == str(run_map)
+
+    landuse._nlcd_db = "eu/CORINE_LandCover/2018"
+    assert landuse.source_mapping == "eu-disturbed"
+
+    landuse._nlcd_db = "eu/other-provider/2018"
+    assert landuse.source_mapping == "esdac"
+
+
+def test_corine_cleanup_preserves_case_sensitive_custom_and_legacy_configured_maps(tmp_path):
+    from contextlib import nullcontext
+
+    directory = tmp_path / "landuse"
+    configured = directory / "Provider" / "Map.json"
+    custom = directory / "Review" / "Map.json"
+    for path in (configured, custom):
+        path.parent.mkdir(parents=True)
+        path.write_text("{}")
+    stale = directory / "old-assignments.txt"
+    stale.touch()
+    landuse = Landuse.__new__(Landuse)
+    landuse.wd = str(tmp_path)
+    landuse._mode = LanduseMode.Gridded
+    landuse._mapping = "esdac"
+    landuse._custom_mapping_relpath = "landuse/Review/Map.json"
+    landuse.locked = nullcontext
+    config = {"nlcd_db": "eu/corine_landcover/2018", "mapping": str(configured)}
+    landuse.config_get_str = lambda _section, option, default=None: config.get(option, default)
+
+    landuse.clean()
+
+    assert configured.read_text() == "{}"
+    assert custom.read_text() == "{}"
+    assert not stale.exists()
+
+
+def test_corine_buffer_resolves_against_the_requested_source_before_mode_changes():
+    landuse = Landuse.__new__(Landuse)
+    landuse._mode = LanduseMode.UserDefined
+    landuse._mapping = "esdac"
+    landuse._nlcd_db = "eu/CORINE_LandCover/2018"
+    landuse.config_get_str = lambda _section, _option, default=None: default
+
+    summary = landuse.validate_mofe_buffer_selection(25, mode=LanduseMode.Gridded)
+    assert summary.desc == "Mixed forest"
+    assert landuse.mode == LanduseMode.UserDefined
+    assert landuse.mapping == "esdac"

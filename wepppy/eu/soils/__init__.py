@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -16,6 +16,8 @@ def build_esdac_soils(
     soils_dir: str,
     res_lyr_ksat_threshold: float = 2.0,
     status_channel: str | None = None,
+    *,
+    subsoil_defaults: Mapping[str, object] | None = None,
 ) -> tuple[dict[str, SoilSummary], dict[str, str]]:
     """Proxy to :func:`wepppy.eu.soils.soil_build.build_esdac_soils`.
 
@@ -29,4 +31,5 @@ def build_esdac_soils(
         soils_dir,
         res_lyr_ksat_threshold=res_lyr_ksat_threshold,
         status_channel=status_channel,
+        subsoil_defaults=subsoil_defaults,
     )

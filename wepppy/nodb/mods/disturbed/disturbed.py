@@ -56,7 +56,7 @@ from copy import deepcopy
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, wait
 from concurrent.futures.process import BrokenProcessPool
-from typing import Optional, Dict, List, Tuple, Any, Union, Sequence
+from typing import Optional, Dict, List, Tuple, Any, Union, Sequence, Mapping
 
 import rasterio
 from rasterio.warp import reproject, Resampling
@@ -93,6 +93,8 @@ from .route_coefficients import (
 )
 
 __all__ = [
+    "IncompatibleDisturbedMapping",
+    "build_disturbed_key_lookup",
     'disturbed_class_aliases',
     'TREATMENT_SUFFIXES',
     'lookup_disturbed_class',
@@ -573,7 +575,7 @@ def _build_disturbed_mofe_soil(task_args: Dict[str, Any]) -> Tuple[str, float]:
 
     from wepppy.soils.ssurgo.retention import check_treatment_task, finish_treatment_task, write_exclusive
     retention_context = check_treatment_task(task_args)
-    soil_u = WeppSoilUtil(task_args['source_soil_path'])
+    soil_u = WeppSoilUtil(task_args['source_soil_path'], max_horizons=task_args.get('max_horizons', 10))
     if task_args['sol_ver'] == 7778.0:
         new = soil_u.to_7778disturbed(
             replacement_values,
@@ -958,6 +960,42 @@ class InvalidProjection(Exception):
     """
 
     __name__ = 'Invalid Projection'
+
+
+class IncompatibleDisturbedMapping(AssertionError):
+    """The management map cannot supply the required disturbance classes."""
+
+
+def build_disturbed_key_lookup(mapping_dict: Mapping[str, Mapping[str, Any]]) -> Dict[str, str]:
+    """Use the first management key for each disturbance class in map order."""
+    lookup = {}
+    missing_metadata = []
+    for key, row in mapping_dict.items():
+        disturbed_class = row.get('DisturbedClass')
+        if not isinstance(disturbed_class, str):
+            missing_metadata.append(key)
+        elif disturbed_class:
+            lookup.setdefault(disturbed_class.replace(' ', '_'), key)
+
+    if missing_metadata:
+        keys = ', '.join(missing_metadata[:10])
+        if len(missing_metadata) > 10:
+            keys += f' and {len(missing_metadata) - 10} more'
+        raise IncompatibleDisturbedMapping(
+            f'DisturbedClass is missing or invalid for management keys {keys}.'
+        )
+
+    missing_destinations = [
+        name.replace('_', ' ')
+        for vegetation in ('forest', 'shrub', 'grass')
+        for severity in ('low', 'moderate', 'high')
+        if (name := f'{vegetation}_{severity}_sev_fire') not in lookup
+    ]
+    if missing_destinations:
+        raise IncompatibleDisturbedMapping(
+            f"Missing wildfire management classes: {', '.join(missing_destinations)}."
+        )
+    return lookup
 
 
 class Disturbed(NoDbBase):
@@ -1617,29 +1655,10 @@ class Disturbed(NoDbBase):
         sbs.export_4class_map(self.sbs_4class_path)
         return SoilBurnSeverityMap(self.sbs_4class_path)
     
-    def get_disturbed_key_lookup(self) -> Dict[str, str]:
-        mapping_dict = self.landuse_instance.get_mapping_dict()
-        d = {}
-        for key in mapping_dict:
-            disturbed_class = mapping_dict[key]['DisturbedClass'].replace(' ', '_')
-            if not disturbed_class:  # filter '' and None
-                continue
-            if disturbed_class not in d:
-                d[disturbed_class] = key
-
-        assert 'forest_low_sev_fire' in d
-        assert 'forest_moderate_sev_fire' in d
-        assert 'forest_high_sev_fire' in d
-
-        assert 'shrub_low_sev_fire' in d
-        assert 'shrub_moderate_sev_fire' in d
-        assert 'shrub_high_sev_fire' in d
-
-        assert 'grass_low_sev_fire' in d
-        assert 'grass_moderate_sev_fire' in d
-        assert 'grass_high_sev_fire' in d
-
-        return d
+    def get_disturbed_key_lookup(self, *, mapping_dict=None) -> Dict[str, str]:
+        if mapping_dict is None:
+            mapping_dict = self.landuse_instance.get_mapping_dict()
+        return build_disturbed_key_lookup(mapping_dict)
 
     def remap_landuse(self, *, rebuild_managements: bool = True) -> None:
         func_name = inspect.currentframe().f_code.co_name
@@ -1825,7 +1844,8 @@ class Disturbed(NoDbBase):
             'plant.data.xmxlai', 'plant.data.yld']
                 
                 
-        mapping = Landuse.getInstance(self.wd).mapping
+        landuse = Landuse.getInstance(self.wd)
+        mapping = landuse._resolve_effective_mapping_reference(landuse.source_mapping)
         d = load_map(mapping)
 
         man_d = {}
@@ -2299,7 +2319,8 @@ class Disturbed(NoDbBase):
         processed_segments = 0
 
         with soils.locked():
-            planned_soil_keys = set(soils.soils.keys())
+            existing_soil_keys = set(soils.soils)
+            planned_soil_keys = set(existing_soil_keys)
 
             for topaz_id, mukey in source_soil_keys.items():
                 processed_hillslopes += 1
@@ -2385,6 +2406,7 @@ class Disturbed(NoDbBase):
                                 disturbed_mukey=disturbed_mukey,
                                 disturbed_fn=disturbed_fn,
                                 source_soil_path=source_soil_path,
+                                max_horizons=self.wepp_instance.soil_input_capacity,
                                 output_path=output_path,
                                 replacements=dict(replacements) if replacements is not None else None,
                                 sol_ver=sol_ver,
@@ -2399,7 +2421,7 @@ class Disturbed(NoDbBase):
                             )
                         )
                         planned_soil_keys.add(disturbed_mukey)
-                    elif base_quality is not None:
+                    elif base_quality is not None and disturbed_mukey in existing_soil_keys:
                         _validate_existing_eu_soil_artifact(
                             output_path,
                             base_quality=base_quality,
@@ -2558,7 +2580,7 @@ class Disturbed(NoDbBase):
 
         for idx, hillslope_plan in enumerate(hillslope_plans, start=1):
             with self.timed('  Generating MOFE soil file with SoilMultipleOfeSynth'):
-                mofe_synth = SoilMultipleOfeSynth(stack=hillslope_plan['stack'])
+                mofe_synth = SoilMultipleOfeSynth(stack=hillslope_plan['stack'], max_horizons=self.wepp_instance.soil_input_capacity)
                 output_path = _join(soils.soils_dir, hillslope_plan['sol_fn'])
                 base_quality = (
                     _quality_for_topaz(
@@ -2748,7 +2770,8 @@ class Disturbed(NoDbBase):
                         topaz_id=str(topaz_id),
                         mukey=str(mukey),
                         soil_summary_dir=getattr(_soil, 'soils_dir', None),
-                    )
+                    ),
+                    max_horizons=self.wepp_instance.soil_input_capacity,
                 )
                 if sol_ver == 7778.0:
                     new = soil_u.to_7778disturbed(

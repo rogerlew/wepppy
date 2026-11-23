@@ -291,7 +291,10 @@ locks use the existing `WEPPCLOUD_RQ_LIFECYCLE_LOCK_DIR` setting under `/tmp`;
 transport authentication tests create fixture-owned account data rather than
 reading deployment accounts.
 
-The CI image is built locally and is not published. `Dockerfile.test` defaults to
+The CI image is built locally and is not published. It builds the required shape,
+GeoParquet and CSV parsers from candidate sources with provenance sidecars.
+`tests/prepare_ci_runtime.py` exposes the locked image browser assets to the checkout
+before the unchanged wctl preflight verifies their identity. `Dockerfile.test` defaults to
 the pinned common-image digest and pins Node by digest. To test a host-local
 candidate, set `WEPPCLOUD_TEST_BASE_IMAGE` to its unique local tag for the test
 Compose build, and retain the resolved image ID before and after building.
@@ -331,6 +334,8 @@ lacked the required Roads geometry/water APIs. Native commit
 `4d4c075421c4013cba99a0addc76482229e7f3f7` supplies those APIs and the DM-01
 anisotropy policy, with interchange SHA256
 `7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad`.
+
+Large-watershed interchange pairs native revision `b236ab0eed894e5664bdee5800c62f97f63ea81b` with preflight SHA-256 `9c16555afa70595c3a4031eb8bab94a1cdc6a7ea23637f40aff6120ab83520f9`.
 
 ## Redis durability policy + RQ DB9 deploy flush policy
 
@@ -750,12 +755,26 @@ For AI agents performing deployments:
 - [ ] Static assets accessible (404s resolved)
 - [ ] Monitoring established
 
+### CI Comrak and PRISM runtime alignment (2026-11-21)
+
+The [baseline job](https://github.com/rogerlew/wepppy/actions/runs/44933644862/job/136937190372)
+failed during database bootstrap because its Python environment lacked
+`comrak`. The stubtest job had already passed. The next common image cleared
+bootstrap but still lacked the native `raw_tdmean_c` API required by PRISM.
+
+`Dockerfile.test` uses the digest published by the
+[common-image build for `2dfde16fb`](https://github.com/rogerlew/wepppy/actions/runs/44942315781).
+That revision includes the pinned `comrak-ext` dependency and WEPPpyo3
+`af3b5c977bbdae576fadec929620412732824ad1`, which supplies the updated climate
+extension without the retired PRISM analysis sidecars.
+
 ### CI native alignment acceptance (2026-10-29)
 
 The [common-image build for `84412a38b`](https://github.com/rogerlew/wepppy/actions/runs/40813271338)
 published digest `sha256:7619a9fc9b3e8adf1e09b65b4a0aa9a995c30fface90561bdc509411074b6cfb`,
-now pinned by `Dockerfile.test`. The isolated test Compose project accepted the
-required interchange SHA from `/opt/vendor/wepppyo3/release/linux/py312/`.
+which was pinned by `Dockerfile.test` at the time. The isolated test Compose
+project accepted the required interchange SHA from
+`/opt/vendor/wepppyo3/release/linux/py312/`.
 Startup-contract, anisotropy, developer-mode and Roads publication checks passed
 (62 tests), as did the complete eight-module stubtest suite and test-stub checks.
 Focused startup-file isolation passed with one unchanged-order iteration and
@@ -801,3 +820,30 @@ The shared dev profile applies to every service that lazily imports Flask for
 ownership/auth checks, including browse, download, D-Tale, query-engine,
 rq-engine and workers. Production and worker shared environments pin
 production/disabled too; web-only profile configuration is insufficient.
+
+
+### Isolated browser and Status2 CI checks
+
+`docker-compose.browser-test.yml` extends the existing test runtime with explicit
+`test` deployment identity and ephemeral `/wc1/runs` storage. It publishes no ports.
+`tests/ci_browser_runtime.py` initializes an empty account database, creates an
+in-memory disposable account and token, mounts the app at `/weppcloud` on loopback,
+and runs the existing browser suites. The existing CAP service supplies real login
+challenges; the existing RQ API runs on a second private loopback socket for session
+tokens. Both use disposable fixture credentials; browser cookies are deleted when
+the helper exits and containers are removed by unconditional job cleanup. The helper
+requires image-owned browser assets prepared by `tests/prepare_ci_runtime.py`;
+foreign asset directories or mismatched package manifests fail explicitly. Only the
+browser/application container has outbound access for the page's existing public
+CDN scripts; databases and CAP remain on the internal network.
+Recreate the project between suites because
+the fixture refuses an already populated database. Reports live under
+`wepppy/weppcloud/static-src/test-results/` and `playwright-report/`.
+
+`docker-compose.status-smoke-test.yml` builds the actual Status2 service and its
+existing authenticated smoke client. It uses job-local Redis and signing material,
+no host secrets and no published ports. A successful run reports five delivered
+status frames and a latency summary. Use a unique `COMPOSE_PROJECT_NAME` and run
+`down --volumes --remove-orphans --rmi local` after either runtime, including failures.
+The existing developer `scripts/run-status2-smoke.sh` remains available for deliberate
+checks against a configured development stack.

@@ -1,0 +1,2 @@
+parquet_csv_cli: ready (real conversion and CSV byte readback)
+{"status": "ok", "workers": 8, "csv_bytes": 35, "csv_sha256": "beb97965596e92cdac82affe9d3df2c67b50b79acb97cdf7db39611b3cd8f573", "raw_readback": true, "private_denied": true}

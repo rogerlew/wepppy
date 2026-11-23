@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -371,6 +372,17 @@ def test_index_usersum_docs_rq_builds_index_without_postgres(
     assert any("COMPLETED index_usersum_docs_rq" in message for _, message in published)
 
 
+def _commit_usersum_fixture(repo_root: Path, forest_repo: Path) -> None:
+    for repo in (repo_root, forest_repo):
+        subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(forest_repo), "add", "change-log.md"], check=True)
+    subprocess.run(
+        ["git", "-C", str(forest_repo), "-c", "user.name=Test", "-c",
+         "user.email=test@example.com", "commit", "-qm", "test source"],
+        check=True,
+    )
+
+
 def test_index_usersum_docs_rq_syncs_vendor_docs_before_require_vendor_validation(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -385,6 +397,8 @@ def test_index_usersum_docs_rq_syncs_vendor_docs_before_require_vendor_validatio
         "# Change Log\n\n| Date | Commit Hash | Compiler | Version | Notes |\n",
         encoding="utf-8",
     )
+
+    _commit_usersum_fixture(repo_root, forest_repo)
 
     (usersum_dir / "docs_manifest.yaml").write_text(
         "\n".join(
@@ -478,6 +492,8 @@ def test_index_usersum_docs_rq_syncs_vendor_docs_when_write_index_disabled(
         "# Change Log\n\n| Date | Commit Hash | Compiler | Version | Notes |\n",
         encoding="utf-8",
     )
+
+    _commit_usersum_fixture(repo_root, forest_repo)
 
     (usersum_dir / "docs_manifest.yaml").write_text(
         "\n".join(

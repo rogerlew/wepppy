@@ -1,25 +1,35 @@
 name: NPM Coverage Nightly
 on:
   schedule:
-    - cron: 30 9 * * *
-  workflow_dispatch:
+  - cron: 30 9 * * *
+  workflow_dispatch: null
 jobs:
   npm-coverage:
     runs-on:
-      - self-hosted
-      - Linux
-      - X64
-      - homelab
+    - self-hosted
+    - Linux
+    - X64
+    - remote-ci
     timeout-minutes: 60
     steps:
-      - name: Run npm coverage suite
-        run: |
-          set -euo pipefail
-          scripts/run-npm-coverage.sh
-      - name: Upload npm coverage artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: npm-coverage
-          path: coverage/npm
-          if-no-files-found: warn
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    - name: Run JavaScript checks
+      run: |-
+        set -euo pipefail
+        docker run --rm --user "$(id -u):$(id -g)" --cap-drop ALL --security-opt no-new-privileges \
+          -e HOME=/tmp -v "$GITHUB_WORKSPACE:/workspace" -w /workspace/wepppy/weppcloud/static-src \
+          node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 sh -ec 'npm ci --legacy-peer-deps
+        NODE_OPTIONS=--experimental-vm-modules node node_modules/jest/bin/jest.js --config jest.config.mjs --coverage --coverageProvider=v8 --coverageDirectory=/workspace/coverage/npm --coverageReporters=text --coverageReporters=lcov
+        node --test tests/node/*.test.mjs
+        test -s /workspace/coverage/npm/lcov.info'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: npm-coverage
+        path: coverage/npm
+        if-no-files-found: error
+    forest_bootstrap: false
+permissions:
+  contents: read

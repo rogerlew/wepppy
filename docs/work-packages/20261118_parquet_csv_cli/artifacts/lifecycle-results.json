@@ -1,0 +1,49 @@
+[
+  {
+    "case": "cpu",
+    "code": "child_failed",
+    "seconds": 1.3882922031916678,
+    "cleanup": true
+  },
+  {
+    "case": "wall",
+    "code": "timeout",
+    "seconds": 0.3246798077598214,
+    "cleanup": true
+  },
+  {
+    "case": "staging",
+    "code": "staging_timeout",
+    "seconds": 0.017625161912292242,
+    "cleanup": true
+  },
+  {
+    "case": "output",
+    "code": "resource_limit",
+    "seconds": 1.3590312479063869,
+    "cleanup": true
+  },
+  {
+    "case": "two_concurrent",
+    "seconds": 28.634737636893988,
+    "rows": [
+      3004240,
+      3004240
+    ],
+    "child_rss_kib": [
+      31104,
+      31104
+    ],
+    "parent_rss_kib": 31104,
+    "output_sha256": "3b46f65692f3fbab2db74891eb1ce647114c640f021c36cc3e3a156c969c7231",
+    "third": "busy"
+  },
+  {
+    "case": "advisory_cold_rust",
+    "hint": "POSIX_FADV_DONTNEED; no guaranteed physical eviction",
+    "seconds": 17.0678677293472,
+    "child_rss_kib": 31104,
+    "rows": 3004240,
+    "output_sha256": "3b46f65692f3fbab2db74891eb1ce647114c640f021c36cc3e3a156c969c7231"
+  }
+]

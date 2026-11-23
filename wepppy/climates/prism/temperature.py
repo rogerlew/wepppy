@@ -1,6 +1,5 @@
 """ADR-0092: repair only temperature inversions introduced by spatialization."""
 import logging
-from pathlib import Path
 
 import numpy as np
 
@@ -35,17 +34,10 @@ def repair_temperature_ordering(tmax, tmin):
                              maximum_inversion_c=maximum, maximum_adjustment_c=maximum_adjustment)
 
 
-def start_temperature_revision(source, output):
-    """Retain an incomplete diagnostic beside the normal output artifact."""
-    path = Path(str(output) + '.temperature-ordering.log')
-    path.write_text(f'status=working source={str(source)!r} output={str(output)!r}\n')
-    return path
-
-
-def complete_temperature_revision(path, diagnostics):
-    """Call only after the climate writer/readback has succeeded."""
-    message = 'status=complete ' + ' '.join(f'{key}={diagnostics[key]}' for key in (
-        'method', 'corrected_days', 'maximum_inversion_c', 'maximum_adjustment_c'))
-    with Path(path).open('a') as stream:
-        stream.write(message + '\n')
-    logging.getLogger(__name__).info('%s %s', path, message)
+def log_temperature_revision(source, output, diagnostics):
+    logging.getLogger(__name__).info(
+        'status=complete source=%s output=%s method=%s corrected_days=%s '
+        'maximum_inversion_c=%s maximum_adjustment_c=%s',
+        source, output, diagnostics['method'], diagnostics['corrected_days'],
+        diagnostics['maximum_inversion_c'], diagnostics['maximum_adjustment_c'],
+    )

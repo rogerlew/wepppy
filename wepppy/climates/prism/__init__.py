@@ -21,7 +21,7 @@ from wepppy.climates.metquery_client import (
 
 from wepppy.climates.prism.temperature import (
     validate_source_temperatures, repair_temperature_ordering,
-    start_temperature_revision, complete_temperature_revision,
+    log_temperature_revision,
 )
 
 _rowfmt = lambda x : '\t'.join(['%0.2f' % v for v in x])
@@ -43,7 +43,6 @@ def prism_revision(cli_fn: str, ws_lng: float, ws_lat: float,
         assert cli_fn.endswith('.cli'), cli_fn
         new_cli_fn = cli_fn.replace('.cli', '_revised.cli')
 
-    diagnostic_path = start_temperature_revision(cli_fn, new_cli_fn)
     cli = ClimateFile(cli_fn)
     df = cli.as_dataframe()
 
@@ -77,6 +76,6 @@ def prism_revision(cli_fn: str, ws_lng: float, ws_lat: float,
 
     cli.write(new_cli_fn)
     monthlies = cli.calc_monthlies()
-    complete_temperature_revision(diagnostic_path, diagnostics)
+    log_temperature_revision(cli_fn, new_cli_fn, diagnostics)
 
     return new_cli_fn, monthlies

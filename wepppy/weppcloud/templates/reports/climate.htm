@@ -15,11 +15,16 @@
   <p><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/' ~ edde.attempt) }}">Source, generation and spatialization evidence</a> · <a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/edde-provenance.json') }}">Published file identities and scaling</a></p>
 {% endif %}
 
-{% if climate.is_single_storm %}
+{% set uploaded_mode = climate.active_uploaded_cli_mode | default(none) %}
+{% if uploaded_mode == 15 or (uploaded_mode is none and climate.is_single_storm) %}
   <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
     <p class="wc-alert__body">
-      <strong>Single-storm climates are deprecated and unsupported.</strong>
-      Legacy outputs may be incomplete or unreliable. Use continuous climate datasets for supported runs.
+      <strong>Single-storm climates are deprecated.</strong>
+      {% if climate.climate_mode | default(-1) | int == 14 %}
+        Running a storm batch requires per-event processing. Upload a CLI for an individual event or choose a continuous climate.
+      {% else %}
+        WEPP can run saved individual storms with a valid event climate file.
+      {% endif %}
       For event-scale analysis, use the Storm Event Analyzer.
     </p>
   </div>
@@ -41,7 +46,7 @@
 </dl>
 {% endif %}
 {% set climate_files_content %}
-  {% if climate.ss_batch_storms %}
+  {% if uploaded_mode is none and climate.ss_batch_storms %}
     <h5>Single Storm Batch Climates</h5>
     <dl class="dl-horizontal">
       {% for d in climate.ss_batch_storms %}
@@ -52,7 +57,7 @@
     <h5>Global Climate</h5>
     <dl class="dl-horizontal">
       <dd><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/' ~ climate.par_fn) }}" target="_blank">{{ climate.par_fn }}</a></dd>
-      <dd><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/' ~ climate.cli_fn) }}" target="_blank">{{ climate.cli_fn }}</a></dd>
+      <dd><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='climate/' ~ climate.cli_fn) }}" target="_blank"{% if climate.cli_fn %} data-climate-active-filename{% endif %}>{{ climate.cli_fn }}</a></dd>
     </dl>
   {% endif %}
   <h5>Climate Build Log</h5>

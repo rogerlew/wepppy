@@ -1,0 +1,24 @@
+# Disposable authenticated service smoke; no host ports, host files or live secrets.
+services:
+  redis:
+    image: redis:7
+    command: [redis-server, --requirepass, local-ci-only]
+    healthcheck:
+      test: [CMD, redis-cli, -a, local-ci-only, ping]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  smoke:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.status-smoke-test
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs: [/tmp]
+    depends_on:
+      redis:
+        condition: service_healthy
+networks:
+  default:
+    internal: true

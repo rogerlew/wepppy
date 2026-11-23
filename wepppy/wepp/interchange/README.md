@@ -39,8 +39,7 @@ hash. Interchange README generation reads only the schema and three preview rows
 from each Parquet file, so documentation does not reload a complete run table.
 ## Outputs
 
-Hillslope writers combine sorted per-hillslope sources into one table. Each
-source maps to one Parquet row group in source order.
+Hillslope writers combine sorted per-hillslope sources into one table. A large watershed can have several hillslopes in one physical row group. Select hillslopes by their identity column.
 
 | Input pattern | Output |
 | --- | --- |

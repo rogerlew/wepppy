@@ -18,9 +18,8 @@ def old_project(tmp_path, monkeypatch):
     from wepppy.nodb.config_builder.snapshot import parse_builder_selections, resolve_builder_candidate
     from wepppy.nodb.project_config_snapshot import materialize_preset_snapshot
     from wepppy.nodb.core import Climate, Watershed, Wepp
-    installed = registry_module.get_linux_wepp_bin_opts()
     with monkeypatch.context() as isolated:
-        isolated.setattr(registry_module, 'get_linux_wepp_bin_opts', lambda: [item for item in installed if item not in ('wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')])
+        isolated.setattr(registry_module, 'get_linux_wepp_bin_opts', lambda: ['wepp_260430', 'wepp_260803'])
         registry = registry_module.load_registry()
     selections = parse_builder_selections(dict(
         locale='continental-us', dem='usgs-ned13-2022', delineation_backend='wbt',
@@ -38,11 +37,11 @@ def old_project(tmp_path, monkeypatch):
     return Wepp(str(tmp_path), 'config.cfg')
 
 
-@pytest.mark.parametrize('binary', ['wepp_260430', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029'])
+@pytest.mark.parametrize('binary', ['wepp_260430', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029', 'wepp_261118', 'wepp_261121'])
 def test_old_builder_project_can_persist_new_release_without_config_migration(old_project, tmp_path, binary):
     from wepppy.nodb.core import Wepp
     before = {name: (tmp_path / name).read_bytes() for name in ('config.cfg', 'config-manifest.json')}
-    assert project_wepp_binary_options(old_project) == ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
+    assert project_wepp_binary_options(old_project) == ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029', 'wepp_261118', 'wepp_261121')
     old_project.parse_inputs({'wepp_bin': binary})
     assert Wepp.load_detached(str(tmp_path)).wepp_bin == binary
     if binary == 'wepp_260430':
@@ -99,7 +98,7 @@ class V1Config:
 
 def test_v1_choices_expand_only_binary_axis_and_preserve_geometry():
     config = V1Config()
-    assert project_wepp_binary_options(config) == ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
+    assert project_wepp_binary_options(config) == ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029', 'wepp_261118', 'wepp_261121')
     validate_project_wepp_binary_selection(config, 'wepp_261010')
     assert project_wepp_binary_options(config, backend='topaz') == project_wepp_binary_options(config, backend='wbt')
 
@@ -139,7 +138,7 @@ def test_explicit_v1_saved_config_persists_new_binary(old_project, tmp_path):
     manifest_path.write_text(json.dumps(manifest))
     before = (serialized, manifest_path.read_bytes())
     reloaded = Wepp.load_detached(str(tmp_path))
-    assert project_wepp_binary_options(reloaded) == ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
+    assert project_wepp_binary_options(reloaded) == ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029', 'wepp_261118', 'wepp_261121')
     reloaded.parse_inputs({'wepp_bin': 'wepp_261010'})
     assert Wepp.load_detached(str(tmp_path)).wepp_bin == 'wepp_261010'
     assert ((tmp_path / 'config.cfg').read_bytes(), manifest_path.read_bytes()) == before
@@ -153,7 +152,7 @@ def test_legacy_mofe_choices_do_not_depend_on_backend(flattened):
         config_get_list=lambda section, option, default=None: default,
         config_get_bool=lambda section, option, default=None: flattened if (section, option) == ('config', 'flattened') else default,
     )
-    expected = ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029')
+    expected = ('wepp_260430', 'wepp_260803', 'wepp_261010', 'wepp_261021', 'wepp_261026', 'wepp_261029', 'wepp_261118', 'wepp_261121')
     for backend in ('topaz', 'wbt'):
         assert project_wepp_binary_options(config, backend=backend) == expected
         validate_project_wepp_binary_selection(config, 'wepp_261010', backend=backend)

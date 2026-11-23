@@ -1,0 +1,9 @@
+{
+  "host": "forest",
+  "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "binary_sha256": "2efd194f5842f668687b58659337598b5d3b868151fc12f0d3b837b9313a8b37",
+  "source_sha": "bba939a47b499fd6b74327cd6817bdee741a13bb",
+  "cache": "warm repetitions; independent advisory first-touch run recorded separately",
+  "cpu_count": 48
+}

@@ -592,3 +592,85 @@ def test_malformed_catalog_history_preserves_protected_metadata(managed):
         assert (stat.S_IMODE(observed.st_mode), observed.st_uid, observed.st_gid) == (
             0o640, before.st_uid, before.st_gid)
         assert {n: os.getxattr(published, n) for n in os.listxattr(published)} == attributes
+
+
+def test_browser_refresh_intent_is_coalesced(managed):
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        outcomes = list(executor.map(lambda _: refresh.prepare_catalog_intent(managed), range(4)))
+    assert all(outcome in {'pending', 'busy'} for outcome in outcomes)
+    assert len(refresh.pending_catalog_requests(managed)) == 1
+    assert not (managed / '_query_engine/catalog.json').exists()
+
+
+def test_wait_mode_detects_real_stale_source_without_repairing_inline(managed):
+    from wepppy.query_engine.access_scope import access_scope
+
+    path = 'wepp/output/interchange/loss.parquet'
+    _parquet(managed / path)
+    activate_query_engine(managed, run_interchange=False)
+    catalog_path = managed / '_query_engine/catalog.json'
+    before = catalog_path.read_bytes()
+    _parquet(managed / path, {'topaz_id': [11], 'new_value': [3.0]})
+    with access_scope(managed, managed, lambda: None, catalog_wait=True):
+        with pytest.raises(refresh.CatalogNotReady) as failure:
+            refresh.ensure_catalog_fresh(managed, [path])
+    assert failure.value.paths == (path,)
+    assert catalog_path.read_bytes() == before
+    assert not refresh.pending_catalog_requests(managed)
+    assert refresh.prepare_catalog_intent(managed, failure.value.paths) == 'pending'
+    refresh.refresh_catalog(managed)
+    with access_scope(managed, managed, lambda: None, catalog_wait=True):
+        catalog = refresh.ensure_catalog_fresh(managed, [path])
+    entry = next(e for e in catalog['files'] if e['path'] == path)
+    assert any(f['name'] == 'new_value' for f in entry['schema']['fields'])
+
+
+def test_browser_prepare_does_not_wait_for_held_lifecycle_guard(managed):
+    context = multiprocessing.get_context('fork')
+    ready, done = context.Event(), context.Event()
+    process = context.Process(target=_take_guard, args=(managed, ready, done))
+    process.start()
+    try:
+        assert ready.wait(5)
+        assert refresh.prepare_catalog_intent(managed) == 'busy'
+        assert not refresh.pending_catalog_requests(managed)
+    finally:
+        done.set()
+        process.join(5)
+    assert process.exitcode == 0
+
+
+def test_browser_repair_preserves_explicit_parent_selection(managed):
+    from wepppy.query_engine.access_scope import access_scope
+
+    child = managed / '_pups/omni/scenarios/test'
+    relative = 'watershed/hillslopes.parquet'
+    source = managed / relative
+    _parquet(source)
+    _parquet(child / relative, {'other': [1]})
+    activate_query_engine(child, run_interchange=False)
+    catalog = json.loads((child / '_query_engine/catalog.json').read_text())
+    entry = next(item for item in catalog['files'] if item['path'] == relative)
+    entry['fs_path'] = str(source)
+    refresh.publish_catalog(child, catalog)
+
+    _parquet(source, {'topaz_id': [11], 'parent_only': [2]})
+    with access_scope(child, managed, lambda: None, catalog_wait=True):
+        with pytest.raises(refresh.CatalogNotReady) as failure:
+            refresh.ensure_catalog_fresh(child, [relative])
+        assert refresh.prepare_catalog_intent(child, failure.value.paths) == 'pending'
+        refresh.refresh_catalog(child)
+        result = refresh.ensure_catalog_fresh(child, [relative])
+    resolved = next(item for item in result['files'] if item['path'] == relative)
+    assert resolved['fs_path'] == str(source)
+    assert {field['name'] for field in resolved['schema']['fields']} == {'topaz_id', 'parent_only'}
+
+
+def test_browser_prepare_refuses_replaced_observed_scope(managed):
+    observed = refresh.resolve_scope(managed)
+    managed.rename(managed.with_name('replaced-run'))
+    managed.mkdir()
+    assert refresh.prepare_catalog_intent(managed, observed_scope=observed) == 'busy'
+    assert not (managed / refresh.REFRESH_PATH).exists()

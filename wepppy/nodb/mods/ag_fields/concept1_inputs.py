@@ -113,6 +113,7 @@ def synthesize_concept1_parent_inputs(
     subfield_runs_dir: Path,
     target_runs_dir: Path,
     target_width_m: float,
+    max_horizons: int = 10,
 ) -> dict[str, Any]:
     """Write a consistent slope/soil/management/climate set for one parent."""
     if not math.isfinite(target_width_m) or target_width_m <= 0.0:
@@ -135,7 +136,7 @@ def synthesize_concept1_parent_inputs(
     )
 
     soil_sources = [str(source_prefix.with_suffix(".sol"))] * len(rows)
-    SoilMultipleOfeSynth(soil_sources).write(str(target_prefix.with_suffix(".sol")))
+    SoilMultipleOfeSynth(soil_sources, max_horizons=max_horizons).write(str(target_prefix.with_suffix(".sol")))
 
     managements = []
     for row in rows:

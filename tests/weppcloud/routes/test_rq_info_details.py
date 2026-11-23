@@ -114,6 +114,7 @@ def test_rq_info_details_route_wires_failed_jobs_context(monkeypatch: pytest.Mon
 
     monkeypatch.setattr(rq_info_details_module, "redis_connection_kwargs", lambda *_args, **_kwargs: {})
     monkeypatch.setattr(rq_info_details_module.redis, "Redis", _DummyRedis)
+    monkeypatch.setattr(rq_info_details_module, "catalog_panels", lambda conn: [("Catalog admission", {})])
     monkeypatch.setattr(rq_info_details_module, "list_recently_completed_jobs", _fake_recently_completed)
     monkeypatch.setattr(rq_info_details_module, "list_active_jobs", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(rq_info_details_module, "render_template", _fake_render_template)
@@ -123,6 +124,7 @@ def test_rq_info_details_route_wires_failed_jobs_context(monkeypatch: pytest.Mon
         response = rq_info_details_module.rq_info_details.__wrapped__.__wrapped__()
 
     assert response == "ok"
+    assert captured_context["catalog"] == [("Catalog admission", {})]
     assert lookback_calls == [rq_info_details_module.FAILED_JOBS_LOOKBACK_SECONDS]
     assert captured_context["failed_lookback_seconds"] == rq_info_details_module.FAILED_JOBS_LOOKBACK_SECONDS
     assert [job["job_id"] for job in captured_context["failed_jobs"]] == ["failed-recent", "failed-old"]
@@ -172,6 +174,7 @@ def test_rq_info_details_route_wires_ordered_active_queue_groups(
 
     monkeypatch.setattr(rq_info_details_module, "redis_connection_kwargs", lambda *_args, **_kwargs: {})
     monkeypatch.setattr(rq_info_details_module.redis, "Redis", _DummyRedis)
+    monkeypatch.setattr(rq_info_details_module, "catalog_panels", lambda conn: [("Catalog admission", {})])
     monkeypatch.setattr(rq_info_details_module, "list_recently_completed_jobs", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(rq_info_details_module, "list_active_jobs", lambda *_args, **_kwargs: active_jobs)
     monkeypatch.setattr(
@@ -319,6 +322,7 @@ def rq_info_auth_client(monkeypatch: pytest.MonkeyPatch):
 
     monkeypatch.setattr(rq_info_details_module, "redis_connection_kwargs", lambda *_args, **_kwargs: {})
     monkeypatch.setattr(rq_info_details_module.redis, "Redis", _DummyRedis)
+    monkeypatch.setattr(rq_info_details_module, "catalog_panels", lambda conn: [("Catalog admission", {})])
     monkeypatch.setattr(rq_info_details_module, "list_recently_completed_jobs", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(rq_info_details_module, "list_active_jobs", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(rq_info_details_module, "render_template", lambda *_args, **_kwargs: "ok")
@@ -346,3 +350,19 @@ def test_rq_info_details_requires_admin_or_root(
     client, user_ids = rq_info_auth_client
     client.get(f"/test-login/{user_ids[role_name]}")
     assert client.get("/rq/info-details").status_code == expected_status
+
+
+def test_catalog_panels_render_with_existing_job_tables():
+    from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
+
+    env = Environment(autoescape=True, loader=ChoiceLoader([
+        FileSystemLoader(INFO_DETAILS_TEMPLATE.parent),
+        DictLoader({'base_pure.htm': '{% block body %}{% endblock %}'}),
+    ]))
+    html = env.get_template('info_details.htm').render(failed_lookback_seconds=86400, catalog=[
+        ('Catalog admission', {'messages': ['Catalog admission is paused.'], 'rows': [('Pause expires', 'No expiry')]}),
+        ('Catalog health', {'messages': ['Monitoring data unavailable.'], 'rows': []}),
+    ])
+    for text in ('Catalog admission', 'Catalog health', 'No expiry', 'Monitoring data unavailable.',
+                 'Recently Completed Jobs', 'Failed Jobs (Last 24 Hours)'):
+        assert text in html

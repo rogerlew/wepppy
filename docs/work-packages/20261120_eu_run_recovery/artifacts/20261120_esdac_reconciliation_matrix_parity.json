@@ -1,0 +1,15 @@
+{
+  "runtime_revision": "00c81ee0a526c8877f42235ada389ef4cee5a41b",
+  "cases": 96,
+  "tests_passed": 99,
+  "native_output_files_byte_identical": 768,
+  "other_model_input_files_byte_identical": 864,
+  "management_files_byte_identical": 96,
+  "soil_files_equal_except_build_date": 96,
+  "prior_artifact_capture_sha256": "a18ee759691645ab9f71e5c66eb9fc6fbc813c09504c4f2bcd8421be61257fe4",
+  "published_provenance_sha256": "8928a034a2dce03ad0efd5b4285407830f92664879019c5ad577b36ceb951220",
+  "published_report_sha256": "31cbd80b8996db905a9bdb4b20666132af8a124c93abbbeebb75a98ba770b947",
+  "regenerated_report_sha256": "31cbd80b8996db905a9bdb4b20666132af8a124c93abbbeebb75a98ba770b947",
+  "management_source_current_sha256": "f76b05cec4acab2de131b8404bdc869f85cfd9d19945d224b5a248a46fb3e459",
+  "retained_matrix": "/home/workdir/wepppy-eu-run-recovery/.wctl-test-runs/retained-esdac-reconciled-final/disturbed_matrix0"
+}

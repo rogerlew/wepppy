@@ -562,13 +562,12 @@ run-sync pages. See the [canonical contract](../../../docs/schemas/weppcloud-web
 `map_gl.js` keeps Terrain as default and delegates the `forestService` background
 to `static/js/forest-service-basemap.js`. Deck remains the input/view/overlay
 owner; its render callback synchronizes the passive MapLibre camera. The adapter
-lazily loads the locked renderer exported by `weppcloud-ui-lab`, releases it on
+lazily loads the locked renderer from `static/vendor/maplibre/`, releases it on
 switching away, and owns provider credit/loading/error text. Unknown keys retain
 Terrain fallback; existing Terrain/Satellite aliases remain supported.
 
 Follow [FSBASE-01](../../../docs/ui-docs/contracts/forest-service-basemap-contract.md).
-Run the normal controller build plus `npm run export:landing` in the UI lab;
-the latter exports the local renderer and license as well as landing assets.
+Run the normal controller build. The renderer and its license are checked in.
 Validate actual served labels/symbols and overlay interactions, including rapid
 switching, before claiming conformance. Do not feed vector resources through the
 raster tile path or add MapLibre attribution controls/remote HTML.

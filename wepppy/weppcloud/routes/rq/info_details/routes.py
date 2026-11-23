@@ -6,6 +6,7 @@ from typing import Any, Mapping, Sequence
 import redis
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.rq.query_catalog_monitor import catalog_panels
 from wepppy.rq.job_listings import (
     DEFAULT_RECENT_LOOKBACK_SECONDS,
     DEFAULT_QUEUES,
@@ -182,6 +183,7 @@ def rq_info_details():
                 lookback_seconds=failed_lookback_seconds,
             )
             active_jobs = list_active_jobs(redis_conn, queue_names=queue_names)
+            catalog = catalog_panels(redis_conn)
         recent_jobs = _filter_jobs_within_lookback(completed_jobs, lookback_seconds=lookback_seconds)
         failed_jobs = _filter_failed_jobs(completed_jobs)
 
@@ -212,6 +214,7 @@ def rq_info_details():
 
         return render_template(
             "info_details.htm",
+            catalog=catalog,
             actions=actions,
             subtitle=subtitle,
             queues=list(queue_names),

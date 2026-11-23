@@ -14,3 +14,7 @@ wepppy/_tests
 wepppy/weppcloud/static-src/node_modules
 wepppy/weppcloud/static-src/playwright-report
 wepppy/weppcloud/static-src/test-results
+
+# Build the native CSV executable from its locked sources, never host targets.
+tools/parquet_csv_cli/rust/target
+.wctl-test-runs

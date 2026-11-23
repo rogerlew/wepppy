@@ -168,6 +168,7 @@
             logLimit: typeof options.logLimit === "number" ? Math.max(1, Math.floor(options.logLimit)) : DEFAULT_LOG_LIMIT,
             renderBatchMs: typeof options.renderBatchMs === "number" ? Math.max(0, options.renderBatchMs) : DEFAULT_RENDER_BATCH_MS,
             formatter: options.formatter,
+            filterMessage: typeof options.filterMessage === "function" ? options.filterMessage : null,
             isImportant: typeof options.isImportant === "function" ? options.isImportant : defaultIsImportantMessage,
             onTrigger: typeof options.onTrigger === "function" ? options.onTrigger : null,
             reconnectBaseMs: options.reconnectBaseMs || DEFAULT_RECONNECT_BASE_MS,
@@ -410,7 +411,7 @@
         }
 
         fetcher(jobId).then(function (text) {
-            if (text) {
+            if (text && (!config.filterMessage || config.filterMessage(message))) {
                 renderStacktraceBody(body, text, stacktraceTargets.allowHtml);
             }
         }).catch(function (error) {
@@ -461,6 +462,9 @@
             }
 
             var data = payload.data;
+            if (config.filterMessage && !config.filterMessage(data)) {
+                return;
+            }
             appendMessage(data);
 
             if (typeof data === "string" && data.indexOf("EXCEPTION") !== -1) {

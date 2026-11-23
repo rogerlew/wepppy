@@ -4,7 +4,7 @@
     var ROOT = "https://tiles.arcgis.com/tiles/gGHDlz6USftL5Pau/arcgis/rest/services/FSBasemap_20240617/VectorTileServer/";
     var STYLE = ROOT + "resources/styles/root.json";
     var ITEM = "https://www.arcgis.com/home/item.html?id=2e1593463c30495e9c802098527e3d1b";
-    var assetRoot = new URL("../ui-lab/maplibre/", document.currentScript.src).href;
+    var assetRoot = new URL("../vendor/maplibre/", document.currentScript.src).href;
     var libraryPromise;
 
     function validateResource(value) {

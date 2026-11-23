@@ -58,25 +58,38 @@ def test_calendar_start_year_infers_from_cli_when_unset(tmp_path: Path) -> None:
     assert climate.calendar_start_year == 1980
 
 
-def test_set_user_defined_cli_refreshes_cli_parquet(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+@pytest.mark.parametrize(('old_mode', 'new_mode', 'fresh'), [
+    (ClimateMode.UserDefinedSingleStorm, ClimateMode.UserDefined, False),
+    (ClimateMode.UserDefined, ClimateMode.UserDefinedSingleStorm, False),
+    (ClimateMode.UserDefined, ClimateMode.UserDefined, True),
+])
+def test_set_user_defined_cli_refreshes_cli_parquet(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, old_mode, new_mode, fresh) -> None:
     cli_dir = tmp_path / "climate"
-    cli_dir.mkdir()
-    cli_path = cli_dir / "user.cli"
+    if not fresh:
+        cli_dir.mkdir()
+    cli_path = (tmp_path if fresh else cli_dir) / "user.cli"
     _write_minimal_cli(cli_path)
+    if new_mode == ClimateMode.UserDefinedSingleStorm:
+        cli_path.write_text('\n'.join(cli_path.read_text().splitlines()[:16]) + '\n')
 
     climate = Climate.__new__(Climate)
     climate.logger = logging.getLogger("test")
     climate.wd = str(tmp_path)
-    climate._climate_mode = ClimateMode.UserDefined
+    climate._climate_mode = old_mode
+    climate._ss_batch_storms = [{'ss_batch_key': 'older-storm'}]
     climate._climate_spatialmode = ClimateSpatialMode.Single
 
+    committed = []
+
     @contextlib.contextmanager
-    def _noop_locked(_self, *args, **kwargs):
+    def capture_commit():
         yield
+        committed.append((
+            climate.climate_mode, climate.cli_fn, climate._catalog_id, climate.ss_batch_storms,
+        ))
 
-    climate.locked = types.MethodType(_noop_locked, climate)
+    climate.locked = capture_commit
 
-    climate._post_defined_climate = lambda *args, **kwargs: None
     climate._prism_revision = lambda *args, **kwargs: None
 
     calls: dict[str, int] = {"export": 0, "freq": 0, "atlas": 0}
@@ -100,9 +113,15 @@ def test_set_user_defined_cli_refreshes_cli_parquet(monkeypatch: pytest.MonkeyPa
         lambda *_args, **_kwargs: (_ for _ in ()).throw(FileNotFoundError()),
     )
 
-    climate.set_user_defined_cli(cli_path.name)
+    climate.set_user_defined_cli(cli_path.name, staged_path=cli_path if fresh else None)
 
+    assert committed == [(new_mode, cli_path.name, "user_defined_cli", None)]
     assert calls["export"] == 1
+    assert climate.climate_mode == new_mode
+    assert climate.active_uploaded_cli_mode == new_mode
+    assert climate.ss_batch_storms is None
+    assert climate.cli_fn == cli_path.name
+    assert (cli_dir / cli_path.name).read_bytes() == cli_path.read_bytes()
 
 
 def test_set_user_defined_cli_delegates_station_meta_builder(
@@ -125,7 +144,6 @@ def test_set_user_defined_cli_delegates_station_meta_builder(
         yield
 
     climate.locked = types.MethodType(_noop_locked, climate)
-    climate._post_defined_climate = lambda *args, **kwargs: None
     climate._prism_revision = lambda *args, **kwargs: None
     climate._export_cli_parquet = lambda: cli_dir / "wepp_cli.parquet"
     climate._export_cli_precip_frequency_csv = lambda *_args, **_kwargs: None
@@ -157,3 +175,103 @@ def test_set_user_defined_cli_delegates_station_meta_builder(
     assert captured["cli_filename"] == cli_path.name
     assert captured["cli_dir"] == str(cli_dir)
     assert isinstance(captured["monthlies"], dict)
+
+
+def test_active_upload_display_and_repair_do_not_share_an_implicit_write(tmp_path):
+    directory = tmp_path / 'climate'
+    directory.mkdir()
+    active = directory / 'user.cli'
+    _write_minimal_cli(active)
+    climate = Climate.__new__(Climate)
+    climate.wd = str(tmp_path)
+    climate.cli_fn = active.name
+    climate._orig_cli_fn = '/original-run/climate/user.cli'
+    climate._user_station_meta = object()
+    climate._climate_mode = ClimateMode.UserDefinedSingleStorm
+    climate._ss_batch_storms = [{'ss_batch_key': 'obsolete'}]
+
+    assert climate.active_uploaded_cli_mode == ClimateMode.UserDefined
+    assert climate.climate_mode == ClimateMode.UserDefinedSingleStorm
+    assert climate.is_single_storm
+
+    writes = []
+
+    @contextlib.contextmanager
+    def record_write():
+        writes.append('lock')
+        yield
+
+    climate.locked = record_write
+    climate.reconcile_uploaded_cli_mode()
+    assert writes == ['lock']
+    assert climate.climate_mode == ClimateMode.UserDefined
+    assert not climate.is_single_storm
+    assert climate.ss_batch_storms is None
+
+    active.write_text('\n'.join(active.read_text().splitlines()[:16]) + '\n')
+    assert climate.active_uploaded_cli_mode == ClimateMode.UserDefinedSingleStorm
+
+
+@pytest.mark.parametrize('invalid', ['no-days', 'non-numeric', 'invalid-date', 'breakpoints', 'without-provenance', 'external-provenance', 'symlink'])
+def test_active_upload_requires_parsed_run_owned_content_and_provenance(tmp_path, invalid):
+    directory = tmp_path / 'climate'
+    directory.mkdir()
+    active = directory / 'user.cli'
+    _write_minimal_cli(active)
+    climate = Climate.__new__(Climate)
+    climate.wd = str(tmp_path)
+    climate.cli_fn = active.name
+    climate._orig_cli_fn = str(active)
+    climate._user_station_meta = object()
+    climate._climate_mode = ClimateMode.UserDefined
+    lines = active.read_text().splitlines()
+    if invalid == 'no-days':
+        active.write_text('\n'.join(lines[:15]) + '\n')
+    elif invalid == 'non-numeric':
+        active.write_text('\n'.join(lines[:15] + [lines[15].replace('19.4', 'bad')]) + '\n')
+    elif invalid == 'invalid-date':
+        active.write_text('\n'.join(lines[:15] + [lines[15].replace('1  1 1980', '31  2 1980')]) + '\n')
+    elif invalid == 'breakpoints':
+        lines[1] = '1 1 0'
+        lines[13] = 'da mo year nbrkpt tmax tmin rad w-vl w-dir tdew'
+        lines[15] = '1 1 1980 1 19.4 11.5 267 2.7 295 13.4'
+        active.write_text('\n'.join(lines[:17]) + '\n')
+    elif invalid == 'without-provenance':
+        climate._user_station_meta = None
+    elif invalid == 'external-provenance':
+        climate._orig_cli_fn = '/observed/database/user.cli'
+    else:
+        elsewhere = tmp_path / 'elsewhere.cli'
+        active.rename(elsewhere)
+        active.symlink_to(elsewhere)
+
+    assert climate.active_uploaded_cli_mode is None
+    assert climate.climate_mode == ClimateMode.UserDefined
+
+    if invalid not in ('without-provenance', 'external-provenance'):
+        climate._climate_mode = ClimateMode.UserDefinedSingleStorm
+        with pytest.raises(ValueError, match='active uploaded climate is missing or invalid'):
+            climate.reconcile_uploaded_cli_mode()
+
+
+def test_invalid_staged_upload_preserves_the_active_same_name(tmp_path):
+    climate_dir = tmp_path / "climate"
+    climate_dir.mkdir()
+    active = climate_dir / "ESFANGAR.cli"
+    _write_minimal_cli(active)
+    previous = active.read_bytes()
+    pending = tmp_path / "ESFANGAR.cli"
+    pending.write_bytes(b"malformed")
+    climate = Climate.__new__(Climate)
+    climate.wd = str(tmp_path)
+    climate.logger = logging.getLogger(__name__)
+    climate._climate_mode = ClimateMode.UserDefined
+    climate.cli_fn = active.name
+    climate.locked = contextlib.nullcontext
+
+    with pytest.raises(ValueError, match="Upload a valid CLIGEN file"):
+        climate.set_user_defined_cli(active.name, staged_path=pending)
+
+    assert active.read_bytes() == previous
+    assert pending.read_bytes() == b"malformed"
+    assert climate.climate_mode == ClimateMode.UserDefined

@@ -414,4 +414,4 @@ Before deploying new logos:
 
 - [UI Style Guide](ui-style-guide.md) — Overall WEPPcloud design system
 - [Theme System](theme-system.md) — VS Code theme integration
-- [Landing Spec](../../weppcloud-ui-lab/landing.spec.md) — Landing page design specification
+- [Landing Spec](contracts/pure-landing-contract.md) — Landing page design specification

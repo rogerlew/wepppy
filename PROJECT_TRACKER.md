@@ -1,6 +1,36 @@
+Implemented and validated locally — [Restore channel upstream area](docs/work-packages/20261122_channel_upstream_area/package.md).
+
+Closed locally — [Large-watershed Parquet interchange](docs/work-packages/20261122_interchange_row_groups/package.md). Verified at 47,582 source IDs and against 45-year source data. Production recovery pending.
+
+Closed locally. The [feature export service test refactor](docs/work-packages/20261121_features_export_service_test_refactor/package.md) split the service cases into six modules and verified all 79 focused cases.
+
+Closed locally — [Schema defaults route refactor](docs/work-packages/20261121_schema_defaults_code_quality_refactor/package.md). All ten published paths and 435 responses matched the baseline. Full pytest passed.
+
+[Retire PRISM analysis sidecars](docs/work-packages/20261121_retire_prism_sidecars/package.md) — implemented and locally validated.
+
+Implemented and locally validated: [Native PRISM hillslope dew point](docs/work-packages/20261121_prism_native_dewpoint/package.md).
+
+Implemented and locally validated: [Comrak Markdown migration](docs/work-packages/20261120_comrak_markdown_migration/package.md). Replaced cmarkgfm in Usersum, project README, Browse and docs tooling. Repository-wide tests excluding the slow marker passed.
+
+Implemented and locally validated: [Usersum vendor link graph and heading lint](docs/work-packages/20261120_usersum_link_graph/package.md). Verified 94 committed copies and 123 focused tests. Broad validation and integration remain open.
+
+Deployed and replayed on forest: [European climate, soils, and WEPP run recovery](docs/work-packages/20261120_eu_run_recovery/package.md) — original autosomal-vetch workflow and E-OBS with gridded ESDAC verified through native output. Staged upload recovery verified. The reconciled ESDAC catalog passed browser admission, soil preparation and WEPP output on forest.
+
+Implemented and locally validated: [GL Dashboard catalog readiness](docs/work-packages/20261119_gl_catalog_readiness/package.md) — One readiness handshake per target, a visible wait before result queries, one RQ admission in the concurrency test, and two served browser tests. Fleet rollout remains pending.
+
+In progress: [CI runner migration](docs/work-packages/20261118_ci_runner_migration/package.md) - Migrate active/nightly checks off homelab; retire approved old profile schedules.
+
+Closed locally; deployment pending: [Parquet CSV native integration](docs/work-packages/20261118_parquet_csv_wepppy_integration/package.md) - Contract-first immediate cutover for all supported CSV exports; code-owned configuration, no environment knobs and no Python fallback. Compatibility, exact-image HTTP/identity checks and broad tests passed; see retained validation and release handoff.
+
+Closed locally; integrated by successor: [Bounded Parquet CSV CLI and Python harness](docs/work-packages/20261118_parquet_csv_cli/package.md) - Rust CLI and async harness implement zero-trust Parquet handling with retained parity, resource and benchmark evidence. See the package decision and validation for acceptance and repository-gate disposition; runtime integration is now validated in the successor above; no deployment.
+
 Completed forest phase: [SSURGO mirror-first and provenance](docs/work-packages/20261118_ssurgo_json_provenance/package.md) — PR #675 merged; regional API/PostGIS and shared forest client defaults active, with real queued SSURGO/STATSGO artifact parity. Broader rollout and live SDA validation remain follow-up scope.
 
 Complete locally: [Default isolated tests](docs/work-packages/20261118_default_worktree_tests/package.md) - Promote run-pytest to isolated execution; native Disturbed matrix explicitly opt-in.
+
+Complete locally: [Soil input capacity 23](docs/work-packages/20261118_soil_input_capacity_23/package.md) — opt-in matched Linux pair, unchanged calculation layers, all confirmed Python consumers, native parity, actual-project 100-year replay, independent reviews and reconciled broad coverage. No deployment or original-project mutation.
+
+Completed evaluation: [Native soil input capacity](docs/work-packages/20261118_native_soil_input_capacity/package.md) — separate input horizons from calculation capacity; no production promotion.
 
 Complete locally: [Durable isolated-worktree validation](docs/work-packages/20261118_isolated_worktree_validation/package.md) - Canonical disposable test runner, runtime preflight and source/runtime integrity receipts. Real browser/native/fixture/tooling tests pass; broad execution stops on the preexisting database-schema prerequisite.
 
@@ -128,7 +158,7 @@ Completed (local implementation): [Roads GL Dashboard](docs/work-packages/202610
 
 Completed (local implementation): [Roads activation messaging](docs/work-packages/20261023_roads_activation_messaging/package.md) — actionable server-configuration explanation and project-URL support handoff; 21 route tests plus direct guard/response readback pass. Text-only change; no deployment or project repair.
 
-Bounded execution complete; general enablement HOLD: [Query-engine asynchronous catalog refresh](docs/work-packages/20261023_query_catalog_async_refresh/package.md) — full deployment `0da9c9071` on wepp1–3; shared-batch pilot passed 17 jobs, two eight-scope artifact waves and 48 query checks with pause/resume recovery. Scratch scopes retired; async remains disabled. Whole-fleet cycle capacity and new-arrival delay are separate gates. See [acceptance](docs/work-packages/20261023_query_catalog_async_refresh/artifacts/20261027_shared_pilot_acceptance.md).
+Deployed on wepp1–3. [Query catalog production rollout](docs/work-packages/20261023_query_catalog_async_refresh/tracker.md#november-22-production-rollout-closeout) enables general refresh and the Rocket cap of two outstanding refreshes per batch owner. Fleet-capacity acceptance remains open.
 
 Completed (local implementation): [Roads validation suite](docs/work-packages/20261023_roads_validation_suite/package.md) — 516 cases across all four textures, isolated project checks and vendored Usersum report; two bounded legacy-input repairs. Implementation `a501c15cc`; full regression 11,647 passed/131 skipped; independent reviews pass. Full-upload unrutted rejection and qualified positive subset documented; no deployment.
 
@@ -877,6 +907,16 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Pure CSS landing migration
+
+The [work package](docs/work-packages/20261122_pure_landing/package.md) tracks
+the Jinja home deployed on Forest, retirement of the separate frontend build,
+and the remaining manual Section 508 conformance review.
+
+### Channel delineation map boundary
+
+[Work package](docs/work-packages/20261119_channel_delineation_map_boundary/package.md) implemented and locally validated. The full suite passed 6,706 tests before a baseline SSURGO cache fixture failure, confirmed on the unchanged starting revision. Repository-wide acceptance is pending.
 
 
 ### Shape-Converter Security Conformance Closure
@@ -1838,6 +1878,54 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+
+### Shared project asset declarations (2026-11-22)
+
+Two producer-owned declarations now serve the query and Feature Export adapters. Both Rocket clients observed equivalent results across 14 project views, including parent-backed scenario watersheds and local hill loss. The private writer/export replay reproduced the 695-feature normal-project export. [Work package](docs/work-packages/20261122_shared_project_asset_declarations/package.md)
+
+
+### Project RQ code quality refactor (2026-11-21)
+
+Extracted WBT subcatchment job-state validation from the project worker.
+Focused mutation-guard and real Redis tests passed.
+[Work package](docs/work-packages/20261121_project_rq_code_quality/package.md)
+
+
+### Features Export service refactor (2026-11-21)
+
+Extracted carrier identity alignment and cached artifact checks from the export
+service. Focused service, worker, and route tests passed. [Work package](docs/work-packages/20261121_features_export_service_refactor/package.md)
+
+### Omni test refactor
+
+[Work package](docs/work-packages/20261121_omni_test_refactor/package.md)
+closed locally on 2026-11-22 UTC. Six controller modules preserve 83 cases.
+All 229 focused Omni tests passed, and the resulting files fall below the
+red quality thresholds.
+
+### Roads controller test refactor
+
+[Work package](docs/work-packages/20261121_roads_controller_test_refactor/package.md)
+closed locally on 2026-11-22 UTC. Eight focused modules carry the same 92
+passing cases. Every replacement module is below the quality tool's red
+thresholds.
+
+### Pure controls render test refactor
+
+[Work package](docs/work-packages/20261121_pure_controls_render_refactor/package.md)
+closed on 2026-11-22 UTC. Isolated Jinja mutations, preserved all 299 focused
+test cases and verified seven cases in a different order.
+
+### I-CREWS interfaces in WEPPcloud
+
+[Work package](docs/work-packages/20261119_i_crews_interface/package.md)
+implemented and locally validated on 2026-11-19. One Site Specific Resources
+card offers both WBT presets, including the WBT Multiple OFE variant. Both
+display the shared Idaho outline, enforce extent intersection and display
+Idaho EPSCoR funding credit. See the
+[validation record](docs/work-packages/20261119_i_crews_interface/artifacts/20261119_validation.md)
+for the broad gate and release scope.
 
 ### Status and Preflight WebSocket Run Authorization
 

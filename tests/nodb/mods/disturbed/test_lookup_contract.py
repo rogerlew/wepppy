@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -750,11 +751,15 @@ def test_build_extended_lookup_writes_separate_extended_csv(
     editable_lookup.write_text("user,edited\n")
 
     class _LanduseStub:
-        mapping = "fake.mapping"
+        source_mapping = "fixture-source"
 
         @classmethod
         def getInstance(cls, _wd: str):
             return cls()
+
+        def _resolve_effective_mapping_reference(self, mapping_reference: str) -> str:
+            assert mapping_reference == self.source_mapping
+            return "fixture-effective"
 
     management = SimpleNamespace(
         desc="Stub Management",
@@ -764,21 +769,15 @@ def test_build_extended_lookup_writes_separate_extended_csv(
 
     monkeypatch.setattr(disturbed_module, "Landuse", _LanduseStub)
     monkeypatch.setattr(management_module, "IniLoopCropland", _IniLoopCroplandStub)
-    monkeypatch.setattr(
-        management_module,
-        "load_map",
-        lambda _mapping: {
-            "42": {
-                "ManagementFile": "high-severity-forest.man",
-                "DisturbedClass": "forest high sev fire",
-            }
+    load_map = Mock(return_value={
+        "42": {
+            "ManagementFile": "high-severity-forest.man",
+            "DisturbedClass": "forest high sev fire",
         },
-    )
-    monkeypatch.setattr(
-        management_module,
-        "get_management",
-        lambda _key, _map=None: management,
-    )
+    })
+    get_management = Mock(return_value=management)
+    monkeypatch.setattr(management_module, "load_map", load_map)
+    monkeypatch.setattr(management_module, "get_management", get_management)
     monkeypatch.setattr(Disturbed, "ensure_land_soil_lookup_schema", lambda self: None)
     monkeypatch.setattr(
         Disturbed,
@@ -801,6 +800,8 @@ def test_build_extended_lookup_writes_separate_extended_csv(
 
     disturbed.build_extended_land_soil_lookup()
 
+    load_map.assert_called_once_with("fixture-effective")
+    get_management.assert_called_once_with("42", _map="fixture-effective")
     assert editable_lookup.read_text() == "user,edited\n"
     extended_lookup = Path(disturbed.extended_lookup_fn)
     assert extended_lookup.exists()

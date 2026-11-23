@@ -77,6 +77,10 @@ def landuse_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
         def locked(self):
             yield
 
+        @property
+        def source_mapping(self):
+            return self.mapping
+
         def _resolve_effective_mapping_reference(self, mapping_reference: str | None = None):
             return mapping_reference
 

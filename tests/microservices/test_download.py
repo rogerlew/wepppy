@@ -16,7 +16,29 @@ from starlette.datastructures import QueryParams
 from starlette.exceptions import HTTPException
 
 from wepppy.microservices.browse import _download as download_mod
-from wepppy.microservices.browse._download import _parquet_to_csv_bytes_with_units
+from starlette.applications import Starlette
+from starlette.routing import Route
+from starlette.testclient import TestClient
+
+
+@pytest.fixture(autouse=True)
+def native_backend(monkeypatch, native_csv_converter):
+    from wepppy.microservices.browse import parquet_csv
+    monkeypatch.setattr(parquet_csv, 'CONVERTER', native_csv_converter)
+
+
+def _consume_response(response):
+    async def endpoint(_):
+        return response
+    with TestClient(Starlette(routes=[Route('/', endpoint)])) as client:
+        return client.get('/')
+
+
+def _native_csv_bytes(path):
+    response = asyncio.run(download_mod.download_response_file(path, QueryParams({'as_csv': '1'})))
+    result = _consume_response(response)
+    assert result.status_code == 200, result.text
+    return result.content
 
 
 def _encode_filter_payload(payload: dict) -> str:
@@ -57,7 +79,7 @@ def test_parquet_to_csv_with_index_column():
         assert len(table.schema) >= 5  # At least 4 data columns + 1 index column
         
         # Test the conversion
-        csv_text = _parquet_to_csv_bytes_with_units(tmp_path).decode("utf-8")
+        csv_text = _native_csv_bytes(tmp_path).decode("utf-8")
         header = csv_text.splitlines()[0].split(",")
 
         # Should have 4 columns (not 5), without materializing a DataFrame.
@@ -92,7 +114,7 @@ def test_parquet_to_csv_with_units_metadata():
         table = pa.Table.from_pandas(df, schema=schema)
         pq.write_table(table, tmp_path)
         
-        csv_text = _parquet_to_csv_bytes_with_units(tmp_path).decode("utf-8")
+        csv_text = _native_csv_bytes(tmp_path).decode("utf-8")
         header = csv_text.splitlines()[0].split(",")
 
         # Should have 2 columns with units appended
@@ -126,7 +148,7 @@ def test_parquet_to_csv_units_already_in_name():
         table = pa.Table.from_pandas(df, schema=schema)
         pq.write_table(table, tmp_path)
         
-        csv_text = _parquet_to_csv_bytes_with_units(tmp_path).decode("utf-8")
+        csv_text = _native_csv_bytes(tmp_path).decode("utf-8")
         header = csv_text.splitlines()[0].split(",")
 
         # Should keep original names without duplicating units
@@ -197,16 +219,10 @@ def test_download_filtered_csv_no_rows_returns_structured_error(monkeypatch):
             }
         )
 
-        with pytest.raises(HTTPException) as exc_info:
-            asyncio.run(
-                download_mod.download_response_file(
-                    tmp_path,
-                    QueryParams({"as_csv": "1", "pqf": pqf}),
-                )
-            )
-
-        assert exc_info.value.status_code == 422
-        payload = exc_info.value.detail
+        response = asyncio.run(download_mod.download_response_file(
+            tmp_path, QueryParams({"as_csv": "1", "pqf": pqf})))
+        assert response.status_code == 422
+        payload = json.loads(response.body)
         assert payload["error"]["code"] == "no_rows_matched_filter"
     finally:
         Path(tmp_path).unlink(missing_ok=True)
@@ -245,7 +261,7 @@ def test_download_filtered_csv_returns_only_matching_rows(monkeypatch):
 
         assert response.status_code == 200
         assert response.headers.get("content-type", "").startswith("text/csv")
-        csv_text = response.body.decode("utf-8")
+        csv_text = _consume_response(response).text
         assert "bob" in csv_text
         assert "Alice" not in csv_text
     finally:

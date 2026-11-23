@@ -160,11 +160,13 @@ def report_soils(runid: str, config: str) -> Response:
     try:
         ctx = load_run_context(runid, config)
         wd = str(ctx.active_root)
+        soils = Soils.getInstance(wd)
         return render_template(
             'reports/soils.htm',
             runid=runid,
             config=config,
-            report=Soils.getInstance(wd).report,
+            report=soils.report if soils.soil_summary_ready else [],
+            esdac_fallback=soils.esdac_fallback_count,
         )
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.

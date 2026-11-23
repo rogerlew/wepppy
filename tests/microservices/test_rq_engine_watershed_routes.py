@@ -33,7 +33,7 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         watershed_routes.Ron,
         "getInstance",
-        lambda wd: type("RonStub", (), {"config_stem": "cfg"})(),
+        lambda wd: SimpleNamespace(config_stem="cfg", config_get_raw=lambda *_: None),
     )
 
 
@@ -483,6 +483,10 @@ def test_fetch_dem_upload_mode_topaz_rejects_nodata_dem(monkeypatch: pytest.Monk
     class DummyRon:
         config_stem = "cfg"
         map = object()
+
+        def config_get_raw(self, section, option):
+            return None
+
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"
 
@@ -526,6 +530,10 @@ def test_fetch_dem_upload_mode_topaz_enqueues_when_dem_has_no_nodata(
     class DummyRon:
         config_stem = "cfg"
         map = object()
+
+        def config_get_raw(self, section, option):
+            return None
+
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"
 
@@ -580,6 +588,10 @@ def test_fetch_dem_upload_mode_topaz_rejects_nodata_dem_for_batch_context(
     class DummyRon:
         config_stem = "cfg"
         map = object()
+
+        def config_get_raw(self, section, option):
+            return None
+
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"
 
@@ -619,6 +631,10 @@ def test_fetch_dem_upload_mode_topaz_returns_400_when_dem_scan_fails(
     class DummyRon:
         config_stem = "cfg"
         map = object()
+
+        def config_get_raw(self, section, option):
+            return None
+
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"
 
@@ -1748,6 +1764,10 @@ def test_fetch_dem_batch_upload_mode_preserves_uploaded_dem_filename(
     class DummyRon:
         config_stem = "cfg"
         map = object()
+
+        def config_get_raw(self, section, option):
+            return None
+
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"
 

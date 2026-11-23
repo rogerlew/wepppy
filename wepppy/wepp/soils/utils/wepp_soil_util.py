@@ -205,6 +205,9 @@ def _require_rosetta3_for_serialization(datver: float):
 class WeppSoilUtil(object):
     """High-level wrapper for parsing, manipulating, and exporting WEPP soils."""
 
+    # Historical deserialized utility instances retain the old input limit.
+    max_horizons: int = 10
+
     def __init__(
         self,
         fn: str,
@@ -212,6 +215,7 @@ class WeppSoilUtil(object):
         compute_conductivity: bool = False,
         *,
         preserve_input_format: bool = False,
+        max_horizons: int = 10,
     ) -> None:
         """
         Parameters
@@ -226,6 +230,7 @@ class WeppSoilUtil(object):
             Validate uploaded native records and retain their version/parameters on write.
             Default False preserves existing catalog/Disturbed serialization.
         """
+        self.max_horizons = max_horizons
         self._preserve_input_format = preserve_input_format
         if preserve_input_format:
             if compute_erodibilities or compute_conductivity or not fn.endswith('.sol'):
@@ -790,7 +795,7 @@ class WeppSoilUtil(object):
             else:
                 s.append('0 0.0 0.0')
 
-        return ensure_200mm_boundary('\n'.join(s) + '\n')
+        return ensure_200mm_boundary('\n'.join(s) + '\n', max_horizons=self.max_horizons)
         
 
     def __repr__(self) -> str:

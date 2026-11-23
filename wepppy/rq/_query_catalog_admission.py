@@ -16,6 +16,9 @@ LEDGER_KEY = 'query-catalog:batch-admission:v1'
 PAUSE_KEY = LEDGER_KEY + ':paused'
 TERMINAL = frozenset({'finished', 'failed', 'stopped', 'canceled'})
 CAP = 7
+OWNER_POLICY_KEY = LEDGER_KEY + ':batch-owner-namespace'
+OWNER_CAP = 2
+OWNER_PENDING = 'query_catalog_owner_capacity_pending'
 
 
 class AdmissionDenied(RuntimeError):
@@ -27,7 +30,10 @@ def _text(value):
 
 
 def _ledger(connection):
-    raw = connection.get(LEDGER_KEY)
+    return _parse_ledger(connection.get(LEDGER_KEY))
+
+
+def _parse_ledger(raw):
     if raw is None:
         raise AdmissionDenied('query_catalog_accounting_unavailable')
     data = json.loads(raw)
@@ -41,6 +47,31 @@ def _ledger(connection):
                 or not isinstance(binding.get('reserved_at'), (int, float))):
             raise AdmissionDenied('query_catalog_accounting_invalid')
     return data
+
+
+def owner_policy(connection, configuration):
+    """Match trusted batch namespaces without decoding or displaying Redis input."""
+    roots = configuration['roots']
+    namespaces = {root['namespace'] for root in roots if root['layout'] == 'batch'}
+    namespaces.difference_update(root['namespace'] for root in roots if root['layout'] != 'batch')
+    bound = max((len(name.encode()) for name in namespaces), default=0)
+    raw = connection.getrange(OWNER_POLICY_KEY, 0, bound)
+    selected = next((name for name in namespaces if name.encode() == raw), None)
+    return selected, bool(raw and selected is None)
+
+
+def batch_owner(scope, namespace):
+    """Classify a refresh using its retained canonical scope, including old jobs."""
+    if namespace is None:
+        return None
+    if not isinstance(scope, dict) or not isinstance(scope.get('namespace'), str) or not scope['namespace']:
+        raise AdmissionDenied('query_catalog_accounting_invalid')
+    if scope['namespace'] != namespace:
+        return None
+    path = scope.get('relative_path')
+    if not isinstance(path, str) or any(part in {'', '.', '..'} for part in path.split('/')):
+        raise AdmissionDenied('query_catalog_accounting_invalid')
+    return path.partition('/')[0]
 
 
 def execution_uncertain(binding: dict[str, Any], status: str | None) -> bool:
@@ -116,7 +147,7 @@ def prepare(pipe: Any, queue: Queue, *, job_id: str, kind: str, configuration: d
     from .query_catalog_rq import WORKER_FIELD
     if queue.name != 'default' or kind not in {'refresh', 'inventory'}:
         raise AdmissionDenied('query_catalog_queue_invalid')
-    pipe.watch(LEDGER_KEY, PAUSE_KEY, queue.key, WORKERS_SUSPENDED)
+    pipe.watch(LEDGER_KEY, PAUSE_KEY, OWNER_POLICY_KEY, queue.key, WORKERS_SUSPENDED)
     try:
         ledger = _ledger(pipe)
     except (AdmissionDenied, ValueError):
@@ -163,6 +194,15 @@ def prepare(pipe: Any, queue: Queue, *, job_id: str, kind: str, configuration: d
         _deny(queue, pilot_id, 'query_catalog_workers_unavailable')
     if len(remaining) >= min(CAP, compatible):
         raise AdmissionDenied('query_catalog_capacity_pending')
+    if kind == 'refresh':
+        namespace, _ = owner_policy(pipe, configuration)
+        owner = batch_owner(scope, namespace)
+        if owner and sum(
+            binding['kind'] == 'refresh' and
+            batch_owner(binding.get('scope'), namespace) == owner
+            for binding in remaining.values()
+        ) >= OWNER_CAP:
+            raise AdmissionDenied(OWNER_PENDING)
     pilot_data = None
     if pilot_id:
         pipe.watch(pilot.key(pilot_id), pilot.key(pilot_id) + ':observer')

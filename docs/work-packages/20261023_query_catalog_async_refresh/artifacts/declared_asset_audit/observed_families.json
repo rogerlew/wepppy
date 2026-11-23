@@ -1,0 +1,642 @@
+{
+  "project_counts": {
+    "normal": 12,
+    "parent": 3,
+    "scenarios": 10,
+    "contrasts": 156
+  },
+  "totals": {
+    "normal": {
+      "catalog self-reference (policy open)": 5,
+      "controller filename": 144,
+      "fixed path": 57,
+      "unassigned": 81,
+      "interchange or report source literal": 78,
+      "attempt workspace (policy open)": 4
+    },
+    "parent": {
+      "catalog self-reference (policy open)": 76,
+      "controller filename": 1134,
+      "fixed path": 363,
+      "unassigned": 135,
+      "WBT resource declaration": 51,
+      "interchange or report source literal": 1070,
+      "attempt workspace (policy open)": 14,
+      "writer template": 726
+    },
+    "scenarios": {
+      "catalog self-reference (policy open)": 10,
+      "controller filename": 136,
+      "fixed path": 150,
+      "unassigned": 198,
+      "WBT resource declaration": 152,
+      "interchange or report source literal": 236,
+      "attempt workspace (policy open)": 12,
+      "writer template": 2352
+    },
+    "contrasts": {
+      "controller filename": 2304,
+      "fixed path": 1962,
+      "interchange or report source literal": 1821,
+      "writer template": 29988
+    }
+  },
+  "projection": [
+    {
+      "parent": 0,
+      "role": "scenarios",
+      "child_catalogs": 2,
+      "projected": 198,
+      "existing": 0,
+      "overlap": 0
+    },
+    {
+      "parent": 0,
+      "role": "contrasts",
+      "child_catalogs": 36,
+      "projected": 1440,
+      "existing": 0,
+      "overlap": 0
+    },
+    {
+      "parent": 1,
+      "role": "scenarios",
+      "child_catalogs": 4,
+      "projected": 424,
+      "existing": 236,
+      "overlap": 216
+    },
+    {
+      "parent": 1,
+      "role": "contrasts",
+      "child_catalogs": 69,
+      "projected": 2760,
+      "existing": 2277,
+      "overlap": 2139
+    },
+    {
+      "parent": 2,
+      "role": "scenarios",
+      "child_catalogs": 4,
+      "projected": 2624,
+      "existing": 0,
+      "overlap": 0
+    },
+    {
+      "parent": 2,
+      "role": "contrasts",
+      "child_catalogs": 51,
+      "projected": 31875,
+      "existing": 0,
+      "overlap": 0
+    }
+  ],
+  "families": [
+    {
+      "family": "(root files)",
+      "extension": ".json",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 3,
+        "parent": 1
+      }
+    },
+    {
+      "family": "(root files)",
+      "extension": ".nodb",
+      "evidence": "controller filename",
+      "counts": {
+        "normal": 144,
+        "parent": 43,
+        "scenarios": 136,
+        "contrasts": 2304
+      }
+    },
+    {
+      "family": "(root files)",
+      "extension": ".nodb",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 7
+      }
+    },
+    {
+      "family": "_pups/omni/contrasts",
+      "extension": ".json",
+      "evidence": "catalog self-reference (policy open)",
+      "counts": {
+        "parent": 69
+      }
+    },
+    {
+      "family": "_pups/omni/contrasts",
+      "extension": ".json",
+      "evidence": "interchange or report source literal",
+      "counts": {
+        "parent": 69
+      }
+    },
+    {
+      "family": "_pups/omni/contrasts",
+      "extension": ".nodb",
+      "evidence": "controller filename",
+      "counts": {
+        "parent": 1035
+      }
+    },
+    {
+      "family": "_pups/omni/contrasts",
+      "extension": ".parquet",
+      "evidence": "fixed path",
+      "counts": {
+        "parent": 138
+      }
+    },
+    {
+      "family": "_pups/omni/contrasts",
+      "extension": ".parquet",
+      "evidence": "interchange or report source literal",
+      "counts": {
+        "parent": 828
+      }
+    },
+    {
+      "family": "_pups/omni/contrasts",
+      "extension": ".tif",
+      "evidence": "fixed path",
+      "counts": {
+        "parent": 138
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".csv",
+      "evidence": "unassigned",
+      "counts": {
+        "parent": 4
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".json",
+      "evidence": "attempt workspace (policy open)",
+      "counts": {
+        "parent": 4
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".json",
+      "evidence": "catalog self-reference (policy open)",
+      "counts": {
+        "parent": 4
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".json",
+      "evidence": "interchange or report source literal",
+      "counts": {
+        "parent": 4
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".json",
+      "evidence": "unassigned",
+      "counts": {
+        "parent": 24
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".nodb",
+      "evidence": "controller filename",
+      "counts": {
+        "parent": 56
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".parquet",
+      "evidence": "attempt workspace (policy open)",
+      "counts": {
+        "parent": 4
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".parquet",
+      "evidence": "fixed path",
+      "counts": {
+        "parent": 12
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".parquet",
+      "evidence": "interchange or report source literal",
+      "counts": {
+        "parent": 92
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".tif",
+      "evidence": "fixed path",
+      "counts": {
+        "parent": 16
+      }
+    },
+    {
+      "family": "_pups/omni/scenarios",
+      "extension": ".tif",
+      "evidence": "unassigned",
+      "counts": {
+        "parent": 16
+      }
+    },
+    {
+      "family": "_query_engine",
+      "extension": ".json",
+      "evidence": "catalog self-reference (policy open)",
+      "counts": {
+        "normal": 5,
+        "parent": 3,
+        "scenarios": 10
+      }
+    },
+    {
+      "family": "climate",
+      "extension": ".csv",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 4,
+        "parent": 4,
+        "scenarios": 11,
+        "contrasts": 192
+      }
+    },
+    {
+      "family": "climate",
+      "extension": ".parquet",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 3,
+        "parent": 3,
+        "scenarios": 10,
+        "contrasts": 156
+      }
+    },
+    {
+      "family": "climate",
+      "extension": ".parquet",
+      "evidence": "writer template",
+      "counts": {
+        "parent": 588,
+        "scenarios": 2352,
+        "contrasts": 29988
+      }
+    },
+    {
+      "family": "climate",
+      "extension": ".tif",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 6,
+        "parent": 6,
+        "scenarios": 18,
+        "contrasts": 315
+      }
+    },
+    {
+      "family": "climate_artifacts/cli_parquet",
+      "extension": ".json",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 1,
+        "parent": 1
+      }
+    },
+    {
+      "family": "dem",
+      "extension": ".tif",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 4,
+        "parent": 3,
+        "scenarios": 9
+      }
+    },
+    {
+      "family": "dem/topaz",
+      "extension": ".json",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 27,
+        "parent": 9,
+        "scenarios": 27
+      }
+    },
+    {
+      "family": "dem/wbt",
+      "extension": ".geojson",
+      "evidence": "WBT resource declaration",
+      "counts": {
+        "parent": 20,
+        "scenarios": 60
+      }
+    },
+    {
+      "family": "dem/wbt",
+      "extension": ".json",
+      "evidence": "WBT resource declaration",
+      "counts": {
+        "parent": 1,
+        "scenarios": 2
+      }
+    },
+    {
+      "family": "dem/wbt",
+      "extension": ".tif",
+      "evidence": "WBT resource declaration",
+      "counts": {
+        "parent": 28,
+        "scenarios": 84
+      }
+    },
+    {
+      "family": "dem/wbt",
+      "extension": ".tif",
+      "evidence": "unassigned",
+      "counts": {
+        "scenarios": 54,
+        "parent": 10
+      }
+    },
+    {
+      "family": "dem/wbt",
+      "extension": ".tsv",
+      "evidence": "WBT resource declaration",
+      "counts": {
+        "parent": 2,
+        "scenarios": 6
+      }
+    },
+    {
+      "family": "dem/wbt",
+      "extension": ".tsv",
+      "evidence": "unassigned",
+      "counts": {
+        "scenarios": 10,
+        "parent": 2
+      }
+    },
+    {
+      "family": "disturbed",
+      "extension": ".csv",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 9,
+        "parent": 3,
+        "scenarios": 10
+      }
+    },
+    {
+      "family": "disturbed",
+      "extension": ".tif",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 11,
+        "parent": 8,
+        "scenarios": 32
+      }
+    },
+    {
+      "family": "export",
+      "extension": ".tsv",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 4,
+        "parent": 4
+      }
+    },
+    {
+      "family": "export/features",
+      "extension": ".json",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 12,
+        "scenarios": 46,
+        "parent": 47
+      }
+    },
+    {
+      "family": "landuse",
+      "extension": ".parquet",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 4,
+        "parent": 3,
+        "scenarios": 10,
+        "contrasts": 156
+      }
+    },
+    {
+      "family": "landuse",
+      "extension": ".tif",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 4,
+        "parent": 3,
+        "scenarios": 10,
+        "contrasts": 156
+      }
+    },
+    {
+      "family": "omni",
+      "extension": ".parquet",
+      "evidence": "fixed path",
+      "counts": {
+        "parent": 12
+      }
+    },
+    {
+      "family": "omni/contrasts",
+      "extension": ".geojson",
+      "evidence": "fixed path",
+      "counts": {
+        "parent": 1
+      }
+    },
+    {
+      "family": "omni/contrasts",
+      "extension": ".geojson",
+      "evidence": "unassigned",
+      "counts": {
+        "parent": 1
+      }
+    },
+    {
+      "family": "omni/contrasts",
+      "extension": ".json",
+      "evidence": "writer template",
+      "counts": {
+        "parent": 69
+      }
+    },
+    {
+      "family": "omni/contrasts",
+      "extension": ".tsv",
+      "evidence": "writer template",
+      "counts": {
+        "parent": 69
+      }
+    },
+    {
+      "family": "soils",
+      "extension": ".parquet",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 4,
+        "parent": 3,
+        "scenarios": 10,
+        "contrasts": 156
+      }
+    },
+    {
+      "family": "soils",
+      "extension": ".tif",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 4,
+        "parent": 3,
+        "scenarios": 10,
+        "contrasts": 156
+      }
+    },
+    {
+      "family": "watershed",
+      "extension": ".geojson",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 4,
+        "parent": 3,
+        "scenarios": 9,
+        "contrasts": 156
+      }
+    },
+    {
+      "family": "watershed",
+      "extension": ".json",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 4,
+        "parent": 3,
+        "scenarios": 9,
+        "contrasts": 156
+      }
+    },
+    {
+      "family": "watershed",
+      "extension": ".parquet",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 8,
+        "parent": 6,
+        "scenarios": 20,
+        "contrasts": 312
+      }
+    },
+    {
+      "family": "watershed",
+      "extension": ".tif",
+      "evidence": "fixed path",
+      "counts": {
+        "parent": 1,
+        "scenarios": 3,
+        "contrasts": 51
+      }
+    },
+    {
+      "family": "wepp/output",
+      "extension": ".json",
+      "evidence": "interchange or report source literal",
+      "counts": {
+        "normal": 3,
+        "parent": 4,
+        "scenarios": 14,
+        "contrasts": 207
+      }
+    },
+    {
+      "family": "wepp/output",
+      "extension": ".json",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 3
+      }
+    },
+    {
+      "family": "wepp/output",
+      "extension": ".parquet",
+      "evidence": "interchange or report source literal",
+      "counts": {
+        "normal": 75,
+        "parent": 73,
+        "scenarios": 222,
+        "contrasts": 1614
+      }
+    },
+    {
+      "family": "wepp/plots",
+      "extension": ".tif",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 6,
+        "parent": 4,
+        "scenarios": 20
+      }
+    },
+    {
+      "family": "wepp/reports",
+      "extension": ".json",
+      "evidence": "attempt workspace (policy open)",
+      "counts": {
+        "normal": 2,
+        "parent": 3,
+        "scenarios": 6
+      }
+    },
+    {
+      "family": "wepp/reports",
+      "extension": ".json",
+      "evidence": "unassigned",
+      "counts": {
+        "normal": 3,
+        "parent": 3,
+        "scenarios": 10
+      }
+    },
+    {
+      "family": "wepp/reports",
+      "extension": ".parquet",
+      "evidence": "attempt workspace (policy open)",
+      "counts": {
+        "normal": 2,
+        "parent": 3,
+        "scenarios": 6
+      }
+    },
+    {
+      "family": "wepp/reports",
+      "extension": ".parquet",
+      "evidence": "fixed path",
+      "counts": {
+        "normal": 3,
+        "parent": 3,
+        "scenarios": 10
+      }
+    }
+  ]
+}

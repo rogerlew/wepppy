@@ -1,0 +1,140 @@
+# Uploaded land-use raster compatibility checkpoint
+
+Starting implementation `af514e39c`. The operator requested that the
+incompatible raster and management-map failures be corrected and that the
+original workflow be replayed on forest. The controlled forest fixture
+used a retained CORINE raster as the submitted data with the plain ESDAC
+selection. It confirmed worker failure and a healthy retry page. That result
+exercises the known mismatch. The uploaded original `LandCover25m.tif` is
+still unavailable.
+
+The [upload compatibility contract](../../../schemas/european-landuse-mapping-contract.md#uploaded-raster-compatibility)
+defines the proposed correction. Currently the route sets the mapping and
+writes the active raw and aligned rasters before RQ admission, then validates
+only the table's ability to load. Normal non-single-input EU admission does
+not use the single-input serialization guard. The build uses a separate
+per-OFE assignment function in MOFE, and Disturbed derives all nine required
+destinations from every row even without an SBS map. Reuse those actual
+classification and lookup boundaries during preflight and bind admitted
+inputs to the queued job. The first invalid build leaves a retryable empty
+project. Rejected replacements preserve the previous build's accepted files.
+Standalone browser mode and dataset selections persist independently.
+
+Required controls include an unused row missing `DisturbedClass`, a table
+missing one severity with no SBS, a code dominant only in one OFE, readback
+from a valid uploaded CORINE raster, exact raw and aligned file identity,
+a near-simultaneous same-name attempt, a custom map edit before worker
+publication, and a gridded transition back to CORINE. Confirm absent,
+legacy, unsupported, malformed and hostile inputs. Keep the normal
+authenticated batch selection and existing worker argument compatibility.
+
+## Reviewed boundaries
+
+Preserve independently persisted selections from before request entry. Prepare
+the private clipped candidate after confirming ordinary upload authorization
+and active-job eligibility. Publish through the worker only after the
+tracked admission and dependency checks. Use ordered functional mapping
+identity, including custom record order, and exact current raw/aligned inputs.
+A definite admission failure must preserve prior state. An ambiguous
+dispatch retains private evidence and permits only the current tracked
+job to progress once authority can be verified. No directory or raster
+symlink is trusted solely because its filename matches.
+
+A retained source must pass the same checks as a new source. A valid MOFE
+segment set and complete model units are prerequisites to the final check.
+Validate an effective persisted buffer even when absent from the request.
+Exercise an existing VRT-to-upload transition, a watershed or OFE change,
+and a same-number upload-to-upload schema change using the real assignment,
+Disturbed and native preparation paths. Include a retained-source retry and
+a no-delineation batch admission. Validate canonical route JSON and rendered
+Landuse feedback, prior files and timestamps under concurrency, and normal
+archive/fork behavior without activating superseded attempts.
+
+The operator requested actionable upload failure correction and preservation
+of the European run workflow. This checkpoint chooses private staging and named
+worker receipts to apply that request with the existing upload authorization
+and queue contracts. It changes neither accepted user inputs nor provider
+class numbering. The standalone contract ancestor is `2de953e92`.
+
+## Independent review disposition
+
+The first reviewer cleared the revised contract and identified the direct
+`BatchRunner` caller of `Landuse.build()` as required coverage. The second
+cleared the earlier findings and required authoritative expected unit IDs
+and the protected watershed read lifetime through consumption. Both are
+explicit in the amended contract. The raster upload, RQ state and response
+contracts cross-reference the slice. Existing authentication, route access,
+format restrictions, and selected-input authority apply. Test imprecise,
+malformed and symlinked paths through the established boundary.
+
+Implement and validate table checks first, including normal UI feedback for
+plain ESDAC in a Disturbed project. Then add the aligned-raster and admitted
+worker evidence path. A table rejection alone is partial conformance.
+
+## First implementation and controls
+
+Shared Disturbed lookup validates all table rows and the nine wildfire
+destinations before resolving an uploaded-raster buffer, mutating project
+settings or enqueuing work. Existing first-match grouping and blank
+class values remain valid. Landuse Options keeps the applied report
+visible through mode and dataset selection and build rejection.
+
+The first correctness review found that mode and dataset selection could
+clear the report before Build, and that buffer validation could mask
+incompatible-table feedback. Tests cover the corrected order and the
+selected-mode-to-rejection controller path. Focused Python passed 99 tests.
+The frontend passed all 127 Jest suites and nine Node tests. Full raster compatibility remains open.
+
+Private alignment of the retained CORINE raster to the controlled forest
+watershed returned all 58 expected hillslopes with the ordinary native
+classifier and flags. The 16 class-25 assignments match the live gridded
+CORINE result. This traces the fixture through the actual classification
+boundary. It does not certify HTTP admission or worker consumption.
+
+## Forest browser verification
+
+After restarting the candidate RQ engine and web services and rebuilding the
+controller bundle, the signed-in browser verified the real Landuse Options
+workflow in `cleft-jump`. The retained CORINE test raster with the plain
+ESDAC map returned HTTP 400 and no job ID. The dedicated alert displayed the
+map, filename, missing metadata and corrective action. The actual applied
+Mixed forest table stayed visible. Byte checks confirmed that the existing
+`nlcd.tif` and `landuse.parquet` survived unchanged. The control restored
+gridded mode when it finished.
+
+An initial browser attempt caught the generic stacktrace handler replacing
+the table even when the panel reset preserved it. The new alert bypasses
+that handler for mapping feedback. Other immediate build errors retain
+their existing Details panel while keeping the summary visible. Later RQ
+failures and overlapping submissions remain part of staged worker
+acceptance. Screenshot `landuse-preflight-retained-report.png` and response
+receipt `forest-landuse-preflight-browser-r6.log` are in the restricted
+forest evidence directory.
+
+## Staged worker validation
+
+The staged receipt and native raster compatibility path were exercised on
+a private copy of the controlled forest project. Actual FastAPI request
+handling, Redis admission and an RQ worker used the retained CORINE source.
+Class 999 returned an actionable HTTP 400 before queue admission. A same-name
+competing upload could not change the accepted bytes. Fault injection after
+publication proved the completion marker was cleared. An actual same-ID
+requeue generated all 58 expected management rows, including 16 class-25
+Mixed forest rows. Valid admission switched the previous VRT path to the
+verified TIFF. A later selection edit made a pending upload ineligible
+without changing its predecessor's active files or completion marker.
+
+A private batch control used the same effective-path lease as the batch
+worker. Holding that lease produced a conflict before raw publication. The
+base accepted its tested source with delineation unavailable and returned
+settings-only acknowledgement. A fresh leaf copy then aligned the retained
+raw source and generated all 58 rows through `Landuse.build()` with the
+leaf geometry. Existing leaves keep their copied settings until the normal
+reset workflow. Existing queued calls without an upload receipt are
+supported.
+
+The independent reviews prompted controls for native missing-coverage
+fallback, explicit aligned NoData, template writer serialization, modern
+NoDir projections and current-job recovery. [Security review](20261120_landuse_upload_security_review.md)
+records these findings. The old original `LandCover25m.tif` is unavailable.
+The native and browser incident controls use the retained CORINE raster.

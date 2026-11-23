@@ -9,7 +9,8 @@
     {% if ron.boundary %}
     {% set boundary = {
         "url": site_prefix ~ "/" ~ ron.boundary,
-        "layerName": ron.boundary_name,
+        "layerName": "Idaho boundary" if is_icrews_run else ron.boundary_name,
+        "showOnLoad": is_icrews_run | default(false),
         "style": {
             "color": ron.boundary_color,
             "opacity": 1,
@@ -148,7 +149,7 @@
                 "singleSelection": landuse.single_selection
             },
             "soils": {
-                "hasSoils": soils.has_soils,
+                "hasSoils": soils.soil_summary_ready,
                 "mode": soils.mode,
                 "singleDbSelection": soils.single_dbselection
             },
@@ -192,6 +193,7 @@
             "subcatchment": {"defaultColorMap": "slp_asp"},
             "project": {"readonly": (ron.readonly or (is_declarative | default(false)))},
             "wepp": {"job_id": wepp.job_id, "job_key": wepp.job_key},
+            "climate": {"job_id": climate_job_id | default(none), "jobDetailsUnavailable": climate_job_unavailable | default(false)},
             "outlet": {},
             "disturbed": {"mode": disturbed_mode, "uniformSeverity": disturbed_uniform},
             "baer": {"mode": baer_mode, "uniformSeverity": baer_uniform},

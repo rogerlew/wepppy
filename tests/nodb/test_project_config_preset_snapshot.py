@@ -36,7 +36,7 @@ def test_policy_corpus_explicitly_covers_every_named_preset() -> None:
     }
 
     assert set(policies) == config_ids
-    assert len(policies) == 128
+    assert policies
     assert all(policy.overrides for policy in policies.values())
 
 

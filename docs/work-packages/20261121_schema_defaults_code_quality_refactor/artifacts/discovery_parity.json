@@ -1,0 +1,57 @@
+{
+  "probe": "discovery_probe.py",
+  "probe_sha256": "ba66c06fd2452de429842e21888c66144ca9625bf1a44744476ff717dc00642c",
+  "reproduce": [
+    "For each commit below, create a clean worktree and copy discovery_probe.py to .wctl-test-runs/discovery_probe.py.",
+    "Use the development Compose preset with the compatible weppcloud image. Run wctl run-pytest --profile python -- .wctl-test-runs/discovery_probe.py -q in each checkout.",
+    "Compare .wctl-test-runs/discovery-parity.json and the per-scenario path manifests with cmp."
+  ],
+  "image": "wepppy-comrak-validation:local",
+  "image_id": "sha256:78f6befd2430fdea0f50bbe16bc37980def3182601646f7c97d9c37a2dc499ca",
+  "scope": "GET requests against the registered FastAPI application with fixture run snapshots, fixed clock and error ID, an empty export job index, and simulated successful authorization. Every advertised operation and controller detail, both endpoint catalog modes, outputs, geospatial metadata, and two unknown-entity errors per scenario are included. OpenAPI digest covers all ten discovery path definitions in the served document.",
+  "baseline": {
+    "commit": "c82da0a9411b20a41b9d579fca1fc1b12133301f",
+    "started_utc": "2026-11-22T03:45:32.932216+00:00",
+    "receipt_id": "e4f6f8ea74f64200b2ed102ba05ae741",
+    "wctl_status": "passed"
+  },
+  "candidate": {
+    "commit": "254ed7b78a743884e0d7ae95fed11a2fe77320cf",
+    "started_utc": "2026-11-22T03:45:32.944946+00:00",
+    "receipt_id": "897b7654cf994c6cbd541d125689455e",
+    "wctl_status": "passed"
+  },
+  "identical_results": {
+    "openapi": {
+      "paths": 10,
+      "sha256": "5706fa78a8b484c94b35511baa486583552132cba0d3e6ae725e23615fe5f844"
+    },
+    "legacy": {
+      "operations": 39,
+      "controllers": 5,
+      "gated_operations": [],
+      "http_responses": 139,
+      "sha256": "d7967364eb9e8c52fa904af253398d7120fcfe6c79697754a00d18e9a782dd9f"
+    },
+    "stored_conus_disturbed": {
+      "operations": 41,
+      "controllers": 6,
+      "gated_operations": [
+        "rq_engine_build_rusle",
+        "rq_engine_upload_sbs"
+      ],
+      "http_responses": 148,
+      "sha256": "fb2929bb316a34df17cec9c4ba6a4e66cb90e934bc840b290142534eacf4d443"
+    },
+    "v1_europe_baer": {
+      "operations": 41,
+      "controllers": 6,
+      "gated_operations": [
+        "rq_engine_build_rusle",
+        "rq_engine_upload_sbs"
+      ],
+      "http_responses": 148,
+      "sha256": "46094f389669f1e367c3829ef02733bb5e342a36127c56625cbcc51596a321c5"
+    }
+  }
+}

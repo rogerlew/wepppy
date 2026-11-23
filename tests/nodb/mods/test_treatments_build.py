@@ -36,7 +36,14 @@ class FakeLanduse:
     def getInstance(cls, wd):
         return cls._instance
 
-    def get_mapping_dict(self):
+    @property
+    def source_mapping(self):
+        return self.mapping
+
+    def _resolve_effective_mapping_reference(self, mapping):
+        return mapping
+
+    def get_mapping_dict(self, **_source):
         return self._mapping
 
     @contextmanager
@@ -320,7 +327,7 @@ def test_validate_map_uses_valid_pixels_only_without_global_mode_fallback(
             return _DummyLanduse()
 
         @staticmethod
-        def get_mapping_dict():
+        def get_mapping_dict(**_source):
             return {
                 "140": {"DisturbedClass": "thinning_40_75", "IsTreatment": True},
                 "41": {"DisturbedClass": "forest", "IsTreatment": False},
@@ -405,7 +412,7 @@ def test_validate_map_tie_break_prefers_larger_value_after_local_and_global_ties
             return _DummyLanduse()
 
         @staticmethod
-        def get_mapping_dict():
+        def get_mapping_dict(**_source):
             return {
                 "140": {"DisturbedClass": "thinning_40_75", "IsTreatment": True},
                 "141": {"DisturbedClass": "thinning_20_40", "IsTreatment": True},
@@ -470,6 +477,7 @@ def test_modify_soil_does_not_strip_isric_composite_mukey(tmp_path):
             self.sand = sand
 
     class DummySoils:
+        soil_input_capacity = 10
         def __init__(self):
             self._locked = False
             self.domsoil_d = {"101": "Cambisols-clay loam"}
@@ -511,6 +519,7 @@ def test_modify_soil_does_not_strip_isric_composite_mukey(tmp_path):
 @pytest.mark.unit
 def test_modify_soil_uses_parent_soil_file_when_clone_file_missing(monkeypatch, tmp_path):
     class DummySoils:
+        soil_input_capacity = 10
         def __init__(self, base_soil, parent_wd, soils_dir):
             self._locked = False
             self.parent_wd = parent_wd
@@ -571,7 +580,8 @@ def test_modify_soil_uses_parent_soil_file_when_clone_file_missing(monkeypatch, 
     to_over9000_kwargs = {}
 
     class FakeWeppSoilUtil:
-        def __init__(self, fn):
+        def __init__(self, fn, *, max_horizons):
+            assert max_horizons == 10
             call_paths.append(fn)
             self.clay = 30.0
             self.sand = 40.0
@@ -606,3 +616,31 @@ def test_modify_soil_uses_parent_soil_file_when_clone_file_missing(monkeypatch, 
     assert to_over9000_kwargs["replacements"] == {"ki": 1.0}
     assert to_over9000_kwargs["h0_max_om"] == disturbed.h0_max_om
     assert to_over9000_kwargs["version"] == disturbed.sol_ver
+
+
+def test_explicit_treatment_raster_preserves_thinning_outside_the_corine_catalog():
+    from logging import getLogger
+
+    from wepppy.nodb.core.landuse import Landuse, LanduseMode
+    from wepppy.nodb.mods.disturbed import Disturbed
+    from wepppy.nodb.mods.treatments.treatments import Treatments, TreatmentsMode
+    from wepppy.wepp.management import get_management_summary
+
+    landuse = Landuse.__new__(Landuse)
+    landuse._mode = LanduseMode.Gridded
+    landuse._mapping = "disturbed"
+    landuse._nlcd_db = "eu/CORINE_LandCover/2018"
+    landuse.domlc_d = {"101": "25"}
+    landuse.managements = {"25": get_management_summary(25, "eu-disturbed")}
+    landuse.config_get_str = lambda _section, _option, default=None: default
+    landuse.islocked = lambda: True
+    disturbed = Disturbed.__new__(Disturbed)
+    treatments = Treatments.__new__(Treatments)
+    treatments._mode = TreatmentsMode.UserDefinedMap
+    treatments.logger = getLogger(__name__)
+
+    target = treatments._apply_thinning(landuse, disturbed, "101", "thinning_65_93", landuse.managements["25"], "forest")
+
+    assert target == landuse.domlc_d["101"]
+    assert target not in landuse.get_mapping_dict()
+    assert landuse.managements[target].disturbed_class == "thinning_65_93"

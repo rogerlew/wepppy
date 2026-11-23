@@ -254,25 +254,35 @@ def require_data_path(request, path):
         raise HTTPException(403, 'Dataset outside authorized resource') from exc
 
 
-def prepare_context(request, run_path, *, scenario=None, **kwargs):
-    """Validate scenario/cache paths before any context activation or repair."""
-    from wepppy.query_engine.context import _resolve_scenario_dir, resolve_run_context
+def query_data_root(request, scenario):
+    """Resolve and check the exact query and catalog target."""
+    from wepppy.query_engine.context import _resolve_scenario_dir
     target = recheck(request)
-    base = _resolve_scenario_dir(target.path, scenario)
     try:
+        base = _resolve_scenario_dir(target.path, scenario)
         checked_path(base, target.path)
         checked_path(base / '_query_engine', target.path)
         checked_path(base / '_query_engine' / 'catalog.json', target.path)
     except (ValueError, FileNotFoundError) as exc:
         raise HTTPException(404, 'Run not found') from exc
     request.state.query_data_root = base
+    return target, base
+
+
+def prepare_context(request, run_path, *, scenario=None, **kwargs):
+    """Validate scenario/cache paths before any context activation or repair."""
+    from wepppy.query_engine.context import resolve_run_context
+    target, base = query_data_root(request, scenario)
+    wait_mode = getattr(request.state, 'catalog_wait', False)
     from wepppy.query_engine.access_scope import access_scope
     try:
-        with access_scope(base, target.parent_path, lambda: recheck(request)):
+        with access_scope(base, target.parent_path, lambda: recheck(request), catalog_wait=wait_mode):
             from wepppy.query_engine.access_scope import current_scope
-            from wepppy.query_engine.catalog_refresh import _load_catalog, pending_catalog_requests
+            from wepppy.query_engine.catalog_refresh import CatalogNotReady, _load_catalog, pending_catalog_requests
             retained = _load_catalog(base, rebuild_malformed=True)
-            if retained is None or pending_catalog_requests(base):
+            if retained is None or pending_catalog_requests(base, first_only=wait_mode):
+                if wait_mode:
+                    raise CatalogNotReady()
                 # Only new/repairing catalogs need a tree preflight. Cached reads
                 # validate selected sources, preserving targeted freshness costs.
                 current_scope().before_scan(base)
@@ -300,7 +310,8 @@ def execute_scoped(request, callback, *args, **kwargs):
     target = recheck(request)
     base = getattr(request.state, 'query_data_root', target.path)
     try:
-        with access_scope(base, target.parent_path, lambda: recheck(request)):
+        with access_scope(base, target.parent_path, lambda: recheck(request),
+                          catalog_wait=getattr(request.state, 'catalog_wait', False)):
             from wepppy.query_engine.access_scope import current_scope
             if kwargs.get('force_refresh'):
                 current_scope().before_scan(base)

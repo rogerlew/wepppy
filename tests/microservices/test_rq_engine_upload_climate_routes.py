@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -90,7 +91,8 @@ def test_upload_cli_succeeds_for_compatible_or_user_defined_authority(
     cli_dir.mkdir(parents=True)
 
     _stub_auth(monkeypatch)
-    _stub_queue(monkeypatch, job_id="job-77")
+    job_id = "a58f79ec-758c-4c67-abef-2e17d56d9a77"
+    _stub_queue(monkeypatch, job_id=job_id)
     _stub_prep(monkeypatch)
     monkeypatch.setattr(upload_climate_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(upload_climate_routes.Ron, "getInstance", lambda wd: object())
@@ -126,7 +128,11 @@ def test_upload_cli_succeeds_for_compatible_or_user_defined_authority(
         )
 
     assert response.status_code == 200
-    assert response.json()["job_id"] == "job-77"
+    assert response.json()["job_id"] == job_id
+    attempt_dir = run_dir / "climate_artifacts" / "climate_upload" / "attempts" / job_id
+    assert (attempt_dir / "demo.cli").read_bytes() == b"data"
+    assert json.loads((attempt_dir / "build-status.json").read_text())["state"] == "staged"
+    assert not (cli_dir / "demo.cli").exists()
 
 
 @pytest.mark.parametrize("authority_kind", ["stored_v2", "stored_v3_without_user_defined"])

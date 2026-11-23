@@ -9,6 +9,7 @@ import errno
 import json
 import logging
 import os
+from pathlib import Path
 import re
 from typing import Any, Mapping, Sequence
 import uuid
@@ -64,6 +65,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(route_class=PayloadRoute)
 
 RQ_CREATE_SCOPES = ["rq:enqueue"]
+_ICREWS_PRESETS = frozenset({"i-crews", "i-crews-mofe"})
 _CREATE_TRANSPORT_FIELDS = frozenset(
     {"cap_token", "config", "creation_idempotency_key", "rq_token"}
 )
@@ -580,15 +582,42 @@ async def _create(request: Request) -> Response:
         idempotency_client = None
         reservation = None
         cfg = f"{config}.cfg"
-        if writer_enabled:
-            idempotency_key = str(creation_values.get("creation_idempotency_key") or "").strip()
-            source_revision = str(os.getenv("RQ_ENGINE_DEPLOYMENT_REVISION") or "dev").strip() or "dev"
+        selected_preset = Path(config.partition("?")[0]).name.removesuffix(".cfg")
+        icrews_preset = selected_preset in _ICREWS_PRESETS
+        if icrews_preset and config != selected_preset:
+            return error_response(
+                "Use the canonical I-CREWS preset name.",
+                status_code=400,
+                code="project_config_validation_failed",
+            )
+        source_revision = str(os.getenv("RQ_ENGINE_DEPLOYMENT_REVISION") or "dev").strip() or "dev"
+        if writer_enabled or icrews_preset:
             try:
                 candidate = resolve_preset_snapshot(
                     config,
                     _durable_override_values(creation_values),
                     source_revision=source_revision,
                 )
+            except PresetPolicyError:
+                return error_response(
+                    "Invalid project creation request.",
+                    status_code=400,
+                    code="project_config_validation_failed",
+                    details="The server's preset configuration policy could not be loaded or validated. The administrator must repair the preset policy before retrying.",
+                    log_exception=True,
+                )
+            except PresetSnapshotError as exc:
+                return error_response(
+                    "Invalid project creation request.",
+                    status_code=400,
+                    code="project_config_validation_failed",
+                    details=str(exc),
+                    log_exception=True,
+                )
+
+        if writer_enabled:
+            idempotency_key = str(creation_values.get("creation_idempotency_key") or "").strip()
+            try:
                 fingerprint = build_creation_fingerprint(
                     mode="preset",
                     preset_id=config,
@@ -602,15 +631,7 @@ async def _create(request: Request) -> Response:
                     actor_scope=_creation_actor_scope(actor),
                     fingerprint=fingerprint,
                 )
-            except PresetPolicyError:
-                return error_response(
-                    "Invalid project creation request.",
-                    status_code=400,
-                    code="project_config_validation_failed",
-                    details="The server's preset configuration policy could not be loaded or validated. The administrator must repair the preset policy before retrying.",
-                    log_exception=True,
-                )
-            except (PresetSnapshotError, CreationIdempotencyError) as exc:
+            except CreationIdempotencyError as exc:
                 return error_response(
                     "Invalid project creation request.",
                     status_code=400,
@@ -646,7 +667,16 @@ async def _create(request: Request) -> Response:
             if reservation.status == "replay":
                 return RedirectResponse(str(reservation.location), status_code=303)
         else:
-            overrides = _collect_overrides(creation_values)
+            if candidate is not None:
+                # Both I-CREWS creation modes share the named preset allowlist.
+                allowed_values = {
+                    key.replace(".", ":", 1): value
+                    for key, value in candidate.normalized_overrides.items()
+                }
+                overrides = _collect_overrides(allowed_values)
+                candidate = None
+            else:
+                overrides = _collect_overrides(creation_values)
             if overrides:
                 cfg = f"{cfg}?{overrides}"
 

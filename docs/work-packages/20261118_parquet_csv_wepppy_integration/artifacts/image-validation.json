@@ -1,0 +1,40 @@
+{
+  "image_id": "sha256:2f7921df03e1be59f95635fa38488a351e641538c33851529ec10bf9994a9f42",
+  "runtime_source_revision": "c433c6ee3",
+  "build_command": "docker build -f docker/Dockerfile --build-arg APP_USER=roger --build-arg APP_GROUP=docker --build-arg APP_UID=1000 --build-arg APP_GID=993 -t wepppy/parquet-csv-integration:local .",
+  "runtime": {
+    "network": "none",
+    "workers": 8,
+    "gunicorn_timeout": 120,
+    "nofile": 1000000,
+    "run_mount": "isolated immutable copies mounted read-only at /wc1/runs",
+    "uid_gid_cases": [
+      "1000:993",
+      "1002:1002",
+      "1002:130"
+    ],
+    "runtime_umask": "022",
+    "operator_umask_for_readiness": "077",
+    "filtered_probe_environment": {
+      "BROWSE_PARQUET_FILTERS_ENABLED": "0",
+      "BROWSE_PARQUET_EXPORT_MAX_ROWS": "1"
+    }
+  },
+  "measurement_notes": "HTTP JSON seconds is body-read duration after headers; conversion time/CPU/RSS is in correlated service logs. CLI ru_maxrss can include inherited worker high-water memory. Offline Redis startup diagnostics are not production-health evidence.",
+  "scope": "Local image acceptance; target-host secrets/proxy/production rollout not performed",
+  "evidence_sha256": {
+    "image-http-1002-130.json": "f50e75dfd86051efda3e00acda22f7d49329ff35dcbf22d8db62b0d766535521",
+    "image-invalid-binary.json": "df209b46911b9306508e496ab7728b9c6e4460104c803f265b738d86adc1f9ab",
+    "image-filtered-http.jsonl": "d122e4605bb0897d9707f07e56c0e62393bfb2077baa7ffb45525c7f476b0c23",
+    "image-http-1000-993.json": "590b23a63da8dd9314e9b4e156f1031aac9bfaddeaddb0798c6df2db23d03e32",
+    "image-native-provenance.json": "e487760fe1d49181020c096eb45cc9ec9e29261f98a6b03422bf61759361e0bf",
+    "image-invalid-provenance.json": "af6158989f78cb67f808c5aab8cd077f02b0020dab08469750cb9febc885c066",
+    "image-otheruid-readiness.log": "a5631e09213ec346176f3ca3814414ff2994d1685db111573b8edb033fce56f8",
+    "image_filter_probe.py": "3cc89e6390a536db31e7b9285e8190f8480d1012ca66a687f28c3e8f6d6c0129",
+    "image_http_probe.py": "87455a9328e2483f73a35a7d50cdc8b08e60fd01666c9ba60d9a5a65f197659b",
+    "image-readiness.log": "a5631e09213ec346176f3ca3814414ff2994d1685db111573b8edb033fce56f8",
+    "image_negative_probe.py": "34e5e406a91f552a2f9c373e485d0bcdc47b5fbfa296ba93be1a716ef7f9603d",
+    "image-http-1002-130.log.gz": "026fbc702858f31b859de5b5980bfb278bd9eafe78115d6425e2af9f60300ff9"
+  },
+  "raw_service_log_sha256": "898ac6d6d02698dff9cb33d0ee1284ff45abf564e3ed84f36ecfff26fa1b05ee"
+}

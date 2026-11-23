@@ -1,0 +1,106 @@
+{
+  "baseline": {
+    "label": "/workdir/native-soil-capacity-evidence/hillslope-v2/two/candidate",
+    "resolved_root": "/home/workdir/native-soil-capacity-evidence/hillslope-v2/two/candidate"
+  },
+  "candidate": {
+    "label": "/workdir/native-soil-capacity-evidence/hillslope-v2/eleven/candidate",
+    "resolved_root": "/home/workdir/native-soil-capacity-evidence/hillslope-v2/eleven/candidate"
+  },
+  "settings": {
+    "runs_root": "/wc1/runs",
+    "output_subdir": "output",
+    "include_globs": [
+      "*.dat",
+      "*.txt",
+      "*.out"
+    ],
+    "exclude_globs": [],
+    "abs_tolerance": 1e-06,
+    "rel_tolerance": 0.0,
+    "top_n": 20
+  },
+  "raw": {
+    "baseline_dir": "/home/workdir/native-soil-capacity-evidence/hillslope-v2/two/candidate/output",
+    "candidate_dir": "/home/workdir/native-soil-capacity-evidence/hillslope-v2/eleven/candidate/output",
+    "include_globs": [
+      "*.dat",
+      "*.txt",
+      "*.out"
+    ],
+    "exclude_globs": [],
+    "abs_tolerance": 1e-06,
+    "rel_tolerance": 0.0,
+    "baseline_file_count": 7,
+    "candidate_file_count": 7,
+    "common_file_count": 7,
+    "only_baseline_count": 0,
+    "only_candidate_count": 0,
+    "only_baseline_examples": [],
+    "only_candidate_examples": [],
+    "identical_count": 3,
+    "changed_count": 4,
+    "status_counts": {
+      "identical": 3,
+      "numeric_diff_exceeds_tol": 4
+    },
+    "max_abs_any": 0.045999999999999375,
+    "max_rel_any": 0.5783321702721562,
+    "top_changed_files": [
+      {
+        "path": "H1.pass.dat",
+        "status": "numeric_diff_exceeds_tol",
+        "line_count_baseline": 1101,
+        "line_count_candidate": 1101,
+        "line_count_mismatch": 0,
+        "numeric_arity_mismatch_lines": 0,
+        "text_mismatch_lines": 0,
+        "numeric_values_compared": 4891,
+        "numeric_values_exceeding_tolerance": 1027,
+        "max_abs_diff": 0.045999999999999375,
+        "max_rel_diff": 0.5783321702721562
+      },
+      {
+        "path": "H1.wat.dat",
+        "status": "numeric_diff_exceeds_tol",
+        "line_count_baseline": 1123,
+        "line_count_candidate": 1123,
+        "line_count_mismatch": 0,
+        "numeric_arity_mismatch_lines": 0,
+        "text_mismatch_lines": 0,
+        "numeric_values_compared": 27377,
+        "numeric_values_exceeding_tolerance": 1206,
+        "max_abs_diff": 0.020000000000038654,
+        "max_rel_diff": 0.5783131322180434
+      },
+      {
+        "path": "H1.element.dat",
+        "status": "numeric_diff_exceeds_tol",
+        "line_count_baseline": 74,
+        "line_count_candidate": 74,
+        "line_count_mismatch": 0,
+        "numeric_arity_mismatch_lines": 0,
+        "text_mismatch_lines": 0,
+        "numeric_values_compared": 1874,
+        "numeric_values_exceeding_tolerance": 48,
+        "max_abs_diff": 0.012999999999976808,
+        "max_rel_diff": 2.883512739575948e-05
+      },
+      {
+        "path": "H1.soil.dat",
+        "status": "numeric_diff_exceeds_tol",
+        "line_count_baseline": 1101,
+        "line_count_candidate": 1101,
+        "line_count_mismatch": 0,
+        "numeric_arity_mismatch_lines": 0,
+        "text_mismatch_lines": 0,
+        "numeric_values_compared": 16425,
+        "numeric_values_exceeding_tolerance": 19,
+        "max_abs_diff": 0.00010000000000010001,
+        "max_rel_diff": 0.00019596315892610031
+      }
+    ],
+    "strict_pass": false
+  },
+  "strict_pass": false
+}

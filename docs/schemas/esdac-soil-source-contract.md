@@ -13,7 +13,7 @@ Build when the available source data produce a valid WEPP profile. Missing descr
 | `usedom` | Forest switch | Warning; existing non-forest/code-zero albedo 0.15 and saturation 0.75; forest codes 5/22 retain 0.06/0.5 |
 | `textdepchg`, `il` | Horizon depths | Reject missing/unsupported values; no guessed depths |
 | `cec_top`, `cec_sub` | Horizon CEC | Require top CEC; require sub CEC only for emitted subsoil |
-| STU texture, density, organic carbon, gravel | Emitted physical profile | Require finite usable values for emitted materials; zero individual texture/gravel values remain valid; reject empty/unbalanced texture and invalid density |
+| STU texture, density, organic carbon, gravel | Emitted physical profile | Require finite usable values for emitted materials; zero individual texture/gravel values remain valid; reject empty/unbalanced texture and invalid density, with the [six-zero subsoil exception](#project-defaults-for-a-missing-subsoil-material) |
 | HydroGrids conductivity | Restrictive-layer calculation | Existing partial-missing warnings accepted; all-missing/invalid coverage rejected |
 
 ## Diagnostics and compatibility
@@ -55,3 +55,19 @@ Required categorical short codes are strings under the raster provider contract.
 Missing pixel/description metadata preserves a usable short code and records a
 warning, including for depth and CEC categories. Arbitrary non-string short-code
 provider payloads are not a supported recovery input.
+
+## Project defaults for a missing subsoil material
+
+[ADR-0151](../adrs/ADR-0151-esdac-missing-subsoil-defaults.md) defines the fixed starting profile and its provenance. Conformance to this amendment is pending.
+
+A gridded ESDAC project has one editable subsoil profile. Before any soil build, show the persisted profile or the fixed default when the persisted profile is absent or empty in Soil Options → Advanced options, with units and a description of where it applies. Eligibility follows actual soil dispatch, not the previous output's `soil_source`. Render this control for eligible ESDAC projects only, including fresh and failed projects. Submit its values only for gridded ESDAC. A malformed nonempty persisted profile fails explicitly with correction guidance. A request without the profile retains the saved setting or uses the fixed defaults. The six fields otherwise form one validated unit. Reject partial, blank, duplicate, Boolean, nonfinite and malformed fields before any mutation, and reject explicit active profile fields when a different soil builder applies.
+
+Use the profile on every hillslope whose required subsoil has all six finite source material values equal to zero. Reject independent physical or structural errors. A profile with usable native subsoil or without a consumed subsoil interval bypasses the fallback. Preserve the source topsoil, depth and CEC categories, and target hydraulic inputs. Derive and validate the generated soil through the standard builder and downstream paths.
+
+Bind the fully validated profile to its admitted attempt. A queued worker must consume that profile even if another request edits the project's settings. Failed enqueue or rejected admission preserves the prior settings and completion markers. Old jobs without a snapshot and direct callers resolve the applicable project setting at build time. A batch settings save without a job retains the same validated project setting. Keep explicit source identity through batch publication. The quality report distinguishes fallback as degraded, with the original missing-source observations, applied values and method. Include fallback provenance in the stable generated soil content so equivalent-file reuse preserves it. The Soils summary places a persistent `wc-alert wc-alert--warning` directly above the coverage table when its accepted artifacts used defaults. Use a visible heading, “Subsoil defaults applied,” and state the affected hillslope count and total. Link to details for that accepted build and identify where to edit the project profile. Announce the warning politely when the summary is refreshed. A count of zero shows no warning. Preserve the association on reload. A failed rebuild may show its own diagnostics. If it invalidates the last accepted soil release, clear that release’s summary and warning. A failed attempt’s quality report cannot supply a successful warning count.
+
+## Format-aware Disturbed readback
+
+Validate actual physical records and required provenance for the native format selected by the project. When a transformed ESDAC 7778 member has expected land-use and texture values, read exactly one occurrence of each required value from the final recognized Disturbed migration block in the pre-body writer comments. Missing, malformed, duplicate and mismatched entries fail with rebuild guidance. An invalid final block cannot fall back to an earlier one. For formats with native land-use and texture metadata, including 9001, 9002, 9003 and 9005, keep native parsed-field checks. Retain format, physical and version checks for base copies and final stacks, and verify transformed members before stacking.
+
+A repeated MOFE member key in one build reuses the pending generation plan. The member must exist and pass validation before assembly. Validate existing reusable members before accepting them. The final stack keeps its normal physical and format readback.

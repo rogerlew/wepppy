@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+import os
 from pathlib import Path
 from threading import Barrier
 
 import pytest
 
-from wepppy.climates.cligen.cligen import CligenStationsManager
+from wepppy.climates.cligen.cligen import CligenStationsManager, par_mod
 
 
 pytestmark = pytest.mark.unit
@@ -57,3 +58,18 @@ def test_real_concurrent_station_catalogs_keep_database_and_par_roots_paired() -
 
     assert all(station_count > 0 for station_count, _root in results)
     assert len({root for _station_count, root in results}) == len(_CATALOGS)
+
+
+def test_failed_climate_localization_preserves_the_caller_working_directory(tmp_path: Path) -> None:
+    start = Path.cwd()
+    try:
+        with pytest.raises(Exception, match="Cannot find station"):
+            par_mod(
+                par="REPLAY_UNKNOWN_CLIGEN_STATION", years=1, lng=3.03, lat=39.82,
+                wd=str(tmp_path), monthly_dataset="eobs", version="ghcn_stations.db",
+            )
+        assert Path.cwd() == start
+        assert (tmp_path / "cligen.log").is_file()
+    finally:
+        if Path.cwd() != start:
+            os.chdir(start)

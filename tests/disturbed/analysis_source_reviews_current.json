@@ -1,18 +1,32 @@
 {
   "status": "unchanged_outputs_after_source_review",
-  "date": "2026-11-03",
+  "date": "2026-11-20",
   "provenance_sha256": "8928a034a2dce03ad0efd5b4285407830f92664879019c5ad577b36ceb951220",
   "report_sha256": "31cbd80b8996db905a9bdb4b20666132af8a124c93abbbeebb75a98ba770b947",
   "reviewed_source_deltas": {
     "wepppy/wepp/management/managements.py": {
       "recorded": "c83275c7b2dd5331f991086158b3a2605a056c9431551d388128391872842664",
-      "current": "7b2d0624eba784313052721a4e50b2dc27104fcdcdee5fb4f9fe9960f0ff1f9d"
+      "current": "f76b05cec4acab2de131b8404bdc869f85cfd9d19945d224b5a248a46fb3e459"
+    },
+    "wepppy/wepp/soils/utils/wepp_soil_util.py": {
+      "recorded": "367e94103f75d8746f99fb5c440fe84059534d1efb50ec2d3431fcbfb76243ba",
+      "current": "b8d8cfa8a82350ada4cfb23c6823062bc6078d0ecc083fce36b6406b3217ff8f"
+    },
+    "wepppy/wepp/soils/horizon_boundary.py": {
+      "recorded": "d15b596a912153d25ab8d5e938de706138f3e5ff7ec8322c128ca522aa12e170",
+      "current": "2ea8581117f960b80c3180a531c03e66bb8f91132e346d889b32d323ddebf684"
+    },
+    "wepppy/wepp/soils/utils/utils.py": {
+      "recorded": "794c9c192054d23ed0ca782fcc49795c0b7b40b22e9110cadbcc3d84afafb351",
+      "current": "2abe4a28b337c9bbd04ee39f8cba549b7185fd4a44a8a3c00da8bfc8bb1cf8e6"
     }
   },
-  "rationale": "Opt-in StrictLegacyRoads validation adds the supported Roads 97.3 parser boundary; the Disturbed matrix does not select it. All96 fresh broad-suite cases passed. All768 published native output bytes and96 management files match; all96 soil differences are exactly one generated Build Date comment. Original report, producer identities and case hashes are preserved.",
-  "evidence": "docs/work-packages/20261029_roads_parameterization_program/artifacts/parameterization-implementation-correctness-review.md",
+  "rationale": "Earlier reviews verified native input capacity and generic thinning admission. The exact European ESDAC map selector and selector metadata are outside the benchmark mapping and vegetation classes. A fresh 96-case matrix matched 768 native outputs, 96 management inputs, and 864 other inputs byte for byte. All 96 generated soils differ only in the Build Date comment. The independently generated report matches the published bytes.",
+  "evidence": "docs/work-packages/20261120_eu_run_recovery/artifacts/20261120_esdac_reconciliation_matrix_parity.json",
   "raw_evidence": [
-    "/wc1/runs/ro/roads-parameterization-program-20261103/parameterization-workflow-v1/disturbed-broad-parity-v1.json",
-    "/wc1/runs/ro/roads-parameterization-program-20261103/parameterization-workflow-v1/disturbed-broad-soil-comment-review-v1.json"
-  ]
+    "/workdir/soil-input-capacity-23-evidence/disturbed-matrix-artifacts.jsonl",
+    "/home/workdir/wepppy-eu-run-recovery/.wctl-test-runs/retained-esdac-reconciled-final/disturbed_matrix0"
+  ],
+  "prior_evidence": "docs/work-packages/20261118_soil_input_capacity_23/artifacts/disturbed-parity.json",
+  "earlier_source_review_evidence": "docs/work-packages/20261120_eu_run_recovery/artifacts/20261120_disturbed_matrix_parity.json"
 }

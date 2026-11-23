@@ -39,10 +39,10 @@ def _infer_netw_area_units(area_key: str, fieldnames: List[str]) -> Optional[str
     key = area_key.lower()
     if "km2" in key or "sqkm" in key or "sq_km" in key:
         return "km2"
-    if "m2" in key or "sqm" in key or "sq_m" in key:
+    if key == "areaup" or "m2" in key or "sqm" in key or "sq_m" in key:
         return "m2"
 
-    if key in ("areaup", "area_up", "area"):
+    if key in ("area_up", "area"):
         for name in fieldnames:
             lower = name.lower()
             if lower.endswith("_m") or lower.endswith("_m2") or "length_m" in lower or "drop_m" in lower:

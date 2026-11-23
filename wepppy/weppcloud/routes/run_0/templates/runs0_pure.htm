@@ -9,6 +9,7 @@
   - See docs/ui-docs/control-ui-styling/preflight_behavior.md for architecture
 #}
 
+{% set is_icrews_run = (ron.config_stem | default('')) in ('i-crews', 'i-crews-mofe') %}
 {% set mods_list = ron.mods or [] %}
 {% set hide_landuse_wepp = 'rhem' in mods_list and not playwright_load_all %}
 {% set show_landuse_modify = ron.enable_landuse_change %}
@@ -68,7 +69,18 @@
   {% include 'header/_run_header_fixed.htm' %}
 {% endblock %}
 
+{% block footer %}
+  {% if is_icrews_run %}
+  <footer class="wc-container" aria-label="I-CREWS funding">
+    {% include 'shared/i_crews_funding.htm' %}
+  </footer>
+  {% endif %}
+{% endblock %}
+
 {% block body_container %}
+{% if fork_status %}
+  {% include '_fork_run_notice.htm' %}
+{% endif %}
 {% if is_declarative | default(false) %}
 <aside class="wc-alert wc-alert--info" role="status">
   <strong>Declarative project</strong>

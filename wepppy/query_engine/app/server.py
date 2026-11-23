@@ -59,6 +59,8 @@ from wepppy.weppcloud.utils.assets import resolve_asset_version
 from .query_presets import QUERY_PRESETS
 from .helpers import QueryTarget
 from .access import authorize_request, configured_origins, prepare_context, recheck, execute_scoped
+from .catalog_readiness import catalog_prepare, catalog_status, readiness_response, require_prepare_origin
+from wepppy.query_engine.catalog_refresh import CatalogNotReady
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 SHARED_TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "weppcloud" / "templates"
@@ -854,10 +856,12 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     if scenario is not None and not isinstance(scenario, str):
         raise HTTPException(400, "Invalid scenario")
 
-    try:
-        context = await run_in_threadpool(prepare_context, request, str(run_path), scenario=scenario, auto_activate=True, run_interchange=False)
-    except FileNotFoundError:
-        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
+    mode = body.pop('catalog_mode', None)
+    if mode is not None and mode != 'wait':
+        raise HTTPException(400, 'Invalid catalog mode')
+    request.state.catalog_wait = mode == 'wait'
+    if request.state.catalog_wait:
+        require_prepare_origin(request)
 
     try:
         payload = QueryRequest(**body)
@@ -874,6 +878,13 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
             status_code=422,
         )
 
+    try:
+        context = await run_in_threadpool(prepare_context, request, str(run_path), scenario=scenario, auto_activate=True, run_interchange=False)
+    except CatalogNotReady:
+        return await run_in_threadpool(readiness_response, request, scenario, prepare=True, query_pending=True)
+    except FileNotFoundError:
+        return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
+
     require_datasets(request, context.base_dir, [spec.path for spec in payload.dataset_specs], entries=context.catalog.entries())
     try:
         if any(roads_lifecycle.current_path(spec.path) for spec in payload.dataset_specs):
@@ -889,6 +900,10 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
                 request, fresh.base_dir, [spec.path for spec in payload.dataset_specs],
                 entries=fresh.catalog.entries(),
             ),
+        )
+    except CatalogNotReady as exc:
+        return await run_in_threadpool(
+            readiness_response, request, scenario, prepare=True, paths=exc.paths, query_pending=True,
         )
     except HTTPException:
         raise
@@ -1053,6 +1068,10 @@ def create_app() -> Starlette:
             name="diagnostics_bandwidth_upload",
         ),
         Route("/", homepage, name="homepage"),
+        Route("/runs/{runid:path}/catalog/prepare", catalog_prepare, methods=["POST"]),
+        Route("/runs/{runid:path}/catalog/prepare/", catalog_prepare, methods=["POST"]),
+        Route("/runs/{runid:path}/catalog/status", catalog_status, methods=["GET"]),
+        Route("/runs/{runid:path}/catalog/status/", catalog_status, methods=["GET"]),
         Route("/runs/{runid:path}/activate", activate_run, methods=["GET", "POST"], name="activate_run"),
         Route("/runs/{runid:path}/activate/", activate_run, methods=["GET", "POST"], name="activate_run_slash"),
         Route("/runs/{runid:path}/schema", run_schema, methods=["GET"], name="run_schema"),

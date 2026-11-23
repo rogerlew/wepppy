@@ -1,0 +1,97 @@
+{
+  "base": "c82da0a9411b20a41b9d579fca1fc1b12133301f",
+  "production_candidate": "254ed7b78a743884e0d7ae95fed11a2fe77320cf",
+  "analyzer": "tools.code_quality_observability.analyze_python_text with Radon",
+  "baseline": {
+    "python_file_sloc": 5359.0,
+    "python_function_len": 2249.0,
+    "python_cc": 90.0
+  },
+  "candidate": {
+    "schema_defaults_controllers.py": {
+      "python_file_sloc": 362.0,
+      "python_function_len": 71.0,
+      "python_cc": 22.0
+    },
+    "schema_defaults_controllers_schema.py": {
+      "python_file_sloc": 431.0,
+      "python_function_len": 102.0,
+      "python_cc": 12.0
+    },
+    "schema_defaults_descriptors.py": {
+      "python_file_sloc": 265.0,
+      "python_function_len": 78.0,
+      "python_cc": 9.0
+    },
+    "schema_defaults_fields.py": {
+      "python_file_sloc": 489.0,
+      "python_function_len": 73.0,
+      "python_cc": 17.0
+    },
+    "schema_defaults_geospatial.py": {
+      "python_file_sloc": 98.0,
+      "python_function_len": 81.0,
+      "python_cc": 6.0
+    },
+    "schema_defaults_operation_docs.py": {
+      "python_file_sloc": 229.0,
+      "python_function_len": 99.0,
+      "python_cc": 18.0
+    },
+    "schema_defaults_ops.py": {
+      "python_file_sloc": 66.0,
+      "python_function_len": 54.0,
+      "python_cc": 6.0
+    },
+    "schema_defaults_ops_inputs.py": {
+      "python_file_sloc": 263.0,
+      "python_function_len": 96.0,
+      "python_cc": 8.0
+    },
+    "schema_defaults_ops_landuse.py": {
+      "python_file_sloc": 519.0,
+      "python_function_len": 67.0,
+      "python_cc": 1.0
+    },
+    "schema_defaults_ops_metadata.py": {
+      "python_file_sloc": 231.0,
+      "python_function_len": 26.0,
+      "python_cc": 1.0
+    },
+    "schema_defaults_ops_models.py": {
+      "python_file_sloc": 258.0,
+      "python_function_len": 81.0,
+      "python_cc": 6.0
+    },
+    "schema_defaults_ops_project.py": {
+      "python_file_sloc": 109.0,
+      "python_function_len": 55.0,
+      "python_cc": 1.0
+    },
+    "schema_defaults_ops_uploads.py": {
+      "python_file_sloc": 226.0,
+      "python_function_len": 67.0,
+      "python_cc": 2.0
+    },
+    "schema_defaults_ops_watershed.py": {
+      "python_file_sloc": 266.0,
+      "python_function_len": 130.0,
+      "python_cc": 3.0
+    },
+    "schema_defaults_outputs.py": {
+      "python_file_sloc": 287.0,
+      "python_function_len": 62.0,
+      "python_cc": 13.0
+    },
+    "schema_defaults_routes.py": {
+      "python_file_sloc": 540.0,
+      "python_function_len": 37.0,
+      "python_cc": 6.0
+    },
+    "schema_defaults_runtime.py": {
+      "python_file_sloc": 482.0,
+      "python_function_len": 82.0,
+      "python_cc": 19.0
+    }
+  }
+}

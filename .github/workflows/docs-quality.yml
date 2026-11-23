@@ -8,7 +8,12 @@ on:
     - tools/check_agents_size.sh
     - tools/check_adr_dates.py
     - tests/tools/test_check_adr_dates.py
-    - wepppy/weppcloud/usersum_docs/adr_catalog.py
+    - tools/usersum_docs_tool.py
+    - docker/requirements-uv.txt
+    - wepppy/markdown_render.py
+    - wepppy/weppcloud/usersum_anchors.py
+    - wepppy/weppcloud/usersum_docs/**
+    - wepppy/weppcloud/routes/usersum/**
     - .github/forest_workflows/docs-quality.yml
     - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
@@ -22,7 +27,12 @@ on:
     - tools/check_agents_size.sh
     - tools/check_adr_dates.py
     - tests/tools/test_check_adr_dates.py
-    - wepppy/weppcloud/usersum_docs/adr_catalog.py
+    - tools/usersum_docs_tool.py
+    - docker/requirements-uv.txt
+    - wepppy/markdown_render.py
+    - wepppy/weppcloud/usersum_anchors.py
+    - wepppy/weppcloud/usersum_docs/**
+    - wepppy/weppcloud/routes/usersum/**
     - .github/forest_workflows/docs-quality.yml
     - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
@@ -38,42 +48,39 @@ jobs:
       contents: read
       security-events: write
     env:
-      RUNNER_DOCKER_ENV: /workdir/wepppy/docker/.env
       MARKDOWN_DOC_WORKSPACE: ${{ secrets.MARKDOWN_DOC_WORKSPACE }}
     timeout-minutes: 20
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       with:
-        clean: false
-    - name: Ensure docker/.env exists
-      shell: bash
-      run: |
-        set -euo pipefail
-        if [ -n "${RUNNER_DOCKER_ENV:-}" ] && [ -f "${RUNNER_DOCKER_ENV}" ]; then
-          cp "${RUNNER_DOCKER_ENV}" docker/.env
-          exit 0
-        fi
-        if [ ! -f docker/.env ]; then
-          printf "%s\n" \
-            "UID=1000" \
-            "GID=993" \
-            "POSTGRES_PASSWORD=localdev" \
-            "SECRET_KEY=localdev" \
-            "SECURITY_PASSWORD_SALT=localdev" \
-            > docker/.env
-        fi
+        persist-credentials: false
+        fetch-depth: 0
     - name: Install wctl shim
       env:
         WCTL_SYMLINK_PATH: ${{ github.workspace }}/.wctl/bin/wctl
-      run: |
-        set -euo pipefail
+      run: |-
         mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
-        chmod +x wctl/install.sh
         ./wctl/install.sh dev
         echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
     - name: Enforce ADR titles and recorded dates
       run: python3 tools/check_adr_dates.py
+    - name: Set up Python for Usersum lint
+      id: usersum-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        update-environment: false
+    - name: Check Usersum links and heading IDs
+      env:
+        USERSUM_LINT_PYTHON: ${{ steps.usersum-python.outputs.python-path }}
+      run: |
+        set -euo pipefail
+        lint_env="$(mktemp -d "${RUNNER_TEMP}/usersum-lint.XXXXXXXX")"
+        trap 'rm -rf "$lint_env"' EXIT
+        "$USERSUM_LINT_PYTHON" -m venv "$lint_env"
+        grep -Ei '^(comrak-ext|pyyaml)==' docker/requirements-uv.txt > "$lint_env/requirements.txt"
+        "$lint_env/bin/python" -m pip --disable-pip-version-check install --only-binary=comrak-ext -r "$lint_env/requirements.txt"
+        PYTHONPATH=. "$lint_env/bin/python" tools/usersum_docs_tool.py lint-links
     - name: Verify markdown-doc tooling
       run: |
         set -euo pipefail
@@ -216,25 +223,3 @@ jobs:
       run: |
         echo "markdown-doc lint reported errors (exit code ${LINT_STATUS})." >&2
         exit 1
-    - name: Remove redis data directory
-      run: |
-        set -euo pipefail
-        REDIS_DIR="${GITHUB_WORKSPACE}/.docker-data/redis"
-        if [ ! -d "${REDIS_DIR}" ]; then
-          echo "Redis data directory not present; nothing to remove."
-          exit 0
-        fi
-
-        echo "Removing ${REDIS_DIR}"
-        if rm -rf "${REDIS_DIR}" 2>/dev/null; then
-          echo "Removed redis data directory without sudo."
-          exit 0
-        fi
-
-        if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
-          sudo -n rm -rf "${REDIS_DIR}"
-          echo "Removed redis data directory with passwordless sudo."
-          exit 0
-        fi
-
-        echo "Warning: unable to remove ${REDIS_DIR} without interactive sudo; continuing." >&2

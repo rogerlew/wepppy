@@ -3,17 +3,32 @@ from __future__ import annotations
 
 import uuid
 
-from flask import current_app, request
+from flask import current_app, g, request
 from flask_login import current_user
 from starlette.exceptions import HTTPException
 
-from wepppy.microservices.rq_engine.auth import AuthError
+from wepppy.microservices.rq_engine.auth import AuthError, _reject_fork_preparing_run
 from wepppy.query_engine.app.access import authorize_resource
 from wepppy.query_engine.app.helpers import resolve_target
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.browse_cookie import query_cookie_name, query_cookie_path
 from wepppy.weppcloud.utils.feature_access import VerifiedPrincipal
 from wepppy.weppcloud.utils.feature_access_identity import principal_claim
+
+
+def _is_fork_query_conflict(exc):
+    return isinstance(exc, AuthError) and exc.status_code == 409 and exc.code == 'job_active'
+
+
+def fork_query_blocked(runid):
+    """Read the existing fork admission decision for result navigation."""
+    try:
+        _reject_fork_preparing_run(runid)
+    except AuthError as exc:
+        if _is_fork_query_conflict(exc):
+            return True
+        raise
+    return False
 
 
 def set_query_cookie(response, runid, config, *, omit_public=False):
@@ -30,7 +45,7 @@ def set_query_cookie(response, runid, config, *, omit_public=False):
     try:
         authorize_resource(target, identity_claims)
     except (HTTPException, AuthError) as exc:
-        if exc.status_code in {401, 403}:
+        if exc.status_code in {401, 403} or _is_fork_query_conflict(exc):
             current_app.logger.info(
                 'Query credential omitted for run %s: access status %s',
                 target.runid, exc.status_code,
@@ -61,7 +76,8 @@ def set_query_cookie(response, runid, config, *, omit_public=False):
 def set_page_query_cookie(response):
     """Cover direct run/report/dashboard entry, not just no-config redirects."""
     values = request.view_args or {}
-    if (request.method == 'GET' and response.status_code == 200
+    if (not getattr(g, 'skip_page_query_cookie', False)
+            and request.method == 'GET' and response.status_code == 200
             and response.mimetype == 'text/html' and values.get('runid') and values.get('config')):
         return set_query_cookie(response, values['runid'], values['config'])
     return response

@@ -2,6 +2,12 @@
 
 Canonical WEPP build/version history for `wepp-forest`.
 
+WEPPcloud has deprecated `latest` in WEPP Exec. It is pinned to `wepp_dcc52a6`
+and remains supported for projects saved with that setting. The version picker
+offers explicit versions for new selections. The pin stays fixed because changing
+the executable behind a saved setting can change rerun results and obscure which
+model build produced them. Select `wepp_dcc52a6` to rerun with the same executable.
+
 Required maintenance rule:
 - update this file whenever a new build or rebuild is made (including new
   release-tagged binaries and version-affecting commits).
@@ -18,6 +24,9 @@ burned-event peak/sediment consequences remain disclosed; see the release notes.
 
 | Date | Commit Hash | Compiler | Version | Notes |
 | --- | --- | --- | --- | --- |
+| 2026-11-21 | `d53f84e4e` | system GNU Fortran 13.3.0 | `wepp_261121` / `wepp_261121_hill` (Linux pair) | Watersheds support up to 50,000 hillslopes, 25,000 channels and 75,025 combined elements, including 25 impoundments. The hillslope limit warning now prints the configured maximum. Select `wepp_261121` in WEPP Exec for a watershed that requires the higher limits. |
+| 2026-11-18 | `f90ba43ed` native implementation | system GNU Fortran | 261118 candidate | Separate 23 input horizons from ten calculation layers; explicit excess rejection, national Puaulu fixture, paired capacity metadata. Native suite 1824 passed, reader 72 passed, both smokes and 31 watchlist cases passed. Daily/hourly paired watershed controls preserve output bytes; 21/23 horizon cases complete. No default promotion. |
+| 2026-11-05 | `e0abe0581` (unchanged revision-7 model source) | WinLibs GNU Fortran/GCC 13.3.0 UCRT | `wepp_261029.exe` / `wepp_261029_hill.exe`, revision 7 | Native Windows build on blarhg; system/UCRT imports only. Quick 130/130, expanded 347/347 and complete nine-year medium 3443/3443 output files match the accepted Linux pair after CRLF normalization only; 491 independently regenerated hillslopes and 211 channels. Linux 1752 tests, both smokes, 31 watchlist, artifact policy and ELF gates pass. Windows capacities remain 4500 hillslopes/1500 channels/6000 elements, hill 32 OFEs; no source or default change. Vendored/registered in wepppy-win-bootstrap (`7922280`); native bootstrap exports 1461 finite daily CSV rows, with 21 native packaging tests passing. [Windows release validation](docs/windows-release-261029.md). |
 | 2026-11-05 | Documentation only; artifact source `e0abe0581` | No rebuild | `wepp_261029` consolidated report, edition 1 | Owner-approved single 21-page stakeholder report with eight figures covering revisions 1–7; maps all 64 changed native paths. Detailed Cedar sediment-delivery account: +187.456% in revision 2, recovered incoming transport at erroneous channel sinks, opposing source amplification, and bounded attribution. Historical evidence is distinguished from current revision-7 validation. [Consolidated release report (PDF)](/weppcloud/static/reports/wepp/release-notes/wepp_261029/wepp_261029_release-notes-consolidated-ed1.pdf) and [publication manifest](/weppcloud/static/reports/wepp/release-notes/wepp_261029/publication-manifest-consolidated-ed1.json). Approved for WEPPpy publication; no binary change, default switch or deployment. |
 | 2026-11-03 | `e0abe0581` | system GNU Fortran 13.3.0 | `wepp_261029` revision 7 (Linux pair) | Reference-preserving 9005/RAP consumer port; seven-field/single-restrictive-record reads, specialized hydraulics/growth and strict cover calendar. 1750 native tests, 31 watchlist, controls/observer parity and complete configured 72-hill workflow pass. [Revision 7](docs/release-notes/wepp_261029/REVISION-7.md) discloses inherited graphics-age overflow and reference scientific limits. Capacity includes unchanged; no deployment/default switch. |
 | 2026-11-02 | `b581352b6`; revision6 | system gfortran | 261029 r6 | Per-layer/per-OFE FC/HK ownership in daily/hourly balance, PURK, PERC and DRAIN; formulas and timing preserved. PMET selected-source capacity/index conformance verified. Four reproduced wrong-owner controls; 26 focused probes, native1416, watchlist31, exact observer/control parity, actual producer/runner transitions and copied-project report readback pass; matched pair locally vendored. 9005/RAP consumer support remains separate HOLD; no deployment/default change. |
@@ -76,6 +85,7 @@ burned-event peak/sediment consequences remain disclosed; see the release notes.
 | 09/15/2025 | `08e8872` | `ifx` | `wepp_250915` | IFX 50k makefile and release refresh (`wepp_250915`). |
 | 08/08/2025 | `f63fcf5` | `ifort` | `wepp_50k` | `wepp_50k` revision. |
 | 08/05/2025 | `f48e495` | `ifort` | `wepp_50k` | Initial `wepp_50k` release commit. |
+| 07/02/2025 | `dcc52a6` | `ifort` 2021.9.0 | `wepp_dcc52a6` / `wepp_dcc52a6_hill` | Updated the topsoil saturation fraction reported in `soil.dat` to use porosity without the `cpm` adjustment in both daily and hourly water balances. This Linux build pair serves as the legacy reference for reproducing historical results. |
 | 03/12/2025 | `a557997` | `ifort` | `-` | Watershed pass-file parsing updated for longer first-table hillslope filenames. |
 | 03/12/2025 | `726fbd5` | `ifort` | `-` | Increased WEPP pass-file name size. |
 | 03/11/2025 | `bcf2ac5` | `ifort` | `-` | Updated `cwshed.inc` release content. |

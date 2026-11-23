@@ -76,7 +76,8 @@ def test_run_watershed_logs_startup_context_and_binary_identity(monkeypatch, tmp
     binary_path = tmp_path / "fake_wepp_watershed"
     binary_bytes = b"fake watershed binary\n"
     expected_sha = hashlib.sha256(binary_bytes).hexdigest()
-    run_path.write_text("watershed run\n", encoding="ascii")
+    run_path.write_text("pw0.sol\n", encoding="ascii")
+    (tmp_path / "pw0.sol").write_text("7778\ncomment\n1 0\n'profile' 'loam' 1 .2 .75 400000 .00008 2\n400 1.3 36 2 .3 .1 40 20 2 15 5\n1 10000 .01\n", encoding="ascii")
     binary_path.write_bytes(binary_bytes)
     published = []
 
@@ -130,7 +131,8 @@ def test_run_hillslope_logs_binary_identity_fields(monkeypatch, tmp_path):
     binary_path = tmp_path / "fake_wepp"
     binary_bytes = b"fake wepp binary\n"
     expected_sha = hashlib.sha256(binary_bytes).hexdigest()
-    run_path.write_text("hillslope run\n", encoding="ascii")
+    run_path.write_text(f"p{wepp_id}.sol\n", encoding="ascii")
+    (tmp_path / f"p{wepp_id}.sol").write_text("7778\ncomment\n1 0\n'profile' 'loam' 1 .2 .75 400000 .00008 2\n400 1.3 36 2 .3 .1 40 20 2 15 5\n1 10000 .01\n", encoding="ascii")
     binary_path.write_bytes(binary_bytes)
 
     monkeypatch.setattr(
@@ -288,7 +290,8 @@ def test_start_dstate_watchdog_noops_when_disabled_or_pid_missing(monkeypatch, t
 def test_run_watershed_logs_stale_handle_close_diagnostics(monkeypatch, tmp_path, capsys):
     run_path = tmp_path / "pw0.run"
     err_path = tmp_path / "pw0.err"
-    run_path.write_text("watershed run\n", encoding="ascii")
+    run_path.write_text("pw0.sol\n", encoding="ascii")
+    (tmp_path / "pw0.sol").write_text("7778\ncomment\n1 0\n'profile' 'loam' 1 .2 .75 400000 .00008 2\n400 1.3 36 2 .3 .1 40 20 2 15 5\n1 10000 .01\n", encoding="ascii")
     real_open = builtins.open
 
     class _CloseFailLog:
@@ -342,7 +345,8 @@ def test_run_watershed_preserves_primary_exception_when_close_also_fails(
 ):
     run_path = tmp_path / "pw0.run"
     err_path = tmp_path / "pw0.err"
-    run_path.write_text("watershed run\n", encoding="ascii")
+    run_path.write_text("pw0.sol\n", encoding="ascii")
+    (tmp_path / "pw0.sol").write_text("7778\ncomment\n1 0\n'profile' 'loam' 1 .2 .75 400000 .00008 2\n400 1.3 36 2 .3 .1 40 20 2 15 5\n1 10000 .01\n", encoding="ascii")
     real_open = builtins.open
 
     class _CloseFailLog:

@@ -50,7 +50,7 @@
 
 {% set selected_dataset = ns.selected_dataset %}
 {% set selected_catalog_id = ns.selected or '' %}
-{% set selected_mode = climate.climate_mode.value %}
+{% set selected_mode = 12 if selected_catalog_id == 'user_defined_cli' else climate.climate_mode.value %}
 {% set selected_station_mode = climate.climatestation_mode.value %}
 {% set spatial_mode = climate.climate_spatialmode.value %}
 {% set is_tenerife_station_catalog = climate.uses_tenerife_station_catalog %}
@@ -85,16 +85,6 @@
 
   <input type="hidden" id="climate_catalog_id" name="climate_catalog_id" value="{{ selected_catalog_id }}" data-climate-field="catalog-id">
   <input type="hidden" id="climate_mode" name="climate_mode" value="{{ selected_mode }}" data-climate-field="mode">
-
-  {% if climate.is_single_storm %}
-  <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
-    <p class="wc-alert__body">
-      <strong>Single-storm climates are deprecated and unsupported.</strong>
-      This run will not execute. Choose a continuous climate dataset instead.
-      For event-scale analysis, use the Storm Event Analyzer.
-    </p>
-  </div>
-  {% endif %}
 
   <section class="wc-stack" id="climate_dataset_section" data-climate-element="dataset">
     {# Build grouped options structure #}
@@ -431,13 +421,13 @@
         class="wc-field__control file disable-readonly">
     </div>
     {% set current_cli_fn = climate.cli_fn or climate.orig_cli_fn %}
-    {% if selected_catalog_id == 'user_defined_cli' and current_cli_fn %}
-      {% set current_cli_display %}<code>{{ current_cli_fn.rsplit('/', 1)[-1] }}</code>{% endset %}
+    <div data-climate-current-cli{% if selected_catalog_id != 'user_defined_cli' or not current_cli_fn %} hidden{% endif %}>
+      {% set current_cli_display %}<code>{{ current_cli_fn.rsplit('/', 1)[-1] if current_cli_fn else '' }}</code>{% endset %}
       {{ ui.text_display(
            label="Current CLI file",
            content=current_cli_display
       ) }}
-    {% endif %}
+    </div>
     <div class="wc-field">
       {% call button_row() %}
         <button

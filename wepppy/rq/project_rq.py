@@ -15,7 +15,6 @@ import base64
 import copy
 from contextlib import ExitStack, contextmanager
 import fcntl
-import hashlib
 import inspect
 import logging
 import json
@@ -38,7 +37,7 @@ import redis
 from rq import Queue, get_current_job
 from rq.exceptions import InvalidJobOperation, NoSuchJobError
 from rq.job import Dependency, Job, JobStatus
-from rq.registry import DeferredJobRegistry, StartedJobRegistry
+from rq.registry import DeferredJobRegistry
 from redis.exceptions import WatchError
 from wepppy.microservices.vector_retention_lifecycle import retained_tree_operation
 from wepppy.microservices.vector_upload_normalization import RetentionActor
@@ -48,6 +47,8 @@ from wepppy.config.redis_settings import (
     redis_connection_kwargs,
     redis_host,
 )
+from wepppy.rq.climate_upload_attempt import ClimateUploadAttempt, validate_cli_basename
+from wepppy.rq.landuse_upload_attempt import LanduseUploadAttempt, apply_landuse_upload
 from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.job_dependencies import release_deferred_job_if_ready
 from wepppy.rq.submission_recovery import RqEnqueueVerificationError
@@ -76,6 +77,7 @@ from wepppy.nodb.core import (
     WatershedCentroidStateError,
     Wepp,
 )
+from wepppy.nodb.core.channel_boundary import ChannelBoundaryError
 from wepppy.nodb.core.climate import ClimateMultipleBuildSupersededError
 from wepppy.nodb.core.watershed_errors import (
     WATERSHED_BOUNDARY_TOUCH_MESSAGE,
@@ -98,7 +100,7 @@ from wepppy.nodb.mods.rusle import Rusle
 from wepppy.nodb.mods.treatments import Treatments
 from wepppy.nodb.project_config_update import project_config_lifecycle_guard
 
-from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.redis_prep import RedisPrep, RedisPrepSnapshotError, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.wepp.interchange import run_totalwatsed3
 from wepppy.io_wait import wait_for_path, wait_for_paths
@@ -106,6 +108,22 @@ from wepppy.rq.exception_logging import with_exception_logging
 from . import project_rq_archive as _archive_helpers
 from . import project_rq_delete as _delete_helpers
 from . import project_rq_fork as _fork_helpers
+from .project_rq_subcatchment_state import (
+    _WBT_ADMISSION_BUILD_KEY,
+    _WBT_ADMISSION_FINGERPRINT_KEY,
+    _WBT_ADMISSION_PREVIOUS_KEY,
+    _WBT_ADMISSION_RECEIPT_KEY,
+    _WBT_ADMISSION_ROOT_KEY,
+    _WBT_BUILD_LINK_KEY,
+    _WBT_RECEIPT_LINK_KEY,
+    _active_job_has_execution_location,
+    _active_job_location_keys,
+    _decode_redis_text,
+    _fetch_job_or_none,
+    _is_terminal_job,
+    _load_exact_subcatchment_tree,
+    _subcatchment_admission_fingerprint,
+)
 from .wepp_rq import run_wepp_rq
 
 _hostname = socket.gethostname()
@@ -133,13 +151,6 @@ WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE = (
 )
 WBT_SUBCATCHMENT_TREE_LOCK_TTL_SECONDS = TIMEOUT + 300
 WBT_SUBCATCHMENT_ADMISSION_RETRY_ATTEMPTS = 5
-_WBT_BUILD_LINK_KEY = "jobs:0,func:build_subcatchments_rq"
-_WBT_RECEIPT_LINK_KEY = "jobs:1,func:abstract_watershed_rq"
-_WBT_ADMISSION_FINGERPRINT_KEY = "wbt_subcatchment_admission_fingerprint"
-_WBT_ADMISSION_ROOT_KEY = "wbt_subcatchment_admission_root"
-_WBT_ADMISSION_BUILD_KEY = "wbt_subcatchment_admission_build"
-_WBT_ADMISSION_RECEIPT_KEY = "wbt_subcatchment_admission_receipt"
-_WBT_ADMISSION_PREVIOUS_KEY = "wbt_subcatchment_admission_previous"
 _COMPARE_AND_DELETE_TAIL_SCRIPT = """
 local current = redis.call('GET', KEYS[1])
 if current == ARGV[1] then
@@ -363,286 +374,6 @@ def _validate_optional_wbt_policy(
 
 def _subcatchment_tail_key(runid: str) -> str:
     return f"rq:subcatchment-mutation-tail:{runid}"
-
-
-def _decode_redis_text(value: Any) -> str | None:
-    if value is None:
-        return None
-    if isinstance(value, bytes):
-        return value.decode("utf-8")
-    return str(value)
-
-
-def _subcatchment_admission_fingerprint(
-    *,
-    parent_job_id: str,
-    queue_name: str,
-    runid: str,
-    updates: dict[str, Any],
-    boundary_policy: dict[str, Any] | None,
-) -> str:
-    payload = {
-        "boundary_policy": boundary_policy,
-        "parent_job_id": parent_job_id,
-        "queue_name": queue_name,
-        "runid": runid,
-        "updates": updates,
-    }
-    encoded = json.dumps(
-        payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
-
-
-def _fetch_job_or_none(job_id: str | None, redis_conn) -> Job | None:
-    if not job_id:
-        return None
-    try:
-        return Job.fetch(job_id, connection=redis_conn)
-    except NoSuchJobError:
-        return None
-
-
-def _is_terminal_job(job: Job) -> bool:
-    return job.get_status(refresh=True) in {
-        JobStatus.CANCELED,
-        JobStatus.FAILED,
-        JobStatus.FINISHED,
-        JobStatus.STOPPED,
-    }
-
-
-def _stored_dependency_ids(job: Job) -> set[str]:
-    return {
-        decoded
-        for raw in job.connection.smembers(job.dependencies_key)
-        if (decoded := _decode_redis_text(raw)) is not None
-    }
-
-
-def _active_job_has_execution_location(job: Job) -> bool:
-    origin = getattr(job, "origin", None)
-    if not isinstance(origin, str) or not origin:
-        return False
-    status = job.get_status(refresh=True)
-    if status == JobStatus.QUEUED:
-        queue = Queue(
-            origin,
-            connection=job.connection,
-            job_class=job.__class__,
-        )
-        intermediate_ids = {
-            decoded
-            for raw in job.connection.lrange(
-                queue.intermediate_queue_key,
-                0,
-                -1,
-            )
-            if (decoded := _decode_redis_text(raw)) is not None
-        }
-        return job.id in queue.get_job_ids() or job.id in intermediate_ids
-    if status == JobStatus.DEFERRED:
-        return job.id in DeferredJobRegistry(
-            origin,
-            connection=job.connection,
-            job_class=job.__class__,
-        ).get_job_ids()
-    if status == JobStatus.STARTED:
-        return job.id in StartedJobRegistry(
-            origin,
-            connection=job.connection,
-            job_class=job.__class__,
-        ).get_job_ids()
-    return False
-
-
-def _active_job_location_keys(job: Job) -> tuple[str, ...]:
-    origin = getattr(job, "origin", None)
-    if not isinstance(origin, str) or not origin:
-        return ()
-    status = job.get_status(refresh=False)
-    if status == JobStatus.QUEUED:
-        queue = Queue(
-            origin,
-            connection=job.connection,
-            job_class=job.__class__,
-        )
-        return (queue.key, queue.intermediate_queue_key)
-    if status == JobStatus.DEFERRED:
-        return (
-            DeferredJobRegistry(
-                origin,
-                connection=job.connection,
-                job_class=job.__class__,
-            ).key,
-        )
-    if status == JobStatus.STARTED:
-        return (
-            StartedJobRegistry(
-                origin,
-                connection=job.connection,
-                job_class=job.__class__,
-            ).key,
-        )
-    return ()
-
-
-def _load_exact_subcatchment_tree(
-    redis_conn,
-    queue: Queue,
-    *,
-    parent_job: Job,
-    fingerprint: str,
-    tail_key: str,
-    require_current_tail: bool,
-) -> tuple[Job, Job] | None:
-    """Return an already committed tree only when all bounded links agree."""
-    build_id = parent_job.meta.get(_WBT_BUILD_LINK_KEY)
-    receipt_id = parent_job.meta.get(_WBT_RECEIPT_LINK_KEY)
-    stored_fingerprint = parent_job.meta.get(_WBT_ADMISSION_FINGERPRINT_KEY)
-    if build_id is None and receipt_id is None and stored_fingerprint is None:
-        return None
-    if not (
-        isinstance(build_id, str)
-        and isinstance(receipt_id, str)
-        and stored_fingerprint == fingerprint
-    ):
-        raise RuntimeError(
-            "WBT subcatchment root contains an incomplete or mismatched "
-            "admission tree."
-        )
-
-    build = _fetch_job_or_none(build_id, redis_conn)
-    receipt = _fetch_job_or_none(receipt_id, redis_conn)
-    if build is None or receipt is None:
-        raise RuntimeError(
-            "WBT subcatchment root references a missing admission job."
-        )
-
-    expected_common = {
-        _WBT_ADMISSION_FINGERPRINT_KEY: fingerprint,
-        _WBT_ADMISSION_ROOT_KEY: parent_job.id,
-    }
-    if any(build.meta.get(key) != value for key, value in expected_common.items()):
-        raise RuntimeError("WBT subcatchment build linkage does not match its root.")
-    if any(receipt.meta.get(key) != value for key, value in expected_common.items()):
-        raise RuntimeError("WBT subcatchment receipt linkage does not match its root.")
-    if build.meta.get(_WBT_ADMISSION_RECEIPT_KEY) != receipt.id:
-        raise RuntimeError("WBT subcatchment build does not link to its receipt.")
-    if receipt.meta.get(_WBT_ADMISSION_BUILD_KEY) != build.id:
-        raise RuntimeError("WBT subcatchment receipt does not link to its build.")
-    if receipt.meta.get("wbt_completion_receipt_for") != build.id:
-        raise RuntimeError("WBT completion receipt identifies the wrong build.")
-
-    deferred_ids = set(
-        DeferredJobRegistry(
-            queue.name,
-            connection=redis_conn,
-            job_class=queue.job_class,
-            serializer=queue.serializer,
-        ).get_job_ids()
-    )
-    queued_ids = set(queue.get_job_ids())
-    intermediate_ids = {
-        decoded
-        for raw in redis_conn.lrange(queue.intermediate_queue_key, 0, -1)
-        if (decoded := _decode_redis_text(raw)) is not None
-    }
-    started_ids = set(
-        StartedJobRegistry(
-            queue.name,
-            connection=redis_conn,
-            job_class=queue.job_class,
-            serializer=queue.serializer,
-        ).get_job_ids()
-    )
-
-    receipt_dependencies = _stored_dependency_ids(receipt)
-    receipt_status = receipt.get_status(refresh=True)
-    if receipt_status == JobStatus.DEFERRED:
-        if receipt_dependencies != {build.id}:
-            raise RuntimeError("WBT completion receipt dependency is incomplete.")
-        if receipt.id not in deferred_ids or receipt.id not in build.dependent_ids:
-            raise RuntimeError(
-                "WBT completion receipt registry linkage is incomplete."
-            )
-    elif (
-        receipt_status == JobStatus.QUEUED
-        and receipt.id not in queued_ids
-        and receipt.id not in intermediate_ids
-    ):
-        raise RuntimeError("WBT completion receipt is absent from its queue.")
-    elif receipt_status == JobStatus.STARTED and receipt.id not in started_ids:
-        raise RuntimeError("WBT completion receipt is absent from its started registry.")
-    elif receipt_status not in {
-        JobStatus.QUEUED,
-        JobStatus.STARTED,
-        JobStatus.CANCELED,
-        JobStatus.FAILED,
-        JobStatus.FINISHED,
-        JobStatus.STOPPED,
-    }:
-        raise RuntimeError("WBT completion receipt has an unsupported status.")
-    if receipt_status != JobStatus.DEFERRED:
-        if receipt_dependencies not in (set(), {build.id}):
-            raise RuntimeError(
-                "WBT completion receipt has an unexpected dependency."
-            )
-        if receipt.id in build.dependent_ids:
-            raise RuntimeError(
-                "WBT build retains a stale completion-receipt link."
-            )
-
-    previous_id = build.meta.get(_WBT_ADMISSION_PREVIOUS_KEY)
-    build_dependencies = _stored_dependency_ids(build)
-    build_status = build.get_status(refresh=True)
-    if previous_id is None:
-        if build_dependencies:
-            raise RuntimeError("WBT build has an unexpected prior dependency.")
-    elif build_status == JobStatus.DEFERRED:
-        if build_dependencies != {previous_id}:
-            raise RuntimeError("WBT build prior dependency is incomplete.")
-        previous = _fetch_job_or_none(previous_id, redis_conn)
-        if previous is None or build.id not in previous.dependent_ids:
-            raise RuntimeError("WBT build reverse dependency is incomplete.")
-    elif build_status not in {
-        JobStatus.QUEUED,
-        JobStatus.STARTED,
-        JobStatus.CANCELED,
-        JobStatus.FAILED,
-        JobStatus.FINISHED,
-        JobStatus.STOPPED,
-    }:
-        raise RuntimeError("WBT build has an unsupported status.")
-    if build_status != JobStatus.DEFERRED:
-        expected_build_dependencies = set() if previous_id is None else {previous_id}
-        if build_dependencies not in (set(), expected_build_dependencies):
-            raise RuntimeError("WBT build has an unexpected prior dependency.")
-        if previous_id is not None:
-            previous = _fetch_job_or_none(previous_id, redis_conn)
-            if previous is not None and build.id in previous.dependent_ids:
-                raise RuntimeError(
-                    "WBT prior build retains a stale dependent link."
-                )
-    if build_status == JobStatus.DEFERRED and build.id not in deferred_ids:
-        raise RuntimeError("WBT build is absent from its deferred registry.")
-    if (
-        build_status == JobStatus.QUEUED
-        and build.id not in queued_ids
-        and build.id not in intermediate_ids
-    ):
-        raise RuntimeError("WBT build is absent from its queue.")
-    if build_status == JobStatus.STARTED and build.id not in started_ids:
-        raise RuntimeError("WBT build is absent from its started registry.")
-
-    if require_current_tail:
-        current_tail = _decode_redis_text(redis_conn.get(tail_key))
-        if current_tail != build.id:
-            raise RuntimeError("WBT admission tail does not identify the exact tree.")
-    return build, receipt
 
 
 def _register_deferred_job(job: Job, pipeline) -> None:
@@ -1518,6 +1249,15 @@ def build_channels_rq(
         
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.build_channels)
+    except ChannelBoundaryError as exc:
+        error_id = uuid.uuid4().hex
+        job.meta["error"] = {"code": exc.code, "message": str(exc), "details": {}}
+        job.meta["error_id"] = error_id
+        job.meta.pop("exc_string", None)
+        job.save_meta()
+        _logger.warning("Channel extent rejected [error_id=%s runid=%s code=%s]", error_id, runid, exc.code)
+        StatusMessenger.publish(status_channel, f"rq:{job.id} FAILED {func_name}({runid}) {exc}")
+        raise
     except WbtUnresolvedDepressionsError as exc:
         error_id = __import__("uuid").uuid4().hex
         job.meta["error"] = {
@@ -2089,11 +1829,15 @@ def build_rangeland_cover_rq(
 
 
 @with_exception_logging
-def build_landuse_rq(runid: str) -> None:
+def build_landuse_rq(
+    runid: str, *, uploaded_filename: str | None = None, upload_receipt_sha256: str | None = None,
+) -> None:
     """Construct landuse layers for the watershed.
 
     Args:
         runid: Identifier used to locate the working directory.
+        uploaded_filename: Sanitized source name for a staged upload.
+        upload_receipt_sha256: Bound digest of the accepted upload's receipt.
 
     Raises:
         Exception: Propagates errors from landuse controller build routines.
@@ -2111,7 +1855,37 @@ def build_landuse_rq(runid: str) -> None:
 
         def _build_landuse() -> None:
             clear_nodb_file_cache(runid, pup_relpath="landuse.nodb")
-            Landuse.getInstance(wd).build()
+            landuse = Landuse.getInstance(wd)
+            if uploaded_filename is None:
+                landuse.build()
+                return
+
+            def apply_and_build() -> None:
+                prep = RedisPrep.getInstance(wd)
+                if prep.get_rq_job_id("build_landuse_rq") != job_id:
+                    raise ValueError("A newer land-use operation superseded this upload.")
+                attempt = LanduseUploadAttempt(Path(wd), runid, job_id, uploaded_filename)
+                applied = None
+                if upload_receipt_sha256 and getattr(landuse, "_user_defined_upload_receipt", None) == upload_receipt_sha256:
+                    applied = landuse.user_defined_raster_destination()
+                with attempt.snapshot(upload_receipt_sha256, applied=applied) as snapshot:
+                    def invalidate_build():
+                        prep.update_metadata(remove=(
+                            f"timestamps:{TaskEnum.build_landuse}", f"timestamps:{TaskEnum.run_geneva}",
+                        ))
+
+                    apply_landuse_upload(
+                        landuse, snapshot, uploaded_filename, upload_receipt_sha256, invalidate_build,
+                    )
+                    landuse.build()
+                try:
+                    attempt.remove_completed_rasters()
+                except OSError:
+                    landuse.logger.warning("Could not remove completed land-use staging rasters", exc_info=True)
+
+            _run_with_directory_root_lock(
+                wd, "watershed", apply_and_build, purpose="build-uploaded-landuse-rq",
+            )
 
         _run_with_directory_root_lock(
             wd,
@@ -2344,7 +2118,12 @@ def build_treatments_rq(runid: str) -> None:
 
 
 @with_exception_logging
-def build_soils_rq(runid: str) -> None:
+def build_soils_rq(
+    runid: str,
+    *,
+    admitted_soil_mode: int | None = None,
+    esdac_subsoil_defaults: dict[str, float] | None = None,
+) -> None:
     """Build soil layers for the watershed.
 
     Args:
@@ -2362,7 +2141,14 @@ def build_soils_rq(runid: str) -> None:
 
         def _build_soils() -> None:
             clear_nodb_file_cache(runid, pup_relpath="soils.nodb")
-            Soils.getInstance(wd).build()
+            soils = Soils.getInstance(wd)
+            if admitted_soil_mode is None and esdac_subsoil_defaults is None:
+                soils.build()
+            else:
+                soils.build(
+                    admitted_soil_mode=admitted_soil_mode,
+                    esdac_subsoil_defaults=esdac_subsoil_defaults,
+                )
 
         _run_with_directory_root_lock(
             wd,
@@ -2455,7 +2241,7 @@ def build_climate_rq(runid: str) -> None:
 
 
 @with_exception_logging
-def upload_cli_rq(runid: str, cli_filename: str) -> None:
+def upload_cli_rq(runid: str, cli_filename: str, *, staged: bool = False) -> None:
     """Apply a user-uploaded CLI file to the run climate state."""
     try:
         job = get_current_job()
@@ -2464,8 +2250,51 @@ def upload_cli_rq(runid: str, cli_filename: str) -> None:
         status_channel = f'{runid}:climate'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         def _set_user_defined_cli() -> None:
+            validate_cli_basename(cli_filename)
+            prep = RedisPrep.getInstance(wd)
             clear_nodb_file_cache(runid, pup_relpath="climate.nodb")
-            Climate.getInstance(wd).set_user_defined_cli(cli_filename)
+            climate = Climate.getInstance(wd)
+            climate_dir = Path(climate.cli_dir)
+            if climate_dir.is_symlink() or not climate_dir.resolve().is_relative_to(Path(wd).resolve()):
+                raise ValueError("Expected a contained Climate directory")
+            if not staged:
+                source = climate_dir / cli_filename
+                if source.is_symlink() or not source.is_file():
+                    raise ValueError("The uploaded climate is missing or invalid.")
+                climate.set_user_defined_cli(cli_filename)
+                prep.timestamp(TaskEnum.build_climate)
+                return
+
+            attempt = ClimateUploadAttempt(Path(wd), runid, job.id, cli_filename)
+            receipt = attempt.read_receipt()
+            if receipt["state"] == "applied":
+                return
+            if (prep.get_rq_job_id("upload_cli_rq") != job.id
+                    or prep.get_rq_job_id("build_climate_rq") != receipt["build_job_id"]):
+                raise ValueError("A newer Climate operation superseded this upload.")
+            digest = receipt["sha256"]
+            build_job_id = receipt["build_job_id"]
+            completed = False
+            try:
+                with attempt.snapshot(digest) as source:
+                    climate.set_user_defined_cli(cli_filename, staged_path=source)
+                    completed = True
+            finally:
+                # Cleanup and telemetry follow the applied artifact.
+                try:
+                    attempt.record("applied" if completed else "failed", digest, build_job_id)
+                    if completed:
+                        attempt.remove_consumed_source(digest)
+                except (OSError, ValueError):
+                    logging.getLogger(__name__).warning(
+                        "Could not update climate upload evidence",
+                        extra={"runid": runid, "job_id": job.id},
+                        exc_info=True,
+                    )
+            try:
+                prep.timestamp(TaskEnum.build_climate)
+            except (OSError, redis.RedisError, RedisPrepSnapshotError):
+                logging.getLogger(__name__).warning("Could not timestamp applied climate upload", exc_info=True)
 
         _run_with_directory_root_lock(
             wd,
@@ -2473,11 +2302,11 @@ def upload_cli_rq(runid: str, cli_filename: str) -> None:
             _set_user_defined_cli,
             purpose="upload-cli-rq",
         )
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   climate CLIMATE_BUILD_TASK_COMPLETED')
-
-        prep = RedisPrep.getInstance(wd)
-        prep.timestamp(TaskEnum.build_climate)
+        try:
+            StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   climate CLIMATE_BUILD_TASK_COMPLETED')
+        except redis.RedisError:
+            logging.getLogger(__name__).warning("Could not publish climate upload completion", exc_info=True)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:941", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

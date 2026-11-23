@@ -5,6 +5,7 @@ from typing import Iterable
 from wepppy.nodb.core import Climate
 
 SINGLE_STORM_DEPRECATED_MESSAGE: str
+SINGLE_STORM_BATCH_UNAVAILABLE_MESSAGE: str
 NODIR_RECOVERY_ROOTS: tuple[str, ...]
 
 
@@ -15,7 +16,7 @@ def recover_mixed_nodir_roots(
 ) -> tuple[str, ...]: ...
 
 
-def assert_supported_climate(climate: Climate) -> None: ...
+def check_execution_climate(climate: Climate, *, prepared_inputs: bool = ...) -> None: ...
 
 
 def with_stage_read_projections(

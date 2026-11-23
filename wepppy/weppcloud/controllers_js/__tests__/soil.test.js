@@ -102,6 +102,41 @@ describe("Soil controller", () => {
         document.body.innerHTML = "";
     });
 
+    test("keeps the accepted warning when a soil submission is rejected", async () => {
+        const form = document.getElementById("soil_form");
+        form.insertAdjacentHTML("beforeend", '<fieldset id="soil_esdac_subsoil_defaults"></fieldset>');
+        const warning = document.getElementById("info");
+        warning.textContent = "Subsoil defaults applied";
+        baseInstance.reset_panel_state.mockImplementationOnce(() => {
+            warning.replaceChildren();
+        });
+        postFormMock.mockRejectedValueOnce(new Error("Already building soil."));
+        soil.build();
+        await Promise.resolve();
+        expect(warning.textContent).toBe("Subsoil defaults applied");
+    });
+
+    test("only submits ESDAC defaults for gridded soil", async () => {
+        const form = document.getElementById("soil_form");
+        form.insertAdjacentHTML("beforeend", `
+            <fieldset id="soil_esdac_subsoil_defaults">
+                <input name="esdac_subsoil_bulk_density" value="1.4">
+            </fieldset>
+        `);
+
+        soil.restore(2);
+        soil.build();
+        await Promise.resolve();
+        expect(postFormMock.mock.calls.at(-1)[1].body.has("esdac_subsoil_bulk_density")).toBe(false);
+        expect(form.querySelector("#soil_esdac_subsoil_defaults").hidden).toBe(true);
+
+        soil.restore(0);
+        soil.build();
+        await Promise.resolve();
+        expect(postFormMock.mock.calls.at(-1)[1].body.get("esdac_subsoil_bulk_density")).toBe("1.4");
+        expect(form.querySelector("#soil_esdac_subsoil_defaults").hidden).toBe(false);
+    });
+
     test("build posts serialized form data and records job id", async () => {
         const pollCompletionValues = [];
         baseInstance.set_rq_job_id.mockImplementationOnce((self) => {

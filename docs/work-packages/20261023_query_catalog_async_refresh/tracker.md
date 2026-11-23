@@ -1,6 +1,66 @@
 # Query catalog refresh tracker
 
-## Status
+The [shared asset declarations work package](../20261122_shared_project_asset_declarations/package.md) now owns the contract, implementation plan and actual-project comparison. Fleet-capacity acceptance stays in this package.
+
+## November 22 shared declarations decision
+
+Use one producer-owned asset definition across writers, Feature Export and the query engine. Retain consumer-specific layer and catalog semantics. Start with a fixed watershed dataset and a scope-dependent loss table; compare both consumers before changing live discovery. [Shared declaration plan](prompts/active/implementation_execplan.md#shared-project-asset-declarations)
+
+## November 22 declared asset and writer audit
+
+The read-only audit covered 1,066 tracked Python files and 181 production catalogs, including all 156 contrast and ten scenario child catalogs under the three selected parents. The reviewed naming rules accounted for every observed Parquet key, including intermediate files whose public visibility is undecided. Parent-qualified visibility differed across all three projects. Proceed to a scope-aware shadow comparison before changing catalog membership. [Evidence, writer inventory and maintenance recommendation](artifacts/declared_asset_audit/findings.md)
+
+## November 22 Rocket refresh phases and completion hints
+
+Two matched NFS fixtures reproduced the asset mix of a climate-heavy run. The replay used the earlier eight production ticks and verified all eleven eligible publications on wepp2. At the same 200-visit budget, two completion hints per tick yielded 23 modeled cursor exits versus 14 observed FIFO exits. Two otherwise observed clearances slipped past the replay window. Production worker and scheduler configuration stayed in place. Fleet-capacity acceptance remains open. [Phase timings, peer validation and replay results](artifacts/rocket_refresh_phases_and_completion_replay.md)
+
+## November 22 reconciliation visit experiment
+
+From 16:41:03 to 16:45:03 UTC on Rocket, eight consecutive production scheduler ticks made 200 visits. **186 visits (93%) sent the locator to the back of the list.** The pending count fell from 4,878 to 4,864. Worker records independently showed 11 successful refresh jobs during those four minutes. This was the reconciliation tail of the November 21 cycle.
+
+| Measurement | Observed result |
+| --- | --- |
+| First visits and confirmations | All 200 visited cycle entries had already passed their initial reconciliation step. Fourteen left the cursor. Immediate follow-up reads covered seven of those exits. All seven scopes existed, were managed and writable, and had no pending receipt. The other seven exits were visible only in the cursor. |
+| Admission | The scheduler reported 11 visits returning a job ID, zero owner-cap deferrals and zero errors. Among 186 retained visits, 175 returned no job ID. The release lacks per-visit reason codes in its checkpoint, so the split among global capacity, contention, backoff and other outcomes is unknown. |
+| Actual worker throughput | Across the two default-worker hosts, log identities and retained RQ timestamps showed 10 refresh enqueues and 11 successful finishes inside the wall-clock window. A tick can return an existing job ID and can enqueue after its recorded start time. Cursor exits, enqueue timestamps and job finishes each measure different events. |
+| Permit occupancy | In the overlapping 43 four-second samples, six jobs stayed started throughout. The seventh permit was occupied in 15 samples and available in 28. Each sampled default queue was empty and each reservation had a known execution state. |
+| Slow workers | Three persistent jobs belonged to `wc1:runs`. At 16:43 UTC two had been running for about 45 minutes and one for 21 minutes. Their worker child processes were in `rpc_wait_bit_killable` on all 15 observations across wepp1 and wepp2. Each used 0.68–0.78 CPU seconds over 12 seconds. A separate 80-success sample from roughly the preceding half hour had median runtime 8.3 s and maximum 1,314 s. Ongoing jobs are excluded from that duration sample. |
+
+**What the measurements explain.** The scheduler maintained its 30 s cadence. After a visit at this queue depth, about 4,850 older entries still stand ahead of a requeued locator. At 25 visits per tick, another turn takes roughly 97 minutes under the observed FIFO ordering. A worker can publish promptly and its cursor entry can still wait that long for confirmation. Independently, three long-lived run jobs occupied permits while repeatedly waiting on RPC. The per-client `/wc1` mount counters also advanced during this window, but those counters include ordinary workloads and cannot attribute a specific operation or server bottleneck to a catalog job.
+
+**Next discriminating test.** On a production NFS test project representative of the slow run scopes, time directory enumeration, metadata/schema reads and publication separately while recording the same worker CPU and RPC evidence. Match the input and cache conditions and verify the catalog digest, schema and query on the peer. For scheduler changes, use a read-only replay of worker-finish hints against FIFO at the same visit and permit budgets and measure finish-to-confirmation delay separately from receipt-to-publication delay. This window supports testing those mechanisms. Fleet-wide capacity and the effect of raising concurrency remain open.
+
+**Reproduction and evidence.** In the wepp1 worker, sample the small health key every two seconds. On each tick change, read the ordered cursor, health and stream length in one Redis transaction. Hash the lexical paths. For adjacent cursors verify identical cycle and stream acknowledgment, an empty stream, exactly the expected unvisited suffix at the front, and the surviving visited head in order at the tail. Join bounded `docker logs --timestamps` from both default-worker hosts to RQ job function and timestamps. Use the deployed admission predicate for permit occupancy. Sample `/proc` CPU counters and wait channels for same-PID worker children with the same live job binding. The raw job IDs, scripts and captures are private under `/home/workdir/query-catalog-studies/visits-uIh1OAiT`. The ordered snapshot SHA-256 is `5351ec202c624bad2e099312039833c015b9a53f8ca31abd3100e85861839337` and the RQ timing capture SHA-256 is `5430a53c3d3967b46f90d3e22bc7a89b068a3214e63b6d007731bf0db250f163`.
+
+## November 22 fleet-capacity acceptance
+
+**Failed for the natural cycle that started November 21 at 00:51:28 UTC.** At November 22 16:30:39 UTC it had run for 39 h 39 min with 4,928 cycle locators pending against a 24-hour target. The deadline had already passed before release `dfc1eaa74` activated. This observation establishes the production miss. A cycle wholly under the new owner cap and matched large-batch windows are still needed to assess the cap.
+
+| Production check | Evidence |
+| --- | --- |
+| Discovery | The matching discovery generation completed in 46 min 20 s after 53,880 directory visits and 181,380 entries. The retained set held 42,681 lexical locators, including possible aliases. Both frontier and stream were empty. |
+| Reconciliation | A single Redis transaction read the cursor, discovery and queue lengths. The cursor had no completion or cycle errors. Pending fell from 10,440 at 09:50:59 to 4,928 at 16:30:39, about 827 net locators/hour. This measures backlog change, including confirmation visits. |
+| Freshness | On wepp2, stable double reads of 24 distinct writable scopes found 74 pending receipts. At least 21 scopes had a current-incarnation receipt older than 24 h. The oldest observed was created November 6 at 09:25:03 UTC, at least 16.29 days before readback. Old receipts occurred in all four namespaces. |
+| Ordinary default queue | Six identifiable, finished non-catalog jobs enqueued and started after 08:42 UTC waited 0.040–0.134 s, below the 300 s threshold in this sample. The admission panel showed 12 compatible workers, 7 of 7 permits occupied, zero uncertain reservations and zero ordinary jobs waiting at the checkpoint. Whole-window maxima remain unknown. |
+| Published artifact | Three live wepp1 refreshes supplied paths for an independent wepp2 read. One was current at readback. Its catalog digest and required schema passed verification, and the query planner and DuckDB returned the same 1,096 rows as the Parquet footer. The other two had outstanding work. Only the successful `wc1:runs` example contributes artifact evidence. |
+
+**Observation method.** Sort the cycle-pending paths and take indices `floor(i × N / 24)` for i from 0 through 23. This yielded 12 batch, three culvert, four wc1 run and five legacy run scopes. Use the existing acceptance helper's `scope_readback` and `artifact_readback` under the worker identity. Sample ordinary arrivals from the first 4,000 reverse-ranked finished default registry entries using retained enqueue/start timestamps. These are bounded samples. The precondition for the full-union receipt census, a completed cycle, was unmet. The sample proves a freshness violation but cannot estimate fleet prevalence or the fleet's oldest receipt.
+
+**Capacity implication.** The live scheduler allows 25 pending visits every 30 s, an optimistic 72,000 visits/day at continuous cadence. Every discovered locator needs an initial visit. A surviving writable locator that creates a full-reconciliation receipt needs another visit to confirm it drained. After 42,681 initial visits, only 29,319 visits/day remain for confirmations and retries at this cadence. The writable count is unknown. Measure first visits, clean confirmations, permit deferrals and repeated pending visits per tick alongside worker completion rate before choosing between scheduler tuning and more NFS concurrency. The observed long tail followed discovery and crossed the Rocket batch-cap boundary into three other namespaces.
+
+**Disposition.** Fleet capacity remains unaccepted. For a retest, retain ordinary arrival observations from the first tick of a natural cycle under the deployed cap, then run the stable full-union census and namespace artifact matrix at completion. The scheduler waits 86,400 s after a completed cycle before starting the next. Release and cap-specific performance evidence remain separate. [Fleet acceptance procedure](../20261105_production_notifications_catalog_cutover/artifacts/general_catalog_acceptance_procedure.md)
+
+Private raw evidence is retained under `/home/workdir/query-catalog-studies/fleet-capacity-OsieApDa`. SHA-256 of the cursor/arrival capture is `e529addfaa363b93c1c85c478e30aec22a631f1f71cdf4978e81b4b33b0a2ca5`, of the receipt readback `229561ed3499ff1508e447014f0d5d3f12c256c553674d4d4ab60a8490f6c1b0`, and of the peer artifact sample `a996a9793746ddd658495140b3a813db60450dadabd70271e0a1be01ff67f512`.
+
+## November 22 production rollout closeout
+
+Release `dfc1eaa74` is active on wepp1, wepp2 and wepp3. The same wepp1-built image passed all three host identity checks. On Rocket NFS, the candidate admitted two siblings, deferred a third and admitted another owner. All four test receipts drained and wepp2 queried all four Parquet artifacts. The final focused catalog suite passed 74 tests.
+
+At the 09:50:59 UTC production scheduler tick, admission was open with 12 compatible default workers, a global ceiling of seven and a cap of two in `wc1:batch`. The tick reported zero reconciliation errors and zero unavailable namespaces. The current cycle began November 21 at 00:51:28 UTC. After about 33 hours, 10,440 locators remained pending and the scheduler had recorded no completion for that cycle. The configured target is 24 hours. The four catalog jobs stopped for deployment remained tracked in the dirty index for autonomous reconciliation.
+
+Keep fleet acceptance open for a natural completed cycle with oldest-unreconciled age, ordinary-job delay and peer artifact readback. Matched production windows with large batch children remain the test of the Rocket cap's performance. At migration, clear the Rocket selector before redirecting the namespace, then reevaluate on wpc1 as recorded in the deployments repository's RKE2 cutover maintenance window. [Rocket cap decision](../../adrs/ADR-0156-rocket-batch-owner-admission.md)
+
+## Historical status
 
 2026-11-06: operator requests production cutover alongside notifications. Combined
 planning is recorded in [production readiness](../20261105_production_notifications_catalog_cutover/notes/production-deployment-readiness.md#combined-notification-and-query-catalog-production-cutover).
@@ -271,3 +331,20 @@ cycle, new ordinary arrivals during that cycle, independent full-union age censu
 and artifact proof. Sample coverage gaps and owned fixture/account cleanup remain
 open. See the combined package's active ExecPlan observation-02 handoff; do not
 reset state, shorten cycle spacing or extend the deadline to force completion.
+
+
+## November 21 admin catalog monitoring
+
+Contract checkpoint `2dacc6b57` adds the Admin/Root snapshot. Dedicated panels
+show simultaneous admission blockers and the latest committed reconciliation
+summary. Route and real-Redis suites passed 58 tests. See the
+[decision and reviews](artifacts/20261121_contract_decision.md).
+
+## November 21 Rocket batch-owner admission pilot
+
+The [implementation and retirement plan](prompts/active/implementation_execplan.md#temporary-rocket-batch-owner-admission-pilot) targets worker capacity during the remaining Rocket deployment. Implementation, live RQ validation and rollout are pending. The wpc1 migration triggers a fresh baseline with the override disabled.
+
+The [worker continuity gate](prompts/active/implementation_execplan.md#worker-continuity-during-rollout) stages the disabled code with a routine deployment and verifies live activation and rollback with both worker pools serving jobs.
+
+The candidate implements the optional watched namespace policy, owner counts
+and last-tick deferral telemetry. Deployment and matched-window acceptance are pending.

@@ -33,6 +33,8 @@
 
 ### Status stream + stacktrace
 
+The Climate panel uses the [climate operation selection contract](../schemas/rq-controller-state-contract.md#climate-operation-selection-on-reload). Its run-scoped status stream accepts tagged events only for the selected job. A message filter runs before display, details, or trigger effects and again before asynchronous detail enrichment. Climate retains its rendered summary while a new operation is pending. These options are opt-in for other controllers.
+
 Traceback content follows the [safe traceback contract](../schemas/safe-traceback-contract.md) (implementation pending). Existing fields and panel behavior stay unchanged; credential material is filtered before publication.
 - Always call `attach_status_stream` with `channel`, `runId`, `spinner`, and `stacktrace: { element, body? }`.
 - StatusStream will enrich stacktraces via `/rq-engine/api/jobinfo/<jobid>` when the channel message includes an RQ job id (`rq:<uuid> ...`). Keep the `data-stacktrace-*` hooks intact or enrichment will fail silently.
@@ -45,7 +47,7 @@ Traceback content follows the [safe traceback contract](../schemas/safe-tracebac
   - Reset `_completion_seen = false` to allow the next completion to fire once.
 - `controlBase` dispatches:
   - `poll_completion_event` + `job:completed` once on `finished` (guarded by `_job_completion_dispatched`).
-  - `job:error` once on `failed`/`stopped`/`canceled`/`not_found` (guarded by `_job_failure_dispatched`), after fetching `/rq-engine/api/jobinfo/<job_id>` to push stacktraces (child `exc_info` preferred).
+  - `job:error` once on `failed`/`stopped`/`canceled`/`not_found` (guarded by `_job_failure_dispatched`), after fetching `/rq-engine/api/jobinfo/<job_id>` to push stacktraces (child `exc_info` preferred). A controller with `on_job_details_unavailable` uses that handler for `not_found`.
 - Custom `onTrigger` handlers must **not** call `triggerEvent` again; `attach_status_stream` already does this. Use guarded handlers for CustomEvents to avoid recursion.
 - **See also:** [trigger-refactor.md](../mini-work-packages/completed/trigger-refactor.md) for the per-controller trigger inventory and completion event names.
 

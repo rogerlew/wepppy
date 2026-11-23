@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from collections.abc import Sequence
 from dataclasses import dataclass
 import logging
@@ -40,4 +42,6 @@ def build_esdac_soils(
     soils_dir: str,
     res_lyr_ksat_threshold: float = ...,
     status_channel: str | None = ...,
+    *,
+    subsoil_defaults: Mapping[str, object] | None = ...,
 ) -> tuple[dict[str, SoilSummary], dict[str, str]]: ...

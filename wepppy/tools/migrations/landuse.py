@@ -8,32 +8,38 @@ from wepppy.observability.secret_profiles import WORKER
 
 import json
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Tuple
 
 from wepppy.tools.migrations.parquet_paths import pick_existing_parquet_path
 
 __all__ = ["migrate_landuse_parquet"]
 
 
-def _landuse_nodb_has_summaries(landuse_nodb: Path) -> Tuple[bool, str | None]:
+def _landuse_nodb_has_hillslope_summaries(landuse_nodb: Path) -> Tuple[bool, str | None]:
     try:
         data = json.loads(landuse_nodb.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         return False, safe_text(f"Failed to read landuse.nodb: {exc}", source_profile=current_profile(WORKER))
 
-    state = data.get("py/state", data)
+    state = data.get("py/state", data) if isinstance(data, dict) else None
     if not isinstance(state, dict):
         return False, "Landuse nodb missing state"
 
-    def _has_entries(value: Any) -> bool:
-        return isinstance(value, dict) and bool(value)
+    assignments = state.get("domlc_d")
+    summaries = state.get("managements")
+    if not isinstance(assignments, dict) or not isinstance(summaries, dict):
+        return False, None
 
-    if _has_entries(state.get("domlc_d")):
-        return True, None
-    if _has_entries(state.get("managements")):
-        return True, None
+    from wepppy.topo.watershed_abstraction.support import is_channel
 
-    return False, None
+    # The Parquet writer serializes hillslopes only. Previously a failed build
+    # could leave new assignments alongside unrelated prior managements.
+    assigned_codes = [code for topaz_id, code in assignments.items() if not is_channel(topaz_id)]
+    covered = bool(assigned_codes) and all(
+        isinstance(code, str) and isinstance(summaries.get(code), dict) and summaries[code]
+        for code in assigned_codes
+    )
+    return covered, None
 
 
 def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
@@ -62,12 +68,12 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         if not landuse_nodb.exists():
             return True, "No landuse parquet or nodb file (nothing to migrate)"
 
-        has_summaries, error = _landuse_nodb_has_summaries(landuse_nodb)
+        has_summaries, error = _landuse_nodb_has_hillslope_summaries(landuse_nodb)
         if error is not None:
             return False, error
 
         if not has_summaries:
-            return True, "Landuse not built (nothing to migrate)"
+            return True, "Landuse not built or missing matching hillslope summaries (nothing to migrate)"
 
         if dry_run:
             return True, "Would generate landuse parquet from landuse.nodb"

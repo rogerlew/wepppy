@@ -1730,6 +1730,20 @@ if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
     "${CAP_RUNTIME_PREPARER}" --secret-only
 fi
 
+# Native CSV is a required common-image artifact. Check actual HTTP bytes under
+# the configured browse identity before any candidate activation/service stop.
+if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "browse"; then
+    if [ -n "${RESUME_RETAINED_CANDIDATE}" ]; then
+        CSV_CANDIDATE_IMAGE="$(retained_image_for_service browse)"
+    elif [ "${BUILD_RETAINED_CANDIDATE}" = true ]; then
+        CSV_CANDIDATE_IMAGE="${RETAINED_RESOLVED_IMAGES[browse]}"
+    else
+        CSV_CANDIDATE_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["browse"]["image"])')"
+    fi
+    CSV_RUNTIME_USER="$(wctl docker compose config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["browse"].get("user", ""))')"
+    "${PROJECT_ROOT}/docker/validate-parquet-csv-runtime-contract.sh" "${CSV_CANDIDATE_IMAGE}" "${CSV_RUNTIME_USER}"
+fi
+
 if [ "${BUILD_RETAINED_CANDIDATE}" = true ]; then
     echo ">>> Retaining immutable candidate without stopping services..."
     create_retained_candidate

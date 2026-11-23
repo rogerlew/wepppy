@@ -148,11 +148,15 @@ def test_get_default_config_path_prefers_canonical_shared_name(
     assert Path(base.get_default_config_path()) == canonical
 
 
-def test_canonical_defaults_is_not_advertised_as_named_preset() -> None:
-    configs = base.get_configs()
+def test_canonical_defaults_is_not_advertised_as_named_preset(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _write_defaults(tmp_path / "_defaults.cfg", "shared")
+    _write_defaults(tmp_path / "example.cfg", "preset")
+    monkeypatch.setattr(base, "_config_dir", str(tmp_path))
 
-    assert "_defaults" not in configs
-    assert len(configs) == 128
+    assert base.get_configs() == ["example"]
 
 
 def test_serialized_nodb_payload_retains_token_without_defaults_basename() -> None:

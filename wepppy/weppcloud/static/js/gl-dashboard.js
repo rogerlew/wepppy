@@ -283,7 +283,22 @@
     yearSlider?.hide?.();
     monthSlider?.hide?.();
   };
-  const queryEngine = createQueryEngine(ctx);
+  const catalogStatusEl = document.getElementById('gl-catalog-status');
+  const catalogRetryEl = document.getElementById('gl-catalog-retry');
+  const catalogStates = new Map();
+  const queryEngine = createQueryEngine(ctx, {
+    onCatalogState(target, state, message) {
+      if (state === 'ready' || state === 'idle') catalogStates.delete(target);
+      else catalogStates.set(target, { state, message });
+      const states = Array.from(catalogStates.values());
+      const failure = states.find((entry) => entry.state === 'unavailable');
+      const preparing = states.some((entry) => entry.state === 'preparing');
+      if (catalogStatusEl) {
+        catalogStatusEl.textContent = failure?.message || (preparing ? 'Preparing watershed results…' : '');
+      }
+      if (catalogRetryEl) catalogRetryEl.hidden = !failure;
+    },
+  });
   const { postQueryEngine, postBaseQueryEngine, postQueryEngineForScenario } = queryEngine;
   let mapController;
   let layerUtils;
@@ -502,7 +517,6 @@
   }
 
   const weppDataManager = createWeppDataManager({
-    ctx,
     getState,
     setValue,
     setState,
@@ -1112,6 +1126,8 @@
   window.glDashboardToggleGraphPanel = toggleGraphPanel;
   window.glDashboardSetGraphMode = setGraphMode;
 
+  let catalogScenarioPath = getState().currentScenarioPath;
+
   async function handleScenarioChange({ scenarioPath, phase } = {}) {
     const targetScenario = scenarioPath != null ? scenarioPath : getState().currentScenarioPath;
     const activeScenario = getState().currentScenarioPath;
@@ -1120,6 +1136,10 @@
     }
 
     if (phase === 'before_base') {
+      if (catalogScenarioPath !== targetScenario) {
+        catalogScenarioPath = targetScenario;
+        queryEngine.scenarioChanged(targetScenario);
+      }
       await Promise.all([
         detectLanduseOverlays(),
         detectSoilsOverlays(),
@@ -1332,6 +1352,34 @@
     ctx, deck, getState, setValue, applyLayers, jet2Color,
   });
 
+  let restoreSavedScope = Boolean(scopeRestore.layers);
+  async function restoreDashboardScope() {
+    if (!restoreSavedScope || catalogStates.size) return;
+    roadsModule.restoreDisplay(scopeRestore, getState, setValue, { display: false });
+    // Restored visibility is a selection, not loaded data. Use the normal
+    // activation paths so yearly/event/monthly values and graphs match it.
+    const visible = (key) => (getState()[key] || []).some((layer) => layer.visible);
+    if (visible('weppYearlyLayers')) await activateWeppYearlyLayer();
+    if (visible('weppYearlyChannelLayers')) await activateWeppYearlyChannelLayer();
+    if (visible('weppEventLayers')) await refreshWeppEventData();
+    if (visible('rapLayers') || getState().rapCumulativeMode) {
+      await refreshRapData();
+      await loadRapTimeseriesData();
+    }
+    if (visible('openetLayers')) {
+      await refreshOpenetData();
+      await loadOpenetTimeseriesData();
+    }
+    updateLayerList();
+    const restoredGraph = scopeRestore.graph;
+    if (restoredGraph && graphDefs.some((group) => group.items?.some((item) => item.key === restoredGraph)) &&
+        !(ctx.outputScope === 'roads' && restoredGraph === 'flow-duration')) {
+      await activateGraphItem(restoredGraph);
+    }
+    applyLayers();
+    restoreSavedScope = catalogStates.size > 0;
+  }
+
   function initializeDashboard() {
     // Synchronous UI setup - runs immediately
     bindScenarioSelector();
@@ -1357,7 +1405,7 @@
     // Async layer detection - fire and forget, don't block page
     (async () => {
       try {
-        const scenarioInitialized = await initializeScenarioFromSelect();
+        const scenarioInitialization = initializeScenarioFromSelect();
         if (dashboardMode === DASHBOARD_MODES.BATCH) {
           const readiness = await initializeBatchReadiness();
           if (readiness && Array.isArray(readiness.readyRuns) && readiness.readyRuns.length === 0) {
@@ -1365,8 +1413,8 @@
             return;
           }
         }
-        const detectionTasks = [detectLayers()];
-        if (!scenarioInitialized) {
+        const detectionTasks = [detectLayers({ includeYearlyChannels: !getState().currentScenarioPath })];
+        if (!(await scenarioInitialization)) {
           detectionTasks.push(
             detectLanduseOverlays(),
             detectSoilsOverlays(),
@@ -1376,40 +1424,40 @@
               detectWeppOverlays(),
               detectWeppChannelOverlays(),
               detectWeppYearlyOverlays(),
-              detectWeppYearlyChannelOverlays(),
             );
           }
         }
         await Promise.all(detectionTasks);
-        if (scopeRestore.layers) {
-          roadsModule.restoreDisplay(scopeRestore, getState, setValue, { display: false });
-          // Restored visibility is a selection, not loaded data. Use the normal
-          // activation paths so yearly/event/monthly values and graphs match it.
-          const visible = (key) => (getState()[key] || []).some((layer) => layer.visible);
-          if (visible('weppYearlyLayers')) await activateWeppYearlyLayer();
-          if (visible('weppYearlyChannelLayers')) await activateWeppYearlyChannelLayer();
-          if (visible('weppEventLayers')) await refreshWeppEventData();
-          if (visible('rapLayers') || getState().rapCumulativeMode) {
-            await refreshRapData();
-            await loadRapTimeseriesData();
-          }
-          if (visible('openetLayers')) {
-            await refreshOpenetData();
-            await loadOpenetTimeseriesData();
-          }
-          updateLayerList();
-          const restoredGraph = scopeRestore.graph;
-          if (restoredGraph && graphDefs.some((group) => group.items?.some((item) => item.key === restoredGraph)) &&
-              !(ctx.outputScope === 'roads' && restoredGraph === 'flow-duration')) {
-            await activateGraphItem(restoredGraph);
-          }
-          applyLayers();
-        }
+        await restoreDashboardScope();
       } catch (err) {
         console.warn('gl-dashboard: layer detection failed', err);
       }
     })();
   }
+
+  catalogRetryEl?.addEventListener('click', async () => {
+    catalogRetryEl.hidden = true;
+    queryEngine.retryCatalogReadiness();
+    const scenarioPath = getState().currentScenarioPath;
+    const graphKey = getState().activeGraphKey;
+    try {
+      await Promise.all([
+        detectLayers({ includeYearlyChannels: false }),
+        handleScenarioChange({ scenarioPath, phase: 'before_base' }),
+      ]);
+      if (getState().currentScenarioPath !== scenarioPath) return;
+      if (getState().comparisonMode && scenarioPath) await scenarioManager.loadBaseScenarioData();
+      await handleScenarioChange({ scenarioPath, phase: 'after_base' });
+      await restoreDashboardScope();
+      if (pickActiveWeppEventLayer()) await refreshWeppEventData();
+      if (graphKey && getState().activeGraphKey === graphKey) {
+        await activateGraphItem(graphKey, { force: true });
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') console.warn('gl-dashboard: retry failed', error);
+    }
+  });
+  window.addEventListener('pagehide', () => queryEngine.resetCatalogReadiness());
 
   window.glDashboardGraphToggled = handleGraphPanelToggle;
   window.glDashboardHighlightSubcatchment = onHighlightSubcatchment;

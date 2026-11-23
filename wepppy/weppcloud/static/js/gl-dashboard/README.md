@@ -234,7 +234,17 @@ interactive keys are no-ops; initial unknown keys resolve to Terrain.
 
 Operator checks: style/tile/font/sprite failures show “Forest Service basemap
 unavailable. Choose another basemap.” Inspect browser requests to the official
-service and same-origin `static/ui-lab/maplibre/` assets. Retry by switching away
+service and same-origin `static/vendor/maplibre/` assets. Retry by switching away
 and back. Rebuild controller and landing exports together; use the normal
 frontend rollout/reload workflow. Rollback restores package-owned source and
 regenerates those assets; no project migration, proxy, or CSP change is involved.
+
+### Query catalog preparation
+
+The standard dashboard uses `data/query-engine.js` for result queries. It shares
+one catalog readiness wait per target, including base and scenario comparisons.
+The surrounding map can render during the wait. A pending SQL response
+restarts the target's readiness check. Leave retries in the shared client and
+preserve preparation errors until the affected UI can reload the work.
+
+See the [GL catalog readiness contract](../../../../../docs/ui-docs/contracts/gl-catalog-readiness-contract.md).

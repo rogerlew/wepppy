@@ -179,3 +179,20 @@ The dedicated service preserves the canonical browse authorization and path-boun
 - Expand the `url_for` shim (or replace it) before migrating more Flask templates.
 - Consider caching popular directory listings or large file renders once LRU caching is revisited.
 - Centralize run-context resolution so `_download.py`, `_gdalinfo.py`, the dedicated download service, and future helpers reuse a single implementation.
+
+## Native CSV downloads
+
+CSV downloads are generated on demand by the required Rust converter and streamed
+from a completed temporary file. They are not saved as project outputs: retained
+copies could become stale or make users expect automatic generation. Raw Parquet
+files remain available if conversion fails. Filtered CSV uses the same native path
+for run, directory-backed, culvert and batch requests.
+
+CSV conversion has no environment settings or Python fallback. Two shared slots
+cover staging, conversion and response consumption across all workers; busy
+requests receive503 with Retry-After. Filters are always enabled for CSV with a
+fixed2,000,000 matched-row limit; unfiltered exports retain their separate larger
+resource envelope. Existing preview/D-Tale/filtered-Parquet settings are unchanged.
+See the [integration contract](../../../docs/schemas/parquet-csv-integration-contract.md)
+for fixed paths, limits, errors and cleanup, and the
+[CLI guide](../../../tools/parquet_csv_cli/README.md) for build/preflight commands.

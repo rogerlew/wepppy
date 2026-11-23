@@ -35,6 +35,8 @@ from .quality import (
     validate_ksat_profile,
 )
 
+from .subsoil import DEFAULT_SUBSOIL, FALLBACK_DIAGNOSTIC, SOURCE_FIELDS, validate_subsoil_profile
+
 
 _esdac_esdb_raster_dir: Final[str] = "/geodata/eu/ESDAC_ESDB_rasters/"  # 1km
 _esdac_derived_db_dir: Final[str] = "/geodata/eu/ESDAC_STU_EU_Layers/"
@@ -353,6 +355,8 @@ class ESDAC:
         soils_dir: str = "./",
         res_lyr_ksat_threshold: float = 2.0,
         ksflag: int = 0,
+        *,
+        subsoil_defaults: Mapping[str, object] | None = None,
     ) -> tuple[str, Horizon, str]:
         """Build a WEPP soil file near ``(lng, lat)`` from ESDAC rasters.
 
@@ -433,8 +437,44 @@ class ESDAC:
                 source_quality,
                 SoilQualityResult(context, "degraded", tuple(lookup_warnings)),
             )
+        applied_defaults = None
         if source_quality.outcome == "rejected":
-            raise ESDACSoilBuildError(source_quality)
+            errors = {
+                (diagnostic.code, diagnostic.field)
+                for diagnostic in source_quality.diagnostics
+                if diagnostic.severity == "error"
+            }
+            subsoil = {field: d_stu.get(f"STU_EU_S_{source}") for field, source in SOURCE_FIELDS.items()}
+            if not (
+                use_subsoil
+                and errors == {
+                    ("source.stu.bulk_density_nonpositive", "STU_EU_S_BD"),
+                    ("source.stu.mandatory_profile_empty", "STU_EU_S_CLAY/SAND/SILT"),
+                }
+                and all(value == 0.0 for value in subsoil.values())
+            ):
+                raise ESDACSoilBuildError(source_quality)
+            applied_defaults = validate_subsoil_profile(
+                DEFAULT_SUBSOIL if subsoil_defaults is None else subsoil_defaults
+            )
+            for field, source in SOURCE_FIELDS.items():
+                d_stu[f"STU_EU_S_{source}"] = applied_defaults[field]
+            source_quality = merge_quality_results(
+                validate_esdac_source_profile(context, esdb=d_esdb, stu=d_stu),
+                SoilQualityResult(
+                    context,
+                    "degraded",
+                    tuple(lookup_warnings)
+                    + (
+                        SoilQualityDiagnostic(
+                            FALLBACK_DIAGNOSTIC, "subsoil", "warning",
+                            raw_value={"source": subsoil, "applied": applied_defaults},
+                        ),
+                    ),
+                ),
+            )
+            if not source_quality.accepted:
+                raise ESDACSoilBuildError(source_quality)
 
         # Diagnostics above retain raw metadata; preserve any usable class even
         # when the pixel or description is missing (especially forest landuse).
@@ -535,6 +575,8 @@ class ESDAC:
              '#', '#']
 
         s.extend(_disclaimer.split('\n'))
+        if applied_defaults is not None:
+            s.append("# ESDAC project subsoil defaults: " + json.dumps(applied_defaults, sort_keys=True))
         for diagnostic in source_quality.diagnostics:
             s.append(f"# Source warning: {diagnostic.code} field={diagnostic.field}")
         

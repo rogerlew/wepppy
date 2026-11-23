@@ -26,46 +26,41 @@ Culvert_web_app developers and stakeholders integrating with the wepp.cloud culv
 
 1. Build a payload from Culvert_web_app outputs using `build_payload.py`
 2. POST to `https://{host}/rq-engine/api/culverts-wepp-batch/`
-3. Poll `status_url` until job completes
-4. Download `weppcloud_run_skeletons.zip` from `https://{host}/weppcloud/culverts/{batch_uuid}/download/weppcloud_run_skeletons.zip`
+3. Poll the returned `status_url` and show the live `progress` job counts.
+4. When `batch.results_available` is true, download the attempt ZIP at
+   `batch.download_url`. Use the legacy skeleton ZIP for older batches without
+   a `batch` object, after successful aggregate completion.
 5. (Optional) Browse results interactively at `https://{host}/weppcloud/culverts/{batch_uuid}/browse/`
 
 ## Authentication (JWT)
 
-Production Culvert credentials are renewed by the [systemd renewal mechanism](../jwt-renewal.md). The deployed identity remains submit-only; the broader example below is not the production registration.
+Production uses the registered service identity `culvert-batch-submit-90d`
+with audience `rq-engine`, class `service`, group `culverts`, and scope
+`culvert:batch:submit` only. The [systemd renewal process](../jwt-renewal.md)
+preserves those claims and supplies a fresh token ID and 90-day lifetime on
+renewal. The Culvert app loads the current token from `WEPPCLOUD_TOKEN_FILE`
+when starting a task.
 
-`/rq-engine/api/culverts-wepp-batch/*` now requires a bearer token. `jobstatus`/`jobinfo` are open
-by default, and their access is governed by `RQ_ENGINE_POLL_AUTH_MODE`: `open` accepts anonymous
-polling, `token_optional` accepts anonymous polling but validates a supplied bearer token, and
-`required` requires `rq:status`.
+| Operation | Credential |
+| --- | --- |
+| Submit a batch | Send the production service JWT as a bearer token. |
+| Cancel a registered Culvert batch job tree | Send the same JWT. The deployed service registration grants `culvert_runner`, which the cancellation endpoint checks along with `culvert:batch:submit`. |
+| Retry or explicitly finalize a batch | Use an independently authorized credential with `culvert:batch:retry`. |
+| Poll `jobstatus` or `jobinfo` on production | Poll the returned `status_url` without an Authorization header. Use the root job ID for optional `jobinfo` diagnostics. Production polling runs in `open` mode. |
+| Browse or download results | Use the returned batch-scoped `browse_token`. |
 
-Required scopes (service token): `culvert:batch:submit`, `culvert:batch:retry`,
-`culvert:batch:read`, `rq:status`.
+`RQ_ENGINE_POLL_AUTH_MODE` controls both polling endpoints. In `open`, a request
+without a bearer token succeeds. If supplied, a token missing `rq:status` falls
+back to anonymous polling, so an HTTP 200 does not demonstrate authenticated
+polling. In `token_optional`, an anonymous request is accepted, and a supplied
+bearer token must pass validation with `rq:status`. In `required`, the bearer
+token and `rq:status` are mandatory. A valid submit-only JWT is rejected with
+HTTP 403 when the selected mode requires its polling scope. Coordinate a
+separately authorized polling credential and client rollout before changing
+production to `required`. The artifact token is for browse and download.
 
-Recommended claims: `aud=<RQ_ENGINE_JWT_AUDIENCE>` (default `rq-engine`), `token_class=service`, `service_groups=culverts`,
-`jti=<uuid>` (required for revocation).
-
-TTL guidance: culvert service tokens should default to ~90 days. Rotate or revoke on compromise
-using `wctl revoke-auth-token` (see `docs/dev-notes/auth-token.spec.md`).
-
-The `scripts/submit_payload.py` helper reads `WEPPCLOUD_TOKEN` or `--token-file` when provided.
-
-Example minting (host):
-```bash
-wctl issue-auth-token culvert-app \
-  --audience rq-engine \
-  --scope culvert:batch:submit \
-  --scope culvert:batch:retry \
-  --scope culvert:batch:read \
-  --scope rq:status \
-  --claim token_class=service \
-  --claim service_groups=culverts \
-  --claim jti=deadbeefdeadbeefdeadbeefdeadbeef \
-  --expires-in 7776000 \
-  --json
-```
-
-Send the token as `Authorization: Bearer <token>`.
+The `scripts/submit_payload.py` helper accepts `WEPPCLOUD_TOKEN` or `--token-file`
+for submission.
 
 ## Artifacts access (browse/download)
 
@@ -77,9 +72,9 @@ Use `browse_token` as `Authorization: Bearer <browse_token>` for:
 - `GET /weppcloud/culverts/{batch_uuid}/browse/*` (interactive browse)
 - `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` (programmatic download via `browse_token`; WEPPcloud also allows privileged `user` tokens for admin browse/download workflows)
 
-The long-lived Culvert service JWT is used for submission, retry, and authenticated status
-polling. The returned `browse_token` is a separate, short-lived batch-scoped artifact token;
-it is browse/download-only and must not be used as the polling credential.
+Use the production service JWT for submission and cancellation. Use the returned
+`browse_token` only for batch artifacts. See the authentication table for
+retry and polling.
 
 ## Payload preparation for wepp.cloud
 
@@ -712,14 +707,16 @@ Each `runs/{point_id}/` directory contains:
     atlas14_intensity_pds_mean_metric.csv
 
   dem/wbt/
-    outlet.geojson            # Detected outlet point
-    channels.geojson          # Channel network (UTM)
-    channels.WGS.geojson      # Channel network (WGS84)
-    subcatchments.geojson     # Subcatchment polygons (UTM)
-    subcatchments.WGS.geojson # Subcatchment polygons (WGS84)
-    netful.geojson            # Full stream network
-    netful.WGS.geojson        # Full stream network (WGS84)
-    subwta.geojson            # Subcatchment attributes
+    outlet.geojson            # Selected outlet point (detected or retained original)
+    bound.geojson             # Canonical watershed boundary polygons (project CRS)
+    bound.WGS.geojson         # Canonical watershed boundary polygons (WGS84)
+    channels.geojson          # Channel-cell footprint polygons (project CRS)
+    channels.WGS.geojson      # Channel-cell footprint polygons (WGS84)
+    subcatchments.geojson     # Hillslope polygon parts (project CRS)
+    subcatchments.WGS.geojson # Hillslope polygon parts (WGS84)
+    netful.geojson            # Selected stream-mask polygons (project CRS)
+    netful.WGS.geojson        # Selected stream-mask polygons (WGS84)
+    subwta.geojson            # Polygonized hillslope and channel cells with TOPAZ IDs
     *.vrt                     # Virtual raster references
 
   watershed/
@@ -769,8 +766,9 @@ Each `runs/{point_id}/` directory contains:
 | File | Description |
 |------|-------------|
 | `run_metadata.json` | Run status (`success`/`failed`), timing, error details |
-| `dem/wbt/channels.geojson` | Channel network geometry for visualization |
-| `dem/wbt/subcatchments.geojson` | Subcatchment boundaries for visualization |
+| `dem/wbt/bound.WGS.geojson` | Canonical footprint for displaying a run’s watershed or mapping its outlet metrics. Preserve all parts and holes. |
+| `dem/wbt/channels.geojson` | Channel footprint polygons with run-local `TopazID`, `WeppID`, and stream `Order`. A reach may span multiple features. |
+| `dem/wbt/subcatchments.geojson` | Hillslope polygons with run-local `TopazID` and `WeppID`. Keep every polygon part for each hillslope. |
 | `watershed/channels.parquet` | Channel attributes (length, slope, contributing area) |
 | `watershed/hillslopes.parquet` | Hillslope attributes (area, slope, aspect) |
 | `wepp/output/interchange/loss_pw0.out.parquet` | Annual sediment/runoff at watershed outlet |
@@ -936,7 +934,8 @@ Terminal responses do not need a `queue` object:
 
 Clients must treat `queue` as optional. Read `queue.rank`, `queue.jobs_ahead`, `queue.name`,
 and `queue.observed_at` only when present; do not calculate an ETA from them. A missing object
-does not mean that a job failed or was lost. Continue using `status` as the lifecycle authority.
+does not mean that a job failed or was lost. Use `status` for the RQ lifecycle
+and `batch` for published results when present.
 The snapshot is omitted for started-only or terminal trees, deferred/scheduled-only trees,
 missing or mixed queue origins, and normal status/Redis races. It never provides unrelated job
 IDs, queue depth, worker capacity, or a cross-queue rank.
@@ -954,6 +953,69 @@ IDs, queue depth, worker capacity, or a cross-queue rank.
 | `stopped` | A running job was stopped |
 
 Note: `jobstatus` is an aggregated status view and does not currently include execution error payloads.
+
+#### Live job progress and final batch results
+
+Poll the `status_url` returned by submission. The root response already
+summarizes its registered descendants. Use `progress.completed`,
+`progress.total`, and `progress.percent` to display **“51 of 53 WEPP Cloud jobs
+complete (96%)”**. No `jobinfo` request is needed for these counts. If
+`progress` is absent, show the current phase without a percentage.
+
+| Field | Meaning |
+| --- | --- |
+| `progress.completed` | Jobs in terminal RQ states `finished`, `failed`, `stopped`, or `canceled`. This includes unsuccessful terminal jobs. |
+| `progress.total` | The root and its currently visible registered descendants, including per-culvert work and the finalizer once registered. The total can grow as jobs are registered, so the percentage can move backward. |
+| `progress.percent` | `100 × completed / total`, rounded to two decimal places. Use it as job-count progress. |
+| `progress.unit`, `progress.updated_at` | Unit `jobs` and the latest observed start or end timestamp in UTC. Before a timestamp exists, `updated_at` is `1970-01-01T00:00:00Z`. |
+| `batch.total` | The number of culvert runs enrolled in this attempt, available when the version-1 batch summary is present. |
+| `batch.succeeded`, `batch.failed`, `batch.skipped` | Settled counts of culvert runs. They remain zero during `running` and `finalizing`, even when RQ jobs have completed. Read them after batch settlement. |
+| `batch.results_available`, `batch.download_url` | Whether usable results were published, and the attempt-specific download path when available. |
+
+Production response excerpt captured during a running batch on November 20,
+2026. The job ID is redacted.
+
+```json
+{
+  "job_id": "<root-job-id>",
+  "status": "started",
+  "progress": {
+    "completed": 51,
+    "total": 53,
+    "unit": "jobs",
+    "percent": 96.23,
+    "updated_at": "2026-11-20T20:23:23Z"
+  },
+  "batch": {
+    "schema_version": 1,
+    "attempt_id": "<root-job-id>",
+    "state": "running",
+    "outcome": null,
+    "total": 51,
+    "succeeded": 0,
+    "failed": 0,
+    "skipped": 0,
+    "results_available": false,
+    "download_url": null,
+    "reason": null
+  }
+}
+```
+
+For a version-1 `batch`, keep polling while it is `running` or `finalizing`,
+even if aggregate RQ `status` reports `failed`. On `completed` with
+`results_available: true`, download the published attempt's results with the
+batch browse token and show the final counts. Verify the download URL matches
+the configured WEPPcloud origin and the expected batch and attempt. A `partial_success` still has
+usable results. A `failed` batch has no published result ZIP. Report its
+`reason` when available. For older jobs without `batch`, retain the legacy
+aggregate-status behavior. Report an unsupported `batch.schema_version` as
+incompatible. Use `jobinfo` for per-job diagnostics.
+
+Use `queue.jobs_ahead` as a separate queue message when present. The percentage
+measures jobs reaching terminal states. It provides neither an ETA nor a
+success rate and can reach 100% on a failed attempt. See the
+[batch outcome contract](../../schemas/batch-outcome-contract.md).
 
 ### Canceling WEPPcloud jobs
 

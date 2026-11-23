@@ -7,7 +7,12 @@ on:
     - tools/check_agents_size.sh
     - tools/check_adr_dates.py
     - tests/tools/test_check_adr_dates.py
-    - wepppy/weppcloud/usersum_docs/adr_catalog.py
+    - tools/usersum_docs_tool.py
+    - docker/requirements-uv.txt
+    - wepppy/markdown_render.py
+    - wepppy/weppcloud/usersum_anchors.py
+    - wepppy/weppcloud/usersum_docs/**
+    - wepppy/weppcloud/routes/usersum/**
     - .github/forest_workflows/docs-quality.yml
     - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
@@ -21,7 +26,12 @@ on:
     - tools/check_agents_size.sh
     - tools/check_adr_dates.py
     - tests/tools/test_check_adr_dates.py
-    - wepppy/weppcloud/usersum_docs/adr_catalog.py
+    - tools/usersum_docs_tool.py
+    - docker/requirements-uv.txt
+    - wepppy/markdown_render.py
+    - wepppy/weppcloud/usersum_anchors.py
+    - wepppy/weppcloud/usersum_docs/**
+    - wepppy/weppcloud/routes/usersum/**
     - .github/forest_workflows/docs-quality.yml
     - .github/forest_workflows/bootstrap.yml
     - .markdown-doc-ignore
@@ -40,8 +50,36 @@ jobs:
       MARKDOWN_DOC_WORKSPACE: ${{ secrets.MARKDOWN_DOC_WORKSPACE }}
     timeout-minutes: 20
     steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Install wctl shim
+      env:
+        WCTL_SYMLINK_PATH: ${{ github.workspace }}/.wctl/bin/wctl
+      run: |-
+        mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
+        ./wctl/install.sh dev
+        echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
     - name: Enforce ADR titles and recorded dates
       run: python3 tools/check_adr_dates.py
+    - name: Set up Python for Usersum lint
+      id: usersum-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        update-environment: false
+    - name: Check Usersum links and heading IDs
+      env:
+        USERSUM_LINT_PYTHON: ${{ steps.usersum-python.outputs.python-path }}
+      run: |
+        set -euo pipefail
+        lint_env="$(mktemp -d "${RUNNER_TEMP}/usersum-lint.XXXXXXXX")"
+        trap 'rm -rf "$lint_env"' EXIT
+        "$USERSUM_LINT_PYTHON" -m venv "$lint_env"
+        grep -Ei '^(comrak-ext|pyyaml)==' docker/requirements-uv.txt > "$lint_env/requirements.txt"
+        "$lint_env/bin/python" -m pip --disable-pip-version-check install --only-binary=comrak-ext -r "$lint_env/requirements.txt"
+        PYTHONPATH=. "$lint_env/bin/python" tools/usersum_docs_tool.py lint-links
     - name: Verify markdown-doc tooling
       run: |
         set -euo pipefail
@@ -184,3 +222,4 @@ jobs:
       run: |
         echo "markdown-doc lint reported errors (exit code ${LINT_STATUS})." >&2
         exit 1
+    forest_bootstrap: false

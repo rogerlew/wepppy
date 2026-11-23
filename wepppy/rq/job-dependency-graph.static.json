@@ -228,9 +228,19 @@
     "enqueue_target": "build_landuse_rq",
     "job_meta_stage": null,
     "notes": [],
+    "queue_name": "unknown",
+    "source_function": "build_landuse",
+    "source_lineno": 885,
+    "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "build_landuse_rq",
+    "job_meta_stage": null,
+    "notes": [],
     "queue_name": "default",
     "source_function": "build_landuse",
-    "source_lineno": 854,
+    "source_lineno": 949,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -240,7 +250,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "modify_landuse_mapping",
-    "source_lineno": 1168,
+    "source_lineno": 1266,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -414,7 +424,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_soils",
-    "source_lineno": 257,
+    "source_lineno": 334,
     "source_module": "wepppy/microservices/rq_engine/soils_routes.py"
   },
   {
@@ -444,7 +454,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "upload_cli",
-    "source_lineno": 193,
+    "source_lineno": 212,
     "source_module": "wepppy/microservices/rq_engine/upload_climate_routes.py"
   },
   {
@@ -454,7 +464,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed",
-    "source_lineno": 1157,
+    "source_lineno": 1164,
     "source_module": "wepppy/microservices/rq_engine/watershed_routes.py"
   },
   {
@@ -464,7 +474,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels",
-    "source_lineno": 804,
+    "source_lineno": 809,
     "source_module": "wepppy/microservices/rq_engine/watershed_routes.py"
   },
   {
@@ -474,7 +484,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "set_outlet",
-    "source_lineno": 928,
+    "source_lineno": 935,
     "source_module": "wepppy/microservices/rq_engine/watershed_routes.py"
   },
   {
@@ -672,7 +682,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 784,
+    "source_lineno": 787,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -684,7 +694,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 792,
+    "source_lineno": 795,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -694,7 +704,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1640,
+    "source_lineno": 1652,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -704,7 +714,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1656,
+    "source_lineno": 1668,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -716,7 +726,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1664,
+    "source_lineno": 1676,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -728,7 +738,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 3032,
+    "source_lineno": 3133,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -738,7 +748,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_inventory",
-    "source_lineno": 330,
+    "source_lineno": 364,
     "source_module": "wepppy/rq/query_catalog_rq.py"
   },
   {
@@ -748,7 +758,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_catalog_refresh",
-    "source_lineno": 198,
+    "source_lineno": 216,
     "source_module": "wepppy/rq/query_catalog_rq.py"
   },
   {
@@ -800,7 +810,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1102,
+    "source_lineno": 1113,
     "source_module": "wepppy/rq/wepp_rq.py"
   },
   {
@@ -810,7 +820,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 955,
+    "source_lineno": 968,
     "source_module": "wepppy/rq/wepp_rq.py"
   },
   {

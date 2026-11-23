@@ -1,5 +1,5 @@
 import copy
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 import json
 from io import BytesIO
 from pathlib import Path
@@ -51,6 +51,10 @@ class _DummySubmissionLock:
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
     from wepppy.rq import submission_recovery
+    # The queue stand-in replaces the shared Redis client. Directory lease
+    # behavior is exercised by the upload persistence and contention controls.
+    monkeypatch.setattr(landuse_routes, "nodir_maintenance_lock", lambda *args, **kwargs: nullcontext())
+
 
     class DummyLock:
         def acquire(self, **kwargs):
@@ -259,7 +263,7 @@ def test_build_landuse_rejects_invalid_custom_mapping(monkeypatch: pytest.Monkey
         def parse_inputs(self, payload) -> None:
             return None
 
-        def get_mapping_dict(self):
+        def get_mapping_dict(self, **_source):
             raise landuse_routes.LanduseCustomMappingError(
                 "Configured landuse custom mapping file is missing: landuse/landuse_user_defined_mapping.json",
                 code="LANDUSE_CUSTOM_MAP_MISSING",
@@ -387,7 +391,7 @@ def test_build_landuse_parses_multipart_mofe_and_disturbance_fields(monkeypatch:
         def __init__(self) -> None:
             self.payloads: list[object] = []
 
-        def validate_mofe_buffer_selection(self, value):
+        def validate_mofe_buffer_selection(self, value, **_source):
             assert value == 42
 
         def parse_inputs(self, payload) -> None:
@@ -438,7 +442,7 @@ def test_build_landuse_maps_nodb_lock_conflict_from_parse_inputs(
         lc_dir = "/tmp"
         lc_fn = "/tmp/lc.tif"
 
-        def validate_mofe_buffer_selection(self, value):
+        def validate_mofe_buffer_selection(self, value, **_source):
             assert value == 42
 
         def parse_inputs(self, payload) -> None:
@@ -1678,6 +1682,67 @@ def test_build_landuse_requires_mapping_for_user_defined(
     assert payload["error"]["message"] == "landuse_management_mapping_selection must be provided"
 
 
+@pytest.mark.parametrize(
+    ("mapping_name", "expected_issue"),
+    [
+        ("esdac", "DisturbedClass is missing or invalid"),
+        ("incomplete-corine", "grass high sev fire"),
+    ],
+)
+def test_disturbed_upload_rejects_incompatible_table_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    mapping_name: str,
+    expected_issue: str,
+) -> None:
+    from tests.factories.raster import raster_bytes
+    from wepppy.wepp.management import load_map
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: str(tmp_path))
+    landuse_dir = tmp_path / "landuse"
+    landuse_dir.mkdir()
+    raw_path = landuse_dir / "_existing.tif"
+    raster_bytes(raw_path, driver="GTiff")
+    original = raw_path.read_bytes()
+
+    if mapping_name == "esdac":
+        table = load_map("esdac")
+    else:
+        table = {key: row for key, row in load_map("eu-disturbed").items()
+                 if row["DisturbedClass"] != "grass high sev fire"}
+
+    landuse = SimpleNamespace(
+        wd=str(tmp_path),
+        mode=landuse_routes.LanduseMode.UserDefined,
+        run_group="default",
+        mods={"disturbed"},
+        lc_dir=str(landuse_dir),
+        user_defined_landcover_fn="existing.tif",
+        get_mapping_dict=lambda **source: table,
+    )
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: landuse)
+    monkeypatch.setattr(
+        landuse_routes, "input_submission",
+        lambda *args: pytest.fail("incompatible upload reached mutation"),
+    )
+    selection = "esdac" if mapping_name == "esdac" else "eu-disturbed"
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={"landuse_management_mapping_selection": selection, "mofe_buffer_selection": 25},
+        )
+
+    assert response.status_code == 400
+    error = response.json()["error"]
+    assert error["code"] == "incompatible_landuse_mapping"
+    assert selection in error["message"]
+    assert "existing.tif" in error["message"]
+    assert expected_issue in error["message"]
+    assert raw_path.read_bytes() == original
+
+
 def test_build_landuse_rejects_path_like_mapping_selection(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1989,6 +2054,10 @@ class _DummyLandusePhase3:
     @contextmanager
     def locked(self):
         yield
+
+    @property
+    def source_mapping(self):
+        return self.mapping
 
     def _resolve_effective_mapping_reference(self, mapping_reference: str | None = None):
         return mapping_reference

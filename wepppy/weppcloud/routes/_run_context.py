@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from flask import abort, g, request
+from flask import abort, current_app, g, request
 import sys
 
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -121,7 +121,8 @@ def register_run_context_preprocessor(bp):
 
     @bp.url_value_preprocessor
     def _load_context(endpoint, values):  # pragma: no cover - flask hook
-        if not values:
+        view = current_app.view_functions.get(endpoint)
+        if not values or getattr(view, '_loads_run_context', False):
             return
 
         runid = values.get('runid')

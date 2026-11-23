@@ -1515,8 +1515,27 @@ h5:first-child {
 }
 
 .wc-theme-switcher {
-  display: inline-flex;
+  display: inline-grid;
+  grid-template: ". label" "bell select" / auto minmax(0, 1fr);
   align-items: center;
+  row-gap: var(--wc-space-xs);
+}
+
+.wc-theme-switcher > label {
+  grid-area: label;
+}
+
+.wc-theme-switcher > .wc-notification-bell {
+  grid-area: bell;
+  margin-inline-end: var(--wc-space-sm);
+}
+
+.wc-theme-switcher > .wc-theme-switcher__select {
+  grid-area: select;
+}
+
+.wc-header .wc-theme-switcher .wc-run-header__field > span {
+  color: var(--wc-color-text);
 }
 
 .wc-theme-switcher__select {
@@ -2469,6 +2488,10 @@ a.wc-maturity-pill:focus-visible {
   margin: 0;
   color: var(--wc-color-text-muted);
   font-size: 1rem;
+}
+
+#wepp_binary_selection:has(#wepp_bin option[value="latest"]:not(:checked)) #wepp_bin_latest_hint {
+  display: none;
 }
 
 .wc-field__message {
@@ -3478,6 +3501,15 @@ a.wc-maturity-pill:focus-visible {
   width: 1.5rem;
   height: 1.5rem;
   flex-shrink: 0;
+}
+
+.wc-interfaces,
+.wc-interfaces > .wc-panel.wc-stack {
+  row-gap: var(--wc-space-2xl);
+}
+
+.wc-interfaces > .wc-panel {
+  margin-block: 0;
 }
 
 .wc-feature {

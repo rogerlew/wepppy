@@ -9,8 +9,11 @@ from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
 pytestmark = pytest.mark.integration
 
 
-def test_rattlesnake_fixture_converts_to_real_png_and_vrt(tmp_path: Path) -> None:
-    source = Path("tests/sbs_map/data/Rattlesnake.tif").resolve()
+def test_rattlesnake_fixture_converts_to_real_png_and_vrt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    source = Path(__file__).resolve().parents[3] / "sbs_map/data/Rattlesnake.tif"
     wgs = tmp_path / "Rattlesnake.wgs.tif"
     png = tmp_path / "baer.wgs.rgba.png"
     vrt = tmp_path / "Rattlesnake.wgs.rgb.vrt"

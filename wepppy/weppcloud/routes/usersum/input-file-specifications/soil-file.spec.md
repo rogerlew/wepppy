@@ -2,7 +2,7 @@
 
 The soil input file supplies soil properties by horizon. Layer depths (`solthk`) are cumulative depths from the soil surface to the bottom of each horizon, in millimeters. WEPP converts these input horizons into its internal calculation layers.
 
-The original WEPP format description used up to eight input layers over 1.8 meters, with internal layers at 0–100, 100–200, and successive 200 mm intervals down to 1800 mm. Those are legacy limits, not a universal limit for every version described below. The generated-soil writer targeting `wepp_261026` enforces a ten-input-layer limit, including any inserted 200 mm boundary.
+The original WEPP format description used up to eight input layers over 1.8 meters, with internal layers at 0–100, 100–200, and successive 200 mm intervals down to 1800 mm. Those are legacy limits, not a universal limit for every version described below. The input limit depends on the selected executable: historical releases allow ten input horizons, while `wepp_261118` allows 23. Both retain ten internal calculation layers. The input count includes any inserted 200 mm boundary.
 
 As with the slope file, soil parameters must be input for each and every Overland Flow Element (OFE) on the hillslope profile and for each channel in a watershed, even if the soil on all OFEs is the same.
 
@@ -49,11 +49,12 @@ removes that difference between preparation paths. The soil-file format alone
 - A profile already containing a 200 mm boundary, or ending at or above 200 mm,
   receives no additional horizon. Repeating normalization does not add duplicates.
 - The emitted horizon count includes the inserted piece. If the generated output
-  would exceed ten layers, preparation fails before replacing the destination
-  file. The writer does not merge layers or discard deeper material to make room.
+  would exceed the selected executable’s limit (ten for historical releases;
+  23 for `wepp_261118`), preparation fails before replacing the destination file. The writer does not merge layers or discard deeper material to make room.
 - The explicit user-uploaded soil preservation path retains the supplied horizon
   structure; this automatic insertion is not applied to those uploads. Source
-  catalogs and existing run artifacts are not rewritten.
+  catalogs and existing run artifacts are not rewritten. Before execution,
+  uploaded and generated profiles must fit the selected executable’s input limit.
 - Newly generated or prepared files can produce different runoff and sediment
   from older unsplit inputs, despite identical supplied material properties.
   Sediment can increase. This normalization is not a sediment-reduction setting

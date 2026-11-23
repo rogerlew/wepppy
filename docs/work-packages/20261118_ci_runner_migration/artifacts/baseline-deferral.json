@@ -1,0 +1,5 @@
+{
+  "run_id": 44425293139,
+  "reason": "Automatic Stubtest run includes broad baseline; defer with full coverage until after integration per operator preference. No stub APIs changed.",
+  "next": "Observe post-integration automatic baseline; dispatch if needed."
+}

@@ -1,0 +1,42 @@
+{
+  "scanner": "owned compact::scan_struct, depth16/container100000/binary65536; first256 bytes at PyArrow dictionary offset",
+  "dictionaries_scanned": 37709,
+  "max_entries": 125855,
+  "above_standalone_limit": [
+    {
+      "entries": 110130,
+      "path": "/wc1/runs/cl/clogging-starch/watershed/flowpaths.parquet",
+      "row_group:column": "0:2"
+    },
+    {
+      "entries": 110461,
+      "path": "/wc1/runs/cl/clogging-starch/watershed/flowpaths.parquet",
+      "row_group:column": "0:6"
+    },
+    {
+      "entries": 108254,
+      "path": "/wc1/runs/cl/clogging-starch/watershed/flowpaths.parquet",
+      "row_group:column": "0:8"
+    },
+    {
+      "entries": 104763,
+      "path": "/wc1/runs/cl/clogging-starch/wepp/roads/history/1edfd5c34c374c3d8662cc87b720b1b9/wepp/roads/output/interchange/pass_pw0.events.parquet",
+      "row_group:column": "0:14"
+    },
+    {
+      "entries": 125855,
+      "path": "/wc1/runs/cl/clogging-starch/wepp/roads/history/1edfd5c34c374c3d8662cc87b720b1b9/wepp/roads/output/interchange/pass_pw0.events.parquet",
+      "row_group:column": "0:20"
+    },
+    {
+      "entries": 107545,
+      "path": "/wc1/runs/cl/clogging-starch/wepp/roads/output/interchange/pass_pw0.events.parquet",
+      "row_group:column": "0:14"
+    },
+    {
+      "entries": 118657,
+      "path": "/wc1/runs/cl/clogging-starch/wepp/roads/output/interchange/pass_pw0.events.parquet",
+      "row_group:column": "0:20"
+    }
+  ]
+}

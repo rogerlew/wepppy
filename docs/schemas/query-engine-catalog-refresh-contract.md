@@ -12,6 +12,8 @@ Use existing Redis/RQ, default workers and scheduler infrastructure. No new queu
 
 The WMesque and Runs catalog queue implementations are precedents for transactional admission and concurrent invalidation handling, not a shared catalog data model. Mere duplicate suppression does not establish eventual consistency.
 
+The proposed [shared asset declaration contract](shared-project-asset-declarations-contract.md) governs the first shadow comparison of producer-owned names. Existing publication, reader and scope contracts govern production pending validation.
+
 ## Migration policy and interfaces
 
 Introduce explicit `request_catalog_refresh(wd, asset_path=None)` for migrated producers. `asset_path=None` requests full reconciliation. The receipt describes durable intent and admission separately: scope, request identifier, `pending|queued|running|failed|current` state, optional canonical `job_id`, and safe error code. It MUST NOT claim an RQ job exists when enqueue has failed or coalesced without a known job.
@@ -363,3 +365,72 @@ See the [bounded DEM contract](declarative-dem-v1-contract.md).
 The DEM v1 consumer is an existing zero-write elevation query. Prepare pending
 catalogs through shared read-only finalization; no post-freeze publication
 exception is granted. Its final build record path exists before manifest creation.
+
+## GL catalog readiness handshake
+
+GL-CATALOG-01 implemented and locally validated. The
+[HTTP access contract](query-engine-http-access-contract.md#gl-catalog-readiness-handshake)
+defines the browser handshake. The dashboard opts into background preparation
+to prevent parallel layer requests from each collecting catalog metadata.
+Legacy synchronous readers and explicit forced activation retain their
+existing contracts.
+
+Preparation first uses bounded catalog and receipt reads. When a catalog is
+missing or unusable, the automatic path may create one repair receipt under
+the existing scope and incarnation guard. Recheck while holding that guard so
+concurrent clients reuse pending intent. Use nonblocking guard acquisition. Register the scope in the existing Redis
+dirty index using bounded Redis I/O and let the scheduler perform
+incarnation-scoped admission. Existing pending receipts retain their scope
+and content. Full tree work runs in a compatible worker. Workers handling
+browser-preparable scopes must derive the exact authorization parent from
+managed layout and apply HTTP-equivalent source containment before reads or
+publication. Revalidate scope and incarnation in the worker. A readonly, unmanaged, or disabled target that needs
+repair receives an explicit unavailable outcome. A usable catalog remains
+queryable in those modes.
+
+Ready requires a readable catalog and no outstanding refresh work for the
+scope. A valid legacy or synchronously published catalog can be ready without
+an async sidecar. Where a publication claim is used, verify its binding to
+catalog bytes and incarnation. An RQ result alone never establishes readiness.
+Status requests only read this state. A failed attempt retains durable intent.
+
+Check freshness at context preparation and again for required sources before
+SQL. Wait-mode checks never perform inline repair. In the artifact-to-receipt
+gap, a query that finds verified stale metadata for an authorized required
+dataset must create or coalesce durable targeted repair intent and register
+the scope for scheduler admission before returning preparing, or return an explicit unavailable
+outcome. Actual absence of an optional dataset follows existing query
+missing-data semantics. Preserve source containment, including canonical
+parent-backed selection. A retry re-enters the current handshake within the
+browser's wait budget.
+
+## Admin admission and health snapshot
+
+The Admin/Root page at `/rq/info-details` shows two read-only catalog panels on
+each manual refresh, independent of the selected job queues. Catalog admission
+shows the enable flag, observed pause owner and remaining TTL (including no
+expiry), worker compatibility and suspension, ordinary default backlog,
+outstanding permits and uncertain reservations. Show simultaneous blockers,
+including an expired RQ job under a pause. A clear snapshot describes the
+observed gates and gives no guarantee of future admission.
+
+Catalog health shows the last committed general scheduler tick in UTC, cycle
+progress and completion, inventory visits, pending locator count, known dirty
+locator count and reconciliation failures. Publish a compact, configuration-bound
+summary alongside the normal cursor so page loads avoid the fleet-sized cursor,
+directory scans and job payloads. Report missing, unsupported or malformed
+telemetry as unavailable. Preserve queue tables when catalog telemetry alone
+fails. A scheduler tick or cycle completion cannot certify per-run publication.
+This distinction matters when admission is paused while the scheduler still runs.
+
+## Rocket batch-owner admission
+
+On shared default, refresh producers watch the optional RQ Redis string
+`query-catalog:batch-admission:v1:batch-owner-namespace` alongside the admission
+ledger. Its value selects a configured batch namespace. Within that namespace
+the first relative path component identifies the filesystem guard owner across
+root aliases. Two outstanding refresh reservations for that owner defer a new
+refresh with `query_catalog_owner_capacity_pending`. Terminal evidence releases
+capacity under the existing execution-accounting rules. Deferred scopes keep
+their receipts and the scheduler continues its bounded rotation. The global
+permit ceiling, ordinary queue priority and inventory admission still apply.

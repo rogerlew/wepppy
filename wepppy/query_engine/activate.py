@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from collections.abc import Callable, Iterable
 
+from wepppy.project_assets import WATERSHED_HILLSLOPES
 from wepppy.runtime_paths.parquet_sidecars import list_existing_retired_root_resources
 from .catalog_refresh import catalog_snapshot, publish_catalog, is_refresh_path
 
@@ -60,7 +61,9 @@ def _collect_nodir_parquet_targets(base: Path) -> dict[str, Path]:
             return False
         return _is_allowed_target(base, resolved)
 
+    hillslopes = WATERSHED_HILLSLOPES.relative_path()
     canonical_targets = {
+        hillslopes: base / hillslopes,
         "landuse/landuse.parquet": base / "landuse" / "landuse.parquet",
         "soils/soils.parquet": base / "soils" / "soils.parquet",
     }
@@ -77,7 +80,7 @@ def _collect_nodir_parquet_targets(base: Path) -> dict[str, Path]:
     watershed_dir = base / "watershed"
     if watershed_dir.is_dir():
         for candidate in sorted(watershed_dir.glob("*.parquet")):
-            if _allowed_file(candidate):
+            if candidate != canonical_targets[hillslopes] and _allowed_file(candidate):
                 targets[f"watershed/{candidate.name}"] = candidate
 
     return targets

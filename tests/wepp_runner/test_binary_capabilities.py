@@ -112,3 +112,44 @@ def test_in_place_binary_change_with_restored_mtime_rejects_stale_sidecar(pair):
     os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
     with pytest.raises(ValueError, match='sha256'):
         capabilities.get_binary_capabilities('wepp_new')
+
+
+def test_capacity_is_separate_from_boolean_features_and_tracks_revision(pair):
+    original=capabilities.get_binary_capabilities('wepp_new')
+    assert capabilities.get_soil_input_capacity('wepp_new')==10
+    before=capabilities.binary_selection_revision(('wepp_new',))
+    for path in pair:update(path,'soil_input_capacity',23)
+    assert capabilities.get_soil_input_capacity('wepp_new')==23
+    assert capabilities.get_binary_capabilities('wepp_new')==original
+    assert capabilities.binary_selection_revision(('wepp_new',))!=before
+
+
+@pytest.mark.parametrize('bad',[None,True,False,0,24,23.0,'23',[],{}])
+def test_invalid_capacity_declaration(pair,bad):
+    update(pair[0],'soil_input_capacity',bad)
+    with pytest.raises(ValueError,match='soil_input_capacity'):
+        capabilities.get_soil_input_capacity('wepp_new')
+
+
+def test_capacity_mismatch_and_absence(pair):
+    update(pair[0],'soil_input_capacity',23)
+    with pytest.raises(ValueError,match='capacities disagree'):
+        capabilities.get_soil_input_capacity('wepp_new')
+    for path in pair:Path(str(path)+'.json').unlink()
+    assert capabilities.get_soil_input_capacity('wepp_new')==10
+
+
+def test_actual_run_soil_rejected_after_binary_downgrade(pair,tmp_path):
+    from wepp_runner.wepp_runner import _validate_run_soil_capacity
+    depths=[200+50*i for i in range(23)]
+    text="7778\ncomment\n1 0\n'profile' 'loam' 23 0.2 0.75 400000 0.00008 2\n"
+    text+=''.join(f'{d} 1.3 36 2 .3 .1 40 20 2 15 5\n' for d in depths)+'1 10000 .01\n'
+    soil=tmp_path/'actual.sol';soil.write_text(text)
+    deck=tmp_path/'p1.run';deck.write_text('actual.sol\n')
+    before=soil.read_bytes()
+    for path in pair:update(path,'soil_input_capacity',23)
+    _validate_run_soil_capacity(deck,tmp_path,'wepp_new')
+    for path in pair:update(path,'soil_input_capacity',10)
+    with pytest.raises(ValueError,match='10-layer limit'):
+        _validate_run_soil_capacity(deck,tmp_path,'wepp_new')
+    assert soil.read_bytes()==before

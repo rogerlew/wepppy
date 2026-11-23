@@ -215,19 +215,28 @@ def run_prism_revision_build(climate, *, verbose=False) -> None:
             helpers._retrieve_prism_revision_tiles(worker, map_obj, ppt, tmin, tmax)
             ppts, tmins, tmaxs = helpers._collect_prism_revision_monthlies(watershed, ppt, tmin, tmax)
             cli = helpers.ClimateFile(snapshot["source"][0])
+            raw_tdmean_c = None
+            if snapshot["climate_mode"] == ClimateMode.Prism800m:
+                import numpy as np
+                import pandas as pd
+
+                source = Path(stage) / "prism800m-source-ws.parquet"
+                shutil.copy2(snapshot["raw_prism"][0], source)
+                raw = pd.read_parquet(source, columns=["tdmean"])
+                dates = raw.index
+                if (not isinstance(dates, pd.DatetimeIndex) or dates.tz is not None
+                        or dates.hasnans or not dates.equals(dates.normalize())):
+                    raise ValueError("PRISM dewpoint requires daily calendar dates")
+                raw_tdmean_c = (
+                    np.ascontiguousarray(dates.year * 10000 + dates.month * 100 + dates.day, dtype=np.int32),
+                    np.ascontiguousarray(raw.tdmean, dtype=np.float64),
+                )
             with ThreadPoolExecutor(max_workers=helpers.NCPU) as executor:
                 futures, par_fns, cli_fns = helpers._submit_prism_revision_futures(
-                    worker, executor, watershed, cli, stage, ppts, tmaxs, tmins, ppt, tmin, tmax
+                    worker, executor, watershed, cli, stage, ppts, tmaxs, tmins, ppt, tmin, tmax,
+                    raw_tdmean_c=raw_tdmean_c,
                 )
                 helpers._wait_for_prism_revision_futures(worker, futures)
-            if climate.climate_mode == ClimateMode.Prism800m:
-                import pandas as pd
-                from wepppy.climates.prism.wepp_adapter import floor_dewpoint
-                shutil.copy2(snapshot["raw_prism"][0], Path(stage) / "prism800m-source-ws.parquet")
-                raw = pd.read_parquet(Path(stage) / "prism800m-source-ws.parquet")
-                for filename in cli_fns.values():
-                    floor_dewpoint(Path(stage) / filename, raw.tdmean,
-                                   Path(stage) / (filename + "-dewpoint.csv"))
             with finalize(climate) as publications:
                 _check_inputs(climate, climate_inputs, snapshot, prism=True)
                 if retain_attempt:

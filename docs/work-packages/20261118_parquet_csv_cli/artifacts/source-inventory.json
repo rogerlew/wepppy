@@ -1,0 +1,15 @@
+{
+  ".gitignore": "4e963d203517877c24ae60844159bf6a4b29ac9fcc946cb465dd1b2655285c89",
+  "README.md": "956388ea37daf92a8fc86d63fef96883e8b0fa5ca016549d70b276585e3874db",
+  "benchmark.py": "6b5577439ee89f3f72a03489b686d2f53f50e46e39a43d378a70d0a60f806e18",
+  "harness/__init__.py": "1c94074a923911d991297dd20dbbf4d38a373c1522c9bbeca514de0943728b33",
+  "harness/provenance.py": "d47916db45de0a16d9bea559148d28626527968737b7d54848ad4b92db8c7d34",
+  "harness/runner.py": "7d1771a40868cf611592d058b35e6c4f3e05c63290b1898bb0121d46d9376c1b",
+  "rust/Cargo.lock": "21f615ebc43c9d467cdbf84f3e21155e450fdda9ac6e506e42b0822e02e81800",
+  "rust/Cargo.toml": "ff71fe74054de236604a4cea682d7bfea57e0c4f0de008668e7f9c2e8b3b4f3c",
+  "rust/src/compact.rs": "a26c408f20dac36a23b794675261f1b7fedd1165893871afe531789f3dd406fd",
+  "rust/src/main.rs": "65d52bb659f8f06ce6dbeccd439b9d16704eca64f87abb8596c902472db53e78",
+  "rust/src/preflight.rs": "5767dcc11661d0592a7e2ef5c7a4355a9d9ec05e4d8eddae9107e2116a91ad64",
+  "rust/src/sha256.rs": "43d871e94e9332ee742c129e4ecd7d910cdcaced96e6e48904acb5ae991505bd",
+  "tests/test_converter.py": "a3098d157117f84952f760d12b22c2add2ab5dbb1e7db22f10a9ef1775c9845d"
+}

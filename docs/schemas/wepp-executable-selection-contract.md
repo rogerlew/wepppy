@@ -80,6 +80,14 @@ geometry with live compatible tuples, while the executable field enum is
 filtered for the current input requirements. `executable_revision` identifies live role
 bytes and declarations separately from the stored `provider_revision`.
 
+### Run-page deprecation of `latest` (2026-11-20)
+
+WEPP Exec excludes the deprecated `latest` alias from new selections on the
+run page. This is a presentation exception to parity with the schema enum.
+The provider, API and submission validator retain existing acceptance rules.
+The [WEPP Exec version selection contract](../ui-docs/contracts/wepp-exec-version-selection-contract.md)
+defines how the run page displays a saved alias.
+
 ### Backend-independent executable compatibility (2026-11-06)
 
 Selection conformance: 305 scoped tests and wepp1 template/schema checks pass.
@@ -132,3 +140,23 @@ selection; retain current binary identity and actual generated MOFE outputs.
 Preserve source soil/management inputs. Capability support does not establish
 numerical stability for every project. Changing releases requires matching
 hillslope and watershed outputs under the existing runner/PASS contracts.
+
+## Soil input capacity (2026-11-18)
+
+Paired sidecars may declare integer `features.soil_input_capacity` in [1, 23].
+This is separate from boolean selection features; boolean capability APIs retain
+their current return shape. Missing declarations retain historical ten-horizon
+behavior. Both roles must agree, and explicit capacity declarations require the
+existing release/source and executable SHA-256 checks. Invalid types, bounds,
+role/source/digest or paired mismatches fail explicitly. Capability freshness
+includes the effective capacity. The new release declares 23 input horizons,
+while calculation capacity remains ten. No automatic project/default migration.
+Before invocation, validate consumed soil counts against the selected pair.
+Generated writers enforce the same limit before publication. Uploaded-input
+admission/byte-preservation policy remains unchanged. See ADR-0150 and the
+generated-soil boundary contract for propagation and artifact acceptance.
+
+Provider role identities retain their historical form for effective capacity ten.
+Other capacities append `:soil_capacity=N` (integer 1–23); capability-graph
+validation accepts both forms. This binds changed capacity to registry freshness
+without invalidating historical identities solely through serialization changes.

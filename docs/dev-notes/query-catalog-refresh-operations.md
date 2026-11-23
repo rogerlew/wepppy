@@ -73,6 +73,15 @@ distinct while sharing their top-level owner's lifecycle guard.
 
 ## Inspecting progress and failures
 
+Admin and Root operators can open `/weppcloud/rq/info-details` and refresh the
+snapshot. **Catalog admission** shows concurrent blockers. A pause with no
+expiry and an uncertain reservation both need investigation. **Catalog health**
+shows the timestamp and age of the last committed scheduler tick, cycle
+timestamps, locator counts and errors. The summary first appears when an
+updated scheduler commits a general reconciliation tick for the same
+configuration. Check project publication evidence below for run-specific
+freshness.
+
 Use existing authorized project browse/download paths:
 
 - `_query_engine/catalog.json`: last published asset catalog.
@@ -258,3 +267,25 @@ now covers inventory admission, worker consumption and published catalog content
 the earlier handwritten batch/stub dispatch check did not establish that boundary.
 The coordinated production rollout is tracked in the
 [deployment package](../work-packages/20261105_production_notifications_catalog_cutover/package.md).
+
+## GL Dashboard readiness
+
+GL first calls catalog preparation and polls the run-scoped status until Query
+Engine can serve result queries. The HTTP path records or joins durable intent,
+registers the scope in the dirty index, and returns. The scheduler admits work
+using the existing maintenance budget. A two-second retry hint covers ordinary
+polling and brief guard contention. GL offers Retry after its wait budget or an
+unavailable result. Check project refresh records, scheduler dirty discovery,
+and worker compatibility when preparation does not progress. The worker may
+still finish after the browser stops waiting.
+
+Before enabling GL preparation, drain old catalog jobs and verify that the
+scheduler and every eligible default worker run the containment-capable
+revision and advertise `browser_prepare_protocol: 1`. Verify that the
+Query Engine and workers have matching roots, storage mapping, and enabled
+settings. Changing the worker capability changes the dirty-index identity.
+The existing scheduler inventory rediscovers durable receipts from earlier
+identities. Keep GL preparation disabled until the old scheduler and workers
+have been retired. Before rollback to a worker without that capability, remove
+the browser prepare surface and drain catalog jobs and browser-generated
+receipts. Use the existing coordinated deployment fence.

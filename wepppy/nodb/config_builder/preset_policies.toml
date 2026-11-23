@@ -341,6 +341,14 @@ id = "lt-wepp_latest"
 overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
 
 [[presets]]
+id = "i-crews"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "i-crews-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
 id = "lt"
 overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
 

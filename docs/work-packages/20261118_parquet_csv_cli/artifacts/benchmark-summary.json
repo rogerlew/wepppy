@@ -1,0 +1,110 @@
+[
+  {
+    "file": "H.wat.parquet",
+    "methods": {
+      "python": {
+        "samples": 3,
+        "median_seconds": 300.56732217408717,
+        "min_seconds": 297.34067735262215,
+        "max_seconds": 305.75339232804254,
+        "max_peak_upper_bound_kib": 1503056,
+        "output_hashes": [
+          "3b46f65692f3fbab2db74891eb1ce647114c640f021c36cc3e3a156c969c7231"
+        ]
+      },
+      "native": {
+        "samples": 3,
+        "median_seconds": 6.7853150349110365,
+        "min_seconds": 6.768905412871391,
+        "max_seconds": 6.807260258123279,
+        "max_peak_upper_bound_kib": 211964,
+        "output_hashes": [
+          "c0c5b56c2b6c1b04e52ddf31c4c6ca1bdf3717075971fc3ba201bb859337dc05"
+        ]
+      },
+      "rust": {
+        "samples": 3,
+        "median_seconds": 16.83814786374569,
+        "min_seconds": 16.097407505381852,
+        "max_seconds": 16.97887545498088,
+        "max_peak_upper_bound_kib": 57204,
+        "output_hashes": [
+          "3b46f65692f3fbab2db74891eb1ce647114c640f021c36cc3e3a156c969c7231"
+        ]
+      }
+    },
+    "speedup": 17.850379068189582
+  },
+  {
+    "file": "chnwb.parquet",
+    "methods": {
+      "python": {
+        "samples": 3,
+        "median_seconds": 14.79605431202799,
+        "min_seconds": 14.595897572580725,
+        "max_seconds": 14.85387725988403,
+        "max_peak_upper_bound_kib": 267640,
+        "output_hashes": [
+          "f8004a93ddbabfabb518be762d19c695f4927d66b007b3087aced622f027ba8d"
+        ]
+      },
+      "native": {
+        "samples": 3,
+        "median_seconds": 0.33993277605623007,
+        "min_seconds": 0.3348982520401478,
+        "max_seconds": 0.3428849969059229,
+        "max_peak_upper_bound_kib": 146304,
+        "output_hashes": [
+          "0765d2b506bcc002cf9ee0915d80494d6a10d0a75da5aeb2f0cb0723587f93f1"
+        ]
+      },
+      "rust": {
+        "samples": 3,
+        "median_seconds": 0.9797708378173411,
+        "min_seconds": 0.9778155763633549,
+        "max_seconds": 0.9874769318848848,
+        "max_peak_upper_bound_kib": 62308,
+        "output_hashes": [
+          "f8004a93ddbabfabb518be762d19c695f4927d66b007b3087aced622f027ba8d"
+        ]
+      }
+    },
+    "speedup": 15.101545933934423
+  },
+  {
+    "file": "pass_pw0.events.parquet",
+    "methods": {
+      "python": {
+        "samples": 3,
+        "median_seconds": 38.14999904669821,
+        "min_seconds": 37.994564700406045,
+        "max_seconds": 38.411859198939055,
+        "max_peak_upper_bound_kib": 336048,
+        "output_hashes": [
+          "02d9895fb7aea89780d1eff4f18963516e0b7b307e88070af468e15d04fe981d"
+        ]
+      },
+      "native": {
+        "samples": 3,
+        "median_seconds": 0.6995572918094695,
+        "min_seconds": 0.6943543376401067,
+        "max_seconds": 0.7215177179314196,
+        "max_peak_upper_bound_kib": 195456,
+        "output_hashes": [
+          "431b46848847bccbe7a72a73ed5294f4c7fe032bb8f38394bb0d39fe73c9c1e4"
+        ]
+      },
+      "rust": {
+        "samples": 3,
+        "median_seconds": 3.1298797479830682,
+        "min_seconds": 1.7785599078051746,
+        "max_seconds": 4.095987998880446,
+        "max_peak_upper_bound_kib": 70224,
+        "output_hashes": [
+          "02d9895fb7aea89780d1eff4f18963516e0b7b307e88070af468e15d04fe981d"
+        ]
+      }
+    },
+    "speedup": 12.188966388016194
+  }
+]

@@ -741,3 +741,103 @@ def test_culvert_uuid_service_human_delegation_rechecks_membership(
     allowed[0] = False
     assert client.post(url, headers=headers, json={'datasets': ['data/sample.parquet']}).status_code == 403
     assert {str(p.relative_to(child)): p.read_bytes() for p in child.rglob('*') if p.is_file()} == before
+
+
+@pytest.mark.parametrize(('method', 'suffix'), [
+    ('POST', '/catalog/prepare'), ('GET', '/catalog/status'),
+])
+def test_private_catalog_handshake_denial_has_no_effect(boundary, method, suffix):
+    client, run, calls = boundary
+    response = client.request(method, '/runs/ab-private/cfg' + suffix,
+                              headers={'Sec-Fetch-Site': 'same-origin'}, json={})
+    assert response.status_code == 401
+    assert not (run / '_query_engine').exists()
+    assert calls == []
+
+
+def test_browser_catalog_preparation_checks_origin_and_selector(boundary, monkeypatch):
+    from wepppy.query_engine.app import access
+
+    client, run, calls = boundary
+    monkeypatch.setattr(access.NoDbBase, 'ispublic', lambda *_args: True)
+    (run / 'workspace').mkdir()
+    url = '/runs/ab-private/cfg/catalog/prepare'
+    assert client.post(url, json={}).status_code == 403
+    assert client.post(url, json={'scenario': 'workspace'},
+                       headers={'Sec-Fetch-Site': 'same-origin'}).status_code in {400, 404}
+    assert not (run / '_query_engine').exists()
+    assert calls == []
+
+
+def test_readiness_with_corrupt_incarnation_uses_safe_read_only_error(boundary):
+    import json
+    from wepppy.query_engine import catalog_refresh
+
+    client, run, calls = boundary
+    (run / 'PUBLIC').touch()
+    directory = run / catalog_refresh.REFRESH_PATH
+    directory.mkdir(parents=True)
+    scope = catalog_refresh.resolve_scope(run)
+    marker = directory / 'incarnation.json'
+    marker.write_text(json.dumps({'scope_id': scope.scope_id, 'managed': False}))
+    before = marker.read_bytes()
+    response = client.get('/runs/ab-private/cfg/catalog/status')
+    assert response.status_code == 503
+    assert response.json() == {'state': 'unavailable', 'code': 'catalog_refresh_unavailable'}
+    assert not (run / 'exceptions.log').exists()
+    assert marker.read_bytes() == before
+    assert calls == []
+
+
+def test_prepare_keeps_receipt_when_dispatch_redis_is_unavailable(boundary, monkeypatch, tmp_path):
+    import json
+    from redis.client import Redis
+    from wepppy.query_engine import catalog_refresh
+    from wepppy.rq import query_catalog_rq
+
+    client, run, calls = boundary
+    (run / 'PUBLIC').touch()
+    monkeypatch.setenv('QUERY_CATALOG_REFRESH_ENABLED', 'true')
+    monkeypatch.setenv('QUERY_CATALOG_ROOTS_JSON', json.dumps([{
+        'path': str(run.parents[1]), 'namespace': 'readiness-dispatch-test',
+        'coordination': str(tmp_path / 'locks'), 'layout': 'sharded',
+    }]))
+    monkeypatch.setattr(query_catalog_rq.redis, 'Redis', Redis)
+    monkeypatch.setattr(query_catalog_rq, 'redis_connection_kwargs',
+                        lambda _: {'unix_socket_path': str(tmp_path / 'absent.sock')})
+    response = client.post('/runs/ab-private/cfg/catalog/prepare', json={},
+                           headers={'Sec-Fetch-Site': 'same-origin'})
+    assert response.status_code == 503
+    assert response.json() == {'state': 'unavailable', 'code': 'catalog_refresh_unavailable'}
+    assert len(catalog_refresh.pending_catalog_requests(run)) == 1
+    assert not (run / '_query_engine/catalog.json').exists()
+    assert calls == []
+
+
+@pytest.mark.parametrize('state', ['running', 'failed'])
+def test_existing_query_credential_still_honors_fork_guard(boundary, signed_token, session_state, state):
+    import redis
+    from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+
+    client, run, calls = boundary
+    _dataset(run)
+    _mark_session()
+    _session_cookie(client, signed_token)
+    redis.Redis(**redis_connection_kwargs(RedisDB.RQ)).hset('rq:fork:planned:ab-private', 'state', state)
+
+    response = client.post('/runs/ab-private/cfg/query', headers={'Sec-Fetch-Site': 'same-origin'},
+                           json={'datasets': ['data/sample.parquet'], 'catalog_mode': 'wait'})
+    assert response.status_code == 409
+    assert calls == []
+
+
+def test_wrong_config_query_cookie_cannot_prepare_catalog(boundary, signed_token, session_state):
+    client, run, calls = boundary
+    _mark_session()
+    _session_cookie(client, signed_token, config='cfg')
+
+    response = client.post('/runs/ab-private/foreign/catalog/prepare', json={},
+                           headers={'Sec-Fetch-Site': 'same-origin'})
+    assert response.status_code == 401
+    assert calls == []
+    assert not (run / '_query_engine').exists()

@@ -653,7 +653,7 @@ def prep_soil(args: Tuple[Any, ...]) -> Tuple[str, float]:
         src_fn, dst_fn, clip=clip_soils, clip_depth=clip_soils_depth,
         minimum=clip_soils_minimum, preserve_input_format=preserve_input_format,
         initial_sat=initial_sat, kslast=kslast)
-    soilu = WeppSoilUtil(src_fn, **({"preserve_input_format": True} if preserve_input_format else {}))  # internally uses rosetta
+    soilu = WeppSoilUtil(src_fn, max_horizons=args[11] if len(args) > 11 else 10, **({"preserve_input_format": True} if preserve_input_format else {}))  # internally uses rosetta
     if not preserve_input_format and _soil_has_symbolic_wepp_parameters(soilu):
         # Match legacy Tenerife template processing:
         # WeppSoilUtil(..., compute_erodibilities=True, compute_conductivity=True).to7778()
@@ -735,7 +735,7 @@ def prep_multi_ofe_hillslope(
         allow_materialize_fallback=True,
     ) as soil_src_fn:
         preserve_input_format = bool(args[15]) if len(args) > 15 else False
-        soilu = WeppSoilUtil(soil_src_fn, **({"preserve_input_format": True} if preserve_input_format else {}))
+        soilu = WeppSoilUtil(soil_src_fn, max_horizons=args[18] if len(args) > 18 else 10, **({"preserve_input_format": True} if preserve_input_format else {}))
         if not preserve_input_format and _soil_has_symbolic_wepp_parameters(soilu):
             soilu.recompute_wepp_parameters()
             soilu = soilu.to7778()
@@ -1288,6 +1288,12 @@ class Wepp(NoDbBase):
     def wepp_bin(self, value: str) -> None:
         require_wepp_input_policy(self, binary=value)
         self._wepp_bin = value
+
+    @property
+    def soil_input_capacity(self) -> int:
+        """Capacity of the selected matched executable pair, not calculation layers."""
+        from wepp_runner.wepp_binary_capabilities import get_soil_input_capacity
+        return get_soil_input_capacity(self.wepp_bin)
 
     @property
     def pass_family(self) -> str:
@@ -2198,6 +2204,7 @@ class Wepp(NoDbBase):
                     single_input_uploads_enabled(self) and int(soils.mode) == 5,
                     anisotropy,
                     developer_mode,
+                    self.soil_input_capacity,
                 )
             )
 
@@ -2638,7 +2645,7 @@ class Wepp(NoDbBase):
             lines.append('    400	1.5	0.5	1	0.242	0.1145	66.8	7	3	11.3	20\n')
             lines.append('1 10000 0.0001\n')
 
-        soil_text = ensure_200mm_boundary(''.join(lines))
+        soil_text = ensure_200mm_boundary(''.join(lines), max_horizons=self.soil_input_capacity)
         with open(_join(runs_dir, 'pw0.sol'), 'w') as fp:
             fp.write(soil_text)
 
@@ -2690,7 +2697,7 @@ class Wepp(NoDbBase):
             lines.append('    400	66.8	7	3	11.3	20\n')
             lines.append('1 25 0.0001\n')
 
-        soil_text = ensure_200mm_boundary(''.join(lines))
+        soil_text = ensure_200mm_boundary(''.join(lines), max_horizons=self.soil_input_capacity)
         with open(_join(runs_dir, 'pw0.sol'), 'w') as fp:
             fp.write(soil_text)
 

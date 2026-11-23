@@ -1,0 +1,44 @@
+{
+  "run_id": 44425333040,
+  "head_sha": "97a82588310dc91a9e3dd2b11547200db0a6dd3a",
+  "stats": {
+    "startTime": "2026-11-19T00:16:11.234Z",
+    "duration": 94633.996,
+    "expected": 16,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  },
+  "files": [
+    {
+      "path": "playwright-controllers-nightly/test-results/ci-browser-result.json",
+      "size_bytes": 33739,
+      "sha256": "7a5d2c41dde208e5a2e81fc85bf7017ebe3c9e41060ec2762b790032b7bbc9e8"
+    },
+    {
+      "path": "playwright-controllers-nightly/playwright-report/index.html",
+      "size_bytes": 534072,
+      "sha256": "8285b0785ae383f88db21f5b7a9109ad0d9054d78e5ce1d9a46588b72bdb677c"
+    },
+    {
+      "path": "playwright-controllers-nightly/playwright-report/data/cf06724e3e6a04fb9c111660474daaaa1b208cf2.md",
+      "size_bytes": 134360,
+      "sha256": "91d10c0e5307f21468c3e330002eb9d1cc9425bed392674fb647b115f04d17d7"
+    },
+    {
+      "path": "playwright-controllers-nightly/playwright-report/data/bf947878a2a4632a9bbf810e73466239264469e5.md",
+      "size_bytes": 133770,
+      "sha256": "a5acdd80d796581b6a5b703249bde92a01c19f9358c160f4840341c732e87555"
+    },
+    {
+      "path": "playwright-controllers-nightly/test-results/controller-regression-cont-13b01-race-and-preserves-job-hint-runs0/error-context.md",
+      "size_bytes": 134360,
+      "sha256": "91d10c0e5307f21468c3e330002eb9d1cc9425bed392674fb647b115f04d17d7"
+    },
+    {
+      "path": "playwright-controllers-nightly/test-results/controller-regression-cont-3a622-race-and-preserves-job-hint-runs0/error-context.md",
+      "size_bytes": 133770,
+      "sha256": "a5acdd80d796581b6a5b703249bde92a01c19f9358c160f4840341c732e87555"
+    }
+  ]
+}

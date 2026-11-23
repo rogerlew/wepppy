@@ -233,7 +233,11 @@ Request contract clarifications:
   Missing precondition hash returns `428 PRECONDITION_REQUIRED`.
 - `build-landuse` `landuse_management_mapping_selection` must be a supported
   mapping key; path-like or unknown selections are rejected with
-  `invalid_mapping_selection`.
+  `invalid_mapping_selection`. The exact `eu-esdac-disturbed` key selects
+  the [Disturbed ESDAC catalog](european-landuse-mapping-contract.md#reconciled-esdac-and-european-fire-scenarios)
+  for ESDAC-coded uploads. A single-OFE map switch can clear an inherited
+  buffer code absent from the new catalog at publication. An explicit
+  buffer selection still requires a valid management code.
 
 Run-root targeting policy for migrated landuse routes:
 - Optional query parameter `pup` is supported for non-composite runids.
@@ -615,6 +619,9 @@ Watershed map-input normalization (`fetch-dem-and-build-channels`):
 - The backend derives missing `map_center` (bbox midpoint) and missing
   `map_zoom` (fit zoom from bounds).
 - Explicitly supplied `map_center`/`map_zoom` still override derived values.
+- The effective config can limit channel extents. See the
+  [channel delineation map boundary contract](channel-delineation-map-boundary-contract.md)
+  for extent authority and admission error codes.
 
 ## Internal Admin Debug Endpoints
 These routes are intentionally **internal/admin** and are not part of the

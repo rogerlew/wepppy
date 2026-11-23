@@ -707,12 +707,19 @@ class BatchRunner(NoDbBase):
             )
 
         if self.is_task_enabled(TaskEnum.build_landuse) and prep[str(TaskEnum.build_landuse)] is None:
-            logger.info(f'building landuse')
+            logger.info('building landuse')
+
+            def build_landuse():
+                if getattr(landuse, "_batch_user_defined_raw_digest", None):
+                    _run_with_directory_root_lock(
+                        runid_wd, "watershed", landuse.build,
+                        purpose="batch-run-build-uploaded-landuse",
+                    )
+                else:
+                    landuse.build()
+
             _run_with_directory_root_lock(
-                runid_wd,
-                "landuse",
-                lambda: landuse.build(),
-                purpose="batch-run-build-landuse",
+                runid_wd, "landuse", build_landuse, purpose="batch-run-build-landuse",
             )
 
         if self.is_task_enabled(TaskEnum.build_soils) and prep[str(TaskEnum.build_soils)] is None:

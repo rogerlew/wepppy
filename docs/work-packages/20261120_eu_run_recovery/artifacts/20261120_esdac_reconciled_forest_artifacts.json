@@ -1,0 +1,227 @@
+{
+  "runid": "unsinkable-succinylcholine",
+  "fork_job_id": "53be16b5-7b6f-4838-955d-db92a92e3ab3",
+  "jobs": {
+    "accepted": "1ee91656-951d-42d1-becf-4c098713a0fe",
+    "soils": "f3c4ce03-24f6-4d9e-8d3a-49927240b944",
+    "wepp": "3143f49d-be2d-4fef-917e-13303f1115ba"
+  },
+  "raster_sha256": "3f553a4d0c40df43be7c3e5e66f75fe9d64cd16d31b29c4567e7952f56702c19",
+  "landuse": {
+    "hillslopes": 58,
+    "classes": 20,
+    "applied_mapping": "eu-esdac-disturbed",
+    "inactive_buffer": null
+  },
+  "soil_quality": {
+    "accepted": 58,
+    "rejected": 0,
+    "used_project_defaults": 37
+  },
+  "native_model_inputs": {
+    "22": [
+      {
+        "topaz_id": 142,
+        "wepp_id": 30,
+        "class_name": "forest",
+        "management": "GeoWEPP/forest_perrenial.man",
+        "cover": [
+          0.9,
+          1.0,
+          1.0
+        ],
+        "management_sha256": "eea5fbcb4523c4a7943ed22ad0b7793ce30083340901f57726e847b19a16aac6",
+        "soil_version": 7778.0,
+        "soil_sha256": "b0fc5aba111213ecb2da661385c3503572250aab0f410ee28a512695ae358057"
+      },
+      {
+        "topaz_id": 221,
+        "wepp_id": 50,
+        "class_name": "forest",
+        "management": "GeoWEPP/forest_perrenial.man",
+        "cover": [
+          0.9,
+          1.0,
+          1.0
+        ],
+        "management_sha256": "eea5fbcb4523c4a7943ed22ad0b7793ce30083340901f57726e847b19a16aac6",
+        "soil_version": 7778.0,
+        "soil_sha256": "b0fc5aba111213ecb2da661385c3503572250aab0f410ee28a512695ae358057"
+      },
+      {
+        "topaz_id": 62,
+        "wepp_id": 10,
+        "class_name": "forest",
+        "management": "GeoWEPP/forest_perrenial.man",
+        "cover": [
+          0.9,
+          1.0,
+          1.0
+        ],
+        "management_sha256": "eea5fbcb4523c4a7943ed22ad0b7793ce30083340901f57726e847b19a16aac6",
+        "soil_version": 7778.0,
+        "soil_sha256": "b0fc5aba111213ecb2da661385c3503572250aab0f410ee28a512695ae358057"
+      }
+    ],
+    "129": [
+      {
+        "topaz_id": 172,
+        "wepp_id": 37,
+        "class_name": "grass high sev fire",
+        "management": "UnDisturbed/Grass_High_Severity_Fire.man",
+        "cover": [
+          0.041,
+          0.1,
+          0.1
+        ],
+        "management_sha256": "c0fafb4337f96524d201a5cc03d9493f7fe4d50d416d57568f8725ac2ab7f36b",
+        "soil_version": 7778.0,
+        "soil_sha256": "f66df6333ed7dde179195bfd34486f3a1f7913615b3379991fb041d9a7cf31fb"
+      },
+      {
+        "topaz_id": 242,
+        "wepp_id": 57,
+        "class_name": "grass high sev fire",
+        "management": "UnDisturbed/Grass_High_Severity_Fire.man",
+        "cover": [
+          0.041,
+          0.1,
+          0.1
+        ],
+        "management_sha256": "c0fafb4337f96524d201a5cc03d9493f7fe4d50d416d57568f8725ac2ab7f36b",
+        "soil_version": 7778.0,
+        "soil_sha256": "f66df6333ed7dde179195bfd34486f3a1f7913615b3379991fb041d9a7cf31fb"
+      },
+      {
+        "topaz_id": 91,
+        "wepp_id": 17,
+        "class_name": "grass high sev fire",
+        "management": "UnDisturbed/Grass_High_Severity_Fire.man",
+        "cover": [
+          0.041,
+          0.1,
+          0.1
+        ],
+        "management_sha256": "c0fafb4337f96524d201a5cc03d9493f7fe4d50d416d57568f8725ac2ab7f36b",
+        "soil_version": 7778.0,
+        "soil_sha256": "f66df6333ed7dde179195bfd34486f3a1f7913615b3379991fb041d9a7cf31fb"
+      }
+    ],
+    "130": [
+      {
+        "topaz_id": 173,
+        "wepp_id": 38,
+        "class_name": "grass moderate sev fire",
+        "management": "UnDisturbed/Grass_Moderate_Severity_Fire.man",
+        "cover": [
+          0.25,
+          0.35,
+          0.35
+        ],
+        "management_sha256": "e15cba4cc8b4a88eefec09edff84ddb5a18e5ebc4e65430557b033ef5b0e6ce8",
+        "soil_version": 7778.0,
+        "soil_sha256": "8c2cc16b84dbce83f978f2c16390942c2b8007f50fc940e292aed79209cc78c1"
+      },
+      {
+        "topaz_id": 243,
+        "wepp_id": 58,
+        "class_name": "grass moderate sev fire",
+        "management": "UnDisturbed/Grass_Moderate_Severity_Fire.man",
+        "cover": [
+          0.25,
+          0.35,
+          0.35
+        ],
+        "management_sha256": "e15cba4cc8b4a88eefec09edff84ddb5a18e5ebc4e65430557b033ef5b0e6ce8",
+        "soil_version": 7778.0,
+        "soil_sha256": "8c2cc16b84dbce83f978f2c16390942c2b8007f50fc940e292aed79209cc78c1"
+      },
+      {
+        "topaz_id": 92,
+        "wepp_id": 18,
+        "class_name": "grass moderate sev fire",
+        "management": "UnDisturbed/Grass_Moderate_Severity_Fire.man",
+        "cover": [
+          0.25,
+          0.35,
+          0.35
+        ],
+        "management_sha256": "e15cba4cc8b4a88eefec09edff84ddb5a18e5ebc4e65430557b033ef5b0e6ce8",
+        "soil_version": 7778.0,
+        "soil_sha256": "8c2cc16b84dbce83f978f2c16390942c2b8007f50fc940e292aed79209cc78c1"
+      }
+    ],
+    "131": [
+      {
+        "topaz_id": 181,
+        "wepp_id": 39,
+        "class_name": "grass low sev fire",
+        "management": "UnDisturbed/Grass_Low_Severity_Fire.man",
+        "cover": [
+          0.3,
+          0.6,
+          0.6
+        ],
+        "management_sha256": "c848ed9b2060a1de559e9e09e777bc2f944fba1bbc6c9d8e1576e232437806d2",
+        "soil_version": 7778.0,
+        "soil_sha256": "cef1e262e791bf1157d71624745fff9f9ffe2f084ff17ea00d3621d4b2fb0e92"
+      },
+      {
+        "topaz_id": 93,
+        "wepp_id": 19,
+        "class_name": "grass low sev fire",
+        "management": "UnDisturbed/Grass_Low_Severity_Fire.man",
+        "cover": [
+          0.3,
+          0.6,
+          0.6
+        ],
+        "management_sha256": "c848ed9b2060a1de559e9e09e777bc2f944fba1bbc6c9d8e1576e232437806d2",
+        "soil_version": 7778.0,
+        "soil_sha256": "cef1e262e791bf1157d71624745fff9f9ffe2f084ff17ea00d3621d4b2fb0e92"
+      }
+    ],
+    "132": [
+      {
+        "topaz_id": 102,
+        "wepp_id": 20,
+        "class_name": "grass prescribed fire",
+        "management": "UnDisturbed/Grass_Low_Severity_Fire.man",
+        "cover": [
+          0.3,
+          0.6,
+          0.6
+        ],
+        "management_sha256": "c848ed9b2060a1de559e9e09e777bc2f944fba1bbc6c9d8e1576e232437806d2",
+        "soil_version": 7778.0,
+        "soil_sha256": "f2640b215eb725fb28a410bf2f73c24a8e20185537d5b50a2a7f984a51b51745"
+      },
+      {
+        "topaz_id": 182,
+        "wepp_id": 40,
+        "class_name": "grass prescribed fire",
+        "management": "UnDisturbed/Grass_Low_Severity_Fire.man",
+        "cover": [
+          0.3,
+          0.6,
+          0.6
+        ],
+        "management_sha256": "c848ed9b2060a1de559e9e09e777bc2f944fba1bbc6c9d8e1576e232437806d2",
+        "soil_version": 7778.0,
+        "soil_sha256": "f2640b215eb725fb28a410bf2f73c24a8e20185537d5b50a2a7f984a51b51745"
+      }
+    ]
+  },
+  "wepp_outputs": {
+    "hillslope_pass_files": 58,
+    "watershed_loss_bytes": 619126,
+    "watershed_ebe_rows": 10957,
+    "hillslope_pass_rows": 635506,
+    "watershed_loss_sha256": "04bed75cbf5fa17a0f8d6be2b71c139f3435f995c82858fe613f71f149be606d",
+    "finished_rq_jobs_including_parent": 18
+  },
+  "climate": {
+    "prepared_input_files": 59,
+    "sha256": "69de607b1bd4056f4f80d9a79aad92e8394a8dcf05fb87fec96245df56b8f339"
+  }
+}

@@ -125,3 +125,108 @@ it.each(['_pups/omni/scenarios/missing', '_pups/omni/contrasts/2'])('isolates fo
   await expect(engine.postQueryEngineForScenario({ datasets: [] }, '')).rejects.toThrow('Current Roads unavailable.');
   expect(onRoadsUnavailable).toHaveBeenCalledWith('Current Roads unavailable.');
 });
+
+
+function catalogResponse(status, body, retryAfter = null) {
+  return {
+    status, ok: status < 300,
+    headers: new Headers(retryAfter == null ? {} : { 'Retry-After': retryAfter }),
+    json: async () => body,
+    clone: () => catalogResponse(status, body, retryAfter),
+  };
+}
+
+it('holds parallel results until one shared catalog preparation is ready', async () => {
+  jest.useFakeTimers();
+  try {
+    const onCatalogState = jest.fn();
+    global.fetch
+      .mockResolvedValueOnce(catalogResponse(202, { state: 'preparing', code: 'catalog_preparing' }, '2'))
+      .mockResolvedValueOnce(catalogResponse(200, { state: 'ready' }))
+      .mockResolvedValue(catalogResponse(200, { records: [{ value: 12 }] }));
+    const engine = createQueryEngine({ runid: 'r', config: 'c' }, { onCatalogState });
+    const work = [engine.postQueryEngine({ datasets: ['a'] }), engine.postBaseQueryEngine({ datasets: ['b'] })];
+    await jest.advanceTimersByTimeAsync(1999);
+    expect(global.fetch.mock.calls.map(([url]) => url)).toEqual(['/query-engine/runs/r/c/catalog/prepare']);
+    expect(onCatalogState).toHaveBeenCalledWith(expect.any(String), 'preparing');
+    await jest.advanceTimersByTimeAsync(1);
+    expect(await Promise.all(work)).toEqual([{ records: [{ value: 12 }] }, { records: [{ value: 12 }] }]);
+    expect(global.fetch.mock.calls.map(([url]) => url)).toEqual([
+      '/query-engine/runs/r/c/catalog/prepare', '/query-engine/runs/r/c/catalog/status',
+      '/query-engine/runs/r/c/query', '/query-engine/runs/r/c/query',
+    ]);
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it('rejoins readiness after a late query invalidation', async () => {
+  jest.useFakeTimers();
+  try {
+    global.fetch
+      .mockResolvedValueOnce(catalogResponse(200, { state: 'ready' }))
+      .mockResolvedValueOnce(catalogResponse(202, { state: 'preparing', code: 'catalog_preparing' }, '2'))
+      .mockResolvedValueOnce(catalogResponse(200, { state: 'ready' }))
+      .mockResolvedValueOnce(catalogResponse(200, { records: [] }));
+    const engine = createQueryEngine({ runid: 'r', config: 'c' }, { onCatalogState: jest.fn() });
+    const work = engine.postQueryEngine({ datasets: ['a'] });
+    await jest.advanceTimersByTimeAsync(1999);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    await jest.advanceTimersByTimeAsync(1);
+    expect(await work).toEqual({ records: [] });
+    expect(global.fetch.mock.calls.map(([url]) => url.split('/').pop())).toEqual(['prepare', 'query', 'prepare', 'query']);
+    expect(JSON.parse(global.fetch.mock.calls[1][1].body).catalog_mode).toBe('wait');
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it('retries contended prepare without sending SQL or reporting a terminal failure', async () => {
+  jest.useFakeTimers();
+  try {
+    global.fetch
+      .mockResolvedValueOnce(catalogResponse(503, { code: 'catalog_refresh_unavailable' }, '2'))
+      .mockResolvedValueOnce(catalogResponse(200, { state: 'ready' }))
+      .mockResolvedValueOnce(catalogResponse(200, { records: [{ value: 7 }] }));
+    const onCatalogState = jest.fn();
+    const engine = createQueryEngine({ runid: 'r', config: 'c' }, { onCatalogState });
+    const work = engine.postQueryEngine({ datasets: ['a'] });
+    await jest.advanceTimersByTimeAsync(1999);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    await jest.advanceTimersByTimeAsync(1);
+    expect(await work).toEqual({ records: [{ value: 7 }] });
+    expect(onCatalogState).not.toHaveBeenCalledWith(expect.any(String), 'unavailable', expect.any(String));
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it('drops an old query even after switching away and back to the same scenario', async () => {
+  let finish;
+  let started;
+  const queryStarted = new Promise((resolve) => { started = resolve; });
+  global.fetch
+    .mockResolvedValueOnce(catalogResponse(200, { state: 'ready' }))
+    .mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; started(); }));
+  const engine = createQueryEngine({ runid: 'r', config: 'c' }, { onCatalogState: jest.fn() });
+  setValue('currentScenarioPath', '_pups/omni/scenarios/a');
+  const work = engine.postQueryEngine({ datasets: ['a'] });
+  await queryStarted;
+  engine.scenarioChanged('_pups/omni/scenarios/b');
+  engine.scenarioChanged('_pups/omni/scenarios/a');
+  finish(catalogResponse(200, { records: [{ obsolete: true }] }));
+  await expect(work).rejects.toMatchObject({ name: 'AbortError' });
+});
+
+it('clears a failed readiness check only when the user retries', async () => {
+  global.fetch
+    .mockResolvedValueOnce(catalogResponse(503, { code: 'catalog_refresh_failed' }))
+    .mockResolvedValueOnce(catalogResponse(200, { state: 'ready' }))
+    .mockResolvedValueOnce(catalogResponse(200, { records: [{ value: 7 }] }));
+  const engine = createQueryEngine({ runid: 'r', config: 'c' }, { onCatalogState: jest.fn() });
+  await expect(engine.postQueryEngine({ datasets: ['a'] })).rejects.toMatchObject({ code: 'catalog_preparation' });
+  await expect(engine.postBaseQueryEngine({ datasets: ['b'] })).rejects.toMatchObject({ code: 'catalog_preparation' });
+  expect(global.fetch).toHaveBeenCalledTimes(1);
+  engine.retryCatalogReadiness();
+  expect(await engine.postQueryEngine({ datasets: ['a'] })).toEqual({ records: [{ value: 7 }] });
+});

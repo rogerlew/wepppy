@@ -143,6 +143,10 @@ Example (sync update):
 ```
 
 Landuse first-class route notes (2026-04-24):
+
+Uploaded raster and map incompatibility returns canonical HTTP 400 with
+`error.code="incompatible_landuse_mapping"` under the
+[upload compatibility contract](european-landuse-mapping-contract.md#uploaded-raster-compatibility).
 - Phase 1 synchronous mutators
   (`set-landuse-mode`, `set-landuse-db`, `modify-landuse-coverage`) return
   HTTP `200` with canonical `{"message": ...}` on success and canonical error
@@ -300,6 +304,12 @@ and unrelated callers across single/batch success, SQL/filesystem failures,
 import failures, status aggregation errors, abandoned workers, and retained failed
 jobs after rollback. Implementation and checkpoint are pending;
 do not treat this amendment as deployed redaction.
+
+### Channel extent admission
+
+Configured project boundary checks for channel submissions use the existing
+error envelope. The spatial policy, HTTP statuses and error codes are defined in
+[Channel delineation map boundary](channel-delineation-map-boundary-contract.md).
 
 ### WBT DEM-boundary controlled failure
 
@@ -549,6 +559,13 @@ validated, deployment separate.
 - `error_id` is optional for generic 4xx responses, but **required** for upload-facing errors (see `docs/schemas/upload-endpoint-contract.md`).
 - Job polling not-found:
   - `/rq-engine/api/jobstatus/<job_id>` and `/rq-engine/api/jobinfo/<job_id>` return HTTP 404 with the canonical error payload and `error.code="not_found"`.
+- For Build Climate input exceptions, return the field-specific validation issue
+  or the validator's secret-filtered explanation in both `error.details` and
+  the first `errors` entry. If the validator provides no explanation and the
+  field cannot be identified, include the exception type. Log the original
+  secret-filtered traceback with the response's `error_id` so operators can
+  diagnose rejected submissions before a job exists. Unexpected preparation
+  failures return HTTP 500 with the secret-filtered traceback in `error.details`.
 - Validation error list:
 ```json
 {

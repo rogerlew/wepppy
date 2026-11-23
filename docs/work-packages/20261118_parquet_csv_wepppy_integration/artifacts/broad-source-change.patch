@@ -1,0 +1,12 @@
+diff --git a/wepppy/wepp/management/scripts/man42_5.man.json b/wepppy/wepp/management/scripts/man42_5.man.json
+index d5600d678..2ba9ea579 100644
+--- a/wepppy/wepp/management/scripts/man42_5.man.json
++++ b/wepppy/wepp/management/scripts/man42_5.man.json
+@@ -16,6 +16,7 @@
+     ]
+   },
+   "nofe": 7,
++  "_pmet_plant_names": null,
+   "datver": "98.4",
+   "datver_value": 98.4,
+   "sim_years": 1,

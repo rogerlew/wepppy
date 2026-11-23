@@ -38,6 +38,14 @@ class CatalogRefreshConflict(RuntimeError):
     """The source scope or catalog changed while metadata was collected."""
 
 
+class CatalogNotReady(RuntimeError):
+    """A wait-mode query needs background preparation."""
+
+    def __init__(self, paths: tuple[str, ...] = ()):
+        super().__init__('Query catalog needs preparation')
+        self.paths = paths
+
+
 @dataclass(frozen=True)
 class RootConfig:
     path: Path
@@ -133,6 +141,34 @@ def _owner(root: RootConfig, base: Path) -> Path:
     return root.path.resolve().joinpath(*relative.parts[:depth])
 
 
+def browser_catalog_parent(base: Path) -> Path | None:
+    """Return the exact managed HTTP source parent, if this layout can prepare."""
+    root = _root_for(base)
+    if root is None:
+        return None
+    parts = base.relative_to(root.path.resolve()).parts
+    if root.layout == 'sharded':
+        if len(parts) < 2 or parts[0] != parts[1][:2]:
+            return None
+        depth = 2
+    elif root.layout == 'flat':
+        depth = 1
+    elif root.layout == 'batch' and len(parts) >= 2 and parts[1] == '_base':
+        depth = 2
+    elif len(parts) >= 3 and parts[1] == 'runs':
+        depth = 3
+    else:
+        return None
+    tail = parts[depth:]
+    if not tail:
+        return base
+    if len(tail) == 4 and tail[:3] in {
+        ('_pups', 'omni', 'scenarios'), ('_pups', 'omni', 'contrasts')
+    }:
+        return root.path.resolve().joinpath(*parts[:depth])
+    return None
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     data = json.loads(path.read_text(encoding='utf-8'))
     if not isinstance(data, dict):
@@ -187,7 +223,9 @@ def resolve_scope(wd: str | Path, *, create: bool = False) -> CatalogScope:
                 invalidate_catalog_incarnation(base)
                 return resolve_scope(base)
         else:
-            incarnation = str(data['incarnation'])
+            incarnation = data.get('incarnation')
+            if not isinstance(incarnation, str) or not incarnation:
+                raise ValueError('Invalid catalog incarnation')
             initialization_only = data.get('initialization_only') is True
     identity = _identity(base) if base.exists() else None
     scope = CatalogScope(base, owner, namespace, relative, scope_id, root is not None,
@@ -311,7 +349,7 @@ def redisprep_snapshot_guard(wd: str | Path, *, allow_missing: bool = True) -> I
 
 
 @contextmanager
-def catalog_metadata_guard(wd: str | Path) -> Iterator[None]:
+def catalog_metadata_guard(wd: str | Path, *, blocking: bool = True) -> Iterator[None]:
     """Wait for catalog ownership without opposing lifecycle-owner lock order.
 
     Only acquisition is retried. Release the serializer before waiting so a
@@ -319,11 +357,13 @@ def catalog_metadata_guard(wd: str | Path) -> Iterator[None]:
     """
     while True:
         with ExitStack() as guards:
-            guards.enter_context(_filesystem_guard(wd, snapshot_only=True))
+            guards.enter_context(_filesystem_guard(wd, snapshot_only=True, blocking=blocking))
             try:
                 guards.enter_context(catalog_lifecycle_guard(wd, blocking=False))
             except BlockingIOError:
-                pass  # Contended acquisition only; release both guards below.
+                if not blocking:
+                    raise
+                # Release both guards before retrying acquisition.
             else:
                 yield
                 return
@@ -490,7 +530,7 @@ def _asset_path(base: Path, asset_path: str | None) -> str | None:
     return normalized
 
 
-def record_catalog_refresh(wd: str | Path, asset_path: str | None = None) -> dict[str, Any]:
+def record_catalog_refresh(wd: str | Path, asset_path: str | None = None, *, repair_only: bool = False) -> dict[str, Any]:
     base = Path(wd).resolve()
     asset = _asset_path(base, asset_path)
     if is_catalog_readonly(base):
@@ -502,17 +542,20 @@ def record_catalog_refresh(wd: str | Path, asset_path: str | None = None) -> dic
         request = {'protocol': PROTOCOL, 'scope_id': scope.scope_id,
                    'incarnation': scope.incarnation, 'request_id': identifier,
                    'asset_path': asset, 'created_at': _now()}
+        if repair_only:
+            request['repair_only'] = True
         atomic_json(base / REFRESH_PATH / 'requests' / (identifier + '.json'), request)
         return {**request, 'state': 'pending'}
 
 
-def pending_catalog_requests(wd: str | Path) -> list[dict[str, Any]]:
+def pending_catalog_requests(wd: str | Path, *, first_only: bool = False) -> list[dict[str, Any]]:
     scope = resolve_scope(wd)
     directory = scope.base / REFRESH_PATH / 'requests'
     requests: list[dict[str, Any]] = []
     if not directory.exists() or scope.incarnation is None:
         return requests
-    for path in sorted(directory.glob('*.json')):
+    matches = directory.glob('*.json')
+    for path in matches if first_only else sorted(matches):
         if path.is_symlink():
             raise ValueError('Catalog receipt cannot be a symlink')
         try:
@@ -526,8 +569,13 @@ def pending_catalog_requests(wd: str | Path) -> list[dict[str, Any]]:
             raise CatalogRefreshConflict('Pending request belongs to another incarnation')
         if not isinstance(request.get('request_id'), str) or request['request_id'] + '.json' != path.name:
             raise ValueError('Pending request identity does not match filename')
-        _asset_path(scope.base, request.get('asset_path'))
+        asset_path = request.get('asset_path')
+        if asset_path is not None and not isinstance(asset_path, str):
+            raise ValueError('Invalid catalog receipt asset path')
+        _asset_path(scope.base, asset_path)
         requests.append(request)
+        if first_only:
+            break
     return requests
 
 
@@ -585,8 +633,59 @@ def _load_catalog(base: Path, *, rebuild_malformed: bool = False) -> dict[str, A
         return None
 
 
+def catalog_readiness(base: Path) -> str:
+    """Inspect catalog state without traversing scientific output directories."""
+    scope = resolve_scope(base)
+    pending = pending_catalog_requests(base, first_only=True)
+    if not pending and _load_catalog(base, rebuild_malformed=True) is not None:
+        return 'ready'
+    if is_catalog_readonly(base):
+        return 'readonly'
+    if not scope.managed or not catalog_refresh_enabled():
+        return 'unavailable'
+    return 'pending' if pending else 'missing'
+
+
+def prepare_catalog_intent(
+    base: Path, paths: tuple[str, ...] = (), *, observed_scope: CatalogScope | None = None,
+) -> str:
+    """Coalesce automatic preparation without waiting for lifecycle ownership."""
+    scope = observed_scope or resolve_scope(base)
+    state = catalog_readiness(base)
+    if state == 'pending' or (state != 'missing' and not (state == 'ready' and paths)):
+        return state
+    if is_catalog_readonly(base):
+        return 'readonly'
+    if browser_catalog_parent(base) is None or not catalog_refresh_enabled():
+        return 'unavailable'
+    try:
+        with catalog_metadata_guard(base, blocking=False):
+            from .access_scope import current_scope
+            access = current_scope()
+            if access is not None:
+                access.checkpoint()
+            current = resolve_scope(base)
+            if (current.directory_identity != scope.directory_identity or
+                    current.incarnation != scope.incarnation):
+                return 'busy'
+            state = catalog_readiness(base)
+            if state == 'missing':
+                record_catalog_refresh(base)
+                return 'pending'
+            if state == 'ready' and paths:
+                if is_catalog_readonly(base):
+                    return 'readonly'
+                for path in tuple(dict.fromkeys(paths))[:8]:
+                    record_catalog_refresh(base, path, repair_only=True)
+                return 'pending'
+            return state
+    except BlockingIOError:
+        return 'busy'
+
+
 def _updated_catalog(base: Path, catalog: dict[str, Any] | None,
-                     paths: Iterable[str | None], *, prefer_canonical: bool = False) -> dict[str, Any]:
+                     paths: Iterable[str | None], *, prefer_canonical: bool = False,
+                     preserve_selection: frozenset[str] = frozenset(), files_only: bool = False) -> dict[str, Any]:
     from .activate import _build_catalog, _build_catalog_subset, _build_entry
     paths = list(paths)
     if catalog is None or None in paths:
@@ -632,7 +731,8 @@ def _updated_catalog(base: Path, catalog: dict[str, Any] | None,
                                 candidate = new_parent / original.relative_to(old_parent)
                 selected = candidate if candidate.is_absolute() else base / candidate
                 # A newly generated child artifact supersedes inherited parent input.
-                if not (prefer_canonical and target.exists() and not selected.resolve().is_relative_to(base)):
+                if not (prefer_canonical and normalized not in preserve_selection
+                        and target.exists() and not selected.resolve().is_relative_to(base)):
                     target = selected
                 from .activate import _is_allowed_target
                 if not _is_allowed_target(base, target.resolve()):
@@ -642,6 +742,8 @@ def _updated_catalog(base: Path, catalog: dict[str, Any] | None,
                 if key == normalized or key.startswith(prefix):
                     del by_path[key]
             if target.is_dir():
+                if files_only:
+                    raise ValueError('Query datasets must be files')
                 for child_entry in _build_catalog_subset(base, target):
                     by_path[child_entry['path']] = child_entry
             elif target.exists():
@@ -667,7 +769,7 @@ def _updated_catalog(base: Path, catalog: dict[str, Any] | None,
     return {'version': 1, 'root': str(base), 'generated_at': _now(), 'files': entries}
 
 
-def _required_inventory(base: Path, paths: Iterable[str | None]) -> set[str]:
+def _required_inventory(base: Path, paths: Iterable[str | None], *, files_only: bool = False) -> set[str]:
     """Inventory required files without the legacy scanner's skip-on-error policy."""
     from .activate import SUPPORTED_EXTENSIONS, _is_allowed_target
     required: set[str] = set()
@@ -685,6 +787,8 @@ def _required_inventory(base: Path, paths: Iterable[str | None]) -> set[str]:
         if not _is_allowed_target(base, resolved) or is_refresh_path(resolved):
             continue
         if path.is_dir():
+            if files_only:
+                raise ValueError('Query datasets must be files')
             if resolved in seen:
                 continue
             seen.add(resolved)
@@ -703,11 +807,11 @@ def _matches_stat(entry: dict[str, Any], stat: os.stat_result) -> bool:
     return stat.st_size == entry.get('size_bytes') and entry.get('modified') in {rounded, truncated}
 
 
-def _verify_required(base: Path, catalog: dict[str, Any], paths: Iterable[str | None]) -> None:
+def _verify_required(base: Path, catalog: dict[str, Any], paths: Iterable[str | None], *, files_only: bool = False) -> None:
     paths = list(paths)
     from .activate import _is_allowed_target
     returned = {entry['path'] for entry in catalog.get('files', [])}
-    missing = _required_inventory(base, paths) - returned
+    missing = _required_inventory(base, paths, files_only=files_only) - returned
     if missing:
         raise ValueError('Required catalog assets were skipped: ' + ', '.join(sorted(missing)))
     for entry in catalog.get('files', []):
@@ -773,7 +877,16 @@ def refresh_catalog(wd: str | Path, *, expected_incarnation: str | None = None,
         paths = ([r['asset_path'] for r in requests] or [None]) if catalog is not None else [None]
         set_catalog_refresh_state(base, 'running', expected_incarnation=scope.incarnation)
     try:
-        candidate = _updated_catalog(base, catalog, paths, prefer_canonical=True)
+        producer_paths = {r['asset_path'] for r in requests if r.get('repair_only') is not True}
+        preserve_selection = frozenset(
+            path for path in paths if path is not None and not any(
+                producer is None or path == producer or path.startswith(producer + '/')
+                for producer in producer_paths
+            )
+        )
+        candidate = _updated_catalog(
+            base, catalog, paths, prefer_canonical=True, preserve_selection=preserve_selection,
+        )
         if strict:
             _verify_required(base, candidate, paths)
         with catalog_metadata_guard(base):
@@ -823,8 +936,13 @@ def ensure_catalog_fresh(wd: str | Path, required_paths: Iterable[str] | None = 
         if str(path) in {'landuse.parquet', 'soils.parquet', 'watershed.parquet'}:
             raise FileNotFoundError(f'Retired root dataset alias is not a catalog key: {path}')
     required = [_asset_path(base, p) for p in required_paths]
-    pending = pending_catalog_requests(base)
+    from .access_scope import current_scope
+    access = current_scope()
+    wait_mode = access is not None and access.catalog_wait
+    pending = pending_catalog_requests(base, first_only=wait_mode)
     catalog = _load_catalog(base, rebuild_malformed=True)
+    if wait_mode and (catalog is None or pending):
+        raise CatalogNotReady()
     if catalog is None:
         refresh_catalog(base)
         catalog = _load_catalog(base)
@@ -834,9 +952,18 @@ def ensure_catalog_fresh(wd: str | Path, required_paths: Iterable[str] | None = 
     if catalog is None:
         raise RuntimeError('Catalog publication did not produce a readable catalog')
     if required:
-        candidate = _updated_catalog(base, catalog, required)
+        candidate = _updated_catalog(base, catalog, required, files_only=wait_mode)
         old = {e['path']: e for e in catalog.get('files', [])}
         new = {e['path']: e for e in candidate['files']}
+        if wait_mode:
+            changed = tuple(path for path in required if old.get(path) != new.get(path))
+            if changed:
+                raise CatalogNotReady(changed)
+            try:
+                _verify_required(base, candidate, required, files_only=True)
+            except CatalogRefreshConflict as exc:
+                raise CatalogNotReady(tuple(required)) from exc
+            return catalog if catalog.get('root') == str(base) else candidate
         _verify_required(base, candidate, required)
         if catalog.get('root') != str(base):
             return candidate

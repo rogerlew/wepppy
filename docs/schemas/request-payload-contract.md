@@ -250,3 +250,9 @@ mutation and actual multipart landuse/soil consumers. Preserve valid defaults,
 false/zero, batch/base saves, aliases, callback replay and uploads. Read actual
 prepared-input files for changed preparation boundaries; mock enqueue only where
 needed to avoid model execution. An untested consumer remains unresolved.
+
+## Gridded ESDAC subsoil profile
+
+A soil build request may omit the ESDAC subsoil profile as a unit to retain existing settings or use the startup preset. When provided, the profile must be complete, supported by the requested builder, and validated before mutation. Reject blank, partial, duplicate, Boolean, nonfinite and unsupported representations. [ESDAC field policy and activation](esdac-soil-source-contract.md#project-defaults-for-a-missing-subsoil-material)
+
+The wire fields are flat scalar keys in JSON and form submissions. The keys are `esdac_subsoil_clay`, `esdac_subsoil_sand`, `esdac_subsoil_silt`, `esdac_subsoil_bulk_density`, `esdac_subsoil_organic_carbon`, and `esdac_subsoil_gravel`. Bulk density is in g/cm³. Other values are percentages. Accept JSON numbers and nonblank finite decimal form strings. Reject arrays, objects, repeated form keys, and duplicate JSON keys before any collapse to a mapping. Texture fractions must sum to 100% within one percentage point, using the same tolerance as native source validation. The browser omits inactive fields. For an ESDAC-capable project changing from another mode to gridded ESDAC on the page, enable the editor and include its full profile.
