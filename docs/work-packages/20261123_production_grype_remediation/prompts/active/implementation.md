@@ -18,6 +18,8 @@ Reduce applicable runtime exposure while preserving login, upload, data acquisit
 
 - [x] 2026-11-23 07:19 UTC. Corrected OAuthlib to 4.0.1 and qualified six additional Python dependency repairs. Moved the clean build of `65084ea5a` to forest1 after forest Docker storage reached 5.2 GiB free. The source checkout uses serving-archive permissions inside a private staging directory.
 
+- [x] 2026-11-23 07:54 UTC. Built the immutable image `a116e2d21457` and independently passed actual signed OAuth, PATH, DEVAL, compressed acquisition, scientific file and CLI checks. The exact CI extension passed frontend lint and all tests.
+
 ## Milestones and verification
 
 1. Start from a clean current-master worktree. Confirm the serving image digest and load the retained SBOM, Grype, npm and native inventory from wepp2. Group rows by advisory alias and source component, retaining each installed path, executable owner, fix state and service exposure. Review all known-exploited flags across severity levels. Reconcile the OpenSSH client match against the affected daemon, libc and installed files. Record image and host scopes separately.
@@ -31,6 +33,8 @@ Reduce applicable runtime exposure while preserving login, upload, data acquisit
 The 87 critical rows represent 31 distinct advisory IDs. Paths and advisory aliases account for repeated matches. Earlier reviews found patched Python Brotli with unchanged upstream version metadata. The evidence must be rebound to the current artifact, including separate examination of bundled libraries.
 
 The serving image includes a separate PyCurl Brotli 1.1.0 decoder. The OpenSSH source match concerns sshd on musl, while the image contains the Debian client on glibc. See the security review for component-level reconciliation.
+
+Forest1 built the image and CI extension but failed to create transient systemd scopes for standalone containers. Both images were transferred to forest with verified immutable identities. The first full run reached 2,802 passes, then retained-tree admission observed less than its 10 GiB free-space reserve in container scratch. The second run uses a private scratch directory on the large forest filesystem.
 
 ## Decision Log
 

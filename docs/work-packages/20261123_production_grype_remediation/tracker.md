@@ -7,7 +7,7 @@
 | Image processing and npm | `8d2ae32ad` passed 36 Pillow and PyCurl consumer cases. `f880db9c7` passed npm ci, lint, all tests and build. Local audit returned zero critical/high. |
 | Additional Python consumers | `65084ea5a` updates Tornado, dnspython, SoupSieve, Mistune, fsspec and Jupyter Core. Signed login, notebook, transport and scientific file trials passed 90 tests with the final pins. |
 | Debian, Go and cache | `5729db5e1` uses an ephemeral uv cache during production installation. All three embedded Go tool consumers have been identified. Awaiting installed-image readback and scan delta. |
-| Candidate and decision | Integrated source `65084ea5a` is building on forest1 with the serving Node/Python base digests and production identities. Hold pending exact-image evidence and independent reviews. Roger Lew owns production risk acceptance. |
+| Candidate and decision | Source `65084ea5a` produced image `sha256:a116e2d21457a0e33a6070ab42518be0adead13ea9b53db5c55d9f7dfa8871d0`. Independent exact-image [correctness checks](artifacts/20261123_correctness_review.md) passed. The CI test image inherits all candidate layers. Hold pending exact-image evidence and independent reviews. Roger Lew owns production risk acceptance. |
 
 Update each row with the commit, immutable artifact and evidence location as work lands. Track individual exceptions in the existing private evidence store.
 
