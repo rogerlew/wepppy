@@ -1,14 +1,17 @@
 <section id="map" class="wc-landing__section" aria-labelledby="atlas-heading">
-  <h2 id="atlas-heading">Run Atlas</h2>
-  <p class="wc-landing__reading">
-    The map shows watersheds with recorded locations from both public and private runs.
-  </p>
+  <div class="wc-landing__columns">
+    <h2 id="atlas-heading">Run Atlas</h2>
+    <div class="wc-landing__reading">
+      <p>The map shows watersheds with recorded locations from both public and private runs.</p>
+      {% if atlas is none %}
+      <p>Run Atlas data is temporarily unavailable. Check again later.</p>
+      {% elif not atlas.run_count %}
+      <p>No projects with recorded locations are available yet.</p>
+      {% endif %}
+    </div>
+  </div>
 
-  {% if atlas is none %}
-  <p>Run Atlas data is temporarily unavailable. Check again later.</p>
-  {% elif not atlas.run_count %}
-  <p>No projects with recorded locations are available yet.</p>
-  {% else %}
+  {% if atlas and atlas.run_count %}
   <dl class="wc-landing__grid wc-landing__metrics">
     <div class="wc-landing__card">
       <dt>Unique runs</dt>

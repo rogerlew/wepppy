@@ -67,20 +67,22 @@
     </p>
   </section>
 
-  <section id="about" class="wc-landing__section" aria-labelledby="about-heading">
+  <section id="about" class="wc-landing__section wc-landing__columns" aria-labelledby="about-heading">
     <h2 id="about-heading">What is WEPPcloud?</h2>
-    <p class="wc-landing__reading">
-      WEPPcloud is an open-source, online watershed modeling platform that automates the acquisition and
-      processing of geospatial resources and performs process-based modeling to predict runoff, erosion, and
-      sediment delivery in minutes. Users can select from a variety of processing options for climate inputs,
-      wildfire, treatments, and land-management scenarios to support side-by-side comparisons and model
-      calibration. They can then analyze and view results through interface reports and maps, and export
-      results for planning, research, and post-fire response.
-    </p>
-    <ul class="wc-landing__links" role="list">
-      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.wepp_model') }}">WEPP Model</a></li>
-      <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.faq') }}">FAQ</a></li>
-    </ul>
+    <div class="wc-landing__reading">
+      <p>
+        WEPPcloud is an open-source, online watershed modeling platform that automates the acquisition and
+        processing of geospatial resources and performs process-based modeling to predict runoff, erosion, and
+        sediment delivery in minutes. Users can select from a variety of processing options for climate inputs,
+        wildfire, treatments, and land-management scenarios to support side-by-side comparisons and model
+        calibration. They can then analyze and view results through interface reports and maps, and export
+        results for planning, research, and post-fire response.
+      </p>
+      <ul class="wc-landing__links" role="list">
+        <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.wepp_model') }}">WEPP Model</a></li>
+        <li><a href="{{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.faq') }}">FAQ</a></li>
+      </ul>
+    </div>
   </section>
 
   {% include "landing/_atlas.htm" %}
@@ -241,7 +243,7 @@
     </div>
   </section>
 
-  <section class="wc-landing__section wc-landing__legal" aria-labelledby="disclaimer-heading">
+  <section class="wc-landing__section wc-landing__columns wc-landing__legal" aria-labelledby="disclaimer-heading">
     <h2 id="disclaimer-heading">Legal disclaimer</h2>
     <div class="wc-landing__reading">
       <p>
