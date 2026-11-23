@@ -1,3 +1,5 @@
+The [GL dashboard sidebar renderer refactor](docs/work-packages/20261123_gl_sidebar_renderer/package.md) separates section assembly, legends and RUSLE tolerance controls.
+
 Completed locally — [GL dashboard layer tooltips](docs/work-packages/20261123_gl_layer_tooltips/package.md).
 
 Production release held pending residual-risk disposition — [Production common-image vulnerability remediation](docs/work-packages/20261123_production_grype_remediation/package.md).

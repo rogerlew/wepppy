@@ -125,7 +125,10 @@ wepppy/weppcloud/static/js/gl-dashboard/
 ├── layers/
 │   ├── detector.js              # Overlay detection (raster, vector, overlays)
 │   ├── orchestrator.js          # Detection sequencing + state wiring
-│   └── renderer.js              # Sidebar/legend DOM rendering
+│   ├── layer-sections.js        # Ordered sidebar groups from dashboard state
+│   ├── legends.js               # Legend DOM and editable ranges
+│   ├── rusle-tolerance.js       # RUSLE A tolerance control and raster recoloring
+│   └── renderer.js              # Sidebar controls and public renderer factory
 ├── map/
 │   ├── controller.js            # deck.gl wrapper
 │   ├── layers.js                # Layer stack builder, tooltips, legends

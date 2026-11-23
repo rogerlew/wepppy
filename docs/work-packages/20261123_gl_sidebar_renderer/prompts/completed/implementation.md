@@ -8,11 +8,11 @@ Dashboard maintainers should be able to follow section assembly, legend editing 
 
 - [x] 2026-11-23 UTC. Identified the renderer entry point, duplicate channel controls and existing DOM tests.
 - [x] 2026-11-23 UTC. Extracted and wired section, legend and RUSLE tolerance modules. Exercised both channel callbacks against the baseline and candidate.
-- [ ] Validate rendered output and review the local integration.
+- [x] 2026-11-23 UTC. Checked native browser output, frontend gates and dashboard Python tests. Reviewed the local merge boundary.
 
 ## Surprises & Discoveries
 
-The renderer spans 1,671 lines. Both channel families use one radio group and clear the other families before refreshing data.
+The baseline renderer spans 1,671 lines. Both channel families use one radio group and clear the other families before refreshing data.
 
 ## Decision Log
 
@@ -25,3 +25,5 @@ Run the renderer-open-state Jest suite from wepppy/weppcloud/static-src. Exercis
 ## Outcomes & Retrospective
 
 The public renderer fell from 1,671 to 604 lines. ESLint peak complexity across the four modules fell from 86 to 36. Chromium returned identical markup and legend input values for a populated channel sidebar and 70 legend cases, covering seven layer families, five modes and absent or populated ranges.
+
+Four additional Chromium comparisons verified the generated RUSLE canvas bytes. The [rendering review](../../artifacts/rendering-review.md) and [tracker](../../tracker.md) record acceptance and broader test limits.
