@@ -13,7 +13,7 @@ The run needs a readable H.pass.parquet and subsequent daily totals even when th
 
 ## Surprises & Discoveries
 
-AgFields completion equates identity count with physical group count. Roads accounting writes at least one chunk per represented target. Baseline WAT, SOIL and ELEMENT aggregation rereads a physical group for each selected identity in it.
+AgFields completion equates identity count with physical group count. Roads accounting writes at least one chunk per represented target. Baseline WAT, SOIL and ELEMENT aggregation previously revisited a physical group for each selected identity in it. The live native source tree included an unreleased MOFE module, so the paired binary must be built from the released crate with only the interchange changes.
 
 ## Decision Log
 

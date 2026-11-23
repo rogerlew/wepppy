@@ -35,3 +35,18 @@ The semantic comparison used absolute tolerance 1e-12 and relative tolerance 1e-
 The initial candidate used decoded mixed-group spans with a footer-supplied row count. The final binary validates their agreement before constructing Arrow's row selection. The reader avoids materializing adjoining source rows for contiguous packed input. An externally interleaved group may still require reading rows between the first and last match. Source packing and physical Arrow splits remain subject to the writer's finite file capacity.
 
 The local correctness gate passes for the reviewed producer and consumer changes. The real watershed inventory and four-source replay establish original-input compatibility on a sample. The synthetic boundary run separately exercises the reported source count. Neither is a full 47,582-hillslope, 45-year production replay. Operational acceptance still requires the compatible runtime in the worker and direct readback of freshly regenerated interchange and dependent daily outputs.
+
+## Replacement release addendum, 2026-11-23 00:26 UTC
+
+The review above records the first candidate, SHA-256 `1769c18b5fb0454026d3ea6dee7192f082a3eabf41f0b33d710af891458443fd`. Subsequent broad tests found it also carried unreleased MOFE segmentation behavior. That invalidated its release sign-off. The words “final binary” above describe the bytes tested on November 22.
+
+The replacement module SHA-256 is `9c16555afa70595c3a4031eb8bab94a1cdc6a7ea23637f40aff6120ab83520f9`, verified before and after replay. Its declared source commit `250243df5b40d72266247fa9308334b80bd93c26` is a direct child of released source `4d4c075421c4013cba99a0addc76482229e7f3f7`. Independent Git comparison found changes to the ten row-group production files and one totalwatsed3 regression file. Cargo manifests and lockfile match the released source. Both commits reference MOFE source blob `67e4ab4c748c3ecce990dee19da7316ff14c332c`. By comparison, the first candidate's base used blob `917907d1d96a1fe5d743adced0e2de7388394b56`.
+
+The reviewer rechecked all 25 inputs against the retained source manifest and ran independent fresh conversions into `/workdir/interchange-row-group-replay/release-9c16555a`. The public WEPPpy facades loaded the replacement from the paired native checkout. The previous-release baseline remained the comparison oracle.
+
+- All six fresh hillslope tables matched the baseline schema, metadata, values, nulls and ordering exactly, including 65,744 rows each for PASS, WAT and SOIL.
+- Ordinary, mixed and split daily layouts passed on all four hills, two selected hills and the empty selection. The maximum absolute difference in the full mixed layout was 1.14e-13 in sbrunv. The selected and empty outputs matched exactly.
+- Reordering the input by day and ID with disabled statistics and 3,001-row groups produced 16,436 rows and 79 columns for both full and selected cases. The maximum full-layout difference in sbrunv was 5.69e-14. The selected output matched exactly.
+- The Roads modeled-area case matched exactly for all four geometries, the daily table with 16,436 rows and 79 columns and the accounting table with 65,744 rows and 32 columns.
+
+The replacement passes this independent local correctness review. The sample covers four hillslopes and 45 years. Full-watershed production replay and original-child recovery remain separate operational gates.
