@@ -78,9 +78,9 @@ function buildTooltipTopazLines(identity, state) {
   if (!identity || identity.topazId == null) return '';
   if (state && state.dashboardMode === DASHBOARD_MODES.BATCH) {
     const runLine = identity.runLabel ? `Run: ${identity.runLabel}\n` : '';
-    return `${runLine}TopazID: ${identity.topazId}\n`;
+    return `${runLine}TOPAZ ID: ${identity.topazId}\n`;
   }
-  return `TopazID: ${identity.topazId}\n`;
+  return `TOPAZ ID: ${identity.topazId}\n`;
 }
 
 function isRapOverlayActive(state) {

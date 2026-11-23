@@ -30,7 +30,7 @@ delineating subcatchments. Return to this control when you need to:
 
 Rebuilding channels can change channel identifiers, flow paths, and the
 available outlet locations. Repeat downstream delineation steps after a
-rebuild.
+rebuild. See [TOPAZ IDs and WEPP IDs](wepp-model.md#topaz-ids-and-wepp-ids) to identify a channel or its contributing hillslopes in the map and reports.
 
 ## Before You Begin
 

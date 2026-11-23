@@ -557,7 +557,7 @@ def _coerce_topaz_ids(raw: Any) -> List[str]:
         try:
             candidate_ids.append(str(int(value)))
         except (TypeError, ValueError) as exc:
-            raise ValueError(f'invalid topaz id: {value!r}') from exc
+            raise ValueError(f'invalid TOPAZ ID: {value!r}') from exc
     return candidate_ids
 
 

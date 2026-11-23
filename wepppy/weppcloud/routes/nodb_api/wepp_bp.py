@@ -487,7 +487,7 @@ def _comparison_return_period_report(wepp, options):
         return wepp.report_return_periods(**options)
     except ValueError as exc:
         channel = options['chn_topaz_id_of_interest']
-        if channel is not None and str(exc) == f"Topaz ID {channel} not present in staged events":
+        if channel is not None and str(exc) == f"TOPAZ ID {channel} not present in staged events":
             return ReturnPeriods.from_dict(dict(options, intervals=options['rec_intervals']))
         if str(exc) == 'Unable to determine simulation years for events' and options['exclude_months']:
             events = pd.read_parquet(
