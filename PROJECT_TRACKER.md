@@ -1,3 +1,5 @@
+Production release held pending residual-risk disposition — [Production common-image vulnerability remediation](docs/work-packages/20261123_production_grype_remediation/package.md).
+
 Deployed 2026-11-23 — [Dedicated query catalog queue on wepp3](docs/work-packages/20261123_dedicated_query_catalog_queue/package.md).
 
 Implemented and validated locally — [Restore channel upstream area](docs/work-packages/20261122_channel_upstream_area/package.md).

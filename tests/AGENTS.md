@@ -12,6 +12,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 | Area | Location | Focus |
 |------|----------|-------|
 | Account identity | `tests/weppcloud/routes/test_account_security.py`, `test_security_oauth_routes.py`, `tests/weppcloud/bootstrap/test_account_identity.py`, `tests/weppcloud/test_account_identity_migration.py` | Real auth forms/CSRF, mailbox sink, signed OIDC/JWT, ORM identity separation, nullable-email consumers and additive migration |
+| Native dependency consumers | `tests/test_pillow_consumers.py`, `tests/test_pycurl_transport.py` | Decode pixels, render WOFF2 and Agg, read compressed HTTP(S) bodies and verify TLS rejection |
 | Smoke/import checks | `tests/test_0_imports.py`, `tests/test_imports.py` | Early detection of missing optional dependencies or circular imports |
 | ADR authoring gate | `tests/tools/test_check_adr_dates.py` | Isolated CLI, explicit date semantics, malformed/absent source, template enforcement and real ADR inventory |
 | Diagnostic sanitation | `tests/observability/` | Canary readback of API/file/log/status/RQ outputs, isolated subprocess hooks, explicit disposable Redis socket |

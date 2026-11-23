@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 import re
 
 from authlib.integrations.base_client.errors import OAuthError
-from authlib.jose.errors import JoseError
+from joserfc.errors import JoseError
 from sqlalchemy.exc import IntegrityError
 from flask import flash, session
 from flask_security import current_user

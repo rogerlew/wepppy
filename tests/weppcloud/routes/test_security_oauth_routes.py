@@ -620,7 +620,8 @@ def test_oauth_disconnect_unlinks_account_and_redirects_to_profile(
 @pytest.mark.parametrize('defect', [None, 'issuer', 'audience', 'expired', 'nonce', 'signature', 'missing', 'userinfo'])
 def test_oidc_signed_claims_before_identity_write(oauth_app, monkeypatch, provider, defect):
     import time
-    from authlib.jose import JsonWebKey, jwt
+    from joserfc import jwt
+    from joserfc.jwk import RSAKey
     from wepppy.weppcloud.utils.oauth import ensure_oauth_client
     issuer = 'https://cilogon.org' if provider == 'cilogon' else 'https://accounts.google.com'
     settings = dict(enabled=True, name=provider, client_id='test-client', client_secret='synthetic-secret',
@@ -628,7 +629,7 @@ def test_oidc_signed_claims_before_identity_write(oauth_app, monkeypatch, provid
     oauth_app.config['OAUTH_PROVIDERS'][provider] = settings
     with oauth_app.app_context():
         remote = ensure_oauth_client(provider, settings)
-    key = JsonWebKey.generate_key('RSA', 2048, is_private=True, options={'kid':'test'})
+    key = RSAKey.generate_key(2048, parameters={'kid':'test'})
     public = key.as_dict(is_private=False)
     monkeypatch.setattr(remote, 'load_server_metadata', lambda: {'issuer':issuer, 'id_token_signing_alg_values_supported':['RS256']})
     monkeypatch.setattr(remote, 'fetch_jwk_set', lambda **kw: {'keys':[public]})
@@ -639,8 +640,8 @@ def test_oidc_signed_claims_before_identity_write(oauth_app, monkeypatch, provid
     if defect == 'audience': claims['aud']='different-client'
     if defect == 'expired': claims['exp']=now-600
     if defect == 'nonce': claims['nonce']='different-nonce'
-    signing_key = JsonWebKey.generate_key('RSA',2048,is_private=True,options={'kid':'test'}) if defect == 'signature' else key
-    token = {'access_token':'synthetic-access', 'id_token':jwt.encode({'alg':'RS256','kid':'test'},claims,signing_key).decode()}
+    signing_key = RSAKey.generate_key(2048,parameters={'kid':'test'}) if defect == 'signature' else key
+    token = {'access_token':'synthetic-access', 'id_token':jwt.encode({'alg':'RS256','kid':'test'},claims,signing_key, algorithms=['RS256'])}
     if defect == 'missing': token.pop('id_token')
     monkeypatch.setattr(remote,'authorize_access_token',lambda **kw:token)
     monkeypatch.setattr(remote,'get',lambda *a,**kw:DummyResponse(payload={'sub':'different-subject' if defect=='userinfo' else 'subject'}))
