@@ -1,6 +1,6 @@
 # Production common-image vulnerability remediation
 
-Opened 2026-11-23 UTC. Status: scoped for execution.
+Opened 2026-11-23 UTC. Candidate validation in progress.
 
 Produce one release decision for the common image serving wepp1, wepp2 and wepp3. The catalog rollout introduced zero new advisory matches, but the serving image carries inherited findings. Use independently reviewable dependency commits so a compatibility failure can be traced to its repair batch. The release candidate combines the accepted batches.
 

@@ -7,11 +7,14 @@ Reduce applicable runtime exposure while preserving login, upload, data acquisit
 ## Progress
 
 - [x] 2026-11-23 UTC. Bound scope to the serving artifact and existing release policy.
+- [x] 2026-11-23 06:56 UTC. Confirmed the baseline worker image on all three hosts and verified the local review copies of the retained JSON against the pinned manifest.
 - [ ] Reconcile the inventory and establish applicability.
 - [ ] Validate public-facing framework and authentication repairs.
 - [ ] Validate image processing, bundled libraries and frontend dependency repairs.
 - [ ] Resolve OS and embedded-tool findings and qualify cache cleanup.
 - [ ] Build, test and review one integrated candidate and record the release decision.
+
+- [x] 2026-11-23 07:03 UTC. Committed separate frontend, framework, native and build-cache batches. Focused tests passed. Started the integrated clean build from `5729db5e1` on forest.
 
 ## Milestones and verification
 
@@ -25,10 +28,14 @@ Reduce applicable runtime exposure while preserving login, upload, data acquisit
 
 The 87 critical rows represent 31 distinct advisory IDs. Paths and advisory aliases account for repeated matches. Earlier reviews found patched Python Brotli with unchanged upstream version metadata. The evidence must be rebound to the current artifact, including separate examination of bundled libraries.
 
+The serving image includes a separate PyCurl Brotli 1.1.0 decoder. The OpenSSH source match concerns sshd on musl, while the image contains the Debian client on glibc. See the security review for component-level reconciliation.
+
 ## Decision Log
 
 2026-11-23 UTC. Use one package because all repair batches affect the same common image and share a release decision. A failing batch can be revised or reverted independently. Any residual exposure returns to the existing policy and approval process.
 
 ## Outcomes & Retrospective
 
-Scaffold complete. Implementation, candidate validation, reviews and release disposition remain pending.
+Four repair commits are available. Component trials on forest passed 158 framework/OAuth and 36 codec/transport cases. The targeted npm lock passed lint, 1,109 Jest tests, nine Node tests and the production asset build. The final image gates and release decision remain open.
+
+Revision on 2026-11-23 records actual baseline identity, repair batches and the start of candidate validation.

@@ -1,4 +1,4 @@
-Scoped — [Production common-image vulnerability remediation](docs/work-packages/20261123_production_grype_remediation/package.md).
+Candidate validation in progress — [Production common-image vulnerability remediation](docs/work-packages/20261123_production_grype_remediation/package.md).
 
 Deployed 2026-11-23 — [Dedicated query catalog queue on wepp3](docs/work-packages/20261123_dedicated_query_catalog_queue/package.md).
 
