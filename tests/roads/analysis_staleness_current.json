@@ -136,6 +136,10 @@
       "recorded": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
       "current": "18f1b7ea4ea187e29e4b8b650d8ba7459160d59f677c9b590b6991281b65936e"
     },
+    "wepppy/wepp/interchange/ag_fields_interchange.py": {
+      "recorded": "7f5a5cd1548e3fd0b6b14211fd55b88b6f4561ba3c8e1139e826d6b04c3bffa4",
+      "current": "5c32d87deac95ca864a444bd7941c08bc245525f8fbfe5a53f2a13e7966af7f6"
+    },
     "wepppy/wepp/interchange/watershed_loss.py": {
       "recorded": "899a499a8750a6750f7163e58d31fa6ae1e6ffbab364daf3cb3e8d67d106dfce",
       "current": "5740bb83796ee426bdb1c5dff719442825c7838b5bfc80ba43238126cd5c7268"
@@ -564,6 +568,21 @@
         }
       },
       "evidence": "docs/work-packages/20261122_shared_project_asset_declarations/artifacts/20261122_live_project_comparison.md"
+    },
+    {
+      "date": "2026-11-22",
+      "scope": "AgFields validates identity runs independently of physical Parquet group boundaries. The existing full-project routing evidence remains stale.",
+      "changes": {
+        "wepppy/wepp/interchange/ag_fields_interchange.py": {
+          "previous_reviewed": null,
+          "current_review": {
+            "recorded": "7f5a5cd1548e3fd0b6b14211fd55b88b6f4561ba3c8e1139e826d6b04c3bffa4",
+            "current": "5c32d87deac95ca864a444bd7941c08bc245525f8fbfe5a53f2a13e7966af7f6"
+          },
+          "scope": "Read ordered field and sub-field identities across packed or split physical groups; retain mapping, coverage and footer validation."
+        }
+      },
+      "evidence": "docs/work-packages/20261122_interchange_row_groups/artifacts/20261122_qa_review.md"
     }
   ]
 }
