@@ -276,7 +276,7 @@ https://digitalcommons.unl.edu/usdaarsfacpub/1515/
 `wepppy/topo/peridot/peridot_runner.py`, `peridot/README.md`
 
 ### Peridot implementation note (support both width methods)
-- Use `netw.tsv` drainage area for each channel link (WBT `areaup` is in m^2) and convert to km^2 before applying either formula.  
+- Join WBT `netw.tsv` by `topaz_id`. Its `areaup` is cumulative area entering the upstream node, excluding that cell (m²). Convert to km² for the hydraulic formulas and hectares for `chandeg.con`. A zero-area headwater retains the 1 km² hydraulic default and reports zero hectares. Missing or invalid drainage areas require a corrected network before building. See [ADR-0158](../../../../docs/adrs/ADR-0158-channel-upstream-node-area.md).  
   (see `weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md`)
 - Implement a model flag to choose width method:
   - `width_method = qswat` -> `width = WM * DA^WE`
