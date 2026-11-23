@@ -234,7 +234,7 @@ interactive keys are no-ops; initial unknown keys resolve to Terrain.
 
 Operator checks: style/tile/font/sprite failures show “Forest Service basemap
 unavailable. Choose another basemap.” Inspect browser requests to the official
-service and same-origin `static/ui-lab/maplibre/` assets. Retry by switching away
+service and same-origin `static/vendor/maplibre/` assets. Retry by switching away
 and back. Rebuild controller and landing exports together; use the normal
 frontend rollout/reload workflow. Rollback restores package-owned source and
 regenerates those assets; no project migration, proxy, or CSP change is involved.

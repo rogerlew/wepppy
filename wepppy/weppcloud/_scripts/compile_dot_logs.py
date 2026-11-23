@@ -5,7 +5,7 @@ Compile per-run access logs into access.csv and run-locations.json.
 This script scans the .<runid> access logs under /wc1/runs (and optional
 legacy roots) and produces:
 - access.csv (used by stats + landing page refresh)
-- runid-locations.json (deck.gl landing map)
+- runid-locations.json (explicitly public projects for the deck.gl landing map)
 - runs_counter.json (stats summaries)
 - run_counts.csv (unique run metrics)
 """
@@ -23,7 +23,7 @@ import time
 import uuid
 from collections import Counter
 from contextlib import ExitStack, contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from glob import glob
 from pathlib import Path
@@ -84,6 +84,7 @@ class RunMetrics:
     access_count: int
     last_accessed: Optional[datetime]
     first_accessed: Optional[datetime]
+    source_dirs: set[Path] = field(default_factory=set)
 
 
 @dataclass
@@ -549,6 +550,9 @@ def _compile_dot_logs_locked(
                 )
                 run_metrics[log.runid] = metrics
 
+            # Multiple source directories can contribute access times to one ID.
+            metrics.source_dirs.add(log.run_dir)
+
             try:
                 with log.log_path.open('r', encoding='utf-8') as handle:
                     for raw_line in handle:
@@ -663,6 +667,9 @@ def _compile_dot_logs_locked(
             runs_counter['ash_hillruns'] += metrics.ash_hillslopes
 
         if metrics.centroid_longitude is None or metrics.centroid_latitude is None:
+            continue
+
+        if not all(Ron.ispublic(path) for path in metrics.source_dirs):
             continue
 
         last_accessed = _format_datetime(metrics.last_accessed)

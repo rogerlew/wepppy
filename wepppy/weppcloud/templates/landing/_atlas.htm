@@ -1,0 +1,83 @@
+{% macro access_time(timestamp) %}
+  {% if timestamp %}
+  <time datetime="{{ timestamp.isoformat() }}">{{ timestamp.strftime('%b %d, %Y') }}</time>
+  {% else %}
+  Unknown
+  {% endif %}
+{% endmacro %}
+
+<section id="map" class="wc-landing__section" aria-labelledby="atlas-heading">
+  <h2 id="atlas-heading">Run Atlas</h2>
+  <p class="wc-landing__reading">
+    The Run Atlas shows project locations from the latest compiled snapshot.
+    Each new snapshot includes only explicitly public projects with recorded locations.
+    Use it to highlight recent wildfire response studies, watershed planning campaigns,
+    and the scale of collaboration across the platform.
+  </p>
+
+  {% if atlas is none %}
+  <p>Run Atlas data is temporarily unavailable. Check again later.</p>
+  {% elif not atlas.run_count %}
+  <p>No projects with recorded locations are available yet.</p>
+  {% else %}
+  <dl class="wc-landing__grid wc-landing__metrics">
+    <div class="wc-landing__card">
+      <dt>Unique runs</dt>
+      <dd>{{ '{:,}'.format(atlas.run_count) }}</dd>
+    </div>
+    <div class="wc-landing__card">
+      <dt>Total hillslopes</dt>
+      <dd>{{ '{:,}'.format(atlas.hillslopes) }}</dd>
+    </div>
+    <div class="wc-landing__card">
+      <dt>Latest access</dt>
+      <dd>{{ access_time(atlas.latest_access) }}</dd>
+    </div>
+  </dl>
+
+  <div data-run-atlas>
+    <figure class="wc-landing__atlas-figure">
+      <div class="wc-landing__atlas-frame">
+        <div class="wc-landing__atlas-map" role="region"
+             aria-label="Run Atlas map" aria-describedby="atlas-keyboard atlas-geography" hidden>
+          <div class="wc-landing__atlas-basemap" aria-hidden="true"></div>
+          <div class="wc-landing__atlas-canvas" aria-hidden="true"></div>
+          <ul class="wc-landing__atlas-key" aria-label="Map legend" role="list">
+            <li><span class="wc-landing__atlas-dot" aria-hidden="true"></span> Standard runs</li>
+            <li title="Runs with soil burn severity data"><span class="wc-landing__atlas-dot wc-landing__atlas-dot--sbs" aria-hidden="true"></span> Runs with SBS<span class="wc-landing__visually-hidden"> (soil burn severity)</span></li>
+          </ul>
+          <p id="atlas-wheel-tip" class="wc-landing__atlas-tip">Hold Ctrl while scrolling to zoom the map.</p>
+        </div>
+        <div class="wc-landing__atlas-controls" role="group" aria-label="Run Atlas map controls" hidden>
+          {% for step, label in [(1, 'Zoom map in'), (-1, 'Zoom map out')] %}
+          <button class="pure-button pure-button-secondary" type="button" data-atlas-zoom="{{ step }}" aria-label="{{ label }}" title="{{ label }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35M8 11h6{% if step > 0 %}m-3-3v6{% endif %}"></path>
+            </svg>
+          </button>
+          {% endfor %}
+          <button class="pure-button pure-button-secondary" type="button" data-atlas-reset aria-label="Reset map view" title="Reset map view">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M3 12a9 9 0 1 1 9 9M3 12V5m0 7h7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <p class="wc-landing__atlas-status" role="status">Interactive map unavailable.</p>
+      <figcaption>
+        <span>Larger markers indicate more hillslopes.</span>
+        <span><a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://carto.com/attributions">CARTO</a></span>
+      </figcaption>
+    </figure>
+    <p id="atlas-geography" class="wc-landing__visually-hidden">
+      Project locations by geographic quadrant.
+      {% for label, count in atlas.quadrants %}
+      {{ label }}: {{ '{:,}'.format(count) }}.
+      {% endfor %}
+    </p>
+    <p id="atlas-keyboard" class="wc-landing__visually-hidden" hidden>Use the arrow keys to pan.</p>
+    <script type="application/json" data-atlas-rows>{{ atlas.map_rows | tojson }}</script>
+  </div>
+  {% endif %}
+</section>
