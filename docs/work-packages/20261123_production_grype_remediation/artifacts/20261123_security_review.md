@@ -35,6 +35,30 @@ The local production-only npm audit returned zero findings. All 24 full lock rep
 
 The OSGeo binding successfully decoded a valid four-value netCDF file with the installed GDAL 3.10.3 netCDF driver. The source driver is present. The upload boundary restricts raster upload drivers, while whole-image reachability and the separate bundled GDAL builds still require a decision.
 
+## Integrated scan and residual exposure
+
+On 2026-11-23 UTC the reviewer verified the candidate bundle against manifest `8454e58f061d10774b960835e5bb51d281e2c8ebeea311b3aab9ed63ccd44a84`. The producer reported zero analysis errors and two qualified scanner diagnostics. The baseline SBOM and candidate SBOM were matched with database `cb2940548440e727d0614b801e7e9d634931107592117c5feae46e085f533faa`. The original 679 High baseline rows became 619 on the refreshed database before any candidate comparison.
+
+| Primary Grype rows | Rematched serving image | Candidate | Change |
+| --- | ---: | ---: | ---: |
+| Critical | 87 | 59 | −28 |
+| High | 619 | 445 | −174 |
+| Medium | 533 | 428 | −105 |
+| Low | 151 | 131 | −20 |
+| Negligible | 1,431 | 1,431 | 0 |
+| Unknown | 3 | 3 | 0 |
+| Total | 2,824 | 2,497 | −327 |
+
+Both images have another 334 suppressed Linux-header rows. Their source records are retained and individually assessed. Of the 327 primary removals, 173 were uv cache copies and 154 were outside the cache. Grouping by scanner section, ecosystem, component, advisory, Go executable and installed/cache scope yields 322 removed groups and zero added groups. Retained groups had zero version or severity changes.
+
+The candidate retains two scanner-flagged known-exploited matches across all severities. The Python Brotli patch and absent OpenSSH daemon account for both. **Outstanding applicable known-exploited findings are zero within scanner coverage.**
+
+**500 primary Critical/High rows remain open** after four Critical exclusions for the patched Brotli extension and Windows-specific Go code. These comprise 55 Critical and 445 High rows. The 111 scanner-fixable rows comprise 108 module-level Go matches and three High Python matches. The three affected components are setuptools’ vendored jaraco.context 5.3.0 and wheel 0.45.1, and the GDAL 3.10.2 binding to the 3.10.3 system library. Operator assessment must cover the actual private vendor paths and the netCDF-enabled runtime. Production reachability of every affected feature remains unresolved. Debian contributes 389 further open rows, including 328 marked wont-fix and 61 without an available fix. Source-package and Go counts include repeated advisory matches.
+
+The canonical candidate npm audit has zero Critical, zero High, 12 Moderate and one Low package report. The earlier local audit had 23 Moderate and one Low. Comparing concrete package/advisory/severity tuples between retained baseline and canonical candidate reports yields 17 removals, four inherited and zero additions. The final ledger records the remaining development/build exposure separately from shipped browser assets.
+
+The private `security/candidate/disposition-final.json`, SHA-256 `a88ea3955f6639e70d19cadcae5e1a6d02812eecc46c9ef4797e55f45cd33924`, covers all 2,831 Grype source rows and all 13 canonical npm package reports. It binds the final platform, archive, source and distribution evidence, records the owner and next action for blocking rows, and distinguishes 342 artifact-specific exclusions, 929 open holds and 1,560 tracked lower-severity rows. The separate `security/candidate/delta.json` hashes to `1d095c343bbabfbf3c9f96021330dfde6fb0f3912bebac9ec70b68374f7f632d`.
+
 ## Release gate
 
-Hold pending the exact candidate scan, same-database comparison, native and authentication evidence, full regression result, and independent correctness review. An image-scoped operator decision must cover any accepted residuals. The underlying protected ledger contains advisory details and remains available for the release decision.
+**Fail · Hold release.** The independent security reviewer verifies the targeted dependency repairs and recommends that Roger Lew review the 111 fix-listed High/Critical rows, remaining Debian exposure and scientific native coverage gaps against the exact candidate. Qualify further repairs for the affected owners or record an explicit, expiring candidate-specific decision. The reviewed record contains no candidate risk acceptance. The serving-image decision expires 2026-11-24 06:23:17.979322 UTC. Separately verify the package-wide regression gates before activation. [Independent correctness review](20261123_correctness_review.md).
