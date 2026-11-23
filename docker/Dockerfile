@@ -24,7 +24,8 @@ FROM ${RUNTIME_BASE_IMAGE} AS base
 LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy"
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG DOCKER_CLI_VERSION=26.1.4
+ARG DOCKER_CLI_VERSION=29.10.0
+ARG DOCKER_CLI_SHA256=94e8261e6e566c719973a81b22906d7b0a2655440b83fca0ea9c26215437541a
 
 # Allow enforcing a non-root runtime user at build time.
 ARG APP_USER=wepp
@@ -82,11 +83,10 @@ RUN apt-get update && \
         ca-certificates && \
     git lfs install --system
 
-RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLI_VERSION}.tgz" -o /tmp/docker.tgz && \
-    tar -xzf /tmp/docker.tgz -C /tmp && \
-    mv /tmp/docker/docker /usr/local/bin/docker && \
-    chmod +x /usr/local/bin/docker && \
-    rm -rf /tmp/docker /tmp/docker.tgz
+RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-cli_${DOCKER_CLI_VERSION}.tgz" -o /tmp/docker-cli.tgz && \
+    echo "${DOCKER_CLI_SHA256}  /tmp/docker-cli.tgz" | sha256sum -c - && \
+    tar -xzf /tmp/docker-cli.tgz -C /usr/local/bin --strip-components=1 bin/docker && \
+    rm /tmp/docker-cli.tgz
 
 ENV UV_SKIP_UPDATE_CHECK=1
 

@@ -472,6 +472,8 @@ for the API, source provenance, freshness failures and recovery.
 
 `wctl` is the supported wrapper for `docker compose` (see `wctl/install.sh`). It merges `docker/defaults.env` plus optional `docker/.env` + host overrides, escapes `$` for Compose interpolation, and sets `WEPPPY_ENV_FILE` for `env_file:` wiring.
 
+The common image installs a SHA-256-verified Docker CLI for the WEPPcloudR renderer. When updating its version, update the upstream CLI-only archive checksum in both Dockerfiles and verify a DEVAL render through the new client.
+
 The Docker Compose v2 plugin is an expected prerequisite for Compose-backed
 tests and local stack operations. Some `wctl run-pytest` environments provide
 the Docker CLI inside `weppcloud` without the Compose plugin; in that case the
