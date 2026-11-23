@@ -25,6 +25,14 @@ The query middleware registration preserves ordering and the OAuth callback catc
 
 The original repair selects OAuthlib 4.0.0, which enters the affected range for a High device authorization endpoint advisory. The prior 3.2.2 was outside that particular range. Review prompted correction to 4.0.1 in `50de1db06`. The PyPI release records for all 13 selected package versions on `65084ea5a` list zero advisories. The image scan assesses the installed versions. [Upstream advisory](https://github.com/oauthlib/oauthlib/security/advisories/GHSA-3jp2-3mrg-2vxc).
 
+## Exact candidate readback
+
+The forest1 build from `65084ea5a1587cde24f8f9612ed87e70d5a8fd6b` produced `sha256:a116e2d21457a0e33a6070ab42518be0adead13ea9b53db5c55d9f7dfa8871d0`. The reviewer verified the stopped container identity and read the filesystem export as data. Its SHA-256 is `2540298cf0fb9df14889c9cdf0692d6f1fd0b3c757861ff9684d3629bcd4564b`. The readback packet `security/forest1/archive-verified.json` hashes to `66b87b946474f570037a91fb0348092c89b23954e68e6b6c0599032277b618e2`.
+
+The image contains the selected Python versions. The Python Brotli source pin, Pillow repair provenance and native hashes match the installed files and wheel RECORD entries. PyCurl ships separate 1.2.1 decoder/common libraries. There are zero uv cache files and zero sshd executables. All 432 Debian package versions and the three Go binary hashes match the serving image. The inventory contains 2,455 native paths and verifies 15,574 scientific data files. Eight Python metadata paths from the earlier checkout’s `.wctl` directory disappear independently of installed runtime repairs.
+
+The local production-only npm audit returned zero findings. All 24 full lock reports belong to development dependencies. Four concrete advisories remain in build/test packages. The production static script copies fixed asset paths and the evidence record identifies all 16 emitted files.
+
 ## Release gate
 
 Hold pending the exact candidate scan, same-database comparison, native and authentication evidence, full regression result, and independent correctness review. An image-scoped operator decision must cover any accepted residuals. The underlying protected ledger contains advisory details and remains available for the release decision.
