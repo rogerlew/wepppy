@@ -16,27 +16,13 @@ function basemapRequest(value) {
   return { url: url.href, credentials: 'omit', referrerPolicy: 'no-referrer' };
 }
 
-function labelOffset({ run_id: runId }) {
-  let hash = 0;
-  for (let index = 0; index < runId.length; index += 1) {
-    hash = ((hash << 5) - hash + runId.charCodeAt(index)) | 0;
-  }
-  const angle = (Math.abs(hash) % 360) * Math.PI / 180;
-  const distance = 4 + Math.abs(hash % 7);
-  return [Math.round(6 + Math.cos(angle) * distance), Math.round(Math.sin(angle) * distance)];
-}
-
 function tooltip({ object }) {
   if (!object) return null;
   return [
-    object.name || 'Unnamed run',
-    `Run ID: ${object.run_id}`,
-    `Location: ${object.latitude}, ${object.longitude}`,
+    `Location: ${object.coordinates[1]}, ${object.coordinates[0]}`,
     `Config: ${object.config === '' ? 'Unknown' : object.config ?? 'Unknown'}`,
-    `Soil burn severity data: ${object.severity == null ? 'Unknown' : object.severity ? 'Yes' : 'No'}`,
+    `Soil burn severity data: ${object.has_sbs == null ? 'Unknown' : object.has_sbs ? 'Yes' : 'No'}`,
     `Hillslopes: ${object.hillslopes ?? 'Unknown'}`,
-    `Accesses: ${object.access_count ?? 'Unknown'}`,
-    `Last accessed: ${object.last_accessed || 'Unknown'}`,
   ].join('\n');
 }
 
@@ -55,7 +41,7 @@ function initAtlas(figure, deck, maplibre) {
     return { ...INITIAL_VIEW, longitude: opening.longitude, latitude: opening.latitude, zoom: opening.zoom };
   }
   const initialView = openingView();
-  const position = row => [row.longitude === 180 ? -180 : row.longitude, row.latitude];
+  const position = row => [row.coordinates[0] === 180 ? -180 : row.coordinates[0], row.coordinates[1]];
 
   const centroids = new deck.ScatterplotLayer({
     id: 'run-centroids',
@@ -66,27 +52,13 @@ function initAtlas(figure, deck, maplibre) {
     radiusMaxPixels: 26,
     getPosition: position,
     getRadius: row => Math.sqrt(row.hillslopes ?? 0),
-    getFillColor: row => row.severity ? [173, 62, 10, 220] : [2, 132, 199, 200],
+    getFillColor: row => row.has_sbs ? [173, 62, 10, 220] : [2, 132, 199, 200],
     getLineColor: [255, 255, 255, 220],
     lineWidthUnits: 'pixels',
-    getLineWidth: row => row.severity ? 3 : 1,
+    getLineWidth: row => row.has_sbs ? 3 : 1,
     stroked: true,
   });
 
-  const labels = new deck.TextLayer({
-    id: 'run-labels',
-    data: rows,
-    getPosition: position,
-    getText: row => row.run_id,
-    getSize: 1,
-    sizeUnits: 'pixels',
-    getColor: [30, 41, 59, 220],
-    getTextAnchor: 'start',
-    getAlignmentBaseline: 'bottom',
-    getPixelOffset: labelOffset,
-  });
-  const labelSize = zoom => Math.min(10, Math.max(1, zoom));
-  const layers = zoom => [centroids, labels.clone({ sizeScale: labelSize(zoom) })];
   let camera = initialView;
   let atOpeningView = true;
 
@@ -126,7 +98,6 @@ function initAtlas(figure, deck, maplibre) {
 
   function updateCamera(next, opening = false) {
     atOpeningView = opening;
-    const labelsChanged = labelSize(camera.zoom) !== labelSize(next.zoom);
     camera = next;
     map.setViewState(camera);
     basemap.jumpTo({
@@ -135,7 +106,6 @@ function initAtlas(figure, deck, maplibre) {
       pitch: camera.pitch,
       bearing: camera.bearing,
     });
-    if (labelsChanged) map.applyLayers(layers(camera.zoom));
   }
 
   const touchOnly = matchMedia('(pointer: coarse) and (not (any-pointer: fine))').matches;
@@ -143,7 +113,7 @@ function initAtlas(figure, deck, maplibre) {
     deck, target, initialViewState: initialView,
     touchAction: touchOnly ? 'pan-y' : 'none',
     controllerOptions: { dragPan: !touchOnly, scrollZoom: true, dragRotate: false, touchRotate: false, keyboard: false },
-    layers: layers(camera.zoom),
+    layers: [centroids],
     getTooltip: tooltip,
     onViewStateChange: ({ viewState, interactionState }) => {
       const interacting = interactionState?.isDragging || interactionState?.isZooming ||

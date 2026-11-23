@@ -1,18 +1,7 @@
-{% macro access_time(timestamp) %}
-  {% if timestamp %}
-  <time datetime="{{ timestamp.isoformat() }}">{{ timestamp.strftime('%b %d, %Y') }}</time>
-  {% else %}
-  Unknown
-  {% endif %}
-{% endmacro %}
-
 <section id="map" class="wc-landing__section" aria-labelledby="atlas-heading">
   <h2 id="atlas-heading">Run Atlas</h2>
   <p class="wc-landing__reading">
-    The Run Atlas shows project locations from the latest compiled snapshot.
-    Each new snapshot includes only explicitly public projects with recorded locations.
-    Use it to highlight recent wildfire response studies, watershed planning campaigns,
-    and the scale of collaboration across the platform.
+    The map shows watersheds with recorded locations from both public and private runs.
   </p>
 
   {% if atlas is none %}
@@ -28,10 +17,6 @@
     <div class="wc-landing__card">
       <dt>Total hillslopes</dt>
       <dd>{{ '{:,}'.format(atlas.hillslopes) }}</dd>
-    </div>
-    <div class="wc-landing__card">
-      <dt>Latest access</dt>
-      <dd>{{ access_time(atlas.latest_access) }}</dd>
     </div>
   </dl>
 

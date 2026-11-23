@@ -182,24 +182,29 @@ def test_landing_maps_the_full_public_atlas_without_year_controls(landing_client
     assert page.select_one('script[src*="deck.gl"]')
     assert page.select_one('script[type=module][src$="landing-atlas.js"]')
 
-    count, hillslopes, latest = page.select(".wc-landing__metrics dd")
+    count, hillslopes = page.select(".wc-landing__metrics dd")
     assert count.get_text(strip=True) == "27"
     assert hillslopes.get_text(strip=True) == "104"
-    assert latest.time["datetime"] == "2026-01-26T14:30:00+00:00"
-    rows = json.loads(page.select_one("[data-atlas-rows]").string)
-    assert len(rows) == 27
-    assert rows[0]["name"] == "<script>26</script>"
-    assert rows[-1]["run_id"] == "older"
-    assert all("year" not in row for row in rows)
+    markers = json.loads(page.select_one("[data-atlas-rows]").string)
+    assert len(markers) == 27
+    assert all(set(row) == {"coordinates", "config", "has_sbs", "hillslopes", "ash_hillslopes"}
+               for row in markers)
+    assert sum(row["hillslopes"] == 4 for row in markers) == 26
+    assert sum(row["hillslopes"] is None for row in markers) == 1
+    assert "Latest access" not in response.text
+    assert "2026-01-" not in response.text
+    assert "run-26" not in response.text
+    for alias in ("/run-locations.json", "/landing/run-locations.json",
+                  "/landing/dark/run-locations.json", "/landing/light/run-locations.json"):
+        assert client.get(alias).get_json() == markers
 
-    assert rows[0]["hillslopes"] == 4
-    assert rows[-1]["hillslopes"] is None
+    path.write_text(json.dumps(list(reversed(rows))), encoding="utf-8")
     assert "<script>26</script>" not in response.text
     assert "<b>config</b>" not in response.text
     assert "private preview field" not in response.text
 
     _, page = _get(client, "/landing/?page=2&year=1900")
-    assert json.loads(page.select_one("[data-atlas-rows]").string) == rows
+    assert json.loads(page.select_one("[data-atlas-rows]").string) == markers
 
 
 def test_landing_keeps_polar_projects_in_summary(landing_client):
@@ -209,16 +214,15 @@ def test_landing_keeps_polar_projects_in_summary(landing_client):
         [181, 20], [float("nan"), 20], [True, 20],
     ]
     path.write_text(json.dumps([
-        {"runid": f"run-{index}", "coordinates": coordinates, "hillslopes": 0}
-        for index, coordinates in enumerate(locations)
+        {"coordinates": coordinates, "hillslopes": 0}
+        for coordinates in locations
     ]), encoding="utf-8")
 
     _, page = _get(client)
     assert page.select_one(".wc-landing__metrics dd").get_text(strip=True) == "5"
     assert "North of the equator, west of Greenwich: 2." in page.select_one("#atlas-geography").get_text()
     rows = json.loads(page.select_one("[data-atlas-rows]").string)
-    assert [row["run_id"] for row in rows] == ["run-2", "run-3", "run-4"]
-    assert [row["longitude"] for row in rows] == [0, 180, -180]
+    assert sorted(row["coordinates"][0] for row in rows) == [-180, 0, 180]
     assert all(row["hillslopes"] == 0 for row in rows)
 
 

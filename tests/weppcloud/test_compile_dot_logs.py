@@ -18,8 +18,6 @@ pytestmark = pytest.mark.unit
 
 
 class RonStub:
-    ispublic = staticmethod(script.Ron.ispublic)
-
     def __init__(self, config_stem: str, has_sbs: bool) -> None:
         self.config_stem = config_stem
         self.has_sbs = has_sbs
@@ -133,11 +131,10 @@ def test_compile_dot_logs_builds_outputs_and_touches_ttl(
 
     payload = json.loads(run_locations.read_text(encoding="utf-8"))
     assert len(payload) == 1
-    record = payload[0]
-    assert record["runid"] == runid
-    assert record["coordinates"] == [-116.1, 43.6]
-    assert record["access_count"] == 2
-    assert record["last_accessed"] == timestamps[-1].isoformat()
+    assert payload[0] == {
+        "coordinates": [-116.1, 43.6], "config": "disturbed", "has_sbs": True,
+        "hillslopes": 2, "ash_hillslopes": 1,
+    }
 
     assert ttl_calls
     assert ttl_calls[0][0] == str(run_dir)
@@ -219,26 +216,19 @@ def test_missing_artifact_does_not_remove_location_or_project(
     )
 
     locations = json.loads(run_locations.read_text(encoding="utf-8"))
-    by_runid = {entry["runid"]: entry for entry in locations}
-    assert set(by_runid) == {"empty-count"}
-    assert by_runid["empty-count"]["hillslopes"] == 0
+    assert sorted(entry["hillslopes"] for entry in locations) == [0, 3]
     counters = json.loads((tmp_path / "runs_counter.json").read_text(encoding="utf-8"))
     assert counters["projects"] == 2
 
-    # Visibility may change while logs are being processed for the next build.
-    def revoke_before_publication(wd, **kwargs):
-        if Path(wd) == public_marker.parent:
-            public_marker.unlink()
-
-    monkeypatch.setattr(ttl_module, "touch_ttl", revoke_before_publication)
+    public_marker.unlink()
     result = script.compile_dot_logs(
         access_log_path=str(access_csv),
         run_locations_path=str(run_locations),
         run_roots=[str(run_root)],
         legacy_roots=[str(tmp_path / "legacy")],
     )
-    assert result["run_locations"] == 0
-    assert json.loads(run_locations.read_text()) == []
+    assert result["run_locations"] == 2
+    assert json.loads(run_locations.read_text()) == locations
     assert len(_read_access_csv(access_csv)) == 2
     assert json.loads((tmp_path / "runs_counter.json").read_text()) == counters
 
@@ -478,9 +468,7 @@ def test_duplicate_runid_logs_reuse_same_metadata(
     assert result["runs"] == 1
     assert [row["hillslopes"] for row in rows] == ["4", "4"]
     locations = json.loads((tmp_path / "runid-locations.json").read_text())
-    assert [(row["runid"], row["access_count"]) for row in locations] == (
-        [(runid, 2)] if legacy_public else []
-    )
+    assert [row["hillslopes"] for row in locations] == [4]
 
 
 def test_disappearance_after_stat_is_counted_as_read_error(
@@ -663,7 +651,7 @@ def test_cross_directory_run_locations_override(
         legacy_roots=[str(tmp_path / "legacy")],
     )
 
-    assert json.loads(locations_path.read_text(encoding="utf-8"))[0]["runid"] == runid
+    assert json.loads(locations_path.read_text(encoding="utf-8"))[0]["coordinates"] == [-116.1, 43.6]
     assert (locations_dir / ".compile_dot_logs.lock").exists()
 
 

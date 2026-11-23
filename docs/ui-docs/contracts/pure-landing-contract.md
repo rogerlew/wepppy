@@ -84,13 +84,12 @@ shortcuts, hosting credit and a consistent mobile gutter. Use the shared
 theme palette for UI surfaces and readable text.
 
 Keep the interactive Atlas and metric group above it, formatted with clear
-numeric hierarchy and a human-readable date. Open on the contiguous US at
+numeric hierarchy. Open on the contiguous US at
 a responsive zoom and level pitch. Bound marker size to reduce overlap
 while retaining hillslope-area encoding. Keep the blue standard marker and
 use ember with the existing thicker outline for SBS. Keep the requested
 two legend chips and persistent desktop wheel instruction. A touch-only
-screen omits the Ctrl instruction and permits one-finger vertical page scrolling. Run ID eligibility follows the build
-rollover publication rule below.
+screen omits the Ctrl instruction and permits one-finger vertical page scrolling.
 
 ## Run Atlas
 
@@ -98,7 +97,7 @@ The Run Atlas is the landing's main visual and follows About as it did
 on the original light landing. Reuse the existing Deck.gl 9 runtime and
 WEPPcloud map helper. Use the live light landing's CARTO Positron
 vector style with the existing MapLibre runtime under the Deck.gl
-centroids and labels. Use
+centroids. Use
 `https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json`
 and its versioned vector tiles, fonts and sprites from
 `tiles.basemaps.cartocdn.com`. Accept only the style URL and the versioned
@@ -111,8 +110,8 @@ requests omit application credentials and preview referrers. Credit
 OpenStreetMap and CARTO for the preview map. The shell follows the selected
 theme and the basemap uses the same palette as the original light landing.
 
-Use the existing compiled snapshot. Keep unique runs, total
-hillslopes and latest recorded access in shared `wc-landing__card` cards
+Use the existing compiled snapshot. Keep unique runs and total
+hillslopes in shared `wc-landing__card` cards
 above the map. Restore the original compact lower-left zoom-in, zoom-out
 and reset map buttons with accessible names and focus indicators. The Atlas has no access-year
 controls or browse-project disclosure and table. Former year and page
@@ -120,10 +119,8 @@ parameters have no effect.
 
 Provide a concise nonvisual geographic summary and a readable failure
 message in the rendered HTML. Keep the marker legend, named keyboard
-panning, native zoom and reset controls, and a normal Tab exit. Render
-run ID labels directly on the map, with the original zoom-dependent
-label size. Keep the inspection paragraph and project-cycle controls out
-of the page. Plain-text hover tooltips retain the existing project fields.
+panning, native zoom and reset controls, and a normal Tab exit. Keep the inspection paragraph and project-cycle controls out
+of the page. Plain-text hover tooltips show location, configuration, soil burn severity and hillslope count.
 Marker area represents each run's hillslope count, with a minimum visible
 marker and maximum radius to keep the map legible, and both an outline and fill distinguish
 soil burn severity data. The canvas has no separate tab stop. Unmodified wheel input scrolls the page. Holding Ctrl while scrolling over
@@ -140,17 +137,18 @@ summary and metrics. Geodetically valid polar locations remain in the
 summary and metrics. Web Mercator only plots eligible coordinates and
 uses the same dateline location for +180 and −180.
 
-At normal snapshot compilation, include a project's Atlas row only if its
-run directory has the existing explicit public designation (NoDb PUBLIC
-marker). If multiple input directories contribute to one run ID, each must
-qualify for that merged row to be published. A change of visibility takes effect in the next successful
-generation. The landing and all four JSON aliases use this same published
-snapshot regardless of session. Only its eligible rows contribute labels,
-tooltips, metrics and geographic summaries. Never ship a second unfiltered
-snapshot as a static asset. Project access and internal statistics keep
-their existing rules. Serialize only public marker fields with Jinja JSON
-encoding. No project links, raw access log, identity data, or user-controlled
-tile URLs are part of this surface.
+Include one location per distinct run in the existing compiler inventory with a
+valid centroid and eligible lifecycle state, regardless of its PUBLIC marker.
+Coincident centroids remain distinct. This shows watershed coverage across the
+platform while keeping run identifiers and access activity out of the atlas.
+Publish only coordinates, config, has_sbs, hillslopes and ash_hillslopes. Omit
+run IDs, ID-derived names, links, access counts, timestamps and access years
+from the snapshot, four JSON aliases and rendered atlas. The aliases and
+landing apply the field restriction to older snapshots during rollover. The
+rows use a deterministic order based only on published fields. The
+expanded coverage appears after the next successful compile. Run permissions
+and internal activity reporting continue under their existing contracts.
+
 
 | Input or runtime state | Required outcome |
 | --- | --- |
@@ -170,12 +168,10 @@ Apply the Revised Section 508 web baseline, including WCAG 2.0 A and AA,
 and the repository's existing AA theme baseline. Include a skip link, one
 main landmark and H1, logical headings, labeled controls,
 descriptive links, visible keyboard focus, readable text at 200% zoom,
-and usable narrow layouts with and without scripts. Keep the requested
-visual-only presentation of individual run IDs and hover details during
-review. The operator approved the existing presentation for cutover. Manual assessment
+and usable narrow layouts with and without scripts. Individual watershed details appear on hover. Manual assessment
 of per-marker equivalence remains open for Section 508 conformance reporting.
 Verify desktop and narrow screenshots show the map as the main visual after About.
-Check rendered geographic features, run ID labels and keyboard navigation
+Check rendered geographic features, watershed markers and keyboard navigation
 in served output. Verify with keyboard and axe across default,
 light-high-contrast, ayu-mirage, ayu-mirage-bordered and cursor-dark-midnight.
 Review text and non-text contrast and perform manual assistive technology
