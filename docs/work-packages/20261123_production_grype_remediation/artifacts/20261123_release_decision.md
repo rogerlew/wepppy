@@ -28,6 +28,10 @@ Before releasing this candidate, resolve the three Python findings and establish
 
 The current serving approval expires **2026-11-24 06:23:17.979322 UTC**. Roger Lew must address that expiry separately. The previous GDAL exception covers its original image only. Production continues on the recorded serving image.
 
+## Regression results
+
+The full candidate-image pytest run passed with 14,751 passed, 751 skipped and 99 deselected. The CI image inherited the complete common-image layer chain. The test scratch mount used the image’s own DuckDB spatial extension, verified by SHA-256. The private forest receipt is `forest1/pytest-final-receipt.json`, SHA-256 `cd8fb3dae9bd7ab03d3bde0373f262bc924eba7dc227e1c7af807c3b2e4d38b8`. Frontend lint, 1,109 Jest tests, nine Node tests and generated asset readback passed. The security findings above determine the release hold.
+
 ## Evidence
 
 The protected wepp2 store retained the candidate under `/workdir/weppcloud-deployments/.local/dependency-security/evidence/grype-remediation-65084ea5/<candidate bundle manifest>/bundle`. Forest retains the same-database rematch, original repair and build records and regression receipts under `/workdir/weppcloud-deployments/.local/dependency-security/evidence/grype-remediation-20261123/`. The independent correctness reviewer verified signed OAuth and rejection paths, actual PATH and DEVAL reports, compressed transfers, and scientific inputs and outputs. [Correctness review](20261123_correctness_review.md) · [Security review](20261123_security_review.md)

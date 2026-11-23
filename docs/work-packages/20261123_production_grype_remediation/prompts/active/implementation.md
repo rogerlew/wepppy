@@ -12,7 +12,7 @@ Reduce applicable runtime exposure while preserving login, upload, data acquisit
 - [x] Validate public-facing framework and authentication repairs.
 - [x] Validate image processing, bundled libraries and frontend dependency repairs.
 - [x] Disposition OS and embedded-tool findings and qualify cache cleanup. The [independent security review](../../artifacts/20261123_security_review.md) retains open applicability and fixes for operator follow-up.
-- [ ] Build, test and review one integrated candidate and record the release decision.
+- [x] Built, tested and independently reviewed the integrated candidate. Recorded a production hold.
 
 - [x] 2026-11-23 07:03 UTC. Committed separate frontend, framework, native and build-cache batches. Focused tests passed. Started the integrated clean build from `5729db5e1` on forest.
 
@@ -48,4 +48,4 @@ Forest1 built the image and CI extension but failed to create transient systemd 
 
 Six repair commits are available. Component trials on forest passed 158 framework/OAuth and 36 codec/transport cases. The targeted npm lock passed lint, 1,109 Jest tests, nine Node tests and the production asset build. The exact-image security and correctness reviews are complete. The [release decision](../../artifacts/20261123_release_decision.md) holds the image under the existing policy.
 
-Revision on 2026-11-23 records actual baseline identity, repair batches and the start of candidate validation.
+The full candidate suite passed with 14,751 passed, 751 skipped and 99 deselected. The isolated test stacks were removed after validation. The work package remains open for Roger Lew’s disposition of residual security findings.
