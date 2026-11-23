@@ -7,7 +7,7 @@ In wepppy/weppcloud/static/js/gl-dashboard/map/layers.js, createLayerUtils suppl
 ## Progress
 
 - [x] 2026-11-23 UTC. Inspected the public interface and measured the baseline.
-- [ ] Extract and wire formatting.
+- [x] 2026-11-23 UTC. Extracted and wired the shared readers and tooltip formatter.
 - [ ] Verify behavior and record local integration readiness.
 
 ## Surprises & Discoveries
@@ -24,4 +24,6 @@ From the repository root run wctl run-npm lint and wctl run-npm test. Inspect th
 
 ## Outcomes & Retrospective
 
-Pending execution.
+The public factory now delegates hover formatting to layer-tooltips.js. Named helper keys remain available to consumers. The original file fell from 1,604 to 1,279 source lines and its peak complexity fell from 155 to 21. The tooltip and value modules measure 165 and 48 source lines, with peak complexity 10 and 11 respectively.
+
+All 1,110 Jest tests and nine Node tests passed. A Chromium replay compared 410 tooltip strings from the baseline and candidate factories across run and batch modes. Inputs covered missing, zero, numeric, numeric-string and invalid values, yearly and event dates, RAP cumulative mode and scalar datasets. A Jest regression exercises priority among overlapping channel, event, OpenET and tile values.
