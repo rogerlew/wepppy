@@ -1,0 +1,9 @@
+{
+  "source": "User-supplied /tmp/boundary.zip, 2026-11-18; Culvert_web_app issue #307",
+  "sha256": "cb640f057ac216f8b35406cb600cf3089d645fe1d1ec2502b67cb4ba64df8f84",
+  "description": "Unmodified Santee Experimental Forest boundary. DBF float:19.11 fields contain scientific notation with more fractional digits than the declared decimal count. Must retain parsed numeric values through conversion.",
+  "expected_numeric_properties": {
+    "Shape_Leng": 0.239087662256,
+    "Shape_Area": 0.00241558165692
+  }
+}
