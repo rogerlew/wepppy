@@ -1,5 +1,5 @@
 # CI-only extension of the accepted common runtime; no image publication.
-ARG WEPPCLOUD_TEST_BASE_IMAGE=ghcr.io/rogerlew/wepppy@sha256:a3ab4594f2c45dd05e22fd31d4ca29ccfec6fc66faed54d9a6930b35a17acc4c
+ARG WEPPCLOUD_TEST_BASE_IMAGE=ghcr.io/rogerlew/wepppy@sha256:95dc500309f3274d4e8e7f5110c7b8d39e4d4516bf80a1579ad0b3a26836186a
 FROM node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS node_runtime
 FROM rust:1.92.0-slim-trixie@sha256:bf3368a992915f128293ac76917ab6e561e4dda883273c8f5c9f6f8ea37a378e AS parquet-csv-builder
 RUN apt-get update && apt-get install -y --no-install-recommends python3 pkg-config && rm -rf /var/lib/apt/lists/*

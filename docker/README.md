@@ -757,6 +757,8 @@ For AI agents performing deployments:
 - [ ] Static assets accessible (404s resolved)
 - [ ] Monitoring established
 
+The [2026-11-24 common image](https://github.com/rogerlew/wepppy/actions/runs/45485485437) includes Authlib 1.9.10 and joserfc 1.8.0 from the application requirements. The previous CI image predated those pins and failed to import the OAuth blueprint during disposable database setup.
+
 ### CI Comrak and PRISM runtime alignment (2026-11-21)
 
 The [baseline job](https://github.com/rogerlew/wepppy/actions/runs/44933644862/job/136937190372)
