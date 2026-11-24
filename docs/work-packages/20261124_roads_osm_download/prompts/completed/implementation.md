@@ -8,8 +8,8 @@ A user can acquire a road map for their project without supplying an input or ru
 
 - [x] 2026-11-24 UTC. Identify upload and secondary button patterns and inspect model resolution.
 - [x] 2026-11-24 UTC. Commit approved contract after two independent reviews.
-- [ ] Implement shared road selection, GeoJSON acquisition and integrated download. Amend ENDUSER.md.
-- [ ] Verify download, GIS-edit and upload, browser states, screenshots, usability and security review.
+- [x] 2026-11-24 UTC. Implement shared road selection, GeoJSON acquisition and integrated download. Amend ENDUSER.md.
+- [x] 2026-11-24 UTC. Verify download, GIS-edit and upload, browser states, screenshots, usability and security review.
 
 ## Surprises & Discoveries
 
@@ -29,4 +29,4 @@ From the task worktree run wctl run-pytest against the changed topo, Roads and r
 
 ## Outcomes & Retrospective
 
-Execution in progress.
+The control, model inputs, documentation and reviews passed local feature acceptance. Chromium completed the live download, GIS round trip and multipart upload. The full regression selection completed with one unrelated team-route assertion failure reproduced on the original revision. Both Roads user guides and four reviewed screenshots accompany the [validation evidence](../../artifacts/20261124_artifact_validation.md).

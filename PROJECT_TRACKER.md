@@ -1,4 +1,4 @@
-Active — [Roads OpenStreetMap download](docs/work-packages/20261124_roads_osm_download/package.md).
+Completed locally — [Roads OpenStreetMap download](docs/work-packages/20261124_roads_osm_download/package.md).
 
 Completed locally — [Run-page Features Export presentation refactor](docs/work-packages/20261123_run0_export_presentation/package.md).
 
