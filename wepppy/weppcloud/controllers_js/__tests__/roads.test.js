@@ -246,6 +246,14 @@ describe("Roads controller", () => {
         expect(button.disabled).toBe(false);
     });
 
+    test("Fetch identifies a gateway timeout without rendering its response document", async () => {
+        httpMock.request.mockRejectedValueOnce({status: 504, body: "<html>Gateway error</html>"});
+        document.querySelector("[data-roads-action='download-osm']").click();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(document.querySelector("#roads_osm_status").textContent)
+            .toBe("The road download gateway timed out (HTTP 504). Try again later.");
+    });
+
     test("upload action validates missing file before posting", async () => {
         await roads.uploadGeojson();
 

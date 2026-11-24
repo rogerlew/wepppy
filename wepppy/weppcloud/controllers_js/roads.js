@@ -549,6 +549,10 @@ var Roads = (function () {
             } catch (error) {
                 if (deadline.signal.aborted) {
                     status.textContent = "Your browser timed out after 30 seconds waiting for the road download. Try again later.";
+                } else if (error && error.status && !(error.body && typeof error.body.error === "object")) {
+                    status.textContent = error.status === 504 || error.status === 408
+                        ? "The road download gateway timed out (HTTP " + error.status + "). Try again later."
+                        : "The road download server returned HTTP " + error.status + ". Try again later.";
                 } else {
                     var payload = toResponsePayload(http, error);
                     var details = payload.error && payload.error.details;
