@@ -16,3 +16,9 @@ requires no dedicated security review.
 The maintainer owns local acceptance. Exercise both payload paths, read back
 generated outputs and run the full pytest gate. The operator requested a
 local master merge and deferred the PR.
+
+## Outcome
+
+Completed locally on 2026-11-24 UTC. The builder shares column preparation
+and manifest metadata assembly across both paths. The [tracker](tracker.md)
+records generated artifact checks and the outstanding broad-suite failure.

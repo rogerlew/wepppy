@@ -11,8 +11,8 @@ event placeholders, requested projection and serialization.
 ## Progress
 
 - [x] 2026-11-24 UTC. Identify the shared sequence and its format-specific boundaries.
-- [ ] Refactor the builder and update the service internals guide.
-- [ ] Validate the payloads and record the local test results.
+- [x] 2026-11-24 UTC. Refactor the builder and update the service internals guide.
+- [x] 2026-11-24 UTC. Validate the payloads and record the local test results.
 
 ## Surprises & Discoveries
 
@@ -33,4 +33,5 @@ merge through the local master worktree.
 
 ## Outcomes & Retrospective
 
-Pending validation.
+All 239 scoped tests passed. The broad suite stopped on a team-route assertion
+that also failed on the baseline. See the package tracker for the receipts.

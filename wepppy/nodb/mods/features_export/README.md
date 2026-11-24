@@ -152,7 +152,10 @@ their own manifest and README alongside the native GDB tree.
 ## Service internals
 
 `service.py` orchestrates submission, execution, cached result reuse, and
-publication. `carrier_identity.py` aligns hillslope and channel keys to
+publication. Consolidated tabular and spatial layers share column selection,
+unit conversion, temporal reshaping, and output naming. Spatial layers attach
+canonical geometry before those steps. Tabular layers backfill watershed IDs
+after naming and bypass geometry loading. `carrier_identity.py` aligns hillslope and channel keys to
 geometry and backfills Topaz and WEPP IDs from watershed tables.
 `cached_artifact_validation.py` checks the format of an existing artifact
 after the service resolves its path inside the run.
