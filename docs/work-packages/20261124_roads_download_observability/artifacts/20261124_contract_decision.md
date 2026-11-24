@@ -1,0 +1,5 @@
+# Retry and failure visibility
+
+Starting revision def085976. The operator requested gentle retries and propagation of timeouts through the Fetch button during validation. Existing timeout and capacity exceptions collapse to the same 503. The Roads download contract now specifies one jittered retry and distinct observable failure states. The bounded timeout and retry limit preserve synchronous worker availability. The controller contract, artifact observability standard and run-access rules apply. Never-used, populated, empty and legacy projects keep the same read-only export workflow. Malformed or denied requests cannot induce additional retries. Verify timed-out and transient HTTP responses through Flask and the actual controller, checking attempt counts, button recovery and downloaded bytes.
+
+Independent correctness and security reviewers accepted before implementation. Their conditions are incorporated: one absolute budget includes sleep and body reads; a timeout after response headers is observable. Browser-only failures display no invented attempt count or reference. Normalize Retry-After to seconds and disclose only local categories and safe metrics.
