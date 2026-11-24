@@ -14,7 +14,7 @@ Roads is for questions such as:
 - How much do inslope and outslope roads change watershed results compared with the no-roads baseline?
 - How sensitive are results to road design, surface, and traffic assumptions in the uploaded linework?
 
-It is not a general road inventory tool and it does not replace the baseline WEPP watershed model.
+You can also download the mapped road centerlines for use in GIS without running a Roads scenario.
 
 ## Parameter validation
 
@@ -35,12 +35,16 @@ Use Roads when:
 
 - the run already has a completed baseline WEPP solution,
 - the project uses the WBT delineation backend,
-- you have road centerlines in GeoJSON form,
+- you have road centerlines or want to start with roads mapped in OpenStreetMap,
 - the uploaded road attributes can be mapped to road meaning the model understands.
 
 ## Before You Begin
 
-Before opening the **Roads** control, make sure you have:
+To get centerlines for your saved project map area, open **Roads** and choose **Download OpenStreetMap roads**. This requires Roads action access on a writable WhiteboxTools project. You can repeat the download and keep working with the file already uploaded.
+
+Open the downloaded GeoJSON in GIS. Each road has its OpenStreetMap ID, road class, mapped surface when available, and original tags in `osm_tags`. For modeling, fill in `DESIGN`, check `SURFACE`, and enter `TRAFFIC`. For example, a road tagged `track` tells you its mapped use. Choose its drainage design from site information. Save the edited lines as GeoJSON, then choose **Upload roads vector file**. The upload limit is 10 MB.
+
+Before running a Roads scenario, make sure you have:
 
 - a baseline WEPP run you trust enough to use as the no-roads comparison,
 - a roads GeoJSON `FeatureCollection` with `LineString` or `MultiLineString` features,
@@ -57,11 +61,11 @@ Roads with other design values remain in the uploaded file but are excluded from
 
 ## What You See In The UI
 
-The **Roads** control has four user-facing stages:
+After you choose your centerlines, the **Roads** control guides you through four stages.
 
 | Visible control | What you choose or do | What WEPPcloud does behind the scenes | Why it matters |
 | --- | --- | --- | --- |
-| `Upload roads GeoJSON` and `Upload Roads GeoJSON` | Choose and upload the linework file | Posts the file to `tasks/roads/upload_geojson`, validates geometry, stages `roads.uploaded.geojson`, discovers top-level attributes, and tries to auto-map fields | A bad upload blocks everything else; a good upload populates the mapping controls with real fields from your file |
+| `Upload roads vector file` | Choose and upload the linework file | Posts the file to `tasks/roads/upload_geojson`, validates geometry, stages `roads.uploaded.geojson`, discovers top-level attributes, and tries to auto-map fields | A bad upload blocks everything else; a good upload populates the mapping controls with real fields from your file |
 | `Attribute Mapping` | Choose `Design field`, `Surface field`, `Surface fallback value`, `Traffic field`, and `Traffic fallback value`, then click `Apply Attribute Mapping` | Posts the selected mapping and defaults to `tasks/roads/set_params`, persists them, and clears stale prepare/run state | This step controls how WEPPcloud interprets your road attributes and whether features are eligible later |
 | `Prepare Segment Candidates` | Start preprocessing | Queues `tasks/roads/prepare_segments` and creates monotonic segments, low points, routing diagnostics, and eligibility summaries | Preparation is where linework becomes modeled road segments |
 | `Run WEPPcloud Roads` | Start the Roads scenario run | Queues `tasks/roads/run` and runs the prepared segments, combines pass effects, reroutes watershed results, and regenerates Roads-scoped reports | This is the actual Roads scenario execution step |

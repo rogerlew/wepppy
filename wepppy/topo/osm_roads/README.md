@@ -40,3 +40,5 @@ This module provides a contract-driven OSM roads client for TerrainProcessor-sty
 - `force_refresh=True` always attempts upstream fetch first.
 - Fallback behavior is explicit and bounded by TTL policy.
 - Missing DB URL for default service is an explicit error (`db_url_required`).
+
+The WEPPcloud Roads download uses one foreground Overpass request to the configured endpoint, independent of the PostgreSQL tile cache. It retains all source tags, clips lines to the project extent, and limits input to one degree per side and 8 MiB of decoded upstream data. See the [download contract](../../../docs/schemas/roads-osm-download-contract.md). TerrainProcessor shares the default vehicular classes, including service roads, forest tracks and road links.

@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
 import os
 import time
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol, Sequence
 
+import httpx
 import requests
 from shapely.geometry import LineString
 
 from .cache import normalize_highway_filter
+from .contracts import VEHICULAR_HIGHWAYS
 from .errors import OSMRoadsUpstreamError
 
 
@@ -51,6 +55,40 @@ class OverpassClient(OverpassClientProtocol):
 
     def __init__(self, config: OverpassConfig | None = None) -> None:
         self.config = config or OverpassConfig.from_env()
+
+    def fetch_download_ways(self, bbox: tuple[float, float, float, float]) -> list:
+        """One bounded, inline-geometry query for a foreground GIS download."""
+        timeout = min(20, self.config.timeout_sec)
+        query = build_overpass_query(bbox_wgs84=bbox, highway_filter=VEHICULAR_HIGHWAYS,
+                                     timeout_sec=timeout, inline_geometry=True)
+
+        async def read_body() -> bytearray:
+            headers = {
+                "User-Agent": "WEPPcloud-Roads (+https://wepp.cloud/)",
+                "Accept": "application/json",
+                "Accept-Encoding": "identity",
+            }
+            data = bytearray()
+            async with asyncio.timeout(timeout):
+                async with httpx.AsyncClient(headers=headers, timeout=timeout) as client:
+                    async with client.stream("POST", self.config.base_url, data={"data": query}) as response:
+                        if response.status_code != 200:
+                            raise OSMRoadsUpstreamError("OpenStreetMap could not complete the download.")
+                        if response.headers.get("content-encoding", "identity").lower() != "identity":
+                            raise OSMRoadsUpstreamError("OpenStreetMap returned an unsupported encoding.")
+                        async for chunk in response.aiter_raw():
+                            if len(data) + len(chunk) > 8 * 1024 * 1024:
+                                raise OSMRoadsUpstreamError("The OpenStreetMap response exceeded the download limit.")
+                            data.extend(chunk)
+            return data
+
+        try:
+            payload = json.loads(asyncio.run(read_body()))
+        except (httpx.HTTPError, TimeoutError, ValueError, RecursionError) as exc:
+            raise OSMRoadsUpstreamError("OpenStreetMap could not complete the download.") from exc
+        if not isinstance(payload, dict) or payload.get("remark") or not isinstance(payload.get("elements"), list):
+            raise OSMRoadsUpstreamError("OpenStreetMap returned an incomplete result.")
+        return payload["elements"]
 
     def fetch_roads(
         self,
@@ -119,6 +157,7 @@ def build_overpass_query(
     bbox_wgs84: tuple[float, float, float, float],
     highway_filter: Sequence[str],
     timeout_sec: int,
+    inline_geometry: bool = False,
 ) -> str:
     """Build Overpass QL query for roads inside ``bbox_wgs84``."""
 
@@ -127,14 +166,13 @@ def build_overpass_query(
     normalized = normalize_highway_filter(highway_filter)
     regex = "|".join(normalized)
 
+    output = "out geom;" if inline_geometry else "out body;>;out skel qt;"
     return (
         f"[out:json][timeout:{timeout_sec}];"
         "("
-        f'way["highway"~"^({regex})$"]({south},{west},{north},{east});'
+        f'way["highway"~"^({regex})$"]["area"!="yes"]({south},{west},{north},{east});'
         ");"
-        "out body;"
-        ">;"
-        "out skel qt;"
+        f"{output}"
     )
 
 

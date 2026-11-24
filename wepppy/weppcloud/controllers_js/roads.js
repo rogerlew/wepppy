@@ -54,6 +54,7 @@ var Roads = (function () {
     };
 
     var ACTIONS = {
+        download: "[data-roads-action='download-osm']",
         upload: "[data-roads-action='upload']",
         prepare: "[data-roads-action='prepare-segments']",
         run: "[data-roads-action='run']",
@@ -513,6 +514,44 @@ var Roads = (function () {
             }
         }
 
+        async function downloadOsm(event, button) {
+            event.preventDefault();
+            if (button.disabled) {
+                return;
+            }
+            var status = dom.qs("#roads_osm_status", controller.form);
+            button.disabled = true;
+            status.textContent = "Fetching mapped roads…";
+            try {
+                var result = await http.request(resolveRunUrl("api/roads/osm.geojson"), {
+                    method: "POST", form: controller.form, timeoutMs: 30000
+                });
+                var collection = result.body;
+                if (!collection || collection.type !== "FeatureCollection" || !Array.isArray(collection.features)) {
+                    throw new Error("Download unavailable. Try again or upload your own road file.");
+                }
+                if (!collection.features.length) {
+                    status.textContent = "No mapped roads were found in the project map area. You can upload your own road file.";
+                    return;
+                }
+                var file = new Blob([JSON.stringify(collection)], { type: "application/geo+json" });
+                var link = document.createElement("a");
+                var url = URL.createObjectURL(file);
+                link.href = url;
+                link.download = "osm-roads.geojson";
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+                status.textContent = "Download started for osm-roads.geojson.";
+            } catch (error) {
+                status.textContent = extractErrorMessage(toResponsePayload(http, error),
+                    "Download unavailable. Try again or upload your own road file.");
+            } finally {
+                button.disabled = false;
+            }
+        }
+
         function attachDelegates(force) {
             if (!controller.form) {
                 detachDelegates();
@@ -523,6 +562,7 @@ var Roads = (function () {
             }
             detachDelegates();
 
+            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.download, downloadOsm));
             controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.upload, function (event) {
                 event.preventDefault();
                 controller.uploadGeojson();
@@ -1202,6 +1242,9 @@ var Roads = (function () {
                 xhr.addEventListener("load", function () {
                     var parsed = parseJsonOrNull(xhr.responseText);
                     if (xhr.status >= 200 && xhr.status < 300) {
+                        controller.form.dataset.roadsInitialized = "1";
+                        dom.show(dom.qs("[data-roads-model-controls]", controller.form));
+                        dom.hide(dom.qs("[data-roads-first-upload-help]", controller.form));
                         updateUploadProgress(100, "Upload complete.", true);
                         setUploadMessage(TASKS.upload.successMessage);
                         setMappingMessage("");
@@ -1341,6 +1384,9 @@ var Roads = (function () {
                 controller.set_rq_job_id(controller, candidateJobId);
             }
 
+            if (controller.form && controller.form.dataset.roadsInitialized === "0") {
+                return controller;
+            }
             refreshRoadsConfig();
             refreshRoadsSummary();
             renderRoadsResultsPanel();

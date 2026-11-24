@@ -281,6 +281,7 @@ def test_roads_signed_flask_session_receipt_and_real_principal_ledger(
     monkeypatch.setattr(helpers, "redis", SimpleNamespace(Redis=lambda **kwargs: retained_ledger.connection))
     controller = RoadsStub(str(root), "cfg")
     controller.set_enabled(True)
+    monkeypatch.setattr(roads, "Roads", RoadsStub)
     monkeypatch.setattr(roads, "_sync_roads_enabled_state", lambda wd, cfg: controller)
     monkeypatch.setattr(Ron, "ispublic", lambda wd: False)
     endpoint = "/runs/demo/cfg/tasks/roads/upload_geojson"
