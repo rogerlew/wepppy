@@ -42,7 +42,7 @@
     },
     "wepppy/nodb/mods/roads/_constants.py": {
       "recorded": null,
-      "current": "545dc010950acea4dda274fc7cf2f81e78c3fb43f84c34dafda2da9eb7b2ecde"
+      "current": "80024ded305d373f5f60a76ee7a4b74b56a2990a2c28717b6452d34819de744e"
     },
     "wepppy/nodb/mods/roads/_execution.py": {
       "recorded": null,
@@ -119,6 +119,10 @@
     "wepppy/nodb/mods/roads/monotonic_segments.py": {
       "recorded": "2b8d6be522233b6444ca21639dfc46a63775125178f97241cc8c4120f911ad5f",
       "current": "6600bdf6b03f675f31165dce8442d712dd093e7c0fc9c069691ef8d1c8b6ae06"
+    },
+    "wepppy/nodb/mods/roads/osm_download.py": {
+      "recorded": null,
+      "current": "6d5f68089c9b81343077b800e2c9e4ffa2e10f81f9668554f4541bc2243995d9"
     },
     "wepppy/nodb/mods/roads/parameterization.py": {
       "recorded": null,

@@ -30,7 +30,7 @@ under [Adjust runoff and erosion parameters](#adjust-runoff-and-erosion-paramete
 
 In **Roads**, choose **Download OpenStreetMap roads**. Save `osm-roads.geojson` and open it in your GIS. The file covers the rectangle of your saved project map, which can extend beyond the watershed. You can keep it as a general road map. Downloading leaves your current Roads input in place.
 
-For modeling, use the attribute table to edit these text fields and save a GeoJSON copy:
+For modeling, edit the fields below in the GIS attribute table and save a GeoJSON copy.
 
 | Field | What to enter |
 | --- | --- |
@@ -40,7 +40,7 @@ For modeling, use the attribute table to edit these text fields and save a GeoJS
 
 For example, a forestry track tagged with a dirt surface has `osm_highway=track`, `osm_surface=dirt` and model `SURFACE=gravel`. If your survey confirms an insloped bare ditch and low traffic, enter `Inslope_bd` and `low` in the design and traffic fields. Keep `osm_id` for the source way and `osm_tags` for the full original tag dictionary. Then choose **Upload roads vector file** and check the attribute mapping before preparing segments.
 
-Coverage depends on local mapping. The download includes mapped private roads and forest tracks, and OSM may lack recent logging roads or surface details. An empty result means no matching roads were found in the map area. You can upload a local inventory instead. Downloads cover up to one degree on each side; if OpenStreetMap is temporarily unavailable, retry later. Credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) when sharing the data.
+Coverage depends on local mapping. The download includes mapped private roads and forest tracks, and OSM may lack recent logging roads or surface details. An empty result means no matching roads were found in the map area. You can upload a local inventory instead. Downloads cover up to one degree on each side. If OpenStreetMap is temporarily unavailable, retry later. When sharing the data, credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
 
 ## Choose the road design that represents drainage
 
@@ -122,8 +122,7 @@ outputs remain historical, including after archive restore.
 
 Export a GeoJSON **FeatureCollection** containing **LineString** or
 **MultiLineString** features. Polygons and point features are not accepted. The
-web upload limit is **10 MB**; use the limit displayed beside the upload
-control if your project differs.
+web upload limit is **10 MB**. The upload control shows any lower limit set for your project.
 
 Use correctly georeferenced linework covering the modeled watershed. Without an
 explicit GeoJSON coordinate-system declaration, the standard input assumption is
