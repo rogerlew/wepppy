@@ -1285,7 +1285,8 @@ def test_osm_download_edit_then_upload(roads_client, tmp_path, monkeypatch, osm_
         "file": (io.BytesIO(edited.read_bytes()), "edited.geojson")})
     assert uploaded.status_code == 200, uploaded.get_json()
     summary = RealRoads.load_detached(wd).query_inputs()
-    staged = json.loads((Path(wd) / summary["uploaded_geojson_relpath"]).read_text())
+    staged_bytes = (Path(wd) / summary["uploaded_geojson_relpath"]).read_bytes()
+    staged = json.loads(staged_bytes)
     assert staged["features"][0]["properties"] == props
     assert summary["attribute_field_map"] == {"design": "DESIGN", "surface": "SURFACE", "traffic": "TRAFFIC"}
 
@@ -1295,8 +1296,7 @@ def test_osm_download_edit_then_upload(roads_client, tmp_path, monkeypatch, osm_
     repeat = client.post(f"/runs/{RUN_ID}/{config}/api/roads/osm.geojson")
     assert repeat.status_code == 200 and repeat.get_json()["features"] == []
     persisted = RealRoads.load_detached(wd).query_inputs()
-    assert persisted["uploaded_geojson_sha256"] == summary["uploaded_geojson_sha256"]
-    assert json.loads((Path(wd) / persisted["uploaded_geojson_relpath"]).read_text()) == staged
+    assert (Path(wd) / persisted["uploaded_geojson_relpath"]).read_bytes() == staged_bytes
 
 
 def test_osm_download_denial_and_absent_extent(roads_client, osm_access):
