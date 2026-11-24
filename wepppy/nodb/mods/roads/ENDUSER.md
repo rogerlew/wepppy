@@ -40,7 +40,11 @@ For modeling, edit the fields below in the GIS attribute table and save a GeoJSO
 
 For example, a forestry track tagged with a dirt surface has `osm_highway=track`, `osm_surface=dirt` and model `SURFACE=gravel`. If your survey confirms an insloped bare ditch and low traffic, enter `Inslope_bd` and `low` in the design and traffic fields. Keep `osm_id` for the source way and `osm_tags` for the full original tag dictionary. Then choose **Upload roads vector file** and check the attribute mapping before preparing segments.
 
-Coverage depends on local mapping. The download includes mapped private roads and forest tracks, and OSM may lack recent logging roads or surface details. An empty result means no matching roads were found in the map area. You can upload a local inventory instead. Downloads cover up to one degree on each side. If OpenStreetMap is temporarily unavailable, retry later. When sharing the data, credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
+Coverage depends on local mapping. The download includes mapped private roads and forest tracks, and OSM may lack recent logging roads or surface details. For a federal or state forest, compare the downloaded lines with the managing agency’s road inventory. On private land, use an owner or operator inventory when available. For hydroenforcement, check road crossings even where a route is closed to traffic.
+
+The OSM class describes the road’s use. A `track` often provides forestry or agricultural access, a `service` road may be a driveway or facility access road, and `unclassified` generally identifies a minor connecting road. Each may have a separately mapped surface. Use site information for drainage design and traffic.
+
+An empty result means no matching roads were found in the map area. You can upload a local inventory instead. Downloads cover up to one degree on each side. If OpenStreetMap is temporarily unavailable, retry later. When sharing the data, credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
 
 ## Choose the road design that represents drainage
 
