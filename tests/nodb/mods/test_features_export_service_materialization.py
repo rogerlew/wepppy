@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -317,6 +318,53 @@ def test_build_materialized_layer_payload_tabular_skips_feature_collection_seria
     assert column_metadata["description_mapping"] == {
         "TopazID": "Topaz ID.",
         "metric": "Metric (mm).",
+    }
+
+
+@pytest.mark.parametrize("source_id,expected_value", [(2, 7.5), (99, None)])
+def test_key_first_spatial_event_payload_reads_geometry_and_attributes(
+    tmp_path: Path, source_id: int, expected_value: float | None,
+) -> None:
+    geometry_path = tmp_path / "carrier.geojson"
+    gpd.GeoDataFrame(
+        {"wepp_id": [2]}, geometry=[Point(-116, 46)], crs="EPSG:4326",
+    ).to_file(geometry_path, driver="GeoJSON")
+    layer = ResolvedLayerPlan(
+        layer_id="event_metric", family="wepp_interchange", scope_class="scope_aware",
+        scope="baseline", output_layer_id="baseline__event_metric", temporal_mode="event",
+    )
+    source = service._LayerCoreResult(
+        layer=layer,
+        frame=pd.DataFrame({
+            service._CONSOLIDATED_JOIN_KEY_COLUMN: [str(source_id)],
+            "wepp_id": [source_id], "metric": [7.5],
+        }),
+        selected_columns=("wepp_id", "metric"),
+        unit_mapping={"wepp_id": "non-unitized", "metric": "non-unitized"},
+        warnings=(), catalog_layer_raw={"join": {"primary_key": "wepp_id"}},
+    )
+    dependency = SimpleNamespace(
+        dependency_role="geometry", dependency_id="geometry", relpath=geometry_path.name,
+    )
+    payload, metadata = service._build_key_first_materialized_layer_payload(
+        wd=tmp_path, layer=layer, source_layers=(layer,), source_results=(source,),
+        entries_by_output_layer_id={layer.output_layer_id: (dependency,)},
+        use_tabular_payload=False, use_tabular_long_layout=False, tabular_event_selector=None,
+        watershed_identity_lookup_cache={}, units_mode="si",
+    )
+
+    document = json.loads(payload.payload)
+    feature, = document["feature_collection"]["features"]
+    assert document["crs_epsg"] == 4326
+    assert feature["geometry"]["coordinates"] == [-116, 46]
+    assert int(feature["properties"]["wepp_id"]) == 2
+    assert feature["properties"]["metric"] == expected_value
+    assert payload.tabular_frame is None
+    assert payload.row_count == payload.feature_count == 1
+    assert metadata["materialization"] == {
+        "strategy": "key_first_geometry_last", "carrier_layer": None,
+        "geometry_relpath": geometry_path.name, "carrier_key_column": "wepp_id",
+        "core_row_count": 1, "geometry_row_count": 1,
     }
 
 
