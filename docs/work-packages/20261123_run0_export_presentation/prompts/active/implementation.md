@@ -7,7 +7,7 @@ A maintainer should be able to find the column schema reader and browser payload
 ## Progress
 
 - [x] 2026-11-24 05:02 UTC. Identify the contiguous Features Export helpers and their consumers.
-- [ ] Extract and wire the modules.
+- [x] 2026-11-24 05:04 UTC. Extract and wire the modules.
 - [ ] Compare the code and exercise route and rendering behavior.
 - [ ] Record outcomes and integrate into local master.
 
