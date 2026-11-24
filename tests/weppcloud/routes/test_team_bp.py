@@ -236,7 +236,7 @@ def test_adduser_errors_when_user_unknown(team_client):
     )
 
     payload = response.get_json()
-    assert payload["error"]["message"] == "missing@example.com does not have a WeppCloud account."
+    assert payload["error"]["message"] == "missing@example.com does not have a WEPPcloud account."
 
 
 def test_removeuser_accepts_json_payload(team_client):
