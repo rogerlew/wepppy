@@ -412,6 +412,7 @@ docker logs docker-postgres-backup-1  # Check recent backup status
 - Docker Desktop or a recent Docker Engine.
 - `docker compose` plugin (v2).
 - Secret files under `docker/secrets/` (gitignored) as defined in `docs/infrastructure/secrets.md`.
+- The root `.dockerignore` excludes host `.env` files and `docker/secrets/` from the common image. Compose reads configuration on the host and mounts each service’s declared secrets at runtime.
 - Optional non-secret overrides in `docker/.env` (gitignored). Defaults live in `docker/defaults.env` (committed).
 
 ```bash
