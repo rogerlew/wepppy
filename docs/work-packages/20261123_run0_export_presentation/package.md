@@ -5,3 +5,5 @@ Opened 2026-11-24 UTC. The run page assembles the export control from catalog de
 The complexity budget is two sibling Python modules and the existing runtime dependencies. Security impact is low. The route continues to own access checks and calls export presentation only inside its existing feature gate. The extraction changes no authorization, filesystem policy, configuration or deployment boundary.
 
 Acceptance requires identical helper logic, route wiring, passing focused payload and template tests, a broad pytest attempt and local-only integration. See the [tracker](tracker.md).
+
+Closed locally on 2026-11-24 05:06 UTC. The blueprint shrank from 2,826 to 1,865 lines. Validation covered both run-page payloads and the rendered control. The tracker records the unrelated baseline failure in the broad gate.

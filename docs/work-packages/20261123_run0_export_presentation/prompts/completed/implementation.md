@@ -8,8 +8,8 @@ A maintainer should be able to find the column schema reader and browser payload
 
 - [x] 2026-11-24 05:02 UTC. Identify the contiguous Features Export helpers and their consumers.
 - [x] 2026-11-24 05:04 UTC. Extract and wire the modules.
-- [ ] Compare the code and exercise route and rendering behavior.
-- [ ] Record outcomes and integrate into local master.
+- [x] 2026-11-24 05:06 UTC. Compare the code and exercise route and rendering behavior.
+- [x] 2026-11-24 05:06 UTC. Record outcomes for local integration.
 
 ## Surprises & Discoveries
 
@@ -25,4 +25,4 @@ From the task checkout, move the helpers into features_export_columns.py and fea
 
 ## Outcomes & Retrospective
 
-Pending candidate validation.
+The three entry points remain wired through the existing feature gate. Both JSON comparisons matched. The focused run passed 456 cases with 15 skips. The repository-wide run reproduced the baseline team-route assertion. The tracker records exact receipts and payload hashes.

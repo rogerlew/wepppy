@@ -1,4 +1,4 @@
-Active locally — [Run-page Features Export presentation refactor](docs/work-packages/20261123_run0_export_presentation/package.md).
+Completed locally — [Run-page Features Export presentation refactor](docs/work-packages/20261123_run0_export_presentation/package.md).
 
 Completed locally — [Features Export carrier payload refactor](docs/work-packages/20261123_features_export_carrier_payload/package.md).
 
