@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import sqlite3
 import sys
 import types
 from pathlib import Path
@@ -211,3 +212,50 @@ def test_readonly_catalog_failure_preserves_writable_state_and_pending_intent(tm
     assert not (root / 'READONLY').exists()
     assert not (root / 'manifest.json').exists()
     assert pending_catalog_requests(root)
+
+
+@pytest.mark.parametrize("readonly", [True, False], ids=["creation", "removal"])
+def test_manifest_verification_failure_restores_previous_state(tmp_path, monkeypatch, readonly):
+    published, commands = _configure_readonly_env(monkeypatch, tmp_path, _PrepStub())
+    root = tmp_path / "demo"
+    ron = project_rq.Ron.getInstance(str(root))
+    ron.is_child_run = False
+    ron.readonly = not readonly
+    if not readonly:
+        (root / "manifest.json").touch()
+
+    # The browse stubs return successfully without changing the file.
+    error = "manifest.json was not created" if readonly else "Unable to remove manifest.json"
+    with pytest.raises(RuntimeError, match=error):
+        project_rq.set_run_readonly_rq("demo", readonly)
+
+    assert ron.readonly is not readonly
+    action = "creation" if readonly else "removal"
+    assert ("demo", f"rq:job-readonly manifest.json {action} failed") in commands
+    assert "EXCEPTION set_run_readonly_rq" in published[-1][1]
+
+
+def test_parent_freeze_and_thaw_round_trip_browse_manifest(tmp_path, monkeypatch):
+    from wepppy.microservices import browse
+
+    _, commands = _configure_readonly_env(monkeypatch, tmp_path, _PrepStub())
+    monkeypatch.setitem(sys.modules, "wepppy.microservices.browse", browse)
+    root = tmp_path / "demo"
+    ron = project_rq.Ron.getInstance(str(root))
+    ron.is_child_run = False
+    (root / "result.txt").write_bytes(b"result")
+    manifest = root / browse.MANIFEST_FILENAME
+
+    project_rq.set_run_readonly_rq("demo", True)
+
+    assert ron.readonly
+    with contextlib.closing(sqlite3.connect(f"{manifest.as_uri()}?mode=ro", uri=True)) as conn:
+        assert conn.execute(
+            "SELECT size_bytes FROM entries WHERE dir_path = '.' AND name = 'result.txt'"
+        ).fetchall() == [(6,)]
+
+    project_rq.set_run_readonly_rq("demo", False)
+
+    assert not ron.readonly
+    assert not manifest.exists()
+    assert commands[-1] == ("demo", f"rq:job-readonly {manifest.name} removed")
