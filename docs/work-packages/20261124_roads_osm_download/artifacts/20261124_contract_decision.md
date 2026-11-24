@@ -1,0 +1,9 @@
+# Contract decision
+
+Base c96af80d4690ec16a3067411df3362ea9a61c080. The operator requested execution of the download/edit/upload workflow with original OSM properties, Roads model attributes, end-user guidance and screenshot-based usability review. This is new behavior. The normative delta is recorded in docs/schemas/roads-osm-download-contract.md and the Roads specification. Existing controller presentation, CSRF, Roads settings, feature access, and preparation lifecycle contracts govern their respective boundaries. No change to their general rules or to model formulas.
+
+Compatibility and regression plan: ordinary uploads and explicit terrain filters keep their contracts. Cover enabled but never initialized, existing upload, read-only access, missing or invalid extent, empty coverage, populated response, malformed or incomplete response and request errors. Verify actual exported tags and model readback, including tags colliding with model field names. Fetch from the configured upstream only, with project authorization and bounded resource use. Reuse layout patterns and independently review rendered desktop and narrow layouts.
+
+Independent review dispositions: usability accepted the layout, optional action and geography wording. Security identified that generating an export requires Roads action entitlement. Adopt the registry's existing action decision, POST with CSRF, bounded decoded upstream body and no redirects. A read-only or ineligible visitor can inspect existing results; generation requires action access.
+
+2026-11-24 18:47 UTC. Independent security and usability reviewers both accepted the amended contract before implementation. Denial reason must be visible without focusing a disabled button. Use a bounded foreground timeout compatible with the synchronous request.

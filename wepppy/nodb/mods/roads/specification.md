@@ -31,6 +31,16 @@ Current implementation includes point-source designs plus `outslope_unrutted` re
    - watershed rerun with combined pass files.
 7. User sees Roads run status and Roads-vs-baseline diagnostics/reports.
 
+### Proposed OpenStreetMap download workflow
+
+See the [OpenStreetMap download contract](../../../../docs/schemas/roads-osm-download-contract.md) for field names, selection and response behavior.
+
+The Roads interface should let a user fetch mapped road centerlines for the project area and download them as a GeoJSON FeatureCollection. The download serves both as a general OSM roads dataset and as a starting file for WEPPcloud Roads. The user can edit the file in GIS and supply it through the existing Roads upload control when ready to model.
+
+Preserve the OSM way ID and every source tag present on the way, including uncommon tags. Keep original tag keys and values recoverable after GIS editing. Give editable Roads properties distinct names that survive case-insensitive field handling. For example, an observed OSM surface of dirt must survive a user assigning the gravel model category. Include model fields for design, surface, and traffic, and leave unknown inputs editable. A missing model input must never remove the road geometry from the download.
+
+Acceptance requires downloading the file, checking the source attributes, editing the model fields, and reading those edits through the Roads uploader. Fetching or downloading alone must not replace an uploaded analysis layer.
+
 ## Roads NoDb Controller Integration (Current Scope)
 
 Roads is in-scope as a first-class NoDb controller for this phase.
