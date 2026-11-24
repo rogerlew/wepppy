@@ -18,13 +18,29 @@ You need:
   delineation backends.
 - Access to enable Roads. The feature currently requires PowerUser access or an
   authorized higher role; read-only project access does not permit editing.
-- Road centerlines in a GeoJSON file, with attributes identifying supported road
+- Road centerlines from OpenStreetMap or your own file, with attributes identifying supported road
   designs. Surface, traffic and geometry attributes improve the interpretation.
 
 On the project page, enable **Roads** from **Mods**, then open the **Roads** section.
-The main sequence is **Upload Roads GeoJSON → Apply Attribute Mapping → Prepare
+The main sequence is **Upload roads vector file → Apply Attribute Mapping → Prepare
 Segment Candidates → Run WEPPcloud Roads**. Optional parameter editing is described
 under [Adjust runoff and erosion parameters](#adjust-runoff-and-erosion-parameters).
+
+## Download mapped roads for your project
+
+In **Roads**, choose **Download OpenStreetMap roads**. Save `osm-roads.geojson` and open it in your GIS. The file covers the rectangle of your saved project map, which can extend beyond the watershed. You can keep it as a general road map. Downloading leaves your current Roads input in place.
+
+For modeling, use the attribute table to edit these text fields and save a GeoJSON copy:
+
+| Field | What to enter |
+| --- | --- |
+| `DESIGN` | Select a drainage design from the table below using field or inventory evidence. Roads skips features without a supported design. |
+| `SURFACE` | Use `paved` or `gravel`. Recognized OSM surfaces are filled in. Check the value against your inventory. |
+| `TRAFFIC` | Use `high`, `low` or `none`. A blank traffic or surface field uses the corresponding Roads fallback. |
+
+For example, a forestry track tagged with a dirt surface has `osm_highway=track`, `osm_surface=dirt` and model `SURFACE=gravel`. If your survey confirms an insloped bare ditch and low traffic, enter `Inslope_bd` and `low` in the design and traffic fields. Keep `osm_id` for the source way and `osm_tags` for the full original tag dictionary. Then choose **Upload roads vector file** and check the attribute mapping before preparing segments.
+
+Coverage depends on local mapping. The download includes mapped private roads and forest tracks, and OSM may lack recent logging roads or surface details. An empty result means no matching roads were found in the map area. You can upload a local inventory instead. Downloads cover up to one degree on each side; if OpenStreetMap is temporarily unavailable, retry later. Credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) when sharing the data.
 
 ## Choose the road design that represents drainage
 
@@ -106,7 +122,7 @@ outputs remain historical, including after archive restore.
 
 Export a GeoJSON **FeatureCollection** containing **LineString** or
 **MultiLineString** features. Polygons and point features are not accepted. The
-standard upload limit is **50 MB**; use the limit displayed beside the upload
+web upload limit is **10 MB**; use the limit displayed beside the upload
 control if your project differs.
 
 Use correctly georeferenced linework covering the modeled watershed. Without an
@@ -204,8 +220,7 @@ ready-to-run project dataset.
 
 ## Upload, map, prepare and run
 
-1. In the project **Roads** section, select the file under **Upload roads
-   GeoJSON**, then click **Upload Roads GeoJSON**. Wait for confirmation and the
+1. In the project **Roads** section, select the file under **Upload roads vector file**, then click **Upload roads vector file**. Wait for confirmation and the
    discovered field names/sample values. Selecting a file alone does not upload it.
 2. Under **Attribute Mapping**, choose **Design field**, **Surface field** and
    **Traffic field**. Check the sample values against the supported classes.

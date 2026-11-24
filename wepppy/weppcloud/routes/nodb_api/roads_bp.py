@@ -21,6 +21,11 @@ from wepppy.microservices.vector_upload_normalization import (
 )
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.roads import Roads
+from wepppy.nodb.mods.roads._constants import ROADS_UPLOAD_GEOJSON_MAX_BYTES
+from wepppy.nodb.mods.roads.osm_download import download_osm_roads
+from wepppy.topo.osm_roads.errors import OSMRoadsUpstreamError, OSMRoadsValidationError
+from wepppy.weppcloud.utils.feature_access_flask import feature_decision
+from wepppy.weppcloud.utils.feature_access_runtime import decision_status
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.roads_rq import (
@@ -42,7 +47,6 @@ from wepppy.weppcloud.utils.helpers import (
 from .._common import *  # noqa: F401,F403
 
 roads_bp = Blueprint("roads", __name__)
-ROADS_UPLOAD_GEOJSON_MAX_BYTES = 10 * 1024 * 1024
 
 
 @roads_bp.after_request
@@ -94,6 +98,32 @@ def _parameterization_view_state(wd: str) -> Dict[str, Any]:
     summary.update(enabled=enabled and bool(controller.enabled), readonly=readonly,
                    controller_present=True)
     return summary
+
+
+@roads_bp.post("/runs/<string:runid>/<config>/api/roads/osm.geojson")
+@authorize_and_handle_with_exception_factory
+def roads_osm_download(runid: str, config: str) -> Response:
+    wd = str(load_run_context(runid, config).active_root)
+    decision = feature_decision("roads", wd=wd, operation="act")
+    if not decision.allowed:
+        return error_factory("Downloading roads is unavailable for this project or account.",
+                             code=decision.reason, status_code=decision_status(decision))
+    ron = Ron.getInstance(wd)
+    if "roads" not in (ron.mods or []):
+        return error_factory("Enable Roads before downloading.", status_code=403)
+    try:
+        payload = download_osm_roads(ron.extent)
+    except OSMRoadsValidationError as exc:
+        return error_factory(str(exc), status_code=422)
+    except OSMRoadsUpstreamError as exc:
+        return error_factory(str(exc) + " Try again later or upload your own file.", status_code=503)
+    response = jsonify(payload)
+    if response.calculate_content_length() > ROADS_UPLOAD_GEOJSON_MAX_BYTES:
+        return error_factory("This road file exceeds the Roads upload size limit. Use a smaller local inventory.",
+                             status_code=422)
+    response.mimetype = "application/geo+json"
+    response.headers["Content-Disposition"] = 'attachment; filename="osm-roads.geojson"'
+    return response
 
 
 @roads_bp.route("/runs/<string:runid>/<config>/roads/parameterization", methods=["GET"])
@@ -339,8 +369,17 @@ def _roads_results_context(runid: str, config: str, controller: Roads) -> Dict[s
 def roads_upload_geojson(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    controller = _sync_roads_enabled_state(wd, f"{config}.cfg")
-    if not controller.enabled:
+    controller = Roads.tryGetInstance(wd)
+    if controller is None:
+        decision = feature_decision("roads", wd=wd, operation="act")
+        if not decision.allowed:
+            return upload_error_factory("Uploading roads is unavailable for this project or account.",
+                                        status_code=decision_status(decision), code=decision.reason)
+        ron = Ron.getInstance(wd)
+        enabled = "roads" in (ron.mods or [])
+    else:
+        enabled = _sync_roads_enabled_state(wd, f"{config}.cfg").enabled
+    if not enabled:
         return upload_error_factory(
             "Roads module is not enabled for this run.",
             status_code=400,
@@ -356,7 +395,8 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
         )
 
     filename = str(uploaded.filename)
-    attempt_root = Path(controller.roads_upload_dir) / "vector_upload_attempts"
+    upload_dir = Path(controller.roads_upload_dir) if controller is not None else Path(wd) / "roads"
+    attempt_root = upload_dir / "vector_upload_attempts"
 
     def _validate_candidate(_path: Path, payload: Dict[str, object]) -> Dict[str, object]:
         return validate_feature_collection_geometries(
@@ -365,6 +405,8 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
         )
 
     try:
+        if controller is None:
+            upload_dir.mkdir(exist_ok=True)
         prepared = prepare_vector_upload(
             raw_filename=filename,
             stream=uploaded.stream,
@@ -378,11 +420,17 @@ def roads_upload_geojson(runid: str, config: str) -> Response:
             actor=_roads_retention_actor(),
             validator=_validate_candidate,
         )
-        canonical_path = Path(controller.roads_upload_dir) / "roads.uploaded.geojson"
+
+        def publish(candidate, commit):
+            active = controller
+            if active is None:
+                active = _ensure_roads_controller(wd, f"{ron.config_stem}.cfg")
+                active.set_enabled(True)
+            return active.set_uploaded_geojson(str(candidate), publication_commit=commit)
+
+        canonical_path = upload_dir / "roads.uploaded.geojson"
         summary = prepared.publish_transactional(
-            mutation=lambda candidate, commit: controller.set_uploaded_geojson(
-                str(candidate), publication_commit=commit,
-            ),
+            mutation=publish,
             canonical_path=canonical_path,
             canonical_relative_path=os.fspath(canonical_path.relative_to(wd)),
         )

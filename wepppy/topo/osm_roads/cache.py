@@ -486,7 +486,8 @@ def canonical_hash(parts: Sequence[str], *, digest_size: int = 16) -> str:
 
 
 def highway_filter_hash(highway_filter: Sequence[str]) -> str:
-    return canonical_hash(normalize_highway_filter(highway_filter))
+    # Legacy tiles may contain area=yes polygons whose original area tag was discarded.
+    return canonical_hash(("centerlines-v2", *normalize_highway_filter(highway_filter)))
 
 
 def tile_cover_hash(tile_ids: Sequence[str]) -> str:

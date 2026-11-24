@@ -82,6 +82,7 @@ from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.debris_flow import DebrisFlow
 from wepppy.nodb.mods.roads import Roads
+from wepppy.nodb.mods.roads._constants import ROADS_UPLOAD_GEOJSON_MAX_BYTES
 from wepppy.nodb.mods.geneva import Geneva
 from wepppy.nodb.mods.rusle import Rusle
 from wepppy.nodb.mods.swat import Swat
@@ -1306,7 +1307,7 @@ def _build_runs0_context(runid, config, playwright_load_all, fork_root=None):
         _feature_role_enabled("debris_flow", playwright_load_all=playwright_load_all)
     )
     show_debris_flow = allow_debris_flow and (debris_flow is not None or playwright_load_all)
-    show_roads = ('roads' in mods_list and roads is not None) or playwright_load_all
+    show_roads = 'roads' in mods_list or playwright_load_all
     show_geneva = ('geneva' in mods_list and geneva is not None) or playwright_load_all
     show_features_export = 'features_export' in mods_list or playwright_load_all
     show_dss_export = 'dss_export' in mods_list or playwright_load_all
@@ -1463,6 +1464,8 @@ def _build_runs0_context(runid, config, playwright_load_all, fork_root=None):
         show_openet_ts=show_openet_ts,
         openet_admin_enabled=feature_actions["openet_ts"].allowed,
         feature_actions=feature_actions,
+        roads_upload_cap_mb=ROADS_UPLOAD_GEOJSON_MAX_BYTES // (1024 * 1024),
+        roads_download_access=feature_decision("roads", wd=wd) if show_roads else None,
         show_treatments=show_treatments,
         show_ash=show_ash,
         show_omni=show_omni,

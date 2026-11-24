@@ -1213,3 +1213,101 @@ def test_parameterization_busy_get_renders_shell_without_scientific_admission(ro
     assert 'data-parameterization-seed' in response.text
     assert '"busy": true' in response.text
     assert '"parameterization": null' in response.text
+
+
+@pytest.fixture
+def osm_access(monkeypatch):
+    from wepppy.weppcloud.utils import feature_access_flask as admission
+    from wepppy.weppcloud.utils.feature_access import FeatureResourceContext, VerifiedPrincipal
+
+    monkeypatch.setattr(admission, "resource_context", lambda *args, **kwargs: FeatureResourceContext(
+        existing_access_allowed=True, backend="wbt", enabled_features=frozenset({"roads"})))
+
+    def select_role(role):
+        principal = VerifiedPrincipal(kind="human", user_id=1, roles=frozenset({role}))
+        monkeypatch.setattr(admission, "current_principal", lambda: principal)
+    return select_role
+
+
+def test_osm_download_edit_then_upload(roads_client, tmp_path, monkeypatch, osm_access):
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from threading import Thread
+    from wepppy.nodb.mods.roads.roads import Roads as RealRoads
+    from urllib.parse import parse_qs
+
+    client, _, ron_cls, _, _, wd = roads_client
+    ron_cls.getInstance(wd).extent = [-117, 46, -116.9, 46.1]
+    config = "disturbed9002-wbt-mofe"
+    ron_cls.getInstance(wd).config_stem = config
+    osm_access("PowerUser")
+    tags = {"highway": "track", "surface": "dirt", "access": "private",
+            "ref:USFS": "44", "DESIGN": "source value"}
+    way = {"type": "way", "id": 56, "tags": tags, "geometry": [
+        {"lon": -117.1, "lat": 46.05}, {"lon": -116.95, "lat": 46.05}]}
+    queries = []
+
+    class Interpreter(BaseHTTPRequestHandler):
+        def do_POST(self):
+            queries.append(parse_qs(self.rfile.read(int(self.headers["Content-Length"])).decode())["data"][0])
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(json.dumps({"elements": [way]}).encode())
+
+    with HTTPServer(("127.0.0.1", 0), Interpreter) as server:
+        monkeypatch.setenv("WEPPPY_OSM_ROADS_OVERPASS_BASE_URL", f"http://127.0.0.1:{server.server_port}/")
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            response = client.post(f"/runs/{RUN_ID}/{config}/api/roads/osm.geojson")
+        finally:
+            server.shutdown()
+            thread.join()
+    assert response.status_code == 200
+    assert response.mimetype == "application/geo+json"
+    assert response.headers["Content-Disposition"].endswith('filename="osm-roads.geojson"')
+    assert len(queries) == 1 and "service" in queries[0] and "out geom;" in queries[0]
+    assert "(46,-117,46.1,-116.9)" in queries[0]
+    assert not (Path(wd) / "roads.nodb").exists()
+    data = response.get_json()
+    feature, = data["features"]
+    assert feature["geometry"]["coordinates"][0] == [-117, 46.05]
+    props = feature["properties"]
+    assert json.loads(props["osm_tags"]) == tags
+    assert (props["DESIGN"], props["SURFACE"], props["TRAFFIC"]) == (None, "gravel", None)
+    props.update(DESIGN="Inslope_bd", SURFACE="paved", TRAFFIC="low")
+    edited = tmp_path / "edited.geojson"
+    edited.write_text(json.dumps(data))
+    from wepppy.nodb.core import Watershed
+    (Path(wd) / "dem").mkdir()
+    Watershed(wd, f"{config}.cfg")
+    monkeypatch.setattr(roads_module, "Roads", RealRoads)
+    uploaded = client.post(f"/runs/{RUN_ID}/{config}/tasks/roads/upload_geojson", data={
+        "file": (io.BytesIO(edited.read_bytes()), "edited.geojson")})
+    assert uploaded.status_code == 200, uploaded.get_json()
+    summary = RealRoads.load_detached(wd).query_inputs()
+    staged = json.loads((Path(wd) / summary["uploaded_geojson_relpath"]).read_text())
+    assert staged["features"][0]["properties"] == props
+    assert summary["attribute_field_map"] == {"design": "DESIGN", "surface": "SURFACE", "traffic": "TRAFFIC"}
+
+    # An empty download on a project with an edited upload preserves the active input.
+    from wepppy.topo.osm_roads.overpass import OverpassClient
+    monkeypatch.setattr(OverpassClient, "fetch_download_ways", lambda self, extent: [])
+    repeat = client.post(f"/runs/{RUN_ID}/{config}/api/roads/osm.geojson")
+    assert repeat.status_code == 200 and repeat.get_json()["features"] == []
+    persisted = RealRoads.load_detached(wd).query_inputs()
+    assert persisted["uploaded_geojson_sha256"] == summary["uploaded_geojson_sha256"]
+    assert json.loads((Path(wd) / persisted["uploaded_geojson_relpath"]).read_text()) == staged
+
+
+def test_osm_download_denial_and_absent_extent(roads_client, osm_access):
+    client, _, ron_cls, _, _, wd = roads_client
+    url = f"/runs/{RUN_ID}/{CONFIG}/api/roads/osm.geojson"
+    osm_access("User")
+    assert client.post(url).status_code == 403
+    assert client.get(url).status_code == 405
+    osm_access("PowerUser")
+    ron = ron_cls.getInstance(wd)
+    ron.extent = None
+    assert client.post(url).status_code == 422
+    ron.mods = []
+    assert client.post(url).status_code == 403

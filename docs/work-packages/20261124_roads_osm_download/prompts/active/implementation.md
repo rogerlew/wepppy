@@ -7,7 +7,7 @@ A user can acquire a road map for their project without supplying an input or ru
 ## Progress
 
 - [x] 2026-11-24 UTC. Identify upload and secondary button patterns and inspect model resolution.
-- [ ] Commit approved contract after two independent reviews.
+- [x] 2026-11-24 UTC. Commit approved contract after two independent reviews.
 - [ ] Implement shared road selection, GeoJSON acquisition and integrated download. Amend ENDUSER.md.
 - [ ] Verify download, GIS-edit and upload, browser states, screenshots, usability and security review.
 

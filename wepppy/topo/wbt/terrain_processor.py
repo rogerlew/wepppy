@@ -14,7 +14,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 import numpy as np
 
-from wepppy.topo.osm_roads.contracts import OSMRoadsService
+from wepppy.topo.osm_roads.contracts import OSMRoadsService, VEHICULAR_HIGHWAYS
 from wepppy.topo.wbt.osm_roads_consumer import resolve_roads_source
 from wepppy.topo.wbt.terrain_processor_helpers import (
     BasinSummary,
@@ -33,17 +33,6 @@ from wepppy.topo.wbt.terrain_processor_helpers import (
     snap_uploaded_culvert_points_to_crossings,
 )
 from wepppy.topo.wbt.wbt_topaz_emulator import WhiteboxToolsTopazEmulator
-
-_DEFAULT_OSM_HIGHWAY_FILTER: tuple[str, ...] = (
-    "motorway",
-    "trunk",
-    "primary",
-    "secondary",
-    "tertiary",
-    "unclassified",
-    "residential",
-    "track",
-)
 
 _SLOPE_NODATA = -9999.0
 _DIFF_NODATA = -9999.0
@@ -166,7 +155,7 @@ class TerrainConfig:
 
     roads_source: str | None = None
     roads_path: str | None = None
-    osm_highway_filter: tuple[str, ...] = _DEFAULT_OSM_HIGHWAY_FILTER
+    osm_highway_filter: tuple[str, ...] = VEHICULAR_HIGHWAYS
     aoi_wgs84_geojson: Mapping[str, Any] | None = None
 
     road_fill_strategy: str = "profile_relative"

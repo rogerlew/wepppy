@@ -6,6 +6,12 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol
 
+VEHICULAR_HIGHWAYS = (
+    "motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link",
+    "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified",
+    "residential", "living_street", "service", "track", "road",
+)
+
 DEFAULT_INCLUDE_TAGS: tuple[str, ...] = (
     "highway",
     "name",

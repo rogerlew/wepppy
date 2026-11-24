@@ -7,7 +7,7 @@
 {% set roads_attribute_catalog = roads_summary.get("discovered_attribute_catalog", {}) %}
 {% set roads_discovered_fields = roads_attribute_catalog.get("field_names", []) if roads_attribute_catalog else [] %}
 {% set roads_upload_relpath = roads_summary.get("uploaded_geojson_relpath") %}
-{% set roads_max_upload_mb = roads_params.get("max_upload_mb", 50) %}
+{% set roads_max_upload_mb = [roads_params.get("max_upload_mb", 50), roads_upload_cap_mb | default(10)] | min %}
 {% set roads_surface_default = roads_params.get("surface_default", "gravel") %}
 {% set roads_traffic_default = roads_params.get("traffic_default", "low") %}
 {% set roads_field_options_ns = namespace(values=[("", "Auto / Unset")]) %}
@@ -24,14 +24,14 @@
 
 {% set description %}
   <p class="wc-text-muted">
-    Upload a roads vector map, prepare segment lowpoint/channel/hillslope mapping, then run Roads watershed integration.
+    Use road centerlines to model runoff and sediment from roads in your watershed.
   </p>
   <p class="wc-text-muted">
     For roads setup guidance and model behavior, see
     {{ usersum_doc_link('src', 'wepppy/nodb/mods/roads/ENDUSER.md', 'Roads user guide') }}.
   </p>
   <ol class="wc-list">
-    <li><strong>Upload roads</strong>: GeoJSON{% if vector_binary_enabled %}, Shapefile ZIP, or GeoParquet{% endif %} with LineString or MultiLineString roads.</li>
+    <li><strong>Choose road centerlines.</strong> Download OpenStreetMap roads below or upload your own GeoJSON{% if vector_binary_enabled %}, Shapefile ZIP, or GeoParquet{% endif %} with LineString or MultiLineString roads.</li>
     <li><strong>Prepare Segment Candidates</strong>: builds monotonic segments and writes decision diagnostics.</li>
     <li><strong>Run WEPPcloud Roads</strong>: runs mapped segments and watershed pass integration.</li>
   </ol>
@@ -42,7 +42,7 @@
      title="Roads",
      collapsible=True,
      description=description,
-     form_attrs={"data-roads-max-upload-mb": roads_max_upload_mb},
+     form_attrs={"data-roads-max-upload-mb": roads_max_upload_mb, "data-roads-initialized": "1" if roads is defined and roads is not none else "0"},
      status_panel_options={"id": "roads_status_panel", "log_id": "roads_status"},
      summary_panel_options={"panel_id": "roads_summary_panel", "summary_id": "roads_info"},
      stacktrace_panel_options={"panel_id": "roads_stacktrace_panel", "body_id": "roads_stacktrace"}
@@ -50,6 +50,18 @@
   <section class="wc-stack">
     <p><a class="pure-button" href="{{ url_for_run('roads.roads_parameterization', runid=runid, config=config) }}">Roads Parameterization</a>
       <span class="wc-text-muted">Inspect source values and adjust runoff and erosion drivers.</span></p>
+
+    {% set download_access = roads_download_access | default(none) %}
+    <fieldset class="wc-fieldset">
+      <legend class="wc-fieldset__legend">Get road centerlines</legend>
+      <p id="roads_osm_help" class="wc-fieldset__description">Download mapped roads for the project map area as GeoJSON. To model them, edit the road attributes in GIS and upload the file below.</p>
+      {% call button_row() %}
+        <button type="button" class="pure-button pure-button-secondary disable-readonly"
+                data-roads-action="download-osm" aria-describedby="roads_osm_help roads_osm_status"
+                {% if not download_access or not download_access.allowed %}disabled{% endif %}>Download OpenStreetMap roads</button>
+      {% endcall %}
+      <p id="roads_osm_status" class="wc-field__help" role="status">{% if not download_access or not download_access.allowed %}{% if download_access and download_access.reason == "readonly" %}This project is read-only.{% else %}{% if download_access and download_access.reason == "backend_required" %}Downloading requires a WhiteboxTools project.{% else %}Not Authorized. Downloading requires Roads action access.{% endif %}{% endif %}{% endif %}</p>
+    </fieldset>
 
     {{ ui.file_upload(
          "roads_geojson_file",
@@ -79,6 +91,8 @@
     {% endcall %}
     <p id="roads_upload_message" class="wc-field__help" aria-live="polite"></p>
 
+    <p data-roads-first-upload-help class="wc-field__help"{% if roads is defined and roads is not none %} hidden{% endif %}>Upload a road file to map its attributes and prepare segments.</p>
+    <div data-roads-model-controls class="wc-stack"{% if roads is not defined or roads is none %} hidden{% endif %}>
     <fieldset
       id="roads_attribute_mapping_section"
       class="wc-fieldset"
@@ -171,6 +185,7 @@
       Segment candidates with <code>mapped</code> lowpoint decisions are eligible for Roads WEPP runs; all decisions are written to Roads summary artifacts.
     </p>
     {{ ui.job_hint("hint_run_roads", extra_class="wc-field__help") }}
+    </div>
   </section>
 {% endcall %}
 

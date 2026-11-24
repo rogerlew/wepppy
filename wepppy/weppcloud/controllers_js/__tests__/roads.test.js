@@ -87,6 +87,10 @@ describe("Roads controller", () => {
                 <div id="roads_stacktrace" style="display:none;"></div>
                 <div id="rq_job"></div>
                 <button id="roads_upload_geojson" type="button" data-roads-action="upload">Upload</button>
+                <button type="button" data-roads-action="download-osm">Download</button>
+                <p id="roads_osm_status"></p>
+                <p data-roads-first-upload-help></p>
+                <div data-roads-model-controls hidden></div>
                 <fieldset id="roads_attribute_mapping_section">
                     <div id="roads_attribute_catalog_preview"></div>
                     <select id="roads_design_field" data-roads-map-field="design"></select>
@@ -217,6 +221,18 @@ describe("Roads controller", () => {
         jest.clearAllMocks();
     });
 
+    test("empty OSM download reports coverage and leaves upload available", async () => {
+        httpMock.request.mockResolvedValueOnce({ body: { type: "FeatureCollection", features: [] } });
+        const button = document.querySelector("[data-roads-action='download-osm']");
+        button.click();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(httpMock.request).toHaveBeenCalledWith("/runs/test-run/test-config/api/roads/osm.geojson",
+            expect.objectContaining({ method: "POST" }));
+        expect(document.querySelector("#roads_osm_status").textContent).toMatch(/no mapped roads/i);
+        expect(button.disabled).toBe(false);
+        expect(document.querySelector("#roads_upload_geojson").disabled).toBe(false);
+    });
+
     test("upload action validates missing file before posting", async () => {
         await roads.uploadGeojson();
 
@@ -234,6 +250,8 @@ describe("Roads controller", () => {
             value: [file]
         });
 
+        document.querySelector("#roads_form").dataset.roadsInitialized = "0";
+        roads.bootstrap({});
         const uploadPromise = roads.uploadGeojson();
         expect(FakeXMLHttpRequest.instances).toHaveLength(1);
 
@@ -266,6 +284,8 @@ describe("Roads controller", () => {
             }
         });
         await uploadPromise;
+        expect(document.querySelector("[data-roads-model-controls]").hidden).toBe(false);
+        expect(document.querySelector("[data-roads-first-upload-help]").hidden).toBe(true);
 
         expect(document.getElementById("roads_upload_message").textContent).toContain("uploaded successfully");
         expect(document.querySelector(".wc-upload-progress__fill").style.width).toBe("100%");

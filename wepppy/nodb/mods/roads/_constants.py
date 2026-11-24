@@ -29,6 +29,8 @@ __all__ = [
     'DEFAULT_MAPPING_WARNING_EXAMPLE_LIMIT',
 ]
 
+ROADS_UPLOAD_GEOJSON_MAX_BYTES = 10 * 1024 * 1024
+
 DESIGN_ALIASES: Dict[str, str] = {
     "inslope_bd": "inslope_bd",
     "inslope_rd": "inslope_rd",
