@@ -10,6 +10,21 @@ COPY wepppy/weppcloud/static-src/ ./
 RUN npm run build
 
 
+FROM golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 AS security-go-toolchain
+
+FROM security-go-toolchain AS quarto-esbuild
+WORKDIR /build
+RUN git clone --depth=1 --branch v0.25.10 https://github.com/evanw/esbuild.git src && \
+    test "$(git -C src rev-parse HEAD)" = d6b668f96fb00d6a6d035f058e38b6bd2507beb6 && \
+    GOTOOLCHAIN=local go work init ./src && \
+    cd src && CGO_ENABLED=0 GOTOOLCHAIN=local go build -trimpath -ldflags="-s -w" -o /out/esbuild ./cmd/esbuild
+
+FROM security-go-toolchain AS git-lfs-builder
+RUN apt-get update && apt-get install -y --no-install-recommends debhelper dh-golang asciidoctor gettext
+WORKDIR /build
+COPY docker/native_security/build_git_lfs_deb.sh ./
+RUN sh build_git_lfs_deb.sh
+
 FROM rust:1.92.0-slim-trixie@sha256:bf3368a992915f128293ac76917ab6e561e4dda883273c8f5c9f6f8ea37a378e AS parquet-csv-builder
 RUN apt-get update && apt-get install -y --no-install-recommends python3 pkg-config && rm -rf /var/lib/apt/lists/*
 WORKDIR /src/parquet-csv
@@ -24,7 +39,8 @@ FROM ${RUNTIME_BASE_IMAGE} AS base
 LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy"
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG DOCKER_CLI_VERSION=26.1.4
+ARG DOCKER_CLI_VERSION=29.10.0
+ARG DOCKER_CLI_SHA256=94e8261e6e566c719973a81b22906d7b0a2655440b83fca0ea9c26215437541a
 
 # Allow enforcing a non-root runtime user at build time.
 ARG APP_USER=wepp
@@ -45,12 +61,13 @@ ARG UV_INSTALLER_URL=https://astral.sh/uv/install.sh
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN apt-get update && \
+RUN --mount=type=bind,from=git-lfs-builder,source=/out,target=/tmp/lfs-package \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
         curl \
         git \
-        git-lfs \
+        /tmp/lfs-package/git-lfs.deb \
         gfortran \
         pkg-config \
         cmake \
@@ -82,11 +99,10 @@ RUN apt-get update && \
         ca-certificates && \
     git lfs install --system
 
-RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLI_VERSION}.tgz" -o /tmp/docker.tgz && \
-    tar -xzf /tmp/docker.tgz -C /tmp && \
-    mv /tmp/docker/docker /usr/local/bin/docker && \
-    chmod +x /usr/local/bin/docker && \
-    rm -rf /tmp/docker /tmp/docker.tgz
+RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-cli_${DOCKER_CLI_VERSION}.tgz" -o /tmp/docker-cli.tgz && \
+    echo "${DOCKER_CLI_SHA256}  /tmp/docker-cli.tgz" | sha256sum -c - && \
+    tar -xzf /tmp/docker-cli.tgz -C /usr/local/bin --strip-components=1 bin/docker && \
+    rm /tmp/docker-cli.tgz
 
 ENV UV_SKIP_UPDATE_CHECK=1
 
@@ -95,8 +111,12 @@ RUN curl -LsSf "${UV_INSTALLER_URL}" | sh && \
 
 # Resolve Python dependencies with uv inside a dedicated virtual environment.
 COPY docker/requirements-uv.txt /tmp/requirements-uv.txt
-RUN uv venv /opt/venv && \
+COPY docker/native_security/build_pillow_wheel.py /tmp/build_pillow_wheel.py
+RUN --mount=type=tmpfs,target=/root/.cache/uv python /tmp/build_pillow_wheel.py /tmp/wepppy-wheels && \
+    uv venv /opt/venv && \
     source /opt/venv/bin/activate && \
+    uv pip install --no-deps --no-cache /tmp/wepppy-wheels/*.whl && \
+    rm -r /tmp/wepppy-wheels && \
     uv pip install --requirement /tmp/requirements-uv.txt && \
     GDAL_CONFIG=/usr/bin/gdal-config uv pip install \
         --no-binary fiona \
@@ -181,10 +201,13 @@ RUN set -euxo pipefail; \
 # Kernelspec registration lets Quarto's jupyter engine resolve `python3`.
 ARG QUARTO_VERSION=1.9.38
 ARG QUARTO_SHA256=bd0d73c1042fc5f719fb87753f0874c11344e516ee2cfbe4fe3ed4e4458c3988
-RUN curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb" -o /tmp/quarto.deb && \
+RUN --mount=type=bind,from=quarto-esbuild,source=/out,target=/tmp/quarto-tools \
+    curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb" -o /tmp/quarto.deb && \
     echo "${QUARTO_SHA256}  /tmp/quarto.deb" | sha256sum -c - && \
     apt-get update && \
     apt-get install -y --no-install-recommends /tmp/quarto.deb && \
+    test "$(/opt/quarto/bin/tools/x86_64/esbuild --version)" = "$(/tmp/quarto-tools/esbuild --version)" && \
+    install -m 0755 /tmp/quarto-tools/esbuild /opt/quarto/bin/tools/x86_64/esbuild && \
     rm -f /tmp/quarto.deb && \
     rm -rf /var/lib/apt/lists/* && \
     /opt/venv/bin/python -m ipykernel install --prefix /opt/venv --name python3 && \

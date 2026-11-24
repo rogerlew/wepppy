@@ -220,3 +220,5 @@ Culvert per-run candidate/receipt lifecycle and legacy compatibility follow
 New culvert admissions resolve and persist original-stream outlets before pruning;
 retain road-point coordinates separately and install the fixed outlet downstream.
 See the selection contract for original_outlet_v1 and retained-policy compatibility.
+
+PRISM 800 m Multiple revisions pass dated raw dew points to the native daily writer. See [Native hillslope dew-point revision](../../docs/schemas/prism-historic-climate-contract.md#native-hillslope-dew-point-revision) for the output and failure contracts.

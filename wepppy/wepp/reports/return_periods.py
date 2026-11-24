@@ -248,7 +248,7 @@ def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[N
 
 
 def _build_topaz_filter(topaz_ids: Optional[Sequence[int]]) -> str:
-    """Generate a SQL WHERE clause limiting events to the given Topaz IDs."""
+    """Generate a SQL WHERE clause limiting events to the given TOPAZ IDs."""
     if not topaz_ids:
         return ""
     values = sorted({int(v) for v in topaz_ids})
@@ -812,7 +812,7 @@ class ReturnPeriodDataset:
             raise ValueError("No channel events are available in the staged dataset")
         target_topaz = topaz_id if topaz_id is not None else available[0]
         if target_topaz not in available:
-            raise ValueError(f"Topaz ID {target_topaz} not present in staged events")
+            raise ValueError(f"TOPAZ ID {target_topaz} not present in staged events")
 
         events = self._events_for_topaz(target_topaz)
         ranks = self._ranks_for_topaz(target_topaz)

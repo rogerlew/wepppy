@@ -49,7 +49,7 @@ describe('gl-dashboard batch tooltip formatting', () => {
     });
 
     expect(tooltip).toBe(
-      'Layer: landuse/landuse.parquet\nRun: run-002\nTopazID: 1\ncancov: 0.100',
+      'Layer: landuse/landuse.parquet\nRun: run-002\nTOPAZ ID: 1\ncancov: 0.100',
     );
   });
 });

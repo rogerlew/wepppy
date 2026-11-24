@@ -1,0 +1,35 @@
+{
+  "binary_name": "wepp_261121_hill",
+  "binary_role": "hillslope",
+  "built_utc": "2026-11-22T06:29:59Z",
+  "features": {
+    "hbp_pass_family": "H*.hbp",
+    "hbp_schema_major": 0,
+    "hbp_schema_minor": 0,
+    "hbp_supported": false,
+    "legacy_ascii_pass_family": "H*.pass.dat",
+    "mode2_direct_hbp_reader": false,
+    "mode2_master_pass_prompt_required": true,
+    "mode3_process_pass_reload": true,
+    "mofe_supported": true,
+    "pass_components_reader_required": true,
+    "pass_components_version": 3,
+    "process_mode_pass_pw0_required": true,
+    "single_user_defined_inputs_supported": true,
+    "soil_input_capacity": 23
+  },
+  "release_tag": "261121",
+  "schema": "wepp-binary-release-metadata-v1",
+  "sha256": "f9f9a9e11ea8b60c082e43eff0f315d345f68f3f89ca0d1883c9109a89a39e36",
+  "source_branch": "wepp_260430_negmeltfix_comparator",
+  "source_commit": "d53f84e4e552bb5a97561ae26e6d7e0c8b971e3a",
+  "source_repo": "wepp-in-the-woods/wepp-forest",
+  "validation": {
+    "hillslope_watchlist": "31 passed",
+    "host_smoke": "passed",
+    "native_full_suite": "1831 passed",
+    "same_build_watershed_replay": "10 paired daily and hourly cases; output bytes identical to 261118",
+    "watershed_capacity": "50,000 hillslopes, 25,000 channels and 25 impoundments; one over-limit channel rejected"
+  },
+  "wepp_banner_version": "2020.500"
+}

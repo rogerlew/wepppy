@@ -29,6 +29,7 @@ from wepppy.nodb.core.watershed_errors import (
     WatershedBoundaryTouchesEdgeError,
 )
 from wepppy.rq.project_rq import _cancel_deferred_job
+from wepppy.rq.project_rq_subcatchment_state import _stored_dependency_ids
 from wepppy.rq.job_dependencies import reconcile_deferred_workflow
 from wepppy.rq.rq_worker import WepppyRqWorker
 from wepppy.rq.job_info import get_wepppy_rq_job_info
@@ -2056,7 +2057,7 @@ def test_policy_apply_failure_cancels_receipt_and_leaves_no_dependency_residue(
             queue_name,
             connection=rq_connection,
         ).get_job_ids()
-        assert project_rq._stored_dependency_ids(receipt) == set()
+        assert _stored_dependency_ids(receipt) == set()
         assert receipt.id not in build.dependent_ids
         assert rq_connection.get(tail_key) is None
         assert rq_connection.get(readiness_key) == b"preserved"

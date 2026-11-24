@@ -68,16 +68,12 @@ The deployment boundary is strict: `wepp.cloud` is Docker Compose and uses
 container registry. Do not introduce registry, manifest-digest, or GitOps
 requirements into a `wepp.cloud` rollout or recovery plan.
 
-The fork/archive serial queue uses `docker-compose.prod.wepp3.yml` on `wepp3`,
-which already has the production NFS mount and otherwise runs no
-containers. Development forest and Forest test production keep local consumers
-for behavioral parity; wepp1 and wepp2 must not consume the production serial
-queue. Track rollout evidence in the
-[Fork/Archive Serial Queue Isolation work package](../docs/work-packages/20260803_fork_archive_serial_queue/package.md).
-
-Install the wepp3 preset once. The canonical entry point recognizes the dedicated
-topology but currently fails closed before mutation until immutable retained
-fork/archive activation is implemented and reviewed:
+Production wepp3 runs one worker for `fork-archive` and one for `query-catalog`
+using `docker-compose.prod.wepp3.yml`. Wepp1 and wepp2 own the default and batch
+pools. Forest can enable a separate single-consumer profile for each dedicated
+queue. Install the wepp3 preset once and inspect the plan before activation.
+See the [worker deployment guide](prod-worker-deploy-guide.md#wepp3-dedicated-workers)
+for mount parity, first-install receipt options and rollback.
 
 ```bash
 ./wctl/install.sh wepp3
@@ -121,7 +117,7 @@ The script restarts itself when a pull updates its implementation and validates
 the post-pull Compose topology before building. It fails closed when an active
 worker-only wctl preset does not expose a supported service set.
 
-Full, worker-pool, and dedicated wepp3 fork/archive deployments are two-phase
+Full, worker-pool, and dedicated wepp3 worker deployments are two-phase
 retained-candidate operations:
 
 ```bash
@@ -172,7 +168,7 @@ docker compose --env-file docker/.env -f docker/docker-compose.prod.yml --profil
 - Runs `docker system prune -a -f` at the end of deploy (unused images, stopped containers, and unused networks).
 - Does **not** prune volumes unless explicitly requested with `--docker-prune-volumes`.
 - Use `--skip-docker-prune` to disable the end-of-deploy runtime prune. The dedicated wepp3
-  fork/archive deployment always skips the broad runtime prune; its build cache is still
+  worker deployment always skips the broad runtime prune; its build cache is still
   pruned immediately after the image build.
 
 Production Python services also fail startup unless the vendored
@@ -335,6 +331,8 @@ lacked the required Roads geometry/water APIs. Native commit
 anisotropy policy, with interchange SHA256
 `7f67d3a8e56066d43b2fdb1ffc5360d357d61f2fcc963190c67fe288373702ad`.
 
+Large-watershed interchange pairs native revision `b236ab0eed894e5664bdee5800c62f97f63ea81b` with preflight SHA-256 `9c16555afa70595c3a4031eb8bab94a1cdc6a7ea23637f40aff6120ab83520f9`.
+
 ## Redis durability policy + RQ DB9 deploy flush policy
 
 WEPPcloud uses a single Redis instance with multiple logical databases (DBs). Stacks that run a `redis` service enable Redis persistence by default so non-RQ state (especially Flask sessions in DB 11) survives routine redeploys and host restarts. Separately, deploy automation can intentionally clear only the RQ database (DB 9) during a deploy to drop queued/active jobs without wiping other Redis DBs.
@@ -414,6 +412,7 @@ docker logs docker-postgres-backup-1  # Check recent backup status
 - Docker Desktop or a recent Docker Engine.
 - `docker compose` plugin (v2).
 - Secret files under `docker/secrets/` (gitignored) as defined in `docs/infrastructure/secrets.md`.
+- The root `.dockerignore` excludes host `.env` files and `docker/secrets/` from the common image. Compose reads configuration on the host and mounts each service’s declared secrets at runtime.
 - Optional non-secret overrides in `docker/.env` (gitignored). Defaults live in `docker/defaults.env` (committed).
 
 ```bash
@@ -474,6 +473,10 @@ for the API, source provenance, freshness failures and recovery.
 
 `wctl` is the supported wrapper for `docker compose` (see `wctl/install.sh`). It merges `docker/defaults.env` plus optional `docker/.env` + host overrides, escapes `$` for Compose interpolation, and sets `WEPPPY_ENV_FILE` for `env_file:` wiring.
 
+The production and development images build the Git LFS Debian package and Quarto’s esbuild client in isolated Go stages. When updating the tooling, verify the real Rosetta LFS objects, Git LFS built-in help, and the PATH report. The Git LFS builder checks the reviewed go.mod and go.sum. [Component qualification](../docs/work-packages/20261123_production_grype_remediation/artifacts/20261123_git_lfs_build.md)
+
+The common image installs a SHA-256-verified Docker CLI for the WEPPcloudR renderer. When updating its version, update the upstream CLI-only archive checksum in both Dockerfiles and verify a DEVAL render through the new client.
+
 The Docker Compose v2 plugin is an expected prerequisite for Compose-backed
 tests and local stack operations. Some `wctl run-pytest` environments provide
 the Docker CLI inside `weppcloud` without the Compose plugin; in that case the
@@ -510,6 +513,7 @@ wctl docker compose config
 | `rq-worker`    | RQ worker pool servicing Redis queue DB 9 | — | Shares code volume; respects `UID`/`GID`. |
 | `rq-worker-batch` | RQ worker pool for batch queue (long-running jobs) | — | 4 workers, 8GB shm, higher resource limits. |
 | `rq-worker-fork-archive` | Single worker for fork, archive-create, and restore | — | One process; production runs only on wepp3. |
+| `rq-worker-query-catalog` | Refresh query-engine catalogs | — | One process on wepp3. |
 | `redis`        | Redis 7.4 | 6379 | Dev: `.docker-data/redis`, Prod: `redis-data` volume |
 | `postgres`     | PostgreSQL 16 | 5432 | Dev: `.docker-data/postgres`, Prod: `postgres-data` volume |
 | `caddy`        | Reverse proxy + TLS terminator (dev: HTTP only) | 8080 | Serves static assets and forwards to upstream services. |
@@ -753,12 +757,26 @@ For AI agents performing deployments:
 - [ ] Static assets accessible (404s resolved)
 - [ ] Monitoring established
 
+### CI Comrak and PRISM runtime alignment (2026-11-21)
+
+The [baseline job](https://github.com/rogerlew/wepppy/actions/runs/44933644862/job/136937190372)
+failed during database bootstrap because its Python environment lacked
+`comrak`. The stubtest job had already passed. The next common image cleared
+bootstrap but still lacked the native `raw_tdmean_c` API required by PRISM.
+
+`Dockerfile.test` uses the digest published by the
+[common-image build for `2dfde16fb`](https://github.com/rogerlew/wepppy/actions/runs/44942315781).
+That revision includes the pinned `comrak-ext` dependency and WEPPpyo3
+`af3b5c977bbdae576fadec929620412732824ad1`, which supplies the updated climate
+extension without the retired PRISM analysis sidecars.
+
 ### CI native alignment acceptance (2026-10-29)
 
 The [common-image build for `84412a38b`](https://github.com/rogerlew/wepppy/actions/runs/40813271338)
 published digest `sha256:7619a9fc9b3e8adf1e09b65b4a0aa9a995c30fface90561bdc509411074b6cfb`,
-now pinned by `Dockerfile.test`. The isolated test Compose project accepted the
-required interchange SHA from `/opt/vendor/wepppyo3/release/linux/py312/`.
+which was pinned by `Dockerfile.test` at the time. The isolated test Compose
+project accepted the required interchange SHA from
+`/opt/vendor/wepppyo3/release/linux/py312/`.
 Startup-contract, anisotropy, developer-mode and Roads publication checks passed
 (62 tests), as did the complete eight-module stubtest suite and test-stub checks.
 Focused startup-file isolation passed with one unchanged-order iteration and

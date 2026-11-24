@@ -31,7 +31,7 @@ Some management file conventions:
 
 ### 2016.3/2017.1 awareness
 
-Recent updates teach the parser about parameters introduced in the 2016.3/2017.1 formats, including release canopy cover (`rcc`), residue resurfacing fractions (`resurf1`/`resurnf1`), understory cover fractions in initial conditions, and the optional permanent-contour flag. These values are ingested into the in-memory management objects so newer management libraries preserve the richer behaviour during simulations.
+Recent updates teach the parser about parameters introduced in the 2016.3/2017.1 formats, including release canopy cover (`rcc`), residue resurfacing fractions (`resurf1`/`resurnf1`), understory cover fractions in initial conditions, and the optional permanent-contour flag. These values are ingested into the in-memory management objects so newer management libraries preserve the richer behavior during simulations.
 
 ### Downgrading managements to 98.4
 

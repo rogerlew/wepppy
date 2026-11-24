@@ -2026,12 +2026,12 @@ class CropRotationManager:
                 raise FileNotFoundError(f'Management file not found: {man_path}')
         else:
             if not isint(normalized_id):
-                raise ValueError(f'WEPP Cloud management file ID must be an integer: {normalized_id}')
+                raise ValueError(f'WEPPcloud management file ID must be an integer: {normalized_id}')
             try:
                 man_path = get_management_summary(normalized_id, landuse_mapping).man_path
             except InvalidManagementKey as exc:
                 logger.error('Error getting management summary for %s: %s', normalized_id, exc)
-                raise ValueError(f'Invalid WEPP Cloud management lookup id: {normalized_id}') from exc
+                raise ValueError(f'Invalid WEPPcloud management lookup id: {normalized_id}') from exc
         return CropRotation(
             crop_name,
             CropRotationDatabase(database),

@@ -30,7 +30,7 @@ def catalog_queue(tmp_path, monkeypatch, isolated_rq):
         "coordination": str(tmp_path / "coordination"), "layout": "flat",
     }]))
     monkeypatch.setenv("QUERY_CATALOG_REFRESH_ENABLED", "true")
-    queue = Queue("default", connection=isolated_rq)
+    queue = Queue("query-catalog", connection=isolated_rq)
     worker = CatalogWorker([queue], connection=isolated_rq, name="query-catalog-test-" + uuid4().hex)
     worker.register_birth()
     worker.set_state("idle")
@@ -75,7 +75,7 @@ def discover(queue, worker):
     worker.set_state("idle")
 
 
-def test_default_dispatch_and_inventory_ignore_batch_backlog(catalog_queue, monkeypatch):
+def test_catalog_dispatch_and_inventory_ignore_batch_backlog(catalog_queue, monkeypatch):
     from datetime import datetime, timezone
     from rq.job import Job
     from wepppy.rq.job_info import recursive_get_job_details
@@ -93,7 +93,7 @@ def test_default_dispatch_and_inventory_ignore_batch_backlog(catalog_queue, monk
         core.record_catalog_refresh(path, "values.csv")
         result = tasks.enqueue_catalog_refresh(path)
         job = Job.fetch(result["job_id"], connection=queue.connection)
-        assert job.origin == "default"
+        assert job.origin == "query-catalog"
         assert recursive_get_job_details(job, queue.connection, datetime.now(timezone.utc))["status"] == "queued"
         drain(queue, worker)
         assert not core.pending_catalog_requests(path)
@@ -102,7 +102,7 @@ def test_default_dispatch_and_inventory_ignore_batch_backlog(catalog_queue, monk
         worker.set_state("idle")
         discovery = tasks.reconcile_query_catalogs()
         inventory_job = Job.fetch(discovery["inventory_job_id"], connection=queue.connection)
-        assert inventory_job.origin == "default"
+        assert inventory_job.origin == "query-catalog"
         drain(queue, worker)
         inventory_job.refresh()
         assert inventory_job.get_status() == JobStatus.FINISHED
@@ -116,17 +116,20 @@ def test_default_ordinary_backlog_defers_refresh(catalog_queue):
     root, queue, _ = catalog_queue
     path = project(root)
     core.record_catalog_refresh(path)
-    ordinary = queue.enqueue_call("builtins.str", args=("ordinary",))
+    default = Queue("default", connection=queue.connection)
+    ordinary = default.enqueue_call("builtins.str", args=("ordinary",))
     result = tasks.enqueue_catalog_refresh(path, queue=queue)
     assert result["error_code"] == "query_catalog_ordinary_backlog"
-    assert queue.get_job_ids() == [ordinary.id]
+    assert default.get_job_ids() == [ordinary.id]
+    assert not queue.count
+    ordinary.cancel()
     assert core.pending_catalog_requests(path)
 
 
-def test_pre_migration_default_worker_blocks_admission(catalog_queue):
+def test_legacy_catalog_subscription_blocks_admission(catalog_queue):
     root, queue, worker = catalog_queue
     legacy = tasks.catalog_worker_configuration()
-    legacy.pop("queue")
+    legacy["queue"] = "default"
     queue.connection.hset(worker.key, tasks.WORKER_FIELD, json.dumps(legacy))
     path = project(root)
     core.record_catalog_refresh(path)
@@ -137,7 +140,7 @@ def test_pre_migration_default_worker_blocks_admission(catalog_queue):
 
 
 @pytest.mark.parametrize("legacy_configuration", [False, True])
-def test_default_worker_rejects_legacy_execution_authority(catalog_queue, legacy_configuration):
+def test_catalog_worker_rejects_legacy_execution_authority(catalog_queue, legacy_configuration):
     from rq.job import Job
     from wepppy.rq import _query_catalog_admission as guard
 
@@ -160,16 +163,21 @@ def test_default_worker_rejects_legacy_execution_authority(catalog_queue, legacy
     assert queue.connection.get(guard.LEDGER_KEY) == retained
 
 
-@pytest.mark.parametrize("origin", ["default", "batch"])
-@pytest.mark.parametrize("registry", [None, "wip", "deferred", "scheduled"])
-def test_missing_ledger_checks_both_queue_histories(catalog_queue, origin, registry):
+@pytest.mark.parametrize("origin", ["default", "batch", "query-catalog"])
+@pytest.mark.parametrize("registry", [None, "intermediate", "wip", "deferred", "scheduled"])
+def test_missing_ledger_checks_all_queue_histories(catalog_queue, origin, registry):
     from wepppy.rq import _query_catalog_admission as guard
 
     _, queue, _ = catalog_queue
     queue.connection.delete(guard.LEDGER_KEY)
     identifier = tasks.PREFIX + str(uuid4())
     key = "rq:queue:" + origin if registry is None else "rq:" + registry + ":" + origin
-    if registry is None:
+    if registry == "intermediate":
+        origin_queue = Queue(origin, connection=queue.connection)
+        queue.connection.rpush(origin_queue.key, identifier)
+        queue.connection.lmove(origin_queue.key, origin_queue.intermediate_queue_key)
+        key = origin_queue.intermediate_queue_key
+    elif registry is None:
         queue.connection.rpush(key, identifier)
     else:
         queue.connection.zadd(key, {identifier: 1})
@@ -188,7 +196,7 @@ def test_new_configuration_inventory_rediscovers_legacy_receipts(catalog_queue):
     path = project(root)
     core.record_catalog_refresh(path)
     legacy = tasks.catalog_worker_configuration()
-    legacy.pop("queue")
+    legacy["queue"] = "default"
     old_id = hashlib.sha256(json.dumps(legacy, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     old_key = "query-catalog:inventory:" + old_id
     retained = b'{"legacy_evidence":true}'
@@ -635,7 +643,7 @@ def test_queued_child_fails_after_owner_freeze(catalog_queue):
     assert core.pending_catalog_requests(child)
 
 
-def test_shipped_scheduler_admits_inventory_and_refresh_on_default(catalog_queue):
+def test_shipped_scheduler_admits_inventory_and_refresh_on_catalog(catalog_queue):
     """Exercise shipped YAML through dispatch, real admission and artifact readback."""
     from wepppy.tools import scheduler
 
@@ -651,7 +659,7 @@ def test_shipped_scheduler_admits_inventory_and_refresh_on_default(catalog_queue
     assert scheduler._enqueue_task(scheduled_queue, state)
     admitted = queue.get_jobs()
     assert admitted, "Scheduled reconciliation must admit work to the consumer queue"
-    assert all(job.origin == "default" for job in admitted)
+    assert all(job.origin == "query-catalog" for job in admitted)
     drain(queue, worker)
     worker.register_birth()
     worker.set_state("idle")
@@ -783,3 +791,154 @@ def test_browser_worker_keeps_exact_omni_parent_source_policy(catalog_queue, sou
         assert job.get_status() == JobStatus.FAILED
         assert not (child / '_query_engine/catalog.json').exists()
         assert len(core.pending_catalog_requests(child)) == 1
+
+
+def test_admin_catalog_panels_expose_pause_and_expired_claim_without_mutation(catalog_queue):
+    from wepppy.rq import _query_catalog_admission as admission
+    from wepppy.rq.query_catalog_monitor import catalog_panels
+
+    _, queue, _ = catalog_queue
+    conn = queue.connection
+    ledger = admission._ledger(conn)
+    ledger['jobs']['query_catalog_refresh_' + str(uuid4())] = {
+        'kind': 'refresh', 'configuration': {}, 'claimed': True, 'reserved_at': 1,
+    }
+    before = json.dumps(ledger)
+    conn.set(admission.LEDGER_KEY, before)
+    conn.set(admission.PAUSE_KEY, '/private/run/secret')
+    panels = dict(catalog_panels(conn))
+    panel = panels['Catalog admission']
+    rows = dict(panel['rows'])
+    assert rows['Pause expires'] == 'No expiry'
+    assert rows['Uncertain reservations'] == 1
+    assert rows['Default workers'] == '0 compatible, 0 incompatible'
+    assert 'secret' not in str(panels)
+    assert 'Catalog admission is paused.' in panel['messages']
+    assert conn.get(admission.LEDGER_KEY) == before.encode()
+    assert 'No scheduler summary' in panels['Catalog health']['messages'][0]
+
+
+def test_admin_health_reads_committed_tick_and_isolates_malformed_summary(catalog_queue):
+    from wepppy.rq.query_catalog_monitor import catalog_panels
+
+    _, queue, _ = catalog_queue
+    conn = queue.connection
+    tasks.reconcile_query_catalogs(queue=queue)
+    panels = dict(catalog_panels(conn))
+    rows = dict(panels['Catalog health']['rows'])
+    assert rows['Last committed scheduler tick'].endswith(' UTC')
+    assert rows['Pending locators'] == 0
+    assert rows['Reconciliation errors'] == 0
+    key = 'query-catalog:inventory:' + tasks._configuration_id()
+    oversized = conn.get(key + ':health') + b' ' * 4100 + b'private-value'
+    conn.set(key + ':health', oversized)
+    assert dict(catalog_panels(conn))['Catalog health']['messages'] == ['Monitoring data unavailable.']
+    conn.set(key + ':health', '{"tick": "private-value"}')
+    panels = dict(catalog_panels(conn))
+    assert panels['Catalog health']['messages'] == ['Monitoring data unavailable.']
+    assert panels['Catalog admission']['messages'] == ['Worker compatibility blocks admission.']
+    assert 'private-value' not in str(panels)
+
+
+def test_batch_owner_cap_counts_legacy_bindings_and_releases_slots(catalog_queue, monkeypatch):
+    from rq.job import Job
+    from wepppy.rq import _query_catalog_admission as admission
+
+    root, queue, worker = catalog_queue
+    conn = queue.connection
+    config = tasks.catalog_worker_configuration()
+    batch = dict(config['roots'][0], layout='batch')
+    monkeypatch.setenv('QUERY_CATALOG_ROOTS_JSON', json.dumps([batch]))
+    for consumer in [worker, *worker._catalog_test_companions]:
+        conn.hset(consumer.key, tasks.WORKER_FIELD, json.dumps(tasks.catalog_worker_configuration()))
+    children = []
+    for owner in ('first', 'second'):
+        runs = root / owner / 'runs'
+        runs.mkdir(parents=True)
+        for n in range(4):
+            child = project(runs, str(n))
+            core.record_catalog_refresh(child, 'values.csv')
+            children.append(child)
+
+    def enqueue(path):
+        return tasks.enqueue_catalog_refresh(path, queue=queue)
+
+    first = enqueue(children[0])['job_id']
+    conn.set(admission.OWNER_POLICY_KEY, batch['namespace'])
+    try:
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            list(pool.map(enqueue, children[1:4]))
+        # Competing writers can all contend. Retry sequentially to converge.
+        results = [enqueue(child) for child in children[1:4]]
+        assert len(queue.get_job_ids()) == 2
+        deferred = [child for child, result in zip(children[1:4], results)
+                    if result.get('error_code') == admission.OWNER_PENDING]
+        assert len(deferred) == 2
+        assert core.pending_catalog_requests(deferred[0])
+        assert enqueue(children[4])['job_id']
+        Job.fetch(first, connection=conn).cancel()
+        assert enqueue(deferred[0])['job_id']
+        conn.delete(admission.OWNER_POLICY_KEY)
+        assert enqueue(deferred[1])['job_id']
+        drain(queue, worker)
+        for child in [*children[1:4], children[4]]:
+            assert not core.pending_catalog_requests(child)
+            assert any(row['path'] == 'values.csv' for row in
+                       json.loads((child / '_query_engine/catalog.json').read_text())['files'])
+    finally:
+        conn.delete(admission.OWNER_POLICY_KEY)
+
+@pytest.mark.parametrize("registration", ["mixed", "dead", "expired"])
+def test_execution_rechecks_live_exclusive_consumer_after_enqueue(catalog_queue, registration):
+    from rq.job import Job
+    from wepppy.rq import _query_catalog_admission as guard
+
+    root, queue, worker = catalog_queue
+    path = project(root)
+    core.record_catalog_refresh(path)
+    job = Job.fetch(tasks.enqueue_catalog_refresh(path, queue=queue)["job_id"], connection=queue.connection)
+    job.worker_name = worker.name
+    job.set_status(JobStatus.STARTED)
+    if registration == "mixed":
+        queue.connection.hset(worker.key, "queues", "query-catalog,fork-archive")
+    elif registration == "dead":
+        queue.connection.hset(worker.key, "death", "2026-01-01T00:00:00Z")
+    else:
+        queue.connection.delete(worker.key)
+    with pytest.raises(ValueError, match="worker did not advertise"):
+        guard.authorize_job(queue.connection, job, kind="refresh", pilot_id=None,
+                            scope_id=core.resolve_scope(path, create=False).scope_id, wd=str(path))
+    assert not guard._ledger(queue.connection)["jobs"][job.id]["claimed"]
+    assert core.pending_catalog_requests(path)
+    assert not (path / "_query_engine/catalog.json").exists()
+
+
+def test_single_catalog_slot_alternates_contended_inventory_and_refresh(catalog_queue, monkeypatch):
+    root, queue, worker = catalog_queue
+    for companion in worker._catalog_test_companions:
+        companion.register_death()
+    monkeypatch.setenv("QUERY_CATALOG_INVENTORY_LIMIT", "1")
+    paths = [project(root, name) for name in ("a", "b", "c")]
+    tasks.reconcile_query_catalogs(queue=queue)
+    for path in paths:
+        core.record_catalog_refresh(path)
+        result = tasks.enqueue_catalog_refresh(path, queue=queue)
+        assert result["error_code"] == "query_catalog_capacity_pending"
+
+    kinds = []
+    for _ in range(24):
+        jobs = queue.get_jobs()
+        assert len(jobs) <= 1
+        if jobs:
+            kinds.append(jobs[0].func_name.split(".")[-1])
+            drain(queue, worker)
+            worker.register_birth()
+            worker.set_state("idle")
+        state = tasks.reconcile_query_catalogs(queue=queue)
+        if state["state"] == "completed":
+            break
+    assert state["state"] == "completed"
+    assert kinds[:3] == ["inventory_query_catalog_rq", "refresh_query_catalog_rq", "inventory_query_catalog_rq"]
+    for path in paths:
+        assert not core.pending_catalog_requests(path)
+        assert "values.csv" in {entry["path"] for entry in json.loads((path / "_query_engine/catalog.json").read_text())["files"]}

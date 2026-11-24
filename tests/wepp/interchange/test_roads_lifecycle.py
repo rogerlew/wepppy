@@ -13,6 +13,12 @@ from wepppy.wepp.interchange import _roads_lifecycle as lifecycle
 pytestmark = pytest.mark.unit
 
 
+def test_loss_hill_required_only_for_continuous_roads() -> None:
+    path = "wepp/roads/output/interchange/loss_pw0.hill.parquet"
+    assert path in lifecycle.mandatory_paths(False)
+    assert path not in lifecycle.mandatory_paths(True)
+
+
 def prepared(root):
     segment_dir = root / lifecycle.SEGMENTS
     segment_dir.mkdir(parents=True)

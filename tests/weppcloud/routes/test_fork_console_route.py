@@ -10,6 +10,7 @@ from flask import Flask, abort as flask_abort
 from werkzeug.exceptions import Forbidden
 
 import wepppy.weppcloud.routes.fork_console.fork_console as fork_console_module
+from wepppy.weppcloud.routes.run_0.fork_status import FORK_DESTINATION_REQUIRED_FILES
 
 
 pytestmark = pytest.mark.routes
@@ -164,7 +165,7 @@ def test_fork_console_query_selections_use_real_source_capabilities(monkeypatch,
 
 @pytest.mark.parametrize("job_args", [(), (True,), (False,)])
 def test_fork_readiness_route_accepts_finished_non_omni_destination(monkeypatch, tmp_path, job_args):
-    for name in fork_console_module._FORK_DESTINATION_REQUIRED_FILES:
+    for name in FORK_DESTINATION_REQUIRED_FILES:
         (tmp_path / name).write_text("{}")
     authorized = []
     monkeypatch.setattr(fork_console_module, "authorize", lambda runid, config: authorized.append(runid))
@@ -322,7 +323,7 @@ def test_fork_destination_readiness_requires_core_nodb_files(
 
     destination = tmp_path / "destination-run"
     destination.mkdir()
-    for name in fork_console_module._FORK_DESTINATION_REQUIRED_FILES:
+    for name in FORK_DESTINATION_REQUIRED_FILES:
         (destination / name).write_text("{}", encoding="utf-8")
 
     monkeypatch.setattr(

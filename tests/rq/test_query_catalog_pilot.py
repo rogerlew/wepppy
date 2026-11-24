@@ -5,6 +5,7 @@ import time
 from uuid import uuid4
 
 import pytest
+from rq import Queue
 from rq.job import Job, JobStatus
 
 from tests.rq.test_query_catalog_rq import catalog_queue, project, drain
@@ -17,9 +18,15 @@ from wepppy.query_engine import catalog_refresh as core
 pytestmark = pytest.mark.integration
 
 
-def enable_pilot(root, queue, worker, monkeypatch, count=2):
+def enable_pilot(root, queue, worker, monkeypatch, count=2, *, stress_pool=False):
     monkeypatch.setenv('QUERY_CATALOG_REFRESH_ENABLED', 'false')
-    for consumer in [worker, *worker._catalog_test_companions]:
+    if stress_pool:
+        # Exercise legacy concurrency bounds separately from the singleton topology.
+        monkeypatch.setattr(pilot, 'EXPECTED_CONSUMERS', 12)
+    else:
+        for companion in worker._catalog_test_companions:
+            companion.register_death()
+    for consumer in [worker, *(worker._catalog_test_companions if stress_pool else [])]:
         consumer.register_death()
         consumer.register_birth()
         consumer.set_state('idle')
@@ -47,18 +54,22 @@ def work(queue, worker):
     worker.set_state('idle')
 
 
-def test_legacy_batch_pilot_is_readable_but_cannot_resume_or_admit(catalog_queue, monkeypatch):
+@pytest.mark.parametrize("origin", ["batch", "default"])
+def test_legacy_pilot_is_readable_but_cannot_resume_or_admit(catalog_queue, monkeypatch, origin):
     import hashlib
 
     root, queue, worker = catalog_queue
     identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch)
     data = pilot.read(queue.connection, identifier)
-    data['manifest']['queue'] = 'batch'
-    data['manifest']['configuration'].pop('queue')
+    data['manifest']['queue'] = origin
+    if origin == 'batch':
+        data['manifest']['configuration'].pop('queue')
+    else:
+        data['manifest']['configuration']['queue'] = origin
     data['manifest_sha256'] = hashlib.sha256(json.dumps(data['manifest'], sort_keys=True).encode()).hexdigest()
     retained = json.dumps(data).encode()
     queue.connection.set(pilot.key(identifier), retained)
-    assert pilot.read(queue.connection, identifier)['manifest']['queue'] == 'batch'
+    assert pilot.read(queue.connection, identifier)['manifest']['queue'] == origin
     with pytest.raises(RuntimeError, match='configuration changed'):
         pilot.resume_pilot(queue.connection, identifier, token)
     with pytest.raises(RuntimeError, match='configuration changed'):
@@ -113,7 +124,9 @@ def test_disabled_pilot_real_workers_exact_inventory_and_catalogs(catalog_queue,
     first = tick(queue, identifier, token)
     assert first['inventory_job_id']
     work(queue, worker)
-    assert tick(queue, identifier, token)['admitted'] == 2
+    assert tick(queue, identifier, token)['admitted'] == 1
+    work(queue, worker)
+    assert tick(queue, identifier, token)['admitted'] == 1
     work(queue, worker)
     assert tick(queue, identifier, token)['state'] == 'completed'
     status = pilot.pilot_status(queue.connection, identifier)
@@ -146,7 +159,8 @@ def test_shared_cap_limits_concurrent_distinct_scope_admission(catalog_queue):
 def test_ordinary_backlog_latches_pause_without_spending_budget(catalog_queue, monkeypatch):
     root, queue, worker = catalog_queue
     identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch)
-    ordinary = queue.enqueue_call('builtins.str', args=('ordinary',))
+    default = Queue('default', connection=queue.connection)
+    ordinary = default.enqueue_call('builtins.str', args=('ordinary',))
     result = tick(queue, identifier, token)
     assert not result.get('inventory_job_id')
     status = pilot.pilot_status(queue.connection, identifier)
@@ -263,10 +277,10 @@ def test_duplicate_known_queue_entries_cannot_mask_ordinary_tail(catalog_queue, 
     queue.connection.lrem(queue.key, 0, admitted['job_id'])
 
 
-def test_pilot_requires_all_twelve_real_registered_consumers(catalog_queue, monkeypatch):
+def test_pilot_rejects_additional_catalog_consumers(catalog_queue, monkeypatch):
     root, queue, worker = catalog_queue
     identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch)
-    worker._catalog_test_companions[0].register_death()
+    worker._catalog_test_companions[0].register_birth()
     assert not tick(queue, identifier, token).get('inventory_job_id')
     assert pilot.read(queue.connection, identifier)['counters'] == dict(refresh=0, inventory=0)
     assert pilot.pilot_status(queue.connection, identifier)['state'] == 'paused'
@@ -324,7 +338,7 @@ def test_retry_attempts_exhaust_refresh_budget_without_reset(catalog_queue, monk
 
 def test_independent_pilots_share_global_capacity(catalog_queue, monkeypatch):
     root, queue, worker = catalog_queue
-    first, token, paths = enable_pilot(root, queue, worker, monkeypatch, count=7)
+    first, token, paths = enable_pilot(root, queue, worker, monkeypatch, count=7, stress_pool=True)
     for path in paths:
         core.record_catalog_refresh(path)
         assert tasks.enqueue_catalog_refresh(path, queue=queue, pilot_id=first, controller_token=token)['job_id']
@@ -380,7 +394,7 @@ def test_inventory_retries_debit_distinct_attempts(catalog_queue, monkeypatch):
 
 def test_concurrent_claims_commit_once_per_admitted_job(catalog_queue, monkeypatch):
     root, queue, worker = catalog_queue
-    identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch, count=7)
+    identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch, count=7, stress_pool=True)
     jobs = []
     for path in paths:
         core.record_catalog_refresh(path)
@@ -388,6 +402,7 @@ def test_concurrent_claims_commit_once_per_admitted_job(catalog_queue, monkeypat
         job = queue.fetch_job(result['job_id'])
         queue.connection.lrem(queue.key, 0, job.id)
         job.set_status(JobStatus.STARTED)
+        job.worker_name = worker.name
         jobs.append((job, path))
     def claim(pair):
         job, path = pair
@@ -404,16 +419,18 @@ def test_concurrent_claims_commit_once_per_admitted_job(catalog_queue, monkeypat
 def test_ordinary_arrival_invalidates_admission_transaction(catalog_queue):
     root, queue, worker = catalog_queue
     from redis.exceptions import WatchError
+    default = Queue('default', connection=queue.connection)
     with queue.connection.pipeline() as pipe:
         ticket = guard.prepare(pipe, queue, job_id=tasks.PREFIX + str(uuid4()), kind='inventory',
                                configuration=tasks.catalog_worker_configuration())
-        ordinary = queue.enqueue_call('builtins.str', args=('ordinary',))
+        ordinary = default.enqueue_call('builtins.str', args=('ordinary',))
         pipe.multi()
         guard.commit(pipe, ticket)
         with pytest.raises(WatchError):
             pipe.execute()
     assert guard._ledger(queue.connection)['jobs'] == {}
-    assert queue.job_ids == [ordinary.id]
+    assert default.job_ids == [ordinary.id]
+    ordinary.cancel()
 
 
 
@@ -425,6 +442,7 @@ def test_claim_rechecks_concurrent_job_status_change(catalog_queue, monkeypatch)
     job = queue.fetch_job(result['job_id'])
     queue.connection.lrem(queue.key, 0, job.id)
     job.set_status(JobStatus.STARTED)
+    job.worker_name = worker.name
     scope = core.resolve_scope(paths[0], create=False)
     original = pilot._scope
     def cancel_after_validation(manifest, path):
@@ -441,7 +459,7 @@ def test_claim_rechecks_concurrent_job_status_change(catalog_queue, monkeypatch)
 def test_running_cancellation_retains_capacity_until_execution_exits(catalog_queue, monkeypatch):
     import multiprocessing
     root, queue, worker = catalog_queue
-    identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch, count=8)
+    identifier, token, paths = enable_pilot(root, queue, worker, monkeypatch, count=8, stress_pool=True)
     for path in paths:
         core.record_catalog_refresh(path)
     jobs = [tasks.enqueue_catalog_refresh(path, queue=queue, pilot_id=identifier,
@@ -506,7 +524,7 @@ def test_pilot_observes_plain_job_id_from_real_execution_registry(catalog_queue)
         pipeline.execute()
     assert execution.composite_key.encode() in queue.connection.zrange(job.started_job_registry.key, 0, -1)
     runtime = Runtime.__new__(Runtime)
-    runtime.connection, runtime.queue, runtime.ordinary_seen = queue.connection, queue, set()
+    runtime.connection, runtime.ordinary_queue, runtime.ordinary_seen = queue.connection, queue, set()
     try:
         result = runtime.raw_ordinary({"global_job_ids": []})
         assert job.id in result["started_ids"]

@@ -1,3 +1,33 @@
+Completed locally — [Run-page Features Export presentation refactor](docs/work-packages/20261123_run0_export_presentation/package.md).
+
+Completed locally — [Features Export carrier payload refactor](docs/work-packages/20261123_features_export_carrier_payload/package.md).
+
+Completed locally — [Project RQ read-only transition refactor](docs/work-packages/20261123_project_rq_readonly_refactor/package.md).
+
+The [deploy execution test refactor](docs/work-packages/20261123_deploy_execution_test_refactor/package.md) is complete locally with all 75 scoped cases passing.
+
+The [Disturbed lookup live runbook refactor](docs/work-packages/20261123_disturbed_live_runbook/package.md) is complete locally. Four scoped replays matched the original calls and evidence.
+
+The [GL dashboard sidebar renderer refactor](docs/work-packages/20261123_gl_sidebar_renderer/package.md) separates section assembly, legends and RUSLE tolerance controls.
+
+Completed locally — [GL dashboard layer tooltips](docs/work-packages/20261123_gl_layer_tooltips/package.md).
+
+Production release held pending residual-risk disposition — [Production common-image vulnerability remediation](docs/work-packages/20261123_production_grype_remediation/package.md).
+
+Deployed 2026-11-23 — [Dedicated query catalog queue on wepp3](docs/work-packages/20261123_dedicated_query_catalog_queue/package.md).
+
+Implemented and validated locally — [Restore channel upstream area](docs/work-packages/20261122_channel_upstream_area/package.md).
+
+Closed locally — [Large-watershed Parquet interchange](docs/work-packages/20261122_interchange_row_groups/package.md). Verified at 47,582 source IDs and against 45-year source data. Production recovery pending.
+
+Closed locally. The [feature export service test refactor](docs/work-packages/20261121_features_export_service_test_refactor/package.md) split the service cases into six modules and verified all 79 focused cases.
+
+Closed locally — [Schema defaults route refactor](docs/work-packages/20261121_schema_defaults_code_quality_refactor/package.md). All ten published paths and 435 responses matched the baseline. Full pytest passed.
+
+[Retire PRISM analysis sidecars](docs/work-packages/20261121_retire_prism_sidecars/package.md) — implemented and locally validated.
+
+Implemented and locally validated: [Native PRISM hillslope dew point](docs/work-packages/20261121_prism_native_dewpoint/package.md).
+
 Implemented and locally validated: [Comrak Markdown migration](docs/work-packages/20261120_comrak_markdown_migration/package.md). Replaced cmarkgfm in Usersum, project README, Browse and docs tooling. Repository-wide tests excluding the slow marker passed.
 
 Implemented and locally validated: [Usersum vendor link graph and heading lint](docs/work-packages/20261120_usersum_link_graph/package.md). Verified 94 committed copies and 123 focused tests. Broad validation and integration remain open.
@@ -146,7 +176,7 @@ Completed (local implementation): [Roads GL Dashboard](docs/work-packages/202610
 
 Completed (local implementation): [Roads activation messaging](docs/work-packages/20261023_roads_activation_messaging/package.md) — actionable server-configuration explanation and project-URL support handoff; 21 route tests plus direct guard/response readback pass. Text-only change; no deployment or project repair.
 
-Bounded execution complete; general enablement HOLD: [Query-engine asynchronous catalog refresh](docs/work-packages/20261023_query_catalog_async_refresh/package.md) — full deployment `0da9c9071` on wepp1–3; shared-batch pilot passed 17 jobs, two eight-scope artifact waves and 48 query checks with pause/resume recovery. Scratch scopes retired; async remains disabled. Whole-fleet cycle capacity and new-arrival delay are separate gates. See [acceptance](docs/work-packages/20261023_query_catalog_async_refresh/artifacts/20261027_shared_pilot_acceptance.md).
+Deployed on wepp1–3. [Query catalog production rollout](docs/work-packages/20261023_query_catalog_async_refresh/tracker.md#november-22-production-rollout-closeout) enables general refresh and the Rocket cap of two outstanding refreshes per batch owner. Fleet-capacity acceptance remains open.
 
 Completed (local implementation): [Roads validation suite](docs/work-packages/20261023_roads_validation_suite/package.md) — 516 cases across all four textures, isolated project checks and vendored Usersum report; two bounded legacy-input repairs. Implementation `a501c15cc`; full regression 11,647 passed/131 skipped; independent reviews pass. Full-upload unrutted rejection and qualified positive subset documented; no deployment.
 
@@ -895,6 +925,12 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Pure CSS landing migration
+
+The [work package](docs/work-packages/20261122_pure_landing/package.md) tracks
+the Jinja home deployed on Forest, retirement of the separate frontend build,
+and the remaining manual Section 508 conformance review.
 
 ### Channel delineation map boundary
 
@@ -1860,6 +1896,49 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+
+### Shared project asset declarations (2026-11-22)
+
+Two producer-owned declarations now serve the query and Feature Export adapters. Both Rocket clients observed equivalent results across 14 project views, including parent-backed scenario watersheds and local hill loss. The private writer/export replay reproduced the 695-feature normal-project export. [Work package](docs/work-packages/20261122_shared_project_asset_declarations/package.md)
+
+
+### Project RQ code quality refactor (2026-11-21)
+
+Extracted WBT subcatchment job-state validation from the project worker.
+Focused mutation-guard and real Redis tests passed.
+[Work package](docs/work-packages/20261121_project_rq_code_quality/package.md)
+
+
+### Features Export service refactor (2026-11-21)
+
+Extracted carrier identity alignment and cached artifact checks from the export
+service. Focused service, worker, and route tests passed. [Work package](docs/work-packages/20261121_features_export_service_refactor/package.md)
+
+### Omni test refactor
+
+[Work package](docs/work-packages/20261121_omni_test_refactor/package.md)
+closed locally on 2026-11-22 UTC. Six controller modules preserve 83 cases.
+All 229 focused Omni tests passed, and the resulting files fall below the
+red quality thresholds.
+
+### Roads controller test refactor
+
+[Work package](docs/work-packages/20261121_roads_controller_test_refactor/package.md)
+closed locally on 2026-11-22 UTC. Eight focused modules carry the same 92
+passing cases. Every replacement module is below the quality tool's red
+thresholds.
+
+### Climate control render test setup
+
+Five render tests now share a fresh climate fixture. All 303 focused cases
+passed on 2026-11-23 UTC. [Work package](docs/work-packages/20261123_climate_render_test_setup/package.md)
+
+### Pure controls render test refactor
+
+[Work package](docs/work-packages/20261121_pure_controls_render_refactor/package.md)
+closed on 2026-11-22 UTC. Isolated Jinja mutations, preserved all 299 focused
+test cases and verified seven cases in a different order.
 
 ### I-CREWS interfaces in WEPPcloud
 

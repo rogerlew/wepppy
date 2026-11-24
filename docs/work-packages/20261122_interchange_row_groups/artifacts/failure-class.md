@@ -1,0 +1,15 @@
+# Failure-class assessment
+
+The old binary reports the same failure as the production child on the 47,582-source boundary fixture. Every source emits one row with its own WEPP ID. Its one-row files distinguish a physical group limit from a total-row limit. The replacement binary closes and reopens the same fixture with 47,582 ordered rows in 15,861 groups. The incident's raw reports are independently inventoried in the correctness review.
+
+| Boundary | Finding and disposition |
+| --- | --- |
+| PASS ASCII/HBP, WAT, SOIL, ELEMENT, EBE and LOSS | All six ordered APIs shared the forced flush. Each supplies its source count for packing. Empty EBE inputs remain supported. HBP and ASCII route to the same sink. |
+| AgFields | All six writers use the same packing. Python validates the field/sub-field mapping and global row order across physical group boundaries. Footer counts and identity counts are independent in manifests. A real LOSS source repeated under 47,582 distinct filenames yielded 237,910 rows, 15,861 groups and 47,582 validated identities. |
+| Watershed and stream writers | PASS event/metadata, EBE, SOIL, LOSS, channel peak, CHANWB, CHNWB and TC_OUT use the common sink. Ash postprocessing, hillslope water balance, the daily writer and Roads target accounting use it too. Accumulating actual group pressure reduces forced flushes even with unknown chunk counts. Arrow can split a single input exceeding its row cap. A regression verifies two actual groups from one chunk. |
+| Baseline totalwatsed3 | PASS scans disjoint physical groups across workers and filters requested IDs. WAT, SOIL and ELEMENT previously revisited all rows of a shared group per identity. A mixed-group index now limits per-hillslope reads to the span from its first to last matching row. Row filtering handles interleaving and sources split across groups. Full, subset, empty, mixed and no-statistics cases are in the correctness review. |
+| Roads totalwatsed3 | Geometry, canonical PASS validation and source-qualified aggregation consume the index. Physical-accounting output benefits from packing. Real-data comparisons cover both daily and accounting artifacts. |
+| Other readers | Hillslope water-balance geometry uses a statistics shortcut for homogeneous groups and otherwise scans identity/OFE/area columns. NoDb examines the first and last populated date records by row. Catalog and README paths read file metadata and previews. The source audit found no physical group ordinal used as a hillslope ID in these readers. |
+| Remaining limits | Single-file output still has the library's absolute physical group ceiling. Each hillslope parser can still hold one source in memory. Interleaved external files can have a wide span for an individual ID. The four-source 45-year and full-count one-day replays cover different dimensions of the incident. |
+
+The previous native producer package documents the twelve-worker daily algorithm and fixture oracles. A physical group is neither a scientific reporting unit nor a subset identity. [Prior native release](../../../dev-notes/totalwatsed3-native-release.md)

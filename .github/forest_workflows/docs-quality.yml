@@ -6,6 +6,14 @@ on:
     - wctl/**
     - tools/check_agents_size.sh
     - tools/check_adr_dates.py
+    - tools/lint_html_content.py
+    - tools/ui_spelling_rules.py
+    - tests/tools/test_lint_html_content.py
+    - 'wepppy/**/*.htm'
+    - 'wepppy/**/*.html'
+    - wepppy/export/ermit_input.py
+    - wepppy/nodb/mods/ag_fields/ag_fields.py
+    - wepppy/weppcloud/routes/nodb_api/project_bp.py
     - tests/tools/test_check_adr_dates.py
     - tools/usersum_docs_tool.py
     - docker/requirements-uv.txt
@@ -25,6 +33,14 @@ on:
     - wctl/**
     - tools/check_agents_size.sh
     - tools/check_adr_dates.py
+    - tools/lint_html_content.py
+    - tools/ui_spelling_rules.py
+    - tests/tools/test_lint_html_content.py
+    - 'wepppy/**/*.htm'
+    - 'wepppy/**/*.html'
+    - wepppy/export/ermit_input.py
+    - wepppy/nodb/mods/ag_fields/ag_fields.py
+    - wepppy/weppcloud/routes/nodb_api/project_bp.py
     - tests/tools/test_check_adr_dates.py
     - tools/usersum_docs_tool.py
     - docker/requirements-uv.txt
@@ -69,7 +85,7 @@ jobs:
       with:
         python-version: '3.12'
         update-environment: false
-    - name: Check Usersum links and heading IDs
+    - name: Check Usersum links, heading IDs and user-facing copy
       env:
         USERSUM_LINT_PYTHON: ${{ steps.usersum-python.outputs.python-path }}
       run: |
@@ -77,9 +93,11 @@ jobs:
         lint_env="$(mktemp -d "${RUNNER_TEMP}/usersum-lint.XXXXXXXX")"
         trap 'rm -rf "$lint_env"' EXIT
         "$USERSUM_LINT_PYTHON" -m venv "$lint_env"
-        grep -Ei '^(comrak-ext|pyyaml)==' docker/requirements-uv.txt > "$lint_env/requirements.txt"
+        grep -Ei '^(comrak-ext|pyyaml|jinja2)==' docker/requirements-uv.txt > "$lint_env/requirements.txt"
         "$lint_env/bin/python" -m pip --disable-pip-version-check install --only-binary=comrak-ext -r "$lint_env/requirements.txt"
         PYTHONPATH=. "$lint_env/bin/python" tools/usersum_docs_tool.py lint-links
+        PYTHONPATH=. "$lint_env/bin/python" -m unittest discover -s tests/tools -p 'test_lint_html_content.py'
+        PYTHONPATH=. "$lint_env/bin/python" tools/lint_html_content.py
     - name: Verify markdown-doc tooling
       run: |
         set -euo pipefail

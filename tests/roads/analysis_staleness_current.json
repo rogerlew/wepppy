@@ -6,7 +6,7 @@
   "reviewed_source_deltas": {
     "tests/roads/roads_analysis.py": {
       "recorded": "97f780aae47f2d01e74eec27197d6ef4c79b028df5a9586ca17bc116f28ec9e8",
-      "current": "4d0540a2d7c20a86e6414a6ef30c4607d324a4102cd62414fc7f68fad9b69ed1"
+      "current": "83d0670b1c0cdd338371beaa484f190980040dcac228c9a4537a3984032fb85e"
     },
     "tests/roads/roads_matrix.py": {
       "recorded": "4288f063a083f845599326a82154304b3a217620de4f1ee1e314346208a751a9",
@@ -86,7 +86,7 @@
     },
     "wepppy/nodb/mods/roads/_reporting.py": {
       "recorded": null,
-      "current": "493a509c8d2cc4e23a7993cede9dc1b9b044587b984d804a898587a8e3820a82"
+      "current": "85184d8c8b222dfd4eb8a8ef49dacc87a47b7311a2a96bb9fed1d92480c5ecaa"
     },
     "wepppy/nodb/mods/roads/_slope_inputs.py": {
       "recorded": null,
@@ -128,9 +128,25 @@
       "recorded": "c902e86fd2c2cef162deef7231da159939458b137c7498c6054f7e6e96517aec",
       "current": "a53920220275bc46afc2ba405f061788c3621b87fc22b4c0bcbd3a3796775321"
     },
+    "wepppy/project_assets.py": {
+      "recorded": null,
+      "current": "3584958ab4fe295cfa4a285b3f32de7ad9c2a653f919f33d3189c5f90f488ca3"
+    },
     "wepppy/wepp/interchange/_roads_lifecycle.py": {
       "recorded": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
-      "current": "86019c49af0c34382f6f1301d22588e53bb10c048b13744e4ac4499457352eaa"
+      "current": "18f1b7ea4ea187e29e4b8b650d8ba7459160d59f677c9b590b6991281b65936e"
+    },
+    "wepppy/wepp/interchange/ag_fields_interchange.py": {
+      "recorded": "7f5a5cd1548e3fd0b6b14211fd55b88b6f4561ba3c8e1139e826d6b04c3bffa4",
+      "current": "5c32d87deac95ca864a444bd7941c08bc245525f8fbfe5a53f2a13e7966af7f6"
+    },
+    "wepppy/wepp/interchange/watershed_loss.py": {
+      "recorded": "899a499a8750a6750f7163e58d31fa6ae1e6ffbab364daf3cb3e8d67d106dfce",
+      "current": "5740bb83796ee426bdb1c5dff719442825c7838b5bfc80ba43238126cd5c7268"
+    },
+    "wepppy/wepp/interchange/watershed_loss_interchange.py": {
+      "recorded": "c2eed0ad152eed2a2a637661d9e663dcbc1705b6050f802f08d974d0b3902914",
+      "current": "e1cf9efe4583b3209e8477fc3ff6e2c8d53066bc8e9cd2ea1cfaf089cb8b193c"
     },
     "wepppy/wepp/management/managements.py": {
       "recorded": null,
@@ -488,6 +504,85 @@
         }
       },
       "evidence": "docs/work-packages/20261120_eu_run_recovery/artifacts/20261120_esdac_management_reconciliation_checkpoint.md"
+    },
+    {
+      "date": "2026-11-22",
+      "scope": "Shared asset extraction. Two actual Roads projects retained identical scoped query and export outcomes on both NFS clients. Historical full-project routing evidence retains its stale status.",
+      "changes": {
+        "tests/roads/roads_analysis.py": {
+          "previous_reviewed": {
+            "recorded": "97f780aae47f2d01e74eec27197d6ef4c79b028df5a9586ca17bc116f28ec9e8",
+            "current": "4d0540a2d7c20a86e6414a6ef30c4607d324a4102cd62414fc7f68fad9b69ed1"
+          },
+          "current_review": {
+            "recorded": "97f780aae47f2d01e74eec27197d6ef4c79b028df5a9586ca17bc116f28ec9e8",
+            "current": "83d0670b1c0cdd338371beaa484f190980040dcac228c9a4537a3984032fb85e"
+          },
+          "scope": "Include the shared declaration module among reviewed sources because Roads now imports the hill-loss filename."
+        },
+        "wepppy/nodb/mods/roads/_reporting.py": {
+          "previous_reviewed": {
+            "recorded": null,
+            "current": "493a509c8d2cc4e23a7993cede9dc1b9b044587b984d804a898587a8e3820a82"
+          },
+          "current_review": {
+            "recorded": null,
+            "current": "85184d8c8b222dfd4eb8a8ef49dacc87a47b7311a2a96bb9fed1d92480c5ecaa"
+          },
+          "scope": "Check the same required Roads hill-loss output via its declaration."
+        },
+        "wepppy/project_assets.py": {
+          "previous_reviewed": null,
+          "current_review": {
+            "recorded": null,
+            "current": "3584958ab4fe295cfa4a285b3f32de7ad9c2a653f919f33d3189c5f90f488ca3"
+          },
+          "scope": "Declare the unchanged hill-loss basename and baseline/Roads scope roots."
+        },
+        "wepppy/wepp/interchange/_roads_lifecycle.py": {
+          "previous_reviewed": {
+            "recorded": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
+            "current": "86019c49af0c34382f6f1301d22588e53bb10c048b13744e4ac4499457352eaa"
+          },
+          "current_review": {
+            "recorded": "1a30e24048c08b6667f866e2a4811f6211266f15a431c8eb740ea91c6dca41dd",
+            "current": "18f1b7ea4ea187e29e4b8b650d8ba7459160d59f677c9b590b6991281b65936e"
+          },
+          "scope": "Use the declared hill-loss basename in the required continuous output set."
+        },
+        "wepppy/wepp/interchange/watershed_loss.py": {
+          "previous_reviewed": null,
+          "current_review": {
+            "recorded": "899a499a8750a6750f7163e58d31fa6ae1e6ffbab364daf3cb3e8d67d106dfce",
+            "current": "5740bb83796ee426bdb1c5dff719442825c7838b5bfc80ba43238126cd5c7268"
+          },
+          "scope": "Read the producer filename mapping for the same four average loss tables."
+        },
+        "wepppy/wepp/interchange/watershed_loss_interchange.py": {
+          "previous_reviewed": null,
+          "current_review": {
+            "recorded": "c2eed0ad152eed2a2a637661d9e663dcbc1705b6050f802f08d974d0b3902914",
+            "current": "e1cf9efe4583b3209e8477fc3ff6e2c8d53066bc8e9cd2ea1cfaf089cb8b193c"
+          },
+          "scope": "Check the native publication receipt for the declared hill-loss output before returning the selected destination."
+        }
+      },
+      "evidence": "docs/work-packages/20261122_shared_project_asset_declarations/artifacts/20261122_live_project_comparison.md"
+    },
+    {
+      "date": "2026-11-22",
+      "scope": "AgFields validates identity runs independently of physical Parquet group boundaries. The existing full-project routing evidence remains stale.",
+      "changes": {
+        "wepppy/wepp/interchange/ag_fields_interchange.py": {
+          "previous_reviewed": null,
+          "current_review": {
+            "recorded": "7f5a5cd1548e3fd0b6b14211fd55b88b6f4561ba3c8e1139e826d6b04c3bffa4",
+            "current": "5c32d87deac95ca864a444bd7941c08bc245525f8fbfe5a53f2a13e7966af7f6"
+          },
+          "scope": "Read ordered field and sub-field identities across packed or split physical groups; retain mapping, coverage and footer validation."
+        }
+      },
+      "evidence": "docs/work-packages/20261122_interchange_row_groups/artifacts/20261122_qa_review.md"
     }
   ]
 }

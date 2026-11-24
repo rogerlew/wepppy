@@ -371,7 +371,7 @@ def create_ermit_input(wd: str) -> str:
 ERMiT/Disturbed WEPP GIS Hillslope File
 =======================================
 
-Created by WeppCloud
+Created by WEPPcloud
 Date: {datetime.now():%Y-%m-%d}
 
 Watershed Name: {name}

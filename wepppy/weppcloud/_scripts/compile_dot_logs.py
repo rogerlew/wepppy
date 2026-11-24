@@ -5,7 +5,7 @@ Compile per-run access logs into access.csv and run-locations.json.
 This script scans the .<runid> access logs under /wc1/runs (and optional
 legacy roots) and produces:
 - access.csv (used by stats + landing page refresh)
-- runid-locations.json (deck.gl landing map)
+- runid-locations.json (watershed markers for the deck.gl landing map)
 - runs_counter.json (stats summaries)
 - run_counts.csv (unique run metrics)
 """
@@ -33,6 +33,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from wepppy.nodb import Ron, Watershed
+from wepppy.weppcloud.atlas_markers import marker_order, watershed_marker
 
 # NOTE for AGENTS: OK to edit (requested). Keep outputs compatible.
 
@@ -73,7 +74,6 @@ class RunLog:
 @dataclass
 class RunMetrics:
     runid: str
-    run_name: str
     run_dir: Path
     config: Optional[str]
     has_sbs: Optional[bool]
@@ -81,7 +81,6 @@ class RunMetrics:
     ash_hillslopes: int
     centroid_longitude: Optional[float]
     centroid_latitude: Optional[float]
-    access_count: int
     last_accessed: Optional[datetime]
     first_accessed: Optional[datetime]
 
@@ -313,20 +312,6 @@ def _load_run_metadata(
     return config, has_sbs, hillslopes, ash_hillslopes, centroid_longitude, centroid_latitude
 
 
-def _derive_run_name(runid: str) -> str:
-    slug = runid.strip().split('/')[-1]
-    slug = slug.lstrip('.')
-    if not slug:
-        return runid
-    return slug.replace('-', ' ')
-
-
-def _format_datetime(dt: Optional[datetime]) -> Optional[str]:
-    if dt is None:
-        return None
-    return dt.isoformat()
-
-
 def _write_json(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(path.name + ".tmp")
@@ -535,7 +520,6 @@ def _compile_dot_logs_locked(
                 )
                 metrics = RunMetrics(
                     runid=log.runid,
-                    run_name=_derive_run_name(log.runid),
                     run_dir=log.run_dir,
                     config=config,
                     has_sbs=has_sbs,
@@ -543,7 +527,6 @@ def _compile_dot_logs_locked(
                     ash_hillslopes=ash_hillslopes,
                     centroid_longitude=centroid_longitude,
                     centroid_latitude=centroid_latitude,
-                    access_count=0,
                     last_accessed=None,
                     first_accessed=None,
                 )
@@ -556,7 +539,6 @@ def _compile_dot_logs_locked(
                         if parsed is None:
                             continue
                         email, ip, timestamp = parsed
-                        metrics.access_count += 1
                         if metrics.last_accessed is None or timestamp > metrics.last_accessed:
                             metrics.last_accessed = timestamp
                         if metrics.first_accessed is None or timestamp < metrics.first_accessed:
@@ -662,22 +644,16 @@ def _compile_dot_logs_locked(
             runs_counter['hillruns'] += metrics.hillslopes
             runs_counter['ash_hillruns'] += metrics.ash_hillslopes
 
-        if metrics.centroid_longitude is None or metrics.centroid_latitude is None:
-            continue
-
-        last_accessed = _format_datetime(metrics.last_accessed)
-        run_locations.append({
-            "runid": metrics.runid,
-            "run_name": metrics.run_name,
+        marker = watershed_marker({
             "coordinates": [metrics.centroid_longitude, metrics.centroid_latitude],
             "config": metrics.config,
-            "year": metrics.last_accessed.year if metrics.last_accessed else None,
             "has_sbs": bool(metrics.has_sbs) if metrics.has_sbs is not None else False,
             "hillslopes": metrics.hillslopes,
             "ash_hillslopes": metrics.ash_hillslopes,
-            "access_count": metrics.access_count,
-            "last_accessed": last_accessed,
         })
+        if marker is None:
+            continue
+        run_locations.append(marker)
 
         if progress_every > 0 and index % progress_every == 0:
             _log_info(
@@ -689,7 +665,7 @@ def _compile_dot_logs_locked(
                 time.perf_counter() - build_started_at,
             )
 
-    run_locations.sort(key=lambda entry: entry.get("last_accessed") or "", reverse=True)
+    run_locations.sort(key=marker_order)
     run_locations_candidate_path = _candidate_path(run_locations_path, generation_id)
     runs_counter_candidate_path = _candidate_path(runs_counter_path, generation_id)
     run_counts_candidate_path = _candidate_path(run_counts_path, generation_id)

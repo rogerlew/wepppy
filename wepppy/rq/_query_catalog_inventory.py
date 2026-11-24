@@ -180,12 +180,13 @@ def _complete(connection: Any, key: str, job_id: str, cycle: str) -> None:
             raise InventorySuperseded('Inventory completion ownership changed') from exc
 
 
-def run(connection: Any, key: str, job_id: str, cycle: str, roots: list[Any], limit: int, *, approved_paths: set[str] | None = None, validate_scope: Any = None) -> None:
-    """Stream to exhaustion; restart replays only the current directory prefix.
+def run(connection: Any, key: str, job_id: str, cycle: str, roots: list[Any], limit: int, *, approved_paths: set[str] | None = None, validate_scope: Any = None, dirty_key: str | None = None) -> None:
+    """Stream until completion or a checkpoint where dirty refresh work can run.
 
     Each publication contains at most ``limit`` entry records. RQ supplies the
     overall execution deadline; slow directory I/O never holds a scheduler lock.
     """
+    start_visited = None
     while True:
         current = state(connection, key)
         if current.get('job_id') != job_id or current.get('cycle') != cycle:
@@ -193,6 +194,13 @@ def run(connection: Any, key: str, job_id: str, cycle: str, roots: list[Any], li
         raw = connection.lindex(key + ':frontier', 0)
         if raw is None:
             _complete(connection, key, job_id, cycle)
+            return
+        visited = current.get('visited', 0)
+        if start_visited is None:
+            start_visited = visited
+        elif dirty_key and visited - start_visited >= limit and connection.exists(dirty_key):
+            # A finished, incomplete attempt deliberately hands its slot to refresh.
+            # Completed directory boundaries need neither a seek offset nor replay.
             return
         item = json.loads(raw)
         try:

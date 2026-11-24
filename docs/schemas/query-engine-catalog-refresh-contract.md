@@ -8,9 +8,11 @@ Asynchronous refresh is the preferred path for artifact producers that do not co
 
 The observed wepp1 failure is a missing catalog triggering a full native scan inside an HTTP submission. The native scan holds the GIL and can starve the serving process heartbeat. Artifact publication, catalog publication, and consumer readiness are distinct outcomes. A successful artifact write MUST NOT be advertised as a fresh catalog.
 
-Use existing Redis/RQ, default workers and scheduler infrastructure. No new queue, service, database, dependency or deployment topology is authorized. Existing model artifacts, filenames, column schemas, runtime identities, permissions and authorization remain unchanged. Canonical cross-cutting authorities include [NoDb persistence](nodb-persistence-concurrency-contract.md), [RQ responses](rq-response-contract.md), [report cache freshness](report-cache-freshness-contract.md), [artifact observability](../standards/artifact-observability-standard.md) and [generated artifact validation](../standards/generated-artifact-validation-standard.md).
+Use the existing Redis/RQ and scheduler infrastructure with the dedicated queue and single catalog worker authorized in [Dedicated catalog queue on wepp3](#dedicated-catalog-queue-on-wepp3). Existing model artifacts, filenames, column schemas, runtime identities, permissions and authorization remain unchanged. Canonical cross-cutting authorities include [NoDb persistence](nodb-persistence-concurrency-contract.md), [RQ responses](rq-response-contract.md), [report cache freshness](report-cache-freshness-contract.md), [artifact observability](../standards/artifact-observability-standard.md) and [generated artifact validation](../standards/generated-artifact-validation-standard.md).
 
 The WMesque and Runs catalog queue implementations are precedents for transactional admission and concurrent invalidation handling, not a shared catalog data model. Mere duplicate suppression does not establish eventual consistency.
+
+The proposed [shared asset declaration contract](shared-project-asset-declarations-contract.md) governs the first shadow comparison of producer-owned names. Existing publication, reader and scope contracts govern production pending validation.
 
 ## Migration policy and interfaces
 
@@ -41,7 +43,7 @@ For each scope, admit at most one queued/started/deferred/scheduled refresh job.
 
 Do not require an idle worker to record invalidation. Capacity shortages leave explicit pending work. Bounded admission/retry must return promptly without invoking a catalog scan in the producer/request process. Multiple changes to one project coalesce; distinct projects remain independent.
 
-All consumers eligible for the shared default queue must advertise the refresh protocol version, configured storage namespace/root mapping and publication-coordination compatibility. Admission checks the queue's eligible consumers; incompatible consumers block new maintenance admission, while durable requests remain pending. Execution revalidates these properties before opening a project. Startup and deployment preflight must detect companion/off-host or mixed-version consumers lacking the protocol. This is not authority to change identities, privileges, mounts or queue topology. Absence of compatible consumers is visible pending/unavailable capacity, never permission for inline scan fallback.
+All consumers eligible for the dedicated catalog queue must advertise the refresh protocol version, configured storage namespace/root mapping and publication-coordination compatibility. Admission checks the queue's eligible consumers; incompatible consumers block new maintenance admission, while durable requests remain pending. Execution revalidates these properties before opening a project. Startup and deployment preflight must detect companion/off-host or mixed-version consumers lacking the protocol. This is not authority to change identities, privileges, mounts or queue topology. Absence of compatible consumers is visible pending/unavailable capacity, never permission for inline scan fallback.
 
 ## Durable invalidation and no lost updates
 
@@ -82,7 +84,7 @@ The same background reconciler also revisits every registered/configured support
 
 Inventory execution clarification (2026-10-27; conformance pending): large-directory
 discovery runs as at most one active maintenance job per configured inventory
-cycle on the existing default queue. Scheduler ticks admit/recover that job and
+cycle on the dedicated catalog queue. Scheduler ticks admit/recover that job and
 drain checkpointed discovery batches; they do not enumerate entire directories.
 Inventory jobs use the existing `query_catalog_refresh_` maintenance-ID privacy
 classification, matching worker capabilities, and existing maintenance timeout
@@ -272,7 +274,7 @@ maintenance can finish in that interval. A cleared queue does not automatically
 resume a paused pilot. End-of-window or exhausted-budget state retains unfinished
 receipts and discovery checkpoints. Never label a stopped partial cycle complete.
 
-Acceptance uses actual existing default workers and queue, actual production
+Acceptance uses the actual dedicated catalog worker and queue, actual production
 identity/mounts, sanitized live job trees and direct generated-artifact readback.
 Verify expected schemas, source lineage and query results, remaining receipts,
 held-out-project noninterference, capacity counters, pause/drain/restart recovery,
@@ -307,6 +309,8 @@ it may resume an otherwise valid pause within the original window but cannot
 resurrect terminal/retired job IDs or reset failure evidence.
 
 ## October 28 default-worker routing amendment
+
+Historical routing, superseded by [Dedicated catalog queue on wepp3](#dedicated-catalog-queue-on-wepp3).
 
 Status: implemented with local default-worker validation; production cutover pending.
 The operator requires catalog update jobs on default workers because batch work
@@ -401,3 +405,59 @@ outcome. Actual absence of an optional dataset follows existing query
 missing-data semantics. Preserve source containment, including canonical
 parent-backed selection. A retry re-enters the current handshake within the
 browser's wait budget.
+
+## Admin admission and health snapshot
+
+The Admin/Root page at `/rq/info-details` shows two read-only catalog panels on
+each manual refresh, independent of the selected job queues. Catalog admission
+shows the enable flag, observed pause owner and remaining TTL (including no
+expiry), worker compatibility and suspension, ordinary default backlog,
+outstanding permits and uncertain reservations. Show simultaneous blockers,
+including an expired RQ job under a pause. A clear snapshot describes the
+observed gates and gives no guarantee of future admission.
+
+Catalog health shows the last committed general scheduler tick in UTC, cycle
+progress and completion, inventory visits, pending locator count, known dirty
+locator count and reconciliation failures. Publish a compact, configuration-bound
+summary alongside the normal cursor so page loads avoid the fleet-sized cursor,
+directory scans and job payloads. Report missing, unsupported or malformed
+telemetry as unavailable. Preserve queue tables when catalog telemetry alone
+fails. A scheduler tick or cycle completion cannot certify per-run publication.
+This distinction matters when admission is paused while the scheduler still runs.
+
+## Rocket batch-owner admission
+
+On shared default, refresh producers watch the optional RQ Redis string
+`query-catalog:batch-admission:v1:batch-owner-namespace` alongside the admission
+ledger. Its value selects a configured batch namespace. Within that namespace
+the first relative path component identifies the filesystem guard owner across
+root aliases. Two outstanding refresh reservations for that owner defer a new
+refresh with `query_catalog_owner_capacity_pending`. Terminal evidence releases
+capacity under the existing execution-accounting rules. Deferred scopes keep
+their receipts and the scheduler continues its bounded rotation. The global
+permit ceiling, ordinary queue priority and inventory admission still apply.
+
+## Dedicated catalog queue on wepp3
+
+The production deployment uses one RQ process on wepp3 listening exclusively to
+`query-catalog`. It serves both refresh and inventory. The `fork-archive`
+process retains its own queue and can run concurrently. This keeps catalog
+execution out of ordinary worker slots while allowing the Rocket NFS effects of
+concurrent fork/archive and catalog access to be measured.
+
+Bind the advertised configuration, scheduler task, enqueue, execution claim and
+pilot manifest to `query-catalog`. Only live consumers exclusively subscribed
+to that queue with the current configuration qualify. The pilot requires one such
+consumer. Preserve the global seven-reservation accounting ceiling, the
+compatible-worker capacity bound, Rocket batch-owner limits, ordinary ready
+backlog deferral on `default`, and durable per-scope receipts. With one worker
+the effective limit is one outstanding job across both maintenance classes.
+With dirty work waiting, general inventory yields at a completed directory boundary after the existing inventory limit of directories. The scheduler offers a refresh turn before resuming the same frontier. A single slow directory can delay this turn. Pending dirty scopes remain eligible when the slot is occupied.
+
+Pause admission during migration, settle legacy in-flight reservations and verify
+the new consumer before resuming. Keep historical ledger, cursor and pilot
+records. New queue-bound configuration starts a new inventory cycle and
+rediscovers durable intent. Old manifests can be inspected; new execution
+requires current authority. During acceptance measure ordinary queue wait,
+fork/archive completion, NFS metadata latency and the age of the oldest pending
+receipt. Apply the same drain and rediscovery procedure before rolling back.

@@ -159,13 +159,12 @@ observed storm duration or intensity.
 | Multiple | Revises centroid daily forcing with existing monthly PRISM hillslope precipitation ratios and temperature offsets. |
 | Multiple climates (nearest PRISM cell) | Uses each hillslope's nearest native cell, with no neighboring-cell averaging or monthly revision. Hillslopes in one cell share unscaled daily weather. |
 
-Existing precipitation scaling options still apply. The observed dewpoint floor
-is retained and recomputed after monthly temperature revision; raw dewpoint stays
-unchanged in source records. The existing PRN format rounds rainfall to0.254mm
+Existing precipitation scaling options still apply. With Multiple climates, each hillslope file uses the higher of the raw PRISM dew point
+and the hillslope’s revised daily minimum temperature. The PRN format rounds rainfall to 0.254 mm
 and temperature to whole Fahrenheit degrees, so trace rain can round to zero.
 The CLIGEN quality guard and any convergence warnings remain applicable.
 
-Source parquet, conversion/dewpoint diagnostics and retained build attempts are
+Source parquet, conversion diagnostics and retained build attempts are
 available under `climate/` in the project browser and archives. OpenET and AgFields
 accept this mode. OpenET comparisons use matching hillslope/calendar months within
 available satellite coverage. AgFields uses each subfield parent hillslope's

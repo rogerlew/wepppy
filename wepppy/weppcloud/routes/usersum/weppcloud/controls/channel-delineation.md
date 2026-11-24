@@ -2,12 +2,12 @@
 > Build a channel network from a DEM so WEPP can route flow and sediment.
 
 ## Overview
-Channel delineation extracts channels from a DEM using either TOPAZ or Weppcloud-WBT. You choose an extent mode to define the working area, set the routing parameters, and run **Build Channels**. The resulting channel network is required before subcatchments and most downstream steps.
+Channel delineation extracts channels from a DEM using either TOPAZ or WEPPcloud-WBT. You choose an extent mode to define the working area, set the routing parameters, and run **Build Channels**. The resulting channel network is required before subcatchments and most downstream steps.
 
 ## Quick Start
 1. Pick an **Extent mode**.
 2. Confirm **Minimum channel length (MCL)** and **Critical source area (CSA)**.
-3. For Weppcloud-WBT, choose the **depression smoothing** option and (if needed) **breach distance**.
+3. For WEPPcloud-WBT, choose the **depression smoothing** option and (if needed) **breach distance**.
 4. Click **Build Channels** and wait for completion.
 
 ## Extent Modes
@@ -53,7 +53,7 @@ If any requirement fails, the upload is rejected with a specific error message.
 - Lower values produce more channels; higher values produce fewer channels.
 
 Calibration guidance: WEPP in WEPPcloud has been calibrated with CSA < 10 ha and MCL < 100 m. Avoid grossly exceeding these values unless you have a specific justification and understand the impacts on channel density and routing.
-### Weppcloud-WBT Options
+### WEPPcloud-WBT Options
 
 See the [WBT Channel Delineation guide](../wbt-channel-delineation.md) for
 end-user guidance on all WBT inputs and choices.
@@ -65,7 +65,7 @@ end-user guidance on all WBT inputs and choices.
     guidance when the selected distance leaves depressions unresolved.
   - Topaz Conditioning Algorithm: reproduces TOPAZ FILDEP/RELIEF depression
     filling, narrow-obstruction adjustment, and flat resolution before the
-    normal Weppcloud-WBT flow and channel steps.
+    normal WEPPcloud-WBT flow and channel steps.
   - A successful **Build Channels** saves the selected algorithm; reloading the
     run shows the algorithm used for the build.
 - **Breach distance**
@@ -124,7 +124,7 @@ Example (truncated):
 
 ## Outputs
 Successful delineation produces channel outputs in the run directory, typically under:
-- `topaz/` (TOPAZ artifacts) or `watershed/wbt/` (Weppcloud-WBT artifacts)
+- `topaz/` (TOPAZ artifacts) or `watershed/wbt/` (WEPPcloud-WBT artifacts)
 - `watershed/` summary files and channel resources
 
 These outputs drive subcatchments, hillslopes, and later WEPP steps.

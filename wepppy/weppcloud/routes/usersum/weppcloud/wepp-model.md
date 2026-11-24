@@ -56,6 +56,23 @@ Watershed delineation can be performed by TOPAZ or WEPPcloud-WBT.
 - The `FindOutlet` tool derives a stream outlet pour point by tracing D8 flow and supports requested start locations for interactive outlet selection.
 - The `StreamJunctionIdentifier` and `PruneStrahlerStreamOrder` tools support confluence/junction analysis and stream-order pruning workflows used by WEPPcloud modules.
 
+#### TOPAZ IDs and WEPP IDs
+
+A hillslope or channel has two IDs in a delineated watershed. Its **TOPAZ ID** identifies the feature on the delineation map. Its **WEPP ID** identifies the same feature in that run’s model inputs and results. To find a feature from a report, enter the number in the map’s **Center or ID search** field and choose **Find TOPAZ ID** or **Find WEPP ID** to match the report’s column heading.
+
+The TOPAZ ID groups each channel with the hillslopes that drain directly into it. The last digit identifies the feature. For example, a headwater channel with TOPAZ ID **24** can have the following hillslopes. Left and right are read facing downstream.
+
+| TOPAZ ID | Legacy TOPAZ | WEPPcloud-WBT |
+| --- | --- | --- |
+| 21 | Headwater hillslope above the channel head | Headwater hillslope above the channel head |
+| 22 | Right-bank hillslope | Left-bank hillslope |
+| 23 | Left-bank hillslope | Right-bank hillslope |
+| 24 | Channel | Channel |
+
+The same pattern applies to other channels. For example, hillslope **53** drains to channel **54**. A channel may have fewer than three hillslopes. Use the delineation backend recorded for your run when interpreting the bank. [Legacy TOPAZ manual, section 2.3.3.12](/weppcloud/usersum/static/topaz/TOPAZ_User-Manual2.pdf) · [WEPPcloud-WBT hillslope numbering](https://github.com/rogerlew/weppcloud-wbt/blob/master/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md)
+
+WEPPcloud assigns consecutive **WEPP IDs** starting at 1. It numbers hillslopes first, in ascending TOPAZ ID order, then channels in descending TOPAZ ID order. In a watershed containing only the four features above, TOPAZ IDs **21, 22, 23, 24** correspond to WEPP IDs **1, 2, 3, 4**. For another watershed, or after rebuilding a delineation, use that run’s IDs.
+
 ### Watershed Abstraction
 
 WEPP represents hillslopes as rectangular elements with a width, a length, and a slope profile. Watershed abstraction is the process of converting delineated topographic data into those WEPP-ready hillslopes and channels. The process includes:

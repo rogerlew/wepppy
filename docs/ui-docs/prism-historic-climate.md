@@ -22,7 +22,7 @@ existing PRN format rounds precipitation to 0.254 mm and temperature to whole
 degrees Fahrenheit; very small rainfall can round to zero.
 
 Use the project file browser's `climate/` directory to inspect source parquet,
-`provenance.json`, conversion/dewpoint CSVs and retained `prism800m-build-*`
+`provenance.json`, conversion CSVs and retained `prism800m-build-*`
 attempts. Project archives retain these records independently of the shared cache.
 Failed or interrupted attempts remain visible for diagnosis. A failed monthly
 revision must be rebuilt successfully before running WEPP.

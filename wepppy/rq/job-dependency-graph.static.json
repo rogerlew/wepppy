@@ -76,7 +76,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_climate",
-    "source_lineno": 743,
+    "source_lineno": 732,
     "source_module": "wepppy/microservices/rq_engine/climate_routes.py"
   },
   {
@@ -230,7 +230,7 @@
     "notes": [],
     "queue_name": "unknown",
     "source_function": "build_landuse",
-    "source_lineno": 885,
+    "source_lineno": 894,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -240,7 +240,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_landuse",
-    "source_lineno": 949,
+    "source_lineno": 958,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -250,7 +250,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "modify_landuse_mapping",
-    "source_lineno": 1266,
+    "source_lineno": 1275,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -682,7 +682,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 787,
+    "source_lineno": 515,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -694,7 +694,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 795,
+    "source_lineno": 523,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -704,7 +704,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1652,
+    "source_lineno": 1380,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -714,7 +714,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1668,
+    "source_lineno": 1396,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -726,7 +726,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1676,
+    "source_lineno": 1404,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -738,7 +738,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 3133,
+    "source_lineno": 2861,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -748,7 +748,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_inventory",
-    "source_lineno": 364,
+    "source_lineno": 365,
     "source_module": "wepppy/rq/query_catalog_rq.py"
   },
   {
@@ -758,7 +758,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_catalog_refresh",
-    "source_lineno": 216,
+    "source_lineno": 217,
     "source_module": "wepppy/rq/query_catalog_rq.py"
   },
   {

@@ -56,6 +56,10 @@ def worker_profile(queues=()):
     names = {getattr(queue, 'name', queue) for queue in queues}
     if 'batch' in names:
         return BATCH_WORKER
+    if names == {'query-catalog'}:
+        if os.getenv('WEPPPY_PROJECT_COMMIT_MODE', 'disabled') == 'postgres':
+            return replace(ARCHIVE_POSTGRES_WORKER, name='query-catalog-postgres-worker')
+        return replace(ARCHIVE_WORKER, name='query-catalog-worker')
     if names == {'fork-archive'}:
         return ARCHIVE_POSTGRES_WORKER if os.getenv('WEPPPY_PROJECT_COMMIT_MODE', 'disabled') == 'postgres' else ARCHIVE_WORKER
     return WORKER

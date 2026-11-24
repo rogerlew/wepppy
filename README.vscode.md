@@ -19,8 +19,14 @@
 3. VS Code should auto-detect `.venv` via `.vscode/settings.json`.
 
 ## Manual Install (optional)
+
+On amd64 Linux, install CMake, a C compiler and GNU binutils first. The shared requirements include an owned Pillow wheel. Build it with the same checked inputs and ABI checks as the container.
+
 ```bash
 uv venv -p 3.12 .venv
+wheel_dir=$(mktemp -d)
+.venv/bin/python docker/native_security/build_pillow_wheel.py "$wheel_dir"
+uv pip install -p .venv/bin/python --no-deps "$wheel_dir"/*.whl
 GDAL_CONFIG=/usr/bin/gdal-config \
 LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu \
 PATH=/usr/bin:$PATH \

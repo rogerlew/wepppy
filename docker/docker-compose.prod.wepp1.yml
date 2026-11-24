@@ -83,6 +83,8 @@ services:
   # Production fork/archive work is consumed only by the wepp3 stack.
   rq-worker-fork-archive:
     scale: 0
+  rq-worker-query-catalog:
+    scale: 0
   fcgiwrap:
     build:
       context: ..

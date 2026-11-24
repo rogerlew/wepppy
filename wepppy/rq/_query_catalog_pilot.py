@@ -13,12 +13,14 @@ from redis.exceptions import WatchError
 from rq import Queue
 from rq.job import Job
 
+from ._query_catalog_admission import CATALOG_QUEUE
+
 MARKER = '.query-catalog-pilot-owner.json'
 OBSERVATION_SECONDS = 10
 LEASE_SECONDS = 60
 WINDOW_SECONDS = 1800
 BUDGETS = {'refresh': 25, 'inventory': 2}
-EXPECTED_CONSUMERS = 12
+EXPECTED_CONSUMERS = 1
 
 
 def key(pilot_id: str) -> str:
@@ -45,7 +47,7 @@ def read(connection: Any, pilot_id: str) -> dict[str, Any]:
         raise ValueError('Malformed pilot counters')
     manifest = data['manifest']
     if (manifest.get('protocol') != 1 or manifest.get('budgets') != BUDGETS
-            or manifest.get('queue') not in {'default', 'batch'}):
+            or manifest.get('queue') not in {CATALOG_QUEUE, 'default', 'batch'}):
         raise ValueError('Malformed pilot manifest protocol or budgets')
     counts = dict.fromkeys(BUDGETS, 0)
     for binding in data['jobs'].values():
@@ -116,10 +118,10 @@ def register_pilot(connection: Any, pilot_id: str, paths: list[str]) -> dict[str
     now = time.time()
     manifest = dict(protocol=1, pilot_id=pilot_id, generation=uuid4().hex, scopes=scopes,
                     configuration=configuration, started_at=now, deadline=now + WINDOW_SECONDS,
-                    budgets=dict(BUDGETS), queue='default')
+                    budgets=dict(BUDGETS), queue=CATALOG_QUEUE)
     data = dict(manifest=manifest, manifest_sha256=hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest(), state='paused', counters=dict(refresh=0, inventory=0),
                 jobs={}, failures=[], phases={}, observation={}, pause_reason='registered')
-    initialize_admission(connection, Queue('default', connection=connection))
+    initialize_admission(connection, Queue(CATALOG_QUEUE, connection=connection))
     if not connection.set(destination, json.dumps(data), nx=True):
         raise ValueError('Pilot identifier already registered; budgets cannot reset')
     return manifest
@@ -146,7 +148,7 @@ def require_admission(connection: Any, data: dict[str, Any], token: str | None) 
         raise RuntimeError('Pilot is paused, expired or exhausted')
     if time.time() - data.get('observation', {}).get('at', 0) >= LEASE_SECONDS:
         raise RuntimeError('Pilot observation is stale')
-    if manifest['queue'] != 'default' or manifest['configuration'] != catalog_worker_configuration():
+    if manifest['queue'] != CATALOG_QUEUE or manifest['configuration'] != catalog_worker_configuration():
         raise RuntimeError('Pilot configuration changed')
 
 
@@ -186,7 +188,7 @@ def pause_pilot(connection: Any, pilot_id: str, reason: str) -> dict[str, Any]:
 def resume_pilot(connection: Any, pilot_id: str, token: str) -> dict[str, Any]:
     from .query_catalog_rq import catalog_worker_configuration
     def change(data):
-        if data['manifest']['queue'] != 'default' or data['manifest']['configuration'] != catalog_worker_configuration():
+        if data['manifest']['queue'] != CATALOG_QUEUE or data['manifest']['configuration'] != catalog_worker_configuration():
             raise RuntimeError('Pilot configuration changed')
         if time.time() >= data['manifest']['deadline']:
             raise RuntimeError('Original pilot admission window expired')
@@ -209,7 +211,8 @@ def _observe_once(connection: Any, pilot_id: str, token: str) -> dict[str, Any]:
         if ledger_raw is None:
             raise RuntimeError('Admission ledger lost; operator recovery required')
         ledger = _ledger(pipe)
-        observed = ordinary_observation(connection, Queue(data['manifest']['queue'], connection=connection), ledger)
+        ordinary_queue = 'batch' if data['manifest']['queue'] == 'batch' else 'default'
+        observed = ordinary_observation(connection, Queue(ordinary_queue, connection=connection), ledger)
         if any(execution_uncertain(binding, text(connection.hget(Job.key_for(jid), 'status')))
                for jid, binding in ledger['jobs'].items()):
             data['state'] = 'paused'

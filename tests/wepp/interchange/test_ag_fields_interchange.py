@@ -400,3 +400,58 @@ def test_invalid_start_year_is_not_silently_ignored(
             mapping_path,
             start_year=invalid_start_year,  # type: ignore[arg-type]
         )
+
+
+@pytest.mark.parametrize(
+    ("ids", "error"),
+    [
+        ([(7, 1), (7, 1), (8, 2), (8, 2), (9, 3)], None),
+        ([(7, 1), (8, 2), (7, 1)], "numeric sub_field_id order"),
+        ([(7, 1), (7, 2), (9, 3)], "unexpected identity pair"),
+        ([(7, 1), (9, 3)], "unexplained missing"),
+    ],
+)
+def test_validates_source_identity_across_physical_boundaries(tmp_path, ids, error):
+    ordinary = subject._FAMILY_CONTRACTS["pass"][4]
+    schema = subject._expected_schema(ordinary)
+    rows = []
+    for field_id, sub_field_id in ids:
+        row = {field.name: _default_value(field.type) for field in schema}
+        row.update(field_id=field_id, sub_field_id=sub_field_id)
+        rows.append(row)
+    path = tmp_path / "packed.parquet"
+    pq.write_table(pa.Table.from_pylist(rows, schema=schema), path, row_group_size=3)
+    mapping = {1: 7, 2: 8, 3: 9}
+    if error:
+        with pytest.raises(ValueError, match=error):
+            subject._validate_output(path, ordinary, mapping, set())
+    else:
+        summary = subject._validate_output(path, ordinary, mapping, set())
+        assert (summary["rows"], summary["row_groups"], summary["identity_count"]) == (5, 2, 3)
+
+
+def test_completion_accepts_packed_sources_and_checks_physical_footer(tmp_path, monkeypatch):
+    output_dir = tmp_path / "output"
+    mapping_path = tmp_path / "fields.parquet"
+    _write_mapping(mapping_path, [(7, 1), (7, 2)])
+    _raw_inputs(output_dir, [1, 2])
+    _install_fake_native(monkeypatch, [])
+    native = subject.call_wepppyo3_interchange
+
+    def write_packed(operation, symbol, sources, path, *args, **kwargs):
+        native(operation, symbol, sources, path, *args, **kwargs)
+        table = pq.read_table(path)
+        pq.write_table(table, path, row_group_size=table.num_rows)
+
+    monkeypatch.setattr(subject, "call_wepppyo3_interchange", write_packed)
+    interchange = subject.run_wepp_ag_fields_interchange(output_dir, mapping_path)
+    manifest_path = interchange / "interchange_version.json"
+    manifest = json.loads(manifest_path.read_text())
+    for summary in manifest["files"].values():
+        assert (summary["identity_count"], summary["row_groups"]) == (2, 1)
+    for deep in (False, True):
+        assert subject._is_wepp_ag_fields_interchange_complete(output_dir, mapping_path, deep=deep)
+
+    manifest["files"]["pass"]["row_groups"] = 2
+    manifest_path.write_text(json.dumps(manifest))
+    assert not subject._is_wepp_ag_fields_interchange_complete(output_dir, mapping_path, deep=True)

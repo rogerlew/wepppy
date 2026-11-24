@@ -27,7 +27,7 @@ The required `wepppyo3.wepp_interchange.totalwatsed3_to_parquet` producer stream
 projected batches of at most 8,192 rows. It retains date aggregates and joins for
 one hillslope per worker, with at most twelve workers. Compact physical chunk
 metadata replaces full column statistics after indexing; readers reconstruct at
-most sixteen row groups at a time. Python resolves paths, options, and ash
+most sixteen row groups at a time. In mixed groups the baseline and Roads readers index the first and last row of each requested hillslope and filter by identity within that range. Python resolves paths, options, and ash
 controller metadata, and retains the existing `Path` return value. Missing native
 support fails explicitly; there is no Python/DuckDB/pandas producer fallback.
 The legacy pandas schema metadata is constructed from field types and installed

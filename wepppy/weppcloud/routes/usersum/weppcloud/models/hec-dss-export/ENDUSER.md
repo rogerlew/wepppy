@@ -12,7 +12,7 @@ The DSS export control is titled `Partitioned DSS Export for HEC`. The user-faci
   - `Export select channels`
   - `Export based on channel order`
 - when `Export select channels` is chosen:
-  - `Channel Topaz IDs to export`
+  - `Channel TOPAZ IDs to export`
 - when `Export based on channel order` is chosen:
   - `Exclude channel orders` with checkboxes `1` through `5`
 - `Export DSS`
@@ -28,7 +28,7 @@ The download link appears only after the job completes:
 | `Start date (optional)` | Lower date bound for the exported series | Use when you only need part of the modeled record |
 | `End date (optional)` | Upper date bound for the exported series | Use when your HEC study window is shorter than the full WEPP run |
 | `Export select channels` | Export only the channels you name explicitly | Use when you already know the exact Topaz channel IDs you need |
-| `Channel Topaz IDs to export` | Comma-separated list of channel IDs | Use for tightly targeted exports |
+| `Channel TOPAZ IDs to export` | Comma-separated list of channel IDs | Use for tightly targeted exports |
 | `Export based on channel order` | Export every eligible channel except the orders you exclude | Use when you want a broad export filtered by network size/order |
 | `Exclude channel orders` | Removes selected Strahler orders from the export set | Use to omit small headwater channels or other orders you do not want in the package |
 
@@ -90,7 +90,7 @@ It is a WEPP-derived time-series package plus helper geometry and boundary sidec
 
 Use `Export select channels` when:
 
-- you already know the exact Topaz IDs you need,
+- you already know the exact TOPAZ IDs you need,
 - you are handing off only a few locations,
 - you do not want small upstream channels included accidentally.
 

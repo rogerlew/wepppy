@@ -449,7 +449,7 @@ def task_adduser(runid, config):
                 user = None
 
         if user is None:
-            return error_factory(f'{email} does not have a WeppCloud account.')
+            return error_factory(f'{email} does not have a WEPPcloud account.')
 
         try:
             run = Run.query.filter(Run.runid == runid).first()

@@ -34,6 +34,7 @@ DEPENDENCY_SERVICES = (
     "rq-worker",
     "rq-worker-batch",
     "rq-worker-fork-archive",
+    "rq-worker-query-catalog",
 )
 RECEIPT_FIELDS = {
     "schema_version", "created_at", "hostname", "machine_id_sha256",

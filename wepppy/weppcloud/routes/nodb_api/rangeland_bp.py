@@ -172,7 +172,7 @@ def task_modify_rangeland_cover(runid, config):
     payload = parse_request_payload(request)
     topaz_ids = _normalize_topaz_ids(payload.get('topaz_ids'))
     if not topaz_ids:
-        return exception_factory('Modify Rangeland Cover failed: provide at least one Topaz ID.', runid=runid)
+        return exception_factory('Modify Rangeland Cover failed: provide at least one TOPAZ ID.', runid=runid)
 
     try:
         covers = _coerce_cover_values(payload)
@@ -190,9 +190,9 @@ def task_modify_rangeland_cover(runid, config):
                 invalid_id = exc.args[0][0]
             else:
                 invalid_id = exc.args[0]
-        message = 'One or more Topaz IDs are invalid.'
+        message = 'One or more TOPAZ IDs are invalid.'
         if invalid_id:
-            message = f'Topaz ID {invalid_id} is not available.'
+            message = f'TOPAZ ID {invalid_id} is not available.'
         return exception_factory(message, runid=runid)
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.

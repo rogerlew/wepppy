@@ -199,7 +199,6 @@ def test_multiple_prism_native_outputs_and_normals_provenance(prepared, monkeypa
     assert set(record['sha256']) == {'ppt','tmin','tmax'}
     assert record['serving_endpoints'] == {key:f'http://{key}.fixture' for key in ('ppt','tmin','tmax')}
     assert record['dataset_revisions'] == {key:'a'*64 for key in ('ppt','tmin','tmax')}
-    assert Path(c.cli_dir,current.sub_cli_fns['1']+'.temperature-ordering.log').is_file()
 
 
 def test_query_grid_change_rejects_before_replay_and_preserves_publication(prepared, monkeypatch):

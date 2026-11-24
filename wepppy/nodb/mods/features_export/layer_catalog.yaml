@@ -84,8 +84,7 @@ layers:
       - source_id: "watershed_hillslope_attributes"
         kind: "parquet"
         locator:
-          kind: "relpath"
-          value: "watershed/hillslopes.parquet"
+          asset_id: "watershed.hillslopes"
         required: false
         role: "attributes"
     dependencies:
@@ -319,8 +318,7 @@ layers:
       - source_id: "wepp_loss_hill"
         kind: "parquet"
         locator:
-          kind: "path_template"
-          value: "wepp/{scope_root}/interchange/loss_pw0.hill.parquet"
+          asset_id: "wepp.loss_hill"
         required: true
         role: "metrics"
     dependencies:
@@ -1631,8 +1629,8 @@ layers:
       - source_id: "omni_scenario_loss_hill"
         kind: "parquet"
         locator:
-          kind: "path_template"
-          value: "_pups/omni/scenarios/{scenario_id}/wepp/output/interchange/loss_pw0.hill.parquet"
+          asset_id: "wepp.loss_hill"
+          projection: "scenario"
         required: true
         role: "metrics"
     dependencies:
@@ -1723,8 +1721,8 @@ layers:
       - source_id: "omni_contrast_loss_hill"
         kind: "parquet"
         locator:
-          kind: "path_template"
-          value: "_pups/omni/contrasts/{contrast_id}/wepp/output/interchange/loss_pw0.hill.parquet"
+          asset_id: "wepp.loss_hill"
+          projection: "contrast"
         required: true
         role: "contrast_metrics"
     dependencies:

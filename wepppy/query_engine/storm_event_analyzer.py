@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 from typing import Iterable, Mapping, Sequence, Literal
 
+from wepppy.project_assets import WATERSHED_HILLSLOPES
 from wepppy.query_engine.catalog import DatasetCatalog
 from wepppy.query_engine.payload import QueryRequest
 from wepppy.wepp.interchange.versioning import Version, read_version_manifest
@@ -29,7 +30,7 @@ STORM_EVENT_DATASETS: Mapping[str, str] = {
     "water": "wepp/output/interchange/H.wat.parquet",
     "hillslope_events": "wepp/output/interchange/H.ebe.parquet",
     "outlet_events": "wepp/output/interchange/ebe_pw0.parquet",
-    "hillslopes": "watershed/hillslopes.parquet",
+    "hillslopes": WATERSHED_HILLSLOPES.relative_path(),
     "tc_out": "wepp/output/interchange/tc_out.parquet",
 }
 

@@ -198,7 +198,7 @@
          "Hillslope group list",
          value=current_groups,
          rows=6,
-         help="Enter one group per line. Use commas or spaces between Topaz IDs; trailing semicolons are allowed. Duplicate IDs are allowed.",
+         help="Enter one group per line. Use commas or spaces between TOPAZ IDs; trailing semicolons are allowed. Duplicate IDs are allowed.",
          placeholder="23,21,31\n231 452 653",
          extra_control_class="disable-readonly"
        ) }}
@@ -291,9 +291,9 @@
           <div hidden>
             {{ ui.text_field(
                  "omni_contrast_select_topaz_ids",
-                 "Topaz IDs (optional)",
+                 "TOPAZ IDs (optional)",
                  value=omni.contrast_select_topaz_ids|join(", ") if omni.contrast_select_topaz_ids is defined and omni.contrast_select_topaz_ids else "",
-                 help="Comma-separated list of Topaz IDs to include.",
+                 help="Comma-separated list of TOPAZ IDs to include.",
                  extra_control_class="disable-readonly"
                ) }}
           </div>

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import math
 from os.path import exists as _exists
 from os.path import join as _join
 from typing import Any, Dict, List, Optional
@@ -41,7 +42,6 @@ class SwatConnectivityMixin:
             slope_col = _resolve_column_optional(cols, ('slope_scalar', 'slope', 'slp'))
             width_col = _resolve_column_optional(cols, ('width', 'width_m', 'chn_width'))
             order_col = _resolve_column_optional(cols, ('order', 'chn_order', 'stream_order', 'strm_order'))
-            area_col = _resolve_column_optional(cols, ('area', 'area_m2', 'area_m', 'area_sq_m'))
             lat_col = _resolve_column_optional(cols, ('centroid_lat', 'centroid_latitude', 'lat'))
             lon_col = _resolve_column_optional(cols, ('centroid_lon', 'centroid_lng', 'centroid_longitude', 'lon', 'lng'))
             elev_col = _resolve_column_optional(cols, ('elevation', 'elev', 'elev_m'))
@@ -53,7 +53,6 @@ class SwatConnectivityMixin:
                 _select_or_null(slope_col, "slope"),
                 _select_or_null(width_col, "width_m"),
                 _select_or_null(order_col, "order"),
-                _select_or_null(area_col, "area_m2"),
                 _select_or_null(lat_col, "centroid_lat"),
                 _select_or_null(lon_col, "centroid_lon"),
                 _select_or_null(elev_col, "elevation"),
@@ -73,7 +72,6 @@ class SwatConnectivityMixin:
                 slope,
                 width_m,
                 order,
-                area_m2,
                 centroid_lat,
                 centroid_lon,
                 elevation,
@@ -94,17 +92,14 @@ class SwatConnectivityMixin:
             if slope_val <= 0.0:
                 slope_val = 0.001
 
-            area_km2 = None
-            if area_m2 is not None:
-                area_value = _safe_float(area_m2, default=None)
-                if area_value is not None:
-                    area_km2 = area_value / 1_000_000.0
-            if area_km2 is None:
-                area_km2 = netw_areas.get(topaz_id)
-            if area_km2 is None or area_km2 <= 0.0:
-                area_km2 = 1.0
-
-            area_ha = area_km2 * 100.0
+            drainage_km2 = netw_areas.get(topaz_id)
+            if drainage_km2 is None or not math.isfinite(drainage_km2) or drainage_km2 < 0:
+                raise SwatNoDbLockedException(
+                    f"Missing or invalid drainage area for TOPAZ channel {topaz_id} in dem/wbt/netw.tsv"
+                )
+            area_ha = drainage_km2 * 100.0
+            # A headwater with no incoming cells still requires positive hydraulic dimensions.
+            area_km2 = drainage_km2 if drainage_km2 > 0 else 1.0
 
             width_value = _safe_float(width_m, default=None)
             width_method = self.width_method
@@ -160,7 +155,7 @@ class SwatConnectivityMixin:
                 return {}
             keys = {key.lower(): key for key in reader.fieldnames}
             id_key = None
-            for candidate in ("link", "id", "topaz_id", "topaz", "channel", "chn_id"):
+            for candidate in ("topaz_id", "topaz", "link", "id", "channel", "chn_id"):
                 if candidate in keys:
                     id_key = keys[candidate]
                     break

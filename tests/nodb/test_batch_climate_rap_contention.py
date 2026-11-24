@@ -680,15 +680,13 @@ def test_restored_time_main_source_change_rejects_publication(controllers, monke
 def test_prism800m_postcommit_diagnostic_failure_keeps_success(controllers,monkeypatch):
     import pandas as pd
     from wepppy.nodb.core import climate_observed_build as observed
-    from wepppy.climates.prism import wepp_adapter
     climate,_=controllers
     with climate.locked(): climate._climate_mode=ClimateMode.Prism800m
-    pd.DataFrame({'tdmean':[1.]}).to_parquet(Path(climate.cli_dir)/'prism800m-source-ws.parquet')
+    pd.DataFrame({'tdmean':[1.]}, index=pd.to_datetime(['2020-01-01'])).to_parquet(Path(climate.cli_dir)/'prism800m-source-ws.parquet')
     monkeypatch.setattr(helpers,'_retrieve_prism_revision_tiles',lambda *a:None)
     monkeypatch.setattr(helpers,'_collect_prism_revision_monthlies',lambda *a:([],[],[]))
     monkeypatch.setattr(helpers,'ClimateFile',lambda path:SimpleNamespace(cli_fn=path,breakpoint=False))
-    monkeypatch.setattr(helpers,'cli_revision',lambda *args:Path(args[-1]).write_text('new hillslope'))
-    monkeypatch.setattr(wepp_adapter,'floor_dewpoint',lambda *a:None)
+    monkeypatch.setattr(helpers,'cli_revision',lambda *args, raw_tdmean_c:Path(args[-1]).write_text('new hillslope'))
     real=observed._write_attempt_status
     def fail_complete(stage,kind,snapshot,state):
         if state=='complete':raise OSError('injected diagnostic write failure')
@@ -710,12 +708,12 @@ def test_prism800m_revision_failure_leaves_centroid_unready(controllers, monkeyp
         climate.sub_par_fns = None
     centroid = Path(climate.cli_path).read_bytes()
     source = Path(climate.cli_dir) / 'prism800m-source-ws.parquet'
-    pd.DataFrame({'tdmean': [1.]}).to_parquet(source)
+    pd.DataFrame({'tdmean': [1.]}, index=pd.to_datetime(['2020-01-01'])).to_parquet(source)
     monkeypatch.setattr(helpers, '_retrieve_prism_revision_tiles', lambda *args: None)
     monkeypatch.setattr(helpers, '_collect_prism_revision_monthlies', lambda *args: ([], [], []))
     monkeypatch.setattr(helpers, 'ClimateFile', lambda path: SimpleNamespace(cli_fn=path, breakpoint=False))
 
-    def fail_revision(*args):
+    def fail_revision(*args, raw_tdmean_c):
         Path(args[-1]).write_text('incomplete hillslope')
         raise ValueError('injected revision failure')
 
@@ -731,3 +729,34 @@ def test_prism800m_revision_failure_leaves_centroid_unready(controllers, monkeyp
     assert len(attempts) == 1
     status = json.loads((attempts[0] / 'build-status.json').read_text())
     assert status['state'] == 'failed'
+
+
+def test_prism800m_publishes_native_dewpoint_artifacts(controllers, monkeypatch):
+    import numpy as np
+    import pandas as pd
+    from tests.climates.test_prism_temperature_ordering import write_source, normals
+    from wepppy.climates.prism.wepp_adapter import read_cli
+
+    climate, _ = controllers
+    with climate.locked():
+        climate._climate_mode = ClimateMode.Prism800m
+    root = Path(climate.cli_dir)
+    source = write_source(Path(climate.cli_path))
+    dates = read_cli(source).index
+    raw = pd.DataFrame({'tdmean': [-2., -.75, 0., 1.1]}, index=dates)
+    raw.to_parquet(root / 'prism800m-source-ws.parquet')
+    ref, target = normals(), normals(True)
+    monkeypatch.setattr(helpers, '_retrieve_prism_revision_tiles', lambda *args: None)
+    monkeypatch.setattr(helpers, '_collect_prism_revision_monthlies',
+                        lambda *args: (ref['ppt'], ref['tmin'], ref['tmax']))
+    monkeypatch.setattr(helpers, 'get_monthlies', lambda path, *_: target[Path(path).stem])
+
+    climate._prism_revision()
+    current = Climate.load_detached(climate.wd)
+    filename, = current.sub_cli_fns.values()
+    attempt, = root.glob('prism800m-build-revision-*')
+    assert json.loads((attempt / 'build-status.json').read_text())['state'] == 'complete'
+    assert (root / filename).read_bytes() == (attempt / filename).read_bytes()
+    cli = read_cli(root / filename)
+    np.testing.assert_allclose(cli.tdew, np.maximum(raw.tdmean, cli.tmin), atol=.051)
+    pd.testing.assert_frame_equal(raw, pd.read_parquet(attempt / 'prism800m-source-ws.parquet'))

@@ -91,7 +91,7 @@ It then runs each hillslope and aggregates the outputs into watershed summaries.
 
 ### `Average Annuals by Hillslope`
 
-This report lists each `Topaz ID` and shows:
+This report lists each `TOPAZ ID` and shows:
 
 - `Runoff`
 - `Sediment Yield`

@@ -244,3 +244,47 @@ def test_interchange_manifest_fallback_skips_historical_run(monkeypatch, swat_in
 
 def test_estimate_total_area_returns_none_without_hillslope_parquet(swat_instance):
     assert swat_instance._estimate_total_area_ha() is None
+
+
+@pytest.mark.parametrize("method", ["bieger2015", "qswat"])
+def test_upstream_area_reaches_swat_channel_files(swat_instance, method):
+    wd = Path(swat_instance.wd)
+    (wd / "watershed").mkdir(exist_ok=True)
+    pd.DataFrame({
+        "topaz_id": [24, 34], "chn_enum": [2, 1],
+        "area": [110.0, 150.0], "width": [1.7, 0.4],
+    }).to_parquet(wd / "watershed/channels.parquet", index=False)
+    netw = wd / "dem/wbt/netw.tsv"
+    netw.parent.mkdir(parents=True)
+    # Ordinals deliberately collide with the opposite TOPAZ ID.
+    netw.write_text("id\ttopaz_id\tlength_m\tareaup\n34\t24\t180\t2084400\n24\t34\t30\t0\n")
+    swat_instance.width_method = method
+    channels = swat_instance._load_channels()
+    swat_instance._write_chandeg_con(channels, {1: 2})
+    swat_instance._write_hyd_sed_lte(channels)
+
+    txt = Path(swat_instance.swat_txtinout_dir)
+    con_rows = (txt / "chandeg.con").read_text().splitlines()
+    assert [float(row.split()[3]) for row in con_rows[2:]] == pytest.approx([0.0, 208.44])
+    hyd = (txt / "hyd-sed-lte.cha").read_text().splitlines()
+    for row, hydraulic_area, bieger_width in zip(hyd[2:], (1.0, 2.0844), (0.4, 1.7), strict=True):
+        values = dict(zip(hyd[1].split(), row.split()))
+        width = bieger_width
+        if method == "qswat":
+            width = swat_instance.qswat_wm * hydraulic_area ** swat_instance.qswat_we
+        depth = swat_instance.qswat_dm * hydraulic_area ** swat_instance.qswat_de
+        assert float(values["wd"]) == pytest.approx(width, abs=5.1e-6)
+        assert float(values["dp"]) == pytest.approx(depth, abs=5.1e-6)
+
+    netw.write_text("id\ttopaz_id\tlength_m\tareaup\n34\t24\t180\t2084400\n")
+    with pytest.raises(swat_module.SwatNoDbLockedException, match="TOPAZ channel 34"):
+        swat_instance._load_channels()
+
+
+@pytest.mark.parametrize(("unit", "expected"), [("auto", 0.0009), ("m2", 0.0009), ("km2", 900.0)])
+def test_areaup_units_in_minimal_network_table(swat_instance, unit, expected):
+    swat_instance.netw_area_units = unit
+    netw = Path(swat_instance.wd) / "dem/wbt/netw.tsv"
+    netw.parent.mkdir(parents=True)
+    netw.write_text("topaz_id\tareaup\n24\t900\n")
+    assert swat_instance._load_netw_areas() == {24: expected}

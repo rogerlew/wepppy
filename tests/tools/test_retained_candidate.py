@@ -481,12 +481,12 @@ def test_prepare_images_reuses_ids_across_host_service_names(candidate_environme
     args = _args(project, deploy_script)
     args.source_receipt = receipt
     args.source_receipt_sha256 = candidate.sha256_file(receipt)
-    args.recreated_service = ['rq-worker-fork-archive']
+    args.recreated_service = ['rq-worker-fork-archive', 'rq-worker-query-catalog']
     monkeypatch.setattr(candidate, 'compose_config', lambda: {
-        'services': {'rq-worker-fork-archive': {'image': 'wepppy:test'}}})
+        'services': {s: {'image': 'wepppy:test'} for s in args.recreated_service}})
     assert candidate.prepare_images(args) == 0
     result = json.loads(capsys.readouterr().out)
-    assert result['images'] == {'rq-worker-fork-archive': _IMAGE_ID}
+    assert result['images'] == {s: _IMAGE_ID for s in args.recreated_service}
     assert result['source_receipt_sha256'] == args.source_receipt_sha256
 
 

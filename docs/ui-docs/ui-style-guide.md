@@ -7,6 +7,12 @@
 > **Controller Contract:** See [`controller-contract.md`](controller-contract.md) for explicit requirements all controllers must follow.
 > **User-facing writing:** Follow [Writing for people](../standards/user-facing-language-standard.md) for labels, messages, navigation and contextual help. Internal pattern names below are authoring aids, not proposed UI labels.
 
+Write **WEPPcloud** in labels, help, errors, accessible names, reports, and download metadata. Use **WEPPcloud-WBT** for the delineation backend. Preserve literal hostnames, paths, and configuration values such as `wepp.cloud`, `/weppcloud/`, and the AgFields database key `weppcloud`.
+
+Use American English in original copy, including *modeled* and *modeling*. Use *meter* and *liter* with every SI prefix, including *kilometer*, *milliliter*, and *hectoliter*. Prefer uppercase L in volume symbols such as mL. Preserve *tonne* and *ton* as written for the quantity reported. Keep published titles and official dataset names in their original spelling.
+
+Run `PYTHONPATH=. python3 tools/lint_html_content.py` from the repository root with the project’s Python dependencies installed. To check dynamic copy, pipe rendered HTML to the same command with `-` as its argument. The check reads page text and accessible labels, including names split across inline tags.
+
 <!-- toc -->
 - [Pattern Catalog](#pattern-catalog)
   - [Pattern #1: Zero-Chill Control Shell](#pattern-1-zero-chill-control-shell)

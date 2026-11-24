@@ -22,6 +22,7 @@ from typing import Any
 from starlette.exceptions import HTTPException
 from starlette.concurrency import run_in_threadpool
 from starlette.applications import Starlette
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
@@ -1236,7 +1237,6 @@ def create_mcp_app() -> Starlette:
     config = get_auth_config()
     app.add_middleware(MCPAuthMiddleware, config=config, path_prefix="")
 
-    @app.middleware("http")
     async def correlation_id_middleware(request: Request, call_next):
         inbound_id = select_inbound_correlation_id(
             request.headers.get(CORRELATION_ID_HEADER),
@@ -1251,4 +1251,5 @@ def create_mcp_app() -> Starlette:
         finally:
             reset_correlation_id(token)
 
+    app.add_middleware(BaseHTTPMiddleware, dispatch=correlation_id_middleware)
     return app

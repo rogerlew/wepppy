@@ -30,7 +30,7 @@ wctl run-pytest tests/wepp/interchange
 ```
 
 The suite covers all public hillslope and watershed formats, schema metadata,
-calendar behavior, native catalog scanning, one-row-group-per-hillslope-source,
+calendar behavior, native catalog scanning, source ordering across physical row groups,
 missing native symbols, propagated native failures, and atomic target
 non-publication.
 

@@ -107,7 +107,7 @@ FLASK_CONSUMERS = frozenset({
     "weppcloud", "browse", "download", "dtale", "query-engine",
     "rq-engine", "rq-worker", "rq-worker-batch",
 })
-DATABASE_CONSUMERS = FLASK_CONSUMERS | {"scheduler", "rq-worker-fork-archive"}
+DATABASE_CONSUMERS = FLASK_CONSUMERS | {"scheduler", "rq-worker-fork-archive", "rq-worker-query-catalog"}
 
 
 def validate_runtime_config(config: dict[str, Any], active: set[str]) -> list[str]:

@@ -7,9 +7,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from wepppy.climates.cligen import Cligen, CligenStationsManager, ClimateFile
+from wepppy.climates.cligen import Cligen, CligenStationsManager
 from wepppy.climates.prism._bulk_protocol import parse_bulk, snap
-from wepppy.climates.prism.wepp_adapter import build_cell, floor_dewpoint, read_cli, validate_years
+from wepppy.climates.prism.wepp_adapter import build_cell, read_cli, validate_years
 from wepppy.nodb.locales.climate_catalog import available_climate_datasets, get_climate_dataset
 
 pytestmark = pytest.mark.integration
@@ -50,12 +50,4 @@ def test_native_observed_cli_roundtrip_and_raw_dewpoint_revision(tmp_path):
     assert np.allclose(cli.rad,df.soltotal*1e6/41840,atol=.501)
     build_cell(cligen,df,wind,tmp_path,'alias',seed=84568,silent_pass_observed_quality_guard=True)
     pd.testing.assert_frame_equal(cli,read_cli(tmp_path/'alias.cli'))
-    # Exercise cooler and warmer revised Tmin with the actual CLI writer.
-    for delta in [-8,8]:
-        c = ClimateFile(str(tmp_path/'cell.cli'))
-        c.replace_var('tmin',df.index,cli.tmin+delta)
-        c.replace_var('tmax',df.index,cli.tmax+delta)
-        c.write(str(tmp_path/'revised.cli'))
-        floor_dewpoint(tmp_path/'revised.cli',df.tdmean,tmp_path/'revision.csv')
-        actual=read_cli(tmp_path/'revised.cli')
-        assert np.allclose(actual.tdew,np.maximum(df.tdmean,actual.tmin),atol=.051)
+    np.testing.assert_allclose(cli.tdew, np.maximum(df.tdmean, cli.tmin), atol=.051)

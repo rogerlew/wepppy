@@ -737,7 +737,7 @@ services:
       - |
         exec /workdir/wepppy/docker/rq-worker-startup.sh 4 batch
 
-  rq-worker-fork-archive:
+  rq-worker-fork-archive: &dedicated-worker
     <<: *wepppy-service
     profiles: ["fork-archive"]
     entrypoint: *wepppyo3-interchange-entrypoint
@@ -764,6 +764,15 @@ services:
       - -lc
       - |
         exec /workdir/wepppy/docker/rq-worker-startup.sh 1 fork-archive
+
+  rq-worker-query-catalog:
+    <<: *dedicated-worker
+    profiles: ["query-catalog"]
+    command:
+      - bash
+      - -lc
+      - |
+        exec /workdir/wepppy/docker/rq-worker-startup.sh 1 query-catalog
 
   status:
     image: ${WEPPCLOUD_STATUS_IMAGE:-wepppy-status:latest}
