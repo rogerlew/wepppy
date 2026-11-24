@@ -1,4 +1,11 @@
 .docker-data
+
+# Host configuration and Compose secret files are runtime inputs.
+**/.env
+docker/secrets/
+.claude/settings.local.json
+.wctl/
+
 .git
 .venv
 .mypy_cache
