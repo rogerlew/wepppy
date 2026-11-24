@@ -233,6 +233,27 @@ describe("Roads controller", () => {
         expect(document.querySelector("#roads_upload_geojson").disabled).toBe(false);
     });
 
+    test("Fetch shows the upstream timeout, attempts, elapsed time and support reference", async () => {
+        httpMock.request.mockRejectedValueOnce({body: {
+            error: {message: "Timed out waiting for OpenStreetMap.", code: "upstream_timeout",
+                details: {attempts: 2, elapsed_seconds: 23.4}}, error_id: "abc123"
+        }});
+        const button = document.querySelector("[data-roads-action='download-osm']");
+        button.click();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(document.querySelector("#roads_osm_status").textContent)
+            .toBe("Timed out waiting for OpenStreetMap. 2 attempts in 23.4 seconds. Reference: abc123.");
+        expect(button.disabled).toBe(false);
+    });
+
+    test("Fetch identifies a gateway timeout without rendering its response document", async () => {
+        httpMock.request.mockRejectedValueOnce({status: 504, body: "<html>Gateway error</html>"});
+        document.querySelector("[data-roads-action='download-osm']").click();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(document.querySelector("#roads_osm_status").textContent)
+            .toBe("The road download gateway timed out (HTTP 504). Try again later.");
+    });
+
     test("upload action validates missing file before posting", async () => {
         await roads.uploadGeojson();
 

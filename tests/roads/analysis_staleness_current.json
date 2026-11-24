@@ -122,7 +122,7 @@
     },
     "wepppy/nodb/mods/roads/osm_download.py": {
       "recorded": null,
-      "current": "6d5f68089c9b81343077b800e2c9e4ffa2e10f81f9668554f4541bc2243995d9"
+      "current": "1609b9984c3b8115e430e6d55f8116ac0756d43993c5b55c9b0ca3303234c959"
     },
     "wepppy/nodb/mods/roads/parameterization.py": {
       "recorded": null,
@@ -613,6 +613,24 @@
         }
       },
       "evidence": "docs/work-packages/20261124_roads_osm_download/artifacts/20261124_correctness_review.md"
+    },
+    {
+      "date": "2026-11-24",
+      "scope": "The GIS export clips the same ways inside foreground error reporting. Historical routing evidence remains stale.",
+      "changes": {
+        "wepppy/nodb/mods/roads/osm_download.py": {
+          "previous_reviewed": {
+            "recorded": null,
+            "current": "6d5f68089c9b81343077b800e2c9e4ffa2e10f81f9668554f4541bc2243995d9"
+          },
+          "current_review": {
+            "recorded": null,
+            "current": "1609b9984c3b8115e430e6d55f8116ac0756d43993c5b55c9b0ca3303234c959"
+          },
+          "scope": "Carry upstream attempt diagnostics through validation and clipping."
+        }
+      },
+      "evidence": "docs/work-packages/20261124_roads_download_observability/tracker.md"
     }
   ]
 }
