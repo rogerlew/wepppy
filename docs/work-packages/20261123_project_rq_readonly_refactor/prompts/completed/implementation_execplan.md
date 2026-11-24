@@ -9,8 +9,8 @@ Children skip manifest creation. Thaw must remove the marker before the manifest
 ## Progress
 
 - [x] 2026-11-23 UTC. Inspect the worker, its tests and the previous package.
-- [ ] Extract private operations and add worker-level failure and thaw coverage.
-- [ ] Run focused tests, repository checks and record outcomes.
+- [x] 2026-11-24 UTC. Extract private operations and add worker-level failure and thaw coverage.
+- [x] 2026-11-24 UTC. Run focused tests, repository checks and record outcomes.
 
 ## Surprises & Discoveries
 
@@ -31,4 +31,6 @@ Commit on the task branch and merge into local master.
 
 ## Outcomes & Retrospective
 
-Pending validation.
+The focused gate passed all 78 tests, including real browse manifest readback.
+The broad gate was interrupted after a separate check reproduced an existing
+team-route failure on both revisions. The tracker retains the run evidence.

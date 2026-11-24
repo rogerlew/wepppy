@@ -11,3 +11,9 @@ existing policy and catalog lifecycle guard govern both operations. A dedicated
 security review is unnecessary. Acceptance requires worker-level tests covering
 parent and child runs, catalog readback, manifest verification and failure
 recovery. Integration is local by operator request.
+
+## Outcome
+
+Completed locally on 2026-11-24 UTC. The worker now names the catalog drain
+and manifest creation steps. See the [tracker](tracker.md) for artifact
+readback, coverage and the outstanding broad-suite result.
