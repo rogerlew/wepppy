@@ -1,3 +1,19 @@
+Completed locally — [Run-page Features Export presentation refactor](docs/work-packages/20261123_run0_export_presentation/package.md).
+
+Completed locally — [Features Export carrier payload refactor](docs/work-packages/20261123_features_export_carrier_payload/package.md).
+
+Completed locally — [Project RQ read-only transition refactor](docs/work-packages/20261123_project_rq_readonly_refactor/package.md).
+
+The [deploy execution test refactor](docs/work-packages/20261123_deploy_execution_test_refactor/package.md) is complete locally with all 75 scoped cases passing.
+
+The [Disturbed lookup live runbook refactor](docs/work-packages/20261123_disturbed_live_runbook/package.md) is complete locally. Four scoped replays matched the original calls and evidence.
+
+The [GL dashboard sidebar renderer refactor](docs/work-packages/20261123_gl_sidebar_renderer/package.md) separates section assembly, legends and RUSLE tolerance controls.
+
+Completed locally — [GL dashboard layer tooltips](docs/work-packages/20261123_gl_layer_tooltips/package.md).
+
+Production release held pending residual-risk disposition — [Production common-image vulnerability remediation](docs/work-packages/20261123_production_grype_remediation/package.md).
+
 Deployed 2026-11-23 — [Dedicated query catalog queue on wepp3](docs/work-packages/20261123_dedicated_query_catalog_queue/package.md).
 
 Implemented and validated locally — [Restore channel upstream area](docs/work-packages/20261122_channel_upstream_area/package.md).
@@ -1912,6 +1928,11 @@ red quality thresholds.
 closed locally on 2026-11-22 UTC. Eight focused modules carry the same 92
 passing cases. Every replacement module is below the quality tool's red
 thresholds.
+
+### Climate control render test setup
+
+Five render tests now share a fresh climate fixture. All 303 focused cases
+passed on 2026-11-23 UTC. [Work package](docs/work-packages/20261123_climate_render_test_setup/package.md)
 
 ### Pure controls render test refactor
 

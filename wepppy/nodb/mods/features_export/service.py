@@ -63,6 +63,7 @@ from .contracts import (
 from .dependency_tracker import DependencyResolutionError, DependencySnapshot, build_dependency_snapshot
 from .discovery import layer_key_candidates, resolve_geometry_relpath
 from .duckdb_materializer import (
+    CarrierCoreResult,
     LayerCarrierInput,
     materialize_carrier_core,
 )
@@ -1442,96 +1443,149 @@ def _build_key_first_materialized_layer_payload(
     )
 
     if use_tabular_payload:
-        merged_table = carrier_core.dataframe.copy()
-
-        selected_columns = _carrier_selected_columns(
-            merged=merged_table,
-            carrier_core=carrier_core,
-            source_results=source_results,
-        )
-        unit_mapping = _carrier_unit_mapping(
-            selected_columns=selected_columns,
-            carrier_core=carrier_core,
-            source_results=source_results,
-        )
-        merged_table, unit_mapping = _apply_unit_conversions(
+        merged = carrier_core.dataframe.copy()
+        materialization = {
+            "strategy": "key_first_tabular_no_geometry",
+            "carrier_layer": layer.carrier_layer,
+            "core_row_count": int(len(merged.index)),
+        }
+    else:
+        merged, materialization = _attach_spatial_carrier_geometry(
             wd=wd,
-            frame=merged_table,
-            selected_columns=selected_columns,
-            unit_mapping=unit_mapping,
-            units_mode=units_mode,
+            layer=layer,
+            source_layers=source_layers,
+            source_results=source_results,
+            entries_by_output_layer_id=entries_by_output_layer_id,
+            carrier_core=carrier_core,
+            allow_non_unique_carrier_keys=allow_non_unique_carrier_keys,
         )
-        if use_tabular_long_layout:
-            temporal_long = reshape_temporal_wide_to_long(
-                frame=merged_table,
-                selected_columns=selected_columns,
-                unit_mapping=unit_mapping,
-                temporal_mode=layer.temporal_mode,
-                event_selector=tabular_event_selector,
-            )
-            merged_table = temporal_long.frame
-            selected_columns = temporal_long.selected_columns
-            unit_mapping = temporal_long.unit_mapping
 
-        merged_table, selected_columns, unit_mapping = apply_unitized_column_suffixes(
-            frame=merged_table,
+    selected_columns = _carrier_selected_columns(
+        merged=merged,
+        carrier_core=carrier_core,
+        source_results=source_results,
+    )
+    unit_mapping = _carrier_unit_mapping(
+        selected_columns=selected_columns,
+        carrier_core=carrier_core,
+        source_results=source_results,
+    )
+    merged, unit_mapping = _apply_unit_conversions(
+        wd=wd,
+        frame=merged,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        units_mode=units_mode,
+    )
+    if use_tabular_long_layout:
+        temporal_long = reshape_temporal_wide_to_long(
+            frame=merged,
             selected_columns=selected_columns,
             unit_mapping=unit_mapping,
-            geometry_name="",
-            consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+            temporal_mode=layer.temporal_mode,
+            event_selector=tabular_event_selector,
         )
-        merged_table, selected_columns, unit_mapping = normalize_identity_output_columns(
-            frame=merged_table,
-            selected_columns=selected_columns,
-            unit_mapping=unit_mapping,
-            geometry_name=None,
-            consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
-        )
-        merged_table = _backfill_tabular_identity_from_watershed(
-            frame=merged_table,
+        merged = temporal_long.frame
+        selected_columns = temporal_long.selected_columns
+        unit_mapping = temporal_long.unit_mapping
+
+    geometry_name = None if use_tabular_payload else merged.geometry.name
+    merged, selected_columns, unit_mapping = apply_unitized_column_suffixes(
+        frame=merged,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        geometry_name=geometry_name or "",
+        consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+    )
+    merged, selected_columns, unit_mapping = normalize_identity_output_columns(
+        frame=merged,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        geometry_name=geometry_name,
+        consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
+    )
+
+    if use_tabular_payload:
+        merged = _backfill_tabular_identity_from_watershed(
+            frame=merged,
             wd=wd,
             carrier_layer=layer.carrier_layer,
             cache=watershed_identity_lookup_cache,
         )
-        merged_table = merged_table.drop(columns=[_CONSOLIDATED_JOIN_KEY_COLUMN], errors="ignore")
+    merged = merged.drop(columns=[_CONSOLIDATED_JOIN_KEY_COLUMN], errors="ignore")
+    geometry_name = None if use_tabular_payload else merged.geometry.name
+    projection_columns = [
+        column for column in selected_columns if column in merged.columns and column != geometry_name
+    ]
+    selected_columns = tuple(_dedupe_identity_selected_columns(projection_columns))
 
-        projection_columns = [column for column in selected_columns if column in merged_table.columns]
-        selected_columns = tuple(_dedupe_identity_selected_columns(projection_columns))
-        table_frame = pd.DataFrame(merged_table[list(selected_columns)]).copy()
-
-        row_count = int(len(table_frame.index))
-        feature_count = row_count
-
-        description_mapping = _column_description_mapping_for_selected_columns(
-            selected_columns=selected_columns,
-            unit_mapping=unit_mapping,
-            catalog_layer_raws=tuple(result.catalog_layer_raw for result in source_results),
+    if use_tabular_payload:
+        table = pd.DataFrame(merged[list(selected_columns)]).copy()
+        prepared = PreparedLayerPayload(
+            output_layer_id=layer.output_layer_id,
+            payload=b"",
+            tabular_frame=table,
+            row_count=len(table.index),
+            feature_count=len(table.index),
+            warnings=tuple(warnings),
+        )
+    else:
+        merged = gpd.GeoDataFrame(
+            merged[list(selected_columns) + [geometry_name]],
+            geometry=geometry_name,
+            crs=merged.crs,
+        )
+        merged = _project_spatial_frame_for_request(
+            merged,
+            requested_crs=requested_crs,
         )
 
-        column_metadata = build_output_layer_column_metadata(
-            source_layer_ids=carrier_core.source_layer_ids,
-            selected_columns=selected_columns,
-            unit_mapping=unit_mapping,
-            description_mapping=description_mapping,
-            materialization={
-                "strategy": "key_first_tabular_no_geometry",
-                "carrier_layer": layer.carrier_layer,
-                "core_row_count": int(len(carrier_core.dataframe.index)),
-            },
+        row_count = int(len(merged.index))
+        feature_count = int(merged.geometry.notna().sum())
+        payload = _serialize_feature_collection_payload(
+            merged,
+            layer_id=layer.layer_id,
+            output_layer_id=layer.output_layer_id,
+            scope=layer.scope,
+            scope_class=layer.scope_class,
         )
 
-        return (
-            PreparedLayerPayload(
-                output_layer_id=layer.output_layer_id,
-                payload=b"",
-                tabular_frame=table_frame,
-                row_count=row_count,
-                feature_count=feature_count,
-                warnings=tuple(warnings),
-            ),
-            column_metadata,
+        prepared = PreparedLayerPayload(
+            output_layer_id=layer.output_layer_id,
+            payload=payload,
+            row_count=row_count,
+            feature_count=feature_count,
+            warnings=tuple(warnings),
         )
 
+    description_mapping = _column_description_mapping_for_selected_columns(
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        catalog_layer_raws=tuple(result.catalog_layer_raw for result in source_results),
+    )
+
+    column_metadata = build_output_layer_column_metadata(
+        source_layer_ids=carrier_core.source_layer_ids,
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        description_mapping=description_mapping,
+        materialization=materialization,
+    )
+
+    return prepared, column_metadata
+
+
+def _attach_spatial_carrier_geometry(
+    *,
+    wd: Path,
+    layer: ResolvedLayerPlan,
+    source_layers: cabc.Sequence[ResolvedLayerPlan],
+    source_results: cabc.Sequence[_LayerCoreResult],
+    entries_by_output_layer_id: cabc.Mapping[str, cabc.Sequence[object]],
+    carrier_core: CarrierCoreResult,
+    allow_non_unique_carrier_keys: bool,
+) -> tuple[gpd.GeoDataFrame, dict[str, object]]:
+    """Attach canonical geometry and report the row counts used in the manifest."""
     candidate_key_tokens: list[str] = []
     geometry_relpaths: list[str] = []
     for source_layer, source_result in zip(source_layers, source_results):
@@ -1583,106 +1637,14 @@ def _build_key_first_materialized_layer_payload(
             consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
         )
 
-    selected_columns = _carrier_selected_columns(
-        merged=merged,
-        carrier_core=carrier_core,
-        source_results=source_results,
-    )
-    unit_mapping = _carrier_unit_mapping(
-        selected_columns=selected_columns,
-        carrier_core=carrier_core,
-        source_results=source_results,
-    )
-    merged, unit_mapping = _apply_unit_conversions(
-        wd=wd,
-        frame=merged,
-        selected_columns=selected_columns,
-        unit_mapping=unit_mapping,
-        units_mode=units_mode,
-    )
-    if use_tabular_long_layout:
-        temporal_long = reshape_temporal_wide_to_long(
-            frame=merged,
-            selected_columns=selected_columns,
-            unit_mapping=unit_mapping,
-            temporal_mode=layer.temporal_mode,
-            event_selector=tabular_event_selector,
-        )
-        merged = temporal_long.frame
-        selected_columns = temporal_long.selected_columns
-        unit_mapping = temporal_long.unit_mapping
-
-    geometry_name = merged.geometry.name
-    merged, selected_columns, unit_mapping = apply_unitized_column_suffixes(
-        frame=merged,
-        selected_columns=selected_columns,
-        unit_mapping=unit_mapping,
-        geometry_name=geometry_name,
-        consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
-    )
-    merged, selected_columns, unit_mapping = normalize_identity_output_columns(
-        frame=merged,
-        selected_columns=selected_columns,
-        unit_mapping=unit_mapping,
-        geometry_name=geometry_name,
-        consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
-    )
-
-    merged = merged.drop(columns=[_CONSOLIDATED_JOIN_KEY_COLUMN], errors="ignore")
-    geometry_name = merged.geometry.name
-    projection_columns = [column for column in selected_columns if column in merged.columns and column != geometry_name]
-    selected_columns = tuple(_dedupe_identity_selected_columns(projection_columns))
-    merged = gpd.GeoDataFrame(
-        merged[list(selected_columns) + [geometry_name]],
-        geometry=geometry_name,
-        crs=merged.crs,
-    )
-    merged = _project_spatial_frame_for_request(
-        merged,
-        requested_crs=requested_crs,
-    )
-
-    row_count = int(len(merged.index))
-    feature_count = int(merged.geometry.notna().sum())
-    payload = _serialize_feature_collection_payload(
-        merged,
-        layer_id=layer.layer_id,
-        output_layer_id=layer.output_layer_id,
-        scope=layer.scope,
-        scope_class=layer.scope_class,
-    )
-
-    description_mapping = _column_description_mapping_for_selected_columns(
-        selected_columns=selected_columns,
-        unit_mapping=unit_mapping,
-        catalog_layer_raws=tuple(result.catalog_layer_raw for result in source_results),
-    )
-
-    column_metadata = build_output_layer_column_metadata(
-        source_layer_ids=carrier_core.source_layer_ids,
-        selected_columns=selected_columns,
-        unit_mapping=unit_mapping,
-        description_mapping=description_mapping,
-        materialization={
-            "strategy": "key_first_geometry_last",
-            "carrier_layer": layer.carrier_layer,
-            "carrier_key_column": geometry_carrier.key_column,
-            "geometry_relpath": geometry_carrier.geometry_relpath,
-            "core_row_count": int(len(core_for_geometry.index)),
-            "geometry_row_count": int(len(geometry_carrier.dataframe.index)),
-        },
-    )
-
-    return (
-        PreparedLayerPayload(
-            output_layer_id=layer.output_layer_id,
-            payload=payload,
-            row_count=row_count,
-            feature_count=feature_count,
-            warnings=tuple(warnings),
-        ),
-        column_metadata,
-    )
+    return merged, {
+        "strategy": "key_first_geometry_last",
+        "carrier_layer": layer.carrier_layer,
+        "carrier_key_column": geometry_carrier.key_column,
+        "geometry_relpath": geometry_carrier.geometry_relpath,
+        "core_row_count": int(len(core_for_geometry.index)),
+        "geometry_row_count": int(len(geometry_carrier.dataframe.index)),
+    }
 
 
 def _carrier_selected_columns(

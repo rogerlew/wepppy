@@ -859,6 +859,35 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
         raise
 
 
+def _refresh_catalogs_before_freeze(wd: str) -> None:
+    """Drain pending metadata while the caller holds the owner lifecycle guard."""
+    from wepppy.query_engine.catalog_refresh import pending_catalog_requests, refresh_catalog
+
+    base = Path(wd).resolve()
+    scopes = {base}
+    for marker in base.rglob("_query_engine/refresh/incarnation.json"):
+        if not marker.is_symlink() and marker.resolve().is_relative_to(base):
+            scopes.add(marker.parents[2])
+    for scope in sorted(scopes):
+        if pending_catalog_requests(scope):
+            refresh_catalog(scope)
+
+
+def _create_readonly_manifest(wd: str, ron: Ron, runid: str, job_id: str) -> None:
+    from wepppy.microservices.browse import MANIFEST_FILENAME, create_manifest
+
+    if ron.is_child_run:
+        StatusMessenger.publish_command(runid, f'rq:{job_id} {MANIFEST_FILENAME} skipped (child run)')
+        return
+
+    StatusMessenger.publish(f'{runid}:wepp', f'rq:{job_id} STATUS {MANIFEST_FILENAME} creation started')
+    with ron.timed('Create manifest'):
+        create_manifest(wd)
+        if not _exists(_join(wd, MANIFEST_FILENAME)):
+            raise RuntimeError(f'{MANIFEST_FILENAME} was not created')
+    StatusMessenger.publish_command(runid, f'rq:{job_id} {MANIFEST_FILENAME} creation finished')
+
+
 @with_exception_logging
 def set_run_readonly_rq(runid: str, readonly: bool) -> None:
     """Toggle read-only state for a run and manage browse manifests.
@@ -870,7 +899,7 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
     Raises:
         Exception: Any error during manifest creation/removal or NoDb updates.
     """
-    from wepppy.microservices.browse import create_manifest, remove_manifest, MANIFEST_FILENAME
+    from wepppy.microservices.browse import MANIFEST_FILENAME, remove_manifest
 
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
@@ -895,42 +924,9 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
 
             if readonly:
                 if not previous_state:
-                    # The owner guard prevents new receipts until READONLY is visible.
-                    # Finish nested scopes too: freezing pending metadata would leave
-                    # strict readers unable to repair it without mutating a frozen run.
-                    from pathlib import Path
-                    from wepppy.query_engine.catalog_refresh import (
-                        pending_catalog_requests, refresh_catalog,
-                    )
-                    base = Path(wd).resolve()
-                    scopes = {base}
-                    scopes.update(marker.parents[2] for marker in
-                                  base.rglob('_query_engine/refresh/incarnation.json')
-                                  if not marker.is_symlink() and
-                                  marker.resolve().is_relative_to(base))
-                    for scope in sorted(scopes):
-                        if pending_catalog_requests(scope):
-                            refresh_catalog(scope)
+                    _refresh_catalogs_before_freeze(wd)
                     ron.readonly = True
-
-                if ron.is_child_run:
-                    StatusMessenger.publish_command(
-                        runid,
-                        f'rq:{job.id} {MANIFEST_FILENAME} skipped (child run)'
-                    )
-                else:
-                    StatusMessenger.publish(
-                        status_channel,
-                        f'rq:{job.id} STATUS {MANIFEST_FILENAME} creation started'
-                    )
-                    with ron.timed('Create manifest'):
-                        create_manifest(wd)
-                        if not _exists(_join(wd, MANIFEST_FILENAME)):
-                            raise RuntimeError(f'{MANIFEST_FILENAME} was not created')
-                    StatusMessenger.publish_command(
-                        runid,
-                        f'rq:{job.id} {MANIFEST_FILENAME} creation finished'
-                    )
+                _create_readonly_manifest(wd, ron, runid, job.id)
             else:
                 if previous_state:
                     ron.readonly = False

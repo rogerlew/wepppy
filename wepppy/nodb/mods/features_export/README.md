@@ -151,8 +151,16 @@ their own manifest and README alongside the native GDB tree.
 
 ## Service internals
 
+The run page builds its layer catalog, selectors and profile defaults in
+[features_export_presentation.py](../../../weppcloud/routes/run_0/features_export_presentation.py).
+The column picker reads Parquet schemas and interchange README descriptions through
+[features_export_columns.py](../../../weppcloud/routes/run_0/features_export_columns.py).
+
 `service.py` orchestrates submission, execution, cached result reuse, and
-publication. `carrier_identity.py` aligns hillslope and channel keys to
+publication. Consolidated tabular and spatial layers share column selection,
+unit conversion, temporal reshaping, and output naming. Spatial layers attach
+canonical geometry before those steps. Tabular layers backfill watershed IDs
+after naming and bypass geometry loading. `carrier_identity.py` aligns hillslope and channel keys to
 geometry and backfills Topaz and WEPP IDs from watershed tables.
 `cached_artifact_validation.py` checks the format of an existing artifact
 after the service resolves its path inside the run.
