@@ -35,92 +35,52 @@ on LiDAR DEMs that already contain road signatures.
 
 ## Comparison with Culvert_web_app Hydroenforcement
 
-The Culvert_web_app's hydroenforcement pipeline (in
-`subroutine_nested_watershed_delineation.py`) is the closest existing
-implementation to what TerrainProcessor aims to replace. Understanding its
-limitations motivates the design decisions below.
-
 ### What Culvert_web_app does
 
-Hydroenforcement is a single binary toggle ("Required" / "Not Required").
-When enabled, it runs a monolithic 4-step sequence gated by the same
-`hydro_enforcement_select == 'hydroenf_required'` conditional:
+The watershed form exposes a single “Required / Not Required” choice. The
+outlet data supplied by the user determine which terrain operations that
+choice activates. This comparison follows the local Production source
+reviewed on 2026-11-20. [Task dispatch](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/tasks/watershed_delineation_task.py#L420)
 
-1. **Create breaklines** — perpendicular segments at road-stream
-   intersections, extended by a fixed offset (default 10m).
-2. **Fill roads** — `adjust_dem_along_polyline` raises the DEM by a
-   uniform +5m within a 2m buffer around all road centerlines.
-3. **Burn breaklines** — `adjust_dem_along_polyline` lowers the DEM by
-   -10m within a 1m buffer along all breaklines.
-4. **Breach depressions** — unconstrained `wbt.breach_depressions` with
-   `max_depth=None, max_length=None, fill_pits=True`.
+| Supplied outlets | Workflow with hydroenforcement enabled |
+| --- | --- |
+| Culverts, or culverts and gauges | Snap supplied points toward roads and construct perpendicular breaklines. Raise the road corridors, burn the breaklines into the raised DEM, then breach and derive the flow stack. [Supplied-point workflow](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/utils/subroutine_nested_watershed_delineation.py#L3389) |
+| None | Breach the DEM and derive streams to locate road–stream crossings. Use those crossings to construct breaklines. Start from the original DEM for the road raise and burn, then breach again and regenerate flow direction, accumulation, and streams. [Crossing discovery](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/utils/subroutine_nested_watershed_delineation.py#L4177) · [Second pass](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/utils/subroutine_nested_watershed_delineation.py#L4301) |
+| Gauges only | Construct breaklines from road-snapped gauge locations and burn them directly into the DEM, skipping the road raise. Breach and derive the flow stack. Resolve gauge outlets separately using D8 flow accumulation. [Gauge conditioning](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/utils/subroutine_nested_watershed_delineation.py#L5017) · [Gauge outlet resolution](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/utils/subroutine_nested_watershed_delineation.py#L5227) |
 
-When disabled, the pipeline still runs `breach_depressions` on the raw
-DEM — so it is not "no conditioning" vs "conditioning" but rather
-"breach only" vs "road fill + breakline burn + breach."
+The adjustable defaults raise cells within 2 m of a road centerline by
+5 m and lower cells within 1 m of a breakline by 10 m. Breakline length
+equals road width plus a 10 m offset. The raster operation processes
+windows on the input DEM grid and applies the configured offset to valid
+cells touched by each buffered corridor. “Not Required” skips the road
+and breakline edits. Depression breaching still runs with
+`max_depth=None`, `max_length=None`, and `fill_pits=True`.
+[Raster adjustment](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/utils/subroutine_nested_watershed_delineation.py#L801) · [Breach settings](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/utils/subroutine_nested_watershed_delineation.py#L3499)
 
 ### Shortcomings TerrainProcessor addresses
 
-**No granularity.** The toggle is all-or-nothing. Users cannot enable
-road embankment synthesis without breakline burning, or vice versa.
-There is no way to choose breach strategy (fill, bounded breach,
-least-cost breach) or to skip road filling on LiDAR DEMs where roads
-are already represented. TerrainProcessor decomposes these into
-independent, composable pipeline phases with separate configuration
-for road synthesis (Phase 1), conditioning strategy (Phase 2), and
-culvert enforcement (Phase 3).
+**Conditioning choices.** Culvert_web_app ties the road raise and burn
+sequence to the outlet mode. Each operation applies a uniform offset
+within its buffer, even where LiDAR already captures the embankment.
+TerrainProcessor separates road synthesis, depression conditioning, and
+culvert enforcement so the user can select each for the terrain.
+Profile-relative synthesis tapers the road raise. Least-cost breach
+limits excavation, and bounded breach constrains it to the basin.
 
-**Uniform, terrain-unaware modification.** `adjust_dem_along_polyline`
-applies the same +5m offset everywhere regardless of local terrain
-context, road class, or whether the DEM already captures embankments.
-Lindsay (2015) demonstrated that minimizing DEM modification is
-critical — every modified cell corrupts slope, curvature, and
-morphometric attributes. TerrainProcessor's `"profile_relative"`
-strategy adapts to local terrain, only raises where needed, and tapers
-to avoid the abrupt cliff edges that `adjust_dem_along_polyline` creates.
+**Inspection.** Culvert_web_app exposes breaklines and outlet layers
+for inspection and deletes consumed intermediate DEMs. TerrainProcessor
+retains phase DEMs and difference rasters so users can inspect the
+effect of individual operations and rerun from the affected phase.
+[Map layers](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/app.py#L1620) · [Intermediate DEM cleanup](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/utils/subroutine_nested_watershed_delineation.py#L3505)
 
-**Unconstrained breach.** The Culvert_web_app calls `breach_depressions`
-with `max_depth=None, max_length=None` — no cost or distance limits.
-Lindsay (2015) explicitly recommends cost-constrained breaching with
-`BreachDepressionsLeastCost` and appropriate `dist` / `max_cost`
-thresholds. On steep terrain, unconstrained breach carves through
-ridgelines into adjacent basins. TerrainProcessor offers
-`breach_least_cost` (Lindsay's recommended approach) and
-`bounded_breach` (fill-first fence for basin boundary integrity).
-
-**No resolution awareness.** The same pipeline runs on any DEM
-resolution. LiDAR DEMs already contain road embankments and don't
-need +5m fill (which doubles the embankment). 10m DEMs lack road
-signatures entirely and need synthesis. 30m DEMs have scale mismatch
-with vector hydrography that neither filling nor breakline burning
-addresses — Lindsay (2016) showed `TopologicalBreachBurn` is needed at
-that scale. TerrainProcessor selects resolution-appropriate defaults
-and guides users toward the minimum-modification pipeline.
-
-**Fixed burn depth.** Breakline burning uses a constant -10m regardless
-of local stream bed elevation or road embankment height. Lindsay (2016)
-recommends `BurnStreamsAtRoads`, which finds the local minimum elevation
-in a corridor and lowers only the higher cells to match — no arbitrary
-burn depth needed. This is the TerrainProcessor default for culvert
-enforcement.
-
-**Minimal user guidance.** The Culvert_web_app provides only three
-sentences of guidance: "Required: Flat terrain where natural flow paths
-are unclear / Not Required: Steep terrain with well-defined drainage
-networks / Consider: Local topography and existing hydrologic
-connectivity." There is no mention of DEM resolution, no quantitative
-thresholds, and no reference to the tradeoffs between breach strategies.
-TerrainProcessor's resolution-specific pipeline recommendations and
-per-step visualization with diff overlays give users the information
-they need to make informed decisions.
-
-**No step-by-step visualization.** The Culvert_web_app runs the full
-pipeline as a background job and shows only the final result.
-TerrainProcessor produces visualization artifacts at every phase —
-hillshade with slope colormap, diff overlays showing what each step
-changed, detected embankment masks, stream networks before and after
-culvert enforcement — so users can inspect intermediate results and
-adjust parameters before proceeding.
+**Basin outputs for collections.** Culvert_web_app shares the final D8
+pointer, snaps outlets to extracted streams with an accumulation-based
+fallback, and calls `wbt.watershed` once per outlet. Each polygon covers
+the full area draining to its outlet, so nested drainage areas overlap.
+TerrainProcessor's [multi-watershed design](#multi-watershed-mode) calls
+for an unnested basin raster and an explicit parent hierarchy. Consumers
+need that distinction when assembling a batch from selected basins.
+[Per-outlet delineation](https://github.com/SouravDSGit/Culvert_web_app/blob/e3fc76d09b99740aedb257544b8feadf4818a755/culvert_app/utils/subroutine_nested_watershed_delineation.py#L1753)
 
 ## Design Intent
 
@@ -435,7 +395,7 @@ then lowers all higher cells in that corridor to match — no arbitrary
 burn depth needed.
 
 The legacy breakline approach (Culvert_web_app) uses a constant burn
-depth (-10m) along perpendicular breaklines. This is retained for cases
+depth (10 m by default) along perpendicular breaklines. This is retained for cases
 where `BurnStreamsAtRoads` produces undesirable results (e.g., when the
 local minimum is itself an artifact), but `BurnStreamsAtRoads` should be
 the default.
@@ -551,9 +511,8 @@ missing culverts, not missing roads. Recommended pipeline:
    (e.g., 5, 50, 150, 750). TerrainProcessor stores `dist` in meters
    (`blc_dist_m`) and converts using cell size.
 
-This replaces the Culvert_web_app's 4-step pipeline (create breaklines +
-fill roads + burn breaklines + unconstrained breach) with two tool calls
-that are spatially controlled and elevation-aware.
+Where LiDAR captures the road embankments, this sequence preserves their
+existing elevations outside the crossing corridors.
 
 Use `EmbankmentMapping` (Van Nieuwenhuizen et al. 2021) in the
 visualization layer to *detect* where the DEM already represents road
@@ -585,7 +544,7 @@ GMTED/SRTM-scale DEMs and mapped hydrography.
 ### Why `adjust_dem_along_polyline` Is Inadequate
 
 The Culvert_web_app's `adjust_dem_along_polyline` applies a uniform
-constant offset (+5m) within a fixed-width buffer (2m) around road
+constant offset (default +5 m) within a fixed-width buffer (default 2 m) around road
 centerlines. This violates Lindsay's minimum-modification principle:
 
 1. **Uniform constant offset.** Adding +5m everywhere ignores local
@@ -797,9 +756,89 @@ ridgeline while allowing natural internal drainage.
 
 ## Multi-Watershed Mode
 
-Multi-watershed is always a precursor to batch or to starting a single
-run from one of the delineated basins. It is not an inline feature of
-the existing run pipeline — it lives in the TerrainProcessor interface.
+### Proposed project contract for collections
+
+A **run** is a single-watershed project. A **collection** is a project
+whose members are watersheds. The collection owns membership and the
+inputs, relationships, and results that have meaning across members.
+A member used as a run must supply the same watershed inputs and artifact
+semantics that a standalone run supplies. Existing run-scoped NoDb
+modules can then operate on that watershed through their usual interface.
+
+Collection-scoped NoDb modules can work across members. For example, a
+culvert module could relate crossings to their drainage basins, a fire/HUC
+interface could identify the hydrologic units affected by one fire, and
+a roads module could associate one road with each watershed it traverses.
+Each interface supplies its own relationships. A shared DEM, a hierarchy
+of nested outlets, and a road network are specific to workflows that use
+them. Collection membership alone implies none of these.
+
+The reason for two contracts is that the same feature can span several
+watersheds while each model run still needs one unambiguous watershed.
+For example, a collection can retain the full road geometry and its
+member associations while a member run consumes the geometry relevant to
+its watershed. A batch is one way to execute work for selected members.
+Membership has meaning before any runs are launched.
+
+### Proposed collection and member URLs
+
+| View | Example path |
+| --- | --- |
+| Collection | `/weppcloud/collections/sturdy-triptych/culvert/` |
+| Member run | `/weppcloud/runs/collection;;sturdy-triptych;;crossing-017/disturbed9002/` |
+
+In the collection URL, `sturdy-triptych` identifies the project and
+`culvert` names its collection config. In the member URL, the qualified
+run ID combines the literal group name `collection`, the collection ID,
+and the stable member ID `crossing-017`. The final segment,
+`disturbed9002`, names that member's single-watershed run config.
+
+The collection map can link directly to the ordinary run view once the
+member has a run. Keeping the collection config outside the qualified
+run ID preserves that link if the collection gains another interface.
+
+### Watershed definition and upstream discovery
+
+Collection members may be nested or unnested. The interface supplies the
+evidence it has, and the method used to identify each watershed travels
+with the result.
+
+| Starting input | Proposed discovery behavior |
+| --- | --- |
+| Study boundary and culvert locations | Use the supplied study area and resolve the crossing outlets. Delineate the catchment for each outlet and record nesting where it occurs. If the study boundary truncates upstream drainage, identify the affected member. |
+| Soil burn severity (SBS) map | Identify watersheds intersecting the SBS footprint. A watershed can include unburned land upstream of the fire. Grow the contributing area up to a configured maximum catchment area and record where that limit clips the result. |
+| One or more outlets | Start at each outlet and trace upstream to discover the contributing area. Derive the map extent from the result so an interactive user or an automated client can start with coordinates alone. |
+
+**Proposed owner.** A catchment discovery utility in `weppcloud-wbt`
+would trace upstream across DEM tile boundaries. It would query tiles
+directly, cache them for reuse across outlets and requests, and fetch
+needed tiles concurrently. A tile edge is a reason to inspect adjacent
+terrain. Completion requires evidence that the upstream frontier is
+exhausted. Missing tile coverage must be distinguishable from a drainage
+divide or an intentional area limit.
+
+**Clipping rule.** Traverse upstream flow connections breadth first,
+advancing all tributaries at the current distance in flow steps before
+advancing to the next distance. This prevents a long tributary from
+consuming the area budget while nearer tributaries are omitted. Apply
+the cap per candidate catchment and use deterministic ordering if the
+cap falls within a frontier, so concurrent tile arrival cannot change
+the boundary. Retain the outlet, delineated area, applied limit, and
+whether the catchment is complete or clipped. A clipped area is useful
+for fire assessment and must be identified as such when selecting a
+member for a run that expects full upstream drainage.
+
+**DEM sources.** The intended inputs are 30 m NED tiles and Copernicus
+GLO-30 tiles for worldwide coverage. Record the selected source and
+native grid spacing with each result. [Copernicus DEM product catalog](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM)
+
+### TerrainProcessor as a collection input
+
+Multi-outlet delineation is one way to populate a collection. For nested
+outlets, distinguish the incremental area between outlets from the full
+drainage area upstream of each outlet. When a member run requires the
+full contributing watershed, its boundary must include upstream member
+areas. An incremental mask alone would understate that watershed.
 
 When `outlet_mode == "multiple"`:
 
@@ -814,7 +853,9 @@ When `outlet_mode == "multiple"`:
    - area, stream order at outlet
 5. Render all basins on the map for the user to inspect.
 
-From here the user can:
+In the proposed collection workflow, the user can retain the reviewed basins
+as members and use them individually or together.
+
 - **Start a batch** — all basins (or a selected subset) become batch
   entries. Each basin's boundary, outlet, and the shared flow stack
   artifacts are the starting resources for the batch run.
