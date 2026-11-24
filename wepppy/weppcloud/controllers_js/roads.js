@@ -521,10 +521,12 @@ var Roads = (function () {
             }
             var status = dom.qs("#roads_osm_status", controller.form);
             button.disabled = true;
-            status.textContent = "Fetching mapped roads…";
+            status.textContent = "Fetching mapped roads… A busy service may be retried once.";
+            var deadline = new AbortController();
+            var timer = window.setTimeout(function () { deadline.abort(); }, 30000);
             try {
                 var result = await http.request(resolveRunUrl("api/roads/osm.geojson"), {
-                    method: "POST", form: controller.form, timeoutMs: 30000
+                    method: "POST", form: controller.form, timeoutMs: 0, signal: deadline.signal
                 });
                 var collection = result.body;
                 if (!collection || collection.type !== "FeatureCollection" || !Array.isArray(collection.features)) {
@@ -545,9 +547,26 @@ var Roads = (function () {
                 window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
                 status.textContent = "Download started for osm-roads.geojson.";
             } catch (error) {
-                status.textContent = extractErrorMessage(toResponsePayload(http, error),
-                    "Download unavailable. Try again or upload your own road file.");
+                if (deadline.signal.aborted) {
+                    status.textContent = "Your browser timed out after 30 seconds waiting for the road download. Try again later.";
+                } else {
+                    var payload = toResponsePayload(http, error);
+                    var details = payload.error && payload.error.details;
+                    var message = extractErrorMessage(payload, "The road download failed.");
+                    if (details && Number.isInteger(details.attempts)) {
+                        message += " " + details.attempts + (details.attempts === 1 ? " attempt" : " attempts") +
+                            " in " + details.elapsed_seconds + " seconds.";
+                    }
+                    if (details && details.retry_after_seconds > 0) {
+                        message += " Wait at least " + details.retry_after_seconds + " seconds before trying again.";
+                    }
+                    if (payload.error_id) {
+                        message += " Reference: " + payload.error_id + ".";
+                    }
+                    status.textContent = message;
+                }
             } finally {
+                window.clearTimeout(timer);
                 button.disabled = false;
             }
         }

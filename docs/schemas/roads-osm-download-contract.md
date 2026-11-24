@@ -18,4 +18,4 @@ One click makes at most two sequential requests to the configured interpreter. A
 
 Return a structured timeout (504), an upstream status or connection failure (503), or an invalid upstream response (502). Display the reason, actual attempt count, elapsed time, and server error reference in the existing inline status. Identify a browser deadline separately when the browser receives no complete response in 30 seconds. Log attempt outcomes, upstream HTTP status when known, elapsed time, and scheduled delay without upstream response text. A validation run must click the real button and inspect its output for retry success, exhausted retries and timeout.
 
-Implementation conformance pending.
+The existing run log (ron.log) records the upstream failure and the same reference displayed to the user. The reference also correlates individual attempts in the application logs.

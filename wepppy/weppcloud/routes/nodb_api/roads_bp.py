@@ -116,7 +116,15 @@ def roads_osm_download(runid: str, config: str) -> Response:
     except OSMRoadsValidationError as exc:
         return error_factory(str(exc), status_code=422)
     except OSMRoadsUpstreamError as exc:
-        return error_factory(str(exc) + " Try again later or upload your own file.", status_code=503)
+        details = dict(exc.context)
+        reference = details.pop("reference", None)
+        status = 504 if exc.code == "upstream_timeout" else 503
+        if exc.code in {"upstream_invalid_response", "upstream_error"}:
+            status = 502
+        ron.logger.warning("Roads OSM download failed: %s; attempts=%s elapsed_s=%s upstream_status=%s reference=%s",
+                           exc.code, details.get("attempts"), details.get("elapsed_seconds"),
+                           details.get("upstream_status"), reference)
+        return error_factory(str(exc), code=exc.code, status_code=status, details=details, error_id=reference)
     response = jsonify(payload)
     if response.calculate_content_length() > ROADS_UPLOAD_GEOJSON_MAX_BYTES:
         return error_factory("This road file exceeds the Roads upload size limit. Use a smaller local inventory.",

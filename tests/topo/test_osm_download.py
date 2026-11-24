@@ -14,7 +14,7 @@ def test_multi_crossing_preserves_one_way_and_unknown_surface(monkeypatch):
     coords = [(0.1, 0.1), (1.2, 0.2), (0.1, 0.3)]
     way = {"id": 8, "type": "way", "tags": tags,
            "geometry": [{"lon": x, "lat": y} for x, y in coords]}
-    monkeypatch.setattr(OverpassClient, "fetch_download_ways", lambda self, bounds: [way])
+    monkeypatch.setattr(OverpassClient, "fetch_download_ways", lambda self, bounds, *, process: process([way]))
     feature, = download_osm_roads([0, 0, 1, 1])["features"]
     assert feature["geometry"]["type"] == "MultiLineString"
     assert feature["properties"]["SURFACE"] is None
@@ -29,6 +29,12 @@ def test_invalid_download_extent_precedes_network_access(extent):
 
 def test_incomplete_download_geometry_is_not_an_empty_result(monkeypatch):
     way = {"id": 8, "type": "way", "tags": {"highway": "track"}}
-    monkeypatch.setattr(OverpassClient, "fetch_download_ways", lambda self, bounds: [way])
+    monkeypatch.setattr(OverpassClient, "fetch_download_ways", lambda self, bounds, *, process: process([way]))
     with pytest.raises(OSMRoadsUpstreamError):
         download_osm_roads([0, 0, 1, 1])
+
+
+@pytest.mark.parametrize(("value", "expected"), [("60", 60), ("", None), ("bad-date", None), ("0", 0)])
+def test_retry_after_seconds(value, expected):
+    from wepppy.topo.osm_roads._foreground import _retry_after
+    assert _retry_after(value) == expected

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import logging
 import json
 import os
 from pathlib import Path
@@ -285,7 +286,7 @@ def roads_client(
 
     monkeypatch.setattr(roads_module, "url_for_run", _fake_url_for_run)
 
-    RonStub = singleton_factory("RonStub", attrs={"mods": ["roads"]}, mixins=(LockedMixin,))
+    RonStub = singleton_factory("RonStub", attrs={"mods": ["roads"], "logger": logging.getLogger("test.roads.ron")}, mixins=(LockedMixin,))
     monkeypatch.setattr(roads_module, "Ron", RonStub)
 
     conn_factory = rq_environment.redis_conn_factory(label="roads-redis")
@@ -1292,7 +1293,7 @@ def test_osm_download_edit_then_upload(roads_client, tmp_path, monkeypatch, osm_
 
     # An empty download on a project with an edited upload preserves the active input.
     from wepppy.topo.osm_roads.overpass import OverpassClient
-    monkeypatch.setattr(OverpassClient, "fetch_download_ways", lambda self, extent: [])
+    monkeypatch.setattr(OverpassClient, "fetch_download_ways", lambda self, extent, *, process: process([]))
     repeat = client.post(f"/runs/{RUN_ID}/{config}/api/roads/osm.geojson")
     assert repeat.status_code == 200 and repeat.get_json()["features"] == []
     persisted = RealRoads.load_detached(wd).query_inputs()
@@ -1311,3 +1312,60 @@ def test_osm_download_denial_and_absent_extent(roads_client, osm_access):
     assert client.post(url).status_code == 422
     ron.mods = []
     assert client.post(url).status_code == 403
+
+
+@pytest.mark.parametrize(("statuses", "remark", "retry_after", "expected_status", "expected_code"), [
+    ([502, 200], None, None, 200, None),
+    ([502, 502], None, None, 503, "upstream_http_error"),
+    ([200], "runtime error: Query timed out", None, 504, "upstream_timeout"),
+    ([429], None, "90", 503, "upstream_http_error"),
+    ([400], None, None, 503, "upstream_http_error"),
+    ([502, 200], "malformed-way", None, 502, "upstream_invalid_response"),
+])
+def test_download_retry_and_failure_evidence(
+    roads_client, osm_access, monkeypatch, statuses, remark, retry_after, expected_status, expected_code
+):
+    import json
+    import time
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from threading import Thread
+
+    client, _, ron_cls, _, _, wd = roads_client
+    ron_cls.getInstance(wd).extent = [-117, 46, -116.9, 46.1]
+    osm_access("PowerUser")
+    times = []
+
+    class Interpreter(BaseHTTPRequestHandler):
+        def do_POST(self):
+            status = statuses[len(times)]
+            times.append(time.monotonic())
+            self.send_response(status)
+            if retry_after:
+                self.send_header("Retry-After", retry_after)
+            self.end_headers()
+            payload = {"elements": [{}]} if remark == "malformed-way" else {"elements": [], "remark": remark}
+            self.wfile.write(json.dumps(payload).encode())
+
+    with HTTPServer(("127.0.0.1", 0), Interpreter) as upstream:
+        monkeypatch.setenv("WEPPPY_OSM_ROADS_OVERPASS_BASE_URL", f"http://127.0.0.1:{upstream.server_port}/")
+        thread = Thread(target=upstream.serve_forever, daemon=True)
+        thread.start()
+        try:
+            response = client.post(f"/runs/{RUN_ID}/{CONFIG}/api/roads/osm.geojson")
+        finally:
+            upstream.shutdown()
+            thread.join()
+    assert len(times) == len(statuses)
+    if len(times) == 2:
+        assert 4 <= times[1] - times[0] < 10
+    assert response.status_code == expected_status
+    if expected_code:
+        error = response.json["error"]
+        assert response.json["error_id"]
+        assert error["code"] == expected_code
+        assert error["details"]["attempts"] == len(times)
+        assert error["details"]["upstream_status"] == statuses[-1]
+        if retry_after:
+            assert error["details"]["retry_after_seconds"] == 90
+    else:
+        assert response.json["type"] == "FeatureCollection"
