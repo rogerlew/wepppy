@@ -238,13 +238,13 @@ describe("Roads controller", () => {
     test("Fetch shows the upstream timeout, attempts, elapsed time and support reference", async () => {
         httpMock.request.mockResolvedValueOnce(available).mockRejectedValueOnce({body: {
             error: {message: "Timed out waiting for OpenStreetMap.", code: "upstream_timeout",
-                details: {attempts: 2, elapsed_seconds: 23.4}}, error_id: "abc123"
+                details: {attempts: 2, elapsed_seconds: 1}}, error_id: "abc123"
         }});
         const button = document.querySelector("[data-roads-action='download-osm']");
         button.click();
         await new Promise(resolve => setTimeout(resolve, 0));
         expect(document.querySelector("#roads_osm_status").textContent)
-            .toBe("Timed out waiting for OpenStreetMap. 2 attempts in 23.4 seconds. Reference: abc123.");
+            .toBe("Timed out waiting for OpenStreetMap. 2 attempts in 1 second. Reference: abc123.");
         expect(button.disabled).toBe(false);
     });
 

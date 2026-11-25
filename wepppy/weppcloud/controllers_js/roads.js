@@ -525,7 +525,7 @@ var Roads = (function () {
             var message = extractErrorMessage(payload, "The road download failed.");
             if (details && Number.isInteger(details.attempts)) {
                 message += " " + details.attempts + (details.attempts === 1 ? " attempt" : " attempts") +
-                    " in " + details.elapsed_seconds + " seconds.";
+                    " in " + details.elapsed_seconds + (details.elapsed_seconds === 1 ? " second." : " seconds.");
             }
             if (payload.error_id) {
                 message += " Reference: " + payload.error_id + ".";
