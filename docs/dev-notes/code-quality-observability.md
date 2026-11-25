@@ -87,15 +87,7 @@ Workflow: `Code Quality Observability`
 
 ## Review Integration
 
-Code review should include a code-quality pass:
-
-1. Read the changed-file section of the observability report.
-2. Note any `red` or worsened metrics in touched files.
-3. Decide whether to:
-   - make a small opportunistic cleanup now, or
-   - capture a short deferred cleanup note in the PR.
-
-The objective is steady trend improvement without blocking feature delivery.
+Use changed-file deltas to identify material increases in complexity. When a touched area materially worsens, record the reason or a follow-up in the PR. Behavioral acceptance and its supporting evidence remain the focus of review.
 
 ## Broad Exception Telemetry
 

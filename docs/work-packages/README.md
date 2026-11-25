@@ -2,7 +2,7 @@
 
 This directory groups long-running initiatives into self-contained "work packages". Each package bundles the brief, tracker, prompts, and supporting notes so agents can jump in without hunting across the repository.
 
-**When to create a work package:** Multi-step features, high-risk migrations, cross-cutting concerns, or any initiative requiring coordination across multiple PRs or agents. See root `AGENTS.md` (`ExecPlans (Required)`) for global planning guardrails, and use the criteria in this guide for package-level decisions.
+For a bounded, reversible single-module change, keep the rationale, acceptance evidence, and remaining uncertainty in the PR. This gives reviewers one place to evaluate the change. Use a work package when the work needs coordination across PRs or agents, sustained investigation, or a consequential acceptance decision such as a high-risk migration. Link directly to package evidence from the PR when it already answers the review questions. Existing contract, ADR, and validation requirements still apply.
 
 **Quick links:**
 - [`PROJECT_TRACKER.md`](../../PROJECT_TRACKER.md) (root) — Kanban board showing active/backlog/completed packages
@@ -37,7 +37,7 @@ YYYYMMDD_slug/
 Feel free to omit `notes/` or `artifacts/` if the package stays simple.
 
 ## Workflow guidelines
-1. Create a new package when a feature, migration, or documentation effort will span multiple PRs or agents or is high risk.
+1. Use the criteria above to decide whether the change needs a package.
 2. Fill in `package.md` with the problem statement, scope, stakeholders, and exit criteria (use template from `docs/prompt_templates/package_template.md`).
 3. Complete security impact triage in `package.md` (`none | low | high`) and record whether a dedicated security review artifact is required.
 4. Track all actions in `tracker.md` (Kanban list, decision log, verification checklist, etc.) — use template from `docs/prompt_templates/tracker_template.md`.

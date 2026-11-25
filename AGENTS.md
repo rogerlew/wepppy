@@ -37,7 +37,7 @@
 - If a broad catch is unavoidable (for example, boundary cleanup/telemetry), document why in a short comment and keep the protected block minimal.
 
 ## ExecPlans (Required)
-- For complex features, significant refactors, or multi-hour work, execute against an active ExecPlan.
+- Use an active ExecPlan for complex features, significant refactors, sustained investigation, coordinated work, or consequential acceptance decisions. For a bounded, reversible single-module change, keep the rationale and evidence in the PR unless one of those conditions applies.
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
 - Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
 - Current ad hoc active ExecPlan: `none`.

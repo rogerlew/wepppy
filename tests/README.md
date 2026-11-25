@@ -84,6 +84,10 @@ OSM_ROADS_POSTGRES_INTEGRATION=1 wctl run-pytest tests/topo -k osm_roads_postgre
 
 ## Smoke Tests
 
+Run `wctl run-pytest --profile python -- tests/test_0_imports.py` to check required runtime imports, including GDAL and the WEPPpy RQ worker. An unavailable optional module produces a skip. An import error inside an installed module fails the check.
+
+For an exploratory inventory, run `python -m tools.diagnose_imports` from a disposable checkout in the development environment. Importing modules executes their top-level code. The command reports failed module names and exits 1 if it observes import failures, including optional integrations. Run it separately from the acceptance suite.
+
 - Playwright smoke harness lives under `wepppy/weppcloud/static-src/tests/smoke`. See [`README.smoke_tests.md`](README.smoke_tests.md) for setup, environment variables, and provisioning/cleanup instructions (`npm run smoke`).
 
 Happy testing! Keep the muscles fresh by running `wctl run-pytest tests --maxfail=1` early and often.

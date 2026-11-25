@@ -1,20 +1,13 @@
-## Summary
+## Change and rationale
 
-- What changed:
-- Why:
+What changed, and why?
 
-## Validation
+## Behavioral acceptance
 
-- Commands/tests run:
-- Any checks intentionally skipped:
+For behavior changes, answer below or link directly to existing evidence that answers these questions.
 
-## Code Quality Observability
+- What will a user or downstream consumer observe?
+- Which test result or artifact readback distinguishes the old behavior from the new? For a refactor, what demonstrates preserved behavior?
+- What remains unverified, including skipped checks or environments?
 
-- [ ] Reviewed the `Code Quality Observability` summary/artifact for this PR.
-- [ ] For worsened `yellow`/`red` metrics in touched files, added rationale or a follow-up note.
-- [ ] Applied opportunistic cleanup where practical while working in hotspot files.
-
-## Risks / Follow-ups
-
-- Known risks:
-- Follow-up work:
+For documentation or other editorial changes, describe the check appropriate to the edit. Mention complexity only when a touched area materially worsens, with a brief rationale or follow-up.
