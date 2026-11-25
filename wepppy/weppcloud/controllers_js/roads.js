@@ -514,6 +514,120 @@ var Roads = (function () {
             }
         }
 
+        function osmFailureMessage(error) {
+            if (error && error.status && !(error.body && typeof error.body.error === "object")) {
+                return error.status === 504 || error.status === 408
+                    ? "The road download gateway timed out (HTTP " + error.status + "). Try again later."
+                    : "The road download server returned HTTP " + error.status + ". Try again later.";
+            }
+            var payload = toResponsePayload(http, error);
+            var details = payload.error && payload.error.details;
+            var message = extractErrorMessage(payload, "The road download failed.");
+            if (details && Number.isInteger(details.attempts)) {
+                message += " " + details.attempts + (details.attempts === 1 ? " attempt" : " attempts") +
+                    " in " + details.elapsed_seconds + (details.elapsed_seconds === 1 ? " second." : " seconds.");
+            }
+            if (payload.error_id) {
+                message += " Reference: " + payload.error_id + ".";
+            }
+            return message;
+        }
+
+        async function fetchOsmCollection(form, button, status) {
+            var expires = performance.now() + 360000;
+            var failure = "";
+            function current() {
+                return button.isConnected && controller.form === form && form.contains(button);
+            }
+            function show(message) {
+                status.textContent = failure ? [failure, message].filter(Boolean).join(" ") : message;
+            }
+            async function wait(seconds, message) {
+                if (performance.now() + seconds * 1000 + 75000 > expires) {
+                    show("The suggested wait is " + seconds + " seconds, beyond the automatic retry window. Try again later.");
+                    return false;
+                }
+                show(message);
+                await new Promise(function (resolve) { window.setTimeout(resolve, seconds * 1000); });
+                return current();
+            }
+            async function post(path, milliseconds) {
+                var abort = new AbortController();
+                var timer = window.setTimeout(function () { abort.abort(); }, milliseconds);
+                try {
+                    return await http.request(resolveRunUrl(path), {
+                        method: "POST", form: form, timeoutMs: 0, signal: abort.signal
+                    });
+                } catch (error) {
+                    if (abort.signal.aborted) {
+                        throw new Error("Your browser timed out after " + milliseconds / 1000 +
+                            " seconds waiting for OpenStreetMap. Try again later.");
+                    }
+                    throw error;
+                } finally {
+                    window.clearTimeout(timer);
+                }
+            }
+            async function awaitSlot() {
+                while (current() && performance.now() + 75000 <= expires) {
+                    show("Checking OpenStreetMap availability…");
+                    var response = await post("api/roads/osm/status", 10000);
+                    var slot = response.body;
+                    if (!slot || !Number.isSafeInteger(slot.wait_seconds) ||
+                        typeof slot.check_again !== "boolean" || slot.check_again !== (slot.state === "running")) {
+                        throw new Error("Could not read OpenStreetMap availability. Try again later.");
+                    }
+                    if (slot.state === "available" && slot.wait_seconds === 0) {
+                        return true;
+                    }
+                    var seconds = slot.wait_seconds;
+                    var message;
+                    if (slot.state === "unknown" && seconds === 60) {
+                        message = "OpenStreetMap availability is unknown. Waiting 60 seconds before fetching.";
+                    } else if (slot.state === "scheduled" && seconds > 0) {
+                        message = "OpenStreetMap has a slot in " + seconds + " seconds.";
+                    } else if (slot.state === "running" && seconds === 5) {
+                        message = "OpenStreetMap is busy. Checking again in 5 seconds.";
+                    } else {
+                        throw new Error("Could not read OpenStreetMap availability. Try again later.");
+                    }
+                    if (!await wait(seconds, message)) { return false; }
+                    if (!slot.check_again) { return true; }
+                }
+                return false;
+            }
+
+            for (var attempt = 1; attempt <= 2 && current(); attempt++) {
+                try {
+                    if (!await awaitSlot() || !current() || performance.now() + 75000 > expires) {
+                        if (current() && performance.now() + 75000 > expires) { show("The download window expired. Try again later."); }
+                        return null;
+                    }
+                } catch (error) {
+                    show(osmFailureMessage(error));
+                    return null;
+                }
+                show("Fetching mapped roads…");
+                try {
+                    var result = await post("api/roads/osm.geojson", 75000);
+                    return current() ? { collection: result.body, failed: attempt - 1 } : null;
+                } catch (error) {
+                    var details = error && error.body && error.body.error && error.body.error.details;
+                    var retryAfter = details && details.retry_after_seconds;
+                    var message = osmFailureMessage(error);
+                    if (attempt === 2) { message += " One earlier attempt also failed."; }
+                    failure = message;
+                    if (!current() || attempt === 2 || !details || details.attempts !== 1 || details.retryable !== true) {
+                        show(retryAfter > 0 ? "Wait at least " + retryAfter + " seconds before trying again." : "");
+                        return null;
+                    }
+                    var delay = Math.max(55, retryAfter || 0);
+                    if (!await wait(delay, "Checking availability again in " + delay + " seconds.")) { return null; }
+                }
+            }
+            return null;
+        }
+
         async function downloadOsm(event, button) {
             event.preventDefault();
             if (button.disabled) {
@@ -521,19 +635,19 @@ var Roads = (function () {
             }
             var status = dom.qs("#roads_osm_status", controller.form);
             button.disabled = true;
-            status.textContent = "Fetching mapped roads… A busy service may be retried once.";
-            var deadline = new AbortController();
-            var timer = window.setTimeout(function () { deadline.abort(); }, 30000);
             try {
-                var result = await http.request(resolveRunUrl("api/roads/osm.geojson"), {
-                    method: "POST", form: controller.form, timeoutMs: 0, signal: deadline.signal
-                });
-                var collection = result.body;
+                var result = await fetchOsmCollection(controller.form, button, status);
+                if (!result) {
+                    return;
+                }
+                var recovery = result.failed ? " Recovered after " + result.failed +
+                    (result.failed === 1 ? " failed attempt." : " failed attempts.") : "";
+                var collection = result.collection;
                 if (!collection || collection.type !== "FeatureCollection" || !Array.isArray(collection.features)) {
                     throw new Error("Download unavailable. Try again or upload your own road file.");
                 }
                 if (!collection.features.length) {
-                    status.textContent = "No mapped roads were found in the project map area. You can upload your own road file.";
+                    status.textContent = "No mapped roads were found in the project map area. You can upload your own road file." + recovery;
                     return;
                 }
                 var file = new Blob([JSON.stringify(collection)], { type: "application/geo+json" });
@@ -545,32 +659,10 @@ var Roads = (function () {
                 link.click();
                 link.remove();
                 window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-                status.textContent = "Download started for osm-roads.geojson.";
+                status.textContent = "Download started for osm-roads.geojson." + recovery;
             } catch (error) {
-                if (deadline.signal.aborted) {
-                    status.textContent = "Your browser timed out after 30 seconds waiting for the road download. Try again later.";
-                } else if (error && error.status && !(error.body && typeof error.body.error === "object")) {
-                    status.textContent = error.status === 504 || error.status === 408
-                        ? "The road download gateway timed out (HTTP " + error.status + "). Try again later."
-                        : "The road download server returned HTTP " + error.status + ". Try again later.";
-                } else {
-                    var payload = toResponsePayload(http, error);
-                    var details = payload.error && payload.error.details;
-                    var message = extractErrorMessage(payload, "The road download failed.");
-                    if (details && Number.isInteger(details.attempts)) {
-                        message += " " + details.attempts + (details.attempts === 1 ? " attempt" : " attempts") +
-                            " in " + details.elapsed_seconds + " seconds.";
-                    }
-                    if (details && details.retry_after_seconds > 0) {
-                        message += " Wait at least " + details.retry_after_seconds + " seconds before trying again.";
-                    }
-                    if (payload.error_id) {
-                        message += " Reference: " + payload.error_id + ".";
-                    }
-                    status.textContent = message;
-                }
+                status.textContent = osmFailureMessage(error);
             } finally {
-                window.clearTimeout(timer);
                 button.disabled = false;
             }
         }

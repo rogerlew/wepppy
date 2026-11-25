@@ -1,0 +1,10 @@
+# Current OSMnx alignment
+
+Base 10b92d397. The operator approved revising the existing package to match current OSMnx. The amended Roads OSM contract specifies status checks and the fixed 55-second pause from version 2.2.0. The browser workflow bounds attempts and elapsed time, honors Retry-After and recovers once from a local timeout as discussed. The prior short retry loops are superseded. Conformance pending. Existing API success format and errors remain compatible. Direct API callers receive one attempt and may use the same preflight. No data provider, cache, dependencies or deployment settings change.
+
+Validate fresh, empty and previously uploaded runs, denied and invalid extents, slot availability, unreadable or delayed status, timeout, HTTP failure, success after retry, long Retry-After and detached controls. Only operator-owned URL configuration may specify the status host. Test real socket behavior and client timers. Review the WEPPcloud and Kubernetes request paths.
+
+Independent correctness and security reviewers identified ambiguous status reporting and the need to distinguish upstream uncertainty from invalid local preflight responses. Added normalized state and fail-closed handling. Correctness also identified that separate requests can reach different replicas. Slot availability is advisory. The dedicated status URL avoids old servers treating a status request as a download.
+
+Validation correction, base 4ca401a3d. The real status check returned unknown. Two 60-second status waits, two 75-second request windows and the 55-second cooldown require 325 seconds, plus the status calls. Allocate six minutes to preserve the ordinary timeout retry when slot reporting is unavailable. No additional requests, worker time or new failure classification. Exercise the double-unknown and slow-timeout sequence with a browser clock.
+Independent security and correctness reviews accepted the bounded change. Reserving both 10-second browser status windows gives a 345-second worst-case reservation.

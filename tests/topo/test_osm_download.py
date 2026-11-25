@@ -38,3 +38,33 @@ def test_incomplete_download_geometry_is_not_an_empty_result(monkeypatch):
 def test_retry_after_seconds(value, expected):
     from wepppy.topo.osm_roads._foreground import _retry_after
     assert _retry_after(value) == expected
+
+
+def test_interpreter_read_timeout_is_reported_as_retryable():
+    import asyncio
+    from wepppy.topo.osm_roads._foreground import fetch_ways
+
+    async def exercise():
+        done = asyncio.Event()
+
+        async def stall(reader, writer):
+            try:
+                await reader.readuntil(b"\r\n\r\n")
+                await done.wait()
+            finally:
+                writer.close()
+                await writer.wait_closed()
+
+        async with await asyncio.start_server(stall, "127.0.0.1", 0) as server:
+            port = server.sockets[0].getsockname()[1]
+            try:
+                with pytest.raises(OSMRoadsUpstreamError) as error:
+                    await fetch_ways(f"http://127.0.0.1:{port}/interpreter", "test", 1, list)
+                assert error.value.code == "upstream_timeout"
+                assert error.value.context["retryable"] is True
+                assert error.value.context["attempts"] == 1
+                assert error.value.context["reference"]
+            finally:
+                done.set()
+
+    asyncio.run(exercise())

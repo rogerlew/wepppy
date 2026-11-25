@@ -221,8 +221,10 @@ describe("Roads controller", () => {
         jest.clearAllMocks();
     });
 
+    const available = {body: {state: "available", wait_seconds: 0, check_again: false}};
+
     test("empty OSM download reports coverage and leaves upload available", async () => {
-        httpMock.request.mockResolvedValueOnce({ body: { type: "FeatureCollection", features: [] } });
+        httpMock.request.mockResolvedValueOnce(available).mockResolvedValueOnce({ body: { type: "FeatureCollection", features: [] } });
         const button = document.querySelector("[data-roads-action='download-osm']");
         button.click();
         await new Promise(resolve => setTimeout(resolve, 0));
@@ -234,20 +236,86 @@ describe("Roads controller", () => {
     });
 
     test("Fetch shows the upstream timeout, attempts, elapsed time and support reference", async () => {
-        httpMock.request.mockRejectedValueOnce({body: {
+        httpMock.request.mockResolvedValueOnce(available).mockRejectedValueOnce({body: {
             error: {message: "Timed out waiting for OpenStreetMap.", code: "upstream_timeout",
-                details: {attempts: 2, elapsed_seconds: 23.4}}, error_id: "abc123"
+                details: {attempts: 2, elapsed_seconds: 1}}, error_id: "abc123"
         }});
         const button = document.querySelector("[data-roads-action='download-osm']");
         button.click();
         await new Promise(resolve => setTimeout(resolve, 0));
         expect(document.querySelector("#roads_osm_status").textContent)
-            .toBe("Timed out waiting for OpenStreetMap. 2 attempts in 23.4 seconds. Reference: abc123.");
+            .toBe("Timed out waiting for OpenStreetMap. 2 attempts in 1 second. Reference: abc123.");
         expect(button.disabled).toBe(false);
     });
 
+    test.each(["recover", "exhaust", "replaced", "retry-after"])("Fetch cooldown and slot recheck: %s", async (outcome) => {
+        jest.useFakeTimers();
+        try {
+            const button = document.querySelector("[data-roads-action='download-osm']");
+            const status = document.querySelector("#roads_osm_status");
+            const failure = {body: {error_id: "ref1", error: {message: "Gateway timed out.",
+                details: {attempts: 1, elapsed_seconds: 2, retryable: true,
+                    retry_after_seconds: outcome === "retry-after" ? 600 : 0}}}};
+            const request = httpMock.request.mockResolvedValueOnce(available).mockRejectedValueOnce(failure)
+                .mockResolvedValueOnce({body: {state: "running", wait_seconds: 5, check_again: true}})
+                .mockResolvedValueOnce(available);
+            if (outcome === "exhaust") { request.mockRejectedValueOnce(failure); }
+            else { request.mockResolvedValueOnce({body: {type: "FeatureCollection", features: []}}); }
+            button.click();
+            await jest.advanceTimersByTimeAsync(54999);
+            expect(request).toHaveBeenCalledTimes(2);
+            expect(status.textContent).toMatch(/timed out.*ref1/);
+            if (outcome === "replaced") { button.remove(); }
+            await jest.advanceTimersByTimeAsync(1);
+            const retried = outcome === "recover" || outcome === "exhaust";
+            expect(request).toHaveBeenCalledTimes(retried ? 3 : 2);
+            const waiting = {recover: "Checking again in 5 seconds", exhaust: "Checking again in 5 seconds",
+                replaced: "55 seconds", "retry-after": "600 seconds"};
+            expect(status.textContent).toContain(waiting[outcome]);
+            await jest.advanceTimersByTimeAsync(5000);
+            const paths = request.mock.calls.map(call => call[0].split("/").pop());
+            expect(paths).toEqual(retried ? ["status", "osm.geojson", "status", "status", "osm.geojson"]
+                : ["status", "osm.geojson"]);
+            const terminal = {recover: "Recovered after 1 failed attempt", exhaust: "earlier attempt also failed",
+                replaced: "55 seconds", "retry-after": "600 seconds"};
+            expect(status.textContent).toContain(terminal[outcome]);
+        } finally { jest.useRealTimers(); }
+    });
+
+    test.each([["unknown", 60], ["scheduled", 9]])("Fetch respects %s slot delay", async (state, seconds) => {
+        jest.useFakeTimers();
+        try {
+            const request = httpMock.request.mockResolvedValueOnce({body: {state, wait_seconds: seconds, check_again: false}})
+                .mockResolvedValueOnce({body: {type: "FeatureCollection", features: []}});
+            document.querySelector("[data-roads-action='download-osm']").click();
+            await jest.advanceTimersByTimeAsync(seconds * 1000 - 1);
+            expect(request).toHaveBeenCalledTimes(1);
+            await jest.advanceTimersByTimeAsync(1);
+            expect(request).toHaveBeenCalledTimes(2);
+        } finally { jest.useRealTimers(); }
+    });
+
+    test("two unknown slot waits still allow recovery from a full local interpreter timeout", async () => {
+        jest.useFakeTimers();
+        try {
+            const unknown = {body: {state: "unknown", wait_seconds: 60, check_again: false}};
+            const timeout = {body: {error_id: "upstream1", error: {message: "Interpreter timed out.",
+                details: {attempts: 1, elapsed_seconds: 60, retryable: true}}}};
+            const request = httpMock.request.mockResolvedValueOnce(unknown)
+                .mockImplementationOnce(() => new Promise((resolve, reject) => setTimeout(() => reject(timeout), 60000)))
+                .mockResolvedValueOnce(unknown)
+                .mockResolvedValueOnce({body: {type: "FeatureCollection", features: []}});
+            document.querySelector("[data-roads-action='download-osm']").click();
+            await jest.advanceTimersByTimeAsync(234999);
+            expect(request).toHaveBeenCalledTimes(3);
+            await jest.advanceTimersByTimeAsync(1);
+            expect(request).toHaveBeenCalledTimes(4);
+            expect(document.querySelector("#roads_osm_status").textContent).toContain("Recovered after 1 failed attempt.");
+        } finally { jest.useRealTimers(); }
+    });
+
     test("Fetch identifies a gateway timeout without rendering its response document", async () => {
-        httpMock.request.mockRejectedValueOnce({status: 504, body: "<html>Gateway error</html>"});
+        httpMock.request.mockResolvedValueOnce(available).mockRejectedValueOnce({status: 504, body: "<html>Gateway error</html>"});
         document.querySelector("[data-roads-action='download-osm']").click();
         await new Promise(resolve => setTimeout(resolve, 0));
         expect(document.querySelector("#roads_osm_status").textContent)

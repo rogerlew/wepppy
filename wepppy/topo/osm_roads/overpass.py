@@ -15,7 +15,7 @@ from shapely.geometry import LineString
 from .cache import normalize_highway_filter
 from .contracts import VEHICULAR_HIGHWAYS
 from .errors import OSMRoadsUpstreamError
-from ._foreground import fetch_ways
+from ._foreground import fetch_slot, fetch_ways
 
 
 @dataclass(frozen=True)
@@ -56,10 +56,13 @@ class OverpassClient(OverpassClientProtocol):
     def __init__(self, config: OverpassConfig | None = None) -> None:
         self.config = config or OverpassConfig.from_env()
 
+    def download_slot(self) -> dict:
+        return asyncio.run(fetch_slot(self.config.base_url))
+
     def fetch_download_ways(self, bbox: tuple[float, float, float, float], *,
                             process: Callable[[list], list] = list) -> list:
         """Fetch foreground GIS geometry within the interactive retry budget."""
-        timeout = min(20, self.config.timeout_sec)
+        timeout = min(60, self.config.timeout_sec)
         query = build_overpass_query(bbox_wgs84=bbox, highway_filter=VEHICULAR_HIGHWAYS,
                                      timeout_sec=timeout, inline_geometry=True)
 

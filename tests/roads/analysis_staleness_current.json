@@ -122,7 +122,7 @@
     },
     "wepppy/nodb/mods/roads/osm_download.py": {
       "recorded": null,
-      "current": "1609b9984c3b8115e430e6d55f8116ac0756d43993c5b55c9b0ca3303234c959"
+      "current": "cbd33435311f1164d3a5c5c67b56797965db6d4ed3e9ca8151d49ce36e4f1e92"
     },
     "wepppy/nodb/mods/roads/parameterization.py": {
       "recorded": null,
@@ -631,6 +631,24 @@
         }
       },
       "evidence": "docs/work-packages/20261124_roads_download_observability/tracker.md"
+    },
+    {
+      "date": "2026-11-24",
+      "scope": "GIS download extent validation is shared with the slot check. Historical routing evidence remains stale.",
+      "changes": {
+        "wepppy/nodb/mods/roads/osm_download.py": {
+          "previous_reviewed": {
+            "recorded": null,
+            "current": "1609b9984c3b8115e430e6d55f8116ac0756d43993c5b55c9b0ca3303234c959"
+          },
+          "current_review": {
+            "recorded": null,
+            "current": "cbd33435311f1164d3a5c5c67b56797965db6d4ed3e9ca8151d49ce36e4f1e92"
+          },
+          "scope": "Extract extent validation without changing selection or model results."
+        }
+      },
+      "evidence": "docs/work-packages/20261124_roads_retry_recovery/artifacts/20261124_osmnx_revision.md"
     }
   ]
 }

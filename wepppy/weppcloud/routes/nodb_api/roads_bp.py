@@ -22,7 +22,8 @@ from wepppy.microservices.vector_upload_normalization import (
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.roads import Roads
 from wepppy.nodb.mods.roads._constants import ROADS_UPLOAD_GEOJSON_MAX_BYTES
-from wepppy.nodb.mods.roads.osm_download import download_osm_roads
+from wepppy.nodb.mods.roads.osm_download import download_osm_roads, validate_download_extent
+from wepppy.topo.osm_roads.overpass import OverpassClient
 from wepppy.topo.osm_roads.errors import OSMRoadsUpstreamError, OSMRoadsValidationError
 from wepppy.weppcloud.utils.feature_access_flask import feature_decision
 from wepppy.weppcloud.utils.feature_access_runtime import decision_status
@@ -100,9 +101,10 @@ def _parameterization_view_state(wd: str) -> Dict[str, Any]:
     return summary
 
 
+@roads_bp.post("/runs/<string:runid>/<config>/api/roads/osm/status", defaults={"slot_check": True})
 @roads_bp.post("/runs/<string:runid>/<config>/api/roads/osm.geojson")
 @authorize_and_handle_with_exception_factory
-def roads_osm_download(runid: str, config: str) -> Response:
+def roads_osm_download(runid: str, config: str, slot_check: bool = False) -> Response:
     wd = str(load_run_context(runid, config).active_root)
     decision = feature_decision("roads", wd=wd, operation="act")
     if not decision.allowed:
@@ -112,6 +114,9 @@ def roads_osm_download(runid: str, config: str) -> Response:
     if "roads" not in (ron.mods or []):
         return error_factory("Enable Roads before downloading.", status_code=403)
     try:
+        if slot_check:
+            validate_download_extent(ron.extent)
+            return jsonify(OverpassClient().download_slot())
         payload = download_osm_roads(ron.extent)
     except OSMRoadsValidationError as exc:
         return error_factory(str(exc), status_code=422)
