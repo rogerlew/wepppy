@@ -534,56 +534,95 @@ var Roads = (function () {
         }
 
         async function fetchOsmCollection(form, button, status) {
-            var started = performance.now();
-            var failed = 0;
-            var url = resolveRunUrl("api/roads/osm.geojson");
+            var expires = performance.now() + 300000;
+            var failure = "";
             function current() {
                 return button.isConnected && controller.form === form && form.contains(button);
             }
-            for (var round = 1; round <= 3 && current(); round++) {
-                status.textContent = round === 1 ? "Fetching mapped roads…" : "Retrying the road download…";
-                var deadline = new AbortController();
-                var timer = window.setTimeout(function () { deadline.abort(); }, 30000);
-                var delay;
+            function show(message) {
+                status.textContent = failure ? [failure, message].filter(Boolean).join(" ") : message;
+            }
+            async function wait(seconds, message) {
+                if (performance.now() + seconds * 1000 + 75000 > expires) {
+                    show(message + " This exceeds the automatic retry window. Try again later.");
+                    return false;
+                }
+                show(message);
+                await new Promise(function (resolve) { window.setTimeout(resolve, seconds * 1000); });
+                return current();
+            }
+            async function post(path, milliseconds) {
+                var abort = new AbortController();
+                var timer = window.setTimeout(function () { abort.abort(); }, milliseconds);
                 try {
-                    var result = await http.request(url, {
-                        method: "POST", form: form, timeoutMs: 0, signal: deadline.signal
+                    return await http.request(resolveRunUrl(path), {
+                        method: "POST", form: form, timeoutMs: 0, signal: abort.signal
                     });
-                    return current() ? { collection: result.body, failed: failed } : null;
                 } catch (error) {
-                    var details = error && error.body && error.body.error && error.body.error.details;
-                    var message = deadline.signal.aborted
-                        ? "Your browser timed out after 30 seconds waiting for the road download. Try again later."
-                        : osmFailureMessage(error);
-                    var counted = details && (details.attempts === 1 || details.attempts === 2);
-                    var previous = failed;
-                    if (counted) {
-                        failed += details.attempts;
+                    if (abort.signal.aborted) {
+                        throw new Error("Your browser timed out after " + milliseconds / 1000 +
+                            " seconds waiting for OpenStreetMap. Try again later.");
                     }
-                    if (previous) {
-                        message += counted ? " " + failed + " failed attempts across " + round + " requests."
-                            : " Earlier failed attempts: " + previous + ".";
-                    }
-                    var retryAfter = details && details.retry_after_seconds;
-                    delay = Math.max(Math.round((12 + Math.random() * 4) * Math.pow(2, round - 1)), retryAfter || 0);
-                    var remaining = 120000 - (performance.now() - started);
-                    if (deadline.signal.aborted || !counted || details.retryable !== true || !current() ||
-                        failed > 2 || round === 3 || (delay * 1000 + 30000 > remaining)) {
-                        if (retryAfter > 0) {
-                            message += " Wait at least " + retryAfter + " seconds before trying again.";
-                        }
-                        status.textContent = message;
-                        return null;
-                    }
-                    status.textContent = message + " Retrying in " + delay + " seconds.";
+                    throw error;
                 } finally {
                     window.clearTimeout(timer);
                 }
-                await new Promise(function (resolve) { window.setTimeout(resolve, delay * 1000); });
-                // Background tabs can wake long after the scheduled retry.
-                if (performance.now() - started > 90000) {
-                    status.textContent = message + " The retry window expired. Try again later.";
+            }
+            async function awaitSlot() {
+                while (current() && performance.now() + 75000 <= expires) {
+                    show("Checking OpenStreetMap availability…");
+                    var response = await post("api/roads/osm/status", 10000);
+                    var slot = response.body;
+                    if (!slot || !Number.isSafeInteger(slot.wait_seconds) ||
+                        typeof slot.check_again !== "boolean" || slot.check_again !== (slot.state === "running")) {
+                        throw new Error("Could not read OpenStreetMap availability. Try again later.");
+                    }
+                    if (slot.state === "available" && slot.wait_seconds === 0) {
+                        return true;
+                    }
+                    var seconds = slot.wait_seconds;
+                    var message;
+                    if (slot.state === "unknown" && seconds === 60) {
+                        message = "OpenStreetMap availability is unknown. Waiting 60 seconds before fetching.";
+                    } else if (slot.state === "scheduled" && seconds > 0) {
+                        message = "OpenStreetMap has a slot in " + seconds + " seconds.";
+                    } else if (slot.state === "running" && seconds === 5) {
+                        message = "OpenStreetMap is busy. Checking again in 5 seconds.";
+                    } else {
+                        throw new Error("Could not read OpenStreetMap availability. Try again later.");
+                    }
+                    if (!await wait(seconds, message)) { return false; }
+                    if (!slot.check_again) { return true; }
+                }
+                return false;
+            }
+
+            for (var attempt = 1; attempt <= 2 && current(); attempt++) {
+                try {
+                    if (!await awaitSlot() || !current() || performance.now() + 75000 > expires) {
+                        if (current() && performance.now() + 75000 > expires) { show("The download window expired. Try again later."); }
+                        return null;
+                    }
+                } catch (error) {
+                    show(osmFailureMessage(error));
                     return null;
+                }
+                show("Fetching mapped roads…");
+                try {
+                    var result = await post("api/roads/osm.geojson", 75000);
+                    return current() ? { collection: result.body, failed: attempt - 1 } : null;
+                } catch (error) {
+                    var details = error && error.body && error.body.error && error.body.error.details;
+                    var retryAfter = details && details.retry_after_seconds;
+                    var message = osmFailureMessage(error);
+                    if (attempt === 2) { message += " One earlier attempt also failed."; }
+                    failure = message;
+                    if (!current() || attempt === 2 || !details || details.attempts !== 1 || details.retryable !== true) {
+                        show(retryAfter > 0 ? "Wait at least " + retryAfter + " seconds before trying again." : "");
+                        return null;
+                    }
+                    var delay = Math.max(55, retryAfter || 0);
+                    if (!await wait(delay, "Checking availability again in " + delay + " seconds.")) { return null; }
                 }
             }
             return null;

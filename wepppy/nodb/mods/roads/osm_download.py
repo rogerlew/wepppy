@@ -12,7 +12,7 @@ from wepppy.topo.osm_roads.service import _iter_line_parts
 from ._constants import SURFACE_ALIASES
 
 
-def download_osm_roads(extent):
+def validate_download_extent(extent):
     if not isinstance(extent, (list, tuple)) or len(extent) != 4:
         raise OSMRoadsValidationError("Set the project map extent before downloading roads.")
     if not all(type(value) in (float, int) and math.isfinite(value) for value in extent):
@@ -22,6 +22,10 @@ def download_osm_roads(extent):
         raise OSMRoadsValidationError("The project map extent is invalid.")
     if east - west > 1 or north - south > 1:
         raise OSMRoadsValidationError("This map extent exceeds the download limit of one degree per side. Use a local road inventory.")
+
+
+def download_osm_roads(extent):
+    validate_download_extent(extent)
     features = OverpassClient().fetch_download_ways(tuple(extent), process=partial(_clip_features, box(*extent)))
     return {"type": "FeatureCollection", "attribution": "© OpenStreetMap contributors",
             "license": "https://www.openstreetmap.org/copyright", "features": features}

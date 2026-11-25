@@ -1315,12 +1315,14 @@ def test_osm_download_denial_and_absent_extent(roads_client, osm_access):
 
 
 @pytest.mark.parametrize(("statuses", "remark", "retry_after", "expected_status", "expected_code"), [
-    ([502, 200], None, None, 200, None),
-    ([502, 502], None, None, 503, "upstream_http_error"),
+    ([200], None, None, 200, None),
+    ([502], None, None, 503, "upstream_http_error"),
     ([200], "runtime error: Query timed out", None, 504, "upstream_timeout"),
     ([429], None, "90", 503, "upstream_http_error"),
+    ([503], None, None, 503, "upstream_http_error"),
+    ([504], None, None, 504, "upstream_timeout"),
     ([400], None, None, 503, "upstream_http_error"),
-    ([502, 200], "malformed-way", None, 502, "upstream_invalid_response"),
+    ([200], "malformed-way", None, 502, "upstream_invalid_response"),
 ])
 def test_download_retry_and_failure_evidence(
     roads_client, osm_access, monkeypatch, statuses, remark, retry_after, expected_status, expected_code
@@ -1356,17 +1358,58 @@ def test_download_retry_and_failure_evidence(
             upstream.shutdown()
             thread.join()
     assert len(times) == len(statuses)
-    if len(times) == 2:
-        assert 4 <= times[1] - times[0] < 10
     assert response.status_code == expected_status
     if expected_code:
         error = response.json["error"]
         assert response.json["error_id"]
         assert error["code"] == expected_code
-        assert error["details"]["retryable"] is (statuses[-1] in (429, 502) or expected_code == "upstream_timeout")
+        assert error["details"]["retryable"] is (statuses[-1] in (429, 502, 504))
         assert error["details"]["attempts"] == len(times)
         assert error["details"]["upstream_status"] == statuses[-1]
         if retry_after:
             assert error["details"]["retry_after_seconds"] == 90
     else:
         assert response.json["type"] == "FeatureCollection"
+
+
+@pytest.mark.parametrize(("status_text", "state", "seconds"), [
+    ("2 slots available now.", "available", 0),
+    ("Slot available after: 2020-01-01T00:00:00Z, in 1 seconds.", "scheduled", 1),
+    ("Currently running queries (pid, space limit, time limit, start time):", "running", 5),
+    ("unrecognized", "unknown", 60),
+    ("x" * 16385 + "\n2 slots available now.", "unknown", 60),
+])
+def test_osm_slot_status(roads_client, osm_access, monkeypatch, status_text, state, seconds):
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from threading import Thread
+
+    client, _, ron_cls, _, _, wd = roads_client
+    url = f"/runs/{RUN_ID}/{CONFIG}/api/roads/osm/status"
+    requested = []
+
+    class Interpreter(BaseHTTPRequestHandler):
+        def do_GET(self):
+            requested.append(self.path)
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(status_text.encode())
+
+    with HTTPServer(("127.0.0.1", 0), Interpreter) as upstream:
+        monkeypatch.setenv("WEPPPY_OSM_ROADS_OVERPASS_BASE_URL", f"http://127.0.0.1:{upstream.server_port}/api/interpreter")
+        thread = Thread(target=upstream.serve_forever, daemon=True)
+        thread.start()
+        try:
+            osm_access("User")
+            assert client.post(url).status_code == 403
+            osm_access("PowerUser")
+            ron = ron_cls.getInstance(wd)
+            ron.extent = None
+            assert client.post(url).status_code == 422
+            ron.extent = [-117, 46, -116.9, 46.1]
+            response = client.post(url)
+        finally:
+            upstream.shutdown()
+            thread.join()
+    assert requested == ["/api/status"]
+    assert response.status_code == 200
+    assert response.json == {"state": state, "wait_seconds": seconds, "check_again": state == "running"}

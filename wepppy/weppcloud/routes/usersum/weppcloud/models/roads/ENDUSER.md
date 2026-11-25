@@ -40,7 +40,7 @@ Use Roads when:
 
 ## Before You Begin
 
-To get centerlines for your saved project map area, open **Roads** and choose **Download OpenStreetMap roads**. This requires Roads action access on a writable WhiteboxTools project. If the service is busy or times out, keep the page open. The control shows the reason and when it will retry, for up to two minutes overall. You can repeat the download and keep working with the file already uploaded.
+To get centerlines for your saved project map area, open **Roads** and choose **Download OpenStreetMap roads**. This requires Roads action access on a writable WhiteboxTools project. If the service is busy or times out, keep the page open. The control shows the reason, waits at least 55 seconds and checks for an available slot before retrying once. The whole download can take up to five minutes. You can repeat the download and keep working with the file already uploaded.
 
 Open the downloaded GeoJSON in GIS. Each road has its OpenStreetMap ID, road class, mapped surface when available, and original tags in `osm_tags`. For modeling, fill in `DESIGN`, check `SURFACE`, and enter `TRAFFIC`. For example, a road tagged `track` tells you its mapped use. Choose its drainage design from site information. Save the edited lines as GeoJSON, then choose **Upload roads vector file**. The upload limit is 10 MB.
 
