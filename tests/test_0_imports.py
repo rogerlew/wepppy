@@ -1,4 +1,6 @@
+import importlib
 import unittest
+
 
 class TestImports(unittest.TestCase):
     def test_import_numpy(self):
@@ -16,38 +18,29 @@ class TestImports(unittest.TestCase):
     def test_import_wepppy_worker(self):
         from wepppy.rq import WepppyRqWorker
 
-    def test_import_rosetta(self):
+    def _import_optional(self, name):
         try:
-            import rosetta  # noqa: F401
-        except ModuleNotFoundError:
-            self.skipTest("rosetta package not installed in this environment")
+            importlib.import_module(name)
+        except ModuleNotFoundError as exc:
+            if exc.name == name or exc.name == name.partition(".")[0]:
+                self.skipTest(f"{exc.name} is unavailable in this environment")
+            raise
+
+    def test_import_rosetta(self):
+        self._import_optional("rosetta")
 
     def test_import_wepp_runner(self):
-        try:
-            import wepp_runner  # noqa: F401
-        except ModuleNotFoundError:
-            self.skipTest("wepp_runner package not installed in this environment")
+        self._import_optional("wepp_runner")
 
     def test_import_weppcloud2(self):
-        try:
-            import weppcloud2  # noqa: F401
-        except ModuleNotFoundError:
-            self.skipTest("weppcloud2 package not installed in this environment")
+        self._import_optional("weppcloud2")
 
     def test_wepppyo3(self):
-        try:
-            import wepppyo3  # noqa: F401
-        except ModuleNotFoundError:
-            self.skipTest("wepppyo3 package not installed in this environment")
+        self._import_optional("wepppyo3")
 
     def test_wepppyo3_swat_utils(self):
-        try:
-            import importlib
-            importlib.import_module("wepppyo3.swat_utils")
-        except ModuleNotFoundError:
-            self.skipTest("wepppyo3.swat_utils not installed in this environment")
-    
+        self._import_optional("wepppyo3.swat_utils")
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
-    
