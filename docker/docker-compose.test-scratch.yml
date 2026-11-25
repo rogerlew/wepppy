@@ -1,0 +1,9 @@
+# Optional scratch for an isolated wctl run-pytest container.
+services:
+  weppcloud:
+    volumes:
+      - type: bind
+        source: ${WCTL_TEST_SCRATCH_DIR:?set WCTL_TEST_SCRATCH_DIR to a disposable absolute directory}
+        target: /tmp
+        bind:
+          create_host_path: false

@@ -76,13 +76,38 @@ Interrupted invocations retain an incomplete receipt; they are not passes.
 Receipts are ignored by Git; copy selected evidence into a work package to retain it.
 
 The runner owns a short unique `/tmp/wt-*` basetemp, avoiding AF_UNIX path-length
-failures. Container scratch disappears on exit; explicitly select candidate paths
+failures. Default container scratch disappears on exit; explicitly select candidate paths
 for pytest JUnit/output artifacts you need to retain. Source fingerprints include
 tracked and untracked nonignored executable/config/template files, additions,
 deletions and symlink targets. They detect before/after differences, not temporary
 writes restored within a run, and are not a concurrency lock. Freeze source while
 testing. Recorded runtime files are rehashed after execution; changes also fail the run.
 The runner never resets or silently repairs a test-written source file.
+
+## Broad tests on a space-constrained Docker filesystem
+
+The vector retention integration tests exercise a real 10 GiB free-space reserve
+on the filesystem backing pytest's temporary project. If the container's
+`/tmp` has less than the reserve plus room for reservations and test output,
+a valid copy can fail with `Copied evidence would exhaust the filesystem reserve.`
+
+From a checkout on a filesystem with sufficient space, select private scratch
+for this run. The outer directory is private to the host user. The inner
+directory has the usual sticky `/tmp` permissions for container processes.
+
+```bash
+mkdir -p .wctl-test-runs
+scratch_run=$(mktemp -d "$PWD/.wctl-test-runs/scratch.XXXXXXXX")
+mkdir -m 1777 "$scratch_run/tmp"
+WCTL_TEST_SCRATCH_DIR="$scratch_run/tmp" \
+  WCTL_COMPOSE_FILE_EXTRAS="${WCTL_COMPOSE_FILE_EXTRAS:+$WCTL_COMPOSE_FILE_EXTRAS,}$PWD/docker/docker-compose.test-scratch.yml" \
+  wctl run-pytest -- tests --maxfail=1
+```
+
+Keep any runtime or parser options needed by the checkout before `--`.
+The override applies to this invocation. The runner still assigns its own
+short basetemp. The bind-mounted scratch remains available for diagnosis
+and can be removed after the container exits.
 
 ## Known boundaries
 
