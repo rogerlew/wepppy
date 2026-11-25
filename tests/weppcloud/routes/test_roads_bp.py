@@ -1363,6 +1363,7 @@ def test_download_retry_and_failure_evidence(
         error = response.json["error"]
         assert response.json["error_id"]
         assert error["code"] == expected_code
+        assert error["details"]["retryable"] is (statuses[-1] in (429, 502) or expected_code == "upstream_timeout")
         assert error["details"]["attempts"] == len(times)
         assert error["details"]["upstream_status"] == statuses[-1]
         if retry_after:

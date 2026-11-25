@@ -164,6 +164,7 @@ async def fetch_ways(
                 continue
             details = {
                 "attempts": attempt,
+                "retryable": retryable or code == "upstream_timeout",
                 "elapsed_seconds": round(elapsed, 1),
                 "reference": reference,
             }

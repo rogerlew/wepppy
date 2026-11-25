@@ -514,6 +514,81 @@ var Roads = (function () {
             }
         }
 
+        function osmFailureMessage(error) {
+            if (error && error.status && !(error.body && typeof error.body.error === "object")) {
+                return error.status === 504 || error.status === 408
+                    ? "The road download gateway timed out (HTTP " + error.status + "). Try again later."
+                    : "The road download server returned HTTP " + error.status + ". Try again later.";
+            }
+            var payload = toResponsePayload(http, error);
+            var details = payload.error && payload.error.details;
+            var message = extractErrorMessage(payload, "The road download failed.");
+            if (details && Number.isInteger(details.attempts)) {
+                message += " " + details.attempts + (details.attempts === 1 ? " attempt" : " attempts") +
+                    " in " + details.elapsed_seconds + " seconds.";
+            }
+            if (payload.error_id) {
+                message += " Reference: " + payload.error_id + ".";
+            }
+            return message;
+        }
+
+        async function fetchOsmCollection(form, button, status) {
+            var started = performance.now();
+            var failed = 0;
+            var url = resolveRunUrl("api/roads/osm.geojson");
+            function current() {
+                return button.isConnected && controller.form === form && form.contains(button);
+            }
+            for (var round = 1; round <= 3 && current(); round++) {
+                status.textContent = round === 1 ? "Fetching mapped roads…" : "Retrying the road download…";
+                var deadline = new AbortController();
+                var timer = window.setTimeout(function () { deadline.abort(); }, 30000);
+                var delay;
+                try {
+                    var result = await http.request(url, {
+                        method: "POST", form: form, timeoutMs: 0, signal: deadline.signal
+                    });
+                    return current() ? { collection: result.body, failed: failed } : null;
+                } catch (error) {
+                    var details = error && error.body && error.body.error && error.body.error.details;
+                    var message = deadline.signal.aborted
+                        ? "Your browser timed out after 30 seconds waiting for the road download. Try again later."
+                        : osmFailureMessage(error);
+                    var counted = details && (details.attempts === 1 || details.attempts === 2);
+                    var previous = failed;
+                    if (counted) {
+                        failed += details.attempts;
+                    }
+                    if (previous) {
+                        message += counted ? " " + failed + " failed attempts across " + round + " requests."
+                            : " Earlier failed attempts: " + previous + ".";
+                    }
+                    var retryAfter = details && details.retry_after_seconds;
+                    delay = Math.max(Math.round((12 + Math.random() * 4) * Math.pow(2, round - 1)), retryAfter || 0);
+                    var remaining = 120000 - (performance.now() - started);
+                    if (deadline.signal.aborted || !counted || details.retryable !== true || !current() ||
+                        failed > 2 || round === 3 || (delay * 1000 + 30000 > remaining)) {
+                        if (retryAfter > 0) {
+                            message += " Wait at least " + retryAfter + " seconds before trying again.";
+                        }
+                        status.textContent = message;
+                        return null;
+                    }
+                    status.textContent = message + " Retrying in " + delay + " seconds.";
+                } finally {
+                    window.clearTimeout(timer);
+                }
+                await new Promise(function (resolve) { window.setTimeout(resolve, delay * 1000); });
+                // Background tabs can wake long after the scheduled retry.
+                if (performance.now() - started > 90000) {
+                    status.textContent = message + " The retry window expired. Try again later.";
+                    return null;
+                }
+            }
+            return null;
+        }
+
         async function downloadOsm(event, button) {
             event.preventDefault();
             if (button.disabled) {
@@ -521,19 +596,19 @@ var Roads = (function () {
             }
             var status = dom.qs("#roads_osm_status", controller.form);
             button.disabled = true;
-            status.textContent = "Fetching mapped roads… A busy service may be retried once.";
-            var deadline = new AbortController();
-            var timer = window.setTimeout(function () { deadline.abort(); }, 30000);
             try {
-                var result = await http.request(resolveRunUrl("api/roads/osm.geojson"), {
-                    method: "POST", form: controller.form, timeoutMs: 0, signal: deadline.signal
-                });
-                var collection = result.body;
+                var result = await fetchOsmCollection(controller.form, button, status);
+                if (!result) {
+                    return;
+                }
+                var recovery = result.failed ? " Recovered after " + result.failed +
+                    (result.failed === 1 ? " failed attempt." : " failed attempts.") : "";
+                var collection = result.collection;
                 if (!collection || collection.type !== "FeatureCollection" || !Array.isArray(collection.features)) {
                     throw new Error("Download unavailable. Try again or upload your own road file.");
                 }
                 if (!collection.features.length) {
-                    status.textContent = "No mapped roads were found in the project map area. You can upload your own road file.";
+                    status.textContent = "No mapped roads were found in the project map area. You can upload your own road file." + recovery;
                     return;
                 }
                 var file = new Blob([JSON.stringify(collection)], { type: "application/geo+json" });
@@ -545,32 +620,10 @@ var Roads = (function () {
                 link.click();
                 link.remove();
                 window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-                status.textContent = "Download started for osm-roads.geojson.";
+                status.textContent = "Download started for osm-roads.geojson." + recovery;
             } catch (error) {
-                if (deadline.signal.aborted) {
-                    status.textContent = "Your browser timed out after 30 seconds waiting for the road download. Try again later.";
-                } else if (error && error.status && !(error.body && typeof error.body.error === "object")) {
-                    status.textContent = error.status === 504 || error.status === 408
-                        ? "The road download gateway timed out (HTTP " + error.status + "). Try again later."
-                        : "The road download server returned HTTP " + error.status + ". Try again later.";
-                } else {
-                    var payload = toResponsePayload(http, error);
-                    var details = payload.error && payload.error.details;
-                    var message = extractErrorMessage(payload, "The road download failed.");
-                    if (details && Number.isInteger(details.attempts)) {
-                        message += " " + details.attempts + (details.attempts === 1 ? " attempt" : " attempts") +
-                            " in " + details.elapsed_seconds + " seconds.";
-                    }
-                    if (details && details.retry_after_seconds > 0) {
-                        message += " Wait at least " + details.retry_after_seconds + " seconds before trying again.";
-                    }
-                    if (payload.error_id) {
-                        message += " Reference: " + payload.error_id + ".";
-                    }
-                    status.textContent = message;
-                }
+                status.textContent = osmFailureMessage(error);
             } finally {
-                window.clearTimeout(timer);
                 button.disabled = false;
             }
         }

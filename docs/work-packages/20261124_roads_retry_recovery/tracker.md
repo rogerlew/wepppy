@@ -2,7 +2,7 @@
 
 ## Progress
 
-Contract amendment drafted. Independent reviews, implementation and validation pending.
+Contract checkpoint 92770cf9d accepted by correctness and security reviewers. Implemented browser backoff and structured retry eligibility. Focused validation underway.
 
 ## Surprises & Discoveries
 

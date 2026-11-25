@@ -44,7 +44,7 @@ Coverage depends on local mapping. The download includes mapped private roads an
 
 The OSM class describes the road’s use. A `track` often provides forestry or agricultural access, a `service` road may be a driveway or facility access road, and `unclassified` generally identifies a minor connecting road. Each may have a separately mapped surface. Use site information for drainage design and traffic.
 
-An empty result means no matching roads were found in the map area. You can upload a local inventory instead. Downloads cover up to one degree on each side. A busy service may be retried once. If the download fails, the message identifies a timeout or service error and shows the attempt count and reference when the server responds. Include the reference when reporting a failed download. When sharing the data, credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
+An empty result means no matching roads were found in the map area. You can upload a local inventory instead. Downloads cover up to one degree on each side. Keep the page open if the service is busy or times out. The control shows the reason and waits progressively longer between retries, for up to two minutes overall. If the download fails, the message identifies a timeout or service error and shows the attempt count and reference when the server responds. Include the reference when reporting a failed download. When sharing the data, credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
 
 ## Choose the road design that represents drainage
 
