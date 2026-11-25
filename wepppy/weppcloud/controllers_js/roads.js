@@ -534,7 +534,7 @@ var Roads = (function () {
         }
 
         async function fetchOsmCollection(form, button, status) {
-            var expires = performance.now() + 300000;
+            var expires = performance.now() + 360000;
             var failure = "";
             function current() {
                 return button.isConnected && controller.form === form && form.contains(button);
@@ -544,7 +544,7 @@ var Roads = (function () {
             }
             async function wait(seconds, message) {
                 if (performance.now() + seconds * 1000 + 75000 > expires) {
-                    show(message + " This exceeds the automatic retry window. Try again later.");
+                    show("The suggested wait is " + seconds + " seconds, beyond the automatic retry window. Try again later.");
                     return false;
                 }
                 show(message);

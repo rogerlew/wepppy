@@ -19,3 +19,5 @@ Verify actual upstream count, deadline handling and real Fetch output before del
 ## OSMnx 2.2.0 revision
 
 Checkpoints d1a25ec45 and 84429c510 supersede the initial timing. The implementation uses a fixed 55-second cooldown and a separate run-authorized slot check. WEPPcloud Compose routes the existing run URL to Flask. The open-wepp-org HTTPRoute also forwards the run prefix to Flask, permits public egress, builds generated UI assets at initialization and configures a 120-second web worker timeout. No changes to the cluster manifests are required. Focused validation includes real HTTP slot and interpreter responses, timeout classification, advisory waits, capped retry scheduling, and upload compatibility.
+
+Implemented the reviewed six-minute ceiling and corrected the terminal long-wait message. Verified the full timeout and double unknown-slot sequence with a deterministic browser-clock regression.

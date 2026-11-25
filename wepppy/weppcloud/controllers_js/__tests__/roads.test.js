@@ -295,6 +295,25 @@ describe("Roads controller", () => {
         } finally { jest.useRealTimers(); }
     });
 
+    test("two unknown slot waits still allow recovery from a full local interpreter timeout", async () => {
+        jest.useFakeTimers();
+        try {
+            const unknown = {body: {state: "unknown", wait_seconds: 60, check_again: false}};
+            const timeout = {body: {error_id: "upstream1", error: {message: "Interpreter timed out.",
+                details: {attempts: 1, elapsed_seconds: 60, retryable: true}}}};
+            const request = httpMock.request.mockResolvedValueOnce(unknown)
+                .mockImplementationOnce(() => new Promise((resolve, reject) => setTimeout(() => reject(timeout), 60000)))
+                .mockResolvedValueOnce(unknown)
+                .mockResolvedValueOnce({body: {type: "FeatureCollection", features: []}});
+            document.querySelector("[data-roads-action='download-osm']").click();
+            await jest.advanceTimersByTimeAsync(234999);
+            expect(request).toHaveBeenCalledTimes(3);
+            await jest.advanceTimersByTimeAsync(1);
+            expect(request).toHaveBeenCalledTimes(4);
+            expect(document.querySelector("#roads_osm_status").textContent).toContain("Recovered after 1 failed attempt.");
+        } finally { jest.useRealTimers(); }
+    });
+
     test("Fetch identifies a gateway timeout without rendering its response document", async () => {
         httpMock.request.mockResolvedValueOnce(available).mockRejectedValueOnce({status: 504, body: "<html>Gateway error</html>"});
         document.querySelector("[data-roads-action='download-osm']").click();
